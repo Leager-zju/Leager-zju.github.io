@@ -122,12 +122,12 @@
   </li>
         <li class="menu-item menu-item-tags">
 
-    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">0</span></a>
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">1</span></a>
 
   </li>
         <li class="menu-item menu-item-categories">
 
-    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">0</span></a>
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">1</span></a>
 
   </li>
         <li class="menu-item menu-item-archives">
@@ -189,7 +189,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/uncategorized/hello-world/">
+    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/6-824/GFS/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/Avatar.jpg">
@@ -203,7 +203,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/uncategorized/hello-world/" class="post-title-link" itemprop="url">Hello World</a>
+            <a href="/6-824/GFS/" class="post-title-link" itemprop="url">GFS</a>
         </h2>
 
         <div class="post-meta">
@@ -213,15 +213,24 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2022-09-23 21:15:10" itemprop="dateCreated datePublished" datetime="2022-09-23T21:15:10+08:00">2022-09-23</time>
+              <time title="创建时间：2022-09-25 12:22:42" itemprop="dateCreated datePublished" datetime="2022-09-25T12:22:42+08:00">2022-09-25</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-09-25 11:38:19" itemprop="dateModified" datetime="2022-09-25T11:38:19+08:00">2022-09-25</time>
+                <time title="修改时间：2022-09-26 19:57:10" itemprop="dateModified" datetime="2022-09-26T19:57:10+08:00">2022-09-26</time>
               </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/6-824/" itemprop="url" rel="index"><span itemprop="name">6.824</span></a>
+                </span>
+            </span>
 
           
 
@@ -234,10 +243,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
+          <p>6.824 的第一篇论文是 Google “三驾马车”之一的 GFS(Google File System)——一个用于大型分布式数据密集型应用程序的可扩展分布式文件系统。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/uncategorized/hello-world/#more" rel="contents">
+              <a class="btn" href="/6-824/GFS/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -328,6 +337,18 @@
           <span class="site-state-item-count">1</span>
           <span class="site-state-item-name">日志</span>
         </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
 </div>
@@ -459,6 +480,61 @@ setInterval("createtime()",250);
 
 
   
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
 
   
 
