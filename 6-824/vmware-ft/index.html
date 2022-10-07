@@ -18,17 +18,20 @@
     var CONFIG = {"hostname":"leager-zju.github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"b2t":true},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="【数据删除】">
-<meta property="og:type" content="website">
-<meta property="og:title" content="没什么看头的地方">
-<meta property="og:url" content="http://leager-zju.github.com/tags/paperReading/index.html">
+  <meta name="description" content="6.824 的第二篇论文是 VMware-FaultTolerance(VMware-FT)，其描述了一个提供容错虚拟机的商业企业级系统——如果主服务器(primary)发生故障，备份服务器(backup)始终可以接管。backup 的状态必须始终保持与 primary 几乎相同，以便在其发生故障时，backup 可以立即接管，并且外部客户端看来并未发生故障且没有数据丢失。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="VMware-FT">
+<meta property="og:url" content="http://leager-zju.github.com/6-824/vmware-ft/index.html">
 <meta property="og:site_name" content="没什么看头的地方">
-<meta property="og:description" content="【数据删除】">
+<meta property="og:description" content="6.824 的第二篇论文是 VMware-FaultTolerance(VMware-FT)，其描述了一个提供容错虚拟机的商业企业级系统——如果主服务器(primary)发生故障，备份服务器(backup)始终可以接管。backup 的状态必须始终保持与 primary 几乎相同，以便在其发生故障时，backup 可以立即接管，并且外部客户端看来并未发生故障且没有数据丢失。">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-10-03T07:31:03.000Z">
+<meta property="article:modified_time" content="2022-10-06T11:52:46.733Z">
 <meta property="article:author" content="Leager">
+<meta property="article:tag" content="paperReading">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://leager-zju.github.com/tags/paperReading/">
+<link rel="canonical" href="http://leager-zju.github.com/6-824/vmware-ft/">
 
 
 <script id="page-configurations">
@@ -36,12 +39,12 @@
   CONFIG.page = {
     sidebar: "",
     isHome : false,
-    isPost : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title>标签: paperReading | 没什么看头的地方</title>
+  <title>VMware-FT | 没什么看头的地方</title>
   
 
 
@@ -183,91 +186,118 @@
         <div class="content-wrap">
           
 
-          <div class="content tag">
+          <div class="content post posts-expand">
             
 
+    
   
   
-  
-  <div class="post-block">
-    <div class="posts-collapse">
-      <div class="collection-title">
-        <h2 class="collection-header">paperReading
-          <small>标签</small>
-        </h2>
-      </div>
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/6-824/vmware-ft/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/Avatar.jpg">
+      <meta itemprop="name" content="Leager">
+      <meta itemprop="description" content="【数据删除】">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="没什么看头的地方">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          VMware-FT
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-10-03 15:31:03" itemprop="dateCreated datePublished" datetime="2022-10-03T15:31:03+08:00">2022-10-03</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-10-06 19:52:46" itemprop="dateModified" datetime="2022-10-06T19:52:46+08:00">2022-10-06</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/6-824/" itemprop="url" rel="index"><span itemprop="name">6.824</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-    <div class="collection-year">
-      <span class="collection-header">2022</span>
-    </div>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2022-10-06T19:46:40+08:00"
-              content="2022-10-06">
-          10-06
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/6-824/aurora/" itemprop="url">
-            <span itemprop="name">Aurora</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2022-10-03T15:31:03+08:00"
-              content="2022-10-03">
-          10-03
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/6-824/vmware-ft/" itemprop="url">
-            <span itemprop="name">VMware-FT</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2022-09-25T12:22:42+08:00"
-              content="2022-09-25">
-          09-25
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/6-824/GFS/" itemprop="url">
-            <span itemprop="name">GFS</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
+        <p>6.824 的第二篇论文是 VMware-FaultTolerance(VMware-FT)，其描述了一个提供容错虚拟机的商业企业级系统——如果主服务器(<strong>primary</strong>)发生故障，备份服务器(<strong>backup</strong>)始终可以接管。backup 的状态必须始终保持与 primary 几乎相同，以便在其发生故障时，backup 可以立即接管，并且外部客户端看来并未发生故障且没有数据丢失。</p>
+<span id="more"></span>
+<h4 id="两种容错方式">两种容错方式</h4>
+<h5 id="状态转移">状态转移</h5>
+<p>在 backup 上复制状态的一种方法是每次同步时，primary 将其<strong>所有状态</strong>（包括 CPU、内存和 I/O 设备）<strong>变化</strong>进行完整地拷贝，并发送到 backup。但发送此状态所需的带宽会非常大。为了提升效率，可以优化为：每次同步只发送上次同步之后改变了的状态。</p>
+<h5 id="操作转移">操作转移</h5>
+<p>将服务器建模为<strong>确定性状态机</strong>，并实现以下两个条件：</p>
+<ol type="1">
+<li>从相同的初始状态开始</li>
+<li>以相同的顺序执行相同的操作</li>
+</ol>
+<p>如果能确保以上两个条件，那么它们会一直互为副本，并且一直保持一致。由于大多数服务器或服务都有一些不确定的操作，因此必须使用额外的协调来确保 primary 和 backup 保持同步，而这一协调所需的额外信息量远远少于 primary 中正在更改的状态量。</p>
+<h4 id="总结">总结</h4>
+<p>操作 Log 的复制与状态机的思路给后续以启迪。</p>
 
     </div>
-  </div>
-  
-  
-  
 
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/paperReading/" rel="tag"># paperReading</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/math/linear-algebra(2)/" rel="prev" title="Linear-Algebra(2)">
+      <i class="fa fa-chevron-left"></i> Linear-Algebra(2)
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/6-824/aurora/" rel="next" title="Aurora">
+      Aurora <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
   
 
 
@@ -320,6 +350,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%A4%E7%A7%8D%E5%AE%B9%E9%94%99%E6%96%B9%E5%BC%8F"><span class="nav-text">两种容错方式</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E8%BD%AC%E7%A7%BB"><span class="nav-text">状态转移</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%93%8D%E4%BD%9C%E8%BD%AC%E7%A7%BB"><span class="nav-text">操作转移</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -483,6 +514,59 @@ setInterval("createtime()",250);
   
 
   
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
 
   
 

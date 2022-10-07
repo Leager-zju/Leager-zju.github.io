@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Aurora</title>
+    <url>/6-824/aurora/</url>
+    <content><![CDATA[
+]]></content>
+      <categories>
+        <category>6.824</category>
+      </categories>
+      <tags>
+        <tag>paperReading</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>GFS</title>
     <url>/6-824/GFS/</url>
     <content><![CDATA[<p>6.824 的第一篇论文是 Google “<strong>三驾马车</strong>”之一的 <strong>GFS</strong>(Google File System)——一个用于大型分布式数据密集型应用程序的可扩展分布式文件系统。</p>
@@ -243,7 +255,7 @@
       </tags>
   </entry>
   <entry>
-    <title>Linear_algebra(1)</title>
+    <title>Linear-Algebra(1)</title>
     <url>/math/linear-algebra(1)/</url>
     <content><![CDATA[<p>如果本科线代能有这样的教育方式和路线，我何苦现在还要来听这门公开课(</p>
 <p>记录一下听的过程中觉得有用的信息好了。</p>
@@ -264,15 +276,15 @@
 <p>拓展到多元方程组也是同理。</p>
 </blockquote></li>
 </ol>
-<p>我们构造一个系数矩阵 <span class="math inline">\({A} = \left[\begin{matrix}2 &amp; -1 \\ -1 &amp; 2\end{matrix}\right]\)</span>，令 <span class="math inline">\({x} = \left[\begin{matrix}x \\ y\end{matrix}\right], {b} = \left[\begin{matrix}0 \\ 3\end{matrix}\right]\)</span>，然后方程组可以写成这样子： <span class="math display">\[
-Ax = b
+<p>我们构造一个系数矩阵 <span class="math inline">\({A} = \left[\begin{matrix}2 &amp; -1 \\ -1 &amp; 2\end{matrix}\right]\)</span>，令 <span class="math inline">\(\vec{x} = \left[\begin{matrix}x \\ y\end{matrix}\right], \vec{b} = \left[\begin{matrix}0 \\ 3\end{matrix}\right]\)</span>，然后方程组可以写成这样子： <span class="math display">\[
+A\vec{x} = \vec{b}
 \]</span></p>
 <h5 id="是否有解">是否有解？</h5>
-<p>这时要考虑一个问题：是否任意 <span class="math inline">\({b}\)</span> 都能让上面那个方程有解呢？</p>
-<p>从<strong>行图像</strong>的角度来讲，如果方程组有解，则所有方程在坐标系上对应的图像（直线、平面、体积）存在交集。如果某一个 <span class="math inline">\({b}\)</span> 不能满足上面条件，则无解（反之有解）。</p>
-<p>从<strong>列图像</strong>的角度来讲，如果某一个 <span class="math inline">\({b}\)</span> 不能成为 <span class="math inline">\({A}\)</span> 列向量的线性组合，则无解（反之有解）。</p>
+<p>这时要考虑一个问题：是否任意 <span class="math inline">\(\vec{b}\)</span> 都能让上面那个方程有解呢？</p>
+<p>从<strong>行图像</strong>的角度来讲，如果方程组有解，则所有方程在坐标系上对应的图像（直线、平面、体积）存在交集。如果某一个 <span class="math inline">\(\vec{b}\)</span> 不能满足上面条件，则无解（反之有解）。</p>
+<p>从<strong>列图像</strong>的角度来讲，如果某一个 <span class="math inline">\(\vec{b}\)</span> 不能成为 <span class="math inline">\({A}\)</span> 列向量的线性组合，则无解（反之有解）。</p>
 <h5 id="如何求解">如何求解？</h5>
-<p>计算机软件（以及人类）计算时最常用的方法是<strong>高斯消元法</strong>，将原方程 <span class="math inline">\({A}{x} = {b}\)</span> 转换为新的方程 <span class="math inline">\({U}{x}={c}\)</span>。</p>
+<p>计算机软件（以及人类）计算时最常用的方法是<strong>高斯消元法</strong>，将原方程 <span class="math inline">\({A}\vec{x} = \vec{b}\)</span> 转换为新的方程 <span class="math inline">\({U}\vec{x}=\vec{c}\)</span>。</p>
 <blockquote>
 <p>其中 <span class="math inline">\({U}\)</span> 为行阶梯最简型矩阵。</p>
 </blockquote>
@@ -288,7 +300,7 @@ Ax = b
 <p><strong>高斯-若尔当消元法</strong>(Gauss-Jordan Elimination)告诉我们，通过构造 <span class="math inline">\(\left[\begin{matrix}\ {A}\ |\ {I}\ \end{matrix}\right]\)</span>，再通过消元法将左侧矩阵变为单位矩阵 <span class="math inline">\({I}\)</span>，易得这一系列行变换操作对应的矩阵是 <span class="math inline">\({A}^{-1}\)</span>，相当于左乘了一个矩阵 <span class="math inline">\({A}^{-1}\)</span>，则右侧矩阵乘完后自然就变为了 <span class="math inline">\({A}^{-1}\)</span>。</p>
 <h4 id="接下来引入拓展到向量空间">接下来引入拓展到向量空间</h4>
 <h5 id="向量空间">向量空间</h5>
-<p>一个向量空间应该满足这样一个<strong>封闭性</strong>条件：对于空间中的任意向量 <span class="math inline">\({u}, {v}\)</span>，其任意线性组合 <span class="math inline">\(a{u}+b{v}(a, b\in\R)\)</span> 必然存在于空间中。显然，所有向量空间必须包括零向量。</p>
+<p>一个向量空间应该满足这样一个<strong>封闭性</strong>条件：对于空间中的任意向量 <span class="math inline">\(\vec{u}, \vec{v}\)</span>，其任意线性组合 <span class="math inline">\(a\vec{u}+b\vec{v}(a, b\in R)\)</span> 必然存在于空间中。显然，所有向量空间必须包括零向量。</p>
 <h5 id="子空间">子空间</h5>
 <p>包含于向量空间之内的一个向量空间称为原向量空间的一个子空间。</p>
 <p>以 <span class="math inline">\({R}^3\)</span> 为例（它代表具有三个实数分量的所有向量的集合），其子空间包括：</p>
@@ -301,9 +313,9 @@ Ax = b
 <h5 id="列空间">列空间</h5>
 <p>矩阵 <span class="math inline">\({A}_{m\times n}\)</span> 的所有列向量张成的空间称为其列空间，以 <span class="math inline">\(C({A})\)</span> 表示。<span class="math inline">\(C({A})\subset R^m\)</span></p>
 <h5 id="零空间">零空间</h5>
-<p>所有满足方程 <span class="math inline">\({A}{x} = {0}\)</span> 的解的集合称为矩阵 <span class="math inline">\({A}_{m\times n}\)</span> 的零空间，以 <span class="math inline">\(N({A})\)</span> 表示。<span class="math inline">\(N({A})\subset R^n\)</span></p>
+<p>所有满足方程 <span class="math inline">\({A}\vec{x} = \vec{0}\)</span> 的解的集合称为矩阵 <span class="math inline">\({A}_{m\times n}\)</span> 的零空间，以 <span class="math inline">\(N({A})\)</span> 表示。<span class="math inline">\(N({A})\subset R^n\)</span></p>
 <h5 id="计算零空间">计算零空间</h5>
-<p>相当于求方程 <span class="math inline">\({A}{x} = {0}\)</span> 的所有解。通过<strong>消元法与列交换</strong>构造出新的方程 <span class="math inline">\({U}{x}={0}\)</span>，其中 <span class="math inline">\({U}\)</span> 是由 <span class="math inline">\(r\)</span> 个<strong>主元列</strong>与 <span class="math inline">\(n-r\)</span> 个<strong>自由列</strong>组成的形如下式的行阶梯型矩阵： <span class="math display">\[
+<p>相当于求方程 <span class="math inline">\({A}\vec{x} = \vec{0}\)</span> 的所有解。通过<strong>消元法与列交换</strong>构造出新的方程 <span class="math inline">\({U}\vec{x}=\vec{0}\)</span>，其中 <span class="math inline">\({U}\)</span> 是由 <span class="math inline">\(r\)</span> 个<strong>主元列</strong>与 <span class="math inline">\(n-r\)</span> 个<strong>自由列</strong>组成的形如下式的行阶梯型矩阵： <span class="math display">\[
 U =
 \left[
 \begin{matrix}
@@ -316,20 +328,20 @@ U =
 <blockquote>
 <p>自由列可以表示为其左侧主元列的线性组合。</p>
 </blockquote>
-<p>原方程变为 <span class="math inline">\({U}\)</span> 的主元行乘以 <span class="math inline">\({x}\)</span>，即 <span class="math inline">\(\left[\begin{matrix}\ {I}\ |\ {F}\ \end{matrix}\right] \left[\begin{matrix}\  x_{pivot} \\ \  x_{free} \ \end{matrix}\right] = 0\)</span>。如果对 $ x_{free}$ 中 <span class="math inline">\(n-r\)</span> 的变量自由取值，我们能得到 <span class="math inline">\(n-r\)</span> 个线性无关的特解，<span class="math inline">\(N({A})\)</span> 则是由这些特解张成的向量空间（<strong>维度</strong>为 <span class="math inline">\(n-r\)</span>）。若把这些特解作为列向量写到一个矩阵 <span class="math inline">\({N}\)</span> 中，则有 <span class="math inline">\({U}{N} = {0}\)</span>，易得： <span class="math display">\[
+<p>原方程变为 <span class="math inline">\({U}\)</span> 的主元行乘以 <span class="math inline">\(\vec{x}\)</span>，即 <span class="math inline">\(\left[\begin{matrix}\ {I}\ |\ {F}\ \end{matrix}\right] \left[\begin{matrix}\  \vec x_{pivot} \\ \  \vec x_{free} \ \end{matrix}\right] = 0\)</span>。如果对 <span class="math inline">\(\vec x_{free}\)</span> 中 <span class="math inline">\(n-r\)</span> 的变量自由取值，我们能得到 <span class="math inline">\(n-r\)</span> 个线性无关的特解，<span class="math inline">\(N({A})\)</span> 则是由这些特解张成的向量空间（<strong>维度</strong>为 <span class="math inline">\(n-r\)</span>）。若把这些特解作为列向量写到一个矩阵 <span class="math inline">\({N}\)</span> 中，则有 <span class="math inline">\({U}{N} = {0}\)</span>，易得： <span class="math display">\[
 N =
 \left[\begin{matrix}\ {-F}_{r\times n-r} \ \\ \ I_{n-r\times n-r} \ \end{matrix}\right]
-\]</span> 其中 <span class="math inline">\({-F}\)</span> 对应 <span class="math inline">\({x}_{pivot}\)</span>，<span class="math inline">\({I}\)</span> 对应 <span class="math inline">\({x}_{free}\)</span></p>
+\]</span> 其中 <span class="math inline">\({-F}\)</span> 对应 <span class="math inline">\(\vec{x}_{pivot}\)</span>，<span class="math inline">\({I}\)</span> 对应 <span class="math inline">\(\vec{x}_{free}\)</span></p>
 <h5 id="如果方程右侧不为零向量">如果方程右侧不为零向量</h5>
-<p>首先抛出结论：若 <span class="math inline">\({b} \in C({A})\)</span>，则方程 <span class="math inline">\({A}{x} = {b}\)</span> 有解。</p>
+<p>首先抛出结论：若 <span class="math inline">\(\vec{b} \in C({A})\)</span>，则方程 <span class="math inline">\({A}\vec{x} = \vec{b}\)</span> 有解。</p>
 <p>当方程有解时，可以先找到方程一个特解，再与 <span class="math inline">\(N({A})\)</span> 进行线性组合，即可得到最后的解。</p>
 <h5 id="秩">秩</h5>
 <p>矩阵的<strong>秩</strong>等于矩阵的主元数。若 <span class="math inline">\(rank({A}_{m\times n}) = r\)</span>，则必有 <span class="math inline">\(r\leq m, r\leq n\)</span> 。</p>
 <ol type="1">
-<li><strong>列满秩</strong>：即 <span class="math inline">\(r=n&lt;m\)</span>，每一列都是主元列，矩阵没有自由列，<span class="math inline">\(N({A})\)</span> 中只有零向量，方程 <span class="math inline">\({A}{x} = {b}\)</span> 要么无解，要么有唯一解。</li>
-<li><strong>行满秩</strong>：即 <span class="math inline">\(r=m\leq n\)</span>，方程 <span class="math inline">\({A}{x} = {b}\)</span> 有无穷多解。</li>
-<li><strong>方阵满秩</strong>：即 <span class="math inline">\(r=m=n\)</span>，方程 <span class="math inline">\({A}{x} = {b}\)</span> 总有唯一解。</li>
-<li><strong>行列均不满秩</strong>：即 <span class="math inline">\(r&lt;m, r&lt;n\)</span>，方程 <span class="math inline">\({A}{x} = {b}\)</span> 要么无解，要么有无穷多解。</li>
+<li><strong>列满秩</strong>：即 <span class="math inline">\(r=n&lt;m\)</span>，每一列都是主元列，矩阵没有自由列，<span class="math inline">\(N({A})\)</span> 中只有零向量，方程 <span class="math inline">\({A}\vec{x} = \vec{b}\)</span> 要么无解，要么有唯一解。</li>
+<li><strong>行满秩</strong>：即 <span class="math inline">\(r=m\leq n\)</span>，方程 <span class="math inline">\({A}\vec{x} = \vec{b}\)</span> 有无穷多解。</li>
+<li><strong>方阵满秩</strong>：即 <span class="math inline">\(r=m=n\)</span>，方程 <span class="math inline">\({A}\vec{x} = \vec{b}\)</span> 总有唯一解。</li>
+<li><strong>行列均不满秩</strong>：即 <span class="math inline">\(r&lt;m, r&lt;n\)</span>，方程 <span class="math inline">\({A}\vec{x} = \vec{b}\)</span> 要么无解，要么有无穷多解。</li>
 </ol>
 <h5 id="线性相关性">线性相关性</h5>
 <p>若一组向量的非零线性组合可以得到零向量，则称这组向量<strong>线性相关</strong>；反之，则称其<strong>线性无关</strong>。</p>
@@ -344,7 +356,7 @@ N =
 <li><strong>左零空间</strong>：所有满足方程 <span class="math inline">\({A^T}{x} = {0}\)</span> 的解的集合称为矩阵 <span class="math inline">\({A}_{m\times n}\)</span> 的左零空间，以 <span class="math inline">\(L({A})\)</span> 表示。<span class="math inline">\(L({A})\subset R^m\)</span></li>
 </ol>
 <p><span class="math inline">\({A}\)</span> 的 <span class="math inline">\(r\)</span> 个主元列构成了 <span class="math inline">\(C({A})\)</span> 的一组基。</p>
-<p><span class="math inline">\({A}{x}={0}\)</span> 的一组特解对应于 <span class="math inline">\({A}\)</span> 的 <span class="math inline">\(n-r\)</span> 个自由列，并构成了 <span class="math inline">\(N({A})\)</span> 的一组基。</p>
+<p><span class="math inline">\({A}\vec{x}=\vec{0}\)</span> 的一组特解对应于 <span class="math inline">\({A}\)</span> 的 <span class="math inline">\(n-r\)</span> 个自由列，并构成了 <span class="math inline">\(N({A})\)</span> 的一组基。</p>
 <p>则得到这样一个结论： <span class="math display">\[
 rank(A) = \# C_{pivot} = dim(C(A)) = r = dim(R(A))
 \]</span> 同样的： <span class="math display">\[
@@ -359,6 +371,499 @@ dim(L(A)) = m-r
       </categories>
       <tags>
         <tag>MIT18.06</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linear-Algebra(2)</title>
+    <url>/math/linear-algebra(2)/</url>
+    <content><![CDATA[<p>书接上回。</p>
+<span id="more"></span>
+<h4 id="如何求解无解方程组">如何求解无解方程组？</h4>
+<p>在这个问题之前，我先做点铺垫。</p>
+<h5 id="正交向量">正交向量</h5>
+<p>若两向量 <span class="math inline">\(\vec{a}, \vec{b}\)</span> 正交，则必然有 <span class="math inline">\(\vec{a}^T\vec{b} = \vec{b}^T\vec{a} = 0\)</span></p>
+<h5 id="正交子空间">正交子空间</h5>
+<p>若子空间 <span class="math inline">\(S\)</span> 与子空间 <span class="math inline">\(T\)</span> 正交，则 <span class="math inline">\(S\)</span> 中任意向量与 <span class="math inline">\(T\)</span> 中任意向量正交。</p>
+<p>不难发现，<span class="math inline">\(R(A)\)</span> 与 <span class="math inline">\(N(A)\)</span> 是正交的，而这两个空间恰好都是 <span class="math inline">\(R^n\)</span> 的子空间，更巧的是，<strong>其维数之和为</strong> <span class="math inline">\(n\)</span>。</p>
+<p>我们称这两个子空间为 <span class="math inline">\(R^n\)</span> 的<strong>正交补</strong>——它们将 <span class="math inline">\(R^n\)</span> 划分为了<strong>两个正交的子空间</strong>。</p>
+<p>同样的，<span class="math inline">\(C(A)\)</span> 与 <span class="math inline">\(L(A)\)</span> 也互为正交补。</p>
+<blockquote>
+<p>两个互为正交补的子空间的维数之和，不能超过原空间的维数。</p>
+</blockquote>
+<h5 id="投影问题">投影问题</h5>
+<p>这一问题的几何解释为：如何在向量 <span class="math inline">\(\vec{a}\)</span> 的方向上寻找与向量 <span class="math inline">\(\vec{b}\)</span> 距离最近的一点。假设这一点对应的向量为 <span class="math inline">\(\vec{p}\)</span>，则 <span class="math inline">\(\vec{e}=\vec{b}-\vec{p}\)</span> 就是这一近似的误差。如图所示：</p>
+<figure>
+<img src="image-20220929215857174.png" alt="image-20220929215857174" /><figcaption aria-hidden="true">image-20220929215857174</figcaption>
+</figure>
+<p>若令 <span class="math inline">\(\vec{p} = \hat{x}\vec{a}\)</span>，因 <span class="math inline">\(\vec{e}\)</span> 与 <span class="math inline">\(\vec{a}\)</span> 正交，则有 <span class="math inline">\(\vec{a}^T(\vec{b}-\hat{x}\vec{a}) = 0\)</span>，解得 <span class="math display">\[
+\hat{x} = \frac{\vec{a}^T\vec{b}}{\vec{a}^T\vec{a}}
+\\[2ex]
+\vec{p} = \vec{a}\frac{\vec{a}^T\vec{b}}{\vec{a}^T\vec{a}}
+\]</span> 相当于把 <span class="math inline">\(\vec{b}\)</span> 以某种操作投影到了 <span class="math inline">\(\vec{p}\)</span> 上。若用<strong>投影矩阵</strong> <span class="math inline">\(P\)</span> 来描述这一操作，则有 <span class="math inline">\(\vec{p} = P\vec{b}\)</span>，得 <span class="math display">\[
+P = \frac{\vec{a}\vec{a}^T}{\vec{a}^T\vec{a}}
+\]</span> 这是一个<strong>对称矩阵</strong>（<span class="math inline">\(P^T=P\)</span>），而且是<strong>幂等矩阵</strong>（<span class="math inline">\(P^2 = P\)</span>）</p>
+<h5 id="如果考虑该问题在高维空间的版本">如果考虑该问题在高维空间的版本</h5>
+<p>有一个向量空间 <span class="math inline">\(V\)</span> 与一个不在该空间上的向量 <span class="math inline">\(\vec{b}\)</span>，如果把 <span class="math inline">\(V\)</span> 视为某一矩阵的列空间，且该空间的基为 <span class="math inline">\(\vec{a_1}, \vec{a_2},\dots, \vec{a_n}\)</span>，则该矩阵可以用 <span class="math inline">\(A = \begin{bmatrix}\vec{a_1} &amp; \vec{a_2} &amp; \cdots &amp; \vec{a_n} \end{bmatrix}\)</span> 来描述。</p>
+<p>令 <span class="math inline">\(\vec{p}\)</span> 为 <span class="math inline">\(\vec{b}\)</span> 在该向量空间上的投影，则 <span class="math inline">\(\vec{p}\)</span> 可以用 <span class="math inline">\(\vec{p} = x_1\vec{a_1} + x_2\vec{a_2} + \dots + x_n\vec{a_n} = A\vec{\hat{x}}\)</span> 来表示。</p>
+<p>显然误差 <span class="math inline">\(\vec{e}\)</span> 与整个向量空间正交，则有 <span class="math inline">\(\vec{a_1}^T\vec{e} = 0, \vec{a_2}^T\vec{e} = 0, \dots, \vec{a_n}^T\vec{e} = 0\)</span></p>
+<p>上式可以写为 <span class="math inline">\(A^T\vec{e} = 0\)</span></p>
+<p>从而得到 <span class="math display">\[
+A^T(\vec{b} - A\vec{\hat{x}}) = 0 \quad \Rarr \quad \vec{\hat{x}} = (A^TA)^{-1}A^T\vec{b}
+\]</span> 那么得到一个<strong>非常优美的结论</strong>： <span class="math display">\[
+\vec{p} = A(A^TA)^{-1}A^T\vec{b}
+\\[2ex]
+P = A(A^TA)^{-1}A^T
+\]</span> 这里的 <span class="math inline">\(P\)</span> 同样满足对称性和幂等性。</p>
+<p>这里 <span class="math inline">\(\vec{p} \in C(A)\)</span>，同时惊喜的发现 <span class="math inline">\(\vec{e}\in L(A)\)</span>，说明 <span class="math inline">\(\vec{b} = \vec{p} + \vec{e}\)</span> 由两部分组成，一部分（<span class="math inline">\(\vec{p}\)</span>）投影到了 <span class="math inline">\(C(A)\)</span> 上，另一部分（<span class="math inline">\(\vec{e}\)</span>）投影到了 <span class="math inline">\(L(A)\)</span> 上。对于 <span class="math inline">\(\vec{e}\)</span>，我们发现可以通过 <span class="math inline">\(\vec{e} = \vec{b} - \vec{p} = \vec{b} - P\vec{b} = (I-P)\vec{b}\)</span> 表示，所以 <span class="math inline">\(I-P\)</span> 也是个投影矩阵，也具有和 <span class="math inline">\(P\)</span> 同样的性质。</p>
+<p>当 <span class="math inline">\(A\)</span> 的列向量线性无关时，说明 <span class="math inline">\(C(A)\)</span> 就是 <span class="math inline">\(R^n\)</span>，此时任意 <span class="math inline">\(\vec{b}\in R^n\)</span> 都必然在 <span class="math inline">\(C(A)\)</span> 中，投影矩阵就是 <span class="math inline">\(I\)</span>。</p>
+<p>对于 <span class="math inline">\(A^TA\)</span> 而言，其零空间与 <span class="math inline">\(A\)</span> 是一致的</p>
+<ol type="1">
+<li>对于 <span class="math inline">\(A^TA\vec{x}=\vec{0}\)</span>，必然满足 <span class="math inline">\(\vec{x}^TA^TA\vec{x} = (A\vec{x})^T A\vec{x} = \vec{0}\)</span>，从而 <span class="math inline">\(A\vec{x}\)</span> 与自身正交，那么 <span class="math inline">\(A\vec{x} = \vec{0}\)</span>。</li>
+<li>对于 <span class="math inline">\(A\vec{x}=\vec{0}\)</span>，必然满足 <span class="math inline">\(A^TA\vec{x}=\vec{0}\)</span></li>
+</ol>
+<p>因此当 <span class="math inline">\(A\)</span> 的列向量线性无关时，<span class="math inline">\(A\vec{x}=\vec{0}\)</span> 只有零解，<span class="math inline">\(A^TA\vec{x}=\vec{0}\)</span> 也只有零解。且 <span class="math inline">\(A^TA\)</span> 为方阵，行列满秩，必然可逆。</p>
+<h5 id="回到最开始的问题如何求解无解方程组">回到最开始的问题：如何求解无解方程组？</h5>
+<p>这个问题看似很离谱，实则我们可以用一个最优解 <span class="math inline">\(\vec{\hat{x}}\)</span> 去近似。对于方程 <span class="math inline">\(A\vec{x} = \vec{b}\)</span>，如果其无解，说明 <span class="math inline">\(\vec{b}\)</span> 不在 <span class="math inline">\(A\)</span> 的列空间中。我们可以将 <span class="math inline">\(\vec{b}\)</span> 投影到 <span class="math inline">\(C(A)\)</span>，将问题转换为求解方程 <span class="math inline">\(A\vec{\hat{x}} = \vec{p}\)</span>，这个解就是我们想求的近似最优解。</p>
+<p>根据上面描述的，我们能够很轻易地得到该解，即 <span class="math display">\[
+\vec{\hat{x}} = (A^TA)^{-1}A^T\vec{b}
+\]</span></p>
+<h5 id="最小二乘法">最小二乘法</h5>
+<p>应用投影矩阵求方程组最优解的方法，最常用于“最小二乘法”拟合曲线，如图：</p>
+<figure>
+<img src="image-20220929223041893.png" alt="image-20220929223041893" /><figcaption aria-hidden="true">image-20220929223041893</figcaption>
+</figure>
+<p>已知数据点，求一直线方程，使该直线尽可能经过所有点——所有点到该直线的距离尽可能小。</p>
+<p>有一个思路是：这些数据点大概率不会共线，也就是说，将这些数据点代入直线方程利用待定系数法求其参数时，组成的线性方程组大多数情况下是无解的，此时就要用到上面的“求无解方程组最优解”的思路。</p>
+<p>还有一个思路是，我们希望误差 <span class="math inline">\(\vec{e}\)</span> 尽可能小，也就是 <span class="math inline">\(||\vec{e}||^2=||A\vec{\hat{x}}-\vec{b}||^2\)</span> 尽可能小。这一等式可以写成一个 <span class="math inline">\(n\)</span> 元的方程，对该方程的所有变量求偏导并令偏导数为 0，则可以得到上面那个思路一样的结果。</p>
+<h5 id="再回到正交向量">再回到正交向量</h5>
+<p>现在说正交向量的升级版——<strong>标准正交向量</strong>，即满足以下条件的一组向量： <span class="math display">\[
+\vec{q}_i^T\vec{q}_j = \begin{cases}1 \quad i = j\\[2ex] 0 \quad i \neq j\end{cases}
+\]</span></p>
+<h5 id="正交矩阵">正交矩阵</h5>
+若令 $Q =
+<span class="math display">\[\begin{bmatrix}\vec{q}_1 &amp; \vec{q}_2 &amp; \cdots &amp; \vec{q}_n \end{bmatrix}\]</span>
+<p>$，易得 <span class="math display">\[
+Q^TQ = I
+\]</span> 此矩阵 <span class="math inline">\(Q\)</span> 称为<strong>正交矩阵</strong>，且显然有 <span class="math inline">\(Q^T=Q^{-1}\)</span>。</p>
+<p>对于正交矩阵来说，在其列空间内关于投影问题的<strong>投影矩阵</strong>也可以<strong>简化为</strong> <span class="math inline">\(P=Q(Q^TQ)^{-1}Q^T = QQ^T\)</span>。若 <span class="math inline">\(Q\)</span> 为方阵，还可以进一步得到 <span class="math inline">\(P=I\)</span>，因为此时其列空间已经张成 <span class="math inline">\(R^n\)</span>，投影操作不会对向量有任何改变。</p>
+<p>对应的 <span class="math inline">\(\vec{p} = P\vec{b} = QQ^T\vec{b} = Q\vec{\hat{x}}\)</span></p>
+<h5 id="施密特正交化">施密特正交化</h5>
+<p>对于一组线性无关的向量 <span class="math inline">\(\vec{a}_1, \vec{a}_2,\dots,\vec{a}_n\)</span>，若其能够张成空间 <span class="math inline">\(V\)</span>，我们希望能找到该空间的<strong>正交矩阵</strong>表示——即找到一组<strong>标准正交向量</strong> <span class="math inline">\(\vec{e}_1, \vec{e}_2, \dots, \vec{e}_n\)</span>，其恰好能张成同样的空间，也就是找到该空间的一组<strong>标准正交基</strong>。</p>
+<blockquote>
+<p>对一个向量的<strong>标准化</strong>过程就是令其除以其模长。</p>
+</blockquote>
+<p>我们不妨逐一分析：</p>
+<ol type="1">
+<li><p>第一个向量不作变动，即 <span class="math inline">\(\displaystyle \vec{e}_1 = \frac{\vec{a}_1}{||\vec{a}_1||}\)</span></p></li>
+<li><p>对于之后的所有向量 <span class="math inline">\(\vec{a}_i\)</span>，由于我们已经求得一组标准正交向量 <span class="math inline">\(\vec{e}_1, \dots, \vec{e}_{i-1}\)</span>，设求其施密特正交化后的向量为 <span class="math inline">\(\vec{e}_i\)</span>，易得 <span class="math inline">\(\vec{e}_i\)</span> 垂直于 <span class="math inline">\(\vec{e}_1, \dots, \vec{e}_{i-1}\)</span>，从而有<span class="math inline">\(\vec{e}_i\)</span> 垂直于 <span class="math inline">\(\vec{e}_1, \dots, \vec{e}_{i-1}\)</span> 张成的向量空间。此时可以把问题转换为<strong>投影问题</strong>，只不过我们这里需要求投影问题中的<strong>误差</strong>，也就是原向量 <span class="math inline">\(\vec{a}_i\)</span> 减去它在投影到所有基 <span class="math inline">\(\vec{e}_k\)</span> 上的分量 <span class="math inline">\(\vec{p}_k\)</span>： <span class="math display">\[
+ \vec{e}_i = \vec{a}_i - \sum\limits_{k=1}^{i-1}\vec{p}_k
+ \\[2ex]
+ \vec{p}_k = \frac{\vec{e}_k^T\vec{a}_i}{\vec{e}_k^T\vec{e}_k}\vec{e}_k
+ \]</span></p></li>
+<li><p>最后还需要对 <span class="math inline">\(\vec{e}_i\)</span> 进行标准化。</p></li>
+</ol>
+<h5 id="qr分解">QR分解</h5>
+我们把得到的标准正交基写成矩阵的形式 <span class="math inline">\(Q = \begin{bmatrix}\vec{e}_1 &amp; \vec{e}_2 &amp; \cdots &amp; \vec{e}_n \end{bmatrix}\)</span>，若令 $A =
+<span class="math display">\[\begin{bmatrix}\vec{a}_1 &amp; \vec{a}_2 &amp; \cdots &amp; \vec{a}_n \end{bmatrix}\]</span>
+<p>$，则 <span class="math inline">\(C(Q)\)</span> 与 <span class="math inline">\(C(A)\)</span> 是同一个向量空间。</p>
+由于 <span class="math inline">\(Q\)</span> 的列向量是 <span class="math inline">\(C(Q)\)</span> 空间中的标准正交基，则 <span class="math inline">\(A\)</span> 的列向量必能由 <span class="math inline">\(Q\)</span> 的列向量线性表示。前文提到，列变换相当于右乘一个置换矩阵，所以我们可以得到如下等式： $$ A = QR 
+<span class="math display">\[\begin{bmatrix}
+\vec{a}_1 &amp; \vec{a}_2 &amp; \cdots &amp; \vec{a}_n
+\end{bmatrix}\]</span>
+=
+<span class="math display">\[\begin{bmatrix}
+\vec{e}_1 &amp; \vec{e}_2 &amp; \cdots &amp; \vec{e}_n
+\end{bmatrix}\]</span>
+<span class="math display">\[\begin{bmatrix}
+\vec{a}_1^T\vec{e}_1 &amp; \vec{a}_2^T\vec{e}_1 &amp; \cdots &amp; \vec{a}_n^T\vec{e}_1
+\\
+\vec{a}_1^T\vec{e}_2 &amp; \vec{a}_2^T\vec{e}_2 &amp; \cdots &amp; \vec{a}_n^T\vec{e}_2
+\\
+\vdots &amp; \vdots &amp; &amp; \vdots
+\\
+\vec{a}_1^T\vec{e}_n &amp; \vec{a}_2^T\vec{e}_n &amp; \cdots &amp; \vec{a}_n^T\vec{e}_n
+\end{bmatrix}\]</span>
+<p>$$ 其中矩阵 <span class="math inline">\(R\)</span> 为列变换的置换矩阵。</p>
+<p>根据我们求正交基的步骤，每一个 <span class="math inline">\(\vec{e}_i\)</span> 都正交于 <span class="math inline">\(\vec{a}_j\ (j &lt; i)\)</span>，因为 <span class="math inline">\(\vec{a}_j\)</span> 属于 <span class="math inline">\(\vec{e}_1, \vec{e}_2,\dots,\vec{e}_{i-1}\)</span> 张成的向量空间，而 <span class="math inline">\(\vec{e}_i\)</span> 与该向量空间正交。从而当 <span class="math inline">\(j &lt; i\)</span> 时，有 <span class="math inline">\(\vec{a}_j^T\vec{e}_i = 0\)</span>，得到 <span class="math inline">\(R\)</span> 为上三角矩阵。</p>
+<p>更清楚的表示为： <span class="math display">\[
+R =
+\begin{bmatrix}
+\vec{a}_1^T\vec{e}_1 &amp; \vec{a}_2^T\vec{e}_1 &amp; \cdots &amp; \vec{a}_{n-1}^T\vec{e}_1 &amp; \vec{a}_n^T\vec{e}_1
+\\
+0 &amp; \vec{a}_2^T\vec{e}_2 &amp; \cdots &amp; \vec{a}_{n-1}^T\vec{e}_2 &amp; \vec{a}_n^T\vec{e}_2
+\\
+\vdots &amp; \vdots &amp; \ddots &amp; \vdots &amp; \vdots
+\\
+0 &amp; 0 &amp; \cdots &amp;  \vec{a}_{n-1}^T\vec{e}_{n-1} &amp; \vec{a}_n^T\vec{e}_{n-1}
+\\
+0 &amp; 0 &amp; \cdots &amp; 0 &amp; \vec{a}_n^T\vec{e}_n
+\end{bmatrix}
+\]</span></p>
+<h4 id="进入第二部分行列式">进入第二部分：行列式</h4>
+<p>跟国内教材上来就给学生塞一堆行列式的定义与性质让你记忆和做题不一样，GS 在讲完矩阵后，把<strong>“行列式作为属于矩阵的一个特性，包含大量矩阵的信息”</strong>教授给大家，并从<strong>三个基本性质</strong>开始。</p>
+<blockquote>
+<p>行列式记为 <span class="math inline">\(det(A) = |A|\)</span>。矩阵必须为方阵。</p>
+</blockquote>
+<h5 id="行列式性质">行列式性质</h5>
+<ol type="1">
+<li><p><span class="math inline">\(det(I) = 1\)</span></p></li>
+<li><p>交换任意两行后，<span class="math inline">\(det(A)\)</span> 取相反数。</p></li>
+<li><ul>
+<li>数乘： <span class="math display">\[
+  \begin{vmatrix}
+  ta &amp; tb
+  \\
+  c &amp; d
+  \end{vmatrix}
+  =
+  t
+  \begin{vmatrix}
+  a &amp; b
+  \\
+  c &amp; d
+  \end{vmatrix}
+  \]</span></li>
+<li>相加： <span class="math display">\[
+  \begin{vmatrix}
+  a+a&#39; &amp; b+b&#39;
+  \\
+  c &amp; d
+  \end{vmatrix}
+  =
+  \begin{vmatrix}
+  a &amp; b
+  \\
+  c &amp; d
+  \end{vmatrix}
+  +
+  \begin{vmatrix}
+  a&#39; &amp; b&#39;
+  \\
+  c &amp; d
+  \end{vmatrix}
+  \]</span></li>
+</ul></li>
+</ol>
+<p>更多的性质可以从以上基本性质中推导出：</p>
+<ol start="4" type="1">
+<li><p>任意两行相等，行列式为 0。</p></li>
+<li><p>任意一行加上/减去另一行的 <span class="math inline">\(k\)</span> 倍，行列式值不变。</p></li>
+<li><p>若某一行为 0，则行列式为 0。</p></li>
+<li><p>上三角/下三角行列式的值等于其主对角线所有元素的乘积。</p>
+<blockquote>
+<p><span class="math display">\[
+\begin{vmatrix}
+a &amp; b
+\\
+c &amp; d
+\end{vmatrix}
+= ad - bc
+\]</span></p>
+</blockquote></li>
+<li><p>若 <span class="math inline">\(det(A) = 0\)</span>，则 <span class="math inline">\(A\)</span> 奇异/不可逆；反之非奇异/可逆。</p></li>
+<li><p><span class="math inline">\(det(AB) = det(A)det(B)\)</span> <span class="math inline">\(det(A^{-1}) = 1/det(A)\)</span> <span class="math inline">\(det(kA) = k^ndet(A)\)</span></p></li>
+<li><p><span class="math inline">\(det(A^T) = det(A)\)</span></p></li>
+</ol>
+<h5 id="代数余子式">代数余子式</h5>
+<p>讲完性质，就来讲怎么对高阶方阵的行列式求值了。</p>
+<p><span class="math inline">\(n\)</span> 阶行列式中，任意位置 <span class="math inline">\(a_{ij}\)</span> 对应的<strong>代数余子式</strong> <span class="math inline">\(C_{ij}\)</span> 等于将第 <span class="math inline">\(i\)</span> 行第 <span class="math inline">\(j\)</span> 列从行列式中移除后，剩下部分构成的 <span class="math inline">\(n-1\)</span> 阶行列式<strong>的值</strong>，且其正负性由 <span class="math inline">\((-1)^{i+j}\)</span> 表示。</p>
+<p>行列式的值，等于任意一行中所有元素与其代数余子式乘积再求和，即<strong>代数余子式展开</strong>： <span class="math display">\[
+det(A) = a_{i1}C_{i1} + a_{i2}C_{i2} + \dots + a_{in}C_{in} \quad (1 \leq i \leq n)
+\]</span> 对列也有类似的展开方法。</p>
+<blockquote>
+<p>一般来说很少用这方法，以<strong>消元法化为上三角行列式</strong>为主。</p>
+</blockquote>
+<h5 id="逆矩阵公式">逆矩阵公式</h5>
+<p>已知二阶矩阵 <span class="math inline">\(A = \begin{bmatrix}a &amp; b \\ c &amp; d\end{bmatrix}\)</span> 的行列式公式，则其逆矩阵为 <span class="math inline">\(\displaystyle A^{-1} = \frac{1}{ad-bc} \begin{bmatrix}d &amp; -b \\ -c &amp; a\end{bmatrix}\)</span></p>
+<p>事实上，<strong>任意矩阵的逆</strong>都可以写为这样一个形式： <span class="math display">\[
+A^{-1} = \frac{1}{det(A)}C^T
+\\[2ex]
+C = \begin{bmatrix}
+C_{11} &amp; C_{12} &amp; \cdots &amp; C_{1n}
+\\
+C_{21} &amp; C_{22} &amp; \cdots &amp; C_{2n}
+\\
+\vdots &amp; \vdots &amp; &amp; \vdots
+\\
+C_{n1} &amp; C_{n2} &amp; \cdots &amp; C_{nn}
+\end{bmatrix}
+\]</span> 其中 <span class="math inline">\(C_{ij}\)</span> 为 <span class="math inline">\(A\)</span> 中元素 <span class="math inline">\(a_{ij}\)</span> 的<strong>代数余子式</strong>。代数余子式矩阵 <span class="math inline">\(C\)</span> 的转置 <span class="math inline">\(C^T\)</span> 也称为 <span class="math inline">\(A\)</span> 的<strong>伴随矩阵</strong>。</p>
+对上式进行左乘 <span class="math inline">\(A\)</span>，则有 $$ AC^T = 
+<span class="math display">\[\begin{bmatrix}
+a_{11} &amp; a_{12} &amp; \cdots &amp; a_{1n}
+\\
+a_{21} &amp; a_{22} &amp; \cdots &amp; a_{2n}
+\\
+\vdots &amp; \vdots &amp; &amp; \vdots
+\\
+a_{n1} &amp; a_{n2} &amp; \cdots &amp; a_{nn}
+\end{bmatrix}\]</span>
+<span class="math display">\[\begin{bmatrix}
+C_{11} &amp; C_{21} &amp; \cdots &amp; C_{n1}
+\\
+C_{12} &amp; C_{22} &amp; \cdots &amp; C_{n2}
+\\
+\vdots &amp; \vdots &amp; &amp; \vdots
+\\
+C_{1n} &amp; C_{2n} &amp; \cdots &amp; C_{nn}
+\end{bmatrix}\]</span>
+<p>$$ 主对角线元素很好判断，就是行列式的<strong>代数余子式展开</strong>；对于其它元素，以 <span class="math inline">\(\sum\limits_{i=1}^na_{2i}C_{1i}\)</span> 为例，它可以视为 <span class="math inline">\(A\)</span> 的第一行元素全由第二行替换后的新矩阵 <span class="math inline">\(A&#39;\)</span> 按第一行代数余子式展开，根据<strong>性质 4</strong>，我们得到 <span class="math inline">\(det(A&#39;)=0\)</span>，即最终结果仅有主对角线元素全为 1，其它都是 0——单位矩阵 <span class="math inline">\(I\)</span>，恰好是 <span class="math inline">\(AA^{-1}\)</span>，故该等式是正确的。</p>
+<h5 id="克拉默法则">克拉默法则</h5>
+<p>对于可逆矩阵 <span class="math inline">\(A\)</span>，方程 <span class="math inline">\(A\vec{x} = \vec{b}\)</span> 必有形如下式的解：<span class="math inline">\(\vec{x} = A^{-1}\vec{b}\)</span></p>
+<p>代入上面得到的逆矩阵公式，有 <span class="math display">\[
+\begin{bmatrix}
+x_1
+\\
+x_2
+\\
+\vdots
+\\
+x_n
+\end{bmatrix}
+= \vec{x} = \frac{1}{det(A)}C^T\vec{b} = \frac{1}{det(A)}
+\begin{bmatrix}
+C_{11} &amp; C_{21} &amp; \cdots &amp; C_{n1}
+\\
+C_{12} &amp; C_{22} &amp; \cdots &amp; C_{n2}
+\\
+\vdots &amp; \vdots &amp; &amp; \vdots
+\\
+C_{1n} &amp; C_{2n} &amp; \cdots &amp; C_{nn}
+\end{bmatrix}
+\begin{bmatrix}
+b_1
+\\
+b_2
+\\
+\vdots
+\\
+b_n
+\end{bmatrix}
+\]</span> 根据之前得到的结论，<span class="math inline">\(\sum\limits_{i=1}^nb_kC_{ik}\)</span> 可以视为将 <span class="math inline">\(A\)</span> 的第 <span class="math inline">\(k\)</span> 列用 <span class="math inline">\(\vec{b}\)</span> 替换后得到的新矩阵 <span class="math inline">\(B_k\)</span> 的行列式值，从而得到 <span class="math display">\[
+x_k = \frac{det(B_k)}{det(A)}
+\]</span> 评价为：<strong>没消元法好用，但确实也是一个可行的方法</strong>。</p>
+<h5 id="几何度量">几何度量</h5>
+<p>二阶行列式 <span class="math inline">\(|det(A)|\)</span> 等于 <span class="math inline">\(A\)</span> 行（列）向量构成的平行四边形的面积。</p>
+<p>三阶行列式 <span class="math inline">\(|det(A)|\)</span> 等于 <span class="math inline">\(A\)</span> 行（列）向量构成的平行六面体的体积。</p>
+<h4 id="进入下一个议题特征向量与特征值">进入下一个议题：特征向量与特征值</h4>
+<p>将矩阵 <span class="math inline">\(A\)</span> 与向量 <span class="math inline">\(\vec{x}\)</span> 相乘当做是对向量的一种操作或者函数，输入 <span class="math inline">\(\vec{x}\)</span> 而输出 <span class="math inline">\(A\vec{x}\)</span> 。<strong>特征向量</strong>即在特定的向量 <span class="math inline">\(\vec{x}\)</span> 方向上输出的 <span class="math inline">\(A \vec{x}\)</span> 平行于 <span class="math inline">\(\vec{x}\)</span> ，即为： <span class="math display">\[
+A\vec{x} = \lambda\vec{x}
+\]</span> 其中 <span class="math inline">\(\vec{x}\)</span> 为 <span class="math inline">\(A\)</span> 的<strong>特征向量</strong>，<span class="math inline">\(\lambda\)</span> 为 <span class="math inline">\(A\)</span> 的<strong>特征值</strong>。</p>
+<h5 id="如何求解特征值与特征向量">如何求解特征值与特征向量？</h5>
+<p>直接上结论：<strong>求解特征值等价于求解方程</strong> <span class="math inline">\(det(A-\lambda I) = 0\)</span></p>
+<p>并且有：</p>
+<ol type="1">
+<li><p>矩阵的<strong>迹</strong>（对角线所有元素之和）等于<strong>特征值之和</strong>。</p></li>
+<li><p>对称矩阵的特征向量<strong>正交</strong>。</p>
+<blockquote>
+<p>设 <span class="math inline">\(\vec{x}_1, \vec{x}_2\)</span> 分别是 <span class="math inline">\(A\)</span> 对应特征值 <span class="math inline">\(\lambda_1, \lambda_2\)</span> 的特征向量，有 <span class="math display">\[
+\begin{align}
+A\vec{x}_1 &amp;= \lambda_1\vec{x}_1
+\\[2ex]
+\vec{x}_2^TA\vec{x}_1 &amp;= \lambda_1\vec{x}_2^T\vec{x}_1
+\\[2ex]
+(A^T\vec{x}_2)^T\vec{x}_1 &amp;= \lambda_2\vec{x}_2^T\vec{x}_1
+\\[2ex]
+(\lambda_1 - \lambda_2)\vec{x}_2^T\vec{x}_1 &amp;= 0
+\end{align}
+\]</span></p>
+<p>由于 <span class="math inline">\(\lambda_1 \neq \lambda_2\)</span>，所以 <span class="math inline">\(\vec{x}_2^T\vec{x}_1 = 0\)</span>，故其正交。</p>
+</blockquote></li>
+</ol>
+]]></content>
+      <categories>
+        <category>math</category>
+      </categories>
+      <tags>
+        <tag>MIT18.06</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>6.824 Lab2 RAFT</title>
+    <url>/6-824/raft1/</url>
+    <content><![CDATA[<p>对于 Raft，官网的说法是这样的：</p>
+<blockquote>
+<p>Raft 是一个易于理解的共识算法。在容错性和性能方面，它相当于 Paxos。不同之处在于，它被分解成相对独立的子问题，并且清楚地解决了实际系统所需的所有主要部分。我们希望 Raft 将向更广泛的受众提供共识，并希望这些更广泛的受众将能够开发出比现在更高质量的基于共识的系统。</p>
+</blockquote>
+<p>之前参加了 pingcap 组织的训练营，lab2 也是 raft，但由于零基础，很快就被干碎了。故本次前来尝试教学级别的 raft code，希望6.824 善待我。</p>
+<span id="more"></span>
+<h4 id="part-a-raft-leader-election">PART A-Raft Leader Election</h4>
+<p>关于 Raft，有一个<a href="http://thesecretlivesofdata.com/raft/#home">非常通俗易懂的Raft 可视化网站</a>，以及<a href="https://pdos.csail.mit.edu/6.824/papers/raft-extended.pdf">描述 Raft 算法的论文</a>。我只能说这个算法很复杂，很有挑战性。</p>
+<p>part A 是 code 出 Raft 节点在启动后，超过一定时间间隔自动发起选举并当上领导者的过程。我把这一过程描述为以下步骤：</p>
+<ol type="1">
+<li><p>节点自身包含一个定时器，自动增长，在 timeout 时间间隔内满足以下条件</p>
+<ul>
+<li>未投票给其它节点</li>
+<li>未收到当前 leader 的RPC</li>
+<li>未发起选举</li>
+</ul>
+<p>则将自身状态变为 Candidate，CurrentTerm 加一，并请求其它各个节点（下称 Peers）给自己投票</p></li>
+<li><p>Peers 收到 requestVote 消息后，对该消息进行处理，并按照一定规则判断是否能够同意其成为 leader</p></li>
+<li><p>如果 Candidate 收到了超过半数的赞成票（自己也算一票），则成为当前 Term 的 leader</p></li>
+</ol>
+<p>至此，一个完整的选举过程就结束了。另外，节点成为 leader 后，需要定期向其它 Peers 发送不带任何 log 的特殊 AppendEntriesRPC，也就是所谓的 <strong>HeartBeat</strong>。</p>
+<p>这一部分并不难，只需修改 Raft.go 即可，而解决它的关键在于 paper 中的 Figure2，为本实验提供了非常有用的结构体定义以及规则。同时，goroutines 也为我们解决某些问题提供了很重要的一个手段。</p>
+<h5 id="结构体定义">结构体定义</h5>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 每个日志条目存相应的索引、term 以及操作</span></span><br><span class="line"><span class="keyword">type</span> LogEntry <span class="keyword">struct</span> &#123;</span><br><span class="line">	Index   <span class="type">int</span></span><br><span class="line">	Term    <span class="type">int</span></span><br><span class="line">	Command <span class="keyword">interface</span>&#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 这里的 RaftState 与 persister 里的不一样</span></span><br><span class="line"><span class="keyword">type</span> RaftState <span class="type">string</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> (</span><br><span class="line">	Follower  RaftState = <span class="string">&quot;Follower&quot;</span></span><br><span class="line">	Candidate RaftState = <span class="string">&quot;Candidate&quot;</span></span><br><span class="line">	Leader    RaftState = <span class="string">&quot;Leader&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Raft <span class="keyword">struct</span> &#123;</span><br><span class="line">	mu        sync.RWMutex</span><br><span class="line">	peers     []*labrpc.ClientEnd</span><br><span class="line">	persister *Persister</span><br><span class="line">	me        <span class="type">int</span></span><br><span class="line">	dead      <span class="type">int32</span></span><br><span class="line"></span><br><span class="line">	CurrentTerm <span class="type">int</span></span><br><span class="line">	VoteFor     <span class="type">int</span></span><br><span class="line">	Entry       []LogEntry</span><br><span class="line">	raftState   RaftState</span><br><span class="line"></span><br><span class="line">	commitIndex <span class="type">int</span></span><br><span class="line">	lastApplied <span class="type">int</span></span><br><span class="line">	nextIndex   []<span class="type">int</span></span><br><span class="line">	matchIndex  []<span class="type">int</span></span><br><span class="line"></span><br><span class="line">	applyChannel <span class="keyword">chan</span> ApplyMsg</span><br><span class="line">	applyCond    *sync.Cond</span><br><span class="line"></span><br><span class="line">	electionTimer  *time.Timer</span><br><span class="line">	heartbeatTimer *time.Timer</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="timer">Timer</h5>
+<p>尽管 6.824 提了一嘴不要用 go time 库里的 timer，但感觉应该是怕学生不会用用错(</p>
+<p>根据算法要求，需要<strong>选举定时器</strong>和<strong>心跳定时器</strong>各一个，每个定时器到点了都要触发一次事件，并且根据节点的 raftState 不同，进行不同的重置定时器操作。</p>
+<blockquote>
+<p>由于 lab 要求 1s 内最多发十次心跳，所以 HeartBeatTimeOut 设置为 100ms</p>
+</blockquote>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rf *Raft)</span></span> ResetTimer(isleader <span class="type">bool</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> isleader &#123;</span><br><span class="line">        rf.heartbeatTimer.Reset(rf.HeartBeatTimeOut())</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        rf.electionTimer.Reset(rf.ElectionTimeOut())</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rf *Raft)</span></span> Ticker() &#123;</span><br><span class="line">    <span class="keyword">for</span> !rf.killed() &#123;</span><br><span class="line">        <span class="keyword">select</span> &#123;</span><br><span class="line">            <span class="keyword">case</span> &lt;-rf.electionTimer.C:</span><br><span class="line">            <span class="comment">// 选举投票超时，发起选举</span></span><br><span class="line">            <span class="keyword">case</span> &lt;-rf.heartbeatTimer.C:</span><br><span class="line">            <span class="comment">// 心跳超时，发送心跳</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="candidate-发送投票请求">Candidate 发送投票请求</h5>
+<p>关键点在于如何应对过期的 reply。这里在每次收到 reply 时，都对整个节点上读写锁，获取当前状态是否为 Candidate 并检查 reply 的 term 是否与节点当前 term 一致。一旦有一个条件不满足，则认为该消息已过时。</p>
+<blockquote>
+<p>由于每个 goroutine 在对 reply 的处理是互斥的，所以这是判断消息是否过期的最有效的办法。</p>
+</blockquote>
+<p>若 Candidate 成功当选（破坏条件1）或收到了一个更高 term 节点的回复而更新自己的状态（破坏条件1, 2），说明这次选举已经可以结束了，再进行下去没有意义了，后续收到所有的该次选举产生的 reply 都作废。</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rf *Raft)</span></span> StartElection() &#123;</span><br><span class="line">    voteCnt := <span class="number">1</span>	<span class="comment">// 赞成票数</span></span><br><span class="line">    args := rf.GetRequestVoteArg()</span><br><span class="line">	<span class="keyword">for</span> i := <span class="keyword">range</span> rf.peers &#123;</span><br><span class="line">        <span class="keyword">if</span> i != rf.me &#123;</span><br><span class="line">            <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(peer <span class="type">int</span>)</span></span> &#123;</span><br><span class="line">                <span class="keyword">for</span> &#123;</span><br><span class="line">                    reply := &amp;RequestVoteReply&#123;&#125;</span><br><span class="line">                    <span class="keyword">if</span> rf.peers[peer].Call(<span class="string">&quot;Raft.RequestVote&quot;</span>, args, reply) &#123;	<span class="comment">// 发送成功了</span></span><br><span class="line">                        rf.mu.Lock()</span><br><span class="line">                        <span class="keyword">if</span> rf.raftState == Candidate &amp;&amp; rf.CurrentTerm == args.Term &#123;	<span class="comment">// 处理过时 reply</span></span><br><span class="line">                            <span class="keyword">if</span> reply.Grant &#123;</span><br><span class="line">                                voteCnt++</span><br><span class="line">                                <span class="keyword">if</span> voteCnt &gt; <span class="built_in">len</span>(rf.peers)/<span class="number">2</span> &#123;</span><br><span class="line">                                    <span class="comment">// 成为 Leader</span></span><br><span class="line">                                &#125;</span><br><span class="line">                            &#125; <span class="keyword">else</span> <span class="keyword">if</span> reply.Term &gt; rf.CurrentTerm &#123;</span><br><span class="line">                                <span class="comment">// 当前 term 已过时，需要更新并转为 Follower</span></span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125;</span><br><span class="line">                        rf.mu.Unlock()</span><br><span class="line">                        <span class="keyword">return</span></span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;(i)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="对投票请求进行回复">对投票请求进行回复</h5>
+<p>因为 2A 部分没有 AppendEntries，所以暂时不用考虑 paper 中各种和 Log 有关的变量。</p>
+<blockquote>
+<p>这里给 reply 加了个变量 Err，为了在打 log 的时候能够知道是因为什么而拒绝了该次投票，从而更快定位 bug。</p>
+</blockquote>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rf *Raft)</span></span> RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) &#123;</span><br><span class="line">    rf.mu.Lock()</span><br><span class="line">    <span class="keyword">defer</span> rf.mu.Unlock()</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 收到过时 rpc</span></span><br><span class="line">    <span class="keyword">if</span> args.Term &lt; rf.CurrentTerm &#123;</span><br><span class="line">        reply.Term, reply.Grant, reply.Err = rf.CurrentTerm, <span class="literal">false</span>, ErrOldTerm</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 当前 term 内已给其他节点投过票</span></span><br><span class="line">    <span class="keyword">if</span> args.Term == rf.CurrentTerm &amp;&amp; (rf.VoteFor != null &amp;&amp; rf.VoteFor != args.CandidateId) &#123;</span><br><span class="line">        reply.Term, reply.Grant, reply.Err = rf.CurrentTerm, <span class="literal">false</span>, ErrVoted</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 当前 term 已过时，需要更新并转为 Follower</span></span><br><span class="line">    <span class="keyword">if</span> args.Term &gt; rf.CurrentTerm &#123;</span><br><span class="line">        rf.VoteFor, rf.CurrentTerm = null, args.Term</span><br><span class="line">        rf.ChangeState(Follower)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    LastLogTerm := rf.GetLastLog().Term</span><br><span class="line">    LastLogIndex := rf.GetLastLog().Index</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 没问题了，就给它投赞成票</span></span><br><span class="line">    reply.Term, reply.Grant, reply.Err = rf.CurrentTerm, <span class="literal">true</span>, OK</span><br><span class="line">    rf.VoteFor = args.CandidateId</span><br><span class="line">    rf.ResetTimer(<span class="literal">false</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="成为-leader">成为 leader</h5>
+<p>当选后需<strong>立即</strong>广播一次 <strong>HeartBeat</strong>，以巩固地位。</p>
+<blockquote>
+<p>否则，考虑这种情况：A 和 B 同时发起投票，C 因为先收到 B 的请求而给 B 投了赞成票，之后收到 A 的请求，因为已经投了票故没有投给 A，也就没有更新选举定时器。最后 A 当选了，如果不马上广播 HeartBeat 而是等心跳定时器超时，则有可能在这段时间内 C 触发了选举超时，进行新的一轮选举。<strong>而事实上我们并不需要这一次多余的选举</strong>。</p>
+<p><strong>尽量避免不必要的流程</strong>。</p>
+</blockquote>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rf *Raft)</span></span> StartHeartbeat() &#123;</span><br><span class="line">    <span class="keyword">for</span> peer := <span class="keyword">range</span> rf.peers &#123;</span><br><span class="line">        <span class="keyword">if</span> peer != rf.me &#123;</span><br><span class="line">            <span class="keyword">go</span> rf.SendHeartBeat(peer)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>2A 中，<code>SendHeartBeat()</code>不需要发送多余的信息，只要告诉其它节点“我”的当前 term 即可。其它节点收到 rpc 后，根据收到的 term 进行相应操作。</p>
+<h4 id="part-b-log-replication">PART B-Log Replication</h4>
+<p>这一 part 要求我们实现 Log 的发送、接受与提交，选举约束与快速恢复。</p>
+<h5 id="appendentry">AppendEntry</h5>
+<p>上层通过调用 Start() 函数向 Leader 发送一个 command，我们需要将这一 command 以日志的形式记录下来，并告知其他 raft node。按照实验要求，我们需要立刻返回这一 command 在日志中的索引与相应 term，同时如果上层调用的结点是 Leader ，则返回 true。</p>
+<p>Leader 结点还是会每隔一定时间发送 Heartbeat，但此时在每个心跳期间，我们可能是有日志要发送的。通过阅读论文发现，有这样一个变量：</p>
+<ul>
+<li>nextIndex[]：for each server, index of the next log entry to send to that server (initialized to leader last log index + 1)</li>
+</ul>
+<p>所以我们对当前是发 HB 是否要捎带日志，只需要判断 next[server] 是否 ≤ LastLogIndex 即可，且要求：</p>
+<ul>
+<li>If last log index ≥ nextIndex for a follower: send AppendEntries RPC with log entries starting at nextIndex。</li>
+</ul>
+<p>上面是发送侧，下面说接收侧。</p>
+<p>paper 中提到了以下规则：</p>
+<ol type="1">
+<li>Reply false if term &lt; currentTerm (§5.1)</li>
+<li>Reply false if log doesn’t contain an entry at prevLogIndex whose term matches prevLogTerm (§5.3)</li>
+<li>If an existing entry conflicts with a new one (same index but different terms), delete the existing entry and all that follow it (§5.3)</li>
+<li>Append any new entries not already in the log</li>
+<li>If leaderCommit &gt; commitIndex, set commitIndex = min(leaderCommit, index of last new entry)</li>
+</ol>
+<p>逐个 adapt 到代码里即可。</p>
+<p>另外，paper 中还提到了：</p>
+<ul>
+<li>If there exists an N such that N &gt; commitIndex, a majority of matchIndex[i] ≥ N, and log[N].term == currentTerm: set commitIndex = N (§5.3, §5.4).</li>
+</ul>
+<p>这条规则就是让我们更新 commitIndex 用的。在每次处理 AE 的 reply 时，都对当前其它 peers 的 matchIndex 进行遍历，找到第二大的 matchIndex 即可，该值必然满足 <strong>a majority of matchIndex[i] ≥ N</strong>。</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rf *Raft)</span></span> FindN() &#123;</span><br><span class="line">    <span class="comment">// locked</span></span><br><span class="line">    matchIndexSet := <span class="built_in">make</span>([]<span class="type">int</span>, <span class="number">0</span>)</span><br><span class="line">    <span class="keyword">for</span> peer := <span class="keyword">range</span> rf.peers &#123;</span><br><span class="line">        <span class="keyword">if</span> peer != rf.me &#123;</span><br><span class="line">            matchindex, _ := rf.GetMatchNextIndex(peer)</span><br><span class="line">            matchIndexSet = <span class="built_in">append</span>(matchIndexSet, matchindex)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    sort.Ints(matchIndexSet)</span><br><span class="line">    N := matchIndexSet[<span class="built_in">len</span>(rf.peers)/<span class="number">2</span>]</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> N &gt; rf.commitIndex &amp;&amp; rf.Entry[N].Term == rf.CurrentTerm &#123;</span><br><span class="line">        rf.UpdateCommitAndApply(N)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里有一个我一开始没搞清楚的坑在于：每次更新 Applied 不能用 Goroutine，否则会报 "out of order xxx" 的错，也就是未按序 apply。</p>
+<h5 id="选举约束">选举约束</h5>
+<p>这其实很好理解，Follwer 只 Grant 最后一个日志比它更 up-to-date 的 VoteRequest，也就是说要满足以下两点：</p>
+<ol type="1">
+<li>Candidate.LastLogTerm &gt; Follwer.LastLogTerm</li>
+<li>if Candidate.LastLogTerm == Follwer.LastLogTerm, Candidate.len(Entry) &gt; Follwer.len(Entry)</li>
+</ol>
+<p>如果不满足，就拒绝。</p>
+<p>需要加上这样一个条件：</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 自己有的 LogEntry 条目更 up-to-date</span></span><br><span class="line"><span class="keyword">if</span> args.LastLogTerm &lt; LastLogTerm || (args.LastLogTerm == LastLogTerm &amp;&amp; args.LastLogIndex &lt; LastLogIndex) &#123;</span><br><span class="line">    reply.Term, reply.Grant, reply.Err = rf.CurrentTerm, <span class="literal">false</span>, ErrLogNotMatch</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="快速恢复">快速恢复</h5>
+<p>Guide 上面讲的还挺清楚的，conflictIndex 是发生冲突时 <strong>Follwer 日志里的 Index</strong>，conflictTerm 就是那个索引下对应日志的 Term。</p>
+<p><strong>接受侧：</strong></p>
+<ul>
+<li>If a follower does not have prevLogIndex in its log, it should return with <strong>conflictIndex = len(log)</strong> and <strong>conflictTerm = None</strong>.</li>
+<li>If a follower does have prevLogIndex in its log, but the term does not match, it should return <strong>conflictTerm = log[prevLogIndex].Term</strong>, and then search its log for <strong>the first index whose entry has term equal to conflictTerm</strong>.</li>
+</ul>
+<p><strong>发送侧：</strong></p>
+<ul>
+<li>Upon receiving a conflict response, the leader should first search its log for conflictTerm. If it finds an entry in its log with that term, it should <strong>set nextIndex to be the one beyond the index of the last entry in that term in its log</strong>.</li>
+<li>If it does not find an entry with that term, it should <strong>set nextIndex = conflictIndex</strong>.</li>
+</ul>
+<p>这样做有助于快速修改 next[]，而不用每次都只是减一。这里我用了 binarysearch 来找对应的 index。</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rf *Raft)</span></span> FindNextIndex(ConflictIndex, ConflictTerm <span class="type">int</span>) (next <span class="type">int</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> ConflictTerm == <span class="number">0</span> || rf.Entry[ConflictIndex].Term == ConflictTerm &#123;</span><br><span class="line">        next = ConflictIndex</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    left, right := BaseIndex, rf.Entry[<span class="built_in">len</span>(rf.Entry)<span class="number">-1</span>].Index</span><br><span class="line">    <span class="keyword">for</span> left &lt; right<span class="number">-1</span> &#123;</span><br><span class="line">        mid := left + (right-left)/<span class="number">2</span></span><br><span class="line">        <span class="keyword">if</span> rf.Entry[mid-BaseIndex].Term &lt;= ConflictTerm &#123;</span><br><span class="line">            left = mid</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            right = mid - <span class="number">1</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> rf.Entry[right-BaseIndex].Term == ConflictTerm &#123;</span><br><span class="line">        next = right + <span class="number">1</span></span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> rf.Entry[left-BaseIndex].Term == ConflictTerm &#123;</span><br><span class="line">        next = left + <span class="number">1</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        next = ConflictIndex</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="其他">其他</h5>
+<ol type="1">
+<li>在生成 raft node 的时候我把一个 index:0 term:0 的日志塞到里面，这样就能让它每一个 index 都能直接对应，而不需要考虑数组从 0 开始，PrevLogTerm 也就不需要考虑 PrevLogIndex 是否大于零了。</li>
+<li>AppendEntryRPC 成功和失败都返回 ConflictIndex 和 ConflictTerm，而 AE 成功时我们就认为 ConflictIndex 是 Follwer 的最后一个索引，HB 成功时则设置为 args.PrevLogIndex（这是参考了 Raft 官网的设定），就能正确更新到 next[server]</li>
+</ol>
+<h4 id="part-c-persistence">PART C-Persistence</h4>
+<p>这块虽然标了 hard，但实际代码量可以忽略不计。总的来说要我们实现一致性，即能保证节点 crash 后能恢复到原来的状态。</p>
+<p>Paper 中已经为我们标出了哪些变量（VoteFor、Term、Entry）是需要保持一致性的，所以 Persist() 和 ReadPersist() 没什么好聊的，直接 uncomment 掉，稍微改改就好了。</p>
+<p>我们需要在这三个变量被修改的时候，及时调用 Persist() 函数以保存到 rf.Persist 里。</p>
+<ul>
+<li><strong>VoteFor</strong>：这个变量只有在两种情况下会变：
+<ol type="1">
+<li>收到投票申请，同意投票。 这个直接在 RequestVote 里改就好了。</li>
+<li>任期改变，重置投票。 收到任一 Term 大于 CurrentTerm 的 Message 都会导致任期改变，同时也会使节点“convert to Follwer（Rules For Servers）”。</li>
+</ol></li>
+<li><strong>Term</strong>：同上。</li>
+<li><strong>Entry</strong>：直接在 AppendEntries() 里加。</li>
+</ul>
+<p>由于系统的高并发性与网络的不可靠性，我们还需要在合适的位置及时上锁，尽可能保证线性一致（善用 rf.mu）。</p>
+<p>以及测试中有两个是 unreliable network ，意味着会丢包，我在 log 的时候发现这会导致选举的赞成票迟迟发不到 candidate 手上（被网络丢弃了），就是出现 Term 不断增加而没有 Leader 出现。于是在 sendRequestVote 里把 Call 改成了循环发送直至返回 true。</p>
+<blockquote>
+<p>不需要在 SendHeartBeat 里应用这一修改，因为心跳的发送是周期性的，很有可能上一个心跳时刻由于没收到 reply 而重复发，发着发着就到下一个心跳时刻了，这是我们不能接受的。</p>
+</blockquote>
+<h4 id="part-d-log-compaction">PART D-Log Compaction</h4>
+<p>由于日志会无限增长，如果不采取某些措施，内存则会被大大浪费。Paper 第七节提出了“日志压缩”这一机制，也就是 Leader 节点定期在 Raft 层调用 Snapshot() 将当前 Application 层的状态以快照的形式保存，并丢弃那些已经被 Applied 的日志——这些日志在之后的时间不会再被用到。如下图所示</p>
+<p><img src="raf1ukdq.jpg" style="zoom:80%;" /></p>
+<p>原理就如 Paper 中说的那样。 在这一 part 中我们需要做这些事情：</p>
+<ol start="0" type="1">
+<li>改变 Entry 的索引方式</li>
+<li>实现 Snapshot() 函数</li>
+<li>实现 InstallSnapshotRPC() 以及相应的 args、reply</li>
+<li>实现 crash 后恢复所需的持久状态</li>
+</ol>
+<h5 id="索引">索引</h5>
+<p>因为节点的日志里存的 Index 不一定和数组下标一一对应了，前面我将每个 rf.Entry[0] 都设为一个 {Index:0, Term: 0} 的哨兵来防止越界，在这里由于进行了日志压缩，哨兵可以改为 {Index: LastIncludedIndex, Term: LastIncludedTerm}，这样一来日志索引 index 到数组里的位置就变成了 index - rf.Entry[0].Index</p>
+<p>⚠ 每个涉及到<strong>索引</strong>的地方都要进行修改</p>
+<h5 id="snapshotindex-int-snapshot-byte">Snapshot(index int, snapshot []byte)</h5>
+<p>这里的 index 其实就是 LastIncludedIndex，snapshot 其实就是上层告诉我们的状态，需要保存到 persist 里。 我们对 index 进行一个范围的判断，如果不越界，则进行日志的截断，并进行一个 persist.SaveSnapshot 的操作。</p>
+<blockquote>
+<p>因为 persist.go 里没有单独保存 snapshot 的函数，我就自己加了一个。 （根据观察，测试里好像会隐式对所有节点调用 Snapshot，当然我也不确定、、）</p>
+</blockquote>
+<h5 id="installsnapshotrpc">InstallSnapShotRPC</h5>
+<p>args 和 reply 要的变量都直接在 6.824 lab 网页的 hint 里和 paper 里找就行。 唯一要解决的问题是发送端要怎么处理这个 RPC—— 我的处理方法是，如果某个要发送的 AppendEntries 的 PrevLogIndex 比 Leader 当前存的第一个日志的 Index 还要小，说明这个 peer 已经落后太多，Leader 没有更早的日志能发过去了，那就直接告诉它要采用这个快照，一步到位，然后更新 Leader 里这个 peer 对应的 nextIndex。 那么接收侧如果收到了这一 RPC，先按照 paper 里说的检查一下，无误后自己截断日志，并更新 lastapplied 和 commitindex（snapshot 里没有这一步）</p>
+<blockquote>
+<p>考虑到并发性，我选择让这一 RPC 和 AE RPC 有同等地位——每个心跳时刻只发送其中的一个，否则会出现上一个心跳时刻的 goroutine 和下一个心跳时刻的 goroutine 时间上起冲突</p>
+</blockquote>
+<p>BTW，2D 测试一开始会出现 <a href="https://thesquareplanet.com/blog/students-guide-to-raft/">RAFT GUIDE</a> 里最后提到的“四向死锁”这一糟糕的情况，解决方案是在建立 raft 节点时，开一个新线程让其 Apply 日志，每次 CommitIndex 更新时，都通过 raft 里的某个条件变量唤醒线程，让其工作，然后再次进入 Wait()</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rf *Raft)</span></span> Applier() &#123;</span><br><span class="line">    <span class="keyword">for</span> !rf.killed() &#123;</span><br><span class="line">        rf.mu.Lock()</span><br><span class="line">        <span class="keyword">for</span> !(rf.lastApplied &lt; rf.commitIndex) &#123;</span><br><span class="line">            rf.applyCond.Wait()</span><br><span class="line">        &#125;</span><br><span class="line">        CommitIndex := rf.commitIndex</span><br><span class="line">        BaseIndex := rf.GetBaseLog().Index</span><br><span class="line">        Entries := <span class="built_in">make</span>([]LogEntry, rf.commitIndex-rf.lastApplied)</span><br><span class="line">        <span class="built_in">copy</span>(Entries, rf.Entry[rf.lastApplied+<span class="number">1</span>-BaseIndex:rf.commitIndex+<span class="number">1</span>-BaseIndex])</span><br><span class="line">        </span><br><span class="line">        rf.mu.Unlock()</span><br><span class="line">        <span class="keyword">for</span> _, Entry := <span class="keyword">range</span> Entries &#123;</span><br><span class="line">            rf.applyChannel &lt;- ApplyMsg&#123;</span><br><span class="line">                CommandValid: <span class="literal">true</span>,</span><br><span class="line">                Command:      Entry.Command,</span><br><span class="line">                CommandTerm:  Entry.Term,</span><br><span class="line">                CommandIndex: Entry.Index,</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        rf.mu.Lock()</span><br><span class="line">        rf.lastApplied = max(rf.lastApplied, CommitIndex)</span><br><span class="line">        rf.mu.Unlock()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>6.824</category>
+      </categories>
+      <tags>
+        <tag>lab</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>VMware-FT</title>
+    <url>/6-824/vmware-ft/</url>
+    <content><![CDATA[<p>6.824 的第二篇论文是 VMware-FaultTolerance(VMware-FT)，其描述了一个提供容错虚拟机的商业企业级系统——如果主服务器(<strong>primary</strong>)发生故障，备份服务器(<strong>backup</strong>)始终可以接管。backup 的状态必须始终保持与 primary 几乎相同，以便在其发生故障时，backup 可以立即接管，并且外部客户端看来并未发生故障且没有数据丢失。</p>
+<span id="more"></span>
+<h4 id="两种容错方式">两种容错方式</h4>
+<h5 id="状态转移">状态转移</h5>
+<p>在 backup 上复制状态的一种方法是每次同步时，primary 将其<strong>所有状态</strong>（包括 CPU、内存和 I/O 设备）<strong>变化</strong>进行完整地拷贝，并发送到 backup。但发送此状态所需的带宽会非常大。为了提升效率，可以优化为：每次同步只发送上次同步之后改变了的状态。</p>
+<h5 id="操作转移">操作转移</h5>
+<p>将服务器建模为<strong>确定性状态机</strong>，并实现以下两个条件：</p>
+<ol type="1">
+<li>从相同的初始状态开始</li>
+<li>以相同的顺序执行相同的操作</li>
+</ol>
+<p>如果能确保以上两个条件，那么它们会一直互为副本，并且一直保持一致。由于大多数服务器或服务都有一些不确定的操作，因此必须使用额外的协调来确保 primary 和 backup 保持同步，而这一协调所需的额外信息量远远少于 primary 中正在更改的状态量。</p>
+<h4 id="总结">总结</h4>
+<p>操作 Log 的复制与状态机的思路给后续以启迪。</p>
+]]></content>
+      <categories>
+        <category>6.824</category>
+      </categories>
+      <tags>
+        <tag>paperReading</tag>
       </tags>
   </entry>
 </search>
