@@ -775,7 +775,7 @@ dim(L(A)) = m-r
   </entry>
   <entry>
     <title>6.824 Lab3 FTkvserver</title>
-    <url>/uncategorized/raft2/</url>
+    <url>/6-824/raft2/</url>
     <content><![CDATA[<p>本实验要求在每一个 raft 节点上实现一个 K/V 服务器(server)，向上接受客户端(client)的请求并返回请求结果，向下生成日志应用到 raft 节点中。</p>
 <p>整个模式大概长<a href="https://pdos.csail.mit.edu/6.824/notes/raft_diagram.pdf">这样</a>。</p>
 <p>主要流程是这样的：</p>
@@ -832,6 +832,12 @@ dim(L(A)) = m-r
 <p>persist 里的 raftstate 和 index 没有直接关系，所以不能用在 snapshot 里的 index 参数。</p>
 </blockquote>
 ]]></content>
+      <categories>
+        <category>6.824</category>
+      </categories>
+      <tags>
+        <tag>lab</tag>
+      </tags>
   </entry>
   <entry>
     <title>6.824 Lab2 RAFT</title>
