@@ -1009,7 +1009,7 @@ dim(L(A)) = m-r
   <entry>
     <title>weekCompetition314</title>
     <url>/LeetCode/weekCompetition314/</url>
-    <content><![CDATA[<p>第 314 场周赛复盘。</p>
+    <content><![CDATA[<p><a href="https://leetcode.cn/contest/weekly-contest-314/">第 314 场周赛</a>复盘。</p>
 <p><strong>排名</strong> 1130 / 4838</p>
 <span id="more"></span>
 <h4 id="处理用时最长的那个任务的员工">1. <a href="https://leetcode.cn/problems/the-employee-that-worked-on-the-longest-task/">处理用时最长的那个任务的员工</a></h4>
@@ -1185,7 +1185,7 @@ dim(L(A)) = m-r
   <entry>
     <title>weekCompetition315</title>
     <url>/LeetCode/weekCompetition315/</url>
-    <content><![CDATA[<p>第 315 场周赛复盘。</p>
+    <content><![CDATA[<p><a href="https://leetcode.cn/contest/weekly-contest-315/">第 315 场周赛</a>复盘。</p>
 <p><strong>排名</strong> 2768 / 6490</p>
 <span id="more"></span>
 <h4 id="与对应负数同时存在的最大正整数">1. <a href="https://leetcode.cn/problems/largest-positive-integer-that-exists-with-its-negative/">与对应负数同时存在的最大正整数</a></h4>
@@ -1555,6 +1555,77 @@ A\vec{x}_1 &amp;= \lambda_1\vec{x}_1
       </categories>
       <tags>
         <tag>MIT18.06</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>weekCompetition313</title>
+    <url>/LeetCode/weekCompetition313/</url>
+    <content><![CDATA[<p><a href="https://leetcode.cn/contest/weekly-contest-313/">第 313 场周赛</a>复盘。</p>
+<p><strong>排名</strong> 106 / 5445</p>
+<span id="more"></span>
+<h4 id="公因子的数目">1. <a href="https://leetcode.cn/problems/number-of-common-factors/">公因子的数目</a></h4>
+<blockquote>
+<p>给你两个正整数 a 和 b ，返回 a 和 b 的 <strong>公</strong> 因子的数目。</p>
+<p>如果 x 可以同时整除 a 和 b ，则认为 x 是 a 和 b 的一个 <strong>公因子</strong> 。</p>
+</blockquote>
+<h5 id="思路">思路</h5>
+<p>从 1 到 gcd(a, b) 遍历即可。</p>
+<h5 id="code">code</h5>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">gcd</span><span class="params">(a, b <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;	<span class="comment">// assert a &lt; b</span></span><br><span class="line">    <span class="keyword">if</span> a &gt; b &#123;</span><br><span class="line">        <span class="keyword">return</span> gcd(b, a)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> b % a == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> a</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> gcd(b % a, a)</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">commonFactors</span><span class="params">(a <span class="type">int</span>, b <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    cnt := <span class="number">0</span>    </span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">1</span>; i &lt;= gcd(a, b); i++ &#123;</span><br><span class="line">        <span class="keyword">if</span> a % i == <span class="number">0</span> &amp;&amp; b % i == <span class="number">0</span> &#123;</span><br><span class="line">            cnt++</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> cnt</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="沙漏的最大总和">2. <a href="https://leetcode.cn/problems/maximum-sum-of-an-hourglass/">沙漏的最大总和</a></h4>
+<blockquote>
+<p>给你一个大小为 <strong>m x n</strong> 的整数矩阵 <code>grid</code> 。</p>
+<p>按以下形式将矩阵的一部分定义为一个 <strong>沙漏</strong> ：</p>
+<p><img src="image-20221017190111674.png" alt="image-20221017190111674" style="zoom:50%;" /></p>
+<p>返回沙漏中元素的 <strong>最大</strong> 总和。</p>
+<p><strong>注意</strong>：沙漏无法旋转且必须整个包含在矩阵中。</p>
+</blockquote>
+<h5 id="思路-1">思路</h5>
+<p>由于沙漏占据了 3×3 的矩阵空间，最不用思考的做法就是遍历沙漏的左上角即可。</p>
+<h5 id="code-1">code</h5>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">maxSum</span><span class="params">(g [][]<span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    res := <span class="number">0</span>    </span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt;= <span class="built_in">len</span>(g)<span class="number">-3</span>; i++ &#123;</span><br><span class="line">        <span class="keyword">for</span> j := <span class="number">0</span>; j &lt;= <span class="built_in">len</span>(g[i])<span class="number">-3</span>; j++ &#123;</span><br><span class="line">            sum := <span class="number">0</span></span><br><span class="line">            sum += g[i][j] + g[i][j+<span class="number">1</span>] + g[i][j+<span class="number">2</span>] + g[i+<span class="number">1</span>][j+<span class="number">1</span>] + g[i+<span class="number">2</span>][j] + g[i+<span class="number">2</span>][j+<span class="number">1</span>] + g[i+<span class="number">2</span>][j+<span class="number">2</span>]</span><br><span class="line">            <span class="keyword">if</span> sum &gt; res &#123;</span><br><span class="line">                res = sum</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="最小-xor">3. <a href="https://leetcode.cn/problems/minimize-xor/">最小 XOR</a></h4>
+<blockquote>
+<p>给你两个正整数 num1 和 num2 ，找出满足下述条件的整数 x ：</p>
+<ul>
+<li>x 的置位数和 num2 相同，且</li>
+<li>x XOR num1 的值 <strong>最小</strong></li>
+</ul>
+<p>注意 XOR 是按位异或运算。</p>
+<p>返回整数 x 。题目保证，对于生成的测试用例， x 是 <strong>唯一确定</strong> 的。</p>
+<p>整数的 <strong>置位数</strong> 是其二进制表示中 1 的数目。</p>
+</blockquote>
+<h5 id="思路-2">思路</h5>
+<p>若要使两个数按位异或所得结果最小，它们二进制中 1 的位置应尽可能一致，所以找题目中的 <span class="math inline">\(x\)</span> 实际上就是<strong>安排其二进制中 ‘1’ 的位置</strong>。令 <span class="math inline">\(k(num1)\)</span> 表示 <span class="math inline">\(num1\)</span> 的置位数。则对于给定的 <span class="math inline">\(num1\)</span> 与 <span class="math inline">\(k(x) = k(num2)\)</span> ，只有以下三种情况：</p>
+<ol type="1">
+<li><p><span class="math inline">\(k(num1) = k(num2)\)</span>：则 <span class="math inline">\(x=num1\)</span> 时 <span class="math inline">\(x\ XOR\ num1\)</span> 最小</p></li>
+<li><p><span class="math inline">\(k(num1) &lt; k(num2)\)</span>：<span class="math inline">\(k(num1)\)</span> 个 ‘1’ 与 <span class="math inline">\(num1\)</span> 中的 ‘1’ 相互抵消后，还剩下 <span class="math inline">\(k(num2) - k(num1)\)</span> 个 ‘1’ 未安排位置，这部分应尽量“靠左”，并且不与 <span class="math inline">\(num1\)</span> 中 ‘1’ 的位置冲突。</p>
+<p>例如，当 <span class="math inline">\(num1=10, k(num2)=3\)</span> 时，<span class="math inline">\(num1=(1010)_2\)</span>。首先能够得到 <span class="math inline">\(x=(1\_1\_)_2\)</span>，最后一个 ‘1’ 的位置显然易见，应该放在最右边，故得到 <span class="math inline">\(x = (1011)_2\)</span></p></li>
+<li><p><span class="math inline">\(k(num1) &gt; k(num2)\)</span>：<span class="math inline">\(x\)</span> 的值即保留 <span class="math inline">\(num1\)</span> 右侧 <span class="math inline">\(k(num2)\)</span> 个 ‘1’ 的结果。</p></li>
+</ol>
+<h5 id="code-2">code</h5>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">k</span><span class="params">(num <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    res := <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> num &gt; <span class="number">0</span> &#123;</span><br><span class="line">        res += num &amp; <span class="number">1</span></span><br><span class="line">        num &gt;&gt;= <span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">minimizeXor</span><span class="params">(num1 <span class="type">int</span>, num2 <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    cnt1, cnt2, x := k(num1), k(num2), num1</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> cnt1 &gt; cnt2 &#123;</span><br><span class="line">        p := <span class="number">1</span></span><br><span class="line">        cnt1 -= cnt2    <span class="comment">// x 为 num1 去掉低 cnt1-cnt2 位 1</span></span><br><span class="line">        <span class="keyword">for</span> cnt1 &gt; <span class="number">0</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> x &amp; p &gt; <span class="number">0</span> &#123;</span><br><span class="line">                x -= p</span><br><span class="line">                cnt1--</span><br><span class="line">            &#125;</span><br><span class="line">            p &lt;&lt;= <span class="number">1</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> cnt1 &lt; cnt2 &#123;</span><br><span class="line">        p := <span class="number">1</span></span><br><span class="line">        cnt2 -= cnt1	<span class="comment">// x 为 num1 再加上 cnt2-cnt1 位 1</span></span><br><span class="line">        <span class="keyword">for</span> cnt2 &gt; <span class="number">0</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> x &amp; p == <span class="number">0</span> &#123;</span><br><span class="line">                x += p</span><br><span class="line">                cnt2--</span><br><span class="line">            &#125;</span><br><span class="line">            p &lt;&lt;= <span class="number">1</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> temp</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="对字母串可执行的最大删除数">4. <a href="https://leetcode.cn/problems/maximum-deletions-on-a-string/">对字母串可执行的最大删除数</a></h4>
+<blockquote>
+<p>给你一个仅由小写英文字母组成的字符串 s 。在一步操作中，你可以：</p>
+<ul>
+<li>删除 <strong>整个字符串</strong> s ，或者</li>
+<li>对于满足 1 &lt;= i &lt;= s.length / 2 的任意 i ，如果 s 中的 <strong>前</strong> i 个字母和接下来的 i 个字母 <strong>相等</strong> ，删除 <strong>前</strong> i 个字母。</li>
+</ul>
+<p>例如，如果 s = "ababc" ，那么在一步操作中，你可以删除 s 的前两个字母得到 "abc" ，因为 s 的前两个字母和接下来的两个字母都等于 "ab" 。</p>
+<p>返回删除 s 所需的最大操作数。</p>
+</blockquote>
+<h5 id="思路-3">思路</h5>
+<p>考虑操作 2，删除前 i 个字母后还剩下长为 len(s)-i 的新字符串，我们要接着对新字符串执行同样的删除操作。这就是一个递归步骤，并且我们的递归是二叉树状的——每个 i 都需要考虑删 or 不删。</p>
+<p>那么很容易想到用动态规划。定义 <code>dp[i]</code> 为删除 <code>s[i-1:]</code> 所需最大操作数，那么对于任意 <code>1 ≤ i &lt; j ≤ len(s)-1</code>，如果 <code>s[i:j] == s[j:2*j-i]</code>，则 <code>dp[i] = max(dp[i], dp[j] + 1)</code></p>
+<h5 id="code-3">code</h5>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">deleteString</span><span class="params">(s <span class="type">string</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    n := <span class="built_in">len</span>(s)</span><br><span class="line">    dp := <span class="built_in">make</span>([]<span class="type">int</span>, n)  <span class="comment">// dp[i]: s[i:] 所需最大删除数</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i := n<span class="number">-1</span>; i &gt;= <span class="number">0</span>; i-- &#123;</span><br><span class="line">        dp[i] = <span class="number">1</span></span><br><span class="line">        l := n-i</span><br><span class="line">        <span class="keyword">for</span> j := i+<span class="number">1</span>; j &lt;= i+l/<span class="number">2</span>; j++ &#123;</span><br><span class="line">            <span class="keyword">if</span> temp[i:j] == temp[j:<span class="number">2</span>*j-i] &amp;&amp; dp[i] &lt; dp[j] + <span class="number">1</span> &#123;</span><br><span class="line">                dp[i] = dp[j] + <span class="number">1</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> dp[<span class="number">0</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>LeetCode</category>
+      </categories>
+      <tags>
+        <tag>周赛</tag>
       </tags>
   </entry>
 </search>
