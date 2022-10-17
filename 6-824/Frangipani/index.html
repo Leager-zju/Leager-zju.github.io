@@ -18,20 +18,22 @@
     var CONFIG = {"hostname":"leager-zju.github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"b2t":true},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="6.824 的第二篇论文是 VMware-FaultTolerance(VMware-FT)，其描述了一个提供容错虚拟机的商业企业级系统——如果主服务器(primary)发生故障，备份服务器(backup)始终可以接管。backup 的状态必须始终保持与 primary 几乎相同，以便在其发生故障时，backup 可以立即接管，并且外部客户端看来并未发生故障且没有数据丢失。">
+  <meta name="description" content="6.824 的第六篇论文是 Frangipani——一种建立在 Petal（一种可扩展、高可用性、自动管理的分布式存储服务）上的可扩展的分布式文件系统，并使用分布式锁来确保一致性。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="VMware-FT">
-<meta property="og:url" content="http://leager-zju.github.com/6-824/vmware-ft/index.html">
+<meta property="og:title" content="Frangipani">
+<meta property="og:url" content="http://leager-zju.github.com/6-824/Frangipani/index.html">
 <meta property="og:site_name" content="没什么看头的地方">
-<meta property="og:description" content="6.824 的第二篇论文是 VMware-FaultTolerance(VMware-FT)，其描述了一个提供容错虚拟机的商业企业级系统——如果主服务器(primary)发生故障，备份服务器(backup)始终可以接管。backup 的状态必须始终保持与 primary 几乎相同，以便在其发生故障时，backup 可以立即接管，并且外部客户端看来并未发生故障且没有数据丢失。">
+<meta property="og:description" content="6.824 的第六篇论文是 Frangipani——一种建立在 Petal（一种可扩展、高可用性、自动管理的分布式存储服务）上的可扩展的分布式文件系统，并使用分布式锁来确保一致性。">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2022-10-03T07:31:03.000Z">
-<meta property="article:modified_time" content="2022-10-06T11:52:46.733Z">
+<meta property="og:image" content="http://leager-zju.github.com/6-824/Frangipani/image-20221010155347871.png">
+<meta property="article:published_time" content="2022-10-10T05:25:38.000Z">
+<meta property="article:modified_time" content="2022-10-10T09:14:36.023Z">
 <meta property="article:author" content="Leager">
 <meta property="article:tag" content="paperReading">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://leager-zju.github.com/6-824/Frangipani/image-20221010155347871.png">
 
-<link rel="canonical" href="http://leager-zju.github.com/6-824/vmware-ft/">
+<link rel="canonical" href="http://leager-zju.github.com/6-824/Frangipani/">
 
 
 <script id="page-configurations">
@@ -44,7 +46,7 @@
   };
 </script>
 
-  <title>VMware-FT | 没什么看头的地方</title>
+  <title>Frangipani | 没什么看头的地方</title>
   
 
 
@@ -193,7 +195,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/6-824/vmware-ft/">
+    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/6-824/Frangipani/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/Avatar.jpg">
@@ -206,7 +208,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          VMware-FT
+          Frangipani
         </h1>
 
         <div class="post-meta">
@@ -215,16 +217,10 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
+              
 
-              <time title="创建时间：2022-10-03 15:31:03" itemprop="dateCreated datePublished" datetime="2022-10-03T15:31:03+08:00">2022-10-03</time>
+              <time title="创建时间：2022-10-10 13:25:38 / 修改时间：17:14:36" itemprop="dateCreated datePublished" datetime="2022-10-10T13:25:38+08:00">2022-10-10</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-10-06 19:52:46" itemprop="dateModified" datetime="2022-10-06T19:52:46+08:00">2022-10-06</time>
-              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -253,20 +249,45 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>6.824 的第二篇论文是 VMware-FaultTolerance(VMware-FT)，其描述了一个提供容错虚拟机的商业企业级系统——如果主服务器(<strong>primary</strong>)发生故障，备份服务器(<strong>backup</strong>)始终可以接管。backup 的状态必须始终保持与 primary 几乎相同，以便在其发生故障时，backup 可以立即接管，并且外部客户端看来并未发生故障且没有数据丢失。</p>
+        <p>6.824 的第六篇论文是 Frangipani——一种建立在 Petal（一种可扩展、高可用性、自动管理的分布式存储服务）上的可扩展的分布式文件系统，并使用分布式锁来确保一致性。</p>
 <span id="more"></span>
-<h4 id="两种容错方式">两种容错方式</h4>
-<h5 id="状态转移">状态转移</h5>
-<p>在 backup 上复制状态的一种方法是每次同步时，primary 将其<strong>所有状态</strong>（包括 CPU、内存和 I/O 设备）<strong>变化</strong>进行完整地拷贝，并发送到 backup。但发送此状态所需的带宽会非常大。为了提升效率，可以优化为：每次同步只发送上次同步之后改变了的状态。</p>
-<h5 id="操作转移">操作转移</h5>
-<p>将服务器建模为<strong>确定性状态机</strong>，并实现以下两个条件：</p>
+<h4 id="frangipani-初探">Frangipani 初探</h4>
+<h5 id="特点">特点</h5>
+<p>Frangipani 有一个显著特点，就是它采用<strong>一组协作机器使用一个公共存储</strong> Petal 的内部结构，使用锁进行访问同步，同时具备以下特性：</p>
 <ol type="1">
-<li>从相同的初始状态开始</li>
-<li>以相同的顺序执行相同的操作</li>
+<li>为所有用户提供同一组文件的一致视图，即对于同一个文件，所有用户在访问时都能看到相同的数据；</li>
+<li>可以任意添加服务器到 Frangipani 架构中以增加存储容量和吞吐量，而无需更改现有服务器的配置或中断其运行；</li>
+<li>系统管理员可以添加新用户，而无需担心哪些机器将管理他们的数据或哪些磁盘存这些数据；</li>
+<li>系统管理员可以对整个文件系统进行完整且一致的备份，而无需将其关闭，同时允许用户快速访问意外删除的文件；</li>
+<li>文件系统能容忍并从故障中恢复而无需人工干预。</li>
 </ol>
-<p>如果能确保以上两个条件，那么它们会一直互为副本，并且一直保持一致。由于大多数服务器或服务都有一些不确定的操作，因此必须使用额外的协调来确保 primary 和 backup 保持同步，而这一协调所需的额外信息量远远少于 primary 中正在更改的状态量。</p>
+<h5 id="系统结构">系统结构</h5>
+<p>如下图所示，Petal 表现得就像一块被所有用户使用的，基于网络的共享虚拟磁盘，它会运行在一些不同的服务器上。当 Frangipani 需要读写数据时，它会向正确的 <strong>Petal server</strong> 发送 RPC。</p>
+<p><img src="image-20221010155347871.png" alt="image-20221010155347871" style="zoom:80%;" /></p>
+<p>用户通过标准操作系统调用借口访问 Frangipani，对一台机器上的文件或目录进行的修改会立即对其他人可见。</p>
+<p>Frangipani 采用 <strong>Cache</strong> 来缓存文件，这样在一段时间内对文件的修改只需要在本地进行，而无需耗费更高的时间成本进行 RPC 的调用。同时，在下一个用户访问该文件前，不会将修改后的数据持久化到 Petal，但会将元数据的修改操作记录到 <strong>WAL</strong> 中。WAL 保存在 Petal 中，这样当 Frangipani 崩溃时，其它服务器可以访问 WAL 并进行故障恢复。</p>
+<p>每个 Petal server 持有一个 <strong>lock manager</strong>，它有一个表单，存放文件对应的锁以及持有锁的用户，来协调对 Petal 的访问以及保持多个 Frangipani 之间的缓冲区的<strong>缓存一致性</strong>。两个 <strong>Frangipani server</strong> 间无需直接通信，而是通过 LM 通信，这也简化了成员的变化操作。</p>
+<h4 id="锁服务">锁服务</h4>
+<p>Frangipani 中的锁服务提供<strong>共享读锁</strong>与<strong>排他写锁</strong>。当一个 Fserver 访问文件时，它会向对应的 Pserver 中的 LM 发起 <strong>Request</strong> 请求该文件合适的锁，并在得到 LM 的 <strong>Grant</strong> 回复后才获得锁，从而正式读取文件或修改文件。之后，Fserver 会<strong>一直持有文件锁</strong>（但可能不使用它）而不主动释放，这种惰性释放锁的策略也一定程度上提高了性能——在没有其它 Fserver 请求访问的前提下，后续对相同文件的修改不用再次请求锁。</p>
+<p>若有其它的 Fserver 发起了冲突的锁请求，LM 检查当前有一个 Fserver 正持有锁，它会向该 Fserver 发起一个 <strong>Revoke</strong> 请求，持有文件锁的 Fserver 等到当前没有对该文件进行的任何操作，<u>它会将对该文件的所有修改应用到 Pserver 上</u>，这一步完成后才释放锁，向 LM 发出 <strong>Release</strong> 请求。LM 随后删除表单中原先该锁对应的条目，再重新执行一次锁分配的操作。</p>
+<p>通过 LM 的协调服务，我们可以实现良好的 <strong>缓存一致性 Cache Consistency</strong>——A 对本地缓存进行的修改，能够被 B 感知到。同时，只要保证 Fserver 在操作期间一致持有锁，就能保证对文件操作的<strong>原子性 atomicity</strong>。</p>
+<h4 id="故障处理">故障处理</h4>
+<h5 id="日志">日志</h5>
+<p>如前文所述，每个 Frangipani server 都会在 Petal 的某个地方存放自己那部分 WAL。当 Frangipani 需要对文件元数据进行修改时，它首先创建一个修改记录并 append 到本地内存的日志中，这些日志被定期（大概 30s）写入 Petal，只有在日志完整写入 Petal 后，Petal 才会永久修改实际的元数据。<strong>事实上，在 Release 锁前，Fserver 会先将日志写入 Pserver，再传输脏数据</strong>。</p>
+<h5 id="恢复">恢复</h5>
+<p>LM 使用 <strong>lease</strong> 来处理故障，也就是说，当对一个锁进行 Revoke 时，过了 lease 规定的时间没有得到 Release 回复，它会认为这个 Fserver 发生了故障，从而进行故障处理。</p>
+<p><strong>dead</strong> 发生故障后，Pserver 会让另一个 Frangipani（称为 <strong>demon</strong>）读取其日志并进行恢复。demon 会隐式接管 dead 挂前持有的锁，并从日志开始按顺序进行重做，执行完成后，释放 dead 的锁，之后整个系统按正常状态运行。</p>
+<p>这里有可能的几个发生故障的时刻：</p>
+<ol type="1">
+<li><strong>还没发送日志就挂了</strong>：此时文件系统会和 Fserver 开始修改前保持一致，故不用进行任何操作。</li>
+<li><strong>日志发送到一半挂了</strong>：说明 Fserver 尚未发送脏数据，只需执行已发送的那部分日志即可。</li>
+<li><strong>脏数据传到一半挂了</strong>：说明 Fserver 必然已经发完了所有日志，那么对所有日志重做就好了。</li>
+</ol>
+<p>无论是哪种情况，都有一个共同点：<strong>只需要执行已写到 Pserver 内的日志</strong>。</p>
+<p>为了防止 demon 在进行故障恢复时其它 Fserver 对 Petal 的干扰，在日志条目中增加<strong>版本号</strong>的属性：当且仅当日志中元数据的版本号高于 Petal 中存储的数据的版本时，才执行日志。如果是 Petal 中的版本更高，那说明已经有 Fserver 在 dead 修改之后对元数据进行了修改，不能进行回退。</p>
+<p>且 demon 无需关心元数据上是否持有锁。如果有锁，那大可以放心读取；如果锁已经被释放了，那脏数据肯定已经被写进去了，不用执行也没时。</p>
 <h4 id="总结">总结</h4>
-<p>操作 Log 的复制与状态机的思路给后续以启迪。</p>
+<p>Frangipani 提供了实现 Cache Consistency 的新思路，但由于时代的限制，它并没有对存储系统的演进产生任何影响，也无法应用到分布式系统的主要应用场景中。</p>
 
     </div>
 
@@ -285,12 +306,12 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/math/linear-algebra(2)/" rel="prev" title="Linear-Algebra(2)">
-      <i class="fa fa-chevron-left"></i> Linear-Algebra(2)
+    <a href="/LeetCode/leetcode801/" rel="prev" title="使序列递增的最小操作次数">
+      <i class="fa fa-chevron-left"></i> 使序列递增的最小操作次数
     </a></div>
       <div class="post-nav-item">
-    <a href="/6-824/raft1/" rel="next" title="6.824 Lab2 RAFT">
-      6.824 Lab2 RAFT <i class="fa fa-chevron-right"></i>
+    <a href="/LeetCode/weekCompetition315/" rel="next" title="weekCompetition315">
+      weekCompetition315 <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
@@ -350,7 +371,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%A4%E7%A7%8D%E5%AE%B9%E9%94%99%E6%96%B9%E5%BC%8F"><span class="nav-text">两种容错方式</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E8%BD%AC%E7%A7%BB"><span class="nav-text">状态转移</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%93%8D%E4%BD%9C%E8%BD%AC%E7%A7%BB"><span class="nav-text">操作转移</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#frangipani-%E5%88%9D%E6%8E%A2"><span class="nav-text">Frangipani 初探</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%89%B9%E7%82%B9"><span class="nav-text">特点</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E7%BB%93%E6%9E%84"><span class="nav-text">系统结构</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%94%81%E6%9C%8D%E5%8A%A1"><span class="nav-text">锁服务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86"><span class="nav-text">故障处理</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%97%A5%E5%BF%97"><span class="nav-text">日志</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%81%A2%E5%A4%8D"><span class="nav-text">恢复</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
