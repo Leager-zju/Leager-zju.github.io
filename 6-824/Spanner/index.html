@@ -33,7 +33,7 @@
 <meta property="og:image" content="http://leager-zju.github.com/6-824/Spanner/image-20221017132537748.png">
 <meta property="og:image" content="http://leager-zju.github.com/6-824/Spanner/image-20221017142509253.png">
 <meta property="article:published_time" content="2022-10-17T08:52:40.000Z">
-<meta property="article:modified_time" content="2022-10-18T04:57:17.411Z">
+<meta property="article:modified_time" content="2022-10-18T05:00:14.561Z">
 <meta property="article:author" content="Leager">
 <meta property="article:tag" content="paperReading">
 <meta name="twitter:card" content="summary">
@@ -231,7 +231,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-10-18 12:57:17" itemprop="dateModified" datetime="2022-10-18T12:57:17+08:00">2022-10-18</time>
+                <time title="修改时间：2022-10-18 13:00:14" itemprop="dateModified" datetime="2022-10-18T13:00:14+08:00">2022-10-18</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -331,6 +331,9 @@
 <p>RO 事务是一种具有快照隔离性能优势的事务，其以系统指定的 ts 执行，而无需锁定。</p>
 <p>client 可以为 snapshot read 指定 ts，或指定时间边界并让 Spanner 选择合适的 ts。无论是 snapshot read 还是 read-only，都会在足够 up-to-date 的 replica 上直接读取。</p>
 <p>无论是 RO 事务还是 snapshot read，一旦指定了 ts，就必然会 commit，除非该 ts 处的数据已被 garbage collection。当服务器发生故障时，客户端可以继续在不同服务器上通过 ts 和当前读取位置进行查询。</p>
+<blockquote>
+<p>RW: ts = COMMIT TIME；RO: ts = START TIME</p>
+</blockquote>
 <h5 id="paxos-leader-lease">Paxos Leader Lease</h5>
 <p>Spanner 中 Paxos 的 <strong>lease</strong> 默认为 10 秒。如果租约到期，Leader 会请求延长 lease 投票。同时，Spanner 允许 Paxos Leader 主动退位。</p>
 <p>每个 Paxos Group 中不同 Leader 的 lease 互不相交。为了保持这一 <strong>lease 不相交性</strong>，定义 <span class="math inline">\(s_{max}\)</span> 为旧 Leader 的最大 ts，新 Leader 必须等到 <span class="math inline">\(TT.after ( s_{max} ) = true\)</span> 才能开始工作。</p>
