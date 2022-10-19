@@ -28,7 +28,7 @@
 <meta property="og:image" content="http://leager-zju.github.com/math/linear-algebra(2)/image-20220929215857174.png">
 <meta property="og:image" content="http://leager-zju.github.com/math/linear-algebra(2)/image-20220929223041893.png">
 <meta property="article:published_time" content="2022-09-29T13:42:11.000Z">
-<meta property="article:modified_time" content="2022-09-30T10:53:24.696Z">
+<meta property="article:modified_time" content="2022-10-18T08:51:37.370Z">
 <meta property="article:author" content="Leager">
 <meta property="article:tag" content="MIT18.06">
 <meta name="twitter:card" content="summary">
@@ -226,7 +226,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-09-30 18:53:24" itemprop="dateModified" datetime="2022-09-30T18:53:24+08:00">2022-09-30</time>
+                <time title="修改时间：2022-10-18 16:51:37" itemprop="dateModified" datetime="2022-10-18T16:51:37+08:00">2022-10-18</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -272,9 +272,7 @@
 </blockquote>
 <h5 id="投影问题">投影问题</h5>
 <p>这一问题的几何解释为：如何在向量 <span class="math inline">\(\vec{a}\)</span> 的方向上寻找与向量 <span class="math inline">\(\vec{b}\)</span> 距离最近的一点。假设这一点对应的向量为 <span class="math inline">\(\vec{p}\)</span>，则 <span class="math inline">\(\vec{e}=\vec{b}-\vec{p}\)</span> 就是这一近似的误差。如图所示：</p>
-<figure>
-<img src="image-20220929215857174.png" alt="image-20220929215857174" /><figcaption aria-hidden="true">image-20220929215857174</figcaption>
-</figure>
+<p><img src="image-20220929215857174.png" alt="image-20220929215857174" style="zoom:100%;" /></p>
 <p>若令 <span class="math inline">\(\vec{p} = \hat{x}\vec{a}\)</span>，因 <span class="math inline">\(\vec{e}\)</span> 与 <span class="math inline">\(\vec{a}\)</span> 正交，则有 <span class="math inline">\(\vec{a}^T(\vec{b}-\hat{x}\vec{a}) = 0\)</span>，解得 <span class="math display">\[
 \hat{x} = \frac{\vec{a}^T\vec{b}}{\vec{a}^T\vec{a}}
 \\[2ex]
@@ -288,7 +286,7 @@ P = \frac{\vec{a}\vec{a}^T}{\vec{a}^T\vec{a}}
 <p>显然误差 <span class="math inline">\(\vec{e}\)</span> 与整个向量空间正交，则有 <span class="math inline">\(\vec{a_1}^T\vec{e} = 0, \vec{a_2}^T\vec{e} = 0, \dots, \vec{a_n}^T\vec{e} = 0\)</span></p>
 <p>上式可以写为 <span class="math inline">\(A^T\vec{e} = 0\)</span></p>
 <p>从而得到 <span class="math display">\[
-A^T(\vec{b} - A\vec{\hat{x}}) = 0 \quad \Rarr \quad \vec{\hat{x}} = (A^TA)^{-1}A^T\vec{b}
+A^T(\vec{b} - A\vec{\hat{x}}) = 0 \quad \Rightarrow \quad \vec{\hat{x}} = (A^TA)^{-1}A^T\vec{b}
 \]</span> 那么得到一个<strong>非常优美的结论</strong>： <span class="math display">\[
 \vec{p} = A(A^TA)^{-1}A^T\vec{b}
 \\[2ex]
@@ -309,9 +307,7 @@ P = A(A^TA)^{-1}A^T
 \]</span></p>
 <h5 id="最小二乘法">最小二乘法</h5>
 <p>应用投影矩阵求方程组最优解的方法，最常用于“最小二乘法”拟合曲线，如图：</p>
-<figure>
-<img src="image-20220929223041893.png" alt="image-20220929223041893" /><figcaption aria-hidden="true">image-20220929223041893</figcaption>
-</figure>
+<p><img src="image-20220929223041893.png" alt="image-20220929223041893" style="zoom:80%;" /></p>
 <p>已知数据点，求一直线方程，使该直线尽可能经过所有点——所有点到该直线的距离尽可能小。</p>
 <p>有一个思路是：这些数据点大概率不会共线，也就是说，将这些数据点代入直线方程利用待定系数法求其参数时，组成的线性方程组大多数情况下是无解的，此时就要用到上面的“求无解方程组最优解”的思路。</p>
 <p>还有一个思路是，我们希望误差 <span class="math inline">\(\vec{e}\)</span> 尽可能小，也就是 <span class="math inline">\(||\vec{e}||^2=||A\vec{\hat{x}}-\vec{b}||^2\)</span> 尽可能小。这一等式可以写成一个 <span class="math inline">\(n\)</span> 元的方程，对该方程的所有变量求偏导并令偏导数为 0，则可以得到上面那个思路一样的结果。</p>
@@ -343,18 +339,17 @@ Q^TQ = I
 <li><p>最后还需要对 <span class="math inline">\(\vec{e}_i\)</span> 进行标准化。</p></li>
 </ol>
 <h5 id="qr分解">QR分解</h5>
-我们把得到的标准正交基写成矩阵的形式 <span class="math inline">\(Q = \begin{bmatrix}\vec{e}_1 &amp; \vec{e}_2 &amp; \cdots &amp; \vec{e}_n \end{bmatrix}\)</span>，若令 $A =
-<span class="math display">\[\begin{bmatrix}\vec{a}_1 &amp; \vec{a}_2 &amp; \cdots &amp; \vec{a}_n \end{bmatrix}\]</span>
-<p>$，则 <span class="math inline">\(C(Q)\)</span> 与 <span class="math inline">\(C(A)\)</span> 是同一个向量空间。</p>
-由于 <span class="math inline">\(Q\)</span> 的列向量是 <span class="math inline">\(C(Q)\)</span> 空间中的标准正交基，则 <span class="math inline">\(A\)</span> 的列向量必能由 <span class="math inline">\(Q\)</span> 的列向量线性表示。前文提到，列变换相当于右乘一个置换矩阵，所以我们可以得到如下等式： $$ A = QR 
-<span class="math display">\[\begin{bmatrix}
+<p>我们把得到的标准正交基写成矩阵的形式 <span class="math inline">\(Q = \begin{bmatrix}\vec{e}_1 &amp; \vec{e}_2 &amp; \cdots &amp; \vec{e}_n \end{bmatrix}\)</span>，若令 <span class="math inline">\(A = \begin{bmatrix}\vec{a}_1 &amp; \vec{a}_2 &amp; \cdots &amp; \vec{a}_n \end{bmatrix}\)</span>，则 <span class="math inline">\(C(Q)\)</span> 与 <span class="math inline">\(C(A)\)</span> 是同一个向量空间。</p>
+<p>由于 <span class="math inline">\(Q\)</span> 的列向量是 <span class="math inline">\(C(Q)\)</span> 空间中的标准正交基，则 <span class="math inline">\(A\)</span> 的列向量必能由 <span class="math inline">\(Q\)</span> 的列向量线性表示。前文提到，列变换相当于右乘一个置换矩阵，所以我们可以通过 <span class="math inline">\(A=QR\)</span> 得到如下等式： <span class="math display">\[
+\begin{bmatrix}
 \vec{a}_1 &amp; \vec{a}_2 &amp; \cdots &amp; \vec{a}_n
-\end{bmatrix}\]</span>
+\end{bmatrix}
 =
-<span class="math display">\[\begin{bmatrix}
+\begin{bmatrix}
 \vec{e}_1 &amp; \vec{e}_2 &amp; \cdots &amp; \vec{e}_n
-\end{bmatrix}\]</span>
-<span class="math display">\[\begin{bmatrix}
+\end{bmatrix}
+·
+\begin{bmatrix}
 \vec{a}_1^T\vec{e}_1 &amp; \vec{a}_2^T\vec{e}_1 &amp; \cdots &amp; \vec{a}_n^T\vec{e}_1
 \\
 \vec{a}_1^T\vec{e}_2 &amp; \vec{a}_2^T\vec{e}_2 &amp; \cdots &amp; \vec{a}_n^T\vec{e}_2
@@ -362,8 +357,8 @@ Q^TQ = I
 \vdots &amp; \vdots &amp; &amp; \vdots
 \\
 \vec{a}_1^T\vec{e}_n &amp; \vec{a}_2^T\vec{e}_n &amp; \cdots &amp; \vec{a}_n^T\vec{e}_n
-\end{bmatrix}\]</span>
-<p>$$ 其中矩阵 <span class="math inline">\(R\)</span> 为列变换的置换矩阵。</p>
+\end{bmatrix}
+\]</span> 其中矩阵 <span class="math inline">\(R\)</span> 为列变换的置换矩阵。</p>
 <p>根据我们求正交基的步骤，每一个 <span class="math inline">\(\vec{e}_i\)</span> 都正交于 <span class="math inline">\(\vec{a}_j\ (j &lt; i)\)</span>，因为 <span class="math inline">\(\vec{a}_j\)</span> 属于 <span class="math inline">\(\vec{e}_1, \vec{e}_2,\dots,\vec{e}_{i-1}\)</span> 张成的向量空间，而 <span class="math inline">\(\vec{e}_i\)</span> 与该向量空间正交。从而当 <span class="math inline">\(j &lt; i\)</span> 时，有 <span class="math inline">\(\vec{a}_j^T\vec{e}_i = 0\)</span>，得到 <span class="math inline">\(R\)</span> 为上三角矩阵。</p>
 <p>更清楚的表示为： <span class="math display">\[
 R =
@@ -468,8 +463,8 @@ C_{21} &amp; C_{22} &amp; \cdots &amp; C_{2n}
 C_{n1} &amp; C_{n2} &amp; \cdots &amp; C_{nn}
 \end{bmatrix}
 \]</span> 其中 <span class="math inline">\(C_{ij}\)</span> 为 <span class="math inline">\(A\)</span> 中元素 <span class="math inline">\(a_{ij}\)</span> 的<strong>代数余子式</strong>。代数余子式矩阵 <span class="math inline">\(C\)</span> 的转置 <span class="math inline">\(C^T\)</span> 也称为 <span class="math inline">\(A\)</span> 的<strong>伴随矩阵</strong>。</p>
-对上式进行左乘 <span class="math inline">\(A\)</span>，则有 $$ AC^T = 
-<span class="math display">\[\begin{bmatrix}
+<p>对上式进行左乘 <span class="math inline">\(A\)</span>，则有 <span class="math display">\[
+\frac{1}{det(A)}AC^T = \frac{1}{det(A)}\begin{bmatrix}
 a_{11} &amp; a_{12} &amp; \cdots &amp; a_{1n}
 \\
 a_{21} &amp; a_{22} &amp; \cdots &amp; a_{2n}
@@ -477,8 +472,8 @@ a_{21} &amp; a_{22} &amp; \cdots &amp; a_{2n}
 \vdots &amp; \vdots &amp; &amp; \vdots
 \\
 a_{n1} &amp; a_{n2} &amp; \cdots &amp; a_{nn}
-\end{bmatrix}\]</span>
-<span class="math display">\[\begin{bmatrix}
+\end{bmatrix}
+\begin{bmatrix}
 C_{11} &amp; C_{21} &amp; \cdots &amp; C_{n1}
 \\
 C_{12} &amp; C_{22} &amp; \cdots &amp; C_{n2}
@@ -486,8 +481,8 @@ C_{12} &amp; C_{22} &amp; \cdots &amp; C_{n2}
 \vdots &amp; \vdots &amp; &amp; \vdots
 \\
 C_{1n} &amp; C_{2n} &amp; \cdots &amp; C_{nn}
-\end{bmatrix}\]</span>
-<p>$$ 主对角线元素很好判断，就是行列式的<strong>代数余子式展开</strong>；对于其它元素，以 <span class="math inline">\(\sum\limits_{i=1}^na_{2i}C_{1i}\)</span> 为例，它可以视为 <span class="math inline">\(A\)</span> 的第一行元素全由第二行替换后的新矩阵 <span class="math inline">\(A&#39;\)</span> 按第一行代数余子式展开，根据<strong>性质 4</strong>，我们得到 <span class="math inline">\(det(A&#39;)=0\)</span>，即最终结果仅有主对角线元素全为 1，其它都是 0——单位矩阵 <span class="math inline">\(I\)</span>，恰好是 <span class="math inline">\(AA^{-1}\)</span>，故该等式是正确的。</p>
+\end{bmatrix}
+\]</span> 主对角线元素很好判断，就是行列式的<strong>代数余子式展开</strong>；对于其它元素，以 <span class="math inline">\(\sum\limits_{i=1}^na_{2i}C_{1i}\)</span> 为例，它可以视为 <span class="math inline">\(A\)</span> 的第一行元素全由第二行替换后的新矩阵 <span class="math inline">\(A&#39;\)</span> 按第一行代数余子式展开，根据<strong>性质 4</strong>，我们得到 <span class="math inline">\(det(A&#39;)=0\)</span>，即最终结果仅有主对角线元素全为 1，其它都是 0——单位矩阵 <span class="math inline">\(I\)</span>，恰好是 <span class="math inline">\(AA^{-1}\)</span>，故该等式是正确的。</p>
 <h5 id="克拉默法则">克拉默法则</h5>
 <p>对于可逆矩阵 <span class="math inline">\(A\)</span>，方程 <span class="math inline">\(A\vec{x} = \vec{b}\)</span> 必有形如下式的解：<span class="math inline">\(\vec{x} = A^{-1}\vec{b}\)</span></p>
 <p>代入上面得到的逆矩阵公式，有 <span class="math display">\[
@@ -521,7 +516,7 @@ b_n
 \end{bmatrix}
 \]</span> 根据之前得到的结论，<span class="math inline">\(\sum\limits_{i=1}^nb_kC_{ik}\)</span> 可以视为将 <span class="math inline">\(A\)</span> 的第 <span class="math inline">\(k\)</span> 列用 <span class="math inline">\(\vec{b}\)</span> 替换后得到的新矩阵 <span class="math inline">\(B_k\)</span> 的行列式值，从而得到 <span class="math display">\[
 x_k = \frac{det(B_k)}{det(A)}
-\]</span> 评价为：<strong>没消元法好用，但确实也是一个可行的方法</strong>。</p>
+\]</span> &gt; 评价为：<strong>没消元法好用，但确实也是一个可行的方法</strong>。</p>
 <h5 id="几何度量">几何度量</h5>
 <p>二阶行列式 <span class="math inline">\(|det(A)|\)</span> 等于 <span class="math inline">\(A\)</span> 行（列）向量构成的平行四边形的面积。</p>
 <p>三阶行列式 <span class="math inline">\(|det(A)|\)</span> 等于 <span class="math inline">\(A\)</span> 行（列）向量构成的平行六面体的体积。</p>
@@ -550,6 +545,43 @@ A\vec{x}_1 &amp;= \lambda_1\vec{x}_1
 <p>由于 <span class="math inline">\(\lambda_1 \neq \lambda_2\)</span>，所以 <span class="math inline">\(\vec{x}_2^T\vec{x}_1 = 0\)</span>，故其正交。</p>
 </blockquote></li>
 </ol>
+<h5 id="对角化">对角化</h5>
+<p>如果矩阵 <span class="math inline">\(A\)</span> 有 <span class="math inline">\(n\)</span> 个线性无关的特征向量 <span class="math inline">\(\vec{x_i}\)</span> ，将其作为矩阵 <span class="math inline">\(S\)</span> 的列向量，则 <span class="math display">\[
+AS = A
+\begin{bmatrix}
+\vec{x_1} &amp; \vec{x_2} &amp; \cdots &amp; \vec{x_n}
+\end{bmatrix}
+=
+\begin{bmatrix}
+\lambda_1\vec{x_1} &amp; \lambda_2\vec{x_2} &amp; \cdots &amp; \lambda_n\vec{x_n}
+\end{bmatrix}
+=
+\begin{bmatrix}
+\vec{x_1} &amp; \vec{x_2} &amp; \cdots &amp; \vec{x_n}
+\end{bmatrix}
+·
+\begin{bmatrix}
+\lambda_1 &amp; 0 &amp; \cdots &amp; 0
+\\
+0 &amp; \lambda_2 &amp; \cdots &amp; 0
+\\
+\vdots &amp; \vdots &amp; &amp; \vdots
+\\
+0 &amp; 0 &amp; \cdots &amp; \lambda_n
+\end{bmatrix}
+=
+S\Lambda
+\]</span> 我们得到 <span class="math inline">\(S^{-1}AS = \Lambda\)</span>，其中 <span class="math inline">\(\Lambda\)</span> 为对角矩阵，其对角线上所有元素都是 <span class="math inline">\(A\)</span> 的特征值，而且这些特征值的排布与 <span class="math inline">\(S\)</span> 中特征向量的排布是一致的。同时我们可以得到这样一个<strong>新的分解方式</strong>：<span class="math inline">\(A = S\Lambda S^{-1}\)</span>。</p>
+<p>如果 <span class="math inline">\(A\vec{x} = \lambda\vec{x}\)</span>，则有 <span class="math inline">\(A^2\vec{x} = A ·\lambda\vec{x} = \lambda^2\vec{x}\)</span>，所以 <span class="math inline">\(A^2\)</span> 有着和 <span class="math inline">\(A\)</span> 同样的特征向量，且对应的特征值为 <span class="math inline">\(\lambda^2\)</span>。</p>
+<p>我们甚至能进一步推测出，如果 <span class="math inline">\(A\sim\lambda\)</span>，则 <span class="math inline">\(A^k\sim\lambda^k\)</span>，且有 <span class="math inline">\(A^k = S\Lambda^k S^{-1}\)</span>。</p>
+<blockquote>
+<p>若 <span class="math inline">\(|\lambda| &lt; 1\)</span>，则 <span class="math inline">\(\lim\limits_{k\rightarrow\infty} A^k = O\)</span></p>
+</blockquote>
+<p>式子 <span class="math inline">\(S^{-1}AS = \Lambda\)</span> 被称为矩阵的<strong>对角化</strong>。矩阵能够对角化的<strong>充要条件</strong>为：<strong>矩阵有 <span class="math inline">\(n\)</span> 个线性无关的特征向量</strong>。</p>
+<ul>
+<li>如果矩阵没有重复特征值，则根据前文描述，矩阵的特征向量必然线性无关，故必然可对角化。</li>
+<li>如果矩阵有重复特征值，则需要进一步深究——事实上，如果一个特征值重复了 <span class="math inline">\(k\)</span> 次（或称<strong>代数重度</strong>），我们希望它对应 <span class="math inline">\(k\)</span> 个线性无关的特征向量。</li>
+</ul>
 
     </div>
 
@@ -633,7 +665,7 @@ A\vec{x}_1 &amp;= \lambda_1\vec{x}_1
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E6%B1%82%E8%A7%A3%E6%97%A0%E8%A7%A3%E6%96%B9%E7%A8%8B%E7%BB%84"><span class="nav-text">如何求解无解方程组？</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%AD%A3%E4%BA%A4%E5%90%91%E9%87%8F"><span class="nav-text">正交向量</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%AD%A3%E4%BA%A4%E5%AD%90%E7%A9%BA%E9%97%B4"><span class="nav-text">正交子空间</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8A%95%E5%BD%B1%E9%97%AE%E9%A2%98"><span class="nav-text">投影问题</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%A6%82%E6%9E%9C%E8%80%83%E8%99%91%E8%AF%A5%E9%97%AE%E9%A2%98%E5%9C%A8%E9%AB%98%E7%BB%B4%E7%A9%BA%E9%97%B4%E7%9A%84%E7%89%88%E6%9C%AC"><span class="nav-text">如果考虑该问题在高维空间的版本</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%9B%9E%E5%88%B0%E6%9C%80%E5%BC%80%E5%A7%8B%E7%9A%84%E9%97%AE%E9%A2%98%E5%A6%82%E4%BD%95%E6%B1%82%E8%A7%A3%E6%97%A0%E8%A7%A3%E6%96%B9%E7%A8%8B%E7%BB%84"><span class="nav-text">回到最开始的问题：如何求解无解方程组？</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E6%B3%95"><span class="nav-text">最小二乘法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%86%8D%E5%9B%9E%E5%88%B0%E6%AD%A3%E4%BA%A4%E5%90%91%E9%87%8F"><span class="nav-text">再回到正交向量</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%AD%A3%E4%BA%A4%E7%9F%A9%E9%98%B5"><span class="nav-text">正交矩阵</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%96%BD%E5%AF%86%E7%89%B9%E6%AD%A3%E4%BA%A4%E5%8C%96"><span class="nav-text">施密特正交化</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#qr%E5%88%86%E8%A7%A3"><span class="nav-text">QR分解</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%9B%E5%85%A5%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E8%A1%8C%E5%88%97%E5%BC%8F"><span class="nav-text">进入第二部分：行列式</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%A1%8C%E5%88%97%E5%BC%8F%E6%80%A7%E8%B4%A8"><span class="nav-text">行列式性质</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BB%A3%E6%95%B0%E4%BD%99%E5%AD%90%E5%BC%8F"><span class="nav-text">代数余子式</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%80%86%E7%9F%A9%E9%98%B5%E5%85%AC%E5%BC%8F"><span class="nav-text">逆矩阵公式</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%85%8B%E6%8B%89%E9%BB%98%E6%B3%95%E5%88%99"><span class="nav-text">克拉默法则</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%87%A0%E4%BD%95%E5%BA%A6%E9%87%8F"><span class="nav-text">几何度量</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%9B%E5%85%A5%E4%B8%8B%E4%B8%80%E4%B8%AA%E8%AE%AE%E9%A2%98%E7%89%B9%E5%BE%81%E5%90%91%E9%87%8F%E4%B8%8E%E7%89%B9%E5%BE%81%E5%80%BC"><span class="nav-text">进入下一个议题：特征向量与特征值</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E6%B1%82%E8%A7%A3%E7%89%B9%E5%BE%81%E5%80%BC%E4%B8%8E%E7%89%B9%E5%BE%81%E5%90%91%E9%87%8F"><span class="nav-text">如何求解特征值与特征向量？</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E6%B1%82%E8%A7%A3%E6%97%A0%E8%A7%A3%E6%96%B9%E7%A8%8B%E7%BB%84"><span class="nav-text">如何求解无解方程组？</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%AD%A3%E4%BA%A4%E5%90%91%E9%87%8F"><span class="nav-text">正交向量</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%AD%A3%E4%BA%A4%E5%AD%90%E7%A9%BA%E9%97%B4"><span class="nav-text">正交子空间</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8A%95%E5%BD%B1%E9%97%AE%E9%A2%98"><span class="nav-text">投影问题</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%A6%82%E6%9E%9C%E8%80%83%E8%99%91%E8%AF%A5%E9%97%AE%E9%A2%98%E5%9C%A8%E9%AB%98%E7%BB%B4%E7%A9%BA%E9%97%B4%E7%9A%84%E7%89%88%E6%9C%AC"><span class="nav-text">如果考虑该问题在高维空间的版本</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%9B%9E%E5%88%B0%E6%9C%80%E5%BC%80%E5%A7%8B%E7%9A%84%E9%97%AE%E9%A2%98%E5%A6%82%E4%BD%95%E6%B1%82%E8%A7%A3%E6%97%A0%E8%A7%A3%E6%96%B9%E7%A8%8B%E7%BB%84"><span class="nav-text">回到最开始的问题：如何求解无解方程组？</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E6%B3%95"><span class="nav-text">最小二乘法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%86%8D%E5%9B%9E%E5%88%B0%E6%AD%A3%E4%BA%A4%E5%90%91%E9%87%8F"><span class="nav-text">再回到正交向量</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%AD%A3%E4%BA%A4%E7%9F%A9%E9%98%B5"><span class="nav-text">正交矩阵</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%96%BD%E5%AF%86%E7%89%B9%E6%AD%A3%E4%BA%A4%E5%8C%96"><span class="nav-text">施密特正交化</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#qr%E5%88%86%E8%A7%A3"><span class="nav-text">QR分解</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%9B%E5%85%A5%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E8%A1%8C%E5%88%97%E5%BC%8F"><span class="nav-text">进入第二部分：行列式</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%A1%8C%E5%88%97%E5%BC%8F%E6%80%A7%E8%B4%A8"><span class="nav-text">行列式性质</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BB%A3%E6%95%B0%E4%BD%99%E5%AD%90%E5%BC%8F"><span class="nav-text">代数余子式</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%80%86%E7%9F%A9%E9%98%B5%E5%85%AC%E5%BC%8F"><span class="nav-text">逆矩阵公式</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%85%8B%E6%8B%89%E9%BB%98%E6%B3%95%E5%88%99"><span class="nav-text">克拉默法则</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%87%A0%E4%BD%95%E5%BA%A6%E9%87%8F"><span class="nav-text">几何度量</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%9B%E5%85%A5%E4%B8%8B%E4%B8%80%E4%B8%AA%E8%AE%AE%E9%A2%98%E7%89%B9%E5%BE%81%E5%90%91%E9%87%8F%E4%B8%8E%E7%89%B9%E5%BE%81%E5%80%BC"><span class="nav-text">进入下一个议题：特征向量与特征值</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E6%B1%82%E8%A7%A3%E7%89%B9%E5%BE%81%E5%80%BC%E4%B8%8E%E7%89%B9%E5%BE%81%E5%90%91%E9%87%8F"><span class="nav-text">如何求解特征值与特征向量？</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AF%B9%E8%A7%92%E5%8C%96"><span class="nav-text">对角化</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 

@@ -388,64 +388,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Aurora</title>
-    <url>/6-824/aurora/</url>
-    <content><![CDATA[<p>6.824 的第六篇论文是 Aurora——一个高性能，高可靠的关系数据库服务。在处理事务的速度上，Aurora 宣称比其他数据库快 35 倍。同时，其完全抛弃了通用存储，转而构建了自己<strong>应用定制的存储</strong>。</p>
-<span id="more"></span>
-<h4 id="aurora-产生背景">Aurora 产生背景</h4>
-<h5 id="ec2elastic-cloud-2">EC2(Elastic Cloud 2)</h5>
-<p>这是 Amazon 最早的云产品。Amazon 有装满了服务器的数据中心，并且每个服务器上都会运行一个 VMM(<strong>Virtual Machine Monitor</strong>)，以及一些 EC2 实例。每个实例在运行一个标准的操作系统的同时，出租给不同的用户。每个 EC2 的操作系统之上运行着 Web 服务或数据库等应用程序。这种方式成本低，且相对容易配置，在早期是一个成功的服务模式。</p>
-<p>最早的时候，EC2 使用的都是服务器上的硬盘，每个 EC2 实例都会分到硬盘的一部分空间。</p>
-<p>对于无状态的 Web 应用，如果客户数量增加了，可以通过租用更多 EC2 实例来对 Web 服务扩容，尽管服务器崩溃了，只需要在另一台服务器上启动一个新的 EC2 实例就好了。而对于数据库而言，一旦服务器崩溃了，其本地硬盘将无法访问，运行在服务器上的数据库 EC2 实例也将失效——因为数据丢失了。</p>
-<p>Amazon 本身有实现块存储的服务，叫 S3。可以定期对数据库做快照，然后存到 S3 上，并基于快照来实现故障恢复。但也有可能失去两次快照之间的数据，</p>
-<h5 id="ebselastic-block-store">EBS(Elastic Block Store)</h5>
-<p>它表现得像个硬盘，具有容错性，且支持持久化存储的服务，其底层是一对互为副本的存储服务器。当用户要使用数据库 EC2 时，可以将一个 EBS 挂载为自己的硬盘。</p>
-<p>当数据库执行写操作时，数据会通过网络传输到 EBS 服务器，之后，那一对存储服务器会使用 <strong>Chain Replication</strong> 进行数据复制。</p>
-<blockquote>
-<p>第一个服务器处理写，第二个服务器处理读。</p>
-</blockquote>
-<p>虽然 EBS 的出现能够在一定程度上避免因服务器崩溃而导致的数据丢失，但却会产生大量的网络流量，并且容错性并没有得到很好的保障——两个存储服务器会放在同个数据中心（在 paper 中称为 <strong>AZ, Available Zone</strong>）中，也就意味着一旦数据中心崩溃了，那就没辙了。</p>
-<h5 id="rdsrelational-database-service">RDS(Relational Database Service)</h5>
-<p>RDS 尝试将数据进行跨 AZ 复制，这样就算整个 AZ 挂了，用户还可以从另一个 AZ 中获取数据。</p>
-<p>对于 RDS 而言，有且仅有一个 EC2 实例作为<strong>主数据库</strong>，这个数据库将其 data page 和 WAL log 存在 EBS，EC2 和 EBS 都在同一个 AZ <span class="math inline">\(AZ_1\)</span> 中。每次数据库执行写操作时，RDS 会自动将写操作拷贝到另一个 AZ <span class="math inline">\(AZ_2\)</span> 中的<strong>副数据库</strong> EC2 实例上，这个 EC2 的工作就是执行和主数据库相同的操作，写入成功后，会发一个 ack 给主数据库，主数据库看到了这个 ack 后才会认为真正意义上的写入成功。</p>
-<p>但实际上，这样还是会通过网络传输相当大量的数据。</p>
-<h4 id="aurora">Aurora</h4>
-<p>在 Aurora 的架构中，会有 <span class="math inline">\(V\)</span> 个数据副本代替 EBS 的位置，分别存放在 <span class="math inline">\(z\)</span> 个不同的 AZ 中。与此同时，Aurora 通过网络传输的是 <strong>log 条目</strong>而非 data page，这也大大提高了网络性能。当然，这也就导致了 Aurora 的存储系统不再是只能理解 data 的通用存储了，变成了<strong>能够理解 log 的应用定制存储系统</strong>。</p>
-<h5 id="复制与相关故障">复制与相关故障</h5>
-<p>Aurora 采用<strong>基于仲裁的投票协议</strong>来保证容错，即不需要所有副本都确认了读/写操作后才能继续执行。这个协议是这样的：</p>
-<ol type="1">
-<li>每次读操作都需要获得 <span class="math inline">\(V_r\)</span> 个确认；</li>
-<li>每次写操作都需要获得 <span class="math inline">\(V_w\)</span> 个确认；</li>
-<li><span class="math inline">\(V_r + V_w &gt; V\)</span>，保证每次读都能知道最近的写入；</li>
-<li><span class="math inline">\(V_w &gt; V/2\)</span>，保证每次写入必须知道最近的写入从而避免写入冲突；</li>
-</ol>
-<p>这样一来，Aurora 可以有更多的副本和 AZ，而不需要付出过大的性能代价——因为它无需等待所有副本，只需要等待最快的 <span class="math inline">\(V_r/V_w\)</span> 个副本就好了。这也容忍了少数副本的 crash 或是偶尔的慢响应。</p>
-<p>这里又会出现一个问题，客户端读请求可能会得到 <span class="math inline">\(V_r\)</span> 个不同的结果，却并不知道哪个结果是正确的。解决这一问题的方法就是设置<strong>版本号</strong>，每次写请求都会将新的数值与一个递增的版本号绑定，于是读请求便可以从所有结果中取版本号最高的那个结果。</p>
-<h5 id="容错目标">容错目标</h5>
-<p>在 Aurora 中，我们希望</p>
-<ul>
-<li>在整个 AZ 和一个额外的副本崩溃后而不丢失数据；</li>
-<li>整个 AZ 崩溃后不会影响写入数据；</li>
-</ul>
-<p>于是设置 <span class="math inline">\(V = 6,\ V_w = 4,\ V_r = 3,\ z = 3\)</span>，这样每个 AZ 存放 2 个副本。在这样的设置下，一个 AZ 和一个副本崩溃不会影响读性能，且任意两个副本崩溃后也能保持写入可用性。</p>
-<h5 id="数据分片sharding">数据分片(Sharding)</h5>
-<p>对于 Aurora 而言，每个副本都是一个计算机，其内存是有限的，且尽管我们有 6 个副本，我们并没有得到 6 倍大小的内存——每个副本上存放的数据都是一致的。对于数百 TB 甚至更多的数据，需要找一个明智的策略进行存储。</p>
-<p>这一策略是：将数据库的数据，分割到多组(<strong>PG, Protection Group</strong>)存储服务器上，每一个 PG 都包含若干存储服务器作为副本，存该 data page 10GB 的数据。</p>
-<blockquote>
-<p>这里的 PG 是个<strong>逻辑概念</strong>。</p>
-</blockquote>
-<p>Sharding 后，如果要进行 log 处理，则会查看 log 所修改的数据，并找到存储该数据的 PG，并将 log 只发送给该 PG 的副本。这也就意味着，每个 PG 只存储部分 data page 和所有与这些 data page 相关的 log 条目。</p>
-<p>如果某个副本挂了，希望能尽快生成新的副本。事实上，尽管每个 PG 存了某个数据库的 10GB 数据，但一个副本所拥有的存储容量可能高达 10TB，也就是说该副本可能存了成百上千个 PG 的“10GB”，一旦该副本挂了，会牵连到与之相关的所有数据库。一个简单的策略是找到另一台存储服务器，通过拷贝的形式将该副本的所有数据都通过网络传输到新的副本中，但对于 10Gb/s 的网络来说，需要的时间还是太久了。</p>
-<p>Aurora 是这么做的：若某个副本保存了 <span class="math inline">\(PG_1,\ PG_2,\ \dots,\ PG_n\)</span> 的数据，则将这 <span class="math inline">\(n\)</span> 个 PG 的数据并行传输到 <span class="math inline">\(n\)</span> 个新的存储服务器上。也就是说这 <span class="math inline">\(n\)</span> 个存储服务器，每个都会加入到一个新的 PG 中。比起上面的策略，我们获得了 <span class="math inline">\(n\)</span> 倍的性能提升。</p>
-]]></content>
-      <categories>
-        <category>6.824</category>
-      </categories>
-      <tags>
-        <tag>paperReading</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Spanner</title>
     <url>/6-824/Spanner/</url>
     <content><![CDATA[<p>6.824 的第七篇论文是 <strong>Spanner</strong>—— Google 的可扩展、多版本、全球分布和同步复制的数据库。它是第一个在全球范围内分发数据并支持外部一致的分布式事务的系统。</p>
@@ -566,6 +508,64 @@
 </ol>
 <h4 id="总结">总结</h4>
 <p>Spanner 优雅地利用了 TrueTime 实现了外部一致性以及其它强大特性，这是前所未有的创新设计。</p>
+]]></content>
+      <categories>
+        <category>6.824</category>
+      </categories>
+      <tags>
+        <tag>paperReading</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Aurora</title>
+    <url>/6-824/aurora/</url>
+    <content><![CDATA[<p>6.824 的第六篇论文是 Aurora——一个高性能，高可靠的关系数据库服务。在处理事务的速度上，Aurora 宣称比其他数据库快 35 倍。同时，其完全抛弃了通用存储，转而构建了自己<strong>应用定制的存储</strong>。</p>
+<span id="more"></span>
+<h4 id="aurora-产生背景">Aurora 产生背景</h4>
+<h5 id="ec2elastic-cloud-2">EC2(Elastic Cloud 2)</h5>
+<p>这是 Amazon 最早的云产品。Amazon 有装满了服务器的数据中心，并且每个服务器上都会运行一个 VMM(<strong>Virtual Machine Monitor</strong>)，以及一些 EC2 实例。每个实例在运行一个标准的操作系统的同时，出租给不同的用户。每个 EC2 的操作系统之上运行着 Web 服务或数据库等应用程序。这种方式成本低，且相对容易配置，在早期是一个成功的服务模式。</p>
+<p>最早的时候，EC2 使用的都是服务器上的硬盘，每个 EC2 实例都会分到硬盘的一部分空间。</p>
+<p>对于无状态的 Web 应用，如果客户数量增加了，可以通过租用更多 EC2 实例来对 Web 服务扩容，尽管服务器崩溃了，只需要在另一台服务器上启动一个新的 EC2 实例就好了。而对于数据库而言，一旦服务器崩溃了，其本地硬盘将无法访问，运行在服务器上的数据库 EC2 实例也将失效——因为数据丢失了。</p>
+<p>Amazon 本身有实现块存储的服务，叫 S3。可以定期对数据库做快照，然后存到 S3 上，并基于快照来实现故障恢复。但也有可能失去两次快照之间的数据，</p>
+<h5 id="ebselastic-block-store">EBS(Elastic Block Store)</h5>
+<p>它表现得像个硬盘，具有容错性，且支持持久化存储的服务，其底层是一对互为副本的存储服务器。当用户要使用数据库 EC2 时，可以将一个 EBS 挂载为自己的硬盘。</p>
+<p>当数据库执行写操作时，数据会通过网络传输到 EBS 服务器，之后，那一对存储服务器会使用 <strong>Chain Replication</strong> 进行数据复制。</p>
+<blockquote>
+<p>第一个服务器处理写，第二个服务器处理读。</p>
+</blockquote>
+<p>虽然 EBS 的出现能够在一定程度上避免因服务器崩溃而导致的数据丢失，但却会产生大量的网络流量，并且容错性并没有得到很好的保障——两个存储服务器会放在同个数据中心（在 paper 中称为 <strong>AZ, Available Zone</strong>）中，也就意味着一旦数据中心崩溃了，那就没辙了。</p>
+<h5 id="rdsrelational-database-service">RDS(Relational Database Service)</h5>
+<p>RDS 尝试将数据进行跨 AZ 复制，这样就算整个 AZ 挂了，用户还可以从另一个 AZ 中获取数据。</p>
+<p>对于 RDS 而言，有且仅有一个 EC2 实例作为<strong>主数据库</strong>，这个数据库将其 data page 和 WAL log 存在 EBS，EC2 和 EBS 都在同一个 AZ <span class="math inline">\(AZ_1\)</span> 中。每次数据库执行写操作时，RDS 会自动将写操作拷贝到另一个 AZ <span class="math inline">\(AZ_2\)</span> 中的<strong>副数据库</strong> EC2 实例上，这个 EC2 的工作就是执行和主数据库相同的操作，写入成功后，会发一个 ack 给主数据库，主数据库看到了这个 ack 后才会认为真正意义上的写入成功。</p>
+<p>但实际上，这样还是会通过网络传输相当大量的数据。</p>
+<h4 id="aurora">Aurora</h4>
+<p>在 Aurora 的架构中，会有 <span class="math inline">\(V\)</span> 个数据副本代替 EBS 的位置，分别存放在 <span class="math inline">\(z\)</span> 个不同的 AZ 中。与此同时，Aurora 通过网络传输的是 <strong>log 条目</strong>而非 data page，这也大大提高了网络性能。当然，这也就导致了 Aurora 的存储系统不再是只能理解 data 的通用存储了，变成了<strong>能够理解 log 的应用定制存储系统</strong>。</p>
+<h5 id="复制与相关故障">复制与相关故障</h5>
+<p>Aurora 采用<strong>基于仲裁的投票协议</strong>来保证容错，即不需要所有副本都确认了读/写操作后才能继续执行。这个协议是这样的：</p>
+<ol type="1">
+<li>每次读操作都需要获得 <span class="math inline">\(V_r\)</span> 个确认；</li>
+<li>每次写操作都需要获得 <span class="math inline">\(V_w\)</span> 个确认；</li>
+<li><span class="math inline">\(V_r + V_w &gt; V\)</span>，保证每次读都能知道最近的写入；</li>
+<li><span class="math inline">\(V_w &gt; V/2\)</span>，保证每次写入必须知道最近的写入从而避免写入冲突；</li>
+</ol>
+<p>这样一来，Aurora 可以有更多的副本和 AZ，而不需要付出过大的性能代价——因为它无需等待所有副本，只需要等待最快的 <span class="math inline">\(V_r/V_w\)</span> 个副本就好了。这也容忍了少数副本的 crash 或是偶尔的慢响应。</p>
+<p>这里又会出现一个问题，客户端读请求可能会得到 <span class="math inline">\(V_r\)</span> 个不同的结果，却并不知道哪个结果是正确的。解决这一问题的方法就是设置<strong>版本号</strong>，每次写请求都会将新的数值与一个递增的版本号绑定，于是读请求便可以从所有结果中取版本号最高的那个结果。</p>
+<h5 id="容错目标">容错目标</h5>
+<p>在 Aurora 中，我们希望</p>
+<ul>
+<li>在整个 AZ 和一个额外的副本崩溃后而不丢失数据；</li>
+<li>整个 AZ 崩溃后不会影响写入数据；</li>
+</ul>
+<p>于是设置 <span class="math inline">\(V = 6,\ V_w = 4,\ V_r = 3,\ z = 3\)</span>，这样每个 AZ 存放 2 个副本。在这样的设置下，一个 AZ 和一个副本崩溃不会影响读性能，且任意两个副本崩溃后也能保持写入可用性。</p>
+<h5 id="数据分片sharding">数据分片(Sharding)</h5>
+<p>对于 Aurora 而言，每个副本都是一个计算机，其内存是有限的，且尽管我们有 6 个副本，我们并没有得到 6 倍大小的内存——每个副本上存放的数据都是一致的。对于数百 TB 甚至更多的数据，需要找一个明智的策略进行存储。</p>
+<p>这一策略是：将数据库的数据，分割到多组(<strong>PG, Protection Group</strong>)存储服务器上，每一个 PG 都包含若干存储服务器作为副本，存该 data page 10GB 的数据。</p>
+<blockquote>
+<p>这里的 PG 是个<strong>逻辑概念</strong>。</p>
+</blockquote>
+<p>Sharding 后，如果要进行 log 处理，则会查看 log 所修改的数据，并找到存储该数据的 PG，并将 log 只发送给该 PG 的副本。这也就意味着，每个 PG 只存储部分 data page 和所有与这些 data page 相关的 log 条目。</p>
+<p>如果某个副本挂了，希望能尽快生成新的副本。事实上，尽管每个 PG 存了某个数据库的 10GB 数据，但一个副本所拥有的存储容量可能高达 10TB，也就是说该副本可能存了成百上千个 PG 的“10GB”，一旦该副本挂了，会牵连到与之相关的所有数据库。一个简单的策略是找到另一台存储服务器，通过拷贝的形式将该副本的所有数据都通过网络传输到新的副本中，但对于 10Gb/s 的网络来说，需要的时间还是太久了。</p>
+<p>Aurora 是这么做的：若某个副本保存了 <span class="math inline">\(PG_1,\ PG_2,\ \dots,\ PG_n\)</span> 的数据，则将这 <span class="math inline">\(n\)</span> 个 PG 的数据并行传输到 <span class="math inline">\(n\)</span> 个新的存储服务器上。也就是说这 <span class="math inline">\(n\)</span> 个存储服务器，每个都会加入到一个新的 PG 中。比起上面的策略，我们获得了 <span class="math inline">\(n\)</span> 倍的性能提升。</p>
 ]]></content>
       <categories>
         <category>6.824</category>
@@ -747,6 +747,343 @@ rank(A) = \# C_{pivot} = dim(C(A)) = r = dim(R(A))
 dim(L(A)) = m-r
 \]</span> 不妨用下图来表示这一切</p>
 <p><img src="image-20220929160748771.png" alt="image-20220929160748771" style="zoom:67%;" /></p>
+]]></content>
+      <categories>
+        <category>math</category>
+      </categories>
+      <tags>
+        <tag>MIT18.06</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linear-Algebra(2)</title>
+    <url>/math/linear-algebra(2)/</url>
+    <content><![CDATA[<p>书接上回。</p>
+<span id="more"></span>
+<h4 id="如何求解无解方程组">如何求解无解方程组？</h4>
+<p>在这个问题之前，我先做点铺垫。</p>
+<h5 id="正交向量">正交向量</h5>
+<p>若两向量 <span class="math inline">\(\vec{a}, \vec{b}\)</span> 正交，则必然有 <span class="math inline">\(\vec{a}^T\vec{b} = \vec{b}^T\vec{a} = 0\)</span></p>
+<h5 id="正交子空间">正交子空间</h5>
+<p>若子空间 <span class="math inline">\(S\)</span> 与子空间 <span class="math inline">\(T\)</span> 正交，则 <span class="math inline">\(S\)</span> 中任意向量与 <span class="math inline">\(T\)</span> 中任意向量正交。</p>
+<p>不难发现，<span class="math inline">\(R(A)\)</span> 与 <span class="math inline">\(N(A)\)</span> 是正交的，而这两个空间恰好都是 <span class="math inline">\(R^n\)</span> 的子空间，更巧的是，<strong>其维数之和为</strong> <span class="math inline">\(n\)</span>。</p>
+<p>我们称这两个子空间为 <span class="math inline">\(R^n\)</span> 的<strong>正交补</strong>——它们将 <span class="math inline">\(R^n\)</span> 划分为了<strong>两个正交的子空间</strong>。</p>
+<p>同样的，<span class="math inline">\(C(A)\)</span> 与 <span class="math inline">\(L(A)\)</span> 也互为正交补。</p>
+<blockquote>
+<p>两个互为正交补的子空间的维数之和，不能超过原空间的维数。</p>
+</blockquote>
+<h5 id="投影问题">投影问题</h5>
+<p>这一问题的几何解释为：如何在向量 <span class="math inline">\(\vec{a}\)</span> 的方向上寻找与向量 <span class="math inline">\(\vec{b}\)</span> 距离最近的一点。假设这一点对应的向量为 <span class="math inline">\(\vec{p}\)</span>，则 <span class="math inline">\(\vec{e}=\vec{b}-\vec{p}\)</span> 就是这一近似的误差。如图所示：</p>
+<p><img src="image-20220929215857174.png" alt="image-20220929215857174" style="zoom:100%;" /></p>
+<p>若令 <span class="math inline">\(\vec{p} = \hat{x}\vec{a}\)</span>，因 <span class="math inline">\(\vec{e}\)</span> 与 <span class="math inline">\(\vec{a}\)</span> 正交，则有 <span class="math inline">\(\vec{a}^T(\vec{b}-\hat{x}\vec{a}) = 0\)</span>，解得 <span class="math display">\[
+\hat{x} = \frac{\vec{a}^T\vec{b}}{\vec{a}^T\vec{a}}
+\\[2ex]
+\vec{p} = \vec{a}\frac{\vec{a}^T\vec{b}}{\vec{a}^T\vec{a}}
+\]</span> 相当于把 <span class="math inline">\(\vec{b}\)</span> 以某种操作投影到了 <span class="math inline">\(\vec{p}\)</span> 上。若用<strong>投影矩阵</strong> <span class="math inline">\(P\)</span> 来描述这一操作，则有 <span class="math inline">\(\vec{p} = P\vec{b}\)</span>，得 <span class="math display">\[
+P = \frac{\vec{a}\vec{a}^T}{\vec{a}^T\vec{a}}
+\]</span> 这是一个<strong>对称矩阵</strong>（<span class="math inline">\(P^T=P\)</span>），而且是<strong>幂等矩阵</strong>（<span class="math inline">\(P^2 = P\)</span>）</p>
+<h5 id="如果考虑该问题在高维空间的版本">如果考虑该问题在高维空间的版本</h5>
+<p>有一个向量空间 <span class="math inline">\(V\)</span> 与一个不在该空间上的向量 <span class="math inline">\(\vec{b}\)</span>，如果把 <span class="math inline">\(V\)</span> 视为某一矩阵的列空间，且该空间的基为 <span class="math inline">\(\vec{a_1}, \vec{a_2},\dots, \vec{a_n}\)</span>，则该矩阵可以用 <span class="math inline">\(A = \begin{bmatrix}\vec{a_1} &amp; \vec{a_2} &amp; \cdots &amp; \vec{a_n} \end{bmatrix}\)</span> 来描述。</p>
+<p>令 <span class="math inline">\(\vec{p}\)</span> 为 <span class="math inline">\(\vec{b}\)</span> 在该向量空间上的投影，则 <span class="math inline">\(\vec{p}\)</span> 可以用 <span class="math inline">\(\vec{p} = x_1\vec{a_1} + x_2\vec{a_2} + \dots + x_n\vec{a_n} = A\vec{\hat{x}}\)</span> 来表示。</p>
+<p>显然误差 <span class="math inline">\(\vec{e}\)</span> 与整个向量空间正交，则有 <span class="math inline">\(\vec{a_1}^T\vec{e} = 0, \vec{a_2}^T\vec{e} = 0, \dots, \vec{a_n}^T\vec{e} = 0\)</span></p>
+<p>上式可以写为 <span class="math inline">\(A^T\vec{e} = 0\)</span></p>
+<p>从而得到 <span class="math display">\[
+A^T(\vec{b} - A\vec{\hat{x}}) = 0 \quad \Rightarrow \quad \vec{\hat{x}} = (A^TA)^{-1}A^T\vec{b}
+\]</span> 那么得到一个<strong>非常优美的结论</strong>： <span class="math display">\[
+\vec{p} = A(A^TA)^{-1}A^T\vec{b}
+\\[2ex]
+P = A(A^TA)^{-1}A^T
+\]</span> 这里的 <span class="math inline">\(P\)</span> 同样满足对称性和幂等性。</p>
+<p>这里 <span class="math inline">\(\vec{p} \in C(A)\)</span>，同时惊喜的发现 <span class="math inline">\(\vec{e}\in L(A)\)</span>，说明 <span class="math inline">\(\vec{b} = \vec{p} + \vec{e}\)</span> 由两部分组成，一部分（<span class="math inline">\(\vec{p}\)</span>）投影到了 <span class="math inline">\(C(A)\)</span> 上，另一部分（<span class="math inline">\(\vec{e}\)</span>）投影到了 <span class="math inline">\(L(A)\)</span> 上。对于 <span class="math inline">\(\vec{e}\)</span>，我们发现可以通过 <span class="math inline">\(\vec{e} = \vec{b} - \vec{p} = \vec{b} - P\vec{b} = (I-P)\vec{b}\)</span> 表示，所以 <span class="math inline">\(I-P\)</span> 也是个投影矩阵，也具有和 <span class="math inline">\(P\)</span> 同样的性质。</p>
+<p>当 <span class="math inline">\(A\)</span> 的列向量线性无关时，说明 <span class="math inline">\(C(A)\)</span> 就是 <span class="math inline">\(R^n\)</span>，此时任意 <span class="math inline">\(\vec{b}\in R^n\)</span> 都必然在 <span class="math inline">\(C(A)\)</span> 中，投影矩阵就是 <span class="math inline">\(I\)</span>。</p>
+<p>对于 <span class="math inline">\(A^TA\)</span> 而言，其零空间与 <span class="math inline">\(A\)</span> 是一致的</p>
+<ol type="1">
+<li>对于 <span class="math inline">\(A^TA\vec{x}=\vec{0}\)</span>，必然满足 <span class="math inline">\(\vec{x}^TA^TA\vec{x} = (A\vec{x})^T A\vec{x} = \vec{0}\)</span>，从而 <span class="math inline">\(A\vec{x}\)</span> 与自身正交，那么 <span class="math inline">\(A\vec{x} = \vec{0}\)</span>。</li>
+<li>对于 <span class="math inline">\(A\vec{x}=\vec{0}\)</span>，必然满足 <span class="math inline">\(A^TA\vec{x}=\vec{0}\)</span></li>
+</ol>
+<p>因此当 <span class="math inline">\(A\)</span> 的列向量线性无关时，<span class="math inline">\(A\vec{x}=\vec{0}\)</span> 只有零解，<span class="math inline">\(A^TA\vec{x}=\vec{0}\)</span> 也只有零解。且 <span class="math inline">\(A^TA\)</span> 为方阵，行列满秩，必然可逆。</p>
+<h5 id="回到最开始的问题如何求解无解方程组">回到最开始的问题：如何求解无解方程组？</h5>
+<p>这个问题看似很离谱，实则我们可以用一个最优解 <span class="math inline">\(\vec{\hat{x}}\)</span> 去近似。对于方程 <span class="math inline">\(A\vec{x} = \vec{b}\)</span>，如果其无解，说明 <span class="math inline">\(\vec{b}\)</span> 不在 <span class="math inline">\(A\)</span> 的列空间中。我们可以将 <span class="math inline">\(\vec{b}\)</span> 投影到 <span class="math inline">\(C(A)\)</span>，将问题转换为求解方程 <span class="math inline">\(A\vec{\hat{x}} = \vec{p}\)</span>，这个解就是我们想求的近似最优解。</p>
+<p>根据上面描述的，我们能够很轻易地得到该解，即 <span class="math display">\[
+\vec{\hat{x}} = (A^TA)^{-1}A^T\vec{b}
+\]</span></p>
+<h5 id="最小二乘法">最小二乘法</h5>
+<p>应用投影矩阵求方程组最优解的方法，最常用于“最小二乘法”拟合曲线，如图：</p>
+<p><img src="image-20220929223041893.png" alt="image-20220929223041893" style="zoom:80%;" /></p>
+<p>已知数据点，求一直线方程，使该直线尽可能经过所有点——所有点到该直线的距离尽可能小。</p>
+<p>有一个思路是：这些数据点大概率不会共线，也就是说，将这些数据点代入直线方程利用待定系数法求其参数时，组成的线性方程组大多数情况下是无解的，此时就要用到上面的“求无解方程组最优解”的思路。</p>
+<p>还有一个思路是，我们希望误差 <span class="math inline">\(\vec{e}\)</span> 尽可能小，也就是 <span class="math inline">\(||\vec{e}||^2=||A\vec{\hat{x}}-\vec{b}||^2\)</span> 尽可能小。这一等式可以写成一个 <span class="math inline">\(n\)</span> 元的方程，对该方程的所有变量求偏导并令偏导数为 0，则可以得到上面那个思路一样的结果。</p>
+<h5 id="再回到正交向量">再回到正交向量</h5>
+<p>现在说正交向量的升级版——<strong>标准正交向量</strong>，即满足以下条件的一组向量： <span class="math display">\[
+\vec{q}_i^T\vec{q}_j = \begin{cases}1 \quad i = j\\[2ex] 0 \quad i \neq j\end{cases}
+\]</span></p>
+<h5 id="正交矩阵">正交矩阵</h5>
+若令 $Q =
+<span class="math display">\[\begin{bmatrix}\vec{q}_1 &amp; \vec{q}_2 &amp; \cdots &amp; \vec{q}_n \end{bmatrix}\]</span>
+<p>$，易得 <span class="math display">\[
+Q^TQ = I
+\]</span> 此矩阵 <span class="math inline">\(Q\)</span> 称为<strong>正交矩阵</strong>，且显然有 <span class="math inline">\(Q^T=Q^{-1}\)</span>。</p>
+<p>对于正交矩阵来说，在其列空间内关于投影问题的<strong>投影矩阵</strong>也可以<strong>简化为</strong> <span class="math inline">\(P=Q(Q^TQ)^{-1}Q^T = QQ^T\)</span>。若 <span class="math inline">\(Q\)</span> 为方阵，还可以进一步得到 <span class="math inline">\(P=I\)</span>，因为此时其列空间已经张成 <span class="math inline">\(R^n\)</span>，投影操作不会对向量有任何改变。</p>
+<p>对应的 <span class="math inline">\(\vec{p} = P\vec{b} = QQ^T\vec{b} = Q\vec{\hat{x}}\)</span></p>
+<h5 id="施密特正交化">施密特正交化</h5>
+<p>对于一组线性无关的向量 <span class="math inline">\(\vec{a}_1, \vec{a}_2,\dots,\vec{a}_n\)</span>，若其能够张成空间 <span class="math inline">\(V\)</span>，我们希望能找到该空间的<strong>正交矩阵</strong>表示——即找到一组<strong>标准正交向量</strong> <span class="math inline">\(\vec{e}_1, \vec{e}_2, \dots, \vec{e}_n\)</span>，其恰好能张成同样的空间，也就是找到该空间的一组<strong>标准正交基</strong>。</p>
+<blockquote>
+<p>对一个向量的<strong>标准化</strong>过程就是令其除以其模长。</p>
+</blockquote>
+<p>我们不妨逐一分析：</p>
+<ol type="1">
+<li><p>第一个向量不作变动，即 <span class="math inline">\(\displaystyle \vec{e}_1 = \frac{\vec{a}_1}{||\vec{a}_1||}\)</span></p></li>
+<li><p>对于之后的所有向量 <span class="math inline">\(\vec{a}_i\)</span>，由于我们已经求得一组标准正交向量 <span class="math inline">\(\vec{e}_1, \dots, \vec{e}_{i-1}\)</span>，设求其施密特正交化后的向量为 <span class="math inline">\(\vec{e}_i\)</span>，易得 <span class="math inline">\(\vec{e}_i\)</span> 垂直于 <span class="math inline">\(\vec{e}_1, \dots, \vec{e}_{i-1}\)</span>，从而有<span class="math inline">\(\vec{e}_i\)</span> 垂直于 <span class="math inline">\(\vec{e}_1, \dots, \vec{e}_{i-1}\)</span> 张成的向量空间。此时可以把问题转换为<strong>投影问题</strong>，只不过我们这里需要求投影问题中的<strong>误差</strong>，也就是原向量 <span class="math inline">\(\vec{a}_i\)</span> 减去它在投影到所有基 <span class="math inline">\(\vec{e}_k\)</span> 上的分量 <span class="math inline">\(\vec{p}_k\)</span>： <span class="math display">\[
+ \vec{e}_i = \vec{a}_i - \sum\limits_{k=1}^{i-1}\vec{p}_k
+ \\[2ex]
+ \vec{p}_k = \frac{\vec{e}_k^T\vec{a}_i}{\vec{e}_k^T\vec{e}_k}\vec{e}_k
+ \]</span></p></li>
+<li><p>最后还需要对 <span class="math inline">\(\vec{e}_i\)</span> 进行标准化。</p></li>
+</ol>
+<h5 id="qr分解">QR分解</h5>
+<p>我们把得到的标准正交基写成矩阵的形式 <span class="math inline">\(Q = \begin{bmatrix}\vec{e}_1 &amp; \vec{e}_2 &amp; \cdots &amp; \vec{e}_n \end{bmatrix}\)</span>，若令 <span class="math inline">\(A = \begin{bmatrix}\vec{a}_1 &amp; \vec{a}_2 &amp; \cdots &amp; \vec{a}_n \end{bmatrix}\)</span>，则 <span class="math inline">\(C(Q)\)</span> 与 <span class="math inline">\(C(A)\)</span> 是同一个向量空间。</p>
+<p>由于 <span class="math inline">\(Q\)</span> 的列向量是 <span class="math inline">\(C(Q)\)</span> 空间中的标准正交基，则 <span class="math inline">\(A\)</span> 的列向量必能由 <span class="math inline">\(Q\)</span> 的列向量线性表示。前文提到，列变换相当于右乘一个置换矩阵，所以我们可以通过 <span class="math inline">\(A=QR\)</span> 得到如下等式： <span class="math display">\[
+\begin{bmatrix}
+\vec{a}_1 &amp; \vec{a}_2 &amp; \cdots &amp; \vec{a}_n
+\end{bmatrix}
+=
+\begin{bmatrix}
+\vec{e}_1 &amp; \vec{e}_2 &amp; \cdots &amp; \vec{e}_n
+\end{bmatrix}
+·
+\begin{bmatrix}
+\vec{a}_1^T\vec{e}_1 &amp; \vec{a}_2^T\vec{e}_1 &amp; \cdots &amp; \vec{a}_n^T\vec{e}_1
+\\
+\vec{a}_1^T\vec{e}_2 &amp; \vec{a}_2^T\vec{e}_2 &amp; \cdots &amp; \vec{a}_n^T\vec{e}_2
+\\
+\vdots &amp; \vdots &amp; &amp; \vdots
+\\
+\vec{a}_1^T\vec{e}_n &amp; \vec{a}_2^T\vec{e}_n &amp; \cdots &amp; \vec{a}_n^T\vec{e}_n
+\end{bmatrix}
+\]</span> 其中矩阵 <span class="math inline">\(R\)</span> 为列变换的置换矩阵。</p>
+<p>根据我们求正交基的步骤，每一个 <span class="math inline">\(\vec{e}_i\)</span> 都正交于 <span class="math inline">\(\vec{a}_j\ (j &lt; i)\)</span>，因为 <span class="math inline">\(\vec{a}_j\)</span> 属于 <span class="math inline">\(\vec{e}_1, \vec{e}_2,\dots,\vec{e}_{i-1}\)</span> 张成的向量空间，而 <span class="math inline">\(\vec{e}_i\)</span> 与该向量空间正交。从而当 <span class="math inline">\(j &lt; i\)</span> 时，有 <span class="math inline">\(\vec{a}_j^T\vec{e}_i = 0\)</span>，得到 <span class="math inline">\(R\)</span> 为上三角矩阵。</p>
+<p>更清楚的表示为： <span class="math display">\[
+R =
+\begin{bmatrix}
+\vec{a}_1^T\vec{e}_1 &amp; \vec{a}_2^T\vec{e}_1 &amp; \cdots &amp; \vec{a}_{n-1}^T\vec{e}_1 &amp; \vec{a}_n^T\vec{e}_1
+\\
+0 &amp; \vec{a}_2^T\vec{e}_2 &amp; \cdots &amp; \vec{a}_{n-1}^T\vec{e}_2 &amp; \vec{a}_n^T\vec{e}_2
+\\
+\vdots &amp; \vdots &amp; \ddots &amp; \vdots &amp; \vdots
+\\
+0 &amp; 0 &amp; \cdots &amp;  \vec{a}_{n-1}^T\vec{e}_{n-1} &amp; \vec{a}_n^T\vec{e}_{n-1}
+\\
+0 &amp; 0 &amp; \cdots &amp; 0 &amp; \vec{a}_n^T\vec{e}_n
+\end{bmatrix}
+\]</span></p>
+<h4 id="进入第二部分行列式">进入第二部分：行列式</h4>
+<p>跟国内教材上来就给学生塞一堆行列式的定义与性质让你记忆和做题不一样，GS 在讲完矩阵后，把<strong>“行列式作为属于矩阵的一个特性，包含大量矩阵的信息”</strong>教授给大家，并从<strong>三个基本性质</strong>开始。</p>
+<blockquote>
+<p>行列式记为 <span class="math inline">\(det(A) = |A|\)</span>。矩阵必须为方阵。</p>
+</blockquote>
+<h5 id="行列式性质">行列式性质</h5>
+<ol type="1">
+<li><p><span class="math inline">\(det(I) = 1\)</span></p></li>
+<li><p>交换任意两行后，<span class="math inline">\(det(A)\)</span> 取相反数。</p></li>
+<li><ul>
+<li>数乘： <span class="math display">\[
+  \begin{vmatrix}
+  ta &amp; tb
+  \\
+  c &amp; d
+  \end{vmatrix}
+  =
+  t
+  \begin{vmatrix}
+  a &amp; b
+  \\
+  c &amp; d
+  \end{vmatrix}
+  \]</span></li>
+<li>相加： <span class="math display">\[
+  \begin{vmatrix}
+  a+a&#39; &amp; b+b&#39;
+  \\
+  c &amp; d
+  \end{vmatrix}
+  =
+  \begin{vmatrix}
+  a &amp; b
+  \\
+  c &amp; d
+  \end{vmatrix}
+  +
+  \begin{vmatrix}
+  a&#39; &amp; b&#39;
+  \\
+  c &amp; d
+  \end{vmatrix}
+  \]</span></li>
+</ul></li>
+</ol>
+<p>更多的性质可以从以上基本性质中推导出：</p>
+<ol start="4" type="1">
+<li><p>任意两行相等，行列式为 0。</p></li>
+<li><p>任意一行加上/减去另一行的 <span class="math inline">\(k\)</span> 倍，行列式值不变。</p></li>
+<li><p>若某一行为 0，则行列式为 0。</p></li>
+<li><p>上三角/下三角行列式的值等于其主对角线所有元素的乘积。</p>
+<blockquote>
+<p><span class="math display">\[
+\begin{vmatrix}
+a &amp; b
+\\
+c &amp; d
+\end{vmatrix}
+= ad - bc
+\]</span></p>
+</blockquote></li>
+<li><p>若 <span class="math inline">\(det(A) = 0\)</span>，则 <span class="math inline">\(A\)</span> 奇异/不可逆；反之非奇异/可逆。</p></li>
+<li><p><span class="math inline">\(det(AB) = det(A)det(B)\)</span> <span class="math inline">\(det(A^{-1}) = 1/det(A)\)</span> <span class="math inline">\(det(kA) = k^ndet(A)\)</span></p></li>
+<li><p><span class="math inline">\(det(A^T) = det(A)\)</span></p></li>
+</ol>
+<h5 id="代数余子式">代数余子式</h5>
+<p>讲完性质，就来讲怎么对高阶方阵的行列式求值了。</p>
+<p><span class="math inline">\(n\)</span> 阶行列式中，任意位置 <span class="math inline">\(a_{ij}\)</span> 对应的<strong>代数余子式</strong> <span class="math inline">\(C_{ij}\)</span> 等于将第 <span class="math inline">\(i\)</span> 行第 <span class="math inline">\(j\)</span> 列从行列式中移除后，剩下部分构成的 <span class="math inline">\(n-1\)</span> 阶行列式<strong>的值</strong>，且其正负性由 <span class="math inline">\((-1)^{i+j}\)</span> 表示。</p>
+<p>行列式的值，等于任意一行中所有元素与其代数余子式乘积再求和，即<strong>代数余子式展开</strong>： <span class="math display">\[
+det(A) = a_{i1}C_{i1} + a_{i2}C_{i2} + \dots + a_{in}C_{in} \quad (1 \leq i \leq n)
+\]</span> 对列也有类似的展开方法。</p>
+<blockquote>
+<p>一般来说很少用这方法，以<strong>消元法化为上三角行列式</strong>为主。</p>
+</blockquote>
+<h5 id="逆矩阵公式">逆矩阵公式</h5>
+<p>已知二阶矩阵 <span class="math inline">\(A = \begin{bmatrix}a &amp; b \\ c &amp; d\end{bmatrix}\)</span> 的行列式公式，则其逆矩阵为 <span class="math inline">\(\displaystyle A^{-1} = \frac{1}{ad-bc} \begin{bmatrix}d &amp; -b \\ -c &amp; a\end{bmatrix}\)</span></p>
+<p>事实上，<strong>任意矩阵的逆</strong>都可以写为这样一个形式： <span class="math display">\[
+A^{-1} = \frac{1}{det(A)}C^T
+\\[2ex]
+C = \begin{bmatrix}
+C_{11} &amp; C_{12} &amp; \cdots &amp; C_{1n}
+\\
+C_{21} &amp; C_{22} &amp; \cdots &amp; C_{2n}
+\\
+\vdots &amp; \vdots &amp; &amp; \vdots
+\\
+C_{n1} &amp; C_{n2} &amp; \cdots &amp; C_{nn}
+\end{bmatrix}
+\]</span> 其中 <span class="math inline">\(C_{ij}\)</span> 为 <span class="math inline">\(A\)</span> 中元素 <span class="math inline">\(a_{ij}\)</span> 的<strong>代数余子式</strong>。代数余子式矩阵 <span class="math inline">\(C\)</span> 的转置 <span class="math inline">\(C^T\)</span> 也称为 <span class="math inline">\(A\)</span> 的<strong>伴随矩阵</strong>。</p>
+<p>对上式进行左乘 <span class="math inline">\(A\)</span>，则有 <span class="math display">\[
+\frac{1}{det(A)}AC^T = \frac{1}{det(A)}\begin{bmatrix}
+a_{11} &amp; a_{12} &amp; \cdots &amp; a_{1n}
+\\
+a_{21} &amp; a_{22} &amp; \cdots &amp; a_{2n}
+\\
+\vdots &amp; \vdots &amp; &amp; \vdots
+\\
+a_{n1} &amp; a_{n2} &amp; \cdots &amp; a_{nn}
+\end{bmatrix}
+\begin{bmatrix}
+C_{11} &amp; C_{21} &amp; \cdots &amp; C_{n1}
+\\
+C_{12} &amp; C_{22} &amp; \cdots &amp; C_{n2}
+\\
+\vdots &amp; \vdots &amp; &amp; \vdots
+\\
+C_{1n} &amp; C_{2n} &amp; \cdots &amp; C_{nn}
+\end{bmatrix}
+\]</span> 主对角线元素很好判断，就是行列式的<strong>代数余子式展开</strong>；对于其它元素，以 <span class="math inline">\(\sum\limits_{i=1}^na_{2i}C_{1i}\)</span> 为例，它可以视为 <span class="math inline">\(A\)</span> 的第一行元素全由第二行替换后的新矩阵 <span class="math inline">\(A&#39;\)</span> 按第一行代数余子式展开，根据<strong>性质 4</strong>，我们得到 <span class="math inline">\(det(A&#39;)=0\)</span>，即最终结果仅有主对角线元素全为 1，其它都是 0——单位矩阵 <span class="math inline">\(I\)</span>，恰好是 <span class="math inline">\(AA^{-1}\)</span>，故该等式是正确的。</p>
+<h5 id="克拉默法则">克拉默法则</h5>
+<p>对于可逆矩阵 <span class="math inline">\(A\)</span>，方程 <span class="math inline">\(A\vec{x} = \vec{b}\)</span> 必有形如下式的解：<span class="math inline">\(\vec{x} = A^{-1}\vec{b}\)</span></p>
+<p>代入上面得到的逆矩阵公式，有 <span class="math display">\[
+\begin{bmatrix}
+x_1
+\\
+x_2
+\\
+\vdots
+\\
+x_n
+\end{bmatrix}
+= \vec{x} = \frac{1}{det(A)}C^T\vec{b} = \frac{1}{det(A)}
+\begin{bmatrix}
+C_{11} &amp; C_{21} &amp; \cdots &amp; C_{n1}
+\\
+C_{12} &amp; C_{22} &amp; \cdots &amp; C_{n2}
+\\
+\vdots &amp; \vdots &amp; &amp; \vdots
+\\
+C_{1n} &amp; C_{2n} &amp; \cdots &amp; C_{nn}
+\end{bmatrix}
+\begin{bmatrix}
+b_1
+\\
+b_2
+\\
+\vdots
+\\
+b_n
+\end{bmatrix}
+\]</span> 根据之前得到的结论，<span class="math inline">\(\sum\limits_{i=1}^nb_kC_{ik}\)</span> 可以视为将 <span class="math inline">\(A\)</span> 的第 <span class="math inline">\(k\)</span> 列用 <span class="math inline">\(\vec{b}\)</span> 替换后得到的新矩阵 <span class="math inline">\(B_k\)</span> 的行列式值，从而得到 <span class="math display">\[
+x_k = \frac{det(B_k)}{det(A)}
+\]</span> &gt; 评价为：<strong>没消元法好用，但确实也是一个可行的方法</strong>。</p>
+<h5 id="几何度量">几何度量</h5>
+<p>二阶行列式 <span class="math inline">\(|det(A)|\)</span> 等于 <span class="math inline">\(A\)</span> 行（列）向量构成的平行四边形的面积。</p>
+<p>三阶行列式 <span class="math inline">\(|det(A)|\)</span> 等于 <span class="math inline">\(A\)</span> 行（列）向量构成的平行六面体的体积。</p>
+<h4 id="进入下一个议题特征向量与特征值">进入下一个议题：特征向量与特征值</h4>
+<p>将矩阵 <span class="math inline">\(A\)</span> 与向量 <span class="math inline">\(\vec{x}\)</span> 相乘当做是对向量的一种操作或者函数，输入 <span class="math inline">\(\vec{x}\)</span> 而输出 <span class="math inline">\(A\vec{x}\)</span> 。<strong>特征向量</strong>即在特定的向量 <span class="math inline">\(\vec{x}\)</span> 方向上输出的 <span class="math inline">\(A \vec{x}\)</span> 平行于 <span class="math inline">\(\vec{x}\)</span> ，即为： <span class="math display">\[
+A\vec{x} = \lambda\vec{x}
+\]</span> 其中 <span class="math inline">\(\vec{x}\)</span> 为 <span class="math inline">\(A\)</span> 的<strong>特征向量</strong>，<span class="math inline">\(\lambda\)</span> 为 <span class="math inline">\(A\)</span> 的<strong>特征值</strong>。</p>
+<h5 id="如何求解特征值与特征向量">如何求解特征值与特征向量？</h5>
+<p>直接上结论：<strong>求解特征值等价于求解方程</strong> <span class="math inline">\(det(A-\lambda I) = 0\)</span></p>
+<p>并且有：</p>
+<ol type="1">
+<li><p>矩阵的<strong>迹</strong>（对角线所有元素之和）等于<strong>特征值之和</strong>。</p></li>
+<li><p>对称矩阵的特征向量<strong>正交</strong>。</p>
+<blockquote>
+<p>设 <span class="math inline">\(\vec{x}_1, \vec{x}_2\)</span> 分别是 <span class="math inline">\(A\)</span> 对应特征值 <span class="math inline">\(\lambda_1, \lambda_2\)</span> 的特征向量，有 <span class="math display">\[
+\begin{align}
+A\vec{x}_1 &amp;= \lambda_1\vec{x}_1
+\\[2ex]
+\vec{x}_2^TA\vec{x}_1 &amp;= \lambda_1\vec{x}_2^T\vec{x}_1
+\\[2ex]
+(A^T\vec{x}_2)^T\vec{x}_1 &amp;= \lambda_2\vec{x}_2^T\vec{x}_1
+\\[2ex]
+(\lambda_1 - \lambda_2)\vec{x}_2^T\vec{x}_1 &amp;= 0
+\end{align}
+\]</span></p>
+<p>由于 <span class="math inline">\(\lambda_1 \neq \lambda_2\)</span>，所以 <span class="math inline">\(\vec{x}_2^T\vec{x}_1 = 0\)</span>，故其正交。</p>
+</blockquote></li>
+</ol>
+<h5 id="对角化">对角化</h5>
+<p>如果矩阵 <span class="math inline">\(A\)</span> 有 <span class="math inline">\(n\)</span> 个线性无关的特征向量 <span class="math inline">\(\vec{x_i}\)</span> ，将其作为矩阵 <span class="math inline">\(S\)</span> 的列向量，则 <span class="math display">\[
+AS = A
+\begin{bmatrix}
+\vec{x_1} &amp; \vec{x_2} &amp; \cdots &amp; \vec{x_n}
+\end{bmatrix}
+=
+\begin{bmatrix}
+\lambda_1\vec{x_1} &amp; \lambda_2\vec{x_2} &amp; \cdots &amp; \lambda_n\vec{x_n}
+\end{bmatrix}
+=
+\begin{bmatrix}
+\vec{x_1} &amp; \vec{x_2} &amp; \cdots &amp; \vec{x_n}
+\end{bmatrix}
+·
+\begin{bmatrix}
+\lambda_1 &amp; 0 &amp; \cdots &amp; 0
+\\
+0 &amp; \lambda_2 &amp; \cdots &amp; 0
+\\
+\vdots &amp; \vdots &amp; &amp; \vdots
+\\
+0 &amp; 0 &amp; \cdots &amp; \lambda_n
+\end{bmatrix}
+=
+S\Lambda
+\]</span> 我们得到 <span class="math inline">\(S^{-1}AS = \Lambda\)</span>，其中 <span class="math inline">\(\Lambda\)</span> 为对角矩阵，其对角线上所有元素都是 <span class="math inline">\(A\)</span> 的特征值，而且这些特征值的排布与 <span class="math inline">\(S\)</span> 中特征向量的排布是一致的。同时我们可以得到这样一个<strong>新的分解方式</strong>：<span class="math inline">\(A = S\Lambda S^{-1}\)</span>。</p>
+<p>如果 <span class="math inline">\(A\vec{x} = \lambda\vec{x}\)</span>，则有 <span class="math inline">\(A^2\vec{x} = A ·\lambda\vec{x} = \lambda^2\vec{x}\)</span>，所以 <span class="math inline">\(A^2\)</span> 有着和 <span class="math inline">\(A\)</span> 同样的特征向量，且对应的特征值为 <span class="math inline">\(\lambda^2\)</span>。</p>
+<p>我们甚至能进一步推测出，如果 <span class="math inline">\(A\sim\lambda\)</span>，则 <span class="math inline">\(A^k\sim\lambda^k\)</span>，且有 <span class="math inline">\(A^k = S\Lambda^k S^{-1}\)</span>。</p>
+<blockquote>
+<p>若 <span class="math inline">\(|\lambda| &lt; 1\)</span>，则 <span class="math inline">\(\lim\limits_{k\rightarrow\infty} A^k = O\)</span></p>
+</blockquote>
+<p>式子 <span class="math inline">\(S^{-1}AS = \Lambda\)</span> 被称为矩阵的<strong>对角化</strong>。矩阵能够对角化的<strong>充要条件</strong>为：<strong>矩阵有 <span class="math inline">\(n\)</span> 个线性无关的特征向量</strong>。</p>
+<ul>
+<li>如果矩阵没有重复特征值，则根据前文描述，矩阵的特征向量必然线性无关，故必然可对角化。</li>
+<li>如果矩阵有重复特征值，则需要进一步深究——事实上，如果一个特征值重复了 <span class="math inline">\(k\)</span> 次（或称<strong>代数重度</strong>），我们希望它对应 <span class="math inline">\(k\)</span> 个线性无关的特征向量。</li>
+</ul>
 ]]></content>
       <categories>
         <category>math</category>
@@ -1010,6 +1347,152 @@ dim(L(A)) = m-r
       </tags>
   </entry>
   <entry>
+    <title>weekCompetition312</title>
+    <url>/LeetCode/weekCompetition312/</url>
+    <content><![CDATA[<p><a href="https://leetcode.cn/contest/weekly-contest-312/">第 312 场周赛</a>复盘。</p>
+<p><strong>排名</strong> 1273 / 6638</p>
+<span id="more"></span>
+<h4 id="按身高排序">1. <a href="https://leetcode.cn/problems/sort-the-people/">按身高排序</a></h4>
+<blockquote>
+<p>给你一个字符串数组 <code>names</code> ，和一个由 <strong>互不相同</strong> 的正整数组成的数组 <code>heights</code> 。两个数组的长度均为 n 。</p>
+<p>对于每个下标 i，<code>names[i]</code> 和 <code>heights[i]</code> 表示第 i 个人的名字和身高。</p>
+<p>请按身高 <strong>降序</strong> 顺序返回对应的名字数组 <code>names</code> 。</p>
+</blockquote>
+<h5 id="思路">思路</h5>
+<p>由于人名可能有重复，故不能建 map，而是将 name 与其对应的 height 作为一个整体，然后排序。</p>
+<h5 id="code">code</h5>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// c++</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">vector&lt;string&gt; <span class="title">sortPeople</span><span class="params">(vector&lt;string&gt;&amp; names, vector&lt;<span class="type">int</span>&gt;&amp; heights)</span> </span>&#123;</span><br><span class="line">        vector&lt;string&gt; res;</span><br><span class="line">        vector&lt;pair&lt;string, <span class="type">int</span>&gt;&gt; temp;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; names.<span class="built_in">size</span>(); i++) &#123;</span><br><span class="line">            temp.<span class="built_in">emplace_back</span>(<span class="built_in">make_pair</span>(names[i], heights[i]));</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="built_in">sort</span>(temp.<span class="built_in">begin</span>(), temp.<span class="built_in">end</span>(), [&amp;](<span class="type">const</span> pair&lt;string, <span class="type">int</span>&gt; &amp;a, <span class="type">const</span> pair&lt;string, <span class="type">int</span>&gt; &amp;b) &#123;</span><br><span class="line">            <span class="keyword">return</span> a.second &gt; b.second;</span><br><span class="line">        &#125;);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">auto</span> &amp;it : temp) &#123;</span><br><span class="line">            res.<span class="built_in">emplace_back</span>(it.first);</span><br><span class="line">        &#125;</span><br><span class="line">            </span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h4 id="按位与最大的最长子数组">2. <a href="https://leetcode.cn/problems/longest-subarray-with-maximum-bitwise-and/">按位与最大的最长子数组</a></h4>
+<blockquote>
+<p>给你一个长度为 n 的整数数组 <code>nums</code> 。</p>
+<p>考虑 <code>nums</code> 中进行 <strong>按位与</strong>运算得到的值 <strong>最大</strong> 的 <strong>非空</strong> 子数组。</p>
+<ul>
+<li>换句话说，令 k 是 <code>nums</code> <strong>任意</strong> 子数组执行按位与运算所能得到的最大值。那么，只需要考虑那些执行一次按位与运算后等于 k 的子数组。</li>
+</ul>
+<p>返回满足要求的 <strong>最长</strong> 子数组的长度。</p>
+<p>数组的按位与就是对数组中的所有数字进行按位与运算。</p>
+<p><strong>子数组</strong> 是数组中的一个连续元素序列。</p>
+</blockquote>
+<h5 id="思路-1">思路</h5>
+<p>首先有一个性质：<code>a AND b ≤ min(a, b)</code>，那么 AND 运算能够得到的最大值必然是整个数组的最大值。从而问题转换为，找到一个最长的连续子数组，其中所有元素都是 <code>nums[]</code> 中的最大值。</p>
+<h5 id="code-1">code</h5>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// c++</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">longestSubarray</span><span class="params">(vector&lt;<span class="type">int</span>&gt;&amp; nums)</span> </span>&#123;</span><br><span class="line">        <span class="type">int</span> maxm = *<span class="built_in">max_element</span>(nums.<span class="built_in">begin</span>(), nums.<span class="built_in">end</span>());</span><br><span class="line">        <span class="type">int</span> res = <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; nums.<span class="built_in">size</span>(); i++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (nums[i] == maxm) &#123;</span><br><span class="line">                <span class="type">int</span> j = i + <span class="number">1</span>;</span><br><span class="line">                <span class="keyword">for</span> (j = i + <span class="number">1</span>; j &lt; nums.<span class="built_in">size</span>(); j++) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (nums[j] != nums[i]) &#123;</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                res = <span class="built_in">max</span>(res, j - i);</span><br><span class="line">                i = j<span class="number">-1</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h4 id="找到所有好下标">3. <a href="https://leetcode.cn/problems/find-all-good-indices/">找到所有好下标</a></h4>
+<blockquote>
+<p>给你一个大小为 n 下标从 <strong>0</strong> 开始的整数数组 <code>nums</code> 和一个正整数 k 。</p>
+<p>对于 <code>k &lt;= i &lt; n - k</code> 之间的一个下标 i ，如果它满足以下条件，我们就称它为一个 <strong>好</strong> 下标：</p>
+<ul>
+<li>下标 i <strong>之前</strong> 的 k 个元素是 <strong>非递增的</strong> 。</li>
+<li>下标 i <strong>之后</strong> 的 k 个元素是 <strong>非递减的</strong> 。</li>
+</ul>
+<p>按 <strong>升序</strong> 返回所有好下标。</p>
+</blockquote>
+<h5 id="思路-2">思路</h5>
+<p>定义 <code>assend[]</code> 与 <code>dessend[]</code>：如果一个数比它前面那个数大，则 <code>assend[i] = 1</code>；如果一个数比它后面那个数小，则 <code>dessend[i] = 1</code></p>
+<p>问题就变为：找到一个下标，它前面 k-1 个下标的 assend 值均为 0，后面 k-1 个下标的 dessend 值也均为 0</p>
+<p>用滑动窗口来维护前后 k-1 个下标的 assend/dessend 值中 1 的个数，每个迭代的过程只需判断个数是否均为 0 即可。</p>
+<h5 id="code-2">code</h5>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">goodIndices</span><span class="params">(nums []<span class="type">int</span>, k <span class="type">int</span>)</span></span> []<span class="type">int</span> &#123;</span><br><span class="line">    n := <span class="built_in">len</span>(nums)</span><br><span class="line">    </span><br><span class="line">    res := <span class="built_in">make</span>([]<span class="type">int</span>, <span class="number">0</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> n - k &lt;= k &#123;</span><br><span class="line">        <span class="keyword">return</span> res</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    assend := <span class="built_in">make</span>([]<span class="type">int</span>, n)</span><br><span class="line">    dessend := <span class="built_in">make</span>([]<span class="type">int</span>, n)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> i := <span class="keyword">range</span> nums &#123;</span><br><span class="line">        <span class="keyword">if</span> i &gt; <span class="number">0</span> &amp;&amp; nums[i] &gt; nums[i<span class="number">-1</span>] &#123;</span><br><span class="line">            assend[i] = <span class="number">1</span></span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            assend[i] = <span class="number">0</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> i &lt; n<span class="number">-1</span> &amp;&amp; nums[i] &gt; nums[i+<span class="number">1</span>] &#123;</span><br><span class="line">            dessend[i] = <span class="number">1</span></span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            dessend[i] = <span class="number">0</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    left1, right1, left2, right2 := <span class="number">1</span>, k<span class="number">-1</span>, k+<span class="number">1</span>, <span class="number">2</span>*k<span class="number">-1</span></span><br><span class="line">    cnt1, cnt2 := <span class="number">0</span>, <span class="number">0</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> i := left1; i &lt;= right1; i++ &#123;</span><br><span class="line">        cnt1 += assend[i]</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> i := left2; i &lt;= right2; i++ &#123;</span><br><span class="line">        cnt2 += dessend[i]</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> cnt1 == <span class="number">0</span> &amp;&amp; cnt2 == <span class="number">0</span> &#123;</span><br><span class="line">        res = <span class="built_in">append</span>(res, k)</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> i := k+<span class="number">1</span>; i &lt; n-k; i++ &#123;</span><br><span class="line">        right1++</span><br><span class="line">        cnt1 = cnt1 + assend[right1] - assend[left1]</span><br><span class="line">        left1++</span><br><span class="line">        </span><br><span class="line">        right2++</span><br><span class="line">        cnt2 = cnt2 + dessend[right2] - dessend[left2]</span><br><span class="line">        left2++</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> cnt1 == <span class="number">0</span> &amp;&amp; cnt2 == <span class="number">0</span> &#123;</span><br><span class="line">            res = <span class="built_in">append</span>(res, i)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="好路径的数目">4. <a href="https://leetcode.cn/problems/number-of-good-paths/">好路径的数目</a></h4>
+<blockquote>
+<p>给你一棵 n 个节点的树（连通无向无环的图），节点编号从 0 到 n - 1 且恰好有 n - 1 条边。</p>
+<p>给你一个长度为 n 下标从 <strong>0</strong> 开始的整数数组 <code>vals</code> ，分别表示每个节点的值。同时给你一个二维整数数组 <code>edges</code> ，其中 <code>edges[i] = [ai, bi]</code> 表示节点 ai 和 bi 之间有一条 <strong>无向</strong> 边。</p>
+<p>一条 <strong>好路径</strong> 需要满足以下条件：</p>
+<ul>
+<li>开始节点和结束节点的值 <strong>相同</strong> 。</li>
+<li>开始节点和结束节点中间的所有节点值都 <strong>小于等于</strong> 开始节点的值（也就是说开始节点的值应该是路径上所有节点的最大值）。</li>
+</ul>
+<p>请你返回不同好路径的数目。</p>
+<p>注意，一条路径和它反向的路径算作 同一 路径。比方说， <code>0 -&gt; 1</code> 与 <code>1 -&gt; 0</code> 视为同一条路径。单个节点也视为一条合法路径。</p>
+</blockquote>
+<h5 id="思路-3">思路</h5>
+<p>参考了 <a href="https://leetcode.cn/problems/number-of-good-paths/solution/bing-cha-ji-by-endlesscheng-tbz8/">这位大佬的解法</a>。</p>
+<p>朴素的考虑是，找到连通分量中所有的最大值节点，若有 <span class="math inline">\(x\)</span> 个，则共可以生成 <span class="math inline">\(\displaystyle C(x, 2) = \frac{x(x-1)}{2}\)</span> 条好路径；之后，将这些节点删除，对剩下的所有连通分量应用上述步骤。但这种方法实现起来较为复杂。</p>
+<p>不妨逆向思维，从小到大走，同时将删除操作改为合并操作。于是可以考虑用<strong>并查集</strong>来完成这一操作。</p>
+<p>刚开始所有节点都是 standalone 的，我们遍历 <code>edges[]</code> 时，不断合并节点，并让较大元素作为较小元素的<strong>代表元</strong>，一旦在合并过程中发现有两个节点的代表元相等（也就意味着这两个代表元满足<strong>好路径</strong>的要求），如果用 <code>size[]</code> 表示当前节点作为代表元时，所在并查集中最大值的数量，则可以用乘法解得合并后的连通分量里的好路径数量。</p>
+<p>由于我们按照节点值升序访问节点，故每次只需和比自己小的邻居合并，则可以保证对于节点 <span class="math inline">\(v\)</span> 的任意邻居，其所在并查集的最大值不会超过 <span class="math inline">\(vals[v]\)</span>，好路径的数量也就不会遗漏。合并后 <span class="math inline">\(v\)</span> 即为代表元。</p>
+<h5 id="code-3">code</h5>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">findfather</span><span class="params">(father []<span class="type">int</span>, x <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    a, temp := x, x</span><br><span class="line">    <span class="keyword">for</span> father[x] != x &#123;</span><br><span class="line">        x = father[x]</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> a != x &#123;</span><br><span class="line">        a = father[a]</span><br><span class="line">        father[temp] = x</span><br><span class="line">        temp = a</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> x</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">numberOfGoodPaths</span><span class="params">(vals []<span class="type">int</span>, edges [][]<span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    n := <span class="built_in">len</span>(vals)</span><br><span class="line">    res := n  <span class="comment">// 所有单节点好路径数量</span></span><br><span class="line">    father := <span class="built_in">make</span>([]<span class="type">int</span>, n)  <span class="comment">// 代表元</span></span><br><span class="line">    size := <span class="built_in">make</span>([]<span class="type">int</span>, n)    <span class="comment">// 当前节点为代表元时, 所在并查集中最大值的数量</span></span><br><span class="line">    ids := <span class="built_in">make</span>([]<span class="type">int</span>, n)     <span class="comment">// 序号, 根据 vals[id] 来排序</span></span><br><span class="line">    graph := <span class="built_in">make</span>([][]<span class="type">int</span>, n) <span class="comment">// 图</span></span><br><span class="line">    <span class="comment">// 初始化</span></span><br><span class="line">    <span class="keyword">for</span> i := <span class="keyword">range</span> father &#123;</span><br><span class="line">        father[i] = i</span><br><span class="line">        size[i] = <span class="number">1</span></span><br><span class="line">        ids[i] = i</span><br><span class="line">        graph[i] = <span class="built_in">make</span>([]<span class="type">int</span>, <span class="number">0</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> _, edge := <span class="keyword">range</span> edges &#123;</span><br><span class="line">        x, y := edge[<span class="number">0</span>], edge[<span class="number">1</span>]</span><br><span class="line">        graph[x] = <span class="built_in">append</span>(graph[x], y)</span><br><span class="line">        graph[y] = <span class="built_in">append</span>(graph[y], x)</span><br><span class="line">    &#125;</span><br><span class="line">    sort.Slice(ids, <span class="function"><span class="keyword">func</span><span class="params">(i, j <span class="type">int</span>)</span></span> <span class="type">bool</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> vals[ids[i]] &lt; vals[ids[j]]</span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> _, id := <span class="keyword">range</span> ids &#123;</span><br><span class="line">        fx := findfather(father, id)</span><br><span class="line">        <span class="keyword">for</span> _, neighbor := <span class="keyword">range</span> graph[id] &#123;</span><br><span class="line">            fy := findfather(father, neighbor)</span><br><span class="line">            <span class="keyword">if</span> fx == fy || vals[fy] &gt; vals[id] &#123; <span class="comment">// fx == fy 则无需合并, 只考虑比自己小的邻居</span></span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">if</span> vals[fx] == vals[fy] &#123;</span><br><span class="line">                res += size[fx] * size[fy]</span><br><span class="line">                size[fx] += size[fy]</span><br><span class="line">            &#125;</span><br><span class="line">            father[fy] = fx</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>LeetCode</category>
+      </categories>
+      <tags>
+        <tag>周赛</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>weekCompetition313</title>
+    <url>/LeetCode/weekCompetition313/</url>
+    <content><![CDATA[<p><a href="https://leetcode.cn/contest/weekly-contest-313/">第 313 场周赛</a>复盘。</p>
+<p><strong>排名</strong> 106 / 5445</p>
+<span id="more"></span>
+<h4 id="公因子的数目">1. <a href="https://leetcode.cn/problems/number-of-common-factors/">公因子的数目</a></h4>
+<blockquote>
+<p>给你两个正整数 a 和 b ，返回 a 和 b 的 <strong>公</strong> 因子的数目。</p>
+<p>如果 x 可以同时整除 a 和 b ，则认为 x 是 a 和 b 的一个 <strong>公因子</strong> 。</p>
+</blockquote>
+<h5 id="思路">思路</h5>
+<p>从 1 到 gcd(a, b) 遍历即可。</p>
+<h5 id="code">code</h5>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">gcd</span><span class="params">(a, b <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;	<span class="comment">// assert a &lt; b</span></span><br><span class="line">    <span class="keyword">if</span> a &gt; b &#123;</span><br><span class="line">        <span class="keyword">return</span> gcd(b, a)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> b % a == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> a</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> gcd(b % a, a)</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">commonFactors</span><span class="params">(a <span class="type">int</span>, b <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    cnt := <span class="number">0</span>    </span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">1</span>; i &lt;= gcd(a, b); i++ &#123;</span><br><span class="line">        <span class="keyword">if</span> a % i == <span class="number">0</span> &amp;&amp; b % i == <span class="number">0</span> &#123;</span><br><span class="line">            cnt++</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> cnt</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="沙漏的最大总和">2. <a href="https://leetcode.cn/problems/maximum-sum-of-an-hourglass/">沙漏的最大总和</a></h4>
+<blockquote>
+<p>给你一个大小为 <strong>m x n</strong> 的整数矩阵 <code>grid</code> 。</p>
+<p>按以下形式将矩阵的一部分定义为一个 <strong>沙漏</strong> ：</p>
+<p><img src="image-20221017190111674.png" alt="image-20221017190111674" style="zoom:50%;" /></p>
+<p>返回沙漏中元素的 <strong>最大</strong> 总和。</p>
+<p><strong>注意</strong>：沙漏无法旋转且必须整个包含在矩阵中。</p>
+</blockquote>
+<h5 id="思路-1">思路</h5>
+<p>由于沙漏占据了 3×3 的矩阵空间，最不用思考的做法就是遍历沙漏的左上角即可。</p>
+<h5 id="code-1">code</h5>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">maxSum</span><span class="params">(g [][]<span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    res := <span class="number">0</span>    </span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt;= <span class="built_in">len</span>(g)<span class="number">-3</span>; i++ &#123;</span><br><span class="line">        <span class="keyword">for</span> j := <span class="number">0</span>; j &lt;= <span class="built_in">len</span>(g[i])<span class="number">-3</span>; j++ &#123;</span><br><span class="line">            sum := <span class="number">0</span></span><br><span class="line">            sum += g[i][j] + g[i][j+<span class="number">1</span>] + g[i][j+<span class="number">2</span>] + g[i+<span class="number">1</span>][j+<span class="number">1</span>] + g[i+<span class="number">2</span>][j] + g[i+<span class="number">2</span>][j+<span class="number">1</span>] + g[i+<span class="number">2</span>][j+<span class="number">2</span>]</span><br><span class="line">            <span class="keyword">if</span> sum &gt; res &#123;</span><br><span class="line">                res = sum</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="最小-xor">3. <a href="https://leetcode.cn/problems/minimize-xor/">最小 XOR</a></h4>
+<blockquote>
+<p>给你两个正整数 num1 和 num2 ，找出满足下述条件的整数 x ：</p>
+<ul>
+<li>x 的置位数和 num2 相同，且</li>
+<li>x XOR num1 的值 <strong>最小</strong></li>
+</ul>
+<p>注意 XOR 是按位异或运算。</p>
+<p>返回整数 x 。题目保证，对于生成的测试用例， x 是 <strong>唯一确定</strong> 的。</p>
+<p>整数的 <strong>置位数</strong> 是其二进制表示中 1 的数目。</p>
+</blockquote>
+<h5 id="思路-2">思路</h5>
+<p>若要使两个数按位异或所得结果最小，它们二进制中 1 的位置应尽可能一致，所以找题目中的 <span class="math inline">\(x\)</span> 实际上就是<strong>安排其二进制中 ‘1’ 的位置</strong>。令 <span class="math inline">\(k(num1)\)</span> 表示 <span class="math inline">\(num1\)</span> 的置位数。则对于给定的 <span class="math inline">\(num1\)</span> 与 <span class="math inline">\(k(x) = k(num2)\)</span> ，只有以下三种情况：</p>
+<ol type="1">
+<li><p><span class="math inline">\(k(num1) = k(num2)\)</span>：则 <span class="math inline">\(x=num1\)</span> 时 <span class="math inline">\(x\ XOR\ num1\)</span> 最小</p></li>
+<li><p><span class="math inline">\(k(num1) &lt; k(num2)\)</span>：<span class="math inline">\(k(num1)\)</span> 个 ‘1’ 与 <span class="math inline">\(num1\)</span> 中的 ‘1’ 相互抵消后，还剩下 <span class="math inline">\(k(num2) - k(num1)\)</span> 个 ‘1’ 未安排位置，这部分应尽量“靠左”，并且不与 <span class="math inline">\(num1\)</span> 中 ‘1’ 的位置冲突。</p>
+<p>例如，当 <span class="math inline">\(num1=10, k(num2)=3\)</span> 时，<span class="math inline">\(num1=(1010)_2\)</span>。首先能够得到 <span class="math inline">\(x=(1\_1\_)_2\)</span>，最后一个 ‘1’ 的位置显然易见，应该放在最右边，故得到 <span class="math inline">\(x = (1011)_2\)</span></p></li>
+<li><p><span class="math inline">\(k(num1) &gt; k(num2)\)</span>：<span class="math inline">\(x\)</span> 的值即保留 <span class="math inline">\(num1\)</span> 右侧 <span class="math inline">\(k(num2)\)</span> 个 ‘1’ 的结果。</p></li>
+</ol>
+<h5 id="code-2">code</h5>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">k</span><span class="params">(num <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    res := <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> num &gt; <span class="number">0</span> &#123;</span><br><span class="line">        res += num &amp; <span class="number">1</span></span><br><span class="line">        num &gt;&gt;= <span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">minimizeXor</span><span class="params">(num1 <span class="type">int</span>, num2 <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    cnt1, cnt2, x := k(num1), k(num2), num1</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> cnt1 &gt; cnt2 &#123;</span><br><span class="line">        p := <span class="number">1</span></span><br><span class="line">        cnt1 -= cnt2    <span class="comment">// x 为 num1 去掉低 cnt1-cnt2 位 1</span></span><br><span class="line">        <span class="keyword">for</span> cnt1 &gt; <span class="number">0</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> x &amp; p &gt; <span class="number">0</span> &#123;</span><br><span class="line">                x -= p</span><br><span class="line">                cnt1--</span><br><span class="line">            &#125;</span><br><span class="line">            p &lt;&lt;= <span class="number">1</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> cnt1 &lt; cnt2 &#123;</span><br><span class="line">        p := <span class="number">1</span></span><br><span class="line">        cnt2 -= cnt1	<span class="comment">// x 为 num1 再加上 cnt2-cnt1 位 1</span></span><br><span class="line">        <span class="keyword">for</span> cnt2 &gt; <span class="number">0</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> x &amp; p == <span class="number">0</span> &#123;</span><br><span class="line">                x += p</span><br><span class="line">                cnt2--</span><br><span class="line">            &#125;</span><br><span class="line">            p &lt;&lt;= <span class="number">1</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> temp</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="对字母串可执行的最大删除数">4. <a href="https://leetcode.cn/problems/maximum-deletions-on-a-string/">对字母串可执行的最大删除数</a></h4>
+<blockquote>
+<p>给你一个仅由小写英文字母组成的字符串 s 。在一步操作中，你可以：</p>
+<ul>
+<li>删除 <strong>整个字符串</strong> s ，或者</li>
+<li>对于满足 1 &lt;= i &lt;= s.length / 2 的任意 i ，如果 s 中的 <strong>前</strong> i 个字母和接下来的 i 个字母 <strong>相等</strong> ，删除 <strong>前</strong> i 个字母。</li>
+</ul>
+<p>例如，如果 s = "ababc" ，那么在一步操作中，你可以删除 s 的前两个字母得到 "abc" ，因为 s 的前两个字母和接下来的两个字母都等于 "ab" 。</p>
+<p>返回删除 s 所需的最大操作数。</p>
+</blockquote>
+<h5 id="思路-3">思路</h5>
+<p>考虑操作 2，删除前 i 个字母后还剩下长为 len(s)-i 的新字符串，我们要接着对新字符串执行同样的删除操作。这就是一个递归步骤，并且我们的递归是二叉树状的——每个 i 都需要考虑删 or 不删。</p>
+<p>那么很容易想到用动态规划。定义 <code>dp[i]</code> 为删除 <code>s[i-1:]</code> 所需最大操作数，那么对于任意 <code>1 ≤ i &lt; j ≤ len(s)-1</code>，如果 <code>s[i:j] == s[j:2*j-i]</code>，则 <code>dp[i] = max(dp[i], dp[j] + 1)</code></p>
+<h5 id="code-3">code</h5>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">deleteString</span><span class="params">(s <span class="type">string</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    n := <span class="built_in">len</span>(s)</span><br><span class="line">    dp := <span class="built_in">make</span>([]<span class="type">int</span>, n)  <span class="comment">// dp[i]: s[i:] 所需最大删除数</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i := n<span class="number">-1</span>; i &gt;= <span class="number">0</span>; i-- &#123;</span><br><span class="line">        dp[i] = <span class="number">1</span></span><br><span class="line">        l := n-i</span><br><span class="line">        <span class="keyword">for</span> j := i+<span class="number">1</span>; j &lt;= i+l/<span class="number">2</span>; j++ &#123;</span><br><span class="line">            <span class="keyword">if</span> temp[i:j] == temp[j:<span class="number">2</span>*j-i] &amp;&amp; dp[i] &lt; dp[j] + <span class="number">1</span> &#123;</span><br><span class="line">                dp[i] = dp[j] + <span class="number">1</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> dp[<span class="number">0</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>LeetCode</category>
+      </categories>
+      <tags>
+        <tag>周赛</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>weekCompetition314</title>
     <url>/LeetCode/weekCompetition314/</url>
     <content><![CDATA[<p><a href="https://leetcode.cn/contest/weekly-contest-314/">第 314 场周赛</a>复盘。</p>
@@ -1073,6 +1556,76 @@ dim(L(A)) = m-r
 <p>那么有如下状态转移方程：<code>dp[i][j][v] = dp[i-1][j][(v - grid[i][j]) % k] + dp[i][j-1][(v - grid[i][j]) % k]</code></p>
 <h5 id="code-3">code</h5>
 <figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">numberOfPaths</span><span class="params">(grid [][]<span class="type">int</span>, k <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    mod := <span class="number">1000000007</span></span><br><span class="line">    m, n := <span class="built_in">len</span>(grid), <span class="built_in">len</span>(grid[<span class="number">0</span>])</span><br><span class="line">    dp := <span class="built_in">make</span>([][][]<span class="type">int</span>, m)</span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; m; i++ &#123;</span><br><span class="line">        dp[i] = <span class="built_in">make</span>([][]<span class="type">int</span>, n)</span><br><span class="line">        <span class="keyword">for</span> j := <span class="number">0</span>; j &lt; n; j++ &#123;</span><br><span class="line">            dp[i][j] = <span class="built_in">make</span>([]<span class="type">int</span>, k)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    dp[<span class="number">0</span>][<span class="number">0</span>][grid[<span class="number">0</span>][<span class="number">0</span>] % k] = <span class="number">1</span></span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; m; i++ &#123;</span><br><span class="line">        <span class="keyword">for</span> j := <span class="number">0</span>; j &lt; n; j++ &#123;</span><br><span class="line">            <span class="keyword">for</span> v := <span class="number">0</span>; v &lt; k; v++ &#123;</span><br><span class="line">                <span class="keyword">if</span> i &gt; <span class="number">0</span> &#123;</span><br><span class="line">                    dp[i][j][v] += dp[i<span class="number">-1</span>][j][(v - grid[i][j] + <span class="number">100</span>*k) % k]</span><br><span class="line">                    dp[i][j][v] %= mod</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span> j &gt; <span class="number">0</span> &#123;</span><br><span class="line">                    dp[i][j][v] += dp[i][j<span class="number">-1</span>][(v - grid[i][j] + <span class="number">100</span>*k) % k]</span><br><span class="line">                    dp[i][j][v] %= mod</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> dp[m<span class="number">-1</span>][n<span class="number">-1</span>][<span class="number">0</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>LeetCode</category>
+      </categories>
+      <tags>
+        <tag>周赛</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>weekCompetition315</title>
+    <url>/LeetCode/weekCompetition315/</url>
+    <content><![CDATA[<p><a href="https://leetcode.cn/contest/weekly-contest-315/">第 315 场周赛</a>复盘。</p>
+<p><strong>排名</strong> 2768 / 6490</p>
+<span id="more"></span>
+<h4 id="与对应负数同时存在的最大正整数">1. <a href="https://leetcode.cn/problems/largest-positive-integer-that-exists-with-its-negative/">与对应负数同时存在的最大正整数</a></h4>
+<blockquote>
+<p>给你一个 <strong>不包含</strong> 任何零的整数数组 <code>nums</code>，找出自身与对应的负数都在数组中存在的最大正整数 k 。</p>
+<p>返回正整数 k ，如果不存在这样的整数，返回 -1 。</p>
+</blockquote>
+<h5 id="思路">思路</h5>
+<p>遍历数组，对于负数，加入 set；对于正数，判断其对应的负数是否存在于 set 中，若存在则更新最大值。</p>
+<p>遍历一遍是不够的，比如遇到 <code>nums = [1, -1]</code> 的情况就挂了，所以需要遍历两遍，第一遍建 set，第二遍查询，时间复杂度 <span class="math inline">\(O(nlogn)\)</span></p>
+<p>也可以先对数组进行升序排序，这样负数就集中在左侧，正数集中在右侧，只需一次遍历即可。</p>
+<h5 id="code">code</h5>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">findMaxK</span><span class="params">(nums []<span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    mp := <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="type">int</span>]<span class="keyword">struct</span>&#123;&#125;)</span><br><span class="line">    res := <span class="number">-1</span></span><br><span class="line">    <span class="keyword">var</span> null <span class="keyword">struct</span>&#123;&#125;</span><br><span class="line">    sort.Ints(nums)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> _, num := <span class="keyword">range</span> nums &#123;</span><br><span class="line">        <span class="keyword">if</span> num &lt; <span class="number">0</span> &#123;</span><br><span class="line">            mp[num] = null</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> _, ok := mp[-num]; ok &amp;&amp; num &gt; res &#123;</span><br><span class="line">            res = num</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="反转之后不同整数的数目">2. <a href="https://leetcode.cn/problems/count-number-of-distinct-integers-after-reverse-operations/">反转之后不同整数的数目</a></h4>
+<blockquote>
+<p>给你一个由 <strong>正</strong> 整数组成的数组 <code>nums</code>。</p>
+<p>你必须取出数组中的每个整数，<strong>反转其中每个数位</strong>，并将反转后得到的数字添加到数组的末尾。这一操作只针对 <code>nums</code> 中原有的整数执行。</p>
+<p>返回结果数组中 <strong>不同</strong> 整数的数目。</p>
+</blockquote>
+<h5 id="思路-1">思路</h5>
+<p>对原始数组中每一个值，将其和其反转后的数字加入 set，最后返回 set 大小即可。</p>
+<h5 id="code-1">code</h5>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">reverse</span><span class="params">(num <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    res := <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> num &gt; <span class="number">0</span> &#123;</span><br><span class="line">        res = res * <span class="number">10</span> + (num % <span class="number">10</span>)</span><br><span class="line">        num /= <span class="number">10</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">countDistinctIntegers</span><span class="params">(nums []<span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    mp := <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="type">int</span>]<span class="keyword">struct</span>&#123;&#125;)</span><br><span class="line">    <span class="keyword">var</span> null <span class="keyword">struct</span>&#123;&#125;</span><br><span class="line">    <span class="keyword">for</span> _, num := <span class="keyword">range</span> nums &#123;</span><br><span class="line">        mp[num] = null</span><br><span class="line">        mp[reverse(num)] = null</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">len</span>(mp)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="反转之后的数字和">3. <a href="https://leetcode.cn/problems/sum-of-number-and-its-reverse/">反转之后的数字和</a></h4>
+<blockquote>
+<p>给你一个 <strong>非负</strong> 整数 <code>num</code>。如果存在某个 <strong>非负</strong> 整数 <code>k</code> 满足 <code>k + reverse(k) = num</code> ，则返回 true ；否则，返回 false 。</p>
+<p><code>reverse(k)</code> 表示 <code>k</code> 反转每个数位后得到的数字。</p>
+</blockquote>
+<h5 id="思路-2">思路</h5>
+<p>直接无脑枚举即可。</p>
+<h5 id="code-2">code</h5>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">reverse</span><span class="params">(num <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    res := <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> num &gt; <span class="number">0</span> &#123;</span><br><span class="line">        res = res * <span class="number">10</span> + (num % <span class="number">10</span>)</span><br><span class="line">        num /= <span class="number">10</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">sumOfNumberAndReverse</span><span class="params">(num <span class="type">int</span>)</span></span> <span class="type">bool</span> &#123;</span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt;= num; i++ &#123;</span><br><span class="line">        <span class="keyword">if</span> i + reverse(i) == num &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="统计定界子数组的数目">4. <a href="https://leetcode.cn/problems/count-subarrays-with-fixed-bounds/">统计定界子数组的数目</a></h4>
+<blockquote>
+<p>给你一个整数数组 <code>nums</code> 和两个整数 <code>minK</code> 以及 <code>maxK</code> 。</p>
+<p><code>nums</code> 的定界子数组是满足下述条件的一个子数组：</p>
+<ul>
+<li>子数组中的 <strong>最小值</strong> 等于 <code>minK</code> 。</li>
+<li>数组中的 <strong>最大值</strong> 等于 <code>maxK</code> 。</li>
+</ul>
+<p>返回定界子数组的数目。</p>
+<p>子数组是数组中的一个连续部分。</p>
+</blockquote>
+<p>参考了 <a href="https://leetcode.cn/problems/count-subarrays-with-fixed-bounds/solution/jian-ji-xie-fa-pythonjavacgo-by-endlessc-gag2/">这位大佬的解法</a>，我认为这个解法是最完美的了，这里就对该思路进行一个解释。</p>
+<p>他的思路基于以下性质：</p>
+<ol type="1">
+<li>既然是求连续的子数组的个数，不妨对任意 <code>i</code>，考虑其作为数组右端点时能够产生的最大子数组个数；</li>
+<li>如果数组某一区间及其右端点固定，则包含该区间的连续子数组个数为该区间左端点左侧的元素个数 + 1；</li>
+<li>为了考虑到所有可能的情况，左端点必须尽可能靠近右端点；</li>
+<li>区间内所有值必须在 <code>[minK, maxK]</code> 范围内。</li>
+</ol>
+<p>在 3 和 4 的约束下，左端点的坐标即 minK 和 maxK 上一次出现的坐标中的最小值。</p>
+<p>再来看 2，区间不可能无限向左扩展，应该在遇到第一个不满足 <code>[minK, maxK]</code> 范围内的值时停下。</p>
+<p>如果用 <code>minIndex, maxIndex, errIndex</code> 分别代表 minK、maxK 和 <strong>范围外的值</strong> 上一次出现的坐标。如果 errIndex 出现在左端点的右侧，则该区间无效，不进行考虑；反之，以 <code>i</code> 为右端点的子数组个数为 <span class="math display">\[
+\min(minIndex, maxIndex) - errIndex
+\]</span></p>
+<h5 id="code-3">code</h5>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">min</span><span class="params">(a, b <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> a &lt; b &#123;</span><br><span class="line">        <span class="keyword">return</span> a</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> b</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">countSubarrays</span><span class="params">(nums []<span class="type">int</span>, minK <span class="type">int</span>, maxK <span class="type">int</span>)</span></span> <span class="type">int64</span> &#123;</span><br><span class="line">    minIndex, maxIndex, errIndex := <span class="number">-1</span>, <span class="number">-1</span>, <span class="number">-1</span>	       <span class="comment">// -1 代表未出现</span></span><br><span class="line">    res := <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> i, num := <span class="keyword">range</span> nums &#123;</span><br><span class="line">        <span class="keyword">if</span> num == minK &#123;</span><br><span class="line">            minIndex = i</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> num == maxK &#123;</span><br><span class="line">            maxIndex = i</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> num &gt; maxK || num &lt; minK &#123;</span><br><span class="line">            errIndex = i</span><br><span class="line">        &#125;</span><br><span class="line">        leftIndex := min(minIndex, maxIndex)</span><br><span class="line">        <span class="keyword">if</span> leftIndex &gt; errIndex &#123;</span><br><span class="line">            res += leftIndex - errIndex</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="type">int64</span>(res)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>LeetCode</category>
@@ -1183,527 +1736,6 @@ dim(L(A)) = m-r
       </categories>
       <tags>
         <tag>paperReading</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>weekCompetition315</title>
-    <url>/LeetCode/weekCompetition315/</url>
-    <content><![CDATA[<p><a href="https://leetcode.cn/contest/weekly-contest-315/">第 315 场周赛</a>复盘。</p>
-<p><strong>排名</strong> 2768 / 6490</p>
-<span id="more"></span>
-<h4 id="与对应负数同时存在的最大正整数">1. <a href="https://leetcode.cn/problems/largest-positive-integer-that-exists-with-its-negative/">与对应负数同时存在的最大正整数</a></h4>
-<blockquote>
-<p>给你一个 <strong>不包含</strong> 任何零的整数数组 <code>nums</code>，找出自身与对应的负数都在数组中存在的最大正整数 k 。</p>
-<p>返回正整数 k ，如果不存在这样的整数，返回 -1 。</p>
-</blockquote>
-<h5 id="思路">思路</h5>
-<p>遍历数组，对于负数，加入 set；对于正数，判断其对应的负数是否存在于 set 中，若存在则更新最大值。</p>
-<p>遍历一遍是不够的，比如遇到 <code>nums = [1, -1]</code> 的情况就挂了，所以需要遍历两遍，第一遍建 set，第二遍查询，时间复杂度 <span class="math inline">\(O(nlogn)\)</span></p>
-<p>也可以先对数组进行升序排序，这样负数就集中在左侧，正数集中在右侧，只需一次遍历即可。</p>
-<h5 id="code">code</h5>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">findMaxK</span><span class="params">(nums []<span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    mp := <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="type">int</span>]<span class="keyword">struct</span>&#123;&#125;)</span><br><span class="line">    res := <span class="number">-1</span></span><br><span class="line">    <span class="keyword">var</span> null <span class="keyword">struct</span>&#123;&#125;</span><br><span class="line">    sort.Ints(nums)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> _, num := <span class="keyword">range</span> nums &#123;</span><br><span class="line">        <span class="keyword">if</span> num &lt; <span class="number">0</span> &#123;</span><br><span class="line">            mp[num] = null</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> _, ok := mp[-num]; ok &amp;&amp; num &gt; res &#123;</span><br><span class="line">            res = num</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="反转之后不同整数的数目">2. <a href="https://leetcode.cn/problems/count-number-of-distinct-integers-after-reverse-operations/">反转之后不同整数的数目</a></h4>
-<blockquote>
-<p>给你一个由 <strong>正</strong> 整数组成的数组 <code>nums</code>。</p>
-<p>你必须取出数组中的每个整数，<strong>反转其中每个数位</strong>，并将反转后得到的数字添加到数组的末尾。这一操作只针对 <code>nums</code> 中原有的整数执行。</p>
-<p>返回结果数组中 <strong>不同</strong> 整数的数目。</p>
-</blockquote>
-<h5 id="思路-1">思路</h5>
-<p>对原始数组中每一个值，将其和其反转后的数字加入 set，最后返回 set 大小即可。</p>
-<h5 id="code-1">code</h5>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">reverse</span><span class="params">(num <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    res := <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> num &gt; <span class="number">0</span> &#123;</span><br><span class="line">        res = res * <span class="number">10</span> + (num % <span class="number">10</span>)</span><br><span class="line">        num /= <span class="number">10</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">countDistinctIntegers</span><span class="params">(nums []<span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    mp := <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="type">int</span>]<span class="keyword">struct</span>&#123;&#125;)</span><br><span class="line">    <span class="keyword">var</span> null <span class="keyword">struct</span>&#123;&#125;</span><br><span class="line">    <span class="keyword">for</span> _, num := <span class="keyword">range</span> nums &#123;</span><br><span class="line">        mp[num] = null</span><br><span class="line">        mp[reverse(num)] = null</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">len</span>(mp)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="反转之后的数字和">3. <a href="https://leetcode.cn/problems/sum-of-number-and-its-reverse/">反转之后的数字和</a></h4>
-<blockquote>
-<p>给你一个 <strong>非负</strong> 整数 <code>num</code>。如果存在某个 <strong>非负</strong> 整数 <code>k</code> 满足 <code>k + reverse(k) = num</code> ，则返回 true ；否则，返回 false 。</p>
-<p><code>reverse(k)</code> 表示 <code>k</code> 反转每个数位后得到的数字。</p>
-</blockquote>
-<h5 id="思路-2">思路</h5>
-<p>直接无脑枚举即可。</p>
-<h5 id="code-2">code</h5>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">reverse</span><span class="params">(num <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    res := <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> num &gt; <span class="number">0</span> &#123;</span><br><span class="line">        res = res * <span class="number">10</span> + (num % <span class="number">10</span>)</span><br><span class="line">        num /= <span class="number">10</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">sumOfNumberAndReverse</span><span class="params">(num <span class="type">int</span>)</span></span> <span class="type">bool</span> &#123;</span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt;= num; i++ &#123;</span><br><span class="line">        <span class="keyword">if</span> i + reverse(i) == num &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="统计定界子数组的数目">4. <a href="https://leetcode.cn/problems/count-subarrays-with-fixed-bounds/">统计定界子数组的数目</a></h4>
-<blockquote>
-<p>给你一个整数数组 <code>nums</code> 和两个整数 <code>minK</code> 以及 <code>maxK</code> 。</p>
-<p><code>nums</code> 的定界子数组是满足下述条件的一个子数组：</p>
-<ul>
-<li>子数组中的 <strong>最小值</strong> 等于 <code>minK</code> 。</li>
-<li>数组中的 <strong>最大值</strong> 等于 <code>maxK</code> 。</li>
-</ul>
-<p>返回定界子数组的数目。</p>
-<p>子数组是数组中的一个连续部分。</p>
-</blockquote>
-<p>参考了 <a href="https://leetcode.cn/problems/count-subarrays-with-fixed-bounds/solution/jian-ji-xie-fa-pythonjavacgo-by-endlessc-gag2/">这位大佬的解法</a>，我认为这个解法是最完美的了，这里就对该思路进行一个解释。</p>
-<p>他的思路基于以下性质：</p>
-<ol type="1">
-<li>既然是求连续的子数组的个数，不妨对任意 <code>i</code>，考虑其作为数组右端点时能够产生的最大子数组个数；</li>
-<li>如果数组某一区间及其右端点固定，则包含该区间的连续子数组个数为该区间左端点左侧的元素个数 + 1；</li>
-<li>为了考虑到所有可能的情况，左端点必须尽可能靠近右端点；</li>
-<li>区间内所有值必须在 <code>[minK, maxK]</code> 范围内。</li>
-</ol>
-<p>在 3 和 4 的约束下，左端点的坐标即 minK 和 maxK 上一次出现的坐标中的最小值。</p>
-<p>再来看 2，区间不可能无限向左扩展，应该在遇到第一个不满足 <code>[minK, maxK]</code> 范围内的值时停下。</p>
-<p>如果用 <code>minIndex, maxIndex, errIndex</code> 分别代表 minK、maxK 和 <strong>范围外的值</strong> 上一次出现的坐标。如果 errIndex 出现在左端点的右侧，则该区间无效，不进行考虑；反之，以 <code>i</code> 为右端点的子数组个数为 <span class="math display">\[
-\min(minIndex, maxIndex) - errIndex
-\]</span></p>
-<h5 id="code-3">code</h5>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">min</span><span class="params">(a, b <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> a &lt; b &#123;</span><br><span class="line">        <span class="keyword">return</span> a</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> b</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">countSubarrays</span><span class="params">(nums []<span class="type">int</span>, minK <span class="type">int</span>, maxK <span class="type">int</span>)</span></span> <span class="type">int64</span> &#123;</span><br><span class="line">    minIndex, maxIndex, errIndex := <span class="number">-1</span>, <span class="number">-1</span>, <span class="number">-1</span>	       <span class="comment">// -1 代表未出现</span></span><br><span class="line">    res := <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> i, num := <span class="keyword">range</span> nums &#123;</span><br><span class="line">        <span class="keyword">if</span> num == minK &#123;</span><br><span class="line">            minIndex = i</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> num == maxK &#123;</span><br><span class="line">            maxIndex = i</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> num &gt; maxK || num &lt; minK &#123;</span><br><span class="line">            errIndex = i</span><br><span class="line">        &#125;</span><br><span class="line">        leftIndex := min(minIndex, maxIndex)</span><br><span class="line">        <span class="keyword">if</span> leftIndex &gt; errIndex &#123;</span><br><span class="line">            res += leftIndex - errIndex</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="type">int64</span>(res)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>LeetCode</category>
-      </categories>
-      <tags>
-        <tag>周赛</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Linear-Algebra(2)</title>
-    <url>/math/linear-algebra(2)/</url>
-    <content><![CDATA[<p>书接上回。</p>
-<span id="more"></span>
-<h4 id="如何求解无解方程组">如何求解无解方程组？</h4>
-<p>在这个问题之前，我先做点铺垫。</p>
-<h5 id="正交向量">正交向量</h5>
-<p>若两向量 <span class="math inline">\(\vec{a}, \vec{b}\)</span> 正交，则必然有 <span class="math inline">\(\vec{a}^T\vec{b} = \vec{b}^T\vec{a} = 0\)</span></p>
-<h5 id="正交子空间">正交子空间</h5>
-<p>若子空间 <span class="math inline">\(S\)</span> 与子空间 <span class="math inline">\(T\)</span> 正交，则 <span class="math inline">\(S\)</span> 中任意向量与 <span class="math inline">\(T\)</span> 中任意向量正交。</p>
-<p>不难发现，<span class="math inline">\(R(A)\)</span> 与 <span class="math inline">\(N(A)\)</span> 是正交的，而这两个空间恰好都是 <span class="math inline">\(R^n\)</span> 的子空间，更巧的是，<strong>其维数之和为</strong> <span class="math inline">\(n\)</span>。</p>
-<p>我们称这两个子空间为 <span class="math inline">\(R^n\)</span> 的<strong>正交补</strong>——它们将 <span class="math inline">\(R^n\)</span> 划分为了<strong>两个正交的子空间</strong>。</p>
-<p>同样的，<span class="math inline">\(C(A)\)</span> 与 <span class="math inline">\(L(A)\)</span> 也互为正交补。</p>
-<blockquote>
-<p>两个互为正交补的子空间的维数之和，不能超过原空间的维数。</p>
-</blockquote>
-<h5 id="投影问题">投影问题</h5>
-<p>这一问题的几何解释为：如何在向量 <span class="math inline">\(\vec{a}\)</span> 的方向上寻找与向量 <span class="math inline">\(\vec{b}\)</span> 距离最近的一点。假设这一点对应的向量为 <span class="math inline">\(\vec{p}\)</span>，则 <span class="math inline">\(\vec{e}=\vec{b}-\vec{p}\)</span> 就是这一近似的误差。如图所示：</p>
-<figure>
-<img src="image-20220929215857174.png" alt="image-20220929215857174" /><figcaption aria-hidden="true">image-20220929215857174</figcaption>
-</figure>
-<p>若令 <span class="math inline">\(\vec{p} = \hat{x}\vec{a}\)</span>，因 <span class="math inline">\(\vec{e}\)</span> 与 <span class="math inline">\(\vec{a}\)</span> 正交，则有 <span class="math inline">\(\vec{a}^T(\vec{b}-\hat{x}\vec{a}) = 0\)</span>，解得 <span class="math display">\[
-\hat{x} = \frac{\vec{a}^T\vec{b}}{\vec{a}^T\vec{a}}
-\\[2ex]
-\vec{p} = \vec{a}\frac{\vec{a}^T\vec{b}}{\vec{a}^T\vec{a}}
-\]</span> 相当于把 <span class="math inline">\(\vec{b}\)</span> 以某种操作投影到了 <span class="math inline">\(\vec{p}\)</span> 上。若用<strong>投影矩阵</strong> <span class="math inline">\(P\)</span> 来描述这一操作，则有 <span class="math inline">\(\vec{p} = P\vec{b}\)</span>，得 <span class="math display">\[
-P = \frac{\vec{a}\vec{a}^T}{\vec{a}^T\vec{a}}
-\]</span> 这是一个<strong>对称矩阵</strong>（<span class="math inline">\(P^T=P\)</span>），而且是<strong>幂等矩阵</strong>（<span class="math inline">\(P^2 = P\)</span>）</p>
-<h5 id="如果考虑该问题在高维空间的版本">如果考虑该问题在高维空间的版本</h5>
-<p>有一个向量空间 <span class="math inline">\(V\)</span> 与一个不在该空间上的向量 <span class="math inline">\(\vec{b}\)</span>，如果把 <span class="math inline">\(V\)</span> 视为某一矩阵的列空间，且该空间的基为 <span class="math inline">\(\vec{a_1}, \vec{a_2},\dots, \vec{a_n}\)</span>，则该矩阵可以用 <span class="math inline">\(A = \begin{bmatrix}\vec{a_1} &amp; \vec{a_2} &amp; \cdots &amp; \vec{a_n} \end{bmatrix}\)</span> 来描述。</p>
-<p>令 <span class="math inline">\(\vec{p}\)</span> 为 <span class="math inline">\(\vec{b}\)</span> 在该向量空间上的投影，则 <span class="math inline">\(\vec{p}\)</span> 可以用 <span class="math inline">\(\vec{p} = x_1\vec{a_1} + x_2\vec{a_2} + \dots + x_n\vec{a_n} = A\vec{\hat{x}}\)</span> 来表示。</p>
-<p>显然误差 <span class="math inline">\(\vec{e}\)</span> 与整个向量空间正交，则有 <span class="math inline">\(\vec{a_1}^T\vec{e} = 0, \vec{a_2}^T\vec{e} = 0, \dots, \vec{a_n}^T\vec{e} = 0\)</span></p>
-<p>上式可以写为 <span class="math inline">\(A^T\vec{e} = 0\)</span></p>
-<p>从而得到 <span class="math display">\[
-A^T(\vec{b} - A\vec{\hat{x}}) = 0 \quad \Rarr \quad \vec{\hat{x}} = (A^TA)^{-1}A^T\vec{b}
-\]</span> 那么得到一个<strong>非常优美的结论</strong>： <span class="math display">\[
-\vec{p} = A(A^TA)^{-1}A^T\vec{b}
-\\[2ex]
-P = A(A^TA)^{-1}A^T
-\]</span> 这里的 <span class="math inline">\(P\)</span> 同样满足对称性和幂等性。</p>
-<p>这里 <span class="math inline">\(\vec{p} \in C(A)\)</span>，同时惊喜的发现 <span class="math inline">\(\vec{e}\in L(A)\)</span>，说明 <span class="math inline">\(\vec{b} = \vec{p} + \vec{e}\)</span> 由两部分组成，一部分（<span class="math inline">\(\vec{p}\)</span>）投影到了 <span class="math inline">\(C(A)\)</span> 上，另一部分（<span class="math inline">\(\vec{e}\)</span>）投影到了 <span class="math inline">\(L(A)\)</span> 上。对于 <span class="math inline">\(\vec{e}\)</span>，我们发现可以通过 <span class="math inline">\(\vec{e} = \vec{b} - \vec{p} = \vec{b} - P\vec{b} = (I-P)\vec{b}\)</span> 表示，所以 <span class="math inline">\(I-P\)</span> 也是个投影矩阵，也具有和 <span class="math inline">\(P\)</span> 同样的性质。</p>
-<p>当 <span class="math inline">\(A\)</span> 的列向量线性无关时，说明 <span class="math inline">\(C(A)\)</span> 就是 <span class="math inline">\(R^n\)</span>，此时任意 <span class="math inline">\(\vec{b}\in R^n\)</span> 都必然在 <span class="math inline">\(C(A)\)</span> 中，投影矩阵就是 <span class="math inline">\(I\)</span>。</p>
-<p>对于 <span class="math inline">\(A^TA\)</span> 而言，其零空间与 <span class="math inline">\(A\)</span> 是一致的</p>
-<ol type="1">
-<li>对于 <span class="math inline">\(A^TA\vec{x}=\vec{0}\)</span>，必然满足 <span class="math inline">\(\vec{x}^TA^TA\vec{x} = (A\vec{x})^T A\vec{x} = \vec{0}\)</span>，从而 <span class="math inline">\(A\vec{x}\)</span> 与自身正交，那么 <span class="math inline">\(A\vec{x} = \vec{0}\)</span>。</li>
-<li>对于 <span class="math inline">\(A\vec{x}=\vec{0}\)</span>，必然满足 <span class="math inline">\(A^TA\vec{x}=\vec{0}\)</span></li>
-</ol>
-<p>因此当 <span class="math inline">\(A\)</span> 的列向量线性无关时，<span class="math inline">\(A\vec{x}=\vec{0}\)</span> 只有零解，<span class="math inline">\(A^TA\vec{x}=\vec{0}\)</span> 也只有零解。且 <span class="math inline">\(A^TA\)</span> 为方阵，行列满秩，必然可逆。</p>
-<h5 id="回到最开始的问题如何求解无解方程组">回到最开始的问题：如何求解无解方程组？</h5>
-<p>这个问题看似很离谱，实则我们可以用一个最优解 <span class="math inline">\(\vec{\hat{x}}\)</span> 去近似。对于方程 <span class="math inline">\(A\vec{x} = \vec{b}\)</span>，如果其无解，说明 <span class="math inline">\(\vec{b}\)</span> 不在 <span class="math inline">\(A\)</span> 的列空间中。我们可以将 <span class="math inline">\(\vec{b}\)</span> 投影到 <span class="math inline">\(C(A)\)</span>，将问题转换为求解方程 <span class="math inline">\(A\vec{\hat{x}} = \vec{p}\)</span>，这个解就是我们想求的近似最优解。</p>
-<p>根据上面描述的，我们能够很轻易地得到该解，即 <span class="math display">\[
-\vec{\hat{x}} = (A^TA)^{-1}A^T\vec{b}
-\]</span></p>
-<h5 id="最小二乘法">最小二乘法</h5>
-<p>应用投影矩阵求方程组最优解的方法，最常用于“最小二乘法”拟合曲线，如图：</p>
-<figure>
-<img src="image-20220929223041893.png" alt="image-20220929223041893" /><figcaption aria-hidden="true">image-20220929223041893</figcaption>
-</figure>
-<p>已知数据点，求一直线方程，使该直线尽可能经过所有点——所有点到该直线的距离尽可能小。</p>
-<p>有一个思路是：这些数据点大概率不会共线，也就是说，将这些数据点代入直线方程利用待定系数法求其参数时，组成的线性方程组大多数情况下是无解的，此时就要用到上面的“求无解方程组最优解”的思路。</p>
-<p>还有一个思路是，我们希望误差 <span class="math inline">\(\vec{e}\)</span> 尽可能小，也就是 <span class="math inline">\(||\vec{e}||^2=||A\vec{\hat{x}}-\vec{b}||^2\)</span> 尽可能小。这一等式可以写成一个 <span class="math inline">\(n\)</span> 元的方程，对该方程的所有变量求偏导并令偏导数为 0，则可以得到上面那个思路一样的结果。</p>
-<h5 id="再回到正交向量">再回到正交向量</h5>
-<p>现在说正交向量的升级版——<strong>标准正交向量</strong>，即满足以下条件的一组向量： <span class="math display">\[
-\vec{q}_i^T\vec{q}_j = \begin{cases}1 \quad i = j\\[2ex] 0 \quad i \neq j\end{cases}
-\]</span></p>
-<h5 id="正交矩阵">正交矩阵</h5>
-若令 $Q =
-<span class="math display">\[\begin{bmatrix}\vec{q}_1 &amp; \vec{q}_2 &amp; \cdots &amp; \vec{q}_n \end{bmatrix}\]</span>
-<p>$，易得 <span class="math display">\[
-Q^TQ = I
-\]</span> 此矩阵 <span class="math inline">\(Q\)</span> 称为<strong>正交矩阵</strong>，且显然有 <span class="math inline">\(Q^T=Q^{-1}\)</span>。</p>
-<p>对于正交矩阵来说，在其列空间内关于投影问题的<strong>投影矩阵</strong>也可以<strong>简化为</strong> <span class="math inline">\(P=Q(Q^TQ)^{-1}Q^T = QQ^T\)</span>。若 <span class="math inline">\(Q\)</span> 为方阵，还可以进一步得到 <span class="math inline">\(P=I\)</span>，因为此时其列空间已经张成 <span class="math inline">\(R^n\)</span>，投影操作不会对向量有任何改变。</p>
-<p>对应的 <span class="math inline">\(\vec{p} = P\vec{b} = QQ^T\vec{b} = Q\vec{\hat{x}}\)</span></p>
-<h5 id="施密特正交化">施密特正交化</h5>
-<p>对于一组线性无关的向量 <span class="math inline">\(\vec{a}_1, \vec{a}_2,\dots,\vec{a}_n\)</span>，若其能够张成空间 <span class="math inline">\(V\)</span>，我们希望能找到该空间的<strong>正交矩阵</strong>表示——即找到一组<strong>标准正交向量</strong> <span class="math inline">\(\vec{e}_1, \vec{e}_2, \dots, \vec{e}_n\)</span>，其恰好能张成同样的空间，也就是找到该空间的一组<strong>标准正交基</strong>。</p>
-<blockquote>
-<p>对一个向量的<strong>标准化</strong>过程就是令其除以其模长。</p>
-</blockquote>
-<p>我们不妨逐一分析：</p>
-<ol type="1">
-<li><p>第一个向量不作变动，即 <span class="math inline">\(\displaystyle \vec{e}_1 = \frac{\vec{a}_1}{||\vec{a}_1||}\)</span></p></li>
-<li><p>对于之后的所有向量 <span class="math inline">\(\vec{a}_i\)</span>，由于我们已经求得一组标准正交向量 <span class="math inline">\(\vec{e}_1, \dots, \vec{e}_{i-1}\)</span>，设求其施密特正交化后的向量为 <span class="math inline">\(\vec{e}_i\)</span>，易得 <span class="math inline">\(\vec{e}_i\)</span> 垂直于 <span class="math inline">\(\vec{e}_1, \dots, \vec{e}_{i-1}\)</span>，从而有<span class="math inline">\(\vec{e}_i\)</span> 垂直于 <span class="math inline">\(\vec{e}_1, \dots, \vec{e}_{i-1}\)</span> 张成的向量空间。此时可以把问题转换为<strong>投影问题</strong>，只不过我们这里需要求投影问题中的<strong>误差</strong>，也就是原向量 <span class="math inline">\(\vec{a}_i\)</span> 减去它在投影到所有基 <span class="math inline">\(\vec{e}_k\)</span> 上的分量 <span class="math inline">\(\vec{p}_k\)</span>： <span class="math display">\[
- \vec{e}_i = \vec{a}_i - \sum\limits_{k=1}^{i-1}\vec{p}_k
- \\[2ex]
- \vec{p}_k = \frac{\vec{e}_k^T\vec{a}_i}{\vec{e}_k^T\vec{e}_k}\vec{e}_k
- \]</span></p></li>
-<li><p>最后还需要对 <span class="math inline">\(\vec{e}_i\)</span> 进行标准化。</p></li>
-</ol>
-<h5 id="qr分解">QR分解</h5>
-我们把得到的标准正交基写成矩阵的形式 <span class="math inline">\(Q = \begin{bmatrix}\vec{e}_1 &amp; \vec{e}_2 &amp; \cdots &amp; \vec{e}_n \end{bmatrix}\)</span>，若令 $A =
-<span class="math display">\[\begin{bmatrix}\vec{a}_1 &amp; \vec{a}_2 &amp; \cdots &amp; \vec{a}_n \end{bmatrix}\]</span>
-<p>$，则 <span class="math inline">\(C(Q)\)</span> 与 <span class="math inline">\(C(A)\)</span> 是同一个向量空间。</p>
-由于 <span class="math inline">\(Q\)</span> 的列向量是 <span class="math inline">\(C(Q)\)</span> 空间中的标准正交基，则 <span class="math inline">\(A\)</span> 的列向量必能由 <span class="math inline">\(Q\)</span> 的列向量线性表示。前文提到，列变换相当于右乘一个置换矩阵，所以我们可以得到如下等式： $$ A = QR 
-<span class="math display">\[\begin{bmatrix}
-\vec{a}_1 &amp; \vec{a}_2 &amp; \cdots &amp; \vec{a}_n
-\end{bmatrix}\]</span>
-=
-<span class="math display">\[\begin{bmatrix}
-\vec{e}_1 &amp; \vec{e}_2 &amp; \cdots &amp; \vec{e}_n
-\end{bmatrix}\]</span>
-<span class="math display">\[\begin{bmatrix}
-\vec{a}_1^T\vec{e}_1 &amp; \vec{a}_2^T\vec{e}_1 &amp; \cdots &amp; \vec{a}_n^T\vec{e}_1
-\\
-\vec{a}_1^T\vec{e}_2 &amp; \vec{a}_2^T\vec{e}_2 &amp; \cdots &amp; \vec{a}_n^T\vec{e}_2
-\\
-\vdots &amp; \vdots &amp; &amp; \vdots
-\\
-\vec{a}_1^T\vec{e}_n &amp; \vec{a}_2^T\vec{e}_n &amp; \cdots &amp; \vec{a}_n^T\vec{e}_n
-\end{bmatrix}\]</span>
-<p>$$ 其中矩阵 <span class="math inline">\(R\)</span> 为列变换的置换矩阵。</p>
-<p>根据我们求正交基的步骤，每一个 <span class="math inline">\(\vec{e}_i\)</span> 都正交于 <span class="math inline">\(\vec{a}_j\ (j &lt; i)\)</span>，因为 <span class="math inline">\(\vec{a}_j\)</span> 属于 <span class="math inline">\(\vec{e}_1, \vec{e}_2,\dots,\vec{e}_{i-1}\)</span> 张成的向量空间，而 <span class="math inline">\(\vec{e}_i\)</span> 与该向量空间正交。从而当 <span class="math inline">\(j &lt; i\)</span> 时，有 <span class="math inline">\(\vec{a}_j^T\vec{e}_i = 0\)</span>，得到 <span class="math inline">\(R\)</span> 为上三角矩阵。</p>
-<p>更清楚的表示为： <span class="math display">\[
-R =
-\begin{bmatrix}
-\vec{a}_1^T\vec{e}_1 &amp; \vec{a}_2^T\vec{e}_1 &amp; \cdots &amp; \vec{a}_{n-1}^T\vec{e}_1 &amp; \vec{a}_n^T\vec{e}_1
-\\
-0 &amp; \vec{a}_2^T\vec{e}_2 &amp; \cdots &amp; \vec{a}_{n-1}^T\vec{e}_2 &amp; \vec{a}_n^T\vec{e}_2
-\\
-\vdots &amp; \vdots &amp; \ddots &amp; \vdots &amp; \vdots
-\\
-0 &amp; 0 &amp; \cdots &amp;  \vec{a}_{n-1}^T\vec{e}_{n-1} &amp; \vec{a}_n^T\vec{e}_{n-1}
-\\
-0 &amp; 0 &amp; \cdots &amp; 0 &amp; \vec{a}_n^T\vec{e}_n
-\end{bmatrix}
-\]</span></p>
-<h4 id="进入第二部分行列式">进入第二部分：行列式</h4>
-<p>跟国内教材上来就给学生塞一堆行列式的定义与性质让你记忆和做题不一样，GS 在讲完矩阵后，把<strong>“行列式作为属于矩阵的一个特性，包含大量矩阵的信息”</strong>教授给大家，并从<strong>三个基本性质</strong>开始。</p>
-<blockquote>
-<p>行列式记为 <span class="math inline">\(det(A) = |A|\)</span>。矩阵必须为方阵。</p>
-</blockquote>
-<h5 id="行列式性质">行列式性质</h5>
-<ol type="1">
-<li><p><span class="math inline">\(det(I) = 1\)</span></p></li>
-<li><p>交换任意两行后，<span class="math inline">\(det(A)\)</span> 取相反数。</p></li>
-<li><ul>
-<li>数乘： <span class="math display">\[
-  \begin{vmatrix}
-  ta &amp; tb
-  \\
-  c &amp; d
-  \end{vmatrix}
-  =
-  t
-  \begin{vmatrix}
-  a &amp; b
-  \\
-  c &amp; d
-  \end{vmatrix}
-  \]</span></li>
-<li>相加： <span class="math display">\[
-  \begin{vmatrix}
-  a+a&#39; &amp; b+b&#39;
-  \\
-  c &amp; d
-  \end{vmatrix}
-  =
-  \begin{vmatrix}
-  a &amp; b
-  \\
-  c &amp; d
-  \end{vmatrix}
-  +
-  \begin{vmatrix}
-  a&#39; &amp; b&#39;
-  \\
-  c &amp; d
-  \end{vmatrix}
-  \]</span></li>
-</ul></li>
-</ol>
-<p>更多的性质可以从以上基本性质中推导出：</p>
-<ol start="4" type="1">
-<li><p>任意两行相等，行列式为 0。</p></li>
-<li><p>任意一行加上/减去另一行的 <span class="math inline">\(k\)</span> 倍，行列式值不变。</p></li>
-<li><p>若某一行为 0，则行列式为 0。</p></li>
-<li><p>上三角/下三角行列式的值等于其主对角线所有元素的乘积。</p>
-<blockquote>
-<p><span class="math display">\[
-\begin{vmatrix}
-a &amp; b
-\\
-c &amp; d
-\end{vmatrix}
-= ad - bc
-\]</span></p>
-</blockquote></li>
-<li><p>若 <span class="math inline">\(det(A) = 0\)</span>，则 <span class="math inline">\(A\)</span> 奇异/不可逆；反之非奇异/可逆。</p></li>
-<li><p><span class="math inline">\(det(AB) = det(A)det(B)\)</span> <span class="math inline">\(det(A^{-1}) = 1/det(A)\)</span> <span class="math inline">\(det(kA) = k^ndet(A)\)</span></p></li>
-<li><p><span class="math inline">\(det(A^T) = det(A)\)</span></p></li>
-</ol>
-<h5 id="代数余子式">代数余子式</h5>
-<p>讲完性质，就来讲怎么对高阶方阵的行列式求值了。</p>
-<p><span class="math inline">\(n\)</span> 阶行列式中，任意位置 <span class="math inline">\(a_{ij}\)</span> 对应的<strong>代数余子式</strong> <span class="math inline">\(C_{ij}\)</span> 等于将第 <span class="math inline">\(i\)</span> 行第 <span class="math inline">\(j\)</span> 列从行列式中移除后，剩下部分构成的 <span class="math inline">\(n-1\)</span> 阶行列式<strong>的值</strong>，且其正负性由 <span class="math inline">\((-1)^{i+j}\)</span> 表示。</p>
-<p>行列式的值，等于任意一行中所有元素与其代数余子式乘积再求和，即<strong>代数余子式展开</strong>： <span class="math display">\[
-det(A) = a_{i1}C_{i1} + a_{i2}C_{i2} + \dots + a_{in}C_{in} \quad (1 \leq i \leq n)
-\]</span> 对列也有类似的展开方法。</p>
-<blockquote>
-<p>一般来说很少用这方法，以<strong>消元法化为上三角行列式</strong>为主。</p>
-</blockquote>
-<h5 id="逆矩阵公式">逆矩阵公式</h5>
-<p>已知二阶矩阵 <span class="math inline">\(A = \begin{bmatrix}a &amp; b \\ c &amp; d\end{bmatrix}\)</span> 的行列式公式，则其逆矩阵为 <span class="math inline">\(\displaystyle A^{-1} = \frac{1}{ad-bc} \begin{bmatrix}d &amp; -b \\ -c &amp; a\end{bmatrix}\)</span></p>
-<p>事实上，<strong>任意矩阵的逆</strong>都可以写为这样一个形式： <span class="math display">\[
-A^{-1} = \frac{1}{det(A)}C^T
-\\[2ex]
-C = \begin{bmatrix}
-C_{11} &amp; C_{12} &amp; \cdots &amp; C_{1n}
-\\
-C_{21} &amp; C_{22} &amp; \cdots &amp; C_{2n}
-\\
-\vdots &amp; \vdots &amp; &amp; \vdots
-\\
-C_{n1} &amp; C_{n2} &amp; \cdots &amp; C_{nn}
-\end{bmatrix}
-\]</span> 其中 <span class="math inline">\(C_{ij}\)</span> 为 <span class="math inline">\(A\)</span> 中元素 <span class="math inline">\(a_{ij}\)</span> 的<strong>代数余子式</strong>。代数余子式矩阵 <span class="math inline">\(C\)</span> 的转置 <span class="math inline">\(C^T\)</span> 也称为 <span class="math inline">\(A\)</span> 的<strong>伴随矩阵</strong>。</p>
-对上式进行左乘 <span class="math inline">\(A\)</span>，则有 $$ AC^T = 
-<span class="math display">\[\begin{bmatrix}
-a_{11} &amp; a_{12} &amp; \cdots &amp; a_{1n}
-\\
-a_{21} &amp; a_{22} &amp; \cdots &amp; a_{2n}
-\\
-\vdots &amp; \vdots &amp; &amp; \vdots
-\\
-a_{n1} &amp; a_{n2} &amp; \cdots &amp; a_{nn}
-\end{bmatrix}\]</span>
-<span class="math display">\[\begin{bmatrix}
-C_{11} &amp; C_{21} &amp; \cdots &amp; C_{n1}
-\\
-C_{12} &amp; C_{22} &amp; \cdots &amp; C_{n2}
-\\
-\vdots &amp; \vdots &amp; &amp; \vdots
-\\
-C_{1n} &amp; C_{2n} &amp; \cdots &amp; C_{nn}
-\end{bmatrix}\]</span>
-<p>$$ 主对角线元素很好判断，就是行列式的<strong>代数余子式展开</strong>；对于其它元素，以 <span class="math inline">\(\sum\limits_{i=1}^na_{2i}C_{1i}\)</span> 为例，它可以视为 <span class="math inline">\(A\)</span> 的第一行元素全由第二行替换后的新矩阵 <span class="math inline">\(A&#39;\)</span> 按第一行代数余子式展开，根据<strong>性质 4</strong>，我们得到 <span class="math inline">\(det(A&#39;)=0\)</span>，即最终结果仅有主对角线元素全为 1，其它都是 0——单位矩阵 <span class="math inline">\(I\)</span>，恰好是 <span class="math inline">\(AA^{-1}\)</span>，故该等式是正确的。</p>
-<h5 id="克拉默法则">克拉默法则</h5>
-<p>对于可逆矩阵 <span class="math inline">\(A\)</span>，方程 <span class="math inline">\(A\vec{x} = \vec{b}\)</span> 必有形如下式的解：<span class="math inline">\(\vec{x} = A^{-1}\vec{b}\)</span></p>
-<p>代入上面得到的逆矩阵公式，有 <span class="math display">\[
-\begin{bmatrix}
-x_1
-\\
-x_2
-\\
-\vdots
-\\
-x_n
-\end{bmatrix}
-= \vec{x} = \frac{1}{det(A)}C^T\vec{b} = \frac{1}{det(A)}
-\begin{bmatrix}
-C_{11} &amp; C_{21} &amp; \cdots &amp; C_{n1}
-\\
-C_{12} &amp; C_{22} &amp; \cdots &amp; C_{n2}
-\\
-\vdots &amp; \vdots &amp; &amp; \vdots
-\\
-C_{1n} &amp; C_{2n} &amp; \cdots &amp; C_{nn}
-\end{bmatrix}
-\begin{bmatrix}
-b_1
-\\
-b_2
-\\
-\vdots
-\\
-b_n
-\end{bmatrix}
-\]</span> 根据之前得到的结论，<span class="math inline">\(\sum\limits_{i=1}^nb_kC_{ik}\)</span> 可以视为将 <span class="math inline">\(A\)</span> 的第 <span class="math inline">\(k\)</span> 列用 <span class="math inline">\(\vec{b}\)</span> 替换后得到的新矩阵 <span class="math inline">\(B_k\)</span> 的行列式值，从而得到 <span class="math display">\[
-x_k = \frac{det(B_k)}{det(A)}
-\]</span> 评价为：<strong>没消元法好用，但确实也是一个可行的方法</strong>。</p>
-<h5 id="几何度量">几何度量</h5>
-<p>二阶行列式 <span class="math inline">\(|det(A)|\)</span> 等于 <span class="math inline">\(A\)</span> 行（列）向量构成的平行四边形的面积。</p>
-<p>三阶行列式 <span class="math inline">\(|det(A)|\)</span> 等于 <span class="math inline">\(A\)</span> 行（列）向量构成的平行六面体的体积。</p>
-<h4 id="进入下一个议题特征向量与特征值">进入下一个议题：特征向量与特征值</h4>
-<p>将矩阵 <span class="math inline">\(A\)</span> 与向量 <span class="math inline">\(\vec{x}\)</span> 相乘当做是对向量的一种操作或者函数，输入 <span class="math inline">\(\vec{x}\)</span> 而输出 <span class="math inline">\(A\vec{x}\)</span> 。<strong>特征向量</strong>即在特定的向量 <span class="math inline">\(\vec{x}\)</span> 方向上输出的 <span class="math inline">\(A \vec{x}\)</span> 平行于 <span class="math inline">\(\vec{x}\)</span> ，即为： <span class="math display">\[
-A\vec{x} = \lambda\vec{x}
-\]</span> 其中 <span class="math inline">\(\vec{x}\)</span> 为 <span class="math inline">\(A\)</span> 的<strong>特征向量</strong>，<span class="math inline">\(\lambda\)</span> 为 <span class="math inline">\(A\)</span> 的<strong>特征值</strong>。</p>
-<h5 id="如何求解特征值与特征向量">如何求解特征值与特征向量？</h5>
-<p>直接上结论：<strong>求解特征值等价于求解方程</strong> <span class="math inline">\(det(A-\lambda I) = 0\)</span></p>
-<p>并且有：</p>
-<ol type="1">
-<li><p>矩阵的<strong>迹</strong>（对角线所有元素之和）等于<strong>特征值之和</strong>。</p></li>
-<li><p>对称矩阵的特征向量<strong>正交</strong>。</p>
-<blockquote>
-<p>设 <span class="math inline">\(\vec{x}_1, \vec{x}_2\)</span> 分别是 <span class="math inline">\(A\)</span> 对应特征值 <span class="math inline">\(\lambda_1, \lambda_2\)</span> 的特征向量，有 <span class="math display">\[
-\begin{align}
-A\vec{x}_1 &amp;= \lambda_1\vec{x}_1
-\\[2ex]
-\vec{x}_2^TA\vec{x}_1 &amp;= \lambda_1\vec{x}_2^T\vec{x}_1
-\\[2ex]
-(A^T\vec{x}_2)^T\vec{x}_1 &amp;= \lambda_2\vec{x}_2^T\vec{x}_1
-\\[2ex]
-(\lambda_1 - \lambda_2)\vec{x}_2^T\vec{x}_1 &amp;= 0
-\end{align}
-\]</span></p>
-<p>由于 <span class="math inline">\(\lambda_1 \neq \lambda_2\)</span>，所以 <span class="math inline">\(\vec{x}_2^T\vec{x}_1 = 0\)</span>，故其正交。</p>
-</blockquote></li>
-</ol>
-]]></content>
-      <categories>
-        <category>math</category>
-      </categories>
-      <tags>
-        <tag>MIT18.06</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>weekCompetition313</title>
-    <url>/LeetCode/weekCompetition313/</url>
-    <content><![CDATA[<p><a href="https://leetcode.cn/contest/weekly-contest-313/">第 313 场周赛</a>复盘。</p>
-<p><strong>排名</strong> 106 / 5445</p>
-<span id="more"></span>
-<h4 id="公因子的数目">1. <a href="https://leetcode.cn/problems/number-of-common-factors/">公因子的数目</a></h4>
-<blockquote>
-<p>给你两个正整数 a 和 b ，返回 a 和 b 的 <strong>公</strong> 因子的数目。</p>
-<p>如果 x 可以同时整除 a 和 b ，则认为 x 是 a 和 b 的一个 <strong>公因子</strong> 。</p>
-</blockquote>
-<h5 id="思路">思路</h5>
-<p>从 1 到 gcd(a, b) 遍历即可。</p>
-<h5 id="code">code</h5>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">gcd</span><span class="params">(a, b <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;	<span class="comment">// assert a &lt; b</span></span><br><span class="line">    <span class="keyword">if</span> a &gt; b &#123;</span><br><span class="line">        <span class="keyword">return</span> gcd(b, a)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> b % a == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> a</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> gcd(b % a, a)</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">commonFactors</span><span class="params">(a <span class="type">int</span>, b <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    cnt := <span class="number">0</span>    </span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">1</span>; i &lt;= gcd(a, b); i++ &#123;</span><br><span class="line">        <span class="keyword">if</span> a % i == <span class="number">0</span> &amp;&amp; b % i == <span class="number">0</span> &#123;</span><br><span class="line">            cnt++</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> cnt</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="沙漏的最大总和">2. <a href="https://leetcode.cn/problems/maximum-sum-of-an-hourglass/">沙漏的最大总和</a></h4>
-<blockquote>
-<p>给你一个大小为 <strong>m x n</strong> 的整数矩阵 <code>grid</code> 。</p>
-<p>按以下形式将矩阵的一部分定义为一个 <strong>沙漏</strong> ：</p>
-<p><img src="image-20221017190111674.png" alt="image-20221017190111674" style="zoom:50%;" /></p>
-<p>返回沙漏中元素的 <strong>最大</strong> 总和。</p>
-<p><strong>注意</strong>：沙漏无法旋转且必须整个包含在矩阵中。</p>
-</blockquote>
-<h5 id="思路-1">思路</h5>
-<p>由于沙漏占据了 3×3 的矩阵空间，最不用思考的做法就是遍历沙漏的左上角即可。</p>
-<h5 id="code-1">code</h5>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">maxSum</span><span class="params">(g [][]<span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    res := <span class="number">0</span>    </span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt;= <span class="built_in">len</span>(g)<span class="number">-3</span>; i++ &#123;</span><br><span class="line">        <span class="keyword">for</span> j := <span class="number">0</span>; j &lt;= <span class="built_in">len</span>(g[i])<span class="number">-3</span>; j++ &#123;</span><br><span class="line">            sum := <span class="number">0</span></span><br><span class="line">            sum += g[i][j] + g[i][j+<span class="number">1</span>] + g[i][j+<span class="number">2</span>] + g[i+<span class="number">1</span>][j+<span class="number">1</span>] + g[i+<span class="number">2</span>][j] + g[i+<span class="number">2</span>][j+<span class="number">1</span>] + g[i+<span class="number">2</span>][j+<span class="number">2</span>]</span><br><span class="line">            <span class="keyword">if</span> sum &gt; res &#123;</span><br><span class="line">                res = sum</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="最小-xor">3. <a href="https://leetcode.cn/problems/minimize-xor/">最小 XOR</a></h4>
-<blockquote>
-<p>给你两个正整数 num1 和 num2 ，找出满足下述条件的整数 x ：</p>
-<ul>
-<li>x 的置位数和 num2 相同，且</li>
-<li>x XOR num1 的值 <strong>最小</strong></li>
-</ul>
-<p>注意 XOR 是按位异或运算。</p>
-<p>返回整数 x 。题目保证，对于生成的测试用例， x 是 <strong>唯一确定</strong> 的。</p>
-<p>整数的 <strong>置位数</strong> 是其二进制表示中 1 的数目。</p>
-</blockquote>
-<h5 id="思路-2">思路</h5>
-<p>若要使两个数按位异或所得结果最小，它们二进制中 1 的位置应尽可能一致，所以找题目中的 <span class="math inline">\(x\)</span> 实际上就是<strong>安排其二进制中 ‘1’ 的位置</strong>。令 <span class="math inline">\(k(num1)\)</span> 表示 <span class="math inline">\(num1\)</span> 的置位数。则对于给定的 <span class="math inline">\(num1\)</span> 与 <span class="math inline">\(k(x) = k(num2)\)</span> ，只有以下三种情况：</p>
-<ol type="1">
-<li><p><span class="math inline">\(k(num1) = k(num2)\)</span>：则 <span class="math inline">\(x=num1\)</span> 时 <span class="math inline">\(x\ XOR\ num1\)</span> 最小</p></li>
-<li><p><span class="math inline">\(k(num1) &lt; k(num2)\)</span>：<span class="math inline">\(k(num1)\)</span> 个 ‘1’ 与 <span class="math inline">\(num1\)</span> 中的 ‘1’ 相互抵消后，还剩下 <span class="math inline">\(k(num2) - k(num1)\)</span> 个 ‘1’ 未安排位置，这部分应尽量“靠左”，并且不与 <span class="math inline">\(num1\)</span> 中 ‘1’ 的位置冲突。</p>
-<p>例如，当 <span class="math inline">\(num1=10, k(num2)=3\)</span> 时，<span class="math inline">\(num1=(1010)_2\)</span>。首先能够得到 <span class="math inline">\(x=(1\_1\_)_2\)</span>，最后一个 ‘1’ 的位置显然易见，应该放在最右边，故得到 <span class="math inline">\(x = (1011)_2\)</span></p></li>
-<li><p><span class="math inline">\(k(num1) &gt; k(num2)\)</span>：<span class="math inline">\(x\)</span> 的值即保留 <span class="math inline">\(num1\)</span> 右侧 <span class="math inline">\(k(num2)\)</span> 个 ‘1’ 的结果。</p></li>
-</ol>
-<h5 id="code-2">code</h5>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">k</span><span class="params">(num <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    res := <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> num &gt; <span class="number">0</span> &#123;</span><br><span class="line">        res += num &amp; <span class="number">1</span></span><br><span class="line">        num &gt;&gt;= <span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">minimizeXor</span><span class="params">(num1 <span class="type">int</span>, num2 <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    cnt1, cnt2, x := k(num1), k(num2), num1</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> cnt1 &gt; cnt2 &#123;</span><br><span class="line">        p := <span class="number">1</span></span><br><span class="line">        cnt1 -= cnt2    <span class="comment">// x 为 num1 去掉低 cnt1-cnt2 位 1</span></span><br><span class="line">        <span class="keyword">for</span> cnt1 &gt; <span class="number">0</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> x &amp; p &gt; <span class="number">0</span> &#123;</span><br><span class="line">                x -= p</span><br><span class="line">                cnt1--</span><br><span class="line">            &#125;</span><br><span class="line">            p &lt;&lt;= <span class="number">1</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> cnt1 &lt; cnt2 &#123;</span><br><span class="line">        p := <span class="number">1</span></span><br><span class="line">        cnt2 -= cnt1	<span class="comment">// x 为 num1 再加上 cnt2-cnt1 位 1</span></span><br><span class="line">        <span class="keyword">for</span> cnt2 &gt; <span class="number">0</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> x &amp; p == <span class="number">0</span> &#123;</span><br><span class="line">                x += p</span><br><span class="line">                cnt2--</span><br><span class="line">            &#125;</span><br><span class="line">            p &lt;&lt;= <span class="number">1</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> temp</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="对字母串可执行的最大删除数">4. <a href="https://leetcode.cn/problems/maximum-deletions-on-a-string/">对字母串可执行的最大删除数</a></h4>
-<blockquote>
-<p>给你一个仅由小写英文字母组成的字符串 s 。在一步操作中，你可以：</p>
-<ul>
-<li>删除 <strong>整个字符串</strong> s ，或者</li>
-<li>对于满足 1 &lt;= i &lt;= s.length / 2 的任意 i ，如果 s 中的 <strong>前</strong> i 个字母和接下来的 i 个字母 <strong>相等</strong> ，删除 <strong>前</strong> i 个字母。</li>
-</ul>
-<p>例如，如果 s = "ababc" ，那么在一步操作中，你可以删除 s 的前两个字母得到 "abc" ，因为 s 的前两个字母和接下来的两个字母都等于 "ab" 。</p>
-<p>返回删除 s 所需的最大操作数。</p>
-</blockquote>
-<h5 id="思路-3">思路</h5>
-<p>考虑操作 2，删除前 i 个字母后还剩下长为 len(s)-i 的新字符串，我们要接着对新字符串执行同样的删除操作。这就是一个递归步骤，并且我们的递归是二叉树状的——每个 i 都需要考虑删 or 不删。</p>
-<p>那么很容易想到用动态规划。定义 <code>dp[i]</code> 为删除 <code>s[i-1:]</code> 所需最大操作数，那么对于任意 <code>1 ≤ i &lt; j ≤ len(s)-1</code>，如果 <code>s[i:j] == s[j:2*j-i]</code>，则 <code>dp[i] = max(dp[i], dp[j] + 1)</code></p>
-<h5 id="code-3">code</h5>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">deleteString</span><span class="params">(s <span class="type">string</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    n := <span class="built_in">len</span>(s)</span><br><span class="line">    dp := <span class="built_in">make</span>([]<span class="type">int</span>, n)  <span class="comment">// dp[i]: s[i:] 所需最大删除数</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i := n<span class="number">-1</span>; i &gt;= <span class="number">0</span>; i-- &#123;</span><br><span class="line">        dp[i] = <span class="number">1</span></span><br><span class="line">        l := n-i</span><br><span class="line">        <span class="keyword">for</span> j := i+<span class="number">1</span>; j &lt;= i+l/<span class="number">2</span>; j++ &#123;</span><br><span class="line">            <span class="keyword">if</span> temp[i:j] == temp[j:<span class="number">2</span>*j-i] &amp;&amp; dp[i] &lt; dp[j] + <span class="number">1</span> &#123;</span><br><span class="line">                dp[i] = dp[j] + <span class="number">1</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> dp[<span class="number">0</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>LeetCode</category>
-      </categories>
-      <tags>
-        <tag>周赛</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>weekCompetition312</title>
-    <url>/LeetCode/weekCompetition312/</url>
-    <content><![CDATA[<p><a href="https://leetcode.cn/contest/weekly-contest-312/">第 312 场周赛</a>复盘。</p>
-<p><strong>排名</strong> 1273 / 6638</p>
-<span id="more"></span>
-<h4 id="按身高排序">1. <a href="https://leetcode.cn/problems/sort-the-people/">按身高排序</a></h4>
-<blockquote>
-<p>给你一个字符串数组 <code>names</code> ，和一个由 <strong>互不相同</strong> 的正整数组成的数组 <code>heights</code> 。两个数组的长度均为 n 。</p>
-<p>对于每个下标 i，<code>names[i]</code> 和 <code>heights[i]</code> 表示第 i 个人的名字和身高。</p>
-<p>请按身高 <strong>降序</strong> 顺序返回对应的名字数组 <code>names</code> 。</p>
-</blockquote>
-<h5 id="思路">思路</h5>
-<p>由于人名可能有重复，故不能建 map，而是将 name 与其对应的 height 作为一个整体，然后排序。</p>
-<h5 id="code">code</h5>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// c++</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">vector&lt;string&gt; <span class="title">sortPeople</span><span class="params">(vector&lt;string&gt;&amp; names, vector&lt;<span class="type">int</span>&gt;&amp; heights)</span> </span>&#123;</span><br><span class="line">        vector&lt;string&gt; res;</span><br><span class="line">        vector&lt;pair&lt;string, <span class="type">int</span>&gt;&gt; temp;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; names.<span class="built_in">size</span>(); i++) &#123;</span><br><span class="line">            temp.<span class="built_in">emplace_back</span>(<span class="built_in">make_pair</span>(names[i], heights[i]));</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="built_in">sort</span>(temp.<span class="built_in">begin</span>(), temp.<span class="built_in">end</span>(), [&amp;](<span class="type">const</span> pair&lt;string, <span class="type">int</span>&gt; &amp;a, <span class="type">const</span> pair&lt;string, <span class="type">int</span>&gt; &amp;b) &#123;</span><br><span class="line">            <span class="keyword">return</span> a.second &gt; b.second;</span><br><span class="line">        &#125;);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">auto</span> &amp;it : temp) &#123;</span><br><span class="line">            res.<span class="built_in">emplace_back</span>(it.first);</span><br><span class="line">        &#125;</span><br><span class="line">            </span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-<h4 id="按位与最大的最长子数组">2. <a href="https://leetcode.cn/problems/longest-subarray-with-maximum-bitwise-and/">按位与最大的最长子数组</a></h4>
-<blockquote>
-<p>给你一个长度为 n 的整数数组 <code>nums</code> 。</p>
-<p>考虑 <code>nums</code> 中进行 <strong>按位与</strong>运算得到的值 <strong>最大</strong> 的 <strong>非空</strong> 子数组。</p>
-<ul>
-<li>换句话说，令 k 是 <code>nums</code> <strong>任意</strong> 子数组执行按位与运算所能得到的最大值。那么，只需要考虑那些执行一次按位与运算后等于 k 的子数组。</li>
-</ul>
-<p>返回满足要求的 <strong>最长</strong> 子数组的长度。</p>
-<p>数组的按位与就是对数组中的所有数字进行按位与运算。</p>
-<p><strong>子数组</strong> 是数组中的一个连续元素序列。</p>
-</blockquote>
-<h5 id="思路-1">思路</h5>
-<p>首先有一个性质：<code>a AND b ≤ min(a, b)</code>，那么 AND 运算能够得到的最大值必然是整个数组的最大值。从而问题转换为，找到一个最长的连续子数组，其中所有元素都是 <code>nums[]</code> 中的最大值。</p>
-<h5 id="code-1">code</h5>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// c++</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">longestSubarray</span><span class="params">(vector&lt;<span class="type">int</span>&gt;&amp; nums)</span> </span>&#123;</span><br><span class="line">        <span class="type">int</span> maxm = *<span class="built_in">max_element</span>(nums.<span class="built_in">begin</span>(), nums.<span class="built_in">end</span>());</span><br><span class="line">        <span class="type">int</span> res = <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; nums.<span class="built_in">size</span>(); i++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (nums[i] == maxm) &#123;</span><br><span class="line">                <span class="type">int</span> j = i + <span class="number">1</span>;</span><br><span class="line">                <span class="keyword">for</span> (j = i + <span class="number">1</span>; j &lt; nums.<span class="built_in">size</span>(); j++) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (nums[j] != nums[i]) &#123;</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                res = <span class="built_in">max</span>(res, j - i);</span><br><span class="line">                i = j<span class="number">-1</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-<h4 id="找到所有好下标">3. <a href="https://leetcode.cn/problems/find-all-good-indices/">找到所有好下标</a></h4>
-<blockquote>
-<p>给你一个大小为 n 下标从 <strong>0</strong> 开始的整数数组 <code>nums</code> 和一个正整数 k 。</p>
-<p>对于 <code>k &lt;= i &lt; n - k</code> 之间的一个下标 i ，如果它满足以下条件，我们就称它为一个 <strong>好</strong> 下标：</p>
-<ul>
-<li>下标 i <strong>之前</strong> 的 k 个元素是 <strong>非递增的</strong> 。</li>
-<li>下标 i <strong>之后</strong> 的 k 个元素是 <strong>非递减的</strong> 。</li>
-</ul>
-<p>按 <strong>升序</strong> 返回所有好下标。</p>
-</blockquote>
-<h5 id="思路-2">思路</h5>
-<p>定义 <code>assend[]</code> 与 <code>dessend[]</code>：如果一个数比它前面那个数大，则 <code>assend[i] = 1</code>；如果一个数比它后面那个数小，则 <code>dessend[i] = 1</code></p>
-<p>问题就变为：找到一个下标，它前面 k-1 个下标的 assend 值均为 0，后面 k-1 个下标的 dessend 值也均为 0</p>
-<p>用滑动窗口来维护前后 k-1 个下标的 assend/dessend 值中 1 的个数，每个迭代的过程只需判断个数是否均为 0 即可。</p>
-<h5 id="code-2">code</h5>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">goodIndices</span><span class="params">(nums []<span class="type">int</span>, k <span class="type">int</span>)</span></span> []<span class="type">int</span> &#123;</span><br><span class="line">    n := <span class="built_in">len</span>(nums)</span><br><span class="line">    </span><br><span class="line">    res := <span class="built_in">make</span>([]<span class="type">int</span>, <span class="number">0</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> n - k &lt;= k &#123;</span><br><span class="line">        <span class="keyword">return</span> res</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    assend := <span class="built_in">make</span>([]<span class="type">int</span>, n)</span><br><span class="line">    dessend := <span class="built_in">make</span>([]<span class="type">int</span>, n)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> i := <span class="keyword">range</span> nums &#123;</span><br><span class="line">        <span class="keyword">if</span> i &gt; <span class="number">0</span> &amp;&amp; nums[i] &gt; nums[i<span class="number">-1</span>] &#123;</span><br><span class="line">            assend[i] = <span class="number">1</span></span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            assend[i] = <span class="number">0</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> i &lt; n<span class="number">-1</span> &amp;&amp; nums[i] &gt; nums[i+<span class="number">1</span>] &#123;</span><br><span class="line">            dessend[i] = <span class="number">1</span></span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            dessend[i] = <span class="number">0</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    left1, right1, left2, right2 := <span class="number">1</span>, k<span class="number">-1</span>, k+<span class="number">1</span>, <span class="number">2</span>*k<span class="number">-1</span></span><br><span class="line">    cnt1, cnt2 := <span class="number">0</span>, <span class="number">0</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> i := left1; i &lt;= right1; i++ &#123;</span><br><span class="line">        cnt1 += assend[i]</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> i := left2; i &lt;= right2; i++ &#123;</span><br><span class="line">        cnt2 += dessend[i]</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> cnt1 == <span class="number">0</span> &amp;&amp; cnt2 == <span class="number">0</span> &#123;</span><br><span class="line">        res = <span class="built_in">append</span>(res, k)</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> i := k+<span class="number">1</span>; i &lt; n-k; i++ &#123;</span><br><span class="line">        right1++</span><br><span class="line">        cnt1 = cnt1 + assend[right1] - assend[left1]</span><br><span class="line">        left1++</span><br><span class="line">        </span><br><span class="line">        right2++</span><br><span class="line">        cnt2 = cnt2 + dessend[right2] - dessend[left2]</span><br><span class="line">        left2++</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> cnt1 == <span class="number">0</span> &amp;&amp; cnt2 == <span class="number">0</span> &#123;</span><br><span class="line">            res = <span class="built_in">append</span>(res, i)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="好路径的数目">4. <a href="https://leetcode.cn/problems/number-of-good-paths/">好路径的数目</a></h4>
-<blockquote>
-<p>给你一棵 n 个节点的树（连通无向无环的图），节点编号从 0 到 n - 1 且恰好有 n - 1 条边。</p>
-<p>给你一个长度为 n 下标从 <strong>0</strong> 开始的整数数组 <code>vals</code> ，分别表示每个节点的值。同时给你一个二维整数数组 <code>edges</code> ，其中 <code>edges[i] = [ai, bi]</code> 表示节点 ai 和 bi 之间有一条 <strong>无向</strong> 边。</p>
-<p>一条 <strong>好路径</strong> 需要满足以下条件：</p>
-<ul>
-<li>开始节点和结束节点的值 <strong>相同</strong> 。</li>
-<li>开始节点和结束节点中间的所有节点值都 <strong>小于等于</strong> 开始节点的值（也就是说开始节点的值应该是路径上所有节点的最大值）。</li>
-</ul>
-<p>请你返回不同好路径的数目。</p>
-<p>注意，一条路径和它反向的路径算作 同一 路径。比方说， <code>0 -&gt; 1</code> 与 <code>1 -&gt; 0</code> 视为同一条路径。单个节点也视为一条合法路径。</p>
-</blockquote>
-<h5 id="思路-3">思路</h5>
-<p>参考了 <a href="https://leetcode.cn/problems/number-of-good-paths/solution/bing-cha-ji-by-endlesscheng-tbz8/">这位大佬的解法</a>。</p>
-<p>朴素的考虑是，找到连通分量中所有的最大值节点，若有 <span class="math inline">\(x\)</span> 个，则共可以生成 <span class="math inline">\(\displaystyle C(x, 2) = \frac{x(x-1)}{2}\)</span> 条好路径；之后，将这些节点删除，对剩下的所有连通分量应用上述步骤。但这种方法实现起来较为复杂。</p>
-<p>不妨逆向思维，从小到大走，同时将删除操作改为合并操作。于是可以考虑用<strong>并查集</strong>来完成这一操作。</p>
-<p>刚开始所有节点都是 standalone 的，我们遍历 <code>edges[]</code> 时，不断合并节点，并让较大元素作为较小元素的<strong>代表元</strong>，一旦在合并过程中发现有两个节点的代表元相等（也就意味着这两个代表元满足<strong>好路径</strong>的要求），如果用 <code>size[]</code> 表示当前节点作为代表元时，所在并查集中最大值的数量，则可以用乘法解得合并后的连通分量里的好路径数量。</p>
-<p>由于我们按照节点值升序访问节点，故每次只需和比自己小的邻居合并，则可以保证对于节点 <span class="math inline">\(v\)</span> 的任意邻居，其所在并查集的最大值不会超过 <span class="math inline">\(vals[v]\)</span>，好路径的数量也就不会遗漏。合并后 <span class="math inline">\(v\)</span> 即为代表元。</p>
-<h5 id="code-3">code</h5>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">findfather</span><span class="params">(father []<span class="type">int</span>, x <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    a, temp := x, x</span><br><span class="line">    <span class="keyword">for</span> father[x] != x &#123;</span><br><span class="line">        x = father[x]</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> a != x &#123;</span><br><span class="line">        a = father[a]</span><br><span class="line">        father[temp] = x</span><br><span class="line">        temp = a</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> x</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">numberOfGoodPaths</span><span class="params">(vals []<span class="type">int</span>, edges [][]<span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    n := <span class="built_in">len</span>(vals)</span><br><span class="line">    res := n  <span class="comment">// 所有单节点好路径数量</span></span><br><span class="line">    father := <span class="built_in">make</span>([]<span class="type">int</span>, n)  <span class="comment">// 代表元</span></span><br><span class="line">    size := <span class="built_in">make</span>([]<span class="type">int</span>, n)    <span class="comment">// 当前节点为代表元时, 所在并查集中最大值的数量</span></span><br><span class="line">    ids := <span class="built_in">make</span>([]<span class="type">int</span>, n)     <span class="comment">// 序号, 根据 vals[id] 来排序</span></span><br><span class="line">    graph := <span class="built_in">make</span>([][]<span class="type">int</span>, n) <span class="comment">// 图</span></span><br><span class="line">    <span class="comment">// 初始化</span></span><br><span class="line">    <span class="keyword">for</span> i := <span class="keyword">range</span> father &#123;</span><br><span class="line">        father[i] = i</span><br><span class="line">        size[i] = <span class="number">1</span></span><br><span class="line">        ids[i] = i</span><br><span class="line">        graph[i] = <span class="built_in">make</span>([]<span class="type">int</span>, <span class="number">0</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> _, edge := <span class="keyword">range</span> edges &#123;</span><br><span class="line">        x, y := edge[<span class="number">0</span>], edge[<span class="number">1</span>]</span><br><span class="line">        graph[x] = <span class="built_in">append</span>(graph[x], y)</span><br><span class="line">        graph[y] = <span class="built_in">append</span>(graph[y], x)</span><br><span class="line">    &#125;</span><br><span class="line">    sort.Slice(ids, <span class="function"><span class="keyword">func</span><span class="params">(i, j <span class="type">int</span>)</span></span> <span class="type">bool</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> vals[ids[i]] &lt; vals[ids[j]]</span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> _, id := <span class="keyword">range</span> ids &#123;</span><br><span class="line">        fx := findfather(father, id)</span><br><span class="line">        <span class="keyword">for</span> _, neighbor := <span class="keyword">range</span> graph[id] &#123;</span><br><span class="line">            fy := findfather(father, neighbor)</span><br><span class="line">            <span class="keyword">if</span> fx == fy || vals[fy] &gt; vals[id] &#123; <span class="comment">// fx == fy 则无需合并, 只考虑比自己小的邻居</span></span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">if</span> vals[fx] == vals[fy] &#123;</span><br><span class="line">                res += size[fx] * size[fy]</span><br><span class="line">                size[fx] += size[fy]</span><br><span class="line">            &#125;</span><br><span class="line">            father[fy] = fx</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>LeetCode</category>
-      </categories>
-      <tags>
-        <tag>周赛</tag>
       </tags>
   </entry>
 </search>
