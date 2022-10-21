@@ -18,20 +18,22 @@
     var CONFIG = {"hostname":"leager-zju.github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"b2t":true},"copycode":{"enable":false,"show_result":false,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="链接 &gt;&gt;&gt; 2022.10.10 每日一题 LeetCode801(hard) &lt;&lt;&lt;">
+  <meta name="description" content="6.824 的第九篇论文是 FaRM——一个通过为分布式事务提供序列化、高性能、持久性和高可用性的主存分布式计算平台。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="使序列递增的最小操作次数">
-<meta property="og:url" content="http://leager-zju.github.com/LeetCode/leetcode801/index.html">
+<meta property="og:title" content="FaRM">
+<meta property="og:url" content="http://leager-zju.github.com/6-824/FaRM/index.html">
 <meta property="og:site_name" content="没什么看头的地方">
-<meta property="og:description" content="链接 &gt;&gt;&gt; 2022.10.10 每日一题 LeetCode801(hard) &lt;&lt;&lt;">
+<meta property="og:description" content="6.824 的第九篇论文是 FaRM——一个通过为分布式事务提供序列化、高性能、持久性和高可用性的主存分布式计算平台。">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2022-10-10T03:30:00.000Z">
-<meta property="article:modified_time" content="2022-10-16T04:51:49.635Z">
+<meta property="og:image" content="http://leager-zju.github.com/6-824/FaRM/image-20221021142633067.png">
+<meta property="article:published_time" content="2022-10-20T10:57:46.000Z">
+<meta property="article:modified_time" content="2022-10-21T06:32:23.597Z">
 <meta property="article:author" content="Leager">
-<meta property="article:tag" content="每日一题">
+<meta property="article:tag" content="paperReading">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://leager-zju.github.com/6-824/FaRM/image-20221021142633067.png">
 
-<link rel="canonical" href="http://leager-zju.github.com/LeetCode/leetcode801/">
+<link rel="canonical" href="http://leager-zju.github.com/6-824/FaRM/">
 
 
 <script id="page-configurations">
@@ -44,7 +46,7 @@
   };
 </script>
 
-  <title>使序列递增的最小操作次数 | 没什么看头的地方</title>
+  <title>FaRM | 没什么看头的地方</title>
   
 
 
@@ -193,7 +195,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/LeetCode/leetcode801/">
+    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/6-824/FaRM/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/Avatar.jpg">
@@ -206,7 +208,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          使序列递增的最小操作次数
+          FaRM
         </h1>
 
         <div class="post-meta">
@@ -216,14 +218,14 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2022-10-10 11:30:00" itemprop="dateCreated datePublished" datetime="2022-10-10T11:30:00+08:00">2022-10-10</time>
+              <time title="创建时间：2022-10-20 18:57:46" itemprop="dateCreated datePublished" datetime="2022-10-20T18:57:46+08:00">2022-10-20</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-10-16 12:51:49" itemprop="dateModified" datetime="2022-10-16T12:51:49+08:00">2022-10-16</time>
+                <time title="修改时间：2022-10-21 14:32:23" itemprop="dateModified" datetime="2022-10-21T14:32:23+08:00">2022-10-21</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -231,7 +233,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/LeetCode/" itemprop="url" rel="index"><span itemprop="name">LeetCode</span></a>
+                  <a href="/categories/6-824/" itemprop="url" rel="index"><span itemprop="name">6.824</span></a>
                 </span>
             </span>
 
@@ -253,57 +255,54 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>链接 <a target="_blank" rel="noopener" href="https://leetcode.cn/problems/minimum-swaps-to-make-sequences-increasing/submissions/">&gt;&gt;&gt; 2022.10.10 每日一题 LeetCode801(hard) &lt;&lt;&lt;</a></p>
+        <p>6.824 的第九篇论文是 <strong>FaRM</strong>——一个通过为分布式事务提供序列化、高性能、持久性和高可用性的<strong>主存分布式计算平台</strong>。</p>
 <span id="more"></span>
+<p>FaRM 利用以下两种<strong>硬件趋势</strong>做到这一点：</p>
+<ul>
+<li>非易失 DRAM（通过将 DRAM 写入 SSD 实现）</li>
+<li>快速 RDMA</li>
+</ul>
+<p>这消除了存储和网络瓶颈，却带来了新的 CPU 瓶颈。FaRM 通过遵循以下三个原则来解决这一 bottleneck：</p>
+<ul>
+<li><p>减少消息量</p>
 <blockquote>
-<p>我们有两个长度相等且不为空的整型数组 <code>nums1</code> 和 <code>nums2</code>。在一次操作中，我们可以交换 <code>nums1[i]</code> 和 <code>nums2[i]</code> 的元素。</p>
-<p>例如，如果 <code>nums1 = [1,2,3,8], nums2 =[5,6,7,4]</code> ，你可以交换 <code>i = 3</code> 处的元素，得到 <code>nums1 =[1,2,3,4]</code> 和 <code>nums2 =[5,6,7,8]</code> 。 返回 使 <code>nums1</code> 和 <code>nums2</code> <strong>严格递增</strong> 所需操作的最小次数 。</p>
-<p>数组 <code>arr</code> <strong>严格递增</strong> 是指 <code>arr[0] &lt; arr[1] &lt; arr[2] &lt; ... &lt; arr[arr.length - 1]</code></p>
-<p><strong>注意</strong>：用例保证可以实现操作。</p>
-</blockquote>
-<h5 id="最初的想法">最初的想法</h5>
-<p>首先，对于任意 <code>i</code>，我们有两种选择，交换 or 不交换。那么最开始，我们可以考虑定义一个数组 <code>dp[n]</code>，其中 <code>dp[i]</code> 表示前 <code>i+1</code> 个元素的子数组中<strong>使序列递增的最小操作次数</strong>。那么可以得到以下状态转移方程：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> num1[i] &lt;= nums1[i<span class="number">-1</span>] || nums2[i] &lt;= nums2[i<span class="number">-1</span>] &#123;</span><br><span class="line">    dp[i] = dp[i<span class="number">-1</span>] + <span class="number">1</span></span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    dp[i] = dp[i<span class="number">-1</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>但这种考虑存在一个漏洞：我们的考虑范围局限在了相邻两个元素之间的关系，却没有考虑到之前的元素。</p>
-<p>比如当 <code>nums1 = [0,2,2], nums2 = [1,1,3]</code> 时，我们只需交换 <code>i = 1</code> 处的元素。而在上面的状态转移过程中，我们却得到了 <code>dp = [0, 1, 2]</code>——这显然不是我们想要的。而这一结果的成因在于，忽略了之前是否有交换。</p>
-<h5 id="改进">改进</h5>
-<p>于是需要将 <code>dp[n]</code> 扩展到二维数组 <code>dp[n][2]</code>，<code>dp[i][0]</code> 表示对 <code>i</code> 处<strong>不进行交换</strong>时，前 <code>i+1</code> 个元素的子数组中使序列递增的最小操作次数；<code>dp[i][1]</code> 表示<strong>进行交换</strong>时的最小操作次数。这样一来，我们就能够对之前的交换情况进行考虑了。</p>
-<p>既然题目保证最终能够实现操作，那么对任意 <code>i &gt; 1</code>，必然存在以下情况：</p>
+<p>FaRM 允许事务与存储对象跨机器分布；</p>
+<p>使用具有 replica 的垂直 Paxos 以及直接与 Primary/Backup 通信的非复制协调器；</p>
+<p>使用<strong>乐观并发控制</strong>和<strong>四阶段提交协议</strong>(4PC: lock, validation, commit backup, commit primary)。</p>
+</blockquote></li>
+<li><p>使用单侧 RDMA 进行读写，而不是传递消息</p>
+<blockquote>
+<p>不使用远程 CPU，且避免了大部分 local CPU 开销。但这样一来传统的基于 CPU 的 failure-recovery 就失效了，需要考虑<strong>新的 failure-recovery protocol</strong>：</p>
 <ol type="1">
-<li><p><code>nums1[i] &lt;= num1[i-1] || nums2[i] &lt;= nums2[i-1]</code></p>
-<p>这种情况下，<code>i</code> 处的交换情况必须与 <code>i-1</code> 处的交换情况相反，如果 <code>i-1</code> 换了，则 <code>i</code> 处无需交换；反之同理。有： <span class="math display">\[
- \begin{align}
- dp[i][0] &amp;= dp[i-1][1] \\[2ex] dp[i][1] &amp;= dp[i-1][0] + 1
- \end{align}
- \]</span></p></li>
-<li><p><code>(nums1[i] &gt; num1[i-1] &amp;&amp; nums2[i] &gt; nums2[i-1]) &amp;&amp; (nums1[i] &lt;= nums2[i-1] || nums2[i] &lt;= nums1[i-1])</code></p>
-<p>这种情况下，<code>i</code> 处的交换情况必须与 <code>i-1</code> 处的交换情况保持一致，也就是要么都交换，要么都不交换，则有： <span class="math display">\[
- \begin{align}
- dp[i][0] &amp;= dp[i-1][0] \\[2ex] dp[i][1] &amp;= dp[i-1][1] + 1
- \end{align}
- \]</span></p></li>
-<li><p><code>(nums1[i] &gt; num1[i-1] &amp;&amp; nums2[i] &gt; nums2[i-1]) &amp;&amp; (nums1[i] &gt; nums2[i-1] &amp;&amp; nums2[i] &gt; nums1[i-1])</code></p>
-<p>这种情况下，<code>i</code> 处交不交换都无所谓，既然我们要最小操作，则有： <span class="math display">\[
- \begin{align}
- dp[i][0] &amp;= \min(dp[i-1][0], dp[i-1][1])\\[2ex] dp[i][1] &amp;= dp[i][0] + 1
- \end{align}
- \]</span></p></li>
+<li><strong>precise membership</strong>：FaRM servers 不根据它们的 lease 到期而拒绝传入的请求，因为请求由不支持 lease 的网卡(<strong>NIC</strong>)提供服务；使用 precise membership来确保机器同意当前的成员配置，并只向成员机器发送单侧操作；</li>
+<li><strong>reservations</strong>：因为事务记录被写入参与者日志而不涉及 CPU，FaRM 使用 reservations 来确保在开始 commit 之前，日志中有足够空间用于 commit 和 truncate 事务。</li>
 </ol>
-<p>于是代码就很清晰了</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">min</span><span class="params">(a, b <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> a &lt; b &#123;</span><br><span class="line">        <span class="keyword">return</span> a</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> b</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">minSwap</span><span class="params">(nums1 []<span class="type">int</span>, nums2 []<span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    n := <span class="built_in">len</span>(nums1)</span><br><span class="line">    dp := <span class="built_in">make</span>([][]<span class="type">int</span>, n)</span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; n; i++ &#123;</span><br><span class="line">        dp[i] = <span class="built_in">make</span>([]<span class="type">int</span>, <span class="number">2</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    dp[<span class="number">0</span>][<span class="number">0</span>] = <span class="number">0</span></span><br><span class="line">    dp[<span class="number">0</span>][<span class="number">1</span>] = <span class="number">1</span></span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">1</span>; i &lt; n; i++ &#123;</span><br><span class="line">        <span class="keyword">if</span> nums1[i] &lt;= nums1[i<span class="number">-1</span>] || nums2[i] &lt;= nums2[i<span class="number">-1</span>] &#123;</span><br><span class="line">            dp[i][<span class="number">0</span>] = dp[i<span class="number">-1</span>][<span class="number">1</span>]</span><br><span class="line">            dp[i][<span class="number">1</span>] = dp[i<span class="number">-1</span>][<span class="number">0</span>] + <span class="number">1</span></span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> nums1[i] &lt;= nums2[i<span class="number">-1</span>] || nums2[i] &lt;= nums1[i<span class="number">-1</span>] &#123;</span><br><span class="line">            dp[i][<span class="number">0</span>] = dp[i<span class="number">-1</span>][<span class="number">0</span>]</span><br><span class="line">            dp[i][<span class="number">1</span>] = dp[i<span class="number">-1</span>][<span class="number">1</span>] + <span class="number">1</span></span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            dp[i][<span class="number">0</span>] = min(dp[i<span class="number">-1</span>][<span class="number">0</span>], dp[i<span class="number">-1</span>][<span class="number">1</span>])</span><br><span class="line">            dp[i][<span class="number">1</span>] = dp[i][<span class="number">0</span>] + <span class="number">1</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> min(dp[n<span class="number">-1</span>][<span class="number">0</span>], dp[n<span class="number">-1</span>][<span class="number">1</span>])</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>一看提交结果，看来还得优化。</p>
+</blockquote></li>
+<li><p>有效利用并行性</p>
 <blockquote>
-<p>执行用时：144 ms, 在所有 Go 提交中击败了 18.18% 的用户</p>
-<p>内存消耗：19.7 MB, 在所有 Go 提交中击败了 9.09% 的用户</p>
-</blockquote>
-<h5 id="优化">优化</h5>
-<p>注意到，每个 <code>dp[i]</code> 的状态只与 <code>dp[i-1]</code> 有关，之前的信息就被淘汰了，于是可以采用<strong>滚动数组</strong>的技巧优化空间。</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">min</span><span class="params">(a, b <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> a &lt; b &#123;</span><br><span class="line">        <span class="keyword">return</span> a</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> b</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">minSwap</span><span class="params">(nums1 []<span class="type">int</span>, nums2 []<span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    n := <span class="built_in">len</span>(nums1)</span><br><span class="line">    a, b := <span class="number">0</span>, <span class="number">1</span></span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">1</span>; i &lt; n; i++ &#123;</span><br><span class="line">        <span class="keyword">if</span> nums1[i] &lt;= nums1[i<span class="number">-1</span>] || nums2[i] &lt;= nums2[i<span class="number">-1</span>] &#123;</span><br><span class="line">            a, b = b, a + <span class="number">1</span></span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> nums1[i] &lt;= nums2[i<span class="number">-1</span>] || nums2[i] &lt;= nums1[i<span class="number">-1</span>] &#123;</span><br><span class="line">            b++</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            a = min(a, b)</span><br><span class="line">            b = a + <span class="number">1</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> min(a, b)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>优化后，比较满意了。</p>
-<blockquote>
-<p>执行用时：120 ms, 在所有 Go 提交中击败了68.18%的用户</p>
-<p>内存消耗：9.6 MB, 在所有 Go 提交中击败了90.91%的用户</p>
-</blockquote>
+<p>它将每个状态的恢复均匀地分布在集群中，并在每台机器之间并行恢复。它使用<strong>两个优化</strong>来允许事务执行与恢复并行进行：</p>
+<ol type="1">
+<li>事务在锁定恢复阶段之后开始访问受故障影响的数据；</li>
+<li>不受故障影响的事务继续执行而不会阻塞。</li>
+</ol>
+</blockquote></li>
+</ul>
+<h4 id="硬件趋势">硬件趋势</h4>
+<h5 id="非易失-dram">非易失 DRAM</h5>
+<p>发生电源故障时，分布式不间断电源(<strong>UPS</strong>)使用电源中的能量将内存中的数据保存到 SSD，从而提高 DRAM 耐用性。</p>
+<h5 id="rdma-网络">RDMA 网络</h5>
+<p>FaRM 尽可能使用单侧 RDMA 操作，从而有效减少了 CPU 开销与需传递的消息数量——RPC 需要的消息量是单侧 RDMA 的两倍。</p>
+<h4 id="编程模型和架构">编程模型和架构</h4>
+<p>FaRM 为应用程序提供了跨越集群中机器的全局地址空间的抽象。每台机器都运行应用程序线程并将对象存储在地址空间中。FaRM API 提供对事务中本地和远程对象的透明访问。应用程序线程可以随时启动事务，并成为事务的协调者。在事务执行期间，线程可以执行任意逻辑以及读取、写入、分配和释放对象。在执行结束时，线程调用 FaRM 来提交事务。</p>
+<p>FaRM 事务使用乐观并发控制。更新在执行期间在本地缓冲，并且只在成功提交后对其他事务可见。由于与并发事务的冲突或失败，提交可能会失败。 FaRM 为所有成功提交的事务提供严格的可串行化[35]。在事务执行期间，FaRM 保证单个对象读取是原子的，它们只读取已提交的数据，同一对象的连续读取返回相同的数据，并且由事务写入的对象的读取返回最新写入的值。它不保证读取不同对象的原子性，但在这种情况下，它保证事务不会提交，确保提交的事务是严格可序列化的。这允许我们将一致性检查推迟到提交时间，而不是重新检查每个对象读取的一致性。然而，它增加了一些编程复杂性：FaRM 应用程序必须在执行期间处理这些临时的不一致 [20]。可以自动处理这些不一致[12]。</p>
+<p>FaRM API 还提供无锁读取（优化的单对象只读事务）和位置提示，使程序员能够在同一组机器上共同定位相关对象。这些可以被应用程序用来提高性能，如 [16] 中所述。</p>
+<p>图 3 显示了一个带有四台机器的 FaRM 实例。该图还显示了机器 A 的内部组件。每台机器在用户进程中运行 FaRM，每个硬件线程都有一个内核线程。每个内核线程都运行一个事件循环，该循环执行应用程序代码并轮询 RDMA 完成队列。</p>
+<p><img src="image-20221021142633067.png" alt="image-20221021142633067" style="zoom:67%;" /></p>
+<p>随着机器出现故障或添加新机器，FaRM 实例会随着时间的推移在一系列配置中移动。配置是一个元组，其中i是唯一的、单调递增的64位配置标识符，S是配置中的机器集，F是从机器到故障域的映射预计会独立失败（例如，不同的机架），并且 CM ∈ S 是配置管理器。 FaRM 使用 Zookeeper [21] 协调服务来确保机器就当前配置达成一致并存储它，就像在 Vertical Paxos [25] 中一样。但它不像通常那样依赖 Zookeeper 来管理租约、检测故障或协调恢复。 CM 使用利用 RDMA 快速恢复的高效实现来执行这些操作。每次配置更改时，CM 都会调用一次 Zookeeper 来更新配置。</p>
+<p>FaRM 中的全局地址空间由 2 GB 区域组成，每个区域在一个主节点和 f 个备份上复制，其中 f 是所需的容错能力。每台机器在非易失性 DRAM 中存储多个区域，其他机器可以使用 RDMA 读取这些区域。对象总是从包含区域的主副本中读取，如果区域在本地机器上，则使用本地内存访问，如果是远程，则使用单面 RDMA 读取。每个对象都有一个用于并发控制和复制的 64 位版本。区域标识符到其主要和备份的映射由 CM 维护并与区域一起复制。这些映射由其他机器按需获取，并由线程与向主节点发出单侧 RDMA 读取所需的 RDMA 引用一起缓存。</p>
+<p>机器联系 CM 以分配新区域。 CM 从一个单调递增的计数器中分配一个区域标识符，并为该区域选择副本。副本选择平衡每台机器上存储的区域数量，受以下约束：有足够的容量，每个副本位于不同的故障域中，当应用程序指定局部性约束时，该区域与目标区域位于同一位置.然后它将准备消息发送到带有区域标识符的选定副本。如果所有副本都报告分配区域成功，则 CM 向所有副本发送提交消息。这个两阶段协议确保映射在使用之前有效并在所有区域副本中复制。</p>
+<p>与我们之前基于一致散列的方法相比，这种集中式方法提供了更大的灵活性来满足故障独立性和局部性约束[16]。它还可以更轻松地平衡机器之间的负载并在接近容量的情况下运行。使用 2 GB 区域，我们预计一台典型机器上最多有 250 个区域，因此单个 CM 可以处理数千台机器的区域分配。</p>
+<p>每台机器还存储实现 FIFO 队列的环形缓冲区 [16]。它们用作事务日志或消息队列。每个发送者-接收者对都有自己的日志和消息队列，它们物理上位于接收者上。发送者使用单侧 RDMA 写入其尾部将记录附加到日志中。这些写入由 NIC 确认，而不涉及接收器的 CPU。接收器定期轮询日志的头部以处理记录。它在截断日志时延迟更新发送方，允许发送方重用环形缓冲区中的空间。</p>
 
     </div>
 
@@ -313,7 +312,7 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/" rel="tag"># 每日一题</a>
+              <a href="/tags/paperReading/" rel="tag"># paperReading</a>
           </div>
 
         
@@ -322,13 +321,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/6-824/aurora/" rel="prev" title="Aurora">
-      <i class="fa fa-chevron-left"></i> Aurora
+    <a href="/6-824/Spanner/" rel="prev" title="Spanner">
+      <i class="fa fa-chevron-left"></i> Spanner
     </a></div>
-      <div class="post-nav-item">
-    <a href="/6-824/Frangipani/" rel="next" title="Frangipani">
-      Frangipani <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -387,7 +383,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%9C%80%E5%88%9D%E7%9A%84%E6%83%B3%E6%B3%95"><span class="nav-text">最初的想法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%94%B9%E8%BF%9B"><span class="nav-text">改进</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BC%98%E5%8C%96"><span class="nav-text">优化</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A1%AC%E4%BB%B6%E8%B6%8B%E5%8A%BF"><span class="nav-text">硬件趋势</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%9D%9E%E6%98%93%E5%A4%B1-dram"><span class="nav-text">非易失 DRAM</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#rdma-%E7%BD%91%E7%BB%9C"><span class="nav-text">RDMA 网络</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%96%E7%A8%8B%E6%A8%A1%E5%9E%8B%E5%92%8C%E6%9E%B6%E6%9E%84"><span class="nav-text">编程模型和架构</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
