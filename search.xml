@@ -110,15 +110,15 @@
 <li><p>减少消息量</p>
 <blockquote>
 <p>FaRM 允许事务与存储对象跨机器分布；</p>
-<p>使用具有 replica 的垂直 Paxos 以及直接与 Primary/Backup 通信的非复制协调器；</p>
+<p>使用具有 replica 的垂直 Paxos 以及直接与 Primary/Backup 通信的非复制 <strong>coordinator</strong>；</p>
 <p>使用<strong>乐观并发控制</strong>和<strong>四阶段提交协议</strong>(4PC: lock, validation, commit backup, commit primary)。</p>
 </blockquote></li>
 <li><p>使用单侧 RDMA 进行读写，而不是传递消息</p>
 <blockquote>
 <p>不使用远程 CPU，且避免了大部分 local CPU 开销。但这样一来传统的基于 CPU 的 failure-recovery 就失效了，需要考虑<strong>新的 failure-recovery protocol</strong>：</p>
 <ol type="1">
-<li><strong>precise membership</strong>：FaRM servers 不根据它们的 lease 到期而拒绝传入的请求，因为请求由不支持 lease 的网卡(<strong>NIC</strong>)提供服务；使用 precise membership来确保机器同意当前的成员配置，并只向成员机器发送单侧操作；</li>
-<li><strong>reservations</strong>：因为事务记录被写入参与者日志而不涉及 CPU，FaRM 使用 reservations 来确保在开始 commit 之前，日志中有足够空间用于 commit 和 truncate 事务。</li>
+<li><strong>precise membership</strong>：FaRM servers 不根据它们的 lease 到期而拒绝传入的请求，因为请求由不支持 lease 的网卡(<strong>NIC</strong>)提供服务；使用 precise membership 来确保机器同意当前的成员配置，并只向配置中的成员机器发送 RDMA；</li>
+<li><strong>reservations</strong>：因为事务记录被写入日志而不涉及 CPU，FaRM 使用 reservations 来确保在开始 commit 之前，日志中有足够空间用于 commit 和 truncate 事务。</li>
 </ol>
 </blockquote></li>
 <li><p>有效利用并行性</p>
@@ -135,17 +135,135 @@
 <p>发生电源故障时，分布式不间断电源(<strong>UPS</strong>)使用电源中的能量将内存中的数据保存到 SSD，从而提高 DRAM 耐用性。</p>
 <h5 id="rdma-网络">RDMA 网络</h5>
 <p>FaRM 尽可能使用单侧 RDMA 操作，从而有效减少了 CPU 开销与需传递的消息数量——RPC 需要的消息量是单侧 RDMA 的两倍。</p>
-<h4 id="编程模型和架构">编程模型和架构</h4>
-<p>FaRM 为应用程序提供了跨越集群中机器的全局地址空间的抽象。每台机器都运行应用程序线程并将对象存储在地址空间中。FaRM API 提供对事务中本地和远程对象的透明访问。应用程序线程可以随时启动事务，并成为事务的协调者。在事务执行期间，线程可以执行任意逻辑以及读取、写入、分配和释放对象。在执行结束时，线程调用 FaRM 来提交事务。</p>
-<p>FaRM 事务使用乐观并发控制。更新在执行期间在本地缓冲，并且只在成功提交后对其他事务可见。由于与并发事务的冲突或失败，提交可能会失败。 FaRM 为所有成功提交的事务提供严格的可串行化[35]。在事务执行期间，FaRM 保证单个对象读取是原子的，它们只读取已提交的数据，同一对象的连续读取返回相同的数据，并且由事务写入的对象的读取返回最新写入的值。它不保证读取不同对象的原子性，但在这种情况下，它保证事务不会提交，确保提交的事务是严格可序列化的。这允许我们将一致性检查推迟到提交时间，而不是重新检查每个对象读取的一致性。然而，它增加了一些编程复杂性：FaRM 应用程序必须在执行期间处理这些临时的不一致 [20]。可以自动处理这些不一致[12]。</p>
-<p>FaRM API 还提供无锁读取（优化的单对象只读事务）和位置提示，使程序员能够在同一组机器上共同定位相关对象。这些可以被应用程序用来提高性能，如 [16] 中所述。</p>
-<p>图 3 显示了一个带有四台机器的 FaRM 实例。该图还显示了机器 A 的内部组件。每台机器在用户进程中运行 FaRM，每个硬件线程都有一个内核线程。每个内核线程都运行一个事件循环，该循环执行应用程序代码并轮询 RDMA 完成队列。</p>
-<p><img src="image-20221021142633067.png" alt="image-20221021142633067" style="zoom:67%;" /></p>
-<p>随着机器出现故障或添加新机器，FaRM 实例会随着时间的推移在一系列配置中移动。配置是一个元组，其中i是唯一的、单调递增的64位配置标识符，S是配置中的机器集，F是从机器到故障域的映射预计会独立失败（例如，不同的机架），并且 CM ∈ S 是配置管理器。 FaRM 使用 Zookeeper [21] 协调服务来确保机器就当前配置达成一致并存储它，就像在 Vertical Paxos [25] 中一样。但它不像通常那样依赖 Zookeeper 来管理租约、检测故障或协调恢复。 CM 使用利用 RDMA 快速恢复的高效实现来执行这些操作。每次配置更改时，CM 都会调用一次 Zookeeper 来更新配置。</p>
-<p>FaRM 中的全局地址空间由 2 GB 区域组成，每个区域在一个主节点和 f 个备份上复制，其中 f 是所需的容错能力。每台机器在非易失性 DRAM 中存储多个区域，其他机器可以使用 RDMA 读取这些区域。对象总是从包含区域的主副本中读取，如果区域在本地机器上，则使用本地内存访问，如果是远程，则使用单面 RDMA 读取。每个对象都有一个用于并发控制和复制的 64 位版本。区域标识符到其主要和备份的映射由 CM 维护并与区域一起复制。这些映射由其他机器按需获取，并由线程与向主节点发出单侧 RDMA 读取所需的 RDMA 引用一起缓存。</p>
-<p>机器联系 CM 以分配新区域。 CM 从一个单调递增的计数器中分配一个区域标识符，并为该区域选择副本。副本选择平衡每台机器上存储的区域数量，受以下约束：有足够的容量，每个副本位于不同的故障域中，当应用程序指定局部性约束时，该区域与目标区域位于同一位置.然后它将准备消息发送到带有区域标识符的选定副本。如果所有副本都报告分配区域成功，则 CM 向所有副本发送提交消息。这个两阶段协议确保映射在使用之前有效并在所有区域副本中复制。</p>
-<p>与我们之前基于一致散列的方法相比，这种集中式方法提供了更大的灵活性来满足故障独立性和局部性约束[16]。它还可以更轻松地平衡机器之间的负载并在接近容量的情况下运行。使用 2 GB 区域，我们预计一台典型机器上最多有 250 个区域，因此单个 CM 可以处理数千台机器的区域分配。</p>
-<p>每台机器还存储实现 FIFO 队列的环形缓冲区 [16]。它们用作事务日志或消息队列。每个发送者-接收者对都有自己的日志和消息队列，它们物理上位于接收者上。发送者使用单侧 RDMA 写入其尾部将记录附加到日志中。这些写入由 NIC 确认，而不涉及接收器的 CPU。接收器定期轮询日志的头部以处理记录。它在截断日志时延迟更新发送方，允许发送方重用环形缓冲区中的空间。</p>
+<h4 id="编程模型">编程模型</h4>
+<p>FaRM 提供<strong>全局地址空间</strong>的抽象，其 API 为事务提供对对象的透明访问。</p>
+<p>FaRM 事务使用<strong>乐观并发控制</strong>。对数据的修改会先在本地缓存，且只在成功提交后才对其他事务可见。</p>
+<p>FaRM 为所有成功提交的事务提供严格的<strong>可串行化</strong>：</p>
+<ul>
+<li><strong>单对象读取</strong>是原子的：只读取已提交的值，且由事务写入的对象的读取返回最新写入的值。FaRM API 还为单对象 RO 事务提供<strong>无锁读取</strong>和<strong>位置提示</strong>，使程序员能够在同一组机器上共同定位相关对象。</li>
+<li><strong>多对象读取</strong>不保证原子性：保证事务不会提交，同时确保提交的事务是严格可串行化的。这样可以将一致性检查推迟到提交时间。</li>
+</ul>
+<h4 id="整体架构">整体架构</h4>
+<p><img src="FaRM/image-20221021142633067.png" alt="image-20221021142633067" style="zoom:67%;" /></p>
+<h5 id="协调与配置">协调与配置</h5>
+<p>FaRM 使用 Zookeeper 作为协调服务。</p>
+<p>FaRM 实例会随着时间的推移更新<strong>配置</strong>。配置是一个元组 <code>(i, S, F, CM)</code>，其中 <code>i</code> 是<strong>配置标识符</strong>，<code>S</code> 是配置中的<strong>机器集合</strong>，<code>F</code> 是从机器到 <strong>failure region</strong> 的<strong>映射</strong>，<code>CM</code> 是<strong>配置管理器</strong>，且 CM ∈ S。</p>
+<p><strong>CM</strong>(Configuration Manager) 实现管理租约、检测故障或协调恢复。每次配置更改时，CM 都会调用 Zookeeper 来更新配置以达成共识。</p>
+<h5 id="内存管理">内存管理</h5>
+<p>FaRM 中的地址空间由多个 2GB 大小的 <strong>region</strong> 组成。每个 region 分布在一个 primary 和 <span class="math inline">\(f\)</span> 个 backup 上，对于每个机器而言，region 存储在其 DRAM 中并且可以被 RDMA 读取。</p>
+<p>所有的 read 都落到 primary 上（如果 region 在本地，则直接通过本地内存访问；反之，则使用单侧 RDMA 读取）。</p>
+<p>CM 存储 region 标识符到其 primary/backup 的映射。这些映射可被其他机器按需获取、缓存到本地并复制。</p>
+<h5 id="region-分配">region 分配</h5>
+<p>机器联系 CM 以分配新 region。CM 为 new region 分配一个标识符，并为其选择 replicas。对 replica 的选择应尽量<strong>均衡负载</strong>，并且满足：</p>
+<ul>
+<li>有足够的容量；</li>
+<li>每个 replica 位于不同的 failure region 中；</li>
+<li>当应用程序指定局部性约束时，该 region 与目标 region 位于同一位置。</li>
+</ul>
+<p>然后 CM 利用 <strong>2PC</strong> 进行 region 分配。</p>
+<h5 id="logmsg-队列">Log/Msg 队列</h5>
+<p>每台机器存储一个基于 <strong>FIFO</strong> 的环形缓冲区，用于<strong>事务日志或消息队列</strong>。每个接收者都有单独的 log queue 和 msg queue。发送者使用单侧 RDMA 将记录附加到日志尾部，写入由 NIC 发送 ack，不涉及 CPU；接收者定期轮询日志的头部以处理记录。</p>
+<h4 id="分布式事务与复制">分布式事务与复制</h4>
+<p>下图展示了 FaRM 事务提交时间线。</p>
+<p><img src="image-20221025170135679.png" alt="image-20221025170135679" style="zoom:67%;" /></p>
+<h5 id="执行阶段">执行阶段</h5>
+<ul>
+<li>事务使用单侧 RDMA 读取对象并写入本地缓存。</li>
+<li>coordinator 记录所有访问对象的地址和版本号。</li>
+<li>对于与 coordinator 在同一台机器上的 primary/backup，对象对日志的读取和写入使用本地内存访问而不是 RDMA。</li>
+</ul>
+<h5 id="提交阶段">提交阶段</h5>
+<p><img src="image-20221025172808292.png" alt="image-20221025172808292" style="zoom:70%;" /></p>
+<ol type="1">
+<li><p><strong>Lock</strong>：coordinator 将 LOCK 记录写入每台涉及写的 primary。primary 通过尝试使用 compare-and-swap 将对象在指定版本处 lock，并回复是否成功获取所有锁。若失败，则中止事务。</p></li>
+<li><p><strong>Validate</strong>：coordinator 通过从 primary 中读取 被事务读取但未写入的所有对象 的版本来执行 VALIDATE。如果任何对象已更改，则中止事务。</p>
+<blockquote>
+<p>默认使用单侧 RDMA 读，而对于拥有 <span class="math inline">\(t_r\)</span> 以上对象的 primary，则用 RPC（阈值 <span class="math inline">\(t_r\)</span> 反映了 RPC 相对于 RDMA 读取的 CPU 成本）。</p>
+</blockquote></li>
+<li><p><strong>Commit Backup</strong>：coordinator 将 <code>COMMIT-BACKUP</code> 记录写入所有 backup 的日志，然后等待来自 NIC 硬件的 ack，无需 CPU 干涉。</p></li>
+<li><p><strong>Commit Primary</strong>：在确认所有 <code>COMMIT-BACKUP</code> 写入后，coordinator 将 <code>COMMIT-PRIMARY</code> 记录写入每个 primary 的日志中。接下来 primary 更新对象及其版本并 unlock。coordinator 会在收到至少一个 primary 的 ack 时向应用程序报告完成。</p></li>
+<li><p><strong>Truncate</strong>：primary/backup 将记录保留在其日志中直到被截断。coordinator 在收到所有 primary 的确认后，它会在其他日志记录中捎带截断事务的标识符会从而延迟截断。backup 在截断时将更新应用于其对象副本。</p></li>
+</ol>
+<p><img src="image-20221025172832254.png" alt="image-20221025172832254" style="zoom:70%;" /></p>
+<h4 id="故障恢复">故障恢复</h4>
+<h5 id="故障检测">故障检测</h5>
+<p>FaRM 使用 <strong>lease</strong> 来检测故障。每台机器都在 CM 处持有 lease，而 CM 在其他每台机器上都持有 lease。任何 lease 到期都会触发故障恢复。FaRM 使用 <strong>3 次握手</strong>授予 lease。每台机器都会向 CM 发送一个 lease 请求，CM 在授权响应中捎带 CM 的 lease 请求，最后机器回复 CM 的 lease 许可。</p>
+<blockquote>
+<p>FaRM 租期很短，以保证高可用性。</p>
+</blockquote>
+<p>FaRM 为 lease 维护一个专用消息队列，以及时处理请求。可靠传输将要求 CM 为每台机器添加一个额外的队列。</p>
+<p>默认情况下，每过租期的 1/5 会尝试更新租约，以防止消息丢失。还必须及时在 CPU 上安排续租。 FaRM 使用以最高用户空间优先级运行的专用租用管理器线程。</p>
+<h5 id="重新配置">重新配置</h5>
+<p>单侧 RDMA 要求重新配置协议使用 <strong>lease</strong> 实现一致性，服务器在回复访问对象的请求之前检查它们是否持有对象的lease。从配置中被驱逐的服务器存储的对象在 lease 到期之前不被改变。</p>
+<p>但由于 CPU 无法检查是否持有 lease，且 NIC 也不支持 lease。这一问题可用 <strong>precise membership</strong> 来解决：发生故障后，新配置中的所有机器必须在允许对象变更之前就其成员关系达成共识。配置内的机器不会发起/接受配置外机器的 RDMA 请求。</p>
+<p><img src="image-20221026112640579.png" alt="image-20221026112640579" style="zoom:80%;" /></p>
+<ol type="1">
+<li><p><strong>Suspect</strong>：CM 怀疑机器 lease 到期时，会启动重新配置，并开始阻止所有外部 client 请求；机器怀疑 CM lease 到期时，它首先要求 CM backup 中的一个启动重新配置。如果超时，那么它会自己尝试成为新的 CM 并重新配置。</p></li>
+<li><p><strong>Probe</strong>：新 CM 向配置中的所有机器发出 RDMA 读取（任何读取失败的机器也被 SUSPECT），仅当新 CM 获得<strong>大多数</strong> probe 的响应时，它才会继续进行重新配置。</p>
+<blockquote>
+<p>这确保了如果网络被分区，CM 不会在较小的分区中。</p>
+</blockquote></li>
+<li><p><strong>Update Configuration</strong>：新 CM 更新 Zookeeper 中存储的配置数据。使用 znode 序列号来实现原子 <strong>compare-and-swap</strong>。</p>
+<blockquote>
+<p>这确保了即使多台机器同时尝试从具有标识符 c 的配置更改配置，也只有一台机器可以成功地将系统移动到具有标识符 c +1 的配置（并成为 CM）。</p>
+</blockquote></li>
+<li><p><strong>Remap Regions</strong>：新 CM 重新分配 region。若 primary 故障，它会将某个 backup 提升为新的 primary，以减少恢复时间。</p></li>
+<li><p><strong>Send New Configuration</strong>：CM 向所有机器发送<code>NEW-CONFIG</code> 消息。如果 CM 改变，<code>NEW-CONFIG</code> 还会重置 lease 协议。</p></li>
+<li><p><strong>Apply New Configuration</strong>：当机器接收到配置标识符大于自己的配置标识符的 <code>NEW-CONFIG</code> 时，它会应用新配置，此后拒绝任何配置外机器的请求。机器用 <code>NEW-CONFIG-ACK</code> 消息回复 CM。如果 CM 发生了变化，则会向新 CM 重新授予/请求 lease。</p></li>
+<li><p><strong>Commit New Configuration</strong>：一旦 CM 接收到所有 <code>NEW-CONFIG-ACK</code> 消息，它就会等待配置外的机器的 lease 都已过期。然后 CM 向所有配置成员发送 <code>NEW-CONFIG-COMMIT</code>（同时授予 lease）。之后所有成员都解除 <strong>Suspect</strong> 中对外部 client 请求的阻止，并启动事务恢复。</p></li>
+</ol>
+<h5 id="事务状态恢复">事务状态恢复</h5>
+<p>FaRM 在配置更改后使用日志来恢复事务状态。下图为事务恢复时间线：</p>
+<p><img src="image-20221026140042960.png" alt="image-20221026140042960" style="zoom:80%;" /></p>
+<ol type="1">
+<li><p><strong>Block Access To Recovering Regions</strong>：当 region 的 primary 发生故障时，其中一个 backup 会在重新配置期间提升为新的 primary。在更新 region 的所有事务都反映在新的 primary 上之前不能允许访问该 region，直到第 4 步 Lock Recover 结束。</p></li>
+<li><p><strong>Drain Logs</strong>：所有机器在收到 <code>NEW-CONFIG-COMMIT</code> 消息时都会处理其日志中的所有记录。完成后，它们将最新配置标识符记录在变量 <code>LastDrained</code> 中。FaRM 事务具有在 commit 开始时分配的唯一标识符，配置标识符小于或等于 <code>LastDrained</code> 的事务的日志记录将被拒绝。</p>
+<blockquote>
+<p>NIC 会向 COMMIT-BACKUP/PRIMARY 发送 ack，无论它们是在何种配置中发出的。由于 coordinator 在向应用程序公开更新并报告成功之前只等待这些 ack，因此 FaRM 不能仅仅拒绝来自旧配置的消息来达到<strong>跨配置一致性</strong>。</p>
+</blockquote></li>
+<li><p><strong>Finding Recovering Transactions</strong>： recovering transaction 是指在 commit 阶段进行跨配置更改的事务。需要在 Drain Logs 期间检查所有日志记录以确定 RT 的集合。所有机器必须就给定事务是否为 RT 达成一致。CM 在 Probe Read 阶段读取每台机器上的 <code>LastDrained</code>。对于自 <code>LastDrained</code> 以来 replica 归属变化的每个 region <span class="math inline">\(r\)</span>，CM 在 <code>NEW-CONFIG</code> 消息中捎带两个配置标识符：</p>
+<ul>
+<li><code>LastPrimaryChange[r]</code>：primary 最后一个配置标识符；</li>
+<li><code>LastReplicaChange[r]</code>：所有 replica 最后一个配置标识符。</li>
+</ul>
+<p>在配置 <span class="math inline">\(c-1\)</span> 中开始提交的事务在配置 <span class="math inline">\(c\)</span> 中恢复，除非：</p>
+<ul>
+<li>包含由事务<strong>读取</strong>对象的所有 region <span class="math inline">\(r\)</span>，<code>LastPrimaryChange[r] &lt; c</code>；</li>
+<li>包含由事务<strong>修改</strong>对象的所有 region <span class="math inline">\(r&#39;\)</span>，<code>LastReplicaChange[r'] &lt; c</code>；</li>
+<li>配置 <span class="math inline">\(c\)</span> 中 coordinator 尚未被移除。</li>
+</ul>
+<p>region 的每个 replica 都会向 primary 发送一条 <code>NEED-RECOVERY</code> 消息。</p></li>
+<li><p><strong>Lock Recover</strong>：每个 region 的 primary 一直等待，直到本地机器 Drain Log 结束并且从每个 replica 接收到 <code>NEED-RECOVERY</code> 消息，以构建影响该 region 的完整 RT 集。然后它对 RT 分片。并行地，primary 线程从 backup 中获取尚未存储在本地的事务日志记录并给相关对象上锁。当一个 region 的 Lock Recover 完成后，该 region 可访问。</p></li>
+<li><p><strong>Replicate Log Records</strong>：primary 线程通过向 backup 发送 <code>REPLICATE-TX-STATE</code> 消息来复制日志记录，以免丢失事务。</p></li>
+<li><p><strong>Vote</strong>：coordinator 根据 region 的投票决定 commit/abort 事务。投票由 primary 发起。primary 线程将 <code>RECOVERY-VOTE</code> 消息发送到 coordinator 中的对等线程。</p>
+<ul>
+<li>若 replicas 看到 <code>COMMIT-PRIMARY</code> 或 <code>COMMIT-RECOVERY</code>，则投票 <code>commit-primary</code>；</li>
+<li>否则，若 replicas 看到 <code>COMMIT-BACKUP</code> 但没看到 <code>ABORT-RECOVERY</code>，则投票 <code>commit-backup</code>；</li>
+<li>否则，若 replicas 看到 <code>LOCK</code> 记录且没有 <code>ABORT-RECOVERY</code> ，则投票 <code>lock</code>；</li>
+<li>否则，它会投票 <code>abort</code>。</li>
+</ul></li>
+<li><p><strong>Decide</strong>：</p>
+<ul>
+<li>若 coordinator 收到来自所有 region 的 <code>commit-primary</code> 投票，则提交事务；</li>
+<li>否则，等待所有 region 投票。若至少一个 region 投票 <code>commit-backup</code>，且由事务修改的所有其他 region 投票 <code>lock</code>、<code>commit-backup</code> 或 <code>truncated</code>，则提交；</li>
+<li>否则，中止。</li>
+</ul>
+<p>然后它向所有 replicas 发送 <code>COMMIT-RECOVERY</code> 或 <code>ABORT-RECOVERY</code>。在 coordinator 收到来自所有 primary/backup 的 ack 后，它会发送一条 <code>TRUNCATE-RECOVERY</code> 消息。</p></li>
+</ol>
+<h5 id="数据恢复">数据恢复</h5>
+<p>当 primary 的所有 region 可访问时，每台机器都会向 CM 发送 <code>REGIONS-ACTIVE</code> 消息。然后 CM 向配置中的所有机器发送 <code>ALL-REGIONS-ACTIVE</code> 消息，此时开始数据恢复。</p>
+<p>如果对象的版本高于本地版本，则 replicas 会通过 CAS 上锁，更新后解锁；否则，不应用恢复。</p>
+<h5 id="分配器状态恢复">分配器状态恢复</h5>
+<p>FaRM 分配器将 region 拆分为 <strong>block</strong> (1 MB)，这些 block 用作分配小对象的 <strong>slab</strong>。它保留了两个元数据：</p>
+<ul>
+<li>block header：包含对象大小；</li>
+<li>slab 空闲列表。</li>
+</ul>
+<p>分配新 block 时，BH 会复制到 replica 中。由于块头用于数据恢复，因此新 primary 在收到 <code>NEW-CONFIG-COMMIT</code> 后立即将它们发送到所有 replicas。</p>
+<p>slab 空闲列表仅保留在 primary 中，以减少对象分配的开销。</p>
+<p>每个对象的 header 中都有一个 bit 位，表示该对象已分配或被清理。这一 bit 也会在事务提交期间被复制。通过并行扫描故障 region 中的对象，在新的 primary 上恢复空闲列表。为了尽量减少对事务 lock recovery 的影响，分配器恢复在收到 <code>ALL-REGIONS-ACTIVE</code> 后开始，在 slab 空闲列表恢复后释放对象。</p>
+<h4 id="总结">总结</h4>
+<p>这是 6.824 事务与复制的最后一个系列了，用 RDMA 而不是 RPC 很有创新点。</p>
 ]]></content>
       <categories>
         <category>6.824</category>
@@ -196,6 +314,135 @@
 <p>且 demon 无需关心元数据上是否持有锁。如果有锁，那大可以放心读取；如果锁已经被释放了，那脏数据肯定已经被写进去了，不用执行也没时。</p>
 <h4 id="总结">总结</h4>
 <p>Frangipani 提供了实现 Cache Consistency 的新思路，但由于时代的限制，它并没有对存储系统的演进产生任何影响，也无法应用到分布式系统的主要应用场景中。</p>
+]]></content>
+      <categories>
+        <category>6.824</category>
+      </categories>
+      <tags>
+        <tag>paperReading</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Spanner</title>
+    <url>/6-824/Spanner/</url>
+    <content><![CDATA[<p>6.824 的第八篇论文是 <strong>Spanner</strong>—— Google 的可扩展、多版本、全球分布和同步复制的数据库。它是第一个在全球范围内分发数据并支持外部一致的分布式事务的系统。</p>
+<span id="more"></span>
+<h4 id="简介">简介</h4>
+<p>Spanner 中的数据是<strong>多时间版本化</strong>的，每个版本都会自动加上其提交时间的<strong>时间戳</strong>(timestamp)。ts 反映序列化顺序，即：如果事务 <span class="math inline">\(T_1\)</span> 在另一个事务 <span class="math inline">\(T_2\)</span> 开始之前提交，则 <span class="math inline">\(T_1\)</span> 的 commit ts 小于 <span class="math inline">\(T_2\)</span>。 这一机制归功于 <strong>TrueTime API </strong> 设计，通过使用多个现代时钟参考（GPS 和原子钟）来保持较小的不确定性。</p>
+<blockquote>
+<p>Spanner 是第一个在全球范围内提供此类保证的系统。</p>
+</blockquote>
+<p>作为一个全球分布的数据库，Spanner 不仅提供了以下特性：</p>
+<ol type="1">
+<li>数据的复制配置可以由应用程序动态控制；</li>
+<li>应用程序可以指定哪些 data center 包含哪些数据、数据与用户之间的距离（以控制读取延迟）、副本之间的距离（以控制写入延迟）以及维护的副本数量（以控制持久性、可用性和读取性能）</li>
+<li>Spanner 支持跨机器重新<strong>分片</strong>(Sharding)数据，并且能在 data center 之间动态移动数据，以平衡负载。</li>
+</ol>
+<p>还提供了两个在分布式数据库中难以实现的特性：</p>
+<ol type="1">
+<li>满足<strong>外部一致性</strong>的读取和写入；</li>
+<li>利用 <strong>TrueTime</strong> 实现基于 ts 的跨数据库的全局一致读取。</li>
+</ol>
+<h4 id="实现">实现</h4>
+<p>Spanner 部署称之为 <strong>universe</strong>，它由一系列<strong>区域</strong>(zones)组成，每个 zone 都是管理部署的单位。一个 zone 有一个 <strong>zonemaster</strong> 和若干 <strong>spanservers</strong>，前者负责将数据分配给后者，后者负责向客户提供数据。其结构如图所示：</p>
+<p><img src="image-20221015173114863.png" alt="image-20221015173114863" style="zoom:80%;" /></p>
+<h5 id="spanserver-软件栈结构">SpanServer 软件栈结构</h5>
+<p>每个 spanserver 在底层负责若干个称为 <strong>tablet</strong> 的数据结构实例，每个 tablet 是表中的部分数据。</p>
+<p>spanserver 采用 <strong>Paxos</strong> 协议来实现复制。为了提高 Paxos 算法的性能，他们并不是将整个机器作为 Paxos 的处理单位，而是将 spanserver 上的数据进行划分，并分配到不同的 Paxos Group，每次运行 Paxos 都仅由相关的 Paxos Group 参与。写操作必须发给 Leader，而读操作可以发给任意足够 up-to-date 的 replica 然后从其 tablet 中读取。</p>
+<p><img src="image-20221016231043963.png" alt="image-20221016231043963" style="zoom:50%;" /></p>
+<p>所有这些都在一个名为 <strong>Colossus</strong> 的分布式文件系统上。如图所示：</p>
+<p><img src="image-20221016161752140.png" alt="image-20221016161752140" style="zoom:67%;" /></p>
+<blockquote>
+<p>当前的 Spanner 实现会对每个 Paxos 写入进行两次记录：一次在 tablet 的日志中，一次在 Paxos 日志中。</p>
+</blockquote>
+<p>spanserver 中会有一个 longlive 的 <strong>Leader</strong>，它拥有</p>
+<ol type="1">
+<li>一个<strong>锁表</strong>(lock table)来实现并发控制。锁表用于<strong>两阶段锁定</strong>(2PL)。只有需要同步的操作才会获取锁。</li>
+<li>一个<strong>事务管理器</strong>(transaction manager)来支持分布式事务。只有当一个事务涉及多个 Paxos Group 时，事务管理器才参与其中，其中一个 Paxos Group 被选为<strong>协调者</strong>(coordinator)，该组的 <strong>participant Leader</strong> 将成为 <strong>coordinate Leader</strong>。每个事务管理器的状态存储在底层 Paxos Group 中（因此也会被复制）。</li>
+</ol>
+<h5 id="目录">目录</h5>
+<p>为了进一步提高性能，将 Paxos Group 进一步划分为<strong>目录</strong>(Directory)——它是一组<strong>共享公共连续前缀</strong>的键。Directory 是数据迁移和负载均衡的基本单位，其所有数据都具有相同的复制配置。如下图所示。</p>
+<blockquote>
+<p>事实上，Spanner 会将一个过大的目录分片成多个<strong>片段</strong>（片段可能来自不同的 Paxos 组）。 Movedir 在组间移动片段，而不是整个目录。</p>
+</blockquote>
+<p><img src="image-20221016170724711.png" alt="image-20221016170724711" style="zoom:70%;" /></p>
+<p><strong>Movedir</strong> 是用于在 Paxos 组之间移动目录以及向 Paxos 组添加或删除副本的后台任务。Movedir 并不作为单个事务实现，操作的时候是先将实际数据移动到指定位置，然后再用一个原子的操作更新元数据，完成整个移动过程。故 Movdir 不会阻塞当前 client 的操作。</p>
+<h5 id="数据模型">数据模型</h5>
+<p>Spanner 从原先 BigTable 的类关系型数据库变成了采用以下键值映射的类 KV 型数据库： <span class="math display">\[
+(key:string,\quad timestamp:int64) \rightarrow string
+\]</span> 同时 Spanner 向应用程序提供</p>
+<ul>
+<li>基于模式化半关系表的数据模型</li>
+<li>查询语言</li>
+<li>通用事务</li>
+</ul>
+<p><strong>Megastore</strong>支持模式化半关系表和同步复制的需求，它的数据模型更易于管理，而且支持跨 data center 的同步复制，Bigtable 仅支持跨 data center 的最终一致性复制。</p>
+<p>Spanner 的数据模型是<strong>半关系</strong>的原因在于，每个表都需要有一组有序的 primary key。这使得 Spanner 仍然看起来像 KV 存储。</p>
+<p>下图包含一个示例 Spanner 模式。客户端应用程序通过 <code>INTERLEAVE IN</code> 声明层次结构。<code>ON DELETE CASCADE</code> 表示删除目录表中的行会删除任何关联的子行。这种将表交错形成目录的设计允许客户端描述存在于多个表之间的局部关系，这能够提升分片分布式数据库的性能。</p>
+<p><img src="image-20221017112002830.png" alt="image-20221017112002830" style="zoom:67%;" /></p>
+<h4 id="truetime">TrueTime</h4>
+<p>考虑到时间不确定性（如通信延迟），<strong>TrueTime</strong>并不表示某一特定时刻，而是将时间表示为一个具有有限时间不确定性的时间区间 <strong>TTinterval: [earliest, latest]</strong>。 TTinterval 的端点是 <strong>TTstamp</strong> 类型。 TrueTime API 包括以下方法：</p>
+<ol type="1">
+<li><strong>TT.now()</strong>：返回 TTinterval，并保证调用该方法的绝对时刻属于该区间；</li>
+<li><strong>TT.after(t)</strong>：若时刻 <span class="math inline">\(t\)</span> 已过去，则返回 true；</li>
+<li><strong>TT.before(t)</strong>：若时刻 <span class="math inline">\(t\)</span> 还未到，则返回 true。</li>
+</ol>
+<p>TrueTime 利用 GPS 和原子钟两种策略进行时钟参考，因为它们会以和彼此无关的方式出现故障，故其中一个方法发生故障后，可以立刻采用另一种方法。每个 data center 都有一组 <strong>time master</strong>，大多数使用 GPS，剩下的配备了原子钟。通过定期综合比较两种 master 得到一个时间点。</p>
+<h4 id="并发控制">并发控制</h4>
+<h5 id="timestamp-管理">timestamp 管理</h5>
+<p>Spanner 支持 <strong>read-write 事务</strong>、<strong>read-only 事务</strong>和 <strong>snapshot read</strong>，单独写入为 RW 事务；非快照单独读取为 RO 事务。如下表所示：</p>
+<p><img src="image-20221017132537748.png" alt="image-20221017132537748" style="zoom:67%;" /></p>
+<p>RO 事务是一种具有快照隔离性能优势的事务，其以系统指定的 ts 执行，而无需锁定。</p>
+<p>client 可以为 snapshot read 指定 ts，或指定时间边界并让 Spanner 选择合适的 ts。无论是 snapshot read 还是 read-only，都会在足够 up-to-date 的 replica 上直接读取。</p>
+<p>无论是 RO 事务还是 snapshot read，一旦指定了 ts，就必然会 commit，除非该 ts 处的数据已被 garbage collection。当服务器发生故障时，客户端可以继续在不同服务器上通过 ts 和当前读取位置进行查询。</p>
+<blockquote>
+<p>RW: ts = COMMIT TIME；RO: ts = START TIME</p>
+</blockquote>
+<h5 id="paxos-leader-lease">Paxos Leader Lease</h5>
+<p>Spanner 中 Paxos 的 <strong>lease</strong> 默认为 10 秒。如果租约到期，Leader 会请求延长 lease 投票。同时，Spanner 允许 Paxos Leader 主动退位。</p>
+<p>每个 Paxos Group 中不同 Leader 的 lease 互不相交。为了保持这一 <strong>lease 不相交性</strong>，定义 <span class="math inline">\(s_{max}\)</span> 为旧 Leader 的最大 ts，新 Leader 必须等到 <span class="math inline">\(TT.after ( s_{max} ) = true\)</span> 才能开始工作。</p>
+<h5 id="rw-事务">RW 事务</h5>
+<p>RW 事务使用 2PL，故只能在获取所有锁之后与释放所有锁之前的任意时刻分配 ts。对于给定的写事务，Spanner 会选择 Paxos 为提交事务的那次 Paxos Write 分配的时间戳。</p>
+<p>在每个 Paxos Group 内，Spanner 以单调递增的顺序为 Paxos Write 分配 ts。这一约束通过 <strong>lease 不相交性</strong>在不同 Leader 之间进行约束：Leader 只在其 lease 内分配 ts。</p>
+<p>Spanner 使用 2PC 提交事务，为保证<strong>外部一致性</strong>，Spanner 作出以下约束：如果事务 <span class="math inline">\(T_2\)</span> 的 start 发生在事务 <span class="math inline">\(T_1\)</span> commit 之后，则 <span class="math inline">\(T_2\)</span> 的 commit ts 必须大于 <span class="math inline">\(T_1\)</span> 的 commit ts。并且执行事务和分配 ts 的协议遵循以下两条规则：</p>
+<ul>
+<li><strong>START</strong>：写事务 <span class="math inline">\(T_i\)</span> 分配的 commit ts <span class="math inline">\(s_i\)</span> 满足 <span class="math inline">\(s_i \geq TT.now().latest\)</span> 且 <span class="math inline">\(s_i &gt; t_{abs}(e^{server}_i)\)</span>；</li>
+<li><strong>COMMIT WAIT</strong>：client 在 <span class="math inline">\(TT.after ( s_i ) = true\)</span> 之前无法看到 <span class="math inline">\(T_i\)</span> 提交的任何数据且 <span class="math inline">\(s_i &lt; t_{abs}(e^{commit}_i)\)</span>。</li>
+</ul>
+<p>证明如下：</p>
+<p><img src="image-20221017142509253.png" alt="image-20221017142509253" style="zoom:80%;" /></p>
+<p>其中 <span class="math inline">\(e^{start}_i\)</span> 和 <span class="math inline">\(e^{commit}_i\)</span> 为事务启动和提交事件，<span class="math inline">\(e^{server}_i\)</span> 为事务 commit 请求到达 coordinate Leader 的事件。</p>
+<p>同时，为了保证任意读取都是可靠且安全的，每个 replica 都会跟踪一个称为<strong>安全时间</strong>的值 <span class="math inline">\(t_{safe}\)</span>。replica 可以满足任意 <span class="math inline">\(ts \leq t_{safe}\)</span> 的读取。</p>
+<p><span class="math inline">\(t_{safe}\)</span> 定义为 <span class="math inline">\(\min (t^{Paxos}_{safe},\ t^{TM}_{safe})\)</span></p>
+<p><span class="math inline">\(t^{Paxos}_{safe}\)</span> 是最新已应用的 Paxos 写入的 ts。因为 ts 单调增加并且写入是按顺序应用的，对于 Paxos 而言，不会有 ts 小于等于 <span class="math inline">\(t^{Paxos}_{safe}\)</span> 的写入。</p>
+<p>如果不存在 prepared 但未 commit 的事务，则 <span class="math inline">\(t^{TM}_{safe}\)</span> 为 <span class="math inline">\(\infty\)</span>；反之，replicas 还不知道该事务是否会提交，每个 Paxos Group <span class="math inline">\(g\)</span> 的 Leader 为其分配一个 prepare ts <span class="math inline">\(s^{prepare}_{i,g}\)</span> 并确保 <span class="math inline">\(s_i \geq s^{prepare}_{i,g}\)</span>。有 <span class="math inline">\(t^{TM}_{safe} = \min_i ( s^{prepare}_{i,g} ) - 1\)</span>。</p>
+<p>事务中发生的 write 会在客户端缓存直至提交，这使得事务中的 read 看不到事务 write 的影响。这种设计在 Spanner 中运行良好，因为读取返回任何数据读取的时间戳，而未提交的写入尚未分配时间戳。整个事务的具体流程如下：</p>
+<ol type="1">
+<li><p>client 发出 read 请求，Spanner 找到合适的 replica 并获取 read lock，然后读取最新数据。当 client 保持 open 时，它会发送 keep-alive 消息以防止 Leader 超时；</p></li>
+<li><p>当 client 完成所有 read 并缓存所有 write 时，它开始 2PC；</p></li>
+<li><p>client 在 Paxos Group 间选出 coordinate Group 并向其它 Group 的 Leader 发送 commit 消息；</p></li>
+<li><p>participant Leader 首先获得 write lock，然后它选择一个 prepare ts，并通过 Paxos 作好 prepare 记录，之后每个 participants 将其 prepare ts 通知 coordinate；</p>
+<p>coordinate Leader 也首先获取 write lock，但跳过 prepare 阶段。在收到所有其他 participant Leader 的消息后，它会为整个事务选择一个大于所有 prepare ts 的 commit ts <span class="math inline">\(s\)</span>。然后 coordinate Leader 通过 Paxos 记录进行 commit；</p></li>
+<li><p>coordinate Leader 等待直到 <span class="math inline">\(TT.after(s)\)</span> 后，允许 coordinate replica 应用 commit 记录（保证 COMMIT WAIT）；</p></li>
+<li><p>coordinate 将 <span class="math inline">\(s\)</span> 发送给 client 和所有其他 participant Leader，每个 participant Leader 都通过 Paxos 记录事务的结果。所有 participants 在相同的 ts 处应用该结果，然后释放锁。</p></li>
+</ol>
+<blockquote>
+<p>read-write 事务中的 read 使用 <strong>wound-wait</strong> 来避免死锁。</p>
+</blockquote>
+<h5 id="ro-事务">RO 事务</h5>
+<p>RO 事务分两个阶段执行：</p>
+<ul>
+<li>先分配一个时间戳 <span class="math inline">\(s_{read}\)</span>；</li>
+<li>在 <span class="math inline">\(s_{read}\)</span> 处将事务的读取按照 snapshot read 执行。</li>
+</ul>
+<p>在事务开始后的任何时间进行 <span class="math inline">\(s_{read} = TT.now().latest\)</span> 的赋值，通过类似于 RW 事务中的参数来保持<strong>外部一致性</strong>。如果 <span class="math inline">\(t_{safe}\)</span> 没有充分推进，可能需要阻塞在 <span class="math inline">\(s_{read}\)</span> 处执行的读取。为了避免阻塞的发生，Spanner 应该分配能够保持外部一致性的最老的 ts。</p>
+<p>整个事务的具体流程如下：</p>
+<ol type="1">
+<li>如果事务只涉及一个 Paxos Group，则 client 直接向该 Group 的 Leader 发出 RO 事务。将 <span class="math inline">\(LastTS()\)</span> 定义为 Paxos Group 中最后 commit 的 write 的 ts。如果没有事务 prepared，则令 <span class="math inline">\(s_{read} = LastTS()\)</span> 即可满足外部一致性：事务将看到最后一次 write 的结果；</li>
+<li>反之，需要所有参与 read 的 Paxos Group 之间进行协商来决定 ts。Spanner 目前避免了一轮沟通，而是令 client 只在 <span class="math inline">\(s_{read} = TT.now().latest\)</span> 处执行 read（可能会等待 <span class="math inline">\(t_{safe}\)</span>）。事务中的所有 read 都可以发送到足够 up-to-date 的 replica。</li>
+</ol>
+<h4 id="总结">总结</h4>
+<p>Spanner 优雅地利用了 TrueTime 实现了外部一致性以及其它强大特性，这是前所未有的创新设计。</p>
 ]]></content>
       <categories>
         <category>6.824</category>
@@ -447,135 +694,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Spanner</title>
-    <url>/6-824/Spanner/</url>
-    <content><![CDATA[<p>6.824 的第八篇论文是 <strong>Spanner</strong>—— Google 的可扩展、多版本、全球分布和同步复制的数据库。它是第一个在全球范围内分发数据并支持外部一致的分布式事务的系统。</p>
-<span id="more"></span>
-<h4 id="简介">简介</h4>
-<p>Spanner 中的数据是<strong>多时间版本化</strong>的，每个版本都会自动加上其提交时间的<strong>时间戳</strong>(timestamp)。ts 反映序列化顺序，即：如果事务 <span class="math inline">\(T_1\)</span> 在另一个事务 <span class="math inline">\(T_2\)</span> 开始之前提交，则 <span class="math inline">\(T_1\)</span> 的 commit ts 小于 <span class="math inline">\(T_2\)</span>。 这一机制归功于 <strong>TrueTime API </strong> 设计，通过使用多个现代时钟参考（GPS 和原子钟）来保持较小的不确定性。</p>
-<blockquote>
-<p>Spanner 是第一个在全球范围内提供此类保证的系统。</p>
-</blockquote>
-<p>作为一个全球分布的数据库，Spanner 不仅提供了以下特性：</p>
-<ol type="1">
-<li>数据的复制配置可以由应用程序动态控制；</li>
-<li>应用程序可以指定哪些 data center 包含哪些数据、数据与用户之间的距离（以控制读取延迟）、副本之间的距离（以控制写入延迟）以及维护的副本数量（以控制持久性、可用性和读取性能）</li>
-<li>Spanner 支持跨机器重新<strong>分片</strong>(Sharding)数据，并且能在 data center 之间动态移动数据，以平衡负载。</li>
-</ol>
-<p>还提供了两个在分布式数据库中难以实现的特性：</p>
-<ol type="1">
-<li>满足<strong>外部一致性</strong>的读取和写入；</li>
-<li>利用 <strong>TrueTime</strong> 实现基于 ts 的跨数据库的全局一致读取。</li>
-</ol>
-<h4 id="实现">实现</h4>
-<p>Spanner 部署称之为 <strong>universe</strong>，它由一系列<strong>区域</strong>(zones)组成，每个 zone 都是管理部署的单位。一个 zone 有一个 <strong>zonemaster</strong> 和若干 <strong>spanservers</strong>，前者负责将数据分配给后者，后者负责向客户提供数据。其结构如图所示：</p>
-<p><img src="image-20221015173114863.png" alt="image-20221015173114863" style="zoom:80%;" /></p>
-<h5 id="spanserver-软件栈结构">SpanServer 软件栈结构</h5>
-<p>每个 spanserver 在底层负责若干个称为 <strong>tablet</strong> 的数据结构实例，每个 tablet 是表中的部分数据。</p>
-<p>spanserver 采用 <strong>Paxos</strong> 协议来实现复制。为了提高 Paxos 算法的性能，他们并不是将整个机器作为 Paxos 的处理单位，而是将 spanserver 上的数据进行划分，并分配到不同的 Paxos Group，每次运行 Paxos 都仅由相关的 Paxos Group 参与。写操作必须发给 Leader，而读操作可以发给任意足够 up-to-date 的 replica 然后从其 tablet 中读取。</p>
-<p><img src="image-20221016231043963.png" alt="image-20221016231043963" style="zoom:50%;" /></p>
-<p>所有这些都在一个名为 <strong>Colossus</strong> 的分布式文件系统上。如图所示：</p>
-<p><img src="image-20221016161752140.png" alt="image-20221016161752140" style="zoom:67%;" /></p>
-<blockquote>
-<p>当前的 Spanner 实现会对每个 Paxos 写入进行两次记录：一次在 tablet 的日志中，一次在 Paxos 日志中。</p>
-</blockquote>
-<p>spanserver 中会有一个 longlive 的 <strong>Leader</strong>，它拥有</p>
-<ol type="1">
-<li>一个<strong>锁表</strong>(lock table)来实现并发控制。锁表用于<strong>两阶段锁定</strong>(2PL)。只有需要同步的操作才会获取锁。</li>
-<li>一个<strong>事务管理器</strong>(transaction manager)来支持分布式事务。只有当一个事务涉及多个 Paxos Group 时，事务管理器才参与其中，其中一个 Paxos Group 被选为<strong>协调者</strong>(coordinator)，该组的 <strong>participant Leader</strong> 将成为 <strong>coordinate Leader</strong>。每个事务管理器的状态存储在底层 Paxos Group 中（因此也会被复制）。</li>
-</ol>
-<h5 id="目录">目录</h5>
-<p>为了进一步提高性能，将 Paxos Group 进一步划分为<strong>目录</strong>(Directory)——它是一组<strong>共享公共连续前缀</strong>的键。Directory 是数据迁移和负载均衡的基本单位，其所有数据都具有相同的复制配置。如下图所示。</p>
-<blockquote>
-<p>事实上，Spanner 会将一个过大的目录分片成多个<strong>片段</strong>（片段可能来自不同的 Paxos 组）。 Movedir 在组间移动片段，而不是整个目录。</p>
-</blockquote>
-<p><img src="image-20221016170724711.png" alt="image-20221016170724711" style="zoom:70%;" /></p>
-<p><strong>Movedir</strong> 是用于在 Paxos 组之间移动目录以及向 Paxos 组添加或删除副本的后台任务。Movedir 并不作为单个事务实现，操作的时候是先将实际数据移动到指定位置，然后再用一个原子的操作更新元数据，完成整个移动过程。故 Movdir 不会阻塞当前 client 的操作。</p>
-<h5 id="数据模型">数据模型</h5>
-<p>Spanner 从原先 BigTable 的类关系型数据库变成了采用以下键值映射的类 KV 型数据库： <span class="math display">\[
-(key:string,\quad timestamp:int64) \rightarrow string
-\]</span> 同时 Spanner 向应用程序提供</p>
-<ul>
-<li>基于模式化半关系表的数据模型</li>
-<li>查询语言</li>
-<li>通用事务</li>
-</ul>
-<p><strong>Megastore</strong>支持模式化半关系表和同步复制的需求，它的数据模型更易于管理，而且支持跨 data center 的同步复制，Bigtable 仅支持跨 data center 的最终一致性复制。</p>
-<p>Spanner 的数据模型是<strong>半关系</strong>的原因在于，每个表都需要有一组有序的 primary key。这使得 Spanner 仍然看起来像 KV 存储。</p>
-<p>下图包含一个示例 Spanner 模式。客户端应用程序通过 <code>INTERLEAVE IN</code> 声明层次结构。<code>ON DELETE CASCADE</code> 表示删除目录表中的行会删除任何关联的子行。这种将表交错形成目录的设计允许客户端描述存在于多个表之间的局部关系，这能够提升分片分布式数据库的性能。</p>
-<p><img src="image-20221017112002830.png" alt="image-20221017112002830" style="zoom:67%;" /></p>
-<h4 id="truetime">TrueTime</h4>
-<p>考虑到时间不确定性（如通信延迟），<strong>TrueTime</strong>并不表示某一特定时刻，而是将时间表示为一个具有有限时间不确定性的时间区间 <strong>TTinterval: [earliest, latest]</strong>。 TTinterval 的端点是 <strong>TTstamp</strong> 类型。 TrueTime API 包括以下方法：</p>
-<ol type="1">
-<li><strong>TT.now()</strong>：返回 TTinterval，并保证调用该方法的绝对时刻属于该区间；</li>
-<li><strong>TT.after(t)</strong>：若时刻 <span class="math inline">\(t\)</span> 已过去，则返回 true；</li>
-<li><strong>TT.before(t)</strong>：若时刻 <span class="math inline">\(t\)</span> 还未到，则返回 true。</li>
-</ol>
-<p>TrueTime 利用 GPS 和原子钟两种策略进行时钟参考，因为它们会以和彼此无关的方式出现故障，故其中一个方法发生故障后，可以立刻采用另一种方法。每个 data center 都有一组 <strong>time master</strong>，大多数使用 GPS，剩下的配备了原子钟。通过定期综合比较两种 master 得到一个时间点。</p>
-<h4 id="并发控制">并发控制</h4>
-<h5 id="timestamp-管理">timestamp 管理</h5>
-<p>Spanner 支持 <strong>read-write 事务</strong>、<strong>read-only 事务</strong>和 <strong>snapshot read</strong>，单独写入为 RW 事务；非快照单独读取为 RO 事务。如下表所示：</p>
-<p><img src="image-20221017132537748.png" alt="image-20221017132537748" style="zoom:67%;" /></p>
-<p>RO 事务是一种具有快照隔离性能优势的事务，其以系统指定的 ts 执行，而无需锁定。</p>
-<p>client 可以为 snapshot read 指定 ts，或指定时间边界并让 Spanner 选择合适的 ts。无论是 snapshot read 还是 read-only，都会在足够 up-to-date 的 replica 上直接读取。</p>
-<p>无论是 RO 事务还是 snapshot read，一旦指定了 ts，就必然会 commit，除非该 ts 处的数据已被 garbage collection。当服务器发生故障时，客户端可以继续在不同服务器上通过 ts 和当前读取位置进行查询。</p>
-<blockquote>
-<p>RW: ts = COMMIT TIME；RO: ts = START TIME</p>
-</blockquote>
-<h5 id="paxos-leader-lease">Paxos Leader Lease</h5>
-<p>Spanner 中 Paxos 的 <strong>lease</strong> 默认为 10 秒。如果租约到期，Leader 会请求延长 lease 投票。同时，Spanner 允许 Paxos Leader 主动退位。</p>
-<p>每个 Paxos Group 中不同 Leader 的 lease 互不相交。为了保持这一 <strong>lease 不相交性</strong>，定义 <span class="math inline">\(s_{max}\)</span> 为旧 Leader 的最大 ts，新 Leader 必须等到 <span class="math inline">\(TT.after ( s_{max} ) = true\)</span> 才能开始工作。</p>
-<h5 id="rw-事务">RW 事务</h5>
-<p>RW 事务使用 2PL，故只能在获取所有锁之后与释放所有锁之前的任意时刻分配 ts。对于给定的写事务，Spanner 会选择 Paxos 为提交事务的那次 Paxos Write 分配的时间戳。</p>
-<p>在每个 Paxos Group 内，Spanner 以单调递增的顺序为 Paxos Write 分配 ts。这一约束通过 <strong>lease 不相交性</strong>在不同 Leader 之间进行约束：Leader 只在其 lease 内分配 ts。</p>
-<p>Spanner 使用 2PC 提交事务，为保证<strong>外部一致性</strong>，Spanner 作出以下约束：如果事务 <span class="math inline">\(T_2\)</span> 的 start 发生在事务 <span class="math inline">\(T_1\)</span> commit 之后，则 <span class="math inline">\(T_2\)</span> 的 commit ts 必须大于 <span class="math inline">\(T_1\)</span> 的 commit ts。并且执行事务和分配 ts 的协议遵循以下两条规则：</p>
-<ul>
-<li><strong>START</strong>：写事务 <span class="math inline">\(T_i\)</span> 分配的 commit ts <span class="math inline">\(s_i\)</span> 满足 <span class="math inline">\(s_i \geq TT.now().latest\)</span> 且 <span class="math inline">\(s_i &gt; t_{abs}(e^{server}_i)\)</span>；</li>
-<li><strong>COMMIT WAIT</strong>：client 在 <span class="math inline">\(TT.after ( s_i ) = true\)</span> 之前无法看到 <span class="math inline">\(T_i\)</span> 提交的任何数据且 <span class="math inline">\(s_i &lt; t_{abs}(e^{commit}_i)\)</span>。</li>
-</ul>
-<p>证明如下：</p>
-<p><img src="image-20221017142509253.png" alt="image-20221017142509253" style="zoom:80%;" /></p>
-<p>其中 <span class="math inline">\(e^{start}_i\)</span> 和 <span class="math inline">\(e^{commit}_i\)</span> 为事务启动和提交事件，<span class="math inline">\(e^{server}_i\)</span> 为事务 commit 请求到达 coordinate Leader 的事件。</p>
-<p>同时，为了保证任意读取都是可靠且安全的，每个 replica 都会跟踪一个称为<strong>安全时间</strong>的值 <span class="math inline">\(t_{safe}\)</span>。replica 可以满足任意 <span class="math inline">\(ts \leq t_{safe}\)</span> 的读取。</p>
-<p><span class="math inline">\(t_{safe}\)</span> 定义为 <span class="math inline">\(\min (t^{Paxos}_{safe},\ t^{TM}_{safe})\)</span></p>
-<p><span class="math inline">\(t^{Paxos}_{safe}\)</span> 是最新已应用的 Paxos 写入的 ts。因为 ts 单调增加并且写入是按顺序应用的，对于 Paxos 而言，不会有 ts 小于等于 <span class="math inline">\(t^{Paxos}_{safe}\)</span> 的写入。</p>
-<p>如果不存在 prepared 但未 commit 的事务，则 <span class="math inline">\(t^{TM}_{safe}\)</span> 为 <span class="math inline">\(\infty\)</span>；反之，replicas 还不知道该事务是否会提交，每个 Paxos Group <span class="math inline">\(g\)</span> 的 Leader 为其分配一个 prepare ts <span class="math inline">\(s^{prepare}_{i,g}\)</span> 并确保 <span class="math inline">\(s_i \geq s^{prepare}_{i,g}\)</span>。有 <span class="math inline">\(t^{TM}_{safe} = \min_i ( s^{prepare}_{i,g} ) - 1\)</span>。</p>
-<p>事务中发生的 write 会在客户端缓存直至提交，这使得事务中的 read 看不到事务 write 的影响。这种设计在 Spanner 中运行良好，因为读取返回任何数据读取的时间戳，而未提交的写入尚未分配时间戳。整个事务的具体流程如下：</p>
-<ol type="1">
-<li><p>client 发出 read 请求，Spanner 找到合适的 replica 并获取 read lock，然后读取最新数据。当 client 保持 open 时，它会发送 keep-alive 消息以防止 Leader 超时；</p></li>
-<li><p>当 client 完成所有 read 并缓存所有 write 时，它开始 2PC；</p></li>
-<li><p>client 在 Paxos Group 间选出 coordinate Group 并向其它 Group 的 Leader 发送 commit 消息；</p></li>
-<li><p>participant Leader 首先获得 write lock，然后它选择一个 prepare ts，并通过 Paxos 作好 prepare 记录，之后每个 participants 将其 prepare ts 通知 coordinate；</p>
-<p>coordinate Leader 也首先获取 write lock，但跳过 prepare 阶段。在收到所有其他 participant Leader 的消息后，它会为整个事务选择一个大于所有 prepare ts 的 commit ts <span class="math inline">\(s\)</span>。然后 coordinate Leader 通过 Paxos 记录进行 commit；</p></li>
-<li><p>coordinate Leader 等待直到 <span class="math inline">\(TT.after(s)\)</span> 后，允许 coordinate replica 应用 commit 记录（保证 COMMIT WAIT）；</p></li>
-<li><p>coordinate 将 <span class="math inline">\(s\)</span> 发送给 client 和所有其他 participant Leader，每个 participant Leader 都通过 Paxos 记录事务的结果。所有 participants 在相同的 ts 处应用该结果，然后释放锁。</p></li>
-</ol>
-<blockquote>
-<p>read-write 事务中的 read 使用 <strong>wound-wait</strong> 来避免死锁。</p>
-</blockquote>
-<h5 id="ro-事务">RO 事务</h5>
-<p>RO 事务分两个阶段执行：</p>
-<ul>
-<li>先分配一个时间戳 <span class="math inline">\(s_{read}\)</span>；</li>
-<li>在 <span class="math inline">\(s_{read}\)</span> 处将事务的读取按照 snapshot read 执行。</li>
-</ul>
-<p>在事务开始后的任何时间进行 <span class="math inline">\(s_{read} = TT.now().latest\)</span> 的赋值，通过类似于 RW 事务中的参数来保持<strong>外部一致性</strong>。如果 <span class="math inline">\(t_{safe}\)</span> 没有充分推进，可能需要阻塞在 <span class="math inline">\(s_{read}\)</span> 处执行的读取。为了避免阻塞的发生，Spanner 应该分配能够保持外部一致性的最老的 ts。</p>
-<p>整个事务的具体流程如下：</p>
-<ol type="1">
-<li>如果事务只涉及一个 Paxos Group，则 client 直接向该 Group 的 Leader 发出 RO 事务。将 <span class="math inline">\(LastTS()\)</span> 定义为 Paxos Group 中最后 commit 的 write 的 ts。如果没有事务 prepared，则令 <span class="math inline">\(s_{read} = LastTS()\)</span> 即可满足外部一致性：事务将看到最后一次 write 的结果；</li>
-<li>反之，需要所有参与 read 的 Paxos Group 之间进行协商来决定 ts。Spanner 目前避免了一轮沟通，而是令 client 只在 <span class="math inline">\(s_{read} = TT.now().latest\)</span> 处执行 read（可能会等待 <span class="math inline">\(t_{safe}\)</span>）。事务中的所有 read 都可以发送到足够 up-to-date 的 replica。</li>
-</ol>
-<h4 id="总结">总结</h4>
-<p>Spanner 优雅地利用了 TrueTime 实现了外部一致性以及其它强大特性，这是前所未有的创新设计。</p>
-]]></content>
-      <categories>
-        <category>6.824</category>
-      </categories>
-      <tags>
-        <tag>paperReading</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Aurora</title>
     <url>/6-824/aurora/</url>
     <content><![CDATA[<p>6.824 的第六篇论文是 <strong>Aurora</strong>——一个高性能，高可靠的关系数据库服务。在处理事务的速度上，Aurora 宣称比其他数据库快 35 倍。同时，其完全抛弃了通用存储，转而构建了自己<strong>应用定制的存储</strong>。</p>
@@ -631,125 +749,6 @@
       </categories>
       <tags>
         <tag>paperReading</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Linear-Algebra(1)</title>
-    <url>/math/linear-algebra(1)/</url>
-    <content><![CDATA[<p>如果本科线代能有这样的教育方式和路线，我何苦现在还要来听这门公开课(</p>
-<p>记录一下听的过程中觉得有用的信息好了。</p>
-<span id="more"></span>
-<h4 id="从线性方程组开始">从线性方程组开始</h4>
-<p>教授（下简称 GS）认为线性代数的基本用途是解<strong>线性方程组</strong>，比如有这样一个方程组： <span class="math display">\[
-\begin{cases}
-2x-y = 0
-\\[2ex]
--x+2y=3
-\end{cases}
-\]</span> 我们可以从以下三个角度考虑其解法。</p>
-<ol type="1">
-<li><p><strong>行图像</strong>：对于每个方程，我们都可以在二维平面上画出一条直线，这些直线的交点就是我们想要的解。</p></li>
-<li><p><strong>列图像</strong>：对于每个变量的参数，我们都可以把方程组写成若干向量线性组合的形式（本例中是 <span class="math inline">\(x\left[\begin{matrix}2 \\ -1\end{matrix}\right] + y\left[\begin{matrix}-1 \\ 2\end{matrix}\right] = \left[\begin{matrix}0 \\ 3\end{matrix}\right]\)</span>）。只要找到一个合适的组合，方程组得解。</p>
-<blockquote>
-<p>此处如果如果每次取任意的 x 与 y，则等式左侧的向量的组合能布满整个二维平面。</p>
-<p>拓展到多元方程组也是同理。</p>
-</blockquote></li>
-</ol>
-<p>我们构造一个系数矩阵 <span class="math inline">\({A} = \left[\begin{matrix}2 &amp; -1 \\ -1 &amp; 2\end{matrix}\right]\)</span>，令 <span class="math inline">\(\vec{x} = \left[\begin{matrix}x \\ y\end{matrix}\right], \vec{b} = \left[\begin{matrix}0 \\ 3\end{matrix}\right]\)</span>，然后方程组可以写成这样子： <span class="math display">\[
-A\vec{x} = \vec{b}
-\]</span></p>
-<h5 id="是否有解">是否有解？</h5>
-<p>这时要考虑一个问题：是否任意 <span class="math inline">\(\vec{b}\)</span> 都能让上面那个方程有解呢？</p>
-<p>从<strong>行图像</strong>的角度来讲，如果方程组有解，则所有方程在坐标系上对应的图像（直线、平面、体积）存在交集。如果某一个 <span class="math inline">\(\vec{b}\)</span> 不能满足上面条件，则无解（反之有解）。</p>
-<p>从<strong>列图像</strong>的角度来讲，如果某一个 <span class="math inline">\(\vec{b}\)</span> 不能成为 <span class="math inline">\({A}\)</span> 列向量的线性组合，则无解（反之有解）。</p>
-<h5 id="如何求解">如何求解？</h5>
-<p>计算机软件（以及人类）计算时最常用的方法是<strong>高斯消元法</strong>，将原方程 <span class="math inline">\({A}\vec{x} = \vec{b}\)</span> 转换为新的方程 <span class="math inline">\({U}\vec{x}=\vec{c}\)</span>。</p>
-<blockquote>
-<p>其中 <span class="math inline">\({U}\)</span> 为行阶梯最简型矩阵。</p>
-</blockquote>
-<h5 id="消元过程">消元过程</h5>
-<p>每一步消元都可以视为将原矩阵乘上一个<strong>置换矩阵</strong>。左乘置换矩阵可以完成原矩阵的行变换，右乘置换矩阵则为列变换。</p>
-<h5 id="逆矩阵">逆矩阵</h5>
-<p>对于消元过程，每一步都是可逆的。对于一个置换矩阵 $ E_1$，我做了其相反的操作即可得到原矩阵，若这一相反的操作用 $ E_1^{'}$ 表示，则有 $ E_1^{'} E_1 A = A$ 。</p>
-<p>得到 $ E_1^{'} E_1 = {I}$，从而可以用 $ E_1^{'} = { E_1}^{-1}$ 表示逆矩阵。第一个式子代表了逆矩阵的定义与性质。同样也有 <span class="math inline">\(( E_1^{&#39;})^{-1} = { E_1}\)</span> 且 $ E_1 E_1^{'} = {I}$ 。</p>
-<blockquote>
-<p>其中 $ I$ 是<strong>单位矩阵</strong>（对角线元素全为 1，其它元素全为 0 的方阵）</p>
-</blockquote>
-<h5 id="怎么求逆矩阵">怎么求逆矩阵？</h5>
-<p><strong>高斯-若尔当消元法</strong>(Gauss-Jordan Elimination)告诉我们，通过构造 <span class="math inline">\(\left[\begin{matrix}\ {A}\ |\ {I}\ \end{matrix}\right]\)</span>，再通过消元法将左侧矩阵变为单位矩阵 <span class="math inline">\({I}\)</span>，易得这一系列行变换操作对应的矩阵是 <span class="math inline">\({A}^{-1}\)</span>，相当于左乘了一个矩阵 <span class="math inline">\({A}^{-1}\)</span>，则右侧矩阵乘完后自然就变为了 <span class="math inline">\({A}^{-1}\)</span>。</p>
-<h4 id="接下来引入拓展到向量空间">接下来引入拓展到向量空间</h4>
-<h5 id="向量空间">向量空间</h5>
-<p>一个向量空间应该满足这样一个<strong>封闭性</strong>条件：对于空间中的任意向量 <span class="math inline">\(\vec{u}, \vec{v}\)</span>，其任意线性组合 <span class="math inline">\(a\vec{u}+b\vec{v}(a, b\in R)\)</span> 必然存在于空间中。显然，所有向量空间必须包括零向量。</p>
-<h5 id="子空间">子空间</h5>
-<p>包含于向量空间之内的一个向量空间称为原向量空间的一个子空间。</p>
-<p>以 <span class="math inline">\({R}^3\)</span> 为例（它代表具有三个实数分量的所有向量的集合），其子空间包括：</p>
-<ul>
-<li>其本身（三维）</li>
-<li>任一过原点的平面（二维）</li>
-<li>任一过原点的直线（一维）</li>
-<li>零向量</li>
-</ul>
-<h5 id="列空间">列空间</h5>
-<p>矩阵 <span class="math inline">\({A}_{m\times n}\)</span> 的所有列向量张成的空间称为其列空间，以 <span class="math inline">\(C({A})\)</span> 表示。<span class="math inline">\(C({A})\subset R^m\)</span></p>
-<h5 id="零空间">零空间</h5>
-<p>所有满足方程 <span class="math inline">\({A}\vec{x} = \vec{0}\)</span> 的解的集合称为矩阵 <span class="math inline">\({A}_{m\times n}\)</span> 的零空间，以 <span class="math inline">\(N({A})\)</span> 表示。<span class="math inline">\(N({A})\subset R^n\)</span></p>
-<h5 id="计算零空间">计算零空间</h5>
-<p>相当于求方程 <span class="math inline">\({A}\vec{x} = \vec{0}\)</span> 的所有解。通过<strong>消元法与列交换</strong>构造出新的方程 <span class="math inline">\({U}\vec{x}=\vec{0}\)</span>，其中 <span class="math inline">\({U}\)</span> 是由 <span class="math inline">\(r\)</span> 个<strong>主元列</strong>与 <span class="math inline">\(n-r\)</span> 个<strong>自由列</strong>组成的形如下式的行阶梯型矩阵： <span class="math display">\[
-U =
-\left[
-\begin{matrix}
-\quad I_{r\times r} &amp; F_{r\times n-r} \quad
-\\
-\quad 0 &amp; 0 \quad
-\end{matrix}
-\right]
-\]</span></p>
-<blockquote>
-<p>自由列可以表示为其左侧主元列的线性组合。</p>
-</blockquote>
-<p>原方程变为 <span class="math inline">\({U}\)</span> 的主元行乘以 <span class="math inline">\(\vec{x}\)</span>，即 <span class="math inline">\(\left[\begin{matrix}\ {I}\ |\ {F}\ \end{matrix}\right] \left[\begin{matrix}\  \vec x_{pivot} \\ \  \vec x_{free} \ \end{matrix}\right] = 0\)</span>。如果对 <span class="math inline">\(\vec x_{free}\)</span> 中 <span class="math inline">\(n-r\)</span> 的变量自由取值，我们能得到 <span class="math inline">\(n-r\)</span> 个线性无关的特解，<span class="math inline">\(N({A})\)</span> 则是由这些特解张成的向量空间（<strong>维度</strong>为 <span class="math inline">\(n-r\)</span>）。若把这些特解作为列向量写到一个矩阵 <span class="math inline">\({N}\)</span> 中，则有 <span class="math inline">\({U}{N} = {0}\)</span>，易得： <span class="math display">\[
-N =
-\left[\begin{matrix}\ {-F}_{r\times n-r} \ \\ \ I_{n-r\times n-r} \ \end{matrix}\right]
-\]</span> 其中 <span class="math inline">\({-F}\)</span> 对应 <span class="math inline">\(\vec{x}_{pivot}\)</span>，<span class="math inline">\({I}\)</span> 对应 <span class="math inline">\(\vec{x}_{free}\)</span></p>
-<h5 id="如果方程右侧不为零向量">如果方程右侧不为零向量</h5>
-<p>首先抛出结论：若 <span class="math inline">\(\vec{b} \in C({A})\)</span>，则方程 <span class="math inline">\({A}\vec{x} = \vec{b}\)</span> 有解。</p>
-<p>当方程有解时，可以先找到方程一个特解，再与 <span class="math inline">\(N({A})\)</span> 进行线性组合，即可得到最后的解。</p>
-<h5 id="秩">秩</h5>
-<p>矩阵的<strong>秩</strong>等于矩阵的主元数。若 <span class="math inline">\(rank({A}_{m\times n}) = r\)</span>，则必有 <span class="math inline">\(r\leq m, r\leq n\)</span> 。</p>
-<ol type="1">
-<li><strong>列满秩</strong>：即 <span class="math inline">\(r=n&lt;m\)</span>，每一列都是主元列，矩阵没有自由列，<span class="math inline">\(N({A})\)</span> 中只有零向量，方程 <span class="math inline">\({A}\vec{x} = \vec{b}\)</span> 要么无解，要么有唯一解。</li>
-<li><strong>行满秩</strong>：即 <span class="math inline">\(r=m\leq n\)</span>，方程 <span class="math inline">\({A}\vec{x} = \vec{b}\)</span> 有无穷多解。</li>
-<li><strong>方阵满秩</strong>：即 <span class="math inline">\(r=m=n\)</span>，方程 <span class="math inline">\({A}\vec{x} = \vec{b}\)</span> 总有唯一解。</li>
-<li><strong>行列均不满秩</strong>：即 <span class="math inline">\(r&lt;m, r&lt;n\)</span>，方程 <span class="math inline">\({A}\vec{x} = \vec{b}\)</span> 要么无解，要么有无穷多解。</li>
-</ol>
-<h5 id="线性相关性">线性相关性</h5>
-<p>若一组向量的非零线性组合可以得到零向量，则称这组向量<strong>线性相关</strong>；反之，则称其<strong>线性无关</strong>。</p>
-<h5 id="基">基</h5>
-<p>向量空间的<strong>基</strong>是一组<strong>线性无关的向量</strong>，且这些向量能够张成该向量空间。</p>
-<h5 id="维数">维数</h5>
-<p>空间中的每一组基都有相同的向量数，这个数值就是空间的<strong>维数</strong>，通常用 <span class="math inline">\(dim\)</span> 表示。</p>
-<h5 id="基本子空间">基本子空间</h5>
-<p>除了列空间和零空间，还有</p>
-<ol type="1">
-<li><strong>行空间</strong>：矩阵 <span class="math inline">\({A}_{m\times n}\)</span> 的所有行向量张成的空间称为其列空间，以 <span class="math inline">\(R({A})\)</span> 表示。<span class="math inline">\(R({A})\subset R^n\)</span></li>
-<li><strong>左零空间</strong>：所有满足方程 <span class="math inline">\({A^T}{x} = {0}\)</span> 的解的集合称为矩阵 <span class="math inline">\({A}_{m\times n}\)</span> 的左零空间，以 <span class="math inline">\(L({A})\)</span> 表示。<span class="math inline">\(L({A})\subset R^m\)</span></li>
-</ol>
-<p><span class="math inline">\({A}\)</span> 的 <span class="math inline">\(r\)</span> 个主元列构成了 <span class="math inline">\(C({A})\)</span> 的一组基。</p>
-<p><span class="math inline">\({A}\vec{x}=\vec{0}\)</span> 的一组特解对应于 <span class="math inline">\({A}\)</span> 的 <span class="math inline">\(n-r\)</span> 个自由列，并构成了 <span class="math inline">\(N({A})\)</span> 的一组基。</p>
-<p>则得到这样一个结论： <span class="math display">\[
-rank(A) = \# C_{pivot} = dim(C(A)) = r = dim(R(A))
-\]</span> 同样的： <span class="math display">\[
-\#C_{free} = dim(N(A)) = n - r
-\\[2ex]
-dim(L(A)) = m-r
-\]</span> 不妨用下图来表示这一切</p>
-<p><img src="image-20220929160748771.png" alt="image-20220929160748771" style="zoom:67%;" /></p>
-]]></content>
-      <categories>
-        <category>math</category>
-      </categories>
-      <tags>
-        <tag>MIT18.06</tag>
       </tags>
   </entry>
   <entry>
@@ -812,169 +811,6 @@ dim(L(A)) = m-r
       </categories>
       <tags>
         <tag>每日一题</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>6.824 Lab2 RAFT</title>
-    <url>/6-824/raft1/</url>
-    <content><![CDATA[<p>对于 Raft，官网的说法是这样的：</p>
-<blockquote>
-<p>Raft 是一个易于理解的共识算法。在容错性和性能方面，它相当于 Paxos。不同之处在于，它被分解成相对独立的子问题，并且清楚地解决了实际系统所需的所有主要部分。我们希望 Raft 将向更广泛的受众提供共识，并希望这些更广泛的受众将能够开发出比现在更高质量的基于共识的系统。</p>
-</blockquote>
-<p>之前参加了 pingcap 组织的训练营，lab2 也是 raft，但由于零基础，很快就被干碎了。故本次前来尝试教学级别的 raft code，希望6.824 善待我。</p>
-<span id="more"></span>
-<h4 id="part-a-raft-leader-election">PART A-Raft Leader Election</h4>
-<p>关于 Raft，有一个<a href="http://thesecretlivesofdata.com/raft/#home">非常通俗易懂的Raft 可视化网站</a>，以及<a href="https://pdos.csail.mit.edu/6.824/papers/raft-extended.pdf">描述 Raft 算法的论文</a>。我只能说这个算法很复杂，很有挑战性。</p>
-<p>part A 是 code 出 Raft 节点在启动后，超过一定时间间隔自动发起选举并当上领导者的过程。我把这一过程描述为以下步骤：</p>
-<ol type="1">
-<li><p>节点自身包含一个定时器，自动增长，在 timeout 时间间隔内满足以下条件</p>
-<ul>
-<li>未投票给其它节点</li>
-<li>未收到当前 leader 的RPC</li>
-<li>未发起选举</li>
-</ul>
-<p>则将自身状态变为 Candidate，CurrentTerm 加一，并请求其它各个节点（下称 Peers）给自己投票</p></li>
-<li><p>Peers 收到 requestVote 消息后，对该消息进行处理，并按照一定规则判断是否能够同意其成为 leader</p></li>
-<li><p>如果 Candidate 收到了超过半数的赞成票（自己也算一票），则成为当前 Term 的 leader</p></li>
-</ol>
-<p>至此，一个完整的选举过程就结束了。另外，节点成为 leader 后，需要定期向其它 Peers 发送不带任何 log 的特殊 AppendEntriesRPC，也就是所谓的 <strong>HeartBeat</strong>。</p>
-<p>这一部分并不难，只需修改 Raft.go 即可，而解决它的关键在于 paper 中的 Figure2，为本实验提供了非常有用的结构体定义以及规则。同时，goroutines 也为我们解决某些问题提供了很重要的一个手段。</p>
-<h5 id="结构体定义">结构体定义</h5>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 每个日志条目存相应的索引、term 以及操作</span></span><br><span class="line"><span class="keyword">type</span> LogEntry <span class="keyword">struct</span> &#123;</span><br><span class="line">	Index   <span class="type">int</span></span><br><span class="line">	Term    <span class="type">int</span></span><br><span class="line">	Command <span class="keyword">interface</span>&#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 这里的 RaftState 与 persister 里的不一样</span></span><br><span class="line"><span class="keyword">type</span> RaftState <span class="type">string</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> (</span><br><span class="line">	Follower  RaftState = <span class="string">&quot;Follower&quot;</span></span><br><span class="line">	Candidate RaftState = <span class="string">&quot;Candidate&quot;</span></span><br><span class="line">	Leader    RaftState = <span class="string">&quot;Leader&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Raft <span class="keyword">struct</span> &#123;</span><br><span class="line">	mu        sync.RWMutex</span><br><span class="line">	peers     []*labrpc.ClientEnd</span><br><span class="line">	persister *Persister</span><br><span class="line">	me        <span class="type">int</span></span><br><span class="line">	dead      <span class="type">int32</span></span><br><span class="line"></span><br><span class="line">	CurrentTerm <span class="type">int</span></span><br><span class="line">	VoteFor     <span class="type">int</span></span><br><span class="line">	Entry       []LogEntry</span><br><span class="line">	raftState   RaftState</span><br><span class="line"></span><br><span class="line">	commitIndex <span class="type">int</span></span><br><span class="line">	lastApplied <span class="type">int</span></span><br><span class="line">	nextIndex   []<span class="type">int</span></span><br><span class="line">	matchIndex  []<span class="type">int</span></span><br><span class="line"></span><br><span class="line">	applyChannel <span class="keyword">chan</span> ApplyMsg</span><br><span class="line">	applyCond    *sync.Cond</span><br><span class="line"></span><br><span class="line">	electionTimer  *time.Timer</span><br><span class="line">	heartbeatTimer *time.Timer</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h5 id="timer">Timer</h5>
-<p>尽管 6.824 提了一嘴不要用 go time 库里的 timer，但感觉应该是怕学生不会用用错(</p>
-<p>根据算法要求，需要<strong>选举定时器</strong>和<strong>心跳定时器</strong>各一个，每个定时器到点了都要触发一次事件，并且根据节点的 raftState 不同，进行不同的重置定时器操作。</p>
-<blockquote>
-<p>由于 lab 要求 1s 内最多发十次心跳，所以 HeartBeatTimeOut 设置为 100ms</p>
-</blockquote>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rf *Raft)</span></span> ResetTimer(isleader <span class="type">bool</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> isleader &#123;</span><br><span class="line">        rf.heartbeatTimer.Reset(rf.HeartBeatTimeOut())</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        rf.electionTimer.Reset(rf.ElectionTimeOut())</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rf *Raft)</span></span> Ticker() &#123;</span><br><span class="line">    <span class="keyword">for</span> !rf.killed() &#123;</span><br><span class="line">        <span class="keyword">select</span> &#123;</span><br><span class="line">            <span class="keyword">case</span> &lt;-rf.electionTimer.C:</span><br><span class="line">            <span class="comment">// 选举投票超时，发起选举</span></span><br><span class="line">            <span class="keyword">case</span> &lt;-rf.heartbeatTimer.C:</span><br><span class="line">            <span class="comment">// 心跳超时，发送心跳</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h5 id="candidate-发送投票请求">Candidate 发送投票请求</h5>
-<p>关键点在于如何应对过期的 reply。这里在每次收到 reply 时，都对整个节点上读写锁，获取当前状态是否为 Candidate 并检查 reply 的 term 是否与节点当前 term 一致。一旦有一个条件不满足，则认为该消息已过时。</p>
-<blockquote>
-<p>由于每个 goroutine 在对 reply 的处理是互斥的，所以这是判断消息是否过期的最有效的办法。</p>
-</blockquote>
-<p>若 Candidate 成功当选（破坏条件1）或收到了一个更高 term 节点的回复而更新自己的状态（破坏条件1, 2），说明这次选举已经可以结束了，再进行下去没有意义了，后续收到所有的该次选举产生的 reply 都作废。</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rf *Raft)</span></span> StartElection() &#123;</span><br><span class="line">    voteCnt := <span class="number">1</span>	<span class="comment">// 赞成票数</span></span><br><span class="line">    args := rf.GetRequestVoteArg()</span><br><span class="line">	<span class="keyword">for</span> i := <span class="keyword">range</span> rf.peers &#123;</span><br><span class="line">        <span class="keyword">if</span> i != rf.me &#123;</span><br><span class="line">            <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(peer <span class="type">int</span>)</span></span> &#123;</span><br><span class="line">                <span class="keyword">for</span> &#123;</span><br><span class="line">                    reply := &amp;RequestVoteReply&#123;&#125;</span><br><span class="line">                    <span class="keyword">if</span> rf.peers[peer].Call(<span class="string">&quot;Raft.RequestVote&quot;</span>, args, reply) &#123;	<span class="comment">// 发送成功了</span></span><br><span class="line">                        rf.mu.Lock()</span><br><span class="line">                        <span class="keyword">if</span> rf.raftState == Candidate &amp;&amp; rf.CurrentTerm == args.Term &#123;	<span class="comment">// 处理过时 reply</span></span><br><span class="line">                            <span class="keyword">if</span> reply.Grant &#123;</span><br><span class="line">                                voteCnt++</span><br><span class="line">                                <span class="keyword">if</span> voteCnt &gt; <span class="built_in">len</span>(rf.peers)/<span class="number">2</span> &#123;</span><br><span class="line">                                    <span class="comment">// 成为 Leader</span></span><br><span class="line">                                &#125;</span><br><span class="line">                            &#125; <span class="keyword">else</span> <span class="keyword">if</span> reply.Term &gt; rf.CurrentTerm &#123;</span><br><span class="line">                                <span class="comment">// 当前 term 已过时，需要更新并转为 Follower</span></span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125;</span><br><span class="line">                        rf.mu.Unlock()</span><br><span class="line">                        <span class="keyword">return</span></span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;(i)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h5 id="对投票请求进行回复">对投票请求进行回复</h5>
-<p>因为 2A 部分没有 AppendEntries，所以暂时不用考虑 paper 中各种和 Log 有关的变量。</p>
-<blockquote>
-<p>这里给 reply 加了个变量 Err，为了在打 log 的时候能够知道是因为什么而拒绝了该次投票，从而更快定位 bug。</p>
-</blockquote>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rf *Raft)</span></span> RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) &#123;</span><br><span class="line">    rf.mu.Lock()</span><br><span class="line">    <span class="keyword">defer</span> rf.mu.Unlock()</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 收到过时 rpc</span></span><br><span class="line">    <span class="keyword">if</span> args.Term &lt; rf.CurrentTerm &#123;</span><br><span class="line">        reply.Term, reply.Grant, reply.Err = rf.CurrentTerm, <span class="literal">false</span>, ErrOldTerm</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 当前 term 内已给其他节点投过票</span></span><br><span class="line">    <span class="keyword">if</span> args.Term == rf.CurrentTerm &amp;&amp; (rf.VoteFor != null &amp;&amp; rf.VoteFor != args.CandidateId) &#123;</span><br><span class="line">        reply.Term, reply.Grant, reply.Err = rf.CurrentTerm, <span class="literal">false</span>, ErrVoted</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 当前 term 已过时，需要更新并转为 Follower</span></span><br><span class="line">    <span class="keyword">if</span> args.Term &gt; rf.CurrentTerm &#123;</span><br><span class="line">        rf.VoteFor, rf.CurrentTerm = null, args.Term</span><br><span class="line">        rf.ChangeState(Follower)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    LastLogTerm := rf.GetLastLog().Term</span><br><span class="line">    LastLogIndex := rf.GetLastLog().Index</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 没问题了，就给它投赞成票</span></span><br><span class="line">    reply.Term, reply.Grant, reply.Err = rf.CurrentTerm, <span class="literal">true</span>, OK</span><br><span class="line">    rf.VoteFor = args.CandidateId</span><br><span class="line">    rf.ResetTimer(<span class="literal">false</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h5 id="成为-leader">成为 leader</h5>
-<p>当选后需<strong>立即</strong>广播一次 <strong>HeartBeat</strong>，以巩固地位。</p>
-<blockquote>
-<p>否则，考虑这种情况：A 和 B 同时发起投票，C 因为先收到 B 的请求而给 B 投了赞成票，之后收到 A 的请求，因为已经投了票故没有投给 A，也就没有更新选举定时器。最后 A 当选了，如果不马上广播 HeartBeat 而是等心跳定时器超时，则有可能在这段时间内 C 触发了选举超时，进行新的一轮选举。<strong>而事实上我们并不需要这一次多余的选举</strong>。</p>
-<p><strong>尽量避免不必要的流程</strong>。</p>
-</blockquote>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rf *Raft)</span></span> StartHeartbeat() &#123;</span><br><span class="line">    <span class="keyword">for</span> peer := <span class="keyword">range</span> rf.peers &#123;</span><br><span class="line">        <span class="keyword">if</span> peer != rf.me &#123;</span><br><span class="line">            <span class="keyword">go</span> rf.SendHeartBeat(peer)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>2A 中，<code>SendHeartBeat()</code>不需要发送多余的信息，只要告诉其它节点“我”的当前 term 即可。其它节点收到 rpc 后，根据收到的 term 进行相应操作。</p>
-<h4 id="part-b-log-replication">PART B-Log Replication</h4>
-<p>这一 part 要求我们实现 Log 的发送、接受与提交，选举约束与快速恢复。</p>
-<h5 id="appendentry">AppendEntry</h5>
-<p>上层通过调用 Start() 函数向 Leader 发送一个 command，我们需要将这一 command 以日志的形式记录下来，并告知其他 raft node。按照实验要求，我们需要立刻返回这一 command 在日志中的索引与相应 term，同时如果上层调用的结点是 Leader ，则返回 true。</p>
-<p>Leader 结点还是会每隔一定时间发送 Heartbeat，但此时在每个心跳期间，我们可能是有日志要发送的。通过阅读论文发现，有这样一个变量：</p>
-<ul>
-<li>nextIndex[]：for each server, index of the next log entry to send to that server (initialized to leader last log index + 1)</li>
-</ul>
-<p>所以我们对当前是发 HB 是否要捎带日志，只需要判断 next[server] 是否 ≤ LastLogIndex 即可，且要求：</p>
-<ul>
-<li>If last log index ≥ nextIndex for a follower: send AppendEntries RPC with log entries starting at nextIndex。</li>
-</ul>
-<p>上面是发送侧，下面说接收侧。</p>
-<p>paper 中提到了以下规则：</p>
-<ol type="1">
-<li>Reply false if term &lt; currentTerm (§5.1)</li>
-<li>Reply false if log doesn’t contain an entry at prevLogIndex whose term matches prevLogTerm (§5.3)</li>
-<li>If an existing entry conflicts with a new one (same index but different terms), delete the existing entry and all that follow it (§5.3)</li>
-<li>Append any new entries not already in the log</li>
-<li>If leaderCommit &gt; commitIndex, set commitIndex = min(leaderCommit, index of last new entry)</li>
-</ol>
-<p>逐个 adapt 到代码里即可。</p>
-<p>另外，paper 中还提到了：</p>
-<ul>
-<li>If there exists an N such that N &gt; commitIndex, a majority of matchIndex[i] ≥ N, and log[N].term == currentTerm: set commitIndex = N (§5.3, §5.4).</li>
-</ul>
-<p>这条规则就是让我们更新 commitIndex 用的。在每次处理 AE 的 reply 时，都对当前其它 peers 的 matchIndex 进行遍历，找到第二大的 matchIndex 即可，该值必然满足 <strong>a majority of matchIndex[i] ≥ N</strong>。</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rf *Raft)</span></span> FindN() &#123;</span><br><span class="line">    <span class="comment">// locked</span></span><br><span class="line">    matchIndexSet := <span class="built_in">make</span>([]<span class="type">int</span>, <span class="number">0</span>)</span><br><span class="line">    <span class="keyword">for</span> peer := <span class="keyword">range</span> rf.peers &#123;</span><br><span class="line">        <span class="keyword">if</span> peer != rf.me &#123;</span><br><span class="line">            matchindex, _ := rf.GetMatchNextIndex(peer)</span><br><span class="line">            matchIndexSet = <span class="built_in">append</span>(matchIndexSet, matchindex)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    sort.Ints(matchIndexSet)</span><br><span class="line">    N := matchIndexSet[<span class="built_in">len</span>(rf.peers)/<span class="number">2</span>]</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> N &gt; rf.commitIndex &amp;&amp; rf.Entry[N].Term == rf.CurrentTerm &#123;</span><br><span class="line">        rf.UpdateCommitAndApply(N)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这里有一个我一开始没搞清楚的坑在于：每次更新 Applied 不能用 Goroutine，否则会报 "out of order xxx" 的错，也就是未按序 apply。</p>
-<h5 id="选举约束">选举约束</h5>
-<p>这其实很好理解，Follwer 只 Grant 最后一个日志比它更 up-to-date 的 VoteRequest，也就是说要满足以下两点：</p>
-<ol type="1">
-<li>Candidate.LastLogTerm &gt; Follwer.LastLogTerm</li>
-<li>if Candidate.LastLogTerm == Follwer.LastLogTerm, Candidate.len(Entry) &gt; Follwer.len(Entry)</li>
-</ol>
-<p>如果不满足，就拒绝。</p>
-<p>需要加上这样一个条件：</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 自己有的 LogEntry 条目更 up-to-date</span></span><br><span class="line"><span class="keyword">if</span> args.LastLogTerm &lt; LastLogTerm || (args.LastLogTerm == LastLogTerm &amp;&amp; args.LastLogIndex &lt; LastLogIndex) &#123;</span><br><span class="line">    reply.Term, reply.Grant, reply.Err = rf.CurrentTerm, <span class="literal">false</span>, ErrLogNotMatch</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h5 id="快速恢复">快速恢复</h5>
-<p>Guide 上面讲的还挺清楚的，conflictIndex 是发生冲突时 <strong>Follwer 日志里的 Index</strong>，conflictTerm 就是那个索引下对应日志的 Term。</p>
-<p><strong>接受侧：</strong></p>
-<ul>
-<li>If a follower does not have prevLogIndex in its log, it should return with <strong>conflictIndex = len(log)</strong> and <strong>conflictTerm = None</strong>.</li>
-<li>If a follower does have prevLogIndex in its log, but the term does not match, it should return <strong>conflictTerm = log[prevLogIndex].Term</strong>, and then search its log for <strong>the first index whose entry has term equal to conflictTerm</strong>.</li>
-</ul>
-<p><strong>发送侧：</strong></p>
-<ul>
-<li>Upon receiving a conflict response, the leader should first search its log for conflictTerm. If it finds an entry in its log with that term, it should <strong>set nextIndex to be the one beyond the index of the last entry in that term in its log</strong>.</li>
-<li>If it does not find an entry with that term, it should <strong>set nextIndex = conflictIndex</strong>.</li>
-</ul>
-<p>这样做有助于快速修改 next[]，而不用每次都只是减一。这里我用了 binarysearch 来找对应的 index。</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rf *Raft)</span></span> FindNextIndex(ConflictIndex, ConflictTerm <span class="type">int</span>) (next <span class="type">int</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> ConflictTerm == <span class="number">0</span> || rf.Entry[ConflictIndex].Term == ConflictTerm &#123;</span><br><span class="line">        next = ConflictIndex</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    left, right := BaseIndex, rf.Entry[<span class="built_in">len</span>(rf.Entry)<span class="number">-1</span>].Index</span><br><span class="line">    <span class="keyword">for</span> left &lt; right<span class="number">-1</span> &#123;</span><br><span class="line">        mid := left + (right-left)/<span class="number">2</span></span><br><span class="line">        <span class="keyword">if</span> rf.Entry[mid-BaseIndex].Term &lt;= ConflictTerm &#123;</span><br><span class="line">            left = mid</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            right = mid - <span class="number">1</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> rf.Entry[right-BaseIndex].Term == ConflictTerm &#123;</span><br><span class="line">        next = right + <span class="number">1</span></span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> rf.Entry[left-BaseIndex].Term == ConflictTerm &#123;</span><br><span class="line">        next = left + <span class="number">1</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        next = ConflictIndex</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h5 id="其他">其他</h5>
-<ol type="1">
-<li>在生成 raft node 的时候我把一个 index:0 term:0 的日志塞到里面，这样就能让它每一个 index 都能直接对应，而不需要考虑数组从 0 开始，PrevLogTerm 也就不需要考虑 PrevLogIndex 是否大于零了。</li>
-<li>AppendEntryRPC 成功和失败都返回 ConflictIndex 和 ConflictTerm，而 AE 成功时我们就认为 ConflictIndex 是 Follwer 的最后一个索引，HB 成功时则设置为 args.PrevLogIndex（这是参考了 Raft 官网的设定），就能正确更新到 next[server]</li>
-</ol>
-<h4 id="part-c-persistence">PART C-Persistence</h4>
-<p>这块虽然标了 hard，但实际代码量可以忽略不计。总的来说要我们实现一致性，即能保证节点 crash 后能恢复到原来的状态。</p>
-<p>Paper 中已经为我们标出了哪些变量（VoteFor、Term、Entry）是需要保持一致性的，所以 Persist() 和 ReadPersist() 没什么好聊的，直接 uncomment 掉，稍微改改就好了。</p>
-<p>我们需要在这三个变量被修改的时候，及时调用 Persist() 函数以保存到 rf.Persist 里。</p>
-<ul>
-<li><strong>VoteFor</strong>：这个变量只有在两种情况下会变：
-<ol type="1">
-<li>收到投票申请，同意投票。 这个直接在 RequestVote 里改就好了。</li>
-<li>任期改变，重置投票。 收到任一 Term 大于 CurrentTerm 的 Message 都会导致任期改变，同时也会使节点“convert to Follwer（Rules For Servers）”。</li>
-</ol></li>
-<li><strong>Term</strong>：同上。</li>
-<li><strong>Entry</strong>：直接在 AppendEntries() 里加。</li>
-</ul>
-<p>由于系统的高并发性与网络的不可靠性，我们还需要在合适的位置及时上锁，尽可能保证线性一致（善用 rf.mu）。</p>
-<p>以及测试中有两个是 unreliable network ，意味着会丢包，我在 log 的时候发现这会导致选举的赞成票迟迟发不到 candidate 手上（被网络丢弃了），就是出现 Term 不断增加而没有 Leader 出现。于是在 sendRequestVote 里把 Call 改成了循环发送直至返回 true。</p>
-<blockquote>
-<p>不需要在 SendHeartBeat 里应用这一修改，因为心跳的发送是周期性的，很有可能上一个心跳时刻由于没收到 reply 而重复发，发着发着就到下一个心跳时刻了，这是我们不能接受的。</p>
-</blockquote>
-<h4 id="part-d-log-compaction">PART D-Log Compaction</h4>
-<p>由于日志会无限增长，如果不采取某些措施，内存则会被大大浪费。Paper 第七节提出了“日志压缩”这一机制，也就是 Leader 节点定期在 Raft 层调用 Snapshot() 将当前 Application 层的状态以快照的形式保存，并丢弃那些已经被 Applied 的日志——这些日志在之后的时间不会再被用到。如下图所示</p>
-<p><img src="raf1ukdq.jpg" style="zoom:80%;" /></p>
-<p>原理就如 Paper 中说的那样。 在这一 part 中我们需要做这些事情：</p>
-<ol start="0" type="1">
-<li>改变 Entry 的索引方式</li>
-<li>实现 Snapshot() 函数</li>
-<li>实现 InstallSnapshotRPC() 以及相应的 args、reply</li>
-<li>实现 crash 后恢复所需的持久状态</li>
-</ol>
-<h5 id="索引">索引</h5>
-<p>因为节点的日志里存的 Index 不一定和数组下标一一对应了，前面我将每个 rf.Entry[0] 都设为一个 {Index:0, Term: 0} 的哨兵来防止越界，在这里由于进行了日志压缩，哨兵可以改为 {Index: LastIncludedIndex, Term: LastIncludedTerm}，这样一来日志索引 index 到数组里的位置就变成了 index - rf.Entry[0].Index</p>
-<p>⚠ 每个涉及到<strong>索引</strong>的地方都要进行修改</p>
-<h5 id="snapshotindex-int-snapshot-byte">Snapshot(index int, snapshot []byte)</h5>
-<p>这里的 index 其实就是 LastIncludedIndex，snapshot 其实就是上层告诉我们的状态，需要保存到 persist 里。 我们对 index 进行一个范围的判断，如果不越界，则进行日志的截断，并进行一个 persist.SaveSnapshot 的操作。</p>
-<blockquote>
-<p>因为 persist.go 里没有单独保存 snapshot 的函数，我就自己加了一个。 （根据观察，测试里好像会隐式对所有节点调用 Snapshot，当然我也不确定、、）</p>
-</blockquote>
-<h5 id="installsnapshotrpc">InstallSnapShotRPC</h5>
-<p>args 和 reply 要的变量都直接在 6.824 lab 网页的 hint 里和 paper 里找就行。 唯一要解决的问题是发送端要怎么处理这个 RPC—— 我的处理方法是，如果某个要发送的 AppendEntries 的 PrevLogIndex 比 Leader 当前存的第一个日志的 Index 还要小，说明这个 peer 已经落后太多，Leader 没有更早的日志能发过去了，那就直接告诉它要采用这个快照，一步到位，然后更新 Leader 里这个 peer 对应的 nextIndex。 那么接收侧如果收到了这一 RPC，先按照 paper 里说的检查一下，无误后自己截断日志，并更新 lastapplied 和 commitindex（snapshot 里没有这一步）</p>
-<blockquote>
-<p>考虑到并发性，我选择让这一 RPC 和 AE RPC 有同等地位——每个心跳时刻只发送其中的一个，否则会出现上一个心跳时刻的 goroutine 和下一个心跳时刻的 goroutine 时间上起冲突</p>
-</blockquote>
-<p>BTW，2D 测试一开始会出现 <a href="https://thesquareplanet.com/blog/students-guide-to-raft/">RAFT GUIDE</a> 里最后提到的“四向死锁”这一糟糕的情况，解决方案是在建立 raft 节点时，开一个新线程让其 Apply 日志，每次 CommitIndex 更新时，都通过 raft 里的某个条件变量唤醒线程，让其工作，然后再次进入 Wait()</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rf *Raft)</span></span> Applier() &#123;</span><br><span class="line">    <span class="keyword">for</span> !rf.killed() &#123;</span><br><span class="line">        rf.mu.Lock()</span><br><span class="line">        <span class="keyword">for</span> !(rf.lastApplied &lt; rf.commitIndex) &#123;</span><br><span class="line">            rf.applyCond.Wait()</span><br><span class="line">        &#125;</span><br><span class="line">        CommitIndex := rf.commitIndex</span><br><span class="line">        BaseIndex := rf.GetBaseLog().Index</span><br><span class="line">        Entries := <span class="built_in">make</span>([]LogEntry, rf.commitIndex-rf.lastApplied)</span><br><span class="line">        <span class="built_in">copy</span>(Entries, rf.Entry[rf.lastApplied+<span class="number">1</span>-BaseIndex:rf.commitIndex+<span class="number">1</span>-BaseIndex])</span><br><span class="line">        </span><br><span class="line">        rf.mu.Unlock()</span><br><span class="line">        <span class="keyword">for</span> _, Entry := <span class="keyword">range</span> Entries &#123;</span><br><span class="line">            rf.applyChannel &lt;- ApplyMsg&#123;</span><br><span class="line">                CommandValid: <span class="literal">true</span>,</span><br><span class="line">                Command:      Entry.Command,</span><br><span class="line">                CommandTerm:  Entry.Term,</span><br><span class="line">                CommandIndex: Entry.Index,</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        rf.mu.Lock()</span><br><span class="line">        rf.lastApplied = max(rf.lastApplied, CommitIndex)</span><br><span class="line">        rf.mu.Unlock()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>6.824</category>
-      </categories>
-      <tags>
-        <tag>lab</tag>
       </tags>
   </entry>
   <entry>
@@ -1315,6 +1151,288 @@ S\Lambda
       </tags>
   </entry>
   <entry>
+    <title>Linear-Algebra(1)</title>
+    <url>/math/linear-algebra(1)/</url>
+    <content><![CDATA[<p>如果本科线代能有这样的教育方式和路线，我何苦现在还要来听这门公开课(</p>
+<p>记录一下听的过程中觉得有用的信息好了。</p>
+<span id="more"></span>
+<h4 id="从线性方程组开始">从线性方程组开始</h4>
+<p>教授（下简称 GS）认为线性代数的基本用途是解<strong>线性方程组</strong>，比如有这样一个方程组： <span class="math display">\[
+\begin{cases}
+2x-y = 0
+\\[2ex]
+-x+2y=3
+\end{cases}
+\]</span> 我们可以从以下三个角度考虑其解法。</p>
+<ol type="1">
+<li><p><strong>行图像</strong>：对于每个方程，我们都可以在二维平面上画出一条直线，这些直线的交点就是我们想要的解。</p></li>
+<li><p><strong>列图像</strong>：对于每个变量的参数，我们都可以把方程组写成若干向量线性组合的形式（本例中是 <span class="math inline">\(x\left[\begin{matrix}2 \\ -1\end{matrix}\right] + y\left[\begin{matrix}-1 \\ 2\end{matrix}\right] = \left[\begin{matrix}0 \\ 3\end{matrix}\right]\)</span>）。只要找到一个合适的组合，方程组得解。</p>
+<blockquote>
+<p>此处如果如果每次取任意的 x 与 y，则等式左侧的向量的组合能布满整个二维平面。</p>
+<p>拓展到多元方程组也是同理。</p>
+</blockquote></li>
+</ol>
+<p>我们构造一个系数矩阵 <span class="math inline">\({A} = \left[\begin{matrix}2 &amp; -1 \\ -1 &amp; 2\end{matrix}\right]\)</span>，令 <span class="math inline">\(\vec{x} = \left[\begin{matrix}x \\ y\end{matrix}\right], \vec{b} = \left[\begin{matrix}0 \\ 3\end{matrix}\right]\)</span>，然后方程组可以写成这样子： <span class="math display">\[
+A\vec{x} = \vec{b}
+\]</span></p>
+<h5 id="是否有解">是否有解？</h5>
+<p>这时要考虑一个问题：是否任意 <span class="math inline">\(\vec{b}\)</span> 都能让上面那个方程有解呢？</p>
+<p>从<strong>行图像</strong>的角度来讲，如果方程组有解，则所有方程在坐标系上对应的图像（直线、平面、体积）存在交集。如果某一个 <span class="math inline">\(\vec{b}\)</span> 不能满足上面条件，则无解（反之有解）。</p>
+<p>从<strong>列图像</strong>的角度来讲，如果某一个 <span class="math inline">\(\vec{b}\)</span> 不能成为 <span class="math inline">\({A}\)</span> 列向量的线性组合，则无解（反之有解）。</p>
+<h5 id="如何求解">如何求解？</h5>
+<p>计算机软件（以及人类）计算时最常用的方法是<strong>高斯消元法</strong>，将原方程 <span class="math inline">\({A}\vec{x} = \vec{b}\)</span> 转换为新的方程 <span class="math inline">\({U}\vec{x}=\vec{c}\)</span>。</p>
+<blockquote>
+<p>其中 <span class="math inline">\({U}\)</span> 为行阶梯最简型矩阵。</p>
+</blockquote>
+<h5 id="消元过程">消元过程</h5>
+<p>每一步消元都可以视为将原矩阵乘上一个<strong>置换矩阵</strong>。左乘置换矩阵可以完成原矩阵的行变换，右乘置换矩阵则为列变换。</p>
+<h5 id="逆矩阵">逆矩阵</h5>
+<p>对于消元过程，每一步都是可逆的。对于一个置换矩阵 $ E_1$，我做了其相反的操作即可得到原矩阵，若这一相反的操作用 $ E_1^{'}$ 表示，则有 $ E_1^{'} E_1 A = A$ 。</p>
+<p>得到 $ E_1^{'} E_1 = {I}$，从而可以用 $ E_1^{'} = { E_1}^{-1}$ 表示逆矩阵。第一个式子代表了逆矩阵的定义与性质。同样也有 <span class="math inline">\(( E_1^{&#39;})^{-1} = { E_1}\)</span> 且 $ E_1 E_1^{'} = {I}$ 。</p>
+<blockquote>
+<p>其中 $ I$ 是<strong>单位矩阵</strong>（对角线元素全为 1，其它元素全为 0 的方阵）</p>
+</blockquote>
+<h5 id="怎么求逆矩阵">怎么求逆矩阵？</h5>
+<p><strong>高斯-若尔当消元法</strong>(Gauss-Jordan Elimination)告诉我们，通过构造 <span class="math inline">\(\left[\begin{matrix}\ {A}\ |\ {I}\ \end{matrix}\right]\)</span>，再通过消元法将左侧矩阵变为单位矩阵 <span class="math inline">\({I}\)</span>，易得这一系列行变换操作对应的矩阵是 <span class="math inline">\({A}^{-1}\)</span>，相当于左乘了一个矩阵 <span class="math inline">\({A}^{-1}\)</span>，则右侧矩阵乘完后自然就变为了 <span class="math inline">\({A}^{-1}\)</span>。</p>
+<h4 id="接下来引入拓展到向量空间">接下来引入拓展到向量空间</h4>
+<h5 id="向量空间">向量空间</h5>
+<p>一个向量空间应该满足这样一个<strong>封闭性</strong>条件：对于空间中的任意向量 <span class="math inline">\(\vec{u}, \vec{v}\)</span>，其任意线性组合 <span class="math inline">\(a\vec{u}+b\vec{v}(a, b\in R)\)</span> 必然存在于空间中。显然，所有向量空间必须包括零向量。</p>
+<h5 id="子空间">子空间</h5>
+<p>包含于向量空间之内的一个向量空间称为原向量空间的一个子空间。</p>
+<p>以 <span class="math inline">\({R}^3\)</span> 为例（它代表具有三个实数分量的所有向量的集合），其子空间包括：</p>
+<ul>
+<li>其本身（三维）</li>
+<li>任一过原点的平面（二维）</li>
+<li>任一过原点的直线（一维）</li>
+<li>零向量</li>
+</ul>
+<h5 id="列空间">列空间</h5>
+<p>矩阵 <span class="math inline">\({A}_{m\times n}\)</span> 的所有列向量张成的空间称为其列空间，以 <span class="math inline">\(C({A})\)</span> 表示。<span class="math inline">\(C({A})\subset R^m\)</span></p>
+<h5 id="零空间">零空间</h5>
+<p>所有满足方程 <span class="math inline">\({A}\vec{x} = \vec{0}\)</span> 的解的集合称为矩阵 <span class="math inline">\({A}_{m\times n}\)</span> 的零空间，以 <span class="math inline">\(N({A})\)</span> 表示。<span class="math inline">\(N({A})\subset R^n\)</span></p>
+<h5 id="计算零空间">计算零空间</h5>
+<p>相当于求方程 <span class="math inline">\({A}\vec{x} = \vec{0}\)</span> 的所有解。通过<strong>消元法与列交换</strong>构造出新的方程 <span class="math inline">\({U}\vec{x}=\vec{0}\)</span>，其中 <span class="math inline">\({U}\)</span> 是由 <span class="math inline">\(r\)</span> 个<strong>主元列</strong>与 <span class="math inline">\(n-r\)</span> 个<strong>自由列</strong>组成的形如下式的行阶梯型矩阵： <span class="math display">\[
+U =
+\left[
+\begin{matrix}
+\quad I_{r\times r} &amp; F_{r\times n-r} \quad
+\\
+\quad 0 &amp; 0 \quad
+\end{matrix}
+\right]
+\]</span></p>
+<blockquote>
+<p>自由列可以表示为其左侧主元列的线性组合。</p>
+</blockquote>
+<p>原方程变为 <span class="math inline">\({U}\)</span> 的主元行乘以 <span class="math inline">\(\vec{x}\)</span>，即 <span class="math inline">\(\left[\begin{matrix}\ {I}\ |\ {F}\ \end{matrix}\right] \left[\begin{matrix}\  \vec x_{pivot} \\ \  \vec x_{free} \ \end{matrix}\right] = 0\)</span>。如果对 <span class="math inline">\(\vec x_{free}\)</span> 中 <span class="math inline">\(n-r\)</span> 的变量自由取值，我们能得到 <span class="math inline">\(n-r\)</span> 个线性无关的特解，<span class="math inline">\(N({A})\)</span> 则是由这些特解张成的向量空间（<strong>维度</strong>为 <span class="math inline">\(n-r\)</span>）。若把这些特解作为列向量写到一个矩阵 <span class="math inline">\({N}\)</span> 中，则有 <span class="math inline">\({U}{N} = {0}\)</span>，易得： <span class="math display">\[
+N =
+\left[\begin{matrix}\ {-F}_{r\times n-r} \ \\ \ I_{n-r\times n-r} \ \end{matrix}\right]
+\]</span> 其中 <span class="math inline">\({-F}\)</span> 对应 <span class="math inline">\(\vec{x}_{pivot}\)</span>，<span class="math inline">\({I}\)</span> 对应 <span class="math inline">\(\vec{x}_{free}\)</span></p>
+<h5 id="如果方程右侧不为零向量">如果方程右侧不为零向量</h5>
+<p>首先抛出结论：若 <span class="math inline">\(\vec{b} \in C({A})\)</span>，则方程 <span class="math inline">\({A}\vec{x} = \vec{b}\)</span> 有解。</p>
+<p>当方程有解时，可以先找到方程一个特解，再与 <span class="math inline">\(N({A})\)</span> 进行线性组合，即可得到最后的解。</p>
+<h5 id="秩">秩</h5>
+<p>矩阵的<strong>秩</strong>等于矩阵的主元数。若 <span class="math inline">\(rank({A}_{m\times n}) = r\)</span>，则必有 <span class="math inline">\(r\leq m, r\leq n\)</span> 。</p>
+<ol type="1">
+<li><strong>列满秩</strong>：即 <span class="math inline">\(r=n&lt;m\)</span>，每一列都是主元列，矩阵没有自由列，<span class="math inline">\(N({A})\)</span> 中只有零向量，方程 <span class="math inline">\({A}\vec{x} = \vec{b}\)</span> 要么无解，要么有唯一解。</li>
+<li><strong>行满秩</strong>：即 <span class="math inline">\(r=m\leq n\)</span>，方程 <span class="math inline">\({A}\vec{x} = \vec{b}\)</span> 有无穷多解。</li>
+<li><strong>方阵满秩</strong>：即 <span class="math inline">\(r=m=n\)</span>，方程 <span class="math inline">\({A}\vec{x} = \vec{b}\)</span> 总有唯一解。</li>
+<li><strong>行列均不满秩</strong>：即 <span class="math inline">\(r&lt;m, r&lt;n\)</span>，方程 <span class="math inline">\({A}\vec{x} = \vec{b}\)</span> 要么无解，要么有无穷多解。</li>
+</ol>
+<h5 id="线性相关性">线性相关性</h5>
+<p>若一组向量的非零线性组合可以得到零向量，则称这组向量<strong>线性相关</strong>；反之，则称其<strong>线性无关</strong>。</p>
+<h5 id="基">基</h5>
+<p>向量空间的<strong>基</strong>是一组<strong>线性无关的向量</strong>，且这些向量能够张成该向量空间。</p>
+<h5 id="维数">维数</h5>
+<p>空间中的每一组基都有相同的向量数，这个数值就是空间的<strong>维数</strong>，通常用 <span class="math inline">\(dim\)</span> 表示。</p>
+<h5 id="基本子空间">基本子空间</h5>
+<p>除了列空间和零空间，还有</p>
+<ol type="1">
+<li><strong>行空间</strong>：矩阵 <span class="math inline">\({A}_{m\times n}\)</span> 的所有行向量张成的空间称为其列空间，以 <span class="math inline">\(R({A})\)</span> 表示。<span class="math inline">\(R({A})\subset R^n\)</span></li>
+<li><strong>左零空间</strong>：所有满足方程 <span class="math inline">\({A^T}{x} = {0}\)</span> 的解的集合称为矩阵 <span class="math inline">\({A}_{m\times n}\)</span> 的左零空间，以 <span class="math inline">\(L({A})\)</span> 表示。<span class="math inline">\(L({A})\subset R^m\)</span></li>
+</ol>
+<p><span class="math inline">\({A}\)</span> 的 <span class="math inline">\(r\)</span> 个主元列构成了 <span class="math inline">\(C({A})\)</span> 的一组基。</p>
+<p><span class="math inline">\({A}\vec{x}=\vec{0}\)</span> 的一组特解对应于 <span class="math inline">\({A}\)</span> 的 <span class="math inline">\(n-r\)</span> 个自由列，并构成了 <span class="math inline">\(N({A})\)</span> 的一组基。</p>
+<p>则得到这样一个结论： <span class="math display">\[
+rank(A) = \# C_{pivot} = dim(C(A)) = r = dim(R(A))
+\]</span> 同样的： <span class="math display">\[
+\#C_{free} = dim(N(A)) = n - r
+\\[2ex]
+dim(L(A)) = m-r
+\]</span> 不妨用下图来表示这一切</p>
+<p><img src="image-20220929160748771.png" alt="image-20220929160748771" style="zoom:67%;" /></p>
+]]></content>
+      <categories>
+        <category>math</category>
+      </categories>
+      <tags>
+        <tag>MIT18.06</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>6.824 Lab2 RAFT</title>
+    <url>/6-824/raft1/</url>
+    <content><![CDATA[<p>对于 Raft，官网的说法是这样的：</p>
+<blockquote>
+<p>Raft 是一个易于理解的共识算法。在容错性和性能方面，它相当于 Paxos。不同之处在于，它被分解成相对独立的子问题，并且清楚地解决了实际系统所需的所有主要部分。我们希望 Raft 将向更广泛的受众提供共识，并希望这些更广泛的受众将能够开发出比现在更高质量的基于共识的系统。</p>
+</blockquote>
+<p>之前参加了 pingcap 组织的训练营，lab2 也是 raft，但由于零基础，很快就被干碎了。故本次前来尝试教学级别的 raft code，希望6.824 善待我。</p>
+<span id="more"></span>
+<h4 id="part-a-raft-leader-election">PART A-Raft Leader Election</h4>
+<p>关于 Raft，有一个<a href="http://thesecretlivesofdata.com/raft/#home">非常通俗易懂的Raft 可视化网站</a>，以及<a href="https://pdos.csail.mit.edu/6.824/papers/raft-extended.pdf">描述 Raft 算法的论文</a>。我只能说这个算法很复杂，很有挑战性。</p>
+<p>part A 是 code 出 Raft 节点在启动后，超过一定时间间隔自动发起选举并当上领导者的过程。我把这一过程描述为以下步骤：</p>
+<ol type="1">
+<li><p>节点自身包含一个定时器，自动增长，在 timeout 时间间隔内满足以下条件</p>
+<ul>
+<li>未投票给其它节点</li>
+<li>未收到当前 leader 的RPC</li>
+<li>未发起选举</li>
+</ul>
+<p>则将自身状态变为 Candidate，CurrentTerm 加一，并请求其它各个节点（下称 Peers）给自己投票</p></li>
+<li><p>Peers 收到 requestVote 消息后，对该消息进行处理，并按照一定规则判断是否能够同意其成为 leader</p></li>
+<li><p>如果 Candidate 收到了超过半数的赞成票（自己也算一票），则成为当前 Term 的 leader</p></li>
+</ol>
+<p>至此，一个完整的选举过程就结束了。另外，节点成为 leader 后，需要定期向其它 Peers 发送不带任何 log 的特殊 AppendEntriesRPC，也就是所谓的 <strong>HeartBeat</strong>。</p>
+<p>这一部分并不难，只需修改 Raft.go 即可，而解决它的关键在于 paper 中的 Figure2，为本实验提供了非常有用的结构体定义以及规则。同时，goroutines 也为我们解决某些问题提供了很重要的一个手段。</p>
+<h5 id="结构体定义">结构体定义</h5>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 每个日志条目存相应的索引、term 以及操作</span></span><br><span class="line"><span class="keyword">type</span> LogEntry <span class="keyword">struct</span> &#123;</span><br><span class="line">	Index   <span class="type">int</span></span><br><span class="line">	Term    <span class="type">int</span></span><br><span class="line">	Command <span class="keyword">interface</span>&#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 这里的 RaftState 与 persister 里的不一样</span></span><br><span class="line"><span class="keyword">type</span> RaftState <span class="type">string</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> (</span><br><span class="line">	Follower  RaftState = <span class="string">&quot;Follower&quot;</span></span><br><span class="line">	Candidate RaftState = <span class="string">&quot;Candidate&quot;</span></span><br><span class="line">	Leader    RaftState = <span class="string">&quot;Leader&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Raft <span class="keyword">struct</span> &#123;</span><br><span class="line">	mu        sync.RWMutex</span><br><span class="line">	peers     []*labrpc.ClientEnd</span><br><span class="line">	persister *Persister</span><br><span class="line">	me        <span class="type">int</span></span><br><span class="line">	dead      <span class="type">int32</span></span><br><span class="line"></span><br><span class="line">	CurrentTerm <span class="type">int</span></span><br><span class="line">	VoteFor     <span class="type">int</span></span><br><span class="line">	Entry       []LogEntry</span><br><span class="line">	raftState   RaftState</span><br><span class="line"></span><br><span class="line">	commitIndex <span class="type">int</span></span><br><span class="line">	lastApplied <span class="type">int</span></span><br><span class="line">	nextIndex   []<span class="type">int</span></span><br><span class="line">	matchIndex  []<span class="type">int</span></span><br><span class="line"></span><br><span class="line">	applyChannel <span class="keyword">chan</span> ApplyMsg</span><br><span class="line">	applyCond    *sync.Cond</span><br><span class="line"></span><br><span class="line">	electionTimer  *time.Timer</span><br><span class="line">	heartbeatTimer *time.Timer</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="timer">Timer</h5>
+<p>尽管 6.824 提了一嘴不要用 go time 库里的 timer，但感觉应该是怕学生不会用用错(</p>
+<p>根据算法要求，需要<strong>选举定时器</strong>和<strong>心跳定时器</strong>各一个，每个定时器到点了都要触发一次事件，并且根据节点的 raftState 不同，进行不同的重置定时器操作。</p>
+<blockquote>
+<p>由于 lab 要求 1s 内最多发十次心跳，所以 HeartBeatTimeOut 设置为 100ms</p>
+</blockquote>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rf *Raft)</span></span> ResetTimer(isleader <span class="type">bool</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> isleader &#123;</span><br><span class="line">        rf.heartbeatTimer.Reset(rf.HeartBeatTimeOut())</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        rf.electionTimer.Reset(rf.ElectionTimeOut())</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rf *Raft)</span></span> Ticker() &#123;</span><br><span class="line">    <span class="keyword">for</span> !rf.killed() &#123;</span><br><span class="line">        <span class="keyword">select</span> &#123;</span><br><span class="line">            <span class="keyword">case</span> &lt;-rf.electionTimer.C:</span><br><span class="line">            <span class="comment">// 选举投票超时，发起选举</span></span><br><span class="line">            <span class="keyword">case</span> &lt;-rf.heartbeatTimer.C:</span><br><span class="line">            <span class="comment">// 心跳超时，发送心跳</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="candidate-发送投票请求">Candidate 发送投票请求</h5>
+<p>关键点在于如何应对过期的 reply。这里在每次收到 reply 时，都对整个节点上读写锁，获取当前状态是否为 Candidate 并检查 reply 的 term 是否与节点当前 term 一致。一旦有一个条件不满足，则认为该消息已过时。</p>
+<blockquote>
+<p>由于每个 goroutine 在对 reply 的处理是互斥的，所以这是判断消息是否过期的最有效的办法。</p>
+</blockquote>
+<p>若 Candidate 成功当选（破坏条件1）或收到了一个更高 term 节点的回复而更新自己的状态（破坏条件1, 2），说明这次选举已经可以结束了，再进行下去没有意义了，后续收到所有的该次选举产生的 reply 都作废。</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rf *Raft)</span></span> StartElection() &#123;</span><br><span class="line">    voteCnt := <span class="number">1</span>	<span class="comment">// 赞成票数</span></span><br><span class="line">    args := rf.GetRequestVoteArg()</span><br><span class="line">	<span class="keyword">for</span> i := <span class="keyword">range</span> rf.peers &#123;</span><br><span class="line">        <span class="keyword">if</span> i != rf.me &#123;</span><br><span class="line">            <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(peer <span class="type">int</span>)</span></span> &#123;</span><br><span class="line">                <span class="keyword">for</span> &#123;</span><br><span class="line">                    reply := &amp;RequestVoteReply&#123;&#125;</span><br><span class="line">                    <span class="keyword">if</span> rf.peers[peer].Call(<span class="string">&quot;Raft.RequestVote&quot;</span>, args, reply) &#123;	<span class="comment">// 发送成功了</span></span><br><span class="line">                        rf.mu.Lock()</span><br><span class="line">                        <span class="keyword">if</span> rf.raftState == Candidate &amp;&amp; rf.CurrentTerm == args.Term &#123;	<span class="comment">// 处理过时 reply</span></span><br><span class="line">                            <span class="keyword">if</span> reply.Grant &#123;</span><br><span class="line">                                voteCnt++</span><br><span class="line">                                <span class="keyword">if</span> voteCnt &gt; <span class="built_in">len</span>(rf.peers)/<span class="number">2</span> &#123;</span><br><span class="line">                                    <span class="comment">// 成为 Leader</span></span><br><span class="line">                                &#125;</span><br><span class="line">                            &#125; <span class="keyword">else</span> <span class="keyword">if</span> reply.Term &gt; rf.CurrentTerm &#123;</span><br><span class="line">                                <span class="comment">// 当前 term 已过时，需要更新并转为 Follower</span></span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125;</span><br><span class="line">                        rf.mu.Unlock()</span><br><span class="line">                        <span class="keyword">return</span></span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;(i)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="对投票请求进行回复">对投票请求进行回复</h5>
+<p>因为 2A 部分没有 AppendEntries，所以暂时不用考虑 paper 中各种和 Log 有关的变量。</p>
+<blockquote>
+<p>这里给 reply 加了个变量 Err，为了在打 log 的时候能够知道是因为什么而拒绝了该次投票，从而更快定位 bug。</p>
+</blockquote>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rf *Raft)</span></span> RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) &#123;</span><br><span class="line">    rf.mu.Lock()</span><br><span class="line">    <span class="keyword">defer</span> rf.mu.Unlock()</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 收到过时 rpc</span></span><br><span class="line">    <span class="keyword">if</span> args.Term &lt; rf.CurrentTerm &#123;</span><br><span class="line">        reply.Term, reply.Grant, reply.Err = rf.CurrentTerm, <span class="literal">false</span>, ErrOldTerm</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 当前 term 内已给其他节点投过票</span></span><br><span class="line">    <span class="keyword">if</span> args.Term == rf.CurrentTerm &amp;&amp; (rf.VoteFor != null &amp;&amp; rf.VoteFor != args.CandidateId) &#123;</span><br><span class="line">        reply.Term, reply.Grant, reply.Err = rf.CurrentTerm, <span class="literal">false</span>, ErrVoted</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 当前 term 已过时，需要更新并转为 Follower</span></span><br><span class="line">    <span class="keyword">if</span> args.Term &gt; rf.CurrentTerm &#123;</span><br><span class="line">        rf.VoteFor, rf.CurrentTerm = null, args.Term</span><br><span class="line">        rf.ChangeState(Follower)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    LastLogTerm := rf.GetLastLog().Term</span><br><span class="line">    LastLogIndex := rf.GetLastLog().Index</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 没问题了，就给它投赞成票</span></span><br><span class="line">    reply.Term, reply.Grant, reply.Err = rf.CurrentTerm, <span class="literal">true</span>, OK</span><br><span class="line">    rf.VoteFor = args.CandidateId</span><br><span class="line">    rf.ResetTimer(<span class="literal">false</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="成为-leader">成为 leader</h5>
+<p>当选后需<strong>立即</strong>广播一次 <strong>HeartBeat</strong>，以巩固地位。</p>
+<blockquote>
+<p>否则，考虑这种情况：A 和 B 同时发起投票，C 因为先收到 B 的请求而给 B 投了赞成票，之后收到 A 的请求，因为已经投了票故没有投给 A，也就没有更新选举定时器。最后 A 当选了，如果不马上广播 HeartBeat 而是等心跳定时器超时，则有可能在这段时间内 C 触发了选举超时，进行新的一轮选举。<strong>而事实上我们并不需要这一次多余的选举</strong>。</p>
+<p><strong>尽量避免不必要的流程</strong>。</p>
+</blockquote>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rf *Raft)</span></span> StartHeartbeat() &#123;</span><br><span class="line">    <span class="keyword">for</span> peer := <span class="keyword">range</span> rf.peers &#123;</span><br><span class="line">        <span class="keyword">if</span> peer != rf.me &#123;</span><br><span class="line">            <span class="keyword">go</span> rf.SendHeartBeat(peer)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>2A 中，<code>SendHeartBeat()</code>不需要发送多余的信息，只要告诉其它节点“我”的当前 term 即可。其它节点收到 rpc 后，根据收到的 term 进行相应操作。</p>
+<h4 id="part-b-log-replication">PART B-Log Replication</h4>
+<p>这一 part 要求我们实现 Log 的发送、接受与提交，选举约束与快速恢复。</p>
+<h5 id="appendentry">AppendEntry</h5>
+<p>上层通过调用 Start() 函数向 Leader 发送一个 command，我们需要将这一 command 以日志的形式记录下来，并告知其他 raft node。按照实验要求，我们需要立刻返回这一 command 在日志中的索引与相应 term，同时如果上层调用的结点是 Leader ，则返回 true。</p>
+<p>Leader 结点还是会每隔一定时间发送 Heartbeat，但此时在每个心跳期间，我们可能是有日志要发送的。通过阅读论文发现，有这样一个变量：</p>
+<ul>
+<li>nextIndex[]：for each server, index of the next log entry to send to that server (initialized to leader last log index + 1)</li>
+</ul>
+<p>所以我们对当前是发 HB 是否要捎带日志，只需要判断 next[server] 是否 ≤ LastLogIndex 即可，且要求：</p>
+<ul>
+<li>If last log index ≥ nextIndex for a follower: send AppendEntries RPC with log entries starting at nextIndex。</li>
+</ul>
+<p>上面是发送侧，下面说接收侧。</p>
+<p>paper 中提到了以下规则：</p>
+<ol type="1">
+<li>Reply false if term &lt; currentTerm (§5.1)</li>
+<li>Reply false if log doesn’t contain an entry at prevLogIndex whose term matches prevLogTerm (§5.3)</li>
+<li>If an existing entry conflicts with a new one (same index but different terms), delete the existing entry and all that follow it (§5.3)</li>
+<li>Append any new entries not already in the log</li>
+<li>If leaderCommit &gt; commitIndex, set commitIndex = min(leaderCommit, index of last new entry)</li>
+</ol>
+<p>逐个 adapt 到代码里即可。</p>
+<p>另外，paper 中还提到了：</p>
+<ul>
+<li>If there exists an N such that N &gt; commitIndex, a majority of matchIndex[i] ≥ N, and log[N].term == currentTerm: set commitIndex = N (§5.3, §5.4).</li>
+</ul>
+<p>这条规则就是让我们更新 commitIndex 用的。在每次处理 AE 的 reply 时，都对当前其它 peers 的 matchIndex 进行遍历，找到第二大的 matchIndex 即可，该值必然满足 <strong>a majority of matchIndex[i] ≥ N</strong>。</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rf *Raft)</span></span> FindN() &#123;</span><br><span class="line">    <span class="comment">// locked</span></span><br><span class="line">    matchIndexSet := <span class="built_in">make</span>([]<span class="type">int</span>, <span class="number">0</span>)</span><br><span class="line">    <span class="keyword">for</span> peer := <span class="keyword">range</span> rf.peers &#123;</span><br><span class="line">        <span class="keyword">if</span> peer != rf.me &#123;</span><br><span class="line">            matchindex, _ := rf.GetMatchNextIndex(peer)</span><br><span class="line">            matchIndexSet = <span class="built_in">append</span>(matchIndexSet, matchindex)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    sort.Ints(matchIndexSet)</span><br><span class="line">    N := matchIndexSet[<span class="built_in">len</span>(rf.peers)/<span class="number">2</span>]</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> N &gt; rf.commitIndex &amp;&amp; rf.Entry[N].Term == rf.CurrentTerm &#123;</span><br><span class="line">        rf.UpdateCommitAndApply(N)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里有一个我一开始没搞清楚的坑在于：每次更新 Applied 不能用 Goroutine，否则会报 "out of order xxx" 的错，也就是未按序 apply。</p>
+<h5 id="选举约束">选举约束</h5>
+<p>这其实很好理解，Follwer 只 Grant 最后一个日志比它更 up-to-date 的 VoteRequest，也就是说要满足以下两点：</p>
+<ol type="1">
+<li>Candidate.LastLogTerm &gt; Follwer.LastLogTerm</li>
+<li>if Candidate.LastLogTerm == Follwer.LastLogTerm, Candidate.len(Entry) &gt; Follwer.len(Entry)</li>
+</ol>
+<p>如果不满足，就拒绝。</p>
+<p>需要加上这样一个条件：</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 自己有的 LogEntry 条目更 up-to-date</span></span><br><span class="line"><span class="keyword">if</span> args.LastLogTerm &lt; LastLogTerm || (args.LastLogTerm == LastLogTerm &amp;&amp; args.LastLogIndex &lt; LastLogIndex) &#123;</span><br><span class="line">    reply.Term, reply.Grant, reply.Err = rf.CurrentTerm, <span class="literal">false</span>, ErrLogNotMatch</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="快速恢复">快速恢复</h5>
+<p>Guide 上面讲的还挺清楚的，conflictIndex 是发生冲突时 <strong>Follwer 日志里的 Index</strong>，conflictTerm 就是那个索引下对应日志的 Term。</p>
+<p><strong>接受侧：</strong></p>
+<ul>
+<li>If a follower does not have prevLogIndex in its log, it should return with <strong>conflictIndex = len(log)</strong> and <strong>conflictTerm = None</strong>.</li>
+<li>If a follower does have prevLogIndex in its log, but the term does not match, it should return <strong>conflictTerm = log[prevLogIndex].Term</strong>, and then search its log for <strong>the first index whose entry has term equal to conflictTerm</strong>.</li>
+</ul>
+<p><strong>发送侧：</strong></p>
+<ul>
+<li>Upon receiving a conflict response, the leader should first search its log for conflictTerm. If it finds an entry in its log with that term, it should <strong>set nextIndex to be the one beyond the index of the last entry in that term in its log</strong>.</li>
+<li>If it does not find an entry with that term, it should <strong>set nextIndex = conflictIndex</strong>.</li>
+</ul>
+<p>这样做有助于快速修改 next[]，而不用每次都只是减一。这里我用了 binarysearch 来找对应的 index。</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rf *Raft)</span></span> FindNextIndex(ConflictIndex, ConflictTerm <span class="type">int</span>) (next <span class="type">int</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> ConflictTerm == <span class="number">0</span> || rf.Entry[ConflictIndex].Term == ConflictTerm &#123;</span><br><span class="line">        next = ConflictIndex</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    left, right := BaseIndex, rf.Entry[<span class="built_in">len</span>(rf.Entry)<span class="number">-1</span>].Index</span><br><span class="line">    <span class="keyword">for</span> left &lt; right<span class="number">-1</span> &#123;</span><br><span class="line">        mid := left + (right-left)/<span class="number">2</span></span><br><span class="line">        <span class="keyword">if</span> rf.Entry[mid-BaseIndex].Term &lt;= ConflictTerm &#123;</span><br><span class="line">            left = mid</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            right = mid - <span class="number">1</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> rf.Entry[right-BaseIndex].Term == ConflictTerm &#123;</span><br><span class="line">        next = right + <span class="number">1</span></span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> rf.Entry[left-BaseIndex].Term == ConflictTerm &#123;</span><br><span class="line">        next = left + <span class="number">1</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        next = ConflictIndex</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="其他">其他</h5>
+<ol type="1">
+<li>在生成 raft node 的时候我把一个 index:0 term:0 的日志塞到里面，这样就能让它每一个 index 都能直接对应，而不需要考虑数组从 0 开始，PrevLogTerm 也就不需要考虑 PrevLogIndex 是否大于零了。</li>
+<li>AppendEntryRPC 成功和失败都返回 ConflictIndex 和 ConflictTerm，而 AE 成功时我们就认为 ConflictIndex 是 Follwer 的最后一个索引，HB 成功时则设置为 args.PrevLogIndex（这是参考了 Raft 官网的设定），就能正确更新到 next[server]</li>
+</ol>
+<h4 id="part-c-persistence">PART C-Persistence</h4>
+<p>这块虽然标了 hard，但实际代码量可以忽略不计。总的来说要我们实现一致性，即能保证节点 crash 后能恢复到原来的状态。</p>
+<p>Paper 中已经为我们标出了哪些变量（VoteFor、Term、Entry）是需要保持一致性的，所以 Persist() 和 ReadPersist() 没什么好聊的，直接 uncomment 掉，稍微改改就好了。</p>
+<p>我们需要在这三个变量被修改的时候，及时调用 Persist() 函数以保存到 rf.Persist 里。</p>
+<ul>
+<li><strong>VoteFor</strong>：这个变量只有在两种情况下会变：
+<ol type="1">
+<li>收到投票申请，同意投票。 这个直接在 RequestVote 里改就好了。</li>
+<li>任期改变，重置投票。 收到任一 Term 大于 CurrentTerm 的 Message 都会导致任期改变，同时也会使节点“convert to Follwer（Rules For Servers）”。</li>
+</ol></li>
+<li><strong>Term</strong>：同上。</li>
+<li><strong>Entry</strong>：直接在 AppendEntries() 里加。</li>
+</ul>
+<p>由于系统的高并发性与网络的不可靠性，我们还需要在合适的位置及时上锁，尽可能保证线性一致（善用 rf.mu）。</p>
+<p>以及测试中有两个是 unreliable network ，意味着会丢包，我在 log 的时候发现这会导致选举的赞成票迟迟发不到 candidate 手上（被网络丢弃了），就是出现 Term 不断增加而没有 Leader 出现。于是在 sendRequestVote 里把 Call 改成了循环发送直至返回 true。</p>
+<blockquote>
+<p>不需要在 SendHeartBeat 里应用这一修改，因为心跳的发送是周期性的，很有可能上一个心跳时刻由于没收到 reply 而重复发，发着发着就到下一个心跳时刻了，这是我们不能接受的。</p>
+</blockquote>
+<h4 id="part-d-log-compaction">PART D-Log Compaction</h4>
+<p>由于日志会无限增长，如果不采取某些措施，内存则会被大大浪费。Paper 第七节提出了“日志压缩”这一机制，也就是 Leader 节点定期在 Raft 层调用 Snapshot() 将当前 Application 层的状态以快照的形式保存，并丢弃那些已经被 Applied 的日志——这些日志在之后的时间不会再被用到。如下图所示</p>
+<p><img src="raf1ukdq.jpg" style="zoom:80%;" /></p>
+<p>原理就如 Paper 中说的那样。 在这一 part 中我们需要做这些事情：</p>
+<ol start="0" type="1">
+<li>改变 Entry 的索引方式</li>
+<li>实现 Snapshot() 函数</li>
+<li>实现 InstallSnapshotRPC() 以及相应的 args、reply</li>
+<li>实现 crash 后恢复所需的持久状态</li>
+</ol>
+<h5 id="索引">索引</h5>
+<p>因为节点的日志里存的 Index 不一定和数组下标一一对应了，前面我将每个 rf.Entry[0] 都设为一个 {Index:0, Term: 0} 的哨兵来防止越界，在这里由于进行了日志压缩，哨兵可以改为 {Index: LastIncludedIndex, Term: LastIncludedTerm}，这样一来日志索引 index 到数组里的位置就变成了 index - rf.Entry[0].Index</p>
+<p>⚠ 每个涉及到<strong>索引</strong>的地方都要进行修改</p>
+<h5 id="snapshotindex-int-snapshot-byte">Snapshot(index int, snapshot []byte)</h5>
+<p>这里的 index 其实就是 LastIncludedIndex，snapshot 其实就是上层告诉我们的状态，需要保存到 persist 里。 我们对 index 进行一个范围的判断，如果不越界，则进行日志的截断，并进行一个 persist.SaveSnapshot 的操作。</p>
+<blockquote>
+<p>因为 persist.go 里没有单独保存 snapshot 的函数，我就自己加了一个。 （根据观察，测试里好像会隐式对所有节点调用 Snapshot，当然我也不确定、、）</p>
+</blockquote>
+<h5 id="installsnapshotrpc">InstallSnapShotRPC</h5>
+<p>args 和 reply 要的变量都直接在 6.824 lab 网页的 hint 里和 paper 里找就行。 唯一要解决的问题是发送端要怎么处理这个 RPC—— 我的处理方法是，如果某个要发送的 AppendEntries 的 PrevLogIndex 比 Leader 当前存的第一个日志的 Index 还要小，说明这个 peer 已经落后太多，Leader 没有更早的日志能发过去了，那就直接告诉它要采用这个快照，一步到位，然后更新 Leader 里这个 peer 对应的 nextIndex。 那么接收侧如果收到了这一 RPC，先按照 paper 里说的检查一下，无误后自己截断日志，并更新 lastapplied 和 commitindex（snapshot 里没有这一步）</p>
+<blockquote>
+<p>考虑到并发性，我选择让这一 RPC 和 AE RPC 有同等地位——每个心跳时刻只发送其中的一个，否则会出现上一个心跳时刻的 goroutine 和下一个心跳时刻的 goroutine 时间上起冲突</p>
+</blockquote>
+<p>BTW，2D 测试一开始会出现 <a href="https://thesquareplanet.com/blog/students-guide-to-raft/">RAFT GUIDE</a> 里最后提到的“四向死锁”这一糟糕的情况，解决方案是在建立 raft 节点时，开一个新线程让其 Apply 日志，每次 CommitIndex 更新时，都通过 raft 里的某个条件变量唤醒线程，让其工作，然后再次进入 Wait()</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rf *Raft)</span></span> Applier() &#123;</span><br><span class="line">    <span class="keyword">for</span> !rf.killed() &#123;</span><br><span class="line">        rf.mu.Lock()</span><br><span class="line">        <span class="keyword">for</span> !(rf.lastApplied &lt; rf.commitIndex) &#123;</span><br><span class="line">            rf.applyCond.Wait()</span><br><span class="line">        &#125;</span><br><span class="line">        CommitIndex := rf.commitIndex</span><br><span class="line">        BaseIndex := rf.GetBaseLog().Index</span><br><span class="line">        Entries := <span class="built_in">make</span>([]LogEntry, rf.commitIndex-rf.lastApplied)</span><br><span class="line">        <span class="built_in">copy</span>(Entries, rf.Entry[rf.lastApplied+<span class="number">1</span>-BaseIndex:rf.commitIndex+<span class="number">1</span>-BaseIndex])</span><br><span class="line">        </span><br><span class="line">        rf.mu.Unlock()</span><br><span class="line">        <span class="keyword">for</span> _, Entry := <span class="keyword">range</span> Entries &#123;</span><br><span class="line">            rf.applyChannel &lt;- ApplyMsg&#123;</span><br><span class="line">                CommandValid: <span class="literal">true</span>,</span><br><span class="line">                Command:      Entry.Command,</span><br><span class="line">                CommandTerm:  Entry.Term,</span><br><span class="line">                CommandIndex: Entry.Index,</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        rf.mu.Lock()</span><br><span class="line">        rf.lastApplied = max(rf.lastApplied, CommitIndex)</span><br><span class="line">        rf.mu.Unlock()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>6.824</category>
+      </categories>
+      <tags>
+        <tag>lab</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>6.824 Lab3 FTkvserver</title>
     <url>/6-824/raft2/</url>
     <content><![CDATA[<p>本实验要求在每一个 raft 节点上实现一个 K/V 服务器(server)，向上接受客户端(client)的请求并返回请求结果，向下生成日志应用到 raft 节点中。</p>
@@ -1378,6 +1496,31 @@ S\Lambda
       </categories>
       <tags>
         <tag>lab</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>VMware-FT</title>
+    <url>/6-824/vmware-ft/</url>
+    <content><![CDATA[<p>6.824 的第二篇论文是 VMware-FaultTolerance(VMware-FT)，其描述了一个提供容错虚拟机的商业企业级系统——如果主服务器(<strong>primary</strong>)发生故障，备份服务器(<strong>backup</strong>)始终可以接管。backup 的状态必须始终保持与 primary 几乎相同，以便在其发生故障时，backup 可以立即接管，并且外部客户端看来并未发生故障且没有数据丢失。</p>
+<span id="more"></span>
+<h4 id="两种容错方式">两种容错方式</h4>
+<h5 id="状态转移">状态转移</h5>
+<p>在 backup 上复制状态的一种方法是每次同步时，primary 将其<strong>所有状态</strong>（包括 CPU、内存和 I/O 设备）<strong>变化</strong>进行完整地拷贝，并发送到 backup。但发送此状态所需的带宽会非常大。为了提升效率，可以优化为：每次同步只发送上次同步之后改变了的状态。</p>
+<h5 id="操作转移">操作转移</h5>
+<p>将服务器建模为<strong>确定性状态机</strong>，并实现以下两个条件：</p>
+<ol type="1">
+<li>从相同的初始状态开始</li>
+<li>以相同的顺序执行相同的操作</li>
+</ol>
+<p>如果能确保以上两个条件，那么它们会一直互为副本，并且一直保持一致。由于大多数服务器或服务都有一些不确定的操作，因此必须使用额外的协调来确保 primary 和 backup 保持同步，而这一协调所需的额外信息量远远少于 primary 中正在更改的状态量。</p>
+<h4 id="总结">总结</h4>
+<p>操作 Log 的复制与状态机的思路给后续以启迪。</p>
+]]></content>
+      <categories>
+        <category>6.824</category>
+      </categories>
+      <tags>
+        <tag>paperReading</tag>
       </tags>
   </entry>
   <entry>
@@ -1456,31 +1599,6 @@ S\Lambda
       </tags>
   </entry>
   <entry>
-    <title>VMware-FT</title>
-    <url>/6-824/vmware-ft/</url>
-    <content><![CDATA[<p>6.824 的第二篇论文是 VMware-FaultTolerance(VMware-FT)，其描述了一个提供容错虚拟机的商业企业级系统——如果主服务器(<strong>primary</strong>)发生故障，备份服务器(<strong>backup</strong>)始终可以接管。backup 的状态必须始终保持与 primary 几乎相同，以便在其发生故障时，backup 可以立即接管，并且外部客户端看来并未发生故障且没有数据丢失。</p>
-<span id="more"></span>
-<h4 id="两种容错方式">两种容错方式</h4>
-<h5 id="状态转移">状态转移</h5>
-<p>在 backup 上复制状态的一种方法是每次同步时，primary 将其<strong>所有状态</strong>（包括 CPU、内存和 I/O 设备）<strong>变化</strong>进行完整地拷贝，并发送到 backup。但发送此状态所需的带宽会非常大。为了提升效率，可以优化为：每次同步只发送上次同步之后改变了的状态。</p>
-<h5 id="操作转移">操作转移</h5>
-<p>将服务器建模为<strong>确定性状态机</strong>，并实现以下两个条件：</p>
-<ol type="1">
-<li>从相同的初始状态开始</li>
-<li>以相同的顺序执行相同的操作</li>
-</ol>
-<p>如果能确保以上两个条件，那么它们会一直互为副本，并且一直保持一致。由于大多数服务器或服务都有一些不确定的操作，因此必须使用额外的协调来确保 primary 和 backup 保持同步，而这一协调所需的额外信息量远远少于 primary 中正在更改的状态量。</p>
-<h4 id="总结">总结</h4>
-<p>操作 Log 的复制与状态机的思路给后续以启迪。</p>
-]]></content>
-      <categories>
-        <category>6.824</category>
-      </categories>
-      <tags>
-        <tag>paperReading</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>weekCompetition313</title>
     <url>/LeetCode/weekCompetition313/</url>
     <content><![CDATA[<p><a href="https://leetcode.cn/contest/weekly-contest-313/">第 313 场周赛</a>复盘。</p>
@@ -1543,6 +1661,76 @@ S\Lambda
 <p>那么很容易想到用动态规划。定义 <code>dp[i]</code> 为删除 <code>s[i-1:]</code> 所需最大操作数，那么对于任意 <code>1 ≤ i &lt; j ≤ len(s)-1</code>，如果 <code>s[i:j] == s[j:2*j-i]</code>，则 <code>dp[i] = max(dp[i], dp[j] + 1)</code></p>
 <h5 id="code-3">code</h5>
 <figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">deleteString</span><span class="params">(s <span class="type">string</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    n := <span class="built_in">len</span>(s)</span><br><span class="line">    dp := <span class="built_in">make</span>([]<span class="type">int</span>, n)  <span class="comment">// dp[i]: s[i:] 所需最大删除数</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i := n<span class="number">-1</span>; i &gt;= <span class="number">0</span>; i-- &#123;</span><br><span class="line">        dp[i] = <span class="number">1</span></span><br><span class="line">        l := n-i</span><br><span class="line">        <span class="keyword">for</span> j := i+<span class="number">1</span>; j &lt;= i+l/<span class="number">2</span>; j++ &#123;</span><br><span class="line">            <span class="keyword">if</span> temp[i:j] == temp[j:<span class="number">2</span>*j-i] &amp;&amp; dp[i] &lt; dp[j] + <span class="number">1</span> &#123;</span><br><span class="line">                dp[i] = dp[j] + <span class="number">1</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> dp[<span class="number">0</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>LeetCode</category>
+      </categories>
+      <tags>
+        <tag>周赛</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>weekCompetition315</title>
+    <url>/LeetCode/weekCompetition315/</url>
+    <content><![CDATA[<p><a href="https://leetcode.cn/contest/weekly-contest-315/">第 315 场周赛</a>复盘。</p>
+<p><strong>排名</strong> 2768 / 6490</p>
+<span id="more"></span>
+<h4 id="与对应负数同时存在的最大正整数">1. <a href="https://leetcode.cn/problems/largest-positive-integer-that-exists-with-its-negative/">与对应负数同时存在的最大正整数</a></h4>
+<blockquote>
+<p>给你一个 <strong>不包含</strong> 任何零的整数数组 <code>nums</code>，找出自身与对应的负数都在数组中存在的最大正整数 k 。</p>
+<p>返回正整数 k ，如果不存在这样的整数，返回 -1 。</p>
+</blockquote>
+<h5 id="思路">思路</h5>
+<p>遍历数组，对于负数，加入 set；对于正数，判断其对应的负数是否存在于 set 中，若存在则更新最大值。</p>
+<p>遍历一遍是不够的，比如遇到 <code>nums = [1, -1]</code> 的情况就挂了，所以需要遍历两遍，第一遍建 set，第二遍查询，时间复杂度 <span class="math inline">\(O(nlogn)\)</span></p>
+<p>也可以先对数组进行升序排序，这样负数就集中在左侧，正数集中在右侧，只需一次遍历即可。</p>
+<h5 id="code">code</h5>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">findMaxK</span><span class="params">(nums []<span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    mp := <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="type">int</span>]<span class="keyword">struct</span>&#123;&#125;)</span><br><span class="line">    res := <span class="number">-1</span></span><br><span class="line">    <span class="keyword">var</span> null <span class="keyword">struct</span>&#123;&#125;</span><br><span class="line">    sort.Ints(nums)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> _, num := <span class="keyword">range</span> nums &#123;</span><br><span class="line">        <span class="keyword">if</span> num &lt; <span class="number">0</span> &#123;</span><br><span class="line">            mp[num] = null</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> _, ok := mp[-num]; ok &amp;&amp; num &gt; res &#123;</span><br><span class="line">            res = num</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="反转之后不同整数的数目">2. <a href="https://leetcode.cn/problems/count-number-of-distinct-integers-after-reverse-operations/">反转之后不同整数的数目</a></h4>
+<blockquote>
+<p>给你一个由 <strong>正</strong> 整数组成的数组 <code>nums</code>。</p>
+<p>你必须取出数组中的每个整数，<strong>反转其中每个数位</strong>，并将反转后得到的数字添加到数组的末尾。这一操作只针对 <code>nums</code> 中原有的整数执行。</p>
+<p>返回结果数组中 <strong>不同</strong> 整数的数目。</p>
+</blockquote>
+<h5 id="思路-1">思路</h5>
+<p>对原始数组中每一个值，将其和其反转后的数字加入 set，最后返回 set 大小即可。</p>
+<h5 id="code-1">code</h5>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">reverse</span><span class="params">(num <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    res := <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> num &gt; <span class="number">0</span> &#123;</span><br><span class="line">        res = res * <span class="number">10</span> + (num % <span class="number">10</span>)</span><br><span class="line">        num /= <span class="number">10</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">countDistinctIntegers</span><span class="params">(nums []<span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    mp := <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="type">int</span>]<span class="keyword">struct</span>&#123;&#125;)</span><br><span class="line">    <span class="keyword">var</span> null <span class="keyword">struct</span>&#123;&#125;</span><br><span class="line">    <span class="keyword">for</span> _, num := <span class="keyword">range</span> nums &#123;</span><br><span class="line">        mp[num] = null</span><br><span class="line">        mp[reverse(num)] = null</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">len</span>(mp)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="反转之后的数字和">3. <a href="https://leetcode.cn/problems/sum-of-number-and-its-reverse/">反转之后的数字和</a></h4>
+<blockquote>
+<p>给你一个 <strong>非负</strong> 整数 <code>num</code>。如果存在某个 <strong>非负</strong> 整数 <code>k</code> 满足 <code>k + reverse(k) = num</code> ，则返回 true ；否则，返回 false 。</p>
+<p><code>reverse(k)</code> 表示 <code>k</code> 反转每个数位后得到的数字。</p>
+</blockquote>
+<h5 id="思路-2">思路</h5>
+<p>直接无脑枚举即可。</p>
+<h5 id="code-2">code</h5>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">reverse</span><span class="params">(num <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    res := <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> num &gt; <span class="number">0</span> &#123;</span><br><span class="line">        res = res * <span class="number">10</span> + (num % <span class="number">10</span>)</span><br><span class="line">        num /= <span class="number">10</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">sumOfNumberAndReverse</span><span class="params">(num <span class="type">int</span>)</span></span> <span class="type">bool</span> &#123;</span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt;= num; i++ &#123;</span><br><span class="line">        <span class="keyword">if</span> i + reverse(i) == num &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="统计定界子数组的数目">4. <a href="https://leetcode.cn/problems/count-subarrays-with-fixed-bounds/">统计定界子数组的数目</a></h4>
+<blockquote>
+<p>给你一个整数数组 <code>nums</code> 和两个整数 <code>minK</code> 以及 <code>maxK</code> 。</p>
+<p><code>nums</code> 的定界子数组是满足下述条件的一个子数组：</p>
+<ul>
+<li>子数组中的 <strong>最小值</strong> 等于 <code>minK</code> 。</li>
+<li>数组中的 <strong>最大值</strong> 等于 <code>maxK</code> 。</li>
+</ul>
+<p>返回定界子数组的数目。</p>
+<p>子数组是数组中的一个连续部分。</p>
+</blockquote>
+<p>参考了 <a href="https://leetcode.cn/problems/count-subarrays-with-fixed-bounds/solution/jian-ji-xie-fa-pythonjavacgo-by-endlessc-gag2/">这位大佬的解法</a>，我认为这个解法是最完美的了，这里就对该思路进行一个解释。</p>
+<p>他的思路基于以下性质：</p>
+<ol type="1">
+<li>既然是求连续的子数组的个数，不妨对任意 <code>i</code>，考虑其作为数组右端点时能够产生的最大子数组个数；</li>
+<li>如果数组某一区间及其右端点固定，则包含该区间的连续子数组个数为该区间左端点左侧的元素个数 + 1；</li>
+<li>为了考虑到所有可能的情况，左端点必须尽可能靠近右端点；</li>
+<li>区间内所有值必须在 <code>[minK, maxK]</code> 范围内。</li>
+</ol>
+<p>在 3 和 4 的约束下，左端点的坐标即 minK 和 maxK 上一次出现的坐标中的最小值。</p>
+<p>再来看 2，区间不可能无限向左扩展，应该在遇到第一个不满足 <code>[minK, maxK]</code> 范围内的值时停下。</p>
+<p>如果用 <code>minIndex, maxIndex, errIndex</code> 分别代表 minK、maxK 和 <strong>范围外的值</strong> 上一次出现的坐标。如果 errIndex 出现在左端点的右侧，则该区间无效，不进行考虑；反之，以 <code>i</code> 为右端点的子数组个数为 <span class="math display">\[
+\min(minIndex, maxIndex) - errIndex
+\]</span></p>
+<h5 id="code-3">code</h5>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">min</span><span class="params">(a, b <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> a &lt; b &#123;</span><br><span class="line">        <span class="keyword">return</span> a</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> b</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">countSubarrays</span><span class="params">(nums []<span class="type">int</span>, minK <span class="type">int</span>, maxK <span class="type">int</span>)</span></span> <span class="type">int64</span> &#123;</span><br><span class="line">    minIndex, maxIndex, errIndex := <span class="number">-1</span>, <span class="number">-1</span>, <span class="number">-1</span>	       <span class="comment">// -1 代表未出现</span></span><br><span class="line">    res := <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> i, num := <span class="keyword">range</span> nums &#123;</span><br><span class="line">        <span class="keyword">if</span> num == minK &#123;</span><br><span class="line">            minIndex = i</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> num == maxK &#123;</span><br><span class="line">            maxIndex = i</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> num &gt; maxK || num &lt; minK &#123;</span><br><span class="line">            errIndex = i</span><br><span class="line">        &#125;</span><br><span class="line">        leftIndex := min(minIndex, maxIndex)</span><br><span class="line">        <span class="keyword">if</span> leftIndex &gt; errIndex &#123;</span><br><span class="line">            res += leftIndex - errIndex</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="type">int64</span>(res)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>LeetCode</category>
@@ -1624,67 +1812,68 @@ S\Lambda
       </tags>
   </entry>
   <entry>
-    <title>weekCompetition315</title>
-    <url>/LeetCode/weekCompetition315/</url>
-    <content><![CDATA[<p><a href="https://leetcode.cn/contest/weekly-contest-315/">第 315 场周赛</a>复盘。</p>
-<p><strong>排名</strong> 2768 / 6490</p>
+    <title>weekCompetition316</title>
+    <url>/LeetCode/weekCompetition316/</url>
+    <content><![CDATA[<p><a href="https://leetcode.cn/contest/weekly-contest-316/">第316场周赛</a>复盘。</p>
+<p><strong>排名</strong> 873 / 6387</p>
 <span id="more"></span>
-<h4 id="与对应负数同时存在的最大正整数">1. <a href="https://leetcode.cn/problems/largest-positive-integer-that-exists-with-its-negative/">与对应负数同时存在的最大正整数</a></h4>
+<h4 id="判断两个事件是否存在冲突">1. <a href="https://leetcode.cn/problems/determine-if-two-events-have-conflict/">判断两个事件是否存在冲突</a></h4>
 <blockquote>
-<p>给你一个 <strong>不包含</strong> 任何零的整数数组 <code>nums</code>，找出自身与对应的负数都在数组中存在的最大正整数 k 。</p>
-<p>返回正整数 k ，如果不存在这样的整数，返回 -1 。</p>
+<p>给你两个字符串数组 event1 和 event2，表示发生在 <strong>同一天</strong> 的两个闭区间时间段事件，其中：</p>
+<ul>
+<li><p><code>event1 = [startTime1, endTime1</code>]</p></li>
+<li><p><code>event2 = [startTime2, endTime2]</code></p></li>
+</ul>
+<p>事件的时间为有效的 24 小时制且按 <code>HH:MM</code> 格式给出。</p>
+<p>当两个事件存在某个非空的交集时（即，某些时刻是两个事件都包含的），则认为出现 <strong>冲突</strong> 。</p>
+<p>如果两个事件之间存在冲突，返回 true；否则，返回 false。</p>
 </blockquote>
 <h5 id="思路">思路</h5>
-<p>遍历数组，对于负数，加入 set；对于正数，判断其对应的负数是否存在于 set 中，若存在则更新最大值。</p>
-<p>遍历一遍是不够的，比如遇到 <code>nums = [1, -1]</code> 的情况就挂了，所以需要遍历两遍，第一遍建 set，第二遍查询，时间复杂度 <span class="math inline">\(O(nlogn)\)</span></p>
-<p>也可以先对数组进行升序排序，这样负数就集中在左侧，正数集中在右侧，只需一次遍历即可。</p>
+<p>用 <code>strconv.Atoi()</code> 将字符串转换为数字。</p>
+<p>若 <code>endTime1 &lt; startTime2</code> 或 <code>endTime2 &lt; startTime1</code> 则认为无冲突。</p>
 <h5 id="code">code</h5>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">findMaxK</span><span class="params">(nums []<span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    mp := <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="type">int</span>]<span class="keyword">struct</span>&#123;&#125;)</span><br><span class="line">    res := <span class="number">-1</span></span><br><span class="line">    <span class="keyword">var</span> null <span class="keyword">struct</span>&#123;&#125;</span><br><span class="line">    sort.Ints(nums)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> _, num := <span class="keyword">range</span> nums &#123;</span><br><span class="line">        <span class="keyword">if</span> num &lt; <span class="number">0</span> &#123;</span><br><span class="line">            mp[num] = null</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> _, ok := mp[-num]; ok &amp;&amp; num &gt; res &#123;</span><br><span class="line">            res = num</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="反转之后不同整数的数目">2. <a href="https://leetcode.cn/problems/count-number-of-distinct-integers-after-reverse-operations/">反转之后不同整数的数目</a></h4>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">compare</span><span class="params">(a, b <span class="type">string</span>)</span></span> <span class="type">bool</span> &#123;    <span class="comment">// a is earlier than b</span></span><br><span class="line">    h1, _ := strconv.Atoi(a[:<span class="number">2</span>])</span><br><span class="line">    m1, _ := strconv.Atoi(a[<span class="number">3</span>:])</span><br><span class="line">    h2, _ := strconv.Atoi(b[:<span class="number">2</span>])</span><br><span class="line">    m2, _ := strconv.Atoi(b[<span class="number">3</span>:])</span><br><span class="line">    <span class="keyword">if</span> h1 == h2 &#123;</span><br><span class="line">        <span class="keyword">return</span> m1 &lt; m2</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> h1 &lt; h2</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">haveConflict</span><span class="params">(e1 []<span class="type">string</span>, e2 []<span class="type">string</span>)</span></span> <span class="type">bool</span> &#123;</span><br><span class="line">    start1, end1, start2, end2 := e1[<span class="number">0</span>], e1[<span class="number">1</span>], e2[<span class="number">0</span>], e2[<span class="number">1</span>]</span><br><span class="line">    <span class="keyword">return</span> !(compare(end1, start2) || compare(end2, start1))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="最大公因数等于-k-的子数组数目">2. <a href="https://leetcode.cn/problems/number-of-subarrays-with-gcd-equal-to-k/">最大公因数等于 K 的子数组数目</a></h4>
 <blockquote>
-<p>给你一个由 <strong>正</strong> 整数组成的数组 <code>nums</code>。</p>
-<p>你必须取出数组中的每个整数，<strong>反转其中每个数位</strong>，并将反转后得到的数字添加到数组的末尾。这一操作只针对 <code>nums</code> 中原有的整数执行。</p>
-<p>返回结果数组中 <strong>不同</strong> 整数的数目。</p>
+<p>给你一个整数数组 nums 和一个整数 k ，请你统计并返回 nums 的子数组中元素的最大公因数等于 k 的子数组数目。</p>
+<p><strong>子数组</strong> 是数组中一个连续的非空序列。</p>
+<p><strong>数组的最大公因数</strong> 是能整除数组中所有元素的最大整数。</p>
 </blockquote>
 <h5 id="思路-1">思路</h5>
-<p>对原始数组中每一个值，将其和其反转后的数字加入 set，最后返回 set 大小即可。</p>
+<p>若 <span class="math inline">\(k\)</span> 是 <span class="math inline">\(\{a_1, a_2, \dots, a_n\}\)</span> 的最大公因数，则 <span class="math inline">\(gcd(k, a_{n+1})\)</span> 是 <span class="math inline">\(\{a_1, a_2, \dots, a_n, a_{n+1}\}\)</span> 的最大公因数。</p>
+<p>定义 <code>g[i][j]</code> 表示 <code>nums[i:j+1]</code> 的最大公因数，则 <code>g[i][j] = gcd(g[i][j-1], nums[j])</code></p>
 <h5 id="code-1">code</h5>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">reverse</span><span class="params">(num <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    res := <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> num &gt; <span class="number">0</span> &#123;</span><br><span class="line">        res = res * <span class="number">10</span> + (num % <span class="number">10</span>)</span><br><span class="line">        num /= <span class="number">10</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">countDistinctIntegers</span><span class="params">(nums []<span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    mp := <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="type">int</span>]<span class="keyword">struct</span>&#123;&#125;)</span><br><span class="line">    <span class="keyword">var</span> null <span class="keyword">struct</span>&#123;&#125;</span><br><span class="line">    <span class="keyword">for</span> _, num := <span class="keyword">range</span> nums &#123;</span><br><span class="line">        mp[num] = null</span><br><span class="line">        mp[reverse(num)] = null</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">len</span>(mp)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="反转之后的数字和">3. <a href="https://leetcode.cn/problems/sum-of-number-and-its-reverse/">反转之后的数字和</a></h4>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">gcd</span><span class="params">(a, b <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> a &lt; b &#123;</span><br><span class="line">        <span class="keyword">return</span> gcd(b, a)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> a % b == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> b</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> gcd(b, a%b)</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">subarrayGCD</span><span class="params">(nums []<span class="type">int</span>, k <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    g := <span class="built_in">make</span>([][]<span class="type">int</span>, <span class="built_in">len</span>(nums))</span><br><span class="line">    <span class="keyword">for</span> i := <span class="keyword">range</span> g &#123;</span><br><span class="line">        g[i] = <span class="built_in">make</span>([]<span class="type">int</span>, <span class="built_in">len</span>(nums))</span><br><span class="line">    &#125;</span><br><span class="line">    cnt := <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> i := <span class="keyword">range</span> nums &#123;</span><br><span class="line">        g[i][i] = nums[i]</span><br><span class="line">        <span class="keyword">if</span> g[i][i] == k &#123;</span><br><span class="line">            cnt++</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> j := i+<span class="number">1</span>; j &lt; <span class="built_in">len</span>(nums); j++&#123;</span><br><span class="line">            g[i][j] = gcd(g[i][j<span class="number">-1</span>], nums[j])</span><br><span class="line">            <span class="keyword">if</span> g[i][j] == k &#123;</span><br><span class="line">                cnt++</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> cnt</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="使数组相等的最小开销">3. <a href="https://leetcode.cn/problems/minimum-cost-to-make-array-equal/">使数组相等的最小开销</a></h4>
 <blockquote>
-<p>给你一个 <strong>非负</strong> 整数 <code>num</code>。如果存在某个 <strong>非负</strong> 整数 <code>k</code> 满足 <code>k + reverse(k) = num</code> ，则返回 true ；否则，返回 false 。</p>
-<p><code>reverse(k)</code> 表示 <code>k</code> 反转每个数位后得到的数字。</p>
+<p>给你两个下标从 <strong>0</strong> 开始的数组 nums 和 cost ，分别包含 n 个 <strong>正</strong> 整数。</p>
+<p>你可以执行下面操作 <strong>任意</strong> 次：</p>
+<ul>
+<li>将 nums 中 <strong>任意</strong> 元素增加或者减小 1</li>
+</ul>
+<p>对第 i 个元素执行一次操作的开销是 <code>cost[i]</code>。</p>
+<p>请你返回使 nums 中所有元素 <strong>相等</strong> 的 <strong>最少</strong> 总开销。</p>
 </blockquote>
 <h5 id="思路-2">思路</h5>
-<p>直接无脑枚举即可。</p>
+<p>没做出来，看完 <a href="https://leetcode.cn/problems/minimum-cost-to-make-array-equal/solution/by-endlesscheng-i10r/">题解</a> 发现我真的蠢。。。</p>
 <h5 id="code-2">code</h5>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">reverse</span><span class="params">(num <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    res := <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> num &gt; <span class="number">0</span> &#123;</span><br><span class="line">        res = res * <span class="number">10</span> + (num % <span class="number">10</span>)</span><br><span class="line">        num /= <span class="number">10</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">sumOfNumberAndReverse</span><span class="params">(num <span class="type">int</span>)</span></span> <span class="type">bool</span> &#123;</span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt;= num; i++ &#123;</span><br><span class="line">        <span class="keyword">if</span> i + reverse(i) == num &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="统计定界子数组的数目">4. <a href="https://leetcode.cn/problems/count-subarrays-with-fixed-bounds/">统计定界子数组的数目</a></h4>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">minCost</span><span class="params">(nums, cost []<span class="type">int</span>)</span></span> <span class="type">int64</span> &#123;</span><br><span class="line">	<span class="keyword">type</span> pair <span class="keyword">struct</span>&#123; x, c <span class="type">int</span> &#125;</span><br><span class="line">	a := <span class="built_in">make</span>([]pair, <span class="built_in">len</span>(nums))</span><br><span class="line">	<span class="keyword">for</span> i, x := <span class="keyword">range</span> nums &#123;</span><br><span class="line">		a[i] = pair&#123;x, cost[i]&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	sort.Slice(a, <span class="function"><span class="keyword">func</span><span class="params">(i, j <span class="type">int</span>)</span></span> <span class="type">bool</span> &#123;</span><br><span class="line">        a, b := a[i], a[j];</span><br><span class="line">        <span class="keyword">return</span> a.x &lt; b.x</span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">var</span> total, sumCost <span class="type">int64</span></span><br><span class="line">	<span class="keyword">for</span> _, p := <span class="keyword">range</span> a &#123;</span><br><span class="line">		total += <span class="type">int64</span>(p.c) * <span class="type">int64</span>(p.x-a[<span class="number">0</span>].x)</span><br><span class="line">		sumCost += <span class="type">int64</span>(p.c)</span><br><span class="line">	&#125;</span><br><span class="line">	ans := total</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">1</span>; i &lt; <span class="built_in">len</span>(a); i++ &#123;</span><br><span class="line">		sumCost -= <span class="type">int64</span>(a[i<span class="number">-1</span>].c * <span class="number">2</span>)</span><br><span class="line">		total -= sumCost * <span class="type">int64</span>(a[i].x-a[i<span class="number">-1</span>].x)</span><br><span class="line">		ans = min(ans, total)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> ans</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">min</span><span class="params">(a, b <span class="type">int64</span>)</span></span> <span class="type">int64</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> a &gt; b &#123;</span><br><span class="line">        <span class="keyword">return</span> b</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> a</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="使数组相似的最少操作次数">4. <a href="https://leetcode.cn/problems/minimum-number-of-operations-to-make-arrays-similar/">使数组相似的最少操作次数</a></h4>
 <blockquote>
-<p>给你一个整数数组 <code>nums</code> 和两个整数 <code>minK</code> 以及 <code>maxK</code> 。</p>
-<p><code>nums</code> 的定界子数组是满足下述条件的一个子数组：</p>
+<p>给你两个正整数数组 nums 和 target ，两个数组长度相等。</p>
+<p>在一次操作中，你可以选择两个 <strong>不同</strong> 的下标 i 和 j ，其中 <code>0 &lt;= i, j &lt; nums.length</code> ，并且令</p>
 <ul>
-<li>子数组中的 <strong>最小值</strong> 等于 <code>minK</code> 。</li>
-<li>数组中的 <strong>最大值</strong> 等于 <code>maxK</code> 。</li>
+<li><code>nums[i] = nums[i] + 2</code></li>
+<li><code>nums[j] = nums[j] - 2</code></li>
 </ul>
-<p>返回定界子数组的数目。</p>
-<p>子数组是数组中的一个连续部分。</p>
+<p>如果两个数组中每个元素出现的频率相等，我们称两个数组是 <strong>相似</strong> 的。</p>
+<p>请你返回将 nums 变得与 target 相似的最少操作次数。测试数据保证 nums 一定能变得与 target 相似。</p>
 </blockquote>
-<p>参考了 <a href="https://leetcode.cn/problems/count-subarrays-with-fixed-bounds/solution/jian-ji-xie-fa-pythonjavacgo-by-endlessc-gag2/">这位大佬的解法</a>，我认为这个解法是最完美的了，这里就对该思路进行一个解释。</p>
-<p>他的思路基于以下性质：</p>
-<ol type="1">
-<li>既然是求连续的子数组的个数，不妨对任意 <code>i</code>，考虑其作为数组右端点时能够产生的最大子数组个数；</li>
-<li>如果数组某一区间及其右端点固定，则包含该区间的连续子数组个数为该区间左端点左侧的元素个数 + 1；</li>
-<li>为了考虑到所有可能的情况，左端点必须尽可能靠近右端点；</li>
-<li>区间内所有值必须在 <code>[minK, maxK]</code> 范围内。</li>
-</ol>
-<p>在 3 和 4 的约束下，左端点的坐标即 minK 和 maxK 上一次出现的坐标中的最小值。</p>
-<p>再来看 2，区间不可能无限向左扩展，应该在遇到第一个不满足 <code>[minK, maxK]</code> 范围内的值时停下。</p>
-<p>如果用 <code>minIndex, maxIndex, errIndex</code> 分别代表 minK、maxK 和 <strong>范围外的值</strong> 上一次出现的坐标。如果 errIndex 出现在左端点的右侧，则该区间无效，不进行考虑；反之，以 <code>i</code> 为右端点的子数组个数为 <span class="math display">\[
-\min(minIndex, maxIndex) - errIndex
-\]</span></p>
+<h5 id="思路-3">思路</h5>
+<p>因为必然会相似，则更大的一定会通过不断 <strong>减二</strong> 得到小的数，而更小的数一定会通过不断 <strong>加二</strong> 得到大的数，而为了使总操作更小，nums 中最小的数将变成 target 中最小的数，以此类推（所以需要进行排序）。因为这两步算 <strong>同一次操作</strong>，故考虑所有的“加二”操作即可。</p>
+<p>同时还要考虑奇偶，因为奇数总是变成奇数，偶数总是变成偶数。</p>
 <h5 id="code-3">code</h5>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">min</span><span class="params">(a, b <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> a &lt; b &#123;</span><br><span class="line">        <span class="keyword">return</span> a</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> b</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">countSubarrays</span><span class="params">(nums []<span class="type">int</span>, minK <span class="type">int</span>, maxK <span class="type">int</span>)</span></span> <span class="type">int64</span> &#123;</span><br><span class="line">    minIndex, maxIndex, errIndex := <span class="number">-1</span>, <span class="number">-1</span>, <span class="number">-1</span>	       <span class="comment">// -1 代表未出现</span></span><br><span class="line">    res := <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> i, num := <span class="keyword">range</span> nums &#123;</span><br><span class="line">        <span class="keyword">if</span> num == minK &#123;</span><br><span class="line">            minIndex = i</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> num == maxK &#123;</span><br><span class="line">            maxIndex = i</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> num &gt; maxK || num &lt; minK &#123;</span><br><span class="line">            errIndex = i</span><br><span class="line">        &#125;</span><br><span class="line">        leftIndex := min(minIndex, maxIndex)</span><br><span class="line">        <span class="keyword">if</span> leftIndex &gt; errIndex &#123;</span><br><span class="line">            res += leftIndex - errIndex</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="type">int64</span>(res)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">makeSimilar</span><span class="params">(nums []<span class="type">int</span>, target []<span class="type">int</span>)</span></span> <span class="type">int64</span> &#123;</span><br><span class="line">    <span class="comment">// 考虑奇偶</span></span><br><span class="line">    n1, n2, t1, t2 := <span class="built_in">make</span>([]<span class="type">int</span>, <span class="number">0</span>), <span class="built_in">make</span>([]<span class="type">int</span>, <span class="number">0</span>), <span class="built_in">make</span>([]<span class="type">int</span>, <span class="number">0</span>), <span class="built_in">make</span>([]<span class="type">int</span>, <span class="number">0</span>)</span><br><span class="line">    <span class="keyword">for</span> _, n := <span class="keyword">range</span> nums &#123;</span><br><span class="line">        <span class="keyword">if</span> n % <span class="number">2</span> != <span class="number">0</span> &#123;</span><br><span class="line">            n1 = <span class="built_in">append</span>(n1, n)</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            n2 = <span class="built_in">append</span>(n2, n)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> _, t := <span class="keyword">range</span> target &#123;</span><br><span class="line">        <span class="keyword">if</span> t % <span class="number">2</span> != <span class="number">0</span> &#123;</span><br><span class="line">            t1 = <span class="built_in">append</span>(t1, t)</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            t2 = <span class="built_in">append</span>(t2, t)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    sort.Ints(n1)</span><br><span class="line">    sort.Ints(n2)</span><br><span class="line">    sort.Ints(t1)</span><br><span class="line">    sort.Ints(t2)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">var</span> d1, d2 <span class="type">int64</span> = <span class="number">0</span>, <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> i := <span class="keyword">range</span> n1 &#123;</span><br><span class="line">        <span class="keyword">if</span> t1[i] &gt; n1[i] &#123;</span><br><span class="line">            d1 += <span class="type">int64</span>(t1[i]-n1[i])</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> i := <span class="keyword">range</span> n2 &#123;</span><br><span class="line">        <span class="keyword">if</span> t2[i] &gt; n2[i] &#123;</span><br><span class="line">            d2 += <span class="type">int64</span>(t2[i] - n2[i])</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> (d1+d2)/<span class="number">2</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>LeetCode</category>
