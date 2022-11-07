@@ -25,18 +25,18 @@
 <meta property="og:site_name" content="没什么看头的地方">
 <meta property="og:description" content="6.824 的第九篇论文是 FaRM——一个通过为分布式事务提供序列化、高性能、持久性和高可用性的主存分布式计算平台。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://leager-zju.github.com/6-824/FaRM/FaRM/image-20221021142633067.png">
+<meta property="og:image" content="http://leager-zju.github.com/6-824/FaRM/image-20221021142633067.png">
 <meta property="og:image" content="http://leager-zju.github.com/6-824/FaRM/image-20221025170135679.png">
 <meta property="og:image" content="http://leager-zju.github.com/6-824/FaRM/image-20221025172808292.png">
 <meta property="og:image" content="http://leager-zju.github.com/6-824/FaRM/image-20221025172832254.png">
 <meta property="og:image" content="http://leager-zju.github.com/6-824/FaRM/image-20221026112640579.png">
 <meta property="og:image" content="http://leager-zju.github.com/6-824/FaRM/image-20221026140042960.png">
 <meta property="article:published_time" content="2022-10-20T10:57:46.000Z">
-<meta property="article:modified_time" content="2022-10-27T08:22:41.503Z">
+<meta property="article:modified_time" content="2022-10-27T10:34:56.337Z">
 <meta property="article:author" content="Leager">
 <meta property="article:tag" content="paperReading">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://leager-zju.github.com/6-824/FaRM/FaRM/image-20221021142633067.png">
+<meta name="twitter:image" content="http://leager-zju.github.com/6-824/FaRM/image-20221021142633067.png">
 
 <link rel="canonical" href="http://leager-zju.github.com/6-824/FaRM/">
 
@@ -142,7 +142,7 @@
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">18</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">20</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -230,7 +230,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-10-27 16:22:41" itemprop="dateModified" datetime="2022-10-27T16:22:41+08:00">2022-10-27</time>
+                <time title="修改时间：2022-10-27 18:34:56" itemprop="dateModified" datetime="2022-10-27T18:34:56+08:00">2022-10-27</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -306,7 +306,7 @@
 <li><strong>多对象读取</strong>不保证原子性：保证事务不会提交，同时确保提交的事务是严格可串行化的。这样可以将一致性检查推迟到提交时间。</li>
 </ul>
 <h4 id="整体架构">整体架构</h4>
-<p><img src="FaRM/image-20221021142633067.png" alt="image-20221021142633067" style="zoom:67%;" /></p>
+<p><img src="image-20221021142633067.png" alt="image-20221021142633067" style="zoom:67%;" /></p>
 <h5 id="协调与配置">协调与配置</h5>
 <p>FaRM 使用 Zookeeper 作为协调服务。</p>
 <p>FaRM 实例会随着时间的推移更新<strong>配置</strong>。配置是一个元组 <code>(i, S, F, CM)</code>，其中 <code>i</code> 是<strong>配置标识符</strong>，<code>S</code> 是配置中的<strong>机器集合</strong>，<code>F</code> 是从机器到 <strong>failure region</strong> 的<strong>映射</strong>，<code>CM</code> 是<strong>配置管理器</strong>，且 CM ∈ S。</p>
@@ -525,7 +525,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">18</span>
+          <span class="site-state-item-count">20</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
