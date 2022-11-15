@@ -323,130 +323,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Memcache</title>
-    <url>/6-824/Memcache/</url>
-    <content><![CDATA[<p>6.824 的第十一篇论文基于 <strong>Memcache</strong>——一款高性能的分布式内存对象缓存系统，以低成本提供对共享存储池的低延迟访问。Facebook 扩展了 Memcache 的架构，大大提高了性能与内存效率。</p>
-<span id="more"></span>
-<p>Facebook 的业务场景中决定了其工作负载以<strong>读取</strong>为主，在该情况下对数据进行缓存拥有显著优势。此外，其读取操作从多种来源（MySQL、HDFS 等）获取数据，这种异构性需要一种灵活的缓存策略，能够存储来自不同来源的数据。之所以选择 Memcache 是因为其提供的 api 简单（<code>Get, Set, Delete</code>）。</p>
-<p>memcache 的相关操作如下图所示。</p>
-<p><img src="image-20221109163322740.png" alt="image-20221109163322740" style="zoom:70%;" /></p>
-<ul>
-<li>当 Web Server 读取数据时，它首先访问 memcache，仅当未命中时才用 <code>SELECT</code> 语句访问 db，并重新插入 cache；</li>
-<li>当 Web Server 写入数据时，它会用 <code>UPDATE</code> 语句更新 db，接着删除 memcache 中的旧值（下次访问该 key 时才会重新写回 memcache，保证幂等性）。这种<strong>按需填充</strong>的策略有效减轻了读取负载。此外，将 cache 层与 persist 层分开允许根据工作负载变化独立调整每个层。</li>
-</ul>
-<p>FB 优先考虑两个主要设计目标：</p>
-<ol type="1">
-<li>任何更改都必须针对用户或操作问题，很少考虑范围有限的优化；</li>
-<li>将读取瞬态数据的可能性作为参数进行调整。FB 通过略微公开旧数据，以降低后端存储服务的负载。</li>
-</ol>
-<p>下文使用 <strong>memcached</strong> 来引用源代码或运行二进制文件，使用 <strong>memcache</strong> 来描述分布式系统。</p>
-<h4 id="集群层次延迟与负载">集群层次：延迟与负载</h4>
-<h5 id="降低延迟">降低延迟</h5>
-<p><strong>memcached 的响应延迟</strong>是影响用户请求响应时间的关键因素。</p>
-<p>尽管集群中提供了数百个 <strong>memcached server, ms</strong> 以减少负载，但 Web server 必须定期与多个 ms 通信以交换数据。这种通信模式可能会导致 <a href="https://www.mtyun.com/library/an-brief-intro-to-tcp-incast">Incast 拥塞</a>，或是任意单个 ms 成为短板。<strong>Replication</strong> 通常可以缓解短板问题，但总会导致显著的内存效率低下。</p>
-<p>FB 主要通过关注在每个 Web server 上运行的 <strong>memcache client, mc</strong> 来降低延迟。mc 维护所有可用 ms 的映射，并通过辅助配置系统进行更新。</p>
-<ul>
-<li><p><strong>并行请求和批处理</strong>：构建 Web app 代码以最小化响应页面请求所需的网络往返次数。通过一个 DAG 表示数据之间的依赖关系。Web server 使用此 DAG 来最大化可以同时获取的数据数量。</p></li>
-<li><p><strong>Client-Server 通信</strong>：ms 只与 mc 使用 <strong>UDP/TCP</strong> 进行通信。client 拥有一个称为 <strong>mcrouter</strong> 的独立代理。此代理提供了一个 ms 接口，并对网络消息进行路由。</p>
-<ul>
-<li>client 依靠 <strong>UDP</strong> 允许线程绕过 mcrouter 执行 <code>Get</code> 请求以减少延迟和开销，UDP 只处理错误而不进行恢复。若 <code>Get</code> 错误，client 会认为 memcache 未命中，但 Web server 将在查询数据后跳过插入，以避免增加负载。</li>
-<li>由于需要确认状态更改，client 依靠 <strong>TCP</strong> 通过 mcrouter 执行 <code>Set/Delete</code> 请求以提高可靠性。</li>
-</ul>
-<p>下图表示通过 UDP 和通过 TCP 获取 key 的延迟。</p>
-<p><img src="image-20221109205144053.png" alt="image-20221109205144053" style="zoom:67%;" /></p></li>
-<li><p><strong>Incast 拥塞</strong>：client 使用<strong>滑动窗口机制</strong>来控制未完成请求的数量。当 client 收到响应才可以发送下一个请求，此滑动窗口的大小会随着请求的成功而缓慢增长。</p>
-<p>下图显示了窗口大小对用户请求处于可运行状态但等待在 Web server 中进行调度的时间量的影响：窗口过小，应用将发送更多组连续的 memcache 请求，从而增加 Web 请求的持续时间；窗口过大，同时到达 memcache 请求的数量更多，导致 Incast 拥塞。</p>
-<blockquote>
-<p>一系列用户请求的到达呈现为<a href="https://towardsdatascience.com/the-poisson-distribution-and-poisson-process-explained-4e2cb17d459">泊松过程</a>。假设输入请求率是恒定的，则根据 <strong>Little Law</strong>: L = λW ，服务器中排队的请求数 (L)与处理请求所需的平均时间(W)成正比。</p>
-</blockquote>
-<p><img src="image-20221109211610473.png" alt="image-20221109211610473" style="zoom:67%;" /></p></li>
-</ul>
-<h5 id="降低负载">降低负载</h5>
-<h6 id="lease">Lease</h6>
-<p>lease 的提出是用来解决以下两个问题：</p>
-<ol type="1">
-<li><strong>失效集</strong>：对 memcache 的并发更新被重新排序时，会导致 memcache 中的值并不是最新值。</li>
-<li><a href="https://zhuanlan.zhihu.com/p/65843741"><strong>惊群效应</strong></a>：当对一个特定的 key 进行大量的 RW 活动时，反复 write 会删除 memcache 中的值，导致许多 read 默认使用成本更高的路径——访问数据库而非 cache。</li>
-</ol>
-<p>当 client 遇到 cache miss 时，memcached 向 client 分配一个与 key 绑定的 lease。memcached 会检测尝试写回数据的 client 是否持有 lease 从而判断是否能够将数据写回。如果在这之前 memcached 收到对 key 的 <code>Delete</code> 操作，则 lease 失效。</p>
-<p>通过定期分配 lease 来解决惊群效应——一般是每 10s——如果 client 在预计时间点之前发起请求，则会等待，而再次尝试时，数据已经存入 cache 中了，便无需访问数据库。这样可以大幅度减少 client 等待时间。</p>
-<ul>
-<li><strong>旧值</strong>：在某些情况下返回旧值能够进一步减少这一等待时间。有一个数据结构暂存近期被删除的值，但很快就会被刷掉。<code>Get</code> 或是返回 lease，或是返回这些被标记为过时的数据。可以继续向前推进的应用不需要等待从数据库中获取的最新值。</li>
-</ul>
-<h6 id="memcache-pool">Memcache Pool</h6>
-<p>不同应用的工作负载在共享存储时会对彼此产生负面干扰，从而降低命中率。可以通过将集群的 ms 划分到不同的池中，具有相似工作负载的 ms 共享同一个池。下图为两个不同负载的工作集。</p>
-<p><img src="image-20221112145220737.png" alt="image-20221112145220737" style="zoom: 80%;" /></p>
-<h6 id="replication-with-pools">Replication with pools</h6>
-<p>若池满足以下条件：</p>
-<ol type="1">
-<li>应用同时请求许多 key；</li>
-<li>整个数据集能够放在一个或两个 ms 中；</li>
-<li>请求率远高于单个 ms 可以承受的水平。</li>
-</ol>
-<p>则可以选择在池中复制某一类 key 来降低 ms 的延迟并提高效率。</p>
-<h5 id="故障处理">故障处理</h5>
-<p>无法从 memcache 中获取数据会导致后端服务负载过重，这可能会导致进一步的级联故障：</p>
-<ol type="1">
-<li>网络或服务器故障导致少量主机无法被访问；</li>
-<li>大规模故障导致集群中大部分服务器宕机。</li>
-</ol>
-<p>发生小规模故障时，恢复需要一定时间，却足以导致上述级联故障。于是设置一组名为 <strong>Gutter</strong> 的机器专门来应对这种场景——接管那些故障服务器的职责。</p>
-<ul>
-<li>当 client 未收到请求的答复时，它认为相应 ms 故障，接着重新将请求发送至 <strong>Gutter Pool</strong>；</li>
-<li>如果此请求仍未命中，client 将在查询数据库后将适当的 kv 对插入到 Gutter 机器中，这些 kv 对的有效期很短，以防止 Gutter 无效。</li>
-</ul>
-<h4 id="区域层次复制">区域层次：复制</h4>
-<p>单纯通过增加服务器来扩展集群而不扩展系统并不能解决负载问题。需要将 web server 和 memcached server 拆分为多个<strong>前端集群</strong>(Frontend Cluster, FC)，与<strong>存储集群</strong>(Storage Cluster, SC)一起组成了一个 <strong>region</strong>。</p>
-<h5 id="区域无效化">区域无效化</h5>
-<p>SC 拥有数据的最新版本，FC 拥有数据复制，SC 负责发送 cache <strong>无效化</strong>(invalidation)命令来保持一致性。修改 SC 的 SQL 语句会附上需要在事务提交后无效的 memcache key。每个数据库中都有一个 <strong>mcsqueal</strong> 来检查其数据库提交的 SQL 语句，提取 <code>Delete</code> 并广播到该 region 中每个 FC 中的 ms。如下图所示。</p>
-<p><img src="image-20221112163919753.png" alt="image-20221112163919753" style="zoom:67%;" /></p>
-<ul>
-<li><strong>减少数据包率</strong>：mcsqueal 直接与 ms 通信会浪费网络资源。通过将数据包发给 mcrouter，然后 mcrouter 将这些数据包发给 ms 是个比较好的解决方案。</li>
-<li><strong>通过 web server 进行无效化</strong>：不让 Web server 直接向所有 FC 广播 invalidation 是因为
-<ol type="1">
-<li>Web server 在批量处理方面效率低，开销大；</li>
-<li>当系统层面的 invalidation 问题（如错误路由删除和配置错误）发生时，依靠 mcsqueal 的补救措施更简单。</li>
-</ol></li>
-</ul>
-<h5 id="区域池">区域池</h5>
-<p>若每个集群都持有数据的副本，则会导致内存效率低下。可以让多个 FC 共享相同的多个 ms，称为<strong>区域池</strong>。</p>
-<h5 id="冷集群预热">冷集群预热</h5>
-<p>新集群加入时为空缓存的“冷集群”，大部分请求（因为 cache miss）都会指向数据库。<strong>Cold Cluster Warmup</strong> 系统允许“冷集群”中的 client 从“热集群”中获取数据，从而使得“冷集群”的 Cache 尽快填满。</p>
-<p>然而当冷集群中的客户端 A 更新数据库，同时另一个客户端 B 在热集群收到 invalidation 之前从热集群中请求旧值时，会产生不一致性。memcached 选择在 <code>Delete</code> 后指定的延迟时间（默认 2s）内拒绝 <code>add</code>操作。</p>
-<blockquote>
-<p>当在冷集群中 cache miss 时，client 从热集群重新请求 key 并将其添加到冷集群中。<code>add</code> 失败表明数据库上有更新的数据，因此 client 将从数据库中重新请求值。</p>
-</blockquote>
-<h4 id="跨区域一致性">跨区域：一致性</h4>
-<p>在多个地理位置部署数据中心有以下好处：</p>
-<ol type="1">
-<li>将网络服务器放置在更靠近最终用户的位置可以显著降低延迟；</li>
-<li>地理多样性可以减轻自然灾害或大规模停电等事件的影响；</li>
-<li>新位置可以提供更便宜的电力和其他经济激励措施。</li>
-</ol>
-<p>FB 将跨区域系统架构设计为一个 <strong>master region</strong> 管理 primary DB，其他 <strong>slave region</strong> 管理 ReadOnly 的 replica，如下图所示。</p>
-<p><img src="image-20221109201537652.png" alt="image-20221109201537652" style="zoom:67%;" /></p>
-<p>这一方案往往会因为 replicas 滞后于 primary 而产生不一致性问题。FB 的设计理念为：尽最大努力提供最终的一致性，但强调性能和可用性。</p>
-<p><strong>从主区写入</strong>：通过 mcsqueal 发送 invalidation 的策略避免了 invalidation 在更新数据之前到达。</p>
-<blockquote>
-<p>考虑在 master 中的 Web server 更新完数据库，但修改尚未发送到 backup，在此之前抢先发送 invalidation 会与后续对 backup 数据的查询发生竞争，从而增加将旧数据写入 memcache 的概率。</p>
-</blockquote>
-<p><strong>从非主区写入</strong>：若一个用户更新了非主区域的数据，如果复制延迟过大，一旦最近的更改丢失，其下一个请求可能会出错。因此只有在复制完毕后才允许从 replica db 重新填充 memcache。</p>
-<p>FB 采用 <strong>remote mark</strong> 机制来最小化读取旧数据的概率。若本地的数据被打上标记，表明该数据可能是旧的，并且查询应该被重定向到 master。当 Web server 更新 key 对应的 value 时：</p>
-<ol type="1">
-<li>在 region 中设置标记 <span class="math inline">\(r_k\)</span>；</li>
-<li>将 k-v 写入 master，并指明 key 和 <span class="math inline">\(r_k\)</span> 无效</li>
-<li>删除本地集群中的 key。</li>
-</ol>
-<p>在后续请求 key 时，若 cache miss 且 <span class="math inline">\(r_k\)</span> 存在，则将查询重定向到 master 或本地区域。</p>
-]]></content>
-      <categories>
-        <category>6.824</category>
-      </categories>
-      <tags>
-        <tag>paperReading</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>GFS</title>
     <url>/6-824/GFS/</url>
     <content><![CDATA[<p>6.824 的第一篇论文是 Google “<strong>三驾马车</strong>”之一的 <strong>GFS</strong>(Google File System)——一个用于大型分布式数据密集型应用程序的可扩展分布式文件系统。</p>
@@ -689,217 +565,127 @@
       </tags>
   </entry>
   <entry>
-    <title>Aurora</title>
-    <url>/6-824/aurora/</url>
-    <content><![CDATA[<p>6.824 的第六篇论文是 <strong>Aurora</strong>——一个高性能，高可靠的关系数据库服务。在处理事务的速度上，Aurora 宣称比其他数据库快 35 倍。同时，其完全抛弃了通用存储，转而构建了自己<strong>应用定制的存储</strong>。</p>
+    <title>Memcache</title>
+    <url>/6-824/Memcache/</url>
+    <content><![CDATA[<p>6.824 的第十一篇论文基于 <strong>Memcache</strong>——一款高性能的分布式内存对象缓存系统，以低成本提供对共享存储池的低延迟访问。Facebook 扩展了 Memcache 的架构，大大提高了性能与内存效率。</p>
 <span id="more"></span>
-<h4 id="aurora-产生背景">Aurora 产生背景</h4>
-<h5 id="ec2elastic-cloud-2">EC2(Elastic Cloud 2)</h5>
-<p>这是 Amazon 最早的云产品。Amazon 有装满了服务器的数据中心，并且每个服务器上都会运行一个 VMM(<strong>Virtual Machine Monitor</strong>)，以及一些 EC2 实例。每个实例在运行一个标准的操作系统的同时，出租给不同的用户。每个 EC2 的操作系统之上运行着 Web 服务或数据库等应用程序。这种方式成本低，且相对容易配置，在早期是一个成功的服务模式。</p>
-<p>最早的时候，EC2 使用的都是服务器上的硬盘，每个 EC2 实例都会分到硬盘的一部分空间。</p>
-<p>对于无状态的 Web 应用，如果客户数量增加了，可以通过租用更多 EC2 实例来对 Web 服务扩容，尽管服务器崩溃了，只需要在另一台服务器上启动一个新的 EC2 实例就好了。而对于数据库而言，一旦服务器崩溃了，其本地硬盘将无法访问，运行在服务器上的数据库 EC2 实例也将失效——因为数据丢失了。</p>
-<p>Amazon 本身有实现块存储的服务，叫 S3。可以定期对数据库做快照，然后存到 S3 上，并基于快照来实现故障恢复。但也有可能失去两次快照之间的数据，</p>
-<h5 id="ebselastic-block-store">EBS(Elastic Block Store)</h5>
-<p>它表现得像个硬盘，具有容错性，且支持持久化存储的服务，其底层是一对互为副本的存储服务器。当用户要使用数据库 EC2 时，可以将一个 EBS 挂载为自己的硬盘。</p>
-<p>当数据库执行写操作时，数据会通过网络传输到 EBS 服务器，之后，那一对存储服务器会使用 <strong>Chain Replication</strong> 进行数据复制。</p>
-<blockquote>
-<p>第一个服务器处理写，第二个服务器处理读。</p>
-</blockquote>
-<p>虽然 EBS 的出现能够在一定程度上避免因服务器崩溃而导致的数据丢失，但却会产生大量的网络流量，并且容错性并没有得到很好的保障——两个存储服务器会放在同个数据中心（在 paper 中称为 <strong>AZ, Available Zone</strong>）中，也就意味着一旦数据中心崩溃了，那就没辙了。</p>
-<h5 id="rdsrelational-database-service">RDS(Relational Database Service)</h5>
-<p>RDS 尝试将数据进行跨 AZ 复制，这样就算整个 AZ 挂了，用户还可以从另一个 AZ 中获取数据。</p>
-<p>对于 RDS 而言，有且仅有一个 EC2 实例作为<strong>主数据库</strong>，这个数据库将其 data page 和 WAL log 存在 EBS，EC2 和 EBS 都在同一个 AZ <span class="math inline">\(AZ_1\)</span> 中。每次数据库执行写操作时，RDS 会自动将写操作拷贝到另一个 AZ <span class="math inline">\(AZ_2\)</span> 中的<strong>副数据库</strong> EC2 实例上，这个 EC2 的工作就是执行和主数据库相同的操作，写入成功后，会发一个 ack 给主数据库，主数据库看到了这个 ack 后才会认为真正意义上的写入成功。</p>
-<p>但实际上，这样还是会通过网络传输相当大量的数据。</p>
-<h4 id="aurora">Aurora</h4>
-<p>在 Aurora 的架构中，会有 <span class="math inline">\(V\)</span> 个数据副本代替 EBS 的位置，分别存放在 <span class="math inline">\(z\)</span> 个不同的 AZ 中。与此同时，Aurora 通过网络传输的是 <strong>log 条目</strong>而非 data page，这也大大提高了网络性能。当然，这也就导致了 Aurora 的存储系统不再是只能理解 data 的通用存储了，变成了<strong>能够理解 log 的应用定制存储系统</strong>。</p>
-<h5 id="复制与相关故障">复制与相关故障</h5>
-<p>Aurora 采用<strong>基于仲裁的投票协议</strong>来保证容错，即不需要所有副本都确认了读/写操作后才能继续执行。这个协议是这样的：</p>
-<ol type="1">
-<li>每次读操作都需要获得 <span class="math inline">\(V_r\)</span> 个确认；</li>
-<li>每次写操作都需要获得 <span class="math inline">\(V_w\)</span> 个确认；</li>
-<li><span class="math inline">\(V_r + V_w &gt; V\)</span>，保证每次读都能知道最近的写入；</li>
-<li><span class="math inline">\(V_w &gt; V/2\)</span>，保证每次写入必须知道最近的写入从而避免写入冲突；</li>
-</ol>
-<p>这样一来，Aurora 可以有更多的副本和 AZ，而不需要付出过大的性能代价——因为它无需等待所有副本，只需要等待最快的 <span class="math inline">\(V_r/V_w\)</span> 个副本就好了。这也容忍了少数副本的 crash 或是偶尔的慢响应。</p>
-<p>这里又会出现一个问题，客户端读请求可能会得到 <span class="math inline">\(V_r\)</span> 个不同的结果，却并不知道哪个结果是正确的。解决这一问题的方法就是设置<strong>版本号</strong>，每次写请求都会将新的数值与一个递增的版本号绑定，于是读请求便可以从所有结果中取版本号最高的那个结果。</p>
-<h5 id="容错目标">容错目标</h5>
-<p>在 Aurora 中，我们希望</p>
+<p>Facebook 的业务场景中决定了其工作负载以<strong>读取</strong>为主，在该情况下对数据进行缓存拥有显著优势。此外，其读取操作从多种来源（MySQL、HDFS 等）获取数据，这种异构性需要一种灵活的缓存策略，能够存储来自不同来源的数据。之所以选择 Memcache 是因为其提供的 api 简单（<code>Get, Set, Delete</code>）。</p>
+<p>memcache 的相关操作如下图所示。</p>
+<p><img src="image-20221109163322740.png" alt="image-20221109163322740" style="zoom:70%;" /></p>
 <ul>
-<li>在整个 AZ 和一个额外的副本崩溃后而不丢失数据；</li>
-<li>整个 AZ 崩溃后不会影响写入数据；</li>
+<li>当 Web Server 读取数据时，它首先访问 memcache，仅当未命中时才用 <code>SELECT</code> 语句访问 db，并重新插入 cache；</li>
+<li>当 Web Server 写入数据时，它会用 <code>UPDATE</code> 语句更新 db，接着删除 memcache 中的旧值（下次访问该 key 时才会重新写回 memcache，保证幂等性）。这种<strong>按需填充</strong>的策略有效减轻了读取负载。此外，将 cache 层与 persist 层分开允许根据工作负载变化独立调整每个层。</li>
 </ul>
-<p>于是设置 <span class="math inline">\(V = 6,\ V_w = 4,\ V_r = 3,\ z = 3\)</span>，这样每个 AZ 存放 2 个副本。在这样的设置下，一个 AZ 和一个副本崩溃不会影响读性能，且任意两个副本崩溃后也能保持写入可用性。</p>
-<h5 id="数据分片sharding">数据分片(Sharding)</h5>
-<p>对于 Aurora 而言，每个副本都是一个计算机，其内存是有限的，且尽管我们有 6 个副本，我们并没有得到 6 倍大小的内存——每个副本上存放的数据都是一致的。对于数百 TB 甚至更多的数据，需要找一个明智的策略进行存储。</p>
-<p>这一策略是：将数据库的数据，分割到多组(<strong>PG, Protection Group</strong>)存储服务器上，每一个 PG 都包含若干存储服务器作为副本，存该 data page 10GB 的数据。</p>
+<p>FB 优先考虑两个主要设计目标：</p>
+<ol type="1">
+<li>任何更改都必须针对用户或操作问题，很少考虑范围有限的优化；</li>
+<li>将读取瞬态数据的可能性作为参数进行调整。FB 通过略微公开旧数据，以降低后端存储服务的负载。</li>
+</ol>
+<p>下文使用 <strong>memcached</strong> 来引用源代码或运行二进制文件，使用 <strong>memcache</strong> 来描述分布式系统。</p>
+<h4 id="集群层次延迟与负载">集群层次：延迟与负载</h4>
+<h5 id="降低延迟">降低延迟</h5>
+<p><strong>memcached 的响应延迟</strong>是影响用户请求响应时间的关键因素。</p>
+<p>尽管集群中提供了数百个 <strong>memcached server, ms</strong> 以减少负载，但 Web server 必须定期与多个 ms 通信以交换数据。这种通信模式可能会导致 <a href="https://www.mtyun.com/library/an-brief-intro-to-tcp-incast">Incast 拥塞</a>，或是任意单个 ms 成为短板。<strong>Replication</strong> 通常可以缓解短板问题，但总会导致显著的内存效率低下。</p>
+<p>FB 主要通过关注在每个 Web server 上运行的 <strong>memcache client, mc</strong> 来降低延迟。mc 维护所有可用 ms 的映射，并通过辅助配置系统进行更新。</p>
+<ul>
+<li><p><strong>并行请求和批处理</strong>：构建 Web app 代码以最小化响应页面请求所需的网络往返次数。通过一个 DAG 表示数据之间的依赖关系。Web server 使用此 DAG 来最大化可以同时获取的数据数量。</p></li>
+<li><p><strong>Client-Server 通信</strong>：ms 只与 mc 使用 <strong>UDP/TCP</strong> 进行通信。client 拥有一个称为 <strong>mcrouter</strong> 的独立代理。此代理提供了一个 ms 接口，并对网络消息进行路由。</p>
+<ul>
+<li>client 依靠 <strong>UDP</strong> 允许线程绕过 mcrouter 执行 <code>Get</code> 请求以减少延迟和开销，UDP 只处理错误而不进行恢复。若 <code>Get</code> 错误，client 会认为 memcache 未命中，但 Web server 将在查询数据后跳过插入，以避免增加负载。</li>
+<li>由于需要确认状态更改，client 依靠 <strong>TCP</strong> 通过 mcrouter 执行 <code>Set/Delete</code> 请求以提高可靠性。</li>
+</ul>
+<p>下图表示通过 UDP 和通过 TCP 获取 key 的延迟。</p>
+<p><img src="image-20221109205144053.png" alt="image-20221109205144053" style="zoom:67%;" /></p></li>
+<li><p><strong>Incast 拥塞</strong>：client 使用<strong>滑动窗口机制</strong>来控制未完成请求的数量。当 client 收到响应才可以发送下一个请求，此滑动窗口的大小会随着请求的成功而缓慢增长。</p>
+<p>下图显示了窗口大小对用户请求处于可运行状态但等待在 Web server 中进行调度的时间量的影响：窗口过小，应用将发送更多组连续的 memcache 请求，从而增加 Web 请求的持续时间；窗口过大，同时到达 memcache 请求的数量更多，导致 Incast 拥塞。</p>
 <blockquote>
-<p>这里的 PG 是个<strong>逻辑概念</strong>。</p>
+<p>一系列用户请求的到达呈现为<a href="https://towardsdatascience.com/the-poisson-distribution-and-poisson-process-explained-4e2cb17d459">泊松过程</a>。假设输入请求率是恒定的，则根据 <strong>Little Law</strong>: L = λW ，服务器中排队的请求数 (L)与处理请求所需的平均时间(W)成正比。</p>
 </blockquote>
-<p>Sharding 后，如果要进行 log 处理，则会查看 log 所修改的数据，并找到存储该数据的 PG，并将 log 只发送给该 PG 的副本。这也就意味着，每个 PG 只存储部分 data page 和所有与这些 data page 相关的 log 条目。</p>
-<p>如果某个副本挂了，希望能尽快生成新的副本。事实上，尽管每个 PG 存了某个数据库的 10GB 数据，但一个副本所拥有的存储容量可能高达 10TB，也就是说该副本可能存了成百上千个 PG 的“10GB”，一旦该副本挂了，会牵连到与之相关的所有数据库。一个简单的策略是找到另一台存储服务器，通过拷贝的形式将该副本的所有数据都通过网络传输到新的副本中，但对于 10Gb/s 的网络来说，需要的时间还是太久了。</p>
-<p>Aurora 是这么做的：若某个副本保存了 <span class="math inline">\(PG_1,\ PG_2,\ \dots,\ PG_n\)</span> 的数据，则将这 <span class="math inline">\(n\)</span> 个 PG 的数据并行传输到 <span class="math inline">\(n\)</span> 个新的存储服务器上。也就是说这 <span class="math inline">\(n\)</span> 个存储服务器，每个都会加入到一个新的 PG 中。比起上面的策略，我们获得了 <span class="math inline">\(n\)</span> 倍的性能提升。</p>
+<p><img src="image-20221109211610473.png" alt="image-20221109211610473" style="zoom:67%;" /></p></li>
+</ul>
+<h5 id="降低负载">降低负载</h5>
+<h6 id="lease">Lease</h6>
+<p>lease 的提出是用来解决以下两个问题：</p>
+<ol type="1">
+<li><strong>失效集</strong>：对 memcache 的并发更新被重新排序时，会导致 memcache 中的值并不是最新值。</li>
+<li><a href="https://zhuanlan.zhihu.com/p/65843741"><strong>惊群效应</strong></a>：当对一个特定的 key 进行大量的 RW 活动时，反复 write 会删除 memcache 中的值，导致许多 read 默认使用成本更高的路径——访问数据库而非 cache。</li>
+</ol>
+<p>当 client 遇到 cache miss 时，memcached 向 client 分配一个与 key 绑定的 lease。memcached 会检测尝试写回数据的 client 是否持有 lease 从而判断是否能够将数据写回。如果在这之前 memcached 收到对 key 的 <code>Delete</code> 操作，则 lease 失效。</p>
+<p>通过定期分配 lease 来解决惊群效应——一般是每 10s——如果 client 在预计时间点之前发起请求，则会等待，而再次尝试时，数据已经存入 cache 中了，便无需访问数据库。这样可以大幅度减少 client 等待时间。</p>
+<ul>
+<li><strong>旧值</strong>：在某些情况下返回旧值能够进一步减少这一等待时间。有一个数据结构暂存近期被删除的值，但很快就会被刷掉。<code>Get</code> 或是返回 lease，或是返回这些被标记为过时的数据。可以继续向前推进的应用不需要等待从数据库中获取的最新值。</li>
+</ul>
+<h6 id="memcache-pool">Memcache Pool</h6>
+<p>不同应用的工作负载在共享存储时会对彼此产生负面干扰，从而降低命中率。可以通过将集群的 ms 划分到不同的池中，具有相似工作负载的 ms 共享同一个池。下图为两个不同负载的工作集。</p>
+<p><img src="image-20221112145220737.png" alt="image-20221112145220737" style="zoom: 80%;" /></p>
+<h6 id="replication-with-pools">Replication with pools</h6>
+<p>若池满足以下条件：</p>
+<ol type="1">
+<li>应用同时请求许多 key；</li>
+<li>整个数据集能够放在一个或两个 ms 中；</li>
+<li>请求率远高于单个 ms 可以承受的水平。</li>
+</ol>
+<p>则可以选择在池中复制某一类 key 来降低 ms 的延迟并提高效率。</p>
+<h5 id="故障处理">故障处理</h5>
+<p>无法从 memcache 中获取数据会导致后端服务负载过重，这可能会导致进一步的级联故障：</p>
+<ol type="1">
+<li>网络或服务器故障导致少量主机无法被访问；</li>
+<li>大规模故障导致集群中大部分服务器宕机。</li>
+</ol>
+<p>发生小规模故障时，恢复需要一定时间，却足以导致上述级联故障。于是设置一组名为 <strong>Gutter</strong> 的机器专门来应对这种场景——接管那些故障服务器的职责。</p>
+<ul>
+<li>当 client 未收到请求的答复时，它认为相应 ms 故障，接着重新将请求发送至 <strong>Gutter Pool</strong>；</li>
+<li>如果此请求仍未命中，client 将在查询数据库后将适当的 kv 对插入到 Gutter 机器中，这些 kv 对的有效期很短，以防止 Gutter 无效。</li>
+</ul>
+<h4 id="区域层次复制">区域层次：复制</h4>
+<p>单纯通过增加服务器来扩展集群而不扩展系统并不能解决负载问题。需要将 web server 和 memcached server 拆分为多个<strong>前端集群</strong>(Frontend Cluster, FC)，与<strong>存储集群</strong>(Storage Cluster, SC)一起组成了一个 <strong>region</strong>。</p>
+<h5 id="区域无效化">区域无效化</h5>
+<p>SC 拥有数据的最新版本，FC 拥有数据复制，SC 负责发送 cache <strong>无效化</strong>(invalidation)命令来保持一致性。修改 SC 的 SQL 语句会附上需要在事务提交后无效的 memcache key。每个数据库中都有一个 <strong>mcsqueal</strong> 来检查其数据库提交的 SQL 语句，提取 <code>Delete</code> 并广播到该 region 中每个 FC 中的 ms。如下图所示。</p>
+<p><img src="image-20221112163919753.png" alt="image-20221112163919753" style="zoom:67%;" /></p>
+<ul>
+<li><strong>减少数据包率</strong>：mcsqueal 直接与 ms 通信会浪费网络资源。通过将数据包发给 mcrouter，然后 mcrouter 将这些数据包发给 ms 是个比较好的解决方案。</li>
+<li><strong>通过 web server 进行无效化</strong>：不让 Web server 直接向所有 FC 广播 invalidation 是因为
+<ol type="1">
+<li>Web server 在批量处理方面效率低，开销大；</li>
+<li>当系统层面的 invalidation 问题（如错误路由删除和配置错误）发生时，依靠 mcsqueal 的补救措施更简单。</li>
+</ol></li>
+</ul>
+<h5 id="区域池">区域池</h5>
+<p>若每个集群都持有数据的副本，则会导致内存效率低下。可以让多个 FC 共享相同的多个 ms，称为<strong>区域池</strong>。</p>
+<h5 id="冷集群预热">冷集群预热</h5>
+<p>新集群加入时为空缓存的“冷集群”，大部分请求（因为 cache miss）都会指向数据库。<strong>Cold Cluster Warmup</strong> 系统允许“冷集群”中的 client 从“热集群”中获取数据，从而使得“冷集群”的 Cache 尽快填满。</p>
+<p>然而当冷集群中的客户端 A 更新数据库，同时另一个客户端 B 在热集群收到 invalidation 之前从热集群中请求旧值时，会产生不一致性。memcached 选择在 <code>Delete</code> 后指定的延迟时间（默认 2s）内拒绝 <code>add</code>操作。</p>
+<blockquote>
+<p>当在冷集群中 cache miss 时，client 从热集群重新请求 key 并将其添加到冷集群中。<code>add</code> 失败表明数据库上有更新的数据，因此 client 将从数据库中重新请求值。</p>
+</blockquote>
+<h4 id="跨区域一致性">跨区域：一致性</h4>
+<p>在多个地理位置部署数据中心有以下好处：</p>
+<ol type="1">
+<li>将网络服务器放置在更靠近最终用户的位置可以显著降低延迟；</li>
+<li>地理多样性可以减轻自然灾害或大规模停电等事件的影响；</li>
+<li>新位置可以提供更便宜的电力和其他经济激励措施。</li>
+</ol>
+<p>FB 将跨区域系统架构设计为一个 <strong>master region</strong> 管理 primary DB，其他 <strong>slave region</strong> 管理 ReadOnly 的 replica，如下图所示。</p>
+<p><img src="image-20221109201537652.png" alt="image-20221109201537652" style="zoom:67%;" /></p>
+<p>这一方案往往会因为 replicas 滞后于 primary 而产生不一致性问题。FB 的设计理念为：尽最大努力提供最终的一致性，但强调性能和可用性。</p>
+<p><strong>从主区写入</strong>：通过 mcsqueal 发送 invalidation 的策略避免了 invalidation 在更新数据之前到达。</p>
+<blockquote>
+<p>考虑在 master 中的 Web server 更新完数据库，但修改尚未发送到 backup，在此之前抢先发送 invalidation 会与后续对 backup 数据的查询发生竞争，从而增加将旧数据写入 memcache 的概率。</p>
+</blockquote>
+<p><strong>从非主区写入</strong>：若一个用户更新了非主区域的数据，如果复制延迟过大，一旦最近的更改丢失，其下一个请求可能会出错。因此只有在复制完毕后才允许从 replica db 重新填充 memcache。</p>
+<p>FB 采用 <strong>remote mark</strong> 机制来最小化读取旧数据的概率。若本地的数据被打上标记，表明该数据可能是旧的，并且查询应该被重定向到 master。当 Web server 更新 key 对应的 value 时：</p>
+<ol type="1">
+<li>在 region 中设置标记 <span class="math inline">\(r_k\)</span>；</li>
+<li>将 k-v 写入 master，并指明 key 和 <span class="math inline">\(r_k\)</span> 无效</li>
+<li>删除本地集群中的 key。</li>
+</ol>
+<p>在后续请求 key 时，若 cache miss 且 <span class="math inline">\(r_k\)</span> 存在，则将查询重定向到 master 或本地区域。</p>
 ]]></content>
       <categories>
         <category>6.824</category>
       </categories>
       <tags>
         <tag>paperReading</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Spark</title>
-    <url>/6-824/SPARK/</url>
-    <content><![CDATA[<p>6.824 的第十篇论文是 <strong>Spark</strong>——一个基于弹性分布式数据集(<strong>Resilient Distributed Dataset, RDD</strong>)的容错数据处理框架，能够帮助用户简单的开发快速，统一的大数据应用，对数据进行，协处理，流式处理，交互式分析等。</p>
-<span id="more"></span>
-<h4 id="背景">背景</h4>
-<p>大多数计算框架在处理需要重复使用中间结果的问题（如迭代机器学习和图算法）时，重用数据的唯一方法是将其写入外存，这会导致大量开销，从而效率低下。然而，当前能解决该问题的专用计算框架只支持特定的计算模式，却没有为更一般的数据重用提供抽象。</p>
-<p>于是 RDD 被提出。这是一种容错的分布式内存抽象，它允许用户将中间结果保存在内存中以实现高效的数据重用，同时控制其分区以优化数据放置，并支持广泛的计算模式，从而提供高性能与高兼容性。</p>
-<blockquote>
-<p>但 RDD 不太适合对共享状态进行异步细粒度更新的应用程序，例如 Web 应用程序的存储系统或增量 Web 爬虫。使用执行传统更新日志记录和数据检查点的系统更有效。</p>
-</blockquote>
-<p>与之前的系统相比，RDD 提供了一个基于<strong>粗粒度</strong>变换(<strong>transformation, Trans</strong>)的接口，将相同的变换操作应用于多个数据项。只要记录下用于构建数据集的 Trans 操作，就能在一个分区丢失时很快地恢复数据，而无需进行昂贵的复制。<strong>容错性</strong>于是得到了保证。</p>
-<h4 id="rdd">RDD</h4>
-<p>RDD 本质上是一个<strong>只读</strong>且<strong>分区</strong>的记录集合。Spark 将 RDD 表示为对象，使用对象的方法来操作 RDD：</p>
-<ul>
-<li><p><strong>Transformation/Trans</strong>：基于持久化存储中的源数据或其他 RDD 派生出新的 RDD。如 map(), filter(), join()；</p></li>
-<li><p><strong>Actions/Acts</strong>：对 RDD 中的数据进行计算并将计算结果返回给上层或导出到存储系统。如 count(), collect(), save()；</p>
-<p><img src="image-20221029183028035.png" alt="image-20221029183028035" style="zoom:60%;" /></p>
-<blockquote>
-<p>Trans 不会触发 Spark；只有在首次进行 Acts 时，Spark 才真正开始运作并调度计算任务。这是典型的<strong>惰性计算</strong>。</p>
-</blockquote></li>
-</ul>
-<p>read-only 属性决定了 RDD 只能通过通过 Trans 派生而来。RDD 会记录足够多的 Trans 信息（比如是从哪个 RDD 派生）， 即 <strong>Lineage</strong>，以便在分区丢失时进行数据恢复，且只恢复丢失的那个分区。而如果 RDD 丢失了 Lineage 信息，它将不能被任何程序调用。下图为一个包含 3 个 Trans 的 Lineage 图：</p>
-<p><img src="image-20221029164150596.png" alt="image-20221029164150596" style="zoom:80%;" /></p>
-<p>用户还可以控制 RDD 的另外两个方面：</p>
-<ol type="1">
-<li><strong>持久性</strong>：用户可以调用 <strong>persist</strong> 方法来持久化 RDD 以重用。 Spark 默认将 RDD 持久化在内存中，但如果 RAM 不足，则会 split 到磁盘。通过修改 persist 方法中的 <strong>flag</strong>，用户还可以请求其他持久化策略。还可以在每个 RDD 上设置一个持久化优先级，以指定哪些内存中的数据应该首先 split 到磁盘。</li>
-<li><strong>分区</strong>：用户可以要求基于每条记录中的 key 将 RDD 的元素跨机器分区。</li>
-</ol>
-<h5 id="rdd-作为分布式内存抽象的优势">RDD 作为分布式内存抽象的优势</h5>
-<p><img src="image-20221029183627267.png" alt="image-20221029183627267" style="zoom:67%;" /></p>
-<p>分布式共享内存(Distributed Shared Memory, DSM) 系统是一个非常通用的抽象，但是这种通用性使得在集群上难以实现高效和容错的方式。RDD 和 DSM 之间的区别在以下几点：</p>
-<ol type="1">
-<li>RDD 只能通过粗粒度 Trans 来创建，这限制了 RDD 只能批量执行写入，但能通过 Lineage 实现更有效的容错；而 DSM 允许对每个内存位置进行读写，但一旦数据损坏，所有数据都要重新还原或重做。</li>
-<li>RDD 允许系统启动 backups 来并行执行慢节点的任务从而缓解短板；而在 DSM 中慢节点会拖累所有节点。</li>
-</ol>
-<p>RDD 还有两大优势：</p>
-<ol type="1">
-<li>在 RDD 的批量操作中，可以通过物理上更近的节点调度任务以提高性能。</li>
-<li>当没有足够的内存来存储 RDD 时，溢出的分区可以存储在磁盘上，并将提供与当前数据并行系统相似的性能。</li>
-</ol>
-<h5 id="spark-集群">Spark 集群</h5>
-<p>Spark 由 Driver 程序启动，并将任务分发至多个 Worker 节点。Driver 跟踪 RDD 的 Lineage；Worker 将 RDD 分区存储在 RAM 中。如下图所示：</p>
-<p><img src="image-20221029192204791.png" alt="image-20221029192204791" style="zoom:80%;" /></p>
-<h5 id="rdd-表示">RDD 表示</h5>
-<p>一个 RDD 由以下部分组成：</p>
-<ul>
-<li>数据集的原子分区；</li>
-<li>对父 RDD 的依赖；</li>
-<li>基于父分区计算当前分区的 Trans 函数；</li>
-<li>分区方案和数据地址相关的元数据。</li>
-</ul>
-<h5 id="rdd-依赖">RDD 依赖</h5>
-<p>RDD 在物理形式上是分区的，其完整数据被分散在集群内若干机器的内存上。在利用 Trans 进行派生时，根据 Trans 操作的不同， 子 RDD 会与父 RDD 产生不同依赖关系：</p>
-<ul>
-<li><strong>Narrow Dependency</strong>：每个父分区最多生成一个子分区，如 map(), filter()；</li>
-<li><strong>Wide Dependency</strong>：每个父分区能够生成多个子分区，而每个子分区可能都只依赖各个父分区中的一部分，如 groupBy(), join()。</li>
-</ul>
-<p><img src="image-20221029202838415.png" alt="image-20221029202838415" style="zoom:80%;" /></p>
-<p>进行上述区分有以下两点好处：</p>
-<ol type="1">
-<li><strong>数据传输</strong>：Narrow Dependency 的每个父分区只会传入到一个子分区中，可以在一个节点内流水线式地完成转换；而 Wide Dependency 需要将父分区的数据传输到多个子分区中，往往有 shuffle 操作。</li>
-<li><strong>故障恢复</strong>：Narrow Dependency 下的节点故障后的恢复效率更高，且可以在不同的节点上并行进行；而在 Wide Dependency 中，单个故障节点需要多个分区联合执行恢复，且对父分区的重新计算会产生冗余数据。</li>
-</ol>
-<h4 id="任务调度">任务调度</h4>
-<p><img src="image-20221029235718195.png" alt="image-20221029235718195" style="zoom:80%;" /></p>
-<p>每当用户在 RDD 上运行 Acts 时，调度器(<strong>Scheduler</strong>)根据 Lineage 图与该 RDD 的依赖关系，对不同 Acts 过程的执行进行阶段(<strong>stage</strong>)划分，如上图所示。stage 的<strong>划分依据</strong>即宽窄依赖：从后往前，遇到宽依赖的 Acts 便进行划分。之后，Scheduler 便生成任务(<strong>task</strong>)并将其分配给不同节点。</p>
-<p>task 的分配基于<strong>数据局部性</strong>。如果 task 需要的分区存储在某个节点的内存中，则将其发送到该节点；否则，将 task 发送给 RDD 指定的 preferred 节点。对于 WD，在持有父分区的节点上保存中间产物以加速故障恢复。</p>
-<p>一旦 task 失败，只要它的父 RDD 仍然可用，Spark 就会在另一个节点上重新执行该 task。反之，则根据 Lineage 图重新生成父 RDD，随后再执行任务即可。目前 Spark 还不能容忍 Scheduler 的故障，所以一旦 Scheduler 挂了，所有的工作也白费了。</p>
-<h4 id="内存管理">内存管理</h4>
-<p>Spark 为 RDD 持久化存储提供了三种方案：</p>
-<ol type="1">
-<li><strong>内存中的反序列化 Java 对象</strong>：这提供了最快的性能，因为 JVM 可以在本地访问每个 RDD 元素；</li>
-<li><strong>内存中的序列化数据</strong>：这允许用户在空间有限时选择比 Java 对象图更节省内存的表示，但会降低性能；</li>
-<li><strong>磁盘存储</strong>：这对于那些太大而无法保存在 RAM 中但每次使用时重新计算成本高昂的 RDD 很有用；</li>
-</ol>
-<p>当计算出一个新的 RDD 分区但没有足够的空间来存储它时，会使用 <strong>LRU</strong> 策略进行内存回收，以给新分区提供空间。除此之外，还可以通过设置每个 RDD 的持久性优先级提供进一步的控制。</p>
-<h4 id="检查点">检查点</h4>
-<p>前文提到 Lineage 可以有效进行故障恢复，但对于具有长 Lineage 链的 RDD 则容易耗费太多时间，无法体现较好性能。将一些 <strong>checkpoint</strong> 持久化到存储能很好的解决此问题。</p>
-<p>一般来说，检查点对于 WD 的长 Lineage 图很有用，因为集群中的节点故障可能会导致每个父 RDD 丢失一些数据片段，需要完全重新计算。而对于对 ND 的 RDD，checkpoint 则没那么必要，如果一个节点发生故障，这些 RDD 中丢失的分区可以在其他节点上并行重新计算，而成本只是复制整个 RDD 的一小部分。</p>
-<p>Spark 目前提供了一个用于检查点的 API，将决策权留给了用户，即 <strong>REPLICATE</strong> 标志。</p>
-<figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">rdd.persist(<span class="type">REPLICATE</span>)</span><br></pre></td></tr></table></figure>
-<p>RDD 的 read-only 性质使得它们比一般的共享内存更容易实现 checkpoint，因为一致性不是问题，RDD 可以在后台创建，而不需要程序暂停或分布式快照方案。</p>
-<h4 id="总结">总结</h4>
-<p>RDD 是一种分布式内存抽象，允许用户将中间结果保存在内存中以实现高效的数据重用，同时支持广泛的计算模式。</p>
-<p>RDD 利用了 Lineage 大大简化了节点失效后的数据恢复过程。</p>
-]]></content>
-      <categories>
-        <category>6.824</category>
-      </categories>
-      <tags>
-        <tag>paperReading</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>使序列递增的最小操作次数</title>
-    <url>/LeetCode/leetcode801/</url>
-    <content><![CDATA[<p>链接 <a href="https://leetcode.cn/problems/minimum-swaps-to-make-sequences-increasing/submissions/">&gt;&gt;&gt; 2022.10.10 每日一题 LeetCode801(hard) &lt;&lt;&lt;</a></p>
-<span id="more"></span>
-<blockquote>
-<p>我们有两个长度相等且不为空的整型数组 <code>nums1</code> 和 <code>nums2</code>。在一次操作中，我们可以交换 <code>nums1[i]</code> 和 <code>nums2[i]</code> 的元素。</p>
-<p>例如，如果 <code>nums1 = [1,2,3,8], nums2 =[5,6,7,4]</code> ，你可以交换 <code>i = 3</code> 处的元素，得到 <code>nums1 =[1,2,3,4]</code> 和 <code>nums2 =[5,6,7,8]</code> 。 返回 使 <code>nums1</code> 和 <code>nums2</code> <strong>严格递增</strong> 所需操作的最小次数 。</p>
-<p>数组 <code>arr</code> <strong>严格递增</strong> 是指 <code>arr[0] &lt; arr[1] &lt; arr[2] &lt; ... &lt; arr[arr.length - 1]</code></p>
-<p><strong>注意</strong>：用例保证可以实现操作。</p>
-</blockquote>
-<h5 id="最初的想法">最初的想法</h5>
-<p>首先，对于任意 <code>i</code>，我们有两种选择，交换 or 不交换。那么最开始，我们可以考虑定义一个数组 <code>dp[n]</code>，其中 <code>dp[i]</code> 表示前 <code>i+1</code> 个元素的子数组中<strong>使序列递增的最小操作次数</strong>。那么可以得到以下状态转移方程：</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> num1[i] &lt;= nums1[i<span class="number">-1</span>] || nums2[i] &lt;= nums2[i<span class="number">-1</span>] &#123;</span><br><span class="line">    dp[i] = dp[i<span class="number">-1</span>] + <span class="number">1</span></span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    dp[i] = dp[i<span class="number">-1</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>但这种考虑存在一个漏洞：我们的考虑范围局限在了相邻两个元素之间的关系，却没有考虑到之前的元素。</p>
-<p>比如当 <code>nums1 = [0,2,2], nums2 = [1,1,3]</code> 时，我们只需交换 <code>i = 1</code> 处的元素。而在上面的状态转移过程中，我们却得到了 <code>dp = [0, 1, 2]</code>——这显然不是我们想要的。而这一结果的成因在于，忽略了之前是否有交换。</p>
-<h5 id="改进">改进</h5>
-<p>于是需要将 <code>dp[n]</code> 扩展到二维数组 <code>dp[n][2]</code>，<code>dp[i][0]</code> 表示对 <code>i</code> 处<strong>不进行交换</strong>时，前 <code>i+1</code> 个元素的子数组中使序列递增的最小操作次数；<code>dp[i][1]</code> 表示<strong>进行交换</strong>时的最小操作次数。这样一来，我们就能够对之前的交换情况进行考虑了。</p>
-<p>既然题目保证最终能够实现操作，那么对任意 <code>i &gt; 1</code>，必然存在以下情况：</p>
-<ol type="1">
-<li><p><code>nums1[i] &lt;= num1[i-1] || nums2[i] &lt;= nums2[i-1]</code></p>
-<p>这种情况下，<code>i</code> 处的交换情况必须与 <code>i-1</code> 处的交换情况相反，如果 <code>i-1</code> 换了，则 <code>i</code> 处无需交换；反之同理。有： <span class="math display">\[
- \begin{align}
- dp[i][0] &amp;= dp[i-1][1] \\[2ex] dp[i][1] &amp;= dp[i-1][0] + 1
- \end{align}
- \]</span></p></li>
-<li><p><code>(nums1[i] &gt; num1[i-1] &amp;&amp; nums2[i] &gt; nums2[i-1]) &amp;&amp; (nums1[i] &lt;= nums2[i-1] || nums2[i] &lt;= nums1[i-1])</code></p>
-<p>这种情况下，<code>i</code> 处的交换情况必须与 <code>i-1</code> 处的交换情况保持一致，也就是要么都交换，要么都不交换，则有： <span class="math display">\[
- \begin{align}
- dp[i][0] &amp;= dp[i-1][0] \\[2ex] dp[i][1] &amp;= dp[i-1][1] + 1
- \end{align}
- \]</span></p></li>
-<li><p><code>(nums1[i] &gt; num1[i-1] &amp;&amp; nums2[i] &gt; nums2[i-1]) &amp;&amp; (nums1[i] &gt; nums2[i-1] &amp;&amp; nums2[i] &gt; nums1[i-1])</code></p>
-<p>这种情况下，<code>i</code> 处交不交换都无所谓，既然我们要最小操作，则有： <span class="math display">\[
- \begin{align}
- dp[i][0] &amp;= \min(dp[i-1][0], dp[i-1][1])\\[2ex] dp[i][1] &amp;= dp[i][0] + 1
- \end{align}
- \]</span></p></li>
-</ol>
-<p>于是代码就很清晰了</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">min</span><span class="params">(a, b <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> a &lt; b &#123;</span><br><span class="line">        <span class="keyword">return</span> a</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> b</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">minSwap</span><span class="params">(nums1 []<span class="type">int</span>, nums2 []<span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    n := <span class="built_in">len</span>(nums1)</span><br><span class="line">    dp := <span class="built_in">make</span>([][]<span class="type">int</span>, n)</span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; n; i++ &#123;</span><br><span class="line">        dp[i] = <span class="built_in">make</span>([]<span class="type">int</span>, <span class="number">2</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    dp[<span class="number">0</span>][<span class="number">0</span>] = <span class="number">0</span></span><br><span class="line">    dp[<span class="number">0</span>][<span class="number">1</span>] = <span class="number">1</span></span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">1</span>; i &lt; n; i++ &#123;</span><br><span class="line">        <span class="keyword">if</span> nums1[i] &lt;= nums1[i<span class="number">-1</span>] || nums2[i] &lt;= nums2[i<span class="number">-1</span>] &#123;</span><br><span class="line">            dp[i][<span class="number">0</span>] = dp[i<span class="number">-1</span>][<span class="number">1</span>]</span><br><span class="line">            dp[i][<span class="number">1</span>] = dp[i<span class="number">-1</span>][<span class="number">0</span>] + <span class="number">1</span></span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> nums1[i] &lt;= nums2[i<span class="number">-1</span>] || nums2[i] &lt;= nums1[i<span class="number">-1</span>] &#123;</span><br><span class="line">            dp[i][<span class="number">0</span>] = dp[i<span class="number">-1</span>][<span class="number">0</span>]</span><br><span class="line">            dp[i][<span class="number">1</span>] = dp[i<span class="number">-1</span>][<span class="number">1</span>] + <span class="number">1</span></span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            dp[i][<span class="number">0</span>] = min(dp[i<span class="number">-1</span>][<span class="number">0</span>], dp[i<span class="number">-1</span>][<span class="number">1</span>])</span><br><span class="line">            dp[i][<span class="number">1</span>] = dp[i][<span class="number">0</span>] + <span class="number">1</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> min(dp[n<span class="number">-1</span>][<span class="number">0</span>], dp[n<span class="number">-1</span>][<span class="number">1</span>])</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>一看提交结果，看来还得优化。</p>
-<blockquote>
-<p>执行用时：144 ms, 在所有 Go 提交中击败了 18.18% 的用户</p>
-<p>内存消耗：19.7 MB, 在所有 Go 提交中击败了 9.09% 的用户</p>
-</blockquote>
-<h5 id="优化">优化</h5>
-<p>注意到，每个 <code>dp[i]</code> 的状态只与 <code>dp[i-1]</code> 有关，之前的信息就被淘汰了，于是可以采用<strong>滚动数组</strong>的技巧优化空间。</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">min</span><span class="params">(a, b <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> a &lt; b &#123;</span><br><span class="line">        <span class="keyword">return</span> a</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> b</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">minSwap</span><span class="params">(nums1 []<span class="type">int</span>, nums2 []<span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    n := <span class="built_in">len</span>(nums1)</span><br><span class="line">    a, b := <span class="number">0</span>, <span class="number">1</span></span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">1</span>; i &lt; n; i++ &#123;</span><br><span class="line">        <span class="keyword">if</span> nums1[i] &lt;= nums1[i<span class="number">-1</span>] || nums2[i] &lt;= nums2[i<span class="number">-1</span>] &#123;</span><br><span class="line">            a, b = b, a + <span class="number">1</span></span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> nums1[i] &lt;= nums2[i<span class="number">-1</span>] || nums2[i] &lt;= nums1[i<span class="number">-1</span>] &#123;</span><br><span class="line">            b++</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            a = min(a, b)</span><br><span class="line">            b = a + <span class="number">1</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> min(a, b)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>优化后，比较满意了。</p>
-<blockquote>
-<p>执行用时：120 ms, 在所有 Go 提交中击败了68.18%的用户</p>
-<p>内存消耗：9.6 MB, 在所有 Go 提交中击败了90.91%的用户</p>
-</blockquote>
-]]></content>
-      <categories>
-        <category>LeetCode</category>
-      </categories>
-      <tags>
-        <tag>每日一题</tag>
       </tags>
   </entry>
   <entry>
@@ -1029,6 +815,220 @@
       </categories>
       <tags>
         <tag>paperReading</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Spark</title>
+    <url>/6-824/SPARK/</url>
+    <content><![CDATA[<p>6.824 的第十篇论文是 <strong>Spark</strong>——一个基于弹性分布式数据集(<strong>Resilient Distributed Dataset, RDD</strong>)的容错数据处理框架，能够帮助用户简单的开发快速，统一的大数据应用，对数据进行，协处理，流式处理，交互式分析等。</p>
+<span id="more"></span>
+<h4 id="背景">背景</h4>
+<p>大多数计算框架在处理需要重复使用中间结果的问题（如迭代机器学习和图算法）时，重用数据的唯一方法是将其写入外存，这会导致大量开销，从而效率低下。然而，当前能解决该问题的专用计算框架只支持特定的计算模式，却没有为更一般的数据重用提供抽象。</p>
+<p>于是 RDD 被提出。这是一种容错的分布式内存抽象，它允许用户将中间结果保存在内存中以实现高效的数据重用，同时控制其分区以优化数据放置，并支持广泛的计算模式，从而提供高性能与高兼容性。</p>
+<blockquote>
+<p>但 RDD 不太适合对共享状态进行异步细粒度更新的应用程序，例如 Web 应用程序的存储系统或增量 Web 爬虫。使用执行传统更新日志记录和数据检查点的系统更有效。</p>
+</blockquote>
+<p>与之前的系统相比，RDD 提供了一个基于<strong>粗粒度</strong>变换(<strong>transformation, Trans</strong>)的接口，将相同的变换操作应用于多个数据项。只要记录下用于构建数据集的 Trans 操作，就能在一个分区丢失时很快地恢复数据，而无需进行昂贵的复制。<strong>容错性</strong>于是得到了保证。</p>
+<h4 id="rdd">RDD</h4>
+<p>RDD 本质上是一个<strong>只读</strong>且<strong>分区</strong>的记录集合。Spark 将 RDD 表示为对象，使用对象的方法来操作 RDD：</p>
+<ul>
+<li><p><strong>Transformation/Trans</strong>：基于持久化存储中的源数据或其他 RDD 派生出新的 RDD。如 map(), filter(), join()；</p></li>
+<li><p><strong>Actions/Acts</strong>：对 RDD 中的数据进行计算并将计算结果返回给上层或导出到存储系统。如 count(), collect(), save()；</p>
+<p><img src="image-20221029183028035.png" alt="image-20221029183028035" style="zoom:60%;" /></p>
+<blockquote>
+<p>Trans 不会触发 Spark；只有在首次进行 Acts 时，Spark 才真正开始运作并调度计算任务。这是典型的<strong>惰性计算</strong>。</p>
+</blockquote></li>
+</ul>
+<p>read-only 属性决定了 RDD 只能通过通过 Trans 派生而来。RDD 会记录足够多的 Trans 信息（比如是从哪个 RDD 派生）， 即 <strong>Lineage</strong>，以便在分区丢失时进行数据恢复，且只恢复丢失的那个分区。而如果 RDD 丢失了 Lineage 信息，它将不能被任何程序调用。下图为一个包含 3 个 Trans 的 Lineage 图：</p>
+<p><img src="image-20221029164150596.png" alt="image-20221029164150596" style="zoom:80%;" /></p>
+<p>用户还可以控制 RDD 的另外两个方面：</p>
+<ol type="1">
+<li><strong>持久性</strong>：用户可以调用 <strong>persist</strong> 方法来持久化 RDD 以重用。 Spark 默认将 RDD 持久化在内存中，但如果 RAM 不足，则会 split 到磁盘。通过修改 persist 方法中的 <strong>flag</strong>，用户还可以请求其他持久化策略。还可以在每个 RDD 上设置一个持久化优先级，以指定哪些内存中的数据应该首先 split 到磁盘。</li>
+<li><strong>分区</strong>：用户可以要求基于每条记录中的 key 将 RDD 的元素跨机器分区。</li>
+</ol>
+<h5 id="rdd-作为分布式内存抽象的优势">RDD 作为分布式内存抽象的优势</h5>
+<p><img src="image-20221029183627267.png" alt="image-20221029183627267" style="zoom:67%;" /></p>
+<p>分布式共享内存(Distributed Shared Memory, DSM) 系统是一个非常通用的抽象，但是这种通用性使得在集群上难以实现高效和容错的方式。RDD 和 DSM 之间的区别在以下几点：</p>
+<ol type="1">
+<li>RDD 只能通过粗粒度 Trans 来创建，这限制了 RDD 只能批量执行写入，但能通过 Lineage 实现更有效的容错；而 DSM 允许对每个内存位置进行读写，但一旦数据损坏，所有数据都要重新还原或重做。</li>
+<li>RDD 允许系统启动 backups 来并行执行慢节点的任务从而缓解短板；而在 DSM 中慢节点会拖累所有节点。</li>
+</ol>
+<p>RDD 还有两大优势：</p>
+<ol type="1">
+<li>在 RDD 的批量操作中，可以通过物理上更近的节点调度任务以提高性能。</li>
+<li>当没有足够的内存来存储 RDD 时，溢出的分区可以存储在磁盘上，并将提供与当前数据并行系统相似的性能。</li>
+</ol>
+<h5 id="spark-集群">Spark 集群</h5>
+<p>Spark 由 Driver 程序启动，并将任务分发至多个 Worker 节点。Driver 跟踪 RDD 的 Lineage；Worker 将 RDD 分区存储在 RAM 中。如下图所示：</p>
+<p><img src="image-20221029192204791.png" alt="image-20221029192204791" style="zoom:80%;" /></p>
+<h5 id="rdd-表示">RDD 表示</h5>
+<p>一个 RDD 由以下部分组成：</p>
+<ul>
+<li>数据集的原子分区；</li>
+<li>对父 RDD 的依赖；</li>
+<li>基于父分区计算当前分区的 Trans 函数；</li>
+<li>分区方案和数据地址相关的元数据。</li>
+</ul>
+<h5 id="rdd-依赖">RDD 依赖</h5>
+<p>RDD 在物理形式上是分区的，其完整数据被分散在集群内若干机器的内存上。在利用 Trans 进行派生时，根据 Trans 操作的不同， 子 RDD 会与父 RDD 产生不同依赖关系：</p>
+<ul>
+<li><strong>Narrow Dependency</strong>：每个父分区最多生成一个子分区，如 map(), filter()；</li>
+<li><strong>Wide Dependency</strong>：每个父分区能够生成多个子分区，而每个子分区可能都只依赖各个父分区中的一部分，如 groupBy(), join()。</li>
+</ul>
+<p><img src="image-20221029202838415.png" alt="image-20221029202838415" style="zoom:80%;" /></p>
+<p>进行上述区分有以下两点好处：</p>
+<ol type="1">
+<li><strong>数据传输</strong>：Narrow Dependency 的每个父分区只会传入到一个子分区中，可以在一个节点内流水线式地完成转换；而 Wide Dependency 需要将父分区的数据传输到多个子分区中，往往有 shuffle 操作。</li>
+<li><strong>故障恢复</strong>：Narrow Dependency 下的节点故障后的恢复效率更高，且可以在不同的节点上并行进行；而在 Wide Dependency 中，单个故障节点需要多个分区联合执行恢复，且对父分区的重新计算会产生冗余数据。</li>
+</ol>
+<h4 id="任务调度">任务调度</h4>
+<p><img src="image-20221029235718195.png" alt="image-20221029235718195" style="zoom:80%;" /></p>
+<p>每当用户在 RDD 上运行 Acts 时，调度器(<strong>Scheduler</strong>)根据 Lineage 图与该 RDD 的依赖关系，对不同 Acts 过程的执行进行阶段(<strong>stage</strong>)划分，如上图所示。stage 的<strong>划分依据</strong>即宽窄依赖：从后往前，遇到宽依赖的 Acts 便进行划分。之后，Scheduler 便生成任务(<strong>task</strong>)并将其分配给不同节点。</p>
+<p>task 的分配基于<strong>数据局部性</strong>。如果 task 需要的分区存储在某个节点的内存中，则将其发送到该节点；否则，将 task 发送给 RDD 指定的 preferred 节点。对于 WD，在持有父分区的节点上保存中间产物以加速故障恢复。</p>
+<p>一旦 task 失败，只要它的父 RDD 仍然可用，Spark 就会在另一个节点上重新执行该 task。反之，则根据 Lineage 图重新生成父 RDD，随后再执行任务即可。目前 Spark 还不能容忍 Scheduler 的故障，所以一旦 Scheduler 挂了，所有的工作也白费了。</p>
+<h4 id="内存管理">内存管理</h4>
+<p>Spark 为 RDD 持久化存储提供了三种方案：</p>
+<ol type="1">
+<li><strong>内存中的反序列化 Java 对象</strong>：这提供了最快的性能，因为 JVM 可以在本地访问每个 RDD 元素；</li>
+<li><strong>内存中的序列化数据</strong>：这允许用户在空间有限时选择比 Java 对象图更节省内存的表示，但会降低性能；</li>
+<li><strong>磁盘存储</strong>：这对于那些太大而无法保存在 RAM 中但每次使用时重新计算成本高昂的 RDD 很有用；</li>
+</ol>
+<p>当计算出一个新的 RDD 分区但没有足够的空间来存储它时，会使用 <strong>LRU</strong> 策略进行内存回收，以给新分区提供空间。除此之外，还可以通过设置每个 RDD 的持久性优先级提供进一步的控制。</p>
+<h4 id="检查点">检查点</h4>
+<p>前文提到 Lineage 可以有效进行故障恢复，但对于具有长 Lineage 链的 RDD 则容易耗费太多时间，无法体现较好性能。将一些 <strong>checkpoint</strong> 持久化到存储能很好的解决此问题。</p>
+<p>一般来说，检查点对于 WD 的长 Lineage 图很有用，因为集群中的节点故障可能会导致每个父 RDD 丢失一些数据片段，需要完全重新计算。而对于对 ND 的 RDD，checkpoint 则没那么必要，如果一个节点发生故障，这些 RDD 中丢失的分区可以在其他节点上并行重新计算，而成本只是复制整个 RDD 的一小部分。</p>
+<p>Spark 目前提供了一个用于检查点的 API，将决策权留给了用户，即 <strong>REPLICATE</strong> 标志。</p>
+<figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">rdd.persist(<span class="type">REPLICATE</span>)</span><br></pre></td></tr></table></figure>
+<p>RDD 的 read-only 性质使得它们比一般的共享内存更容易实现 checkpoint，因为一致性不是问题，RDD 可以在后台创建，而不需要程序暂停或分布式快照方案。</p>
+<h4 id="总结">总结</h4>
+<p>RDD 是一种分布式内存抽象，允许用户将中间结果保存在内存中以实现高效的数据重用，同时支持广泛的计算模式。</p>
+<p>RDD 利用了 Lineage 大大简化了节点失效后的数据恢复过程。</p>
+]]></content>
+      <categories>
+        <category>6.824</category>
+      </categories>
+      <tags>
+        <tag>paperReading</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Aurora</title>
+    <url>/6-824/aurora/</url>
+    <content><![CDATA[<p>6.824 的第六篇论文是 <strong>Aurora</strong>——一个高性能，高可靠的关系数据库服务。在处理事务的速度上，Aurora 宣称比其他数据库快 35 倍。同时，其完全抛弃了通用存储，转而构建了自己<strong>应用定制的存储</strong>。</p>
+<span id="more"></span>
+<h4 id="aurora-产生背景">Aurora 产生背景</h4>
+<h5 id="ec2elastic-cloud-2">EC2(Elastic Cloud 2)</h5>
+<p>这是 Amazon 最早的云产品。Amazon 有装满了服务器的数据中心，并且每个服务器上都会运行一个 VMM(<strong>Virtual Machine Monitor</strong>)，以及一些 EC2 实例。每个实例在运行一个标准的操作系统的同时，出租给不同的用户。每个 EC2 的操作系统之上运行着 Web 服务或数据库等应用程序。这种方式成本低，且相对容易配置，在早期是一个成功的服务模式。</p>
+<p>最早的时候，EC2 使用的都是服务器上的硬盘，每个 EC2 实例都会分到硬盘的一部分空间。</p>
+<p>对于无状态的 Web 应用，如果客户数量增加了，可以通过租用更多 EC2 实例来对 Web 服务扩容，尽管服务器崩溃了，只需要在另一台服务器上启动一个新的 EC2 实例就好了。而对于数据库而言，一旦服务器崩溃了，其本地硬盘将无法访问，运行在服务器上的数据库 EC2 实例也将失效——因为数据丢失了。</p>
+<p>Amazon 本身有实现块存储的服务，叫 S3。可以定期对数据库做快照，然后存到 S3 上，并基于快照来实现故障恢复。但也有可能失去两次快照之间的数据，</p>
+<h5 id="ebselastic-block-store">EBS(Elastic Block Store)</h5>
+<p>它表现得像个硬盘，具有容错性，且支持持久化存储的服务，其底层是一对互为副本的存储服务器。当用户要使用数据库 EC2 时，可以将一个 EBS 挂载为自己的硬盘。</p>
+<p>当数据库执行写操作时，数据会通过网络传输到 EBS 服务器，之后，那一对存储服务器会使用 <strong>Chain Replication</strong> 进行数据复制。</p>
+<blockquote>
+<p>第一个服务器处理写，第二个服务器处理读。</p>
+</blockquote>
+<p>虽然 EBS 的出现能够在一定程度上避免因服务器崩溃而导致的数据丢失，但却会产生大量的网络流量，并且容错性并没有得到很好的保障——两个存储服务器会放在同个数据中心（在 paper 中称为 <strong>AZ, Available Zone</strong>）中，也就意味着一旦数据中心崩溃了，那就没辙了。</p>
+<h5 id="rdsrelational-database-service">RDS(Relational Database Service)</h5>
+<p>RDS 尝试将数据进行跨 AZ 复制，这样就算整个 AZ 挂了，用户还可以从另一个 AZ 中获取数据。</p>
+<p>对于 RDS 而言，有且仅有一个 EC2 实例作为<strong>主数据库</strong>，这个数据库将其 data page 和 WAL log 存在 EBS，EC2 和 EBS 都在同一个 AZ <span class="math inline">\(AZ_1\)</span> 中。每次数据库执行写操作时，RDS 会自动将写操作拷贝到另一个 AZ <span class="math inline">\(AZ_2\)</span> 中的<strong>副数据库</strong> EC2 实例上，这个 EC2 的工作就是执行和主数据库相同的操作，写入成功后，会发一个 ack 给主数据库，主数据库看到了这个 ack 后才会认为真正意义上的写入成功。</p>
+<p>但实际上，这样还是会通过网络传输相当大量的数据。</p>
+<h4 id="aurora">Aurora</h4>
+<p>在 Aurora 的架构中，会有 <span class="math inline">\(V\)</span> 个数据副本代替 EBS 的位置，分别存放在 <span class="math inline">\(z\)</span> 个不同的 AZ 中。与此同时，Aurora 通过网络传输的是 <strong>log 条目</strong>而非 data page，这也大大提高了网络性能。当然，这也就导致了 Aurora 的存储系统不再是只能理解 data 的通用存储了，变成了<strong>能够理解 log 的应用定制存储系统</strong>。</p>
+<h5 id="复制与相关故障">复制与相关故障</h5>
+<p>Aurora 采用<strong>基于仲裁的投票协议</strong>来保证容错，即不需要所有副本都确认了读/写操作后才能继续执行。这个协议是这样的：</p>
+<ol type="1">
+<li>每次读操作都需要获得 <span class="math inline">\(V_r\)</span> 个确认；</li>
+<li>每次写操作都需要获得 <span class="math inline">\(V_w\)</span> 个确认；</li>
+<li><span class="math inline">\(V_r + V_w &gt; V\)</span>，保证每次读都能知道最近的写入；</li>
+<li><span class="math inline">\(V_w &gt; V/2\)</span>，保证每次写入必须知道最近的写入从而避免写入冲突；</li>
+</ol>
+<p>这样一来，Aurora 可以有更多的副本和 AZ，而不需要付出过大的性能代价——因为它无需等待所有副本，只需要等待最快的 <span class="math inline">\(V_r/V_w\)</span> 个副本就好了。这也容忍了少数副本的 crash 或是偶尔的慢响应。</p>
+<p>这里又会出现一个问题，客户端读请求可能会得到 <span class="math inline">\(V_r\)</span> 个不同的结果，却并不知道哪个结果是正确的。解决这一问题的方法就是设置<strong>版本号</strong>，每次写请求都会将新的数值与一个递增的版本号绑定，于是读请求便可以从所有结果中取版本号最高的那个结果。</p>
+<h5 id="容错目标">容错目标</h5>
+<p>在 Aurora 中，我们希望</p>
+<ul>
+<li>在整个 AZ 和一个额外的副本崩溃后而不丢失数据；</li>
+<li>整个 AZ 崩溃后不会影响写入数据；</li>
+</ul>
+<p>于是设置 <span class="math inline">\(V = 6,\ V_w = 4,\ V_r = 3,\ z = 3\)</span>，这样每个 AZ 存放 2 个副本。在这样的设置下，一个 AZ 和一个副本崩溃不会影响读性能，且任意两个副本崩溃后也能保持写入可用性。</p>
+<h5 id="数据分片sharding">数据分片(Sharding)</h5>
+<p>对于 Aurora 而言，每个副本都是一个计算机，其内存是有限的，且尽管我们有 6 个副本，我们并没有得到 6 倍大小的内存——每个副本上存放的数据都是一致的。对于数百 TB 甚至更多的数据，需要找一个明智的策略进行存储。</p>
+<p>这一策略是：将数据库的数据，分割到多组(<strong>PG, Protection Group</strong>)存储服务器上，每一个 PG 都包含若干存储服务器作为副本，存该 data page 10GB 的数据。</p>
+<blockquote>
+<p>这里的 PG 是个<strong>逻辑概念</strong>。</p>
+</blockquote>
+<p>Sharding 后，如果要进行 log 处理，则会查看 log 所修改的数据，并找到存储该数据的 PG，并将 log 只发送给该 PG 的副本。这也就意味着，每个 PG 只存储部分 data page 和所有与这些 data page 相关的 log 条目。</p>
+<p>如果某个副本挂了，希望能尽快生成新的副本。事实上，尽管每个 PG 存了某个数据库的 10GB 数据，但一个副本所拥有的存储容量可能高达 10TB，也就是说该副本可能存了成百上千个 PG 的“10GB”，一旦该副本挂了，会牵连到与之相关的所有数据库。一个简单的策略是找到另一台存储服务器，通过拷贝的形式将该副本的所有数据都通过网络传输到新的副本中，但对于 10Gb/s 的网络来说，需要的时间还是太久了。</p>
+<p>Aurora 是这么做的：若某个副本保存了 <span class="math inline">\(PG_1,\ PG_2,\ \dots,\ PG_n\)</span> 的数据，则将这 <span class="math inline">\(n\)</span> 个 PG 的数据并行传输到 <span class="math inline">\(n\)</span> 个新的存储服务器上。也就是说这 <span class="math inline">\(n\)</span> 个存储服务器，每个都会加入到一个新的 PG 中。比起上面的策略，我们获得了 <span class="math inline">\(n\)</span> 倍的性能提升。</p>
+]]></content>
+      <categories>
+        <category>6.824</category>
+      </categories>
+      <tags>
+        <tag>paperReading</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使序列递增的最小操作次数</title>
+    <url>/LeetCode/leetcode801/</url>
+    <content><![CDATA[<p>链接 <a href="https://leetcode.cn/problems/minimum-swaps-to-make-sequences-increasing/submissions/">&gt;&gt;&gt; 2022.10.10 每日一题 LeetCode801(hard) &lt;&lt;&lt;</a></p>
+<span id="more"></span>
+<blockquote>
+<p>我们有两个长度相等且不为空的整型数组 <code>nums1</code> 和 <code>nums2</code>。在一次操作中，我们可以交换 <code>nums1[i]</code> 和 <code>nums2[i]</code> 的元素。</p>
+<p>例如，如果 <code>nums1 = [1,2,3,8], nums2 =[5,6,7,4]</code> ，你可以交换 <code>i = 3</code> 处的元素，得到 <code>nums1 =[1,2,3,4]</code> 和 <code>nums2 =[5,6,7,8]</code> 。 返回 使 <code>nums1</code> 和 <code>nums2</code> <strong>严格递增</strong> 所需操作的最小次数 。</p>
+<p>数组 <code>arr</code> <strong>严格递增</strong> 是指 <code>arr[0] &lt; arr[1] &lt; arr[2] &lt; ... &lt; arr[arr.length - 1]</code></p>
+<p><strong>注意</strong>：用例保证可以实现操作。</p>
+</blockquote>
+<h5 id="最初的想法">最初的想法</h5>
+<p>首先，对于任意 <code>i</code>，我们有两种选择，交换 or 不交换。那么最开始，我们可以考虑定义一个数组 <code>dp[n]</code>，其中 <code>dp[i]</code> 表示前 <code>i+1</code> 个元素的子数组中<strong>使序列递增的最小操作次数</strong>。那么可以得到以下状态转移方程：</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> num1[i] &lt;= nums1[i<span class="number">-1</span>] || nums2[i] &lt;= nums2[i<span class="number">-1</span>] &#123;</span><br><span class="line">    dp[i] = dp[i<span class="number">-1</span>] + <span class="number">1</span></span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    dp[i] = dp[i<span class="number">-1</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>但这种考虑存在一个漏洞：我们的考虑范围局限在了相邻两个元素之间的关系，却没有考虑到之前的元素。</p>
+<p>比如当 <code>nums1 = [0,2,2], nums2 = [1,1,3]</code> 时，我们只需交换 <code>i = 1</code> 处的元素。而在上面的状态转移过程中，我们却得到了 <code>dp = [0, 1, 2]</code>——这显然不是我们想要的。而这一结果的成因在于，忽略了之前是否有交换。</p>
+<h5 id="改进">改进</h5>
+<p>于是需要将 <code>dp[n]</code> 扩展到二维数组 <code>dp[n][2]</code>，<code>dp[i][0]</code> 表示对 <code>i</code> 处<strong>不进行交换</strong>时，前 <code>i+1</code> 个元素的子数组中使序列递增的最小操作次数；<code>dp[i][1]</code> 表示<strong>进行交换</strong>时的最小操作次数。这样一来，我们就能够对之前的交换情况进行考虑了。</p>
+<p>既然题目保证最终能够实现操作，那么对任意 <code>i &gt; 1</code>，必然存在以下情况：</p>
+<ol type="1">
+<li><p><code>nums1[i] &lt;= num1[i-1] || nums2[i] &lt;= nums2[i-1]</code></p>
+<p>这种情况下，<code>i</code> 处的交换情况必须与 <code>i-1</code> 处的交换情况相反，如果 <code>i-1</code> 换了，则 <code>i</code> 处无需交换；反之同理。有： <span class="math display">\[
+ \begin{align}
+ dp[i][0] &amp;= dp[i-1][1] \\[2ex] dp[i][1] &amp;= dp[i-1][0] + 1
+ \end{align}
+ \]</span></p></li>
+<li><p><code>(nums1[i] &gt; num1[i-1] &amp;&amp; nums2[i] &gt; nums2[i-1]) &amp;&amp; (nums1[i] &lt;= nums2[i-1] || nums2[i] &lt;= nums1[i-1])</code></p>
+<p>这种情况下，<code>i</code> 处的交换情况必须与 <code>i-1</code> 处的交换情况保持一致，也就是要么都交换，要么都不交换，则有： <span class="math display">\[
+ \begin{align}
+ dp[i][0] &amp;= dp[i-1][0] \\[2ex] dp[i][1] &amp;= dp[i-1][1] + 1
+ \end{align}
+ \]</span></p></li>
+<li><p><code>(nums1[i] &gt; num1[i-1] &amp;&amp; nums2[i] &gt; nums2[i-1]) &amp;&amp; (nums1[i] &gt; nums2[i-1] &amp;&amp; nums2[i] &gt; nums1[i-1])</code></p>
+<p>这种情况下，<code>i</code> 处交不交换都无所谓，既然我们要最小操作，则有： <span class="math display">\[
+ \begin{align}
+ dp[i][0] &amp;= \min(dp[i-1][0], dp[i-1][1])\\[2ex] dp[i][1] &amp;= dp[i][0] + 1
+ \end{align}
+ \]</span></p></li>
+</ol>
+<p>于是代码就很清晰了</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">min</span><span class="params">(a, b <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> a &lt; b &#123;</span><br><span class="line">        <span class="keyword">return</span> a</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> b</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">minSwap</span><span class="params">(nums1 []<span class="type">int</span>, nums2 []<span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    n := <span class="built_in">len</span>(nums1)</span><br><span class="line">    dp := <span class="built_in">make</span>([][]<span class="type">int</span>, n)</span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; n; i++ &#123;</span><br><span class="line">        dp[i] = <span class="built_in">make</span>([]<span class="type">int</span>, <span class="number">2</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    dp[<span class="number">0</span>][<span class="number">0</span>] = <span class="number">0</span></span><br><span class="line">    dp[<span class="number">0</span>][<span class="number">1</span>] = <span class="number">1</span></span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">1</span>; i &lt; n; i++ &#123;</span><br><span class="line">        <span class="keyword">if</span> nums1[i] &lt;= nums1[i<span class="number">-1</span>] || nums2[i] &lt;= nums2[i<span class="number">-1</span>] &#123;</span><br><span class="line">            dp[i][<span class="number">0</span>] = dp[i<span class="number">-1</span>][<span class="number">1</span>]</span><br><span class="line">            dp[i][<span class="number">1</span>] = dp[i<span class="number">-1</span>][<span class="number">0</span>] + <span class="number">1</span></span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> nums1[i] &lt;= nums2[i<span class="number">-1</span>] || nums2[i] &lt;= nums1[i<span class="number">-1</span>] &#123;</span><br><span class="line">            dp[i][<span class="number">0</span>] = dp[i<span class="number">-1</span>][<span class="number">0</span>]</span><br><span class="line">            dp[i][<span class="number">1</span>] = dp[i<span class="number">-1</span>][<span class="number">1</span>] + <span class="number">1</span></span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            dp[i][<span class="number">0</span>] = min(dp[i<span class="number">-1</span>][<span class="number">0</span>], dp[i<span class="number">-1</span>][<span class="number">1</span>])</span><br><span class="line">            dp[i][<span class="number">1</span>] = dp[i][<span class="number">0</span>] + <span class="number">1</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> min(dp[n<span class="number">-1</span>][<span class="number">0</span>], dp[n<span class="number">-1</span>][<span class="number">1</span>])</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>一看提交结果，看来还得优化。</p>
+<blockquote>
+<p>执行用时：144 ms, 在所有 Go 提交中击败了 18.18% 的用户</p>
+<p>内存消耗：19.7 MB, 在所有 Go 提交中击败了 9.09% 的用户</p>
+</blockquote>
+<h5 id="优化">优化</h5>
+<p>注意到，每个 <code>dp[i]</code> 的状态只与 <code>dp[i-1]</code> 有关，之前的信息就被淘汰了，于是可以采用<strong>滚动数组</strong>的技巧优化空间。</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">min</span><span class="params">(a, b <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> a &lt; b &#123;</span><br><span class="line">        <span class="keyword">return</span> a</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> b</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">minSwap</span><span class="params">(nums1 []<span class="type">int</span>, nums2 []<span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    n := <span class="built_in">len</span>(nums1)</span><br><span class="line">    a, b := <span class="number">0</span>, <span class="number">1</span></span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">1</span>; i &lt; n; i++ &#123;</span><br><span class="line">        <span class="keyword">if</span> nums1[i] &lt;= nums1[i<span class="number">-1</span>] || nums2[i] &lt;= nums2[i<span class="number">-1</span>] &#123;</span><br><span class="line">            a, b = b, a + <span class="number">1</span></span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> nums1[i] &lt;= nums2[i<span class="number">-1</span>] || nums2[i] &lt;= nums1[i<span class="number">-1</span>] &#123;</span><br><span class="line">            b++</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            a = min(a, b)</span><br><span class="line">            b = a + <span class="number">1</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> min(a, b)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>优化后，比较满意了。</p>
+<blockquote>
+<p>执行用时：120 ms, 在所有 Go 提交中击败了68.18%的用户</p>
+<p>内存消耗：9.6 MB, 在所有 Go 提交中击败了90.91%的用户</p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>LeetCode</category>
+      </categories>
+      <tags>
+        <tag>每日一题</tag>
       </tags>
   </entry>
   <entry>
@@ -1817,77 +1817,6 @@ S\Lambda
       </tags>
   </entry>
   <entry>
-    <title>weekCompetition313</title>
-    <url>/LeetCode/weekCompetition313/</url>
-    <content><![CDATA[<p><a href="https://leetcode.cn/contest/weekly-contest-313/">第 313 场周赛</a>复盘。</p>
-<p><strong>排名</strong> 106 / 5445</p>
-<span id="more"></span>
-<h4 id="公因子的数目">1. <a href="https://leetcode.cn/problems/number-of-common-factors/">公因子的数目</a></h4>
-<blockquote>
-<p>给你两个正整数 a 和 b ，返回 a 和 b 的 <strong>公</strong> 因子的数目。</p>
-<p>如果 x 可以同时整除 a 和 b ，则认为 x 是 a 和 b 的一个 <strong>公因子</strong> 。</p>
-</blockquote>
-<h5 id="思路">思路</h5>
-<p>从 1 到 gcd(a, b) 遍历即可。</p>
-<h5 id="code">code</h5>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">gcd</span><span class="params">(a, b <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;	<span class="comment">// assert a &lt; b</span></span><br><span class="line">    <span class="keyword">if</span> a &gt; b &#123;</span><br><span class="line">        <span class="keyword">return</span> gcd(b, a)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> b % a == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> a</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> gcd(b % a, a)</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">commonFactors</span><span class="params">(a <span class="type">int</span>, b <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    cnt := <span class="number">0</span>    </span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">1</span>; i &lt;= gcd(a, b); i++ &#123;</span><br><span class="line">        <span class="keyword">if</span> a % i == <span class="number">0</span> &amp;&amp; b % i == <span class="number">0</span> &#123;</span><br><span class="line">            cnt++</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> cnt</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="沙漏的最大总和">2. <a href="https://leetcode.cn/problems/maximum-sum-of-an-hourglass/">沙漏的最大总和</a></h4>
-<blockquote>
-<p>给你一个大小为 <strong>m x n</strong> 的整数矩阵 <code>grid</code> 。</p>
-<p>按以下形式将矩阵的一部分定义为一个 <strong>沙漏</strong> ：</p>
-<p><img src="image-20221017190111674.png" alt="image-20221017190111674" style="zoom:50%;" /></p>
-<p>返回沙漏中元素的 <strong>最大</strong> 总和。</p>
-<p><strong>注意</strong>：沙漏无法旋转且必须整个包含在矩阵中。</p>
-</blockquote>
-<h5 id="思路-1">思路</h5>
-<p>由于沙漏占据了 3×3 的矩阵空间，最不用思考的做法就是遍历沙漏的左上角即可。</p>
-<h5 id="code-1">code</h5>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">maxSum</span><span class="params">(g [][]<span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    res := <span class="number">0</span>    </span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt;= <span class="built_in">len</span>(g)<span class="number">-3</span>; i++ &#123;</span><br><span class="line">        <span class="keyword">for</span> j := <span class="number">0</span>; j &lt;= <span class="built_in">len</span>(g[i])<span class="number">-3</span>; j++ &#123;</span><br><span class="line">            sum := <span class="number">0</span></span><br><span class="line">            sum += g[i][j] + g[i][j+<span class="number">1</span>] + g[i][j+<span class="number">2</span>] + g[i+<span class="number">1</span>][j+<span class="number">1</span>] + g[i+<span class="number">2</span>][j] + g[i+<span class="number">2</span>][j+<span class="number">1</span>] + g[i+<span class="number">2</span>][j+<span class="number">2</span>]</span><br><span class="line">            <span class="keyword">if</span> sum &gt; res &#123;</span><br><span class="line">                res = sum</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="最小-xor">3. <a href="https://leetcode.cn/problems/minimize-xor/">最小 XOR</a></h4>
-<blockquote>
-<p>给你两个正整数 num1 和 num2 ，找出满足下述条件的整数 x ：</p>
-<ul>
-<li>x 的置位数和 num2 相同，且</li>
-<li>x XOR num1 的值 <strong>最小</strong></li>
-</ul>
-<p>注意 XOR 是按位异或运算。</p>
-<p>返回整数 x 。题目保证，对于生成的测试用例， x 是 <strong>唯一确定</strong> 的。</p>
-<p>整数的 <strong>置位数</strong> 是其二进制表示中 1 的数目。</p>
-</blockquote>
-<h5 id="思路-2">思路</h5>
-<p>若要使两个数按位异或所得结果最小，它们二进制中 1 的位置应尽可能一致，所以找题目中的 <span class="math inline">\(x\)</span> 实际上就是<strong>安排其二进制中 ‘1’ 的位置</strong>。令 <span class="math inline">\(k(num1)\)</span> 表示 <span class="math inline">\(num1\)</span> 的置位数。则对于给定的 <span class="math inline">\(num1\)</span> 与 <span class="math inline">\(k(x) = k(num2)\)</span> ，只有以下三种情况：</p>
-<ol type="1">
-<li><p><span class="math inline">\(k(num1) = k(num2)\)</span>：则 <span class="math inline">\(x=num1\)</span> 时 <span class="math inline">\(x\ XOR\ num1\)</span> 最小</p></li>
-<li><p><span class="math inline">\(k(num1) &lt; k(num2)\)</span>：<span class="math inline">\(k(num1)\)</span> 个 ‘1’ 与 <span class="math inline">\(num1\)</span> 中的 ‘1’ 相互抵消后，还剩下 <span class="math inline">\(k(num2) - k(num1)\)</span> 个 ‘1’ 未安排位置，这部分应尽量“靠左”，并且不与 <span class="math inline">\(num1\)</span> 中 ‘1’ 的位置冲突。</p>
-<p>例如，当 <span class="math inline">\(num1=10, k(num2)=3\)</span> 时，<span class="math inline">\(num1=(1010)_2\)</span>。首先能够得到 <span class="math inline">\(x=(1\_1\_)_2\)</span>，最后一个 ‘1’ 的位置显然易见，应该放在最右边，故得到 <span class="math inline">\(x = (1011)_2\)</span></p></li>
-<li><p><span class="math inline">\(k(num1) &gt; k(num2)\)</span>：<span class="math inline">\(x\)</span> 的值即保留 <span class="math inline">\(num1\)</span> 右侧 <span class="math inline">\(k(num2)\)</span> 个 ‘1’ 的结果。</p></li>
-</ol>
-<h5 id="code-2">code</h5>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">k</span><span class="params">(num <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    res := <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> num &gt; <span class="number">0</span> &#123;</span><br><span class="line">        res += num &amp; <span class="number">1</span></span><br><span class="line">        num &gt;&gt;= <span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">minimizeXor</span><span class="params">(num1 <span class="type">int</span>, num2 <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    cnt1, cnt2, x := k(num1), k(num2), num1</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> cnt1 &gt; cnt2 &#123;</span><br><span class="line">        p := <span class="number">1</span></span><br><span class="line">        cnt1 -= cnt2    <span class="comment">// x 为 num1 去掉低 cnt1-cnt2 位 1</span></span><br><span class="line">        <span class="keyword">for</span> cnt1 &gt; <span class="number">0</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> x &amp; p &gt; <span class="number">0</span> &#123;</span><br><span class="line">                x -= p</span><br><span class="line">                cnt1--</span><br><span class="line">            &#125;</span><br><span class="line">            p &lt;&lt;= <span class="number">1</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> cnt1 &lt; cnt2 &#123;</span><br><span class="line">        p := <span class="number">1</span></span><br><span class="line">        cnt2 -= cnt1	<span class="comment">// x 为 num1 再加上 cnt2-cnt1 位 1</span></span><br><span class="line">        <span class="keyword">for</span> cnt2 &gt; <span class="number">0</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> x &amp; p == <span class="number">0</span> &#123;</span><br><span class="line">                x += p</span><br><span class="line">                cnt2--</span><br><span class="line">            &#125;</span><br><span class="line">            p &lt;&lt;= <span class="number">1</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> temp</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="对字母串可执行的最大删除数">4. <a href="https://leetcode.cn/problems/maximum-deletions-on-a-string/">对字母串可执行的最大删除数</a></h4>
-<blockquote>
-<p>给你一个仅由小写英文字母组成的字符串 s 。在一步操作中，你可以：</p>
-<ul>
-<li>删除 <strong>整个字符串</strong> s ，或者</li>
-<li>对于满足 1 &lt;= i &lt;= s.length / 2 的任意 i ，如果 s 中的 <strong>前</strong> i 个字母和接下来的 i 个字母 <strong>相等</strong> ，删除 <strong>前</strong> i 个字母。</li>
-</ul>
-<p>例如，如果 s = "ababc" ，那么在一步操作中，你可以删除 s 的前两个字母得到 "abc" ，因为 s 的前两个字母和接下来的两个字母都等于 "ab" 。</p>
-<p>返回删除 s 所需的最大操作数。</p>
-</blockquote>
-<h5 id="思路-3">思路</h5>
-<p>考虑操作 2，删除前 i 个字母后还剩下长为 len(s)-i 的新字符串，我们要接着对新字符串执行同样的删除操作。这就是一个递归步骤，并且我们的递归是二叉树状的——每个 i 都需要考虑删 or 不删。</p>
-<p>那么很容易想到用动态规划。定义 <code>dp[i]</code> 为删除 <code>s[i-1:]</code> 所需最大操作数，那么对于任意 <code>1 ≤ i &lt; j ≤ len(s)-1</code>，如果 <code>s[i:j] == s[j:2*j-i]</code>，则 <code>dp[i] = max(dp[i], dp[j] + 1)</code></p>
-<h5 id="code-3">code</h5>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">deleteString</span><span class="params">(s <span class="type">string</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    n := <span class="built_in">len</span>(s)</span><br><span class="line">    dp := <span class="built_in">make</span>([]<span class="type">int</span>, n)  <span class="comment">// dp[i]: s[i:] 所需最大删除数</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i := n<span class="number">-1</span>; i &gt;= <span class="number">0</span>; i-- &#123;</span><br><span class="line">        dp[i] = <span class="number">1</span></span><br><span class="line">        l := n-i</span><br><span class="line">        <span class="keyword">for</span> j := i+<span class="number">1</span>; j &lt;= i+l/<span class="number">2</span>; j++ &#123;</span><br><span class="line">            <span class="keyword">if</span> temp[i:j] == temp[j:<span class="number">2</span>*j-i] &amp;&amp; dp[i] &lt; dp[j] + <span class="number">1</span> &#123;</span><br><span class="line">                dp[i] = dp[j] + <span class="number">1</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> dp[<span class="number">0</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>LeetCode</category>
-      </categories>
-      <tags>
-        <tag>周赛</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>weekCompetition314</title>
     <url>/LeetCode/weekCompetition314/</url>
     <content><![CDATA[<p><a href="https://leetcode.cn/contest/weekly-contest-314/">第 314 场周赛</a>复盘。</p>
@@ -1951,6 +1880,77 @@ S\Lambda
 <p>那么有如下状态转移方程：<code>dp[i][j][v] = dp[i-1][j][(v - grid[i][j]) % k] + dp[i][j-1][(v - grid[i][j]) % k]</code></p>
 <h5 id="code-3">code</h5>
 <figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">numberOfPaths</span><span class="params">(grid [][]<span class="type">int</span>, k <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    mod := <span class="number">1000000007</span></span><br><span class="line">    m, n := <span class="built_in">len</span>(grid), <span class="built_in">len</span>(grid[<span class="number">0</span>])</span><br><span class="line">    dp := <span class="built_in">make</span>([][][]<span class="type">int</span>, m)</span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; m; i++ &#123;</span><br><span class="line">        dp[i] = <span class="built_in">make</span>([][]<span class="type">int</span>, n)</span><br><span class="line">        <span class="keyword">for</span> j := <span class="number">0</span>; j &lt; n; j++ &#123;</span><br><span class="line">            dp[i][j] = <span class="built_in">make</span>([]<span class="type">int</span>, k)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    dp[<span class="number">0</span>][<span class="number">0</span>][grid[<span class="number">0</span>][<span class="number">0</span>] % k] = <span class="number">1</span></span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; m; i++ &#123;</span><br><span class="line">        <span class="keyword">for</span> j := <span class="number">0</span>; j &lt; n; j++ &#123;</span><br><span class="line">            <span class="keyword">for</span> v := <span class="number">0</span>; v &lt; k; v++ &#123;</span><br><span class="line">                <span class="keyword">if</span> i &gt; <span class="number">0</span> &#123;</span><br><span class="line">                    dp[i][j][v] += dp[i<span class="number">-1</span>][j][(v - grid[i][j] + <span class="number">100</span>*k) % k]</span><br><span class="line">                    dp[i][j][v] %= mod</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span> j &gt; <span class="number">0</span> &#123;</span><br><span class="line">                    dp[i][j][v] += dp[i][j<span class="number">-1</span>][(v - grid[i][j] + <span class="number">100</span>*k) % k]</span><br><span class="line">                    dp[i][j][v] %= mod</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> dp[m<span class="number">-1</span>][n<span class="number">-1</span>][<span class="number">0</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>LeetCode</category>
+      </categories>
+      <tags>
+        <tag>周赛</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>weekCompetition313</title>
+    <url>/LeetCode/weekCompetition313/</url>
+    <content><![CDATA[<p><a href="https://leetcode.cn/contest/weekly-contest-313/">第 313 场周赛</a>复盘。</p>
+<p><strong>排名</strong> 106 / 5445</p>
+<span id="more"></span>
+<h4 id="公因子的数目">1. <a href="https://leetcode.cn/problems/number-of-common-factors/">公因子的数目</a></h4>
+<blockquote>
+<p>给你两个正整数 a 和 b ，返回 a 和 b 的 <strong>公</strong> 因子的数目。</p>
+<p>如果 x 可以同时整除 a 和 b ，则认为 x 是 a 和 b 的一个 <strong>公因子</strong> 。</p>
+</blockquote>
+<h5 id="思路">思路</h5>
+<p>从 1 到 gcd(a, b) 遍历即可。</p>
+<h5 id="code">code</h5>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">gcd</span><span class="params">(a, b <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;	<span class="comment">// assert a &lt; b</span></span><br><span class="line">    <span class="keyword">if</span> a &gt; b &#123;</span><br><span class="line">        <span class="keyword">return</span> gcd(b, a)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> b % a == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> a</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> gcd(b % a, a)</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">commonFactors</span><span class="params">(a <span class="type">int</span>, b <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    cnt := <span class="number">0</span>    </span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">1</span>; i &lt;= gcd(a, b); i++ &#123;</span><br><span class="line">        <span class="keyword">if</span> a % i == <span class="number">0</span> &amp;&amp; b % i == <span class="number">0</span> &#123;</span><br><span class="line">            cnt++</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> cnt</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="沙漏的最大总和">2. <a href="https://leetcode.cn/problems/maximum-sum-of-an-hourglass/">沙漏的最大总和</a></h4>
+<blockquote>
+<p>给你一个大小为 <strong>m x n</strong> 的整数矩阵 <code>grid</code> 。</p>
+<p>按以下形式将矩阵的一部分定义为一个 <strong>沙漏</strong> ：</p>
+<p><img src="image-20221017190111674.png" alt="image-20221017190111674" style="zoom:50%;" /></p>
+<p>返回沙漏中元素的 <strong>最大</strong> 总和。</p>
+<p><strong>注意</strong>：沙漏无法旋转且必须整个包含在矩阵中。</p>
+</blockquote>
+<h5 id="思路-1">思路</h5>
+<p>由于沙漏占据了 3×3 的矩阵空间，最不用思考的做法就是遍历沙漏的左上角即可。</p>
+<h5 id="code-1">code</h5>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">maxSum</span><span class="params">(g [][]<span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    res := <span class="number">0</span>    </span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt;= <span class="built_in">len</span>(g)<span class="number">-3</span>; i++ &#123;</span><br><span class="line">        <span class="keyword">for</span> j := <span class="number">0</span>; j &lt;= <span class="built_in">len</span>(g[i])<span class="number">-3</span>; j++ &#123;</span><br><span class="line">            sum := <span class="number">0</span></span><br><span class="line">            sum += g[i][j] + g[i][j+<span class="number">1</span>] + g[i][j+<span class="number">2</span>] + g[i+<span class="number">1</span>][j+<span class="number">1</span>] + g[i+<span class="number">2</span>][j] + g[i+<span class="number">2</span>][j+<span class="number">1</span>] + g[i+<span class="number">2</span>][j+<span class="number">2</span>]</span><br><span class="line">            <span class="keyword">if</span> sum &gt; res &#123;</span><br><span class="line">                res = sum</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="最小-xor">3. <a href="https://leetcode.cn/problems/minimize-xor/">最小 XOR</a></h4>
+<blockquote>
+<p>给你两个正整数 num1 和 num2 ，找出满足下述条件的整数 x ：</p>
+<ul>
+<li>x 的置位数和 num2 相同，且</li>
+<li>x XOR num1 的值 <strong>最小</strong></li>
+</ul>
+<p>注意 XOR 是按位异或运算。</p>
+<p>返回整数 x 。题目保证，对于生成的测试用例， x 是 <strong>唯一确定</strong> 的。</p>
+<p>整数的 <strong>置位数</strong> 是其二进制表示中 1 的数目。</p>
+</blockquote>
+<h5 id="思路-2">思路</h5>
+<p>若要使两个数按位异或所得结果最小，它们二进制中 1 的位置应尽可能一致，所以找题目中的 <span class="math inline">\(x\)</span> 实际上就是<strong>安排其二进制中 ‘1’ 的位置</strong>。令 <span class="math inline">\(k(num1)\)</span> 表示 <span class="math inline">\(num1\)</span> 的置位数。则对于给定的 <span class="math inline">\(num1\)</span> 与 <span class="math inline">\(k(x) = k(num2)\)</span> ，只有以下三种情况：</p>
+<ol type="1">
+<li><p><span class="math inline">\(k(num1) = k(num2)\)</span>：则 <span class="math inline">\(x=num1\)</span> 时 <span class="math inline">\(x\ XOR\ num1\)</span> 最小</p></li>
+<li><p><span class="math inline">\(k(num1) &lt; k(num2)\)</span>：<span class="math inline">\(k(num1)\)</span> 个 ‘1’ 与 <span class="math inline">\(num1\)</span> 中的 ‘1’ 相互抵消后，还剩下 <span class="math inline">\(k(num2) - k(num1)\)</span> 个 ‘1’ 未安排位置，这部分应尽量“靠左”，并且不与 <span class="math inline">\(num1\)</span> 中 ‘1’ 的位置冲突。</p>
+<p>例如，当 <span class="math inline">\(num1=10, k(num2)=3\)</span> 时，<span class="math inline">\(num1=(1010)_2\)</span>。首先能够得到 <span class="math inline">\(x=(1\_1\_)_2\)</span>，最后一个 ‘1’ 的位置显然易见，应该放在最右边，故得到 <span class="math inline">\(x = (1011)_2\)</span></p></li>
+<li><p><span class="math inline">\(k(num1) &gt; k(num2)\)</span>：<span class="math inline">\(x\)</span> 的值即保留 <span class="math inline">\(num1\)</span> 右侧 <span class="math inline">\(k(num2)\)</span> 个 ‘1’ 的结果。</p></li>
+</ol>
+<h5 id="code-2">code</h5>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">k</span><span class="params">(num <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    res := <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> num &gt; <span class="number">0</span> &#123;</span><br><span class="line">        res += num &amp; <span class="number">1</span></span><br><span class="line">        num &gt;&gt;= <span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">minimizeXor</span><span class="params">(num1 <span class="type">int</span>, num2 <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    cnt1, cnt2, x := k(num1), k(num2), num1</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> cnt1 &gt; cnt2 &#123;</span><br><span class="line">        p := <span class="number">1</span></span><br><span class="line">        cnt1 -= cnt2    <span class="comment">// x 为 num1 去掉低 cnt1-cnt2 位 1</span></span><br><span class="line">        <span class="keyword">for</span> cnt1 &gt; <span class="number">0</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> x &amp; p &gt; <span class="number">0</span> &#123;</span><br><span class="line">                x -= p</span><br><span class="line">                cnt1--</span><br><span class="line">            &#125;</span><br><span class="line">            p &lt;&lt;= <span class="number">1</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> cnt1 &lt; cnt2 &#123;</span><br><span class="line">        p := <span class="number">1</span></span><br><span class="line">        cnt2 -= cnt1	<span class="comment">// x 为 num1 再加上 cnt2-cnt1 位 1</span></span><br><span class="line">        <span class="keyword">for</span> cnt2 &gt; <span class="number">0</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> x &amp; p == <span class="number">0</span> &#123;</span><br><span class="line">                x += p</span><br><span class="line">                cnt2--</span><br><span class="line">            &#125;</span><br><span class="line">            p &lt;&lt;= <span class="number">1</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> temp</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="对字母串可执行的最大删除数">4. <a href="https://leetcode.cn/problems/maximum-deletions-on-a-string/">对字母串可执行的最大删除数</a></h4>
+<blockquote>
+<p>给你一个仅由小写英文字母组成的字符串 s 。在一步操作中，你可以：</p>
+<ul>
+<li>删除 <strong>整个字符串</strong> s ，或者</li>
+<li>对于满足 1 &lt;= i &lt;= s.length / 2 的任意 i ，如果 s 中的 <strong>前</strong> i 个字母和接下来的 i 个字母 <strong>相等</strong> ，删除 <strong>前</strong> i 个字母。</li>
+</ul>
+<p>例如，如果 s = "ababc" ，那么在一步操作中，你可以删除 s 的前两个字母得到 "abc" ，因为 s 的前两个字母和接下来的两个字母都等于 "ab" 。</p>
+<p>返回删除 s 所需的最大操作数。</p>
+</blockquote>
+<h5 id="思路-3">思路</h5>
+<p>考虑操作 2，删除前 i 个字母后还剩下长为 len(s)-i 的新字符串，我们要接着对新字符串执行同样的删除操作。这就是一个递归步骤，并且我们的递归是二叉树状的——每个 i 都需要考虑删 or 不删。</p>
+<p>那么很容易想到用动态规划。定义 <code>dp[i]</code> 为删除 <code>s[i-1:]</code> 所需最大操作数，那么对于任意 <code>1 ≤ i &lt; j ≤ len(s)-1</code>，如果 <code>s[i:j] == s[j:2*j-i]</code>，则 <code>dp[i] = max(dp[i], dp[j] + 1)</code></p>
+<h5 id="code-3">code</h5>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">deleteString</span><span class="params">(s <span class="type">string</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    n := <span class="built_in">len</span>(s)</span><br><span class="line">    dp := <span class="built_in">make</span>([]<span class="type">int</span>, n)  <span class="comment">// dp[i]: s[i:] 所需最大删除数</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i := n<span class="number">-1</span>; i &gt;= <span class="number">0</span>; i-- &#123;</span><br><span class="line">        dp[i] = <span class="number">1</span></span><br><span class="line">        l := n-i</span><br><span class="line">        <span class="keyword">for</span> j := i+<span class="number">1</span>; j &lt;= i+l/<span class="number">2</span>; j++ &#123;</span><br><span class="line">            <span class="keyword">if</span> temp[i:j] == temp[j:<span class="number">2</span>*j-i] &amp;&amp; dp[i] &lt; dp[j] + <span class="number">1</span> &#123;</span><br><span class="line">                dp[i] = dp[j] + <span class="number">1</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> dp[<span class="number">0</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>LeetCode</category>
@@ -2101,7 +2101,7 @@ S\Lambda
       </tags>
   </entry>
   <entry>
-    <title>weekCopopularetition317</title>
+    <title>weekCompetition317</title>
     <url>/LeetCode/weekCompetition317/</url>
     <content><![CDATA[<p><a href="https://leetcode.cn/contest/weekly-contest-317/">第317场周赛</a>复盘。</p>
 <p><strong>排名</strong> 690 / 5660</p>
