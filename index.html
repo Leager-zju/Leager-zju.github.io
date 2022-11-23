@@ -189,7 +189,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/6-824/raft3/">
+    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/6-824/6.824lab4/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/Avatar.jpg">
@@ -203,7 +203,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/6-824/raft3/" class="post-title-link" itemprop="url">6.824 Lab4 Sharded Key/Value Service</a>
+            <a href="/6-824/6.824lab4/" class="post-title-link" itemprop="url">6.824 Lab4 Sharded Key/Value Service</a>
         </h2>
 
         <div class="post-meta">
@@ -247,7 +247,7 @@
 <p>参考 <a target="_blank" rel="noopener" href="https://leager-zju.github.io/6-824/aurora/">Aurora</a> 的做法，不妨将数据划分为多个片段，每个副本组负责<strong>分片</strong>(Shard)的一个子集。组内机器使用 Raft 来复制分片。此外还有一个<strong>分片控制器</strong>(Shardctrler)，决定哪个副本组应该为每个分片服务，此信息称为<strong>配置</strong>(Config)。本实验就是实现这样一个 multi-raft 的 kv 存储系统。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/6-824/raft3/#more" rel="contents">
+              <a class="btn" href="/6-824/6.824lab4/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
