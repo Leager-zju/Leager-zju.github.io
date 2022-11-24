@@ -27,7 +27,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://leager-zju.github.com/math/linear-algebra(1)/image-20220929160748771.png">
 <meta property="article:published_time" content="2022-09-29T06:21:50.000Z">
-<meta property="article:modified_time" content="2022-09-29T13:56:32.306Z">
+<meta property="article:modified_time" content="2022-11-24T06:56:38.955Z">
 <meta property="article:author" content="Leager">
 <meta property="article:tag" content="MIT18.06">
 <meta name="twitter:card" content="summary">
@@ -137,7 +137,7 @@
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">24</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">25</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -217,10 +217,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2022-09-29 14:21:50 / 修改时间：21:56:32" itemprop="dateCreated datePublished" datetime="2022-09-29T14:21:50+08:00">2022-09-29</time>
+              <time title="创建时间：2022-09-29 14:21:50" itemprop="dateCreated datePublished" datetime="2022-09-29T14:21:50+08:00">2022-09-29</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-11-24 14:56:38" itemprop="dateModified" datetime="2022-11-24T14:56:38+08:00">2022-11-24</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -252,7 +258,7 @@
         <p>如果本科线代能有这样的教育方式和路线，我何苦现在还要来听这门公开课(</p>
 <p>记录一下听的过程中觉得有用的信息好了。</p>
 <span id="more"></span>
-<h4 id="从线性方程组开始">从线性方程组开始</h4>
+<h3 id="从线性方程组开始">从线性方程组开始</h3>
 <p>教授（下简称 GS）认为线性代数的基本用途是解<strong>线性方程组</strong>，比如有这样一个方程组： <span class="math display">\[
 \begin{cases}
 2x-y = 0
@@ -271,29 +277,29 @@
 <p>我们构造一个系数矩阵 <span class="math inline">\({A} = \left[\begin{matrix}2 &amp; -1 \\ -1 &amp; 2\end{matrix}\right]\)</span>，令 <span class="math inline">\(\vec{x} = \left[\begin{matrix}x \\ y\end{matrix}\right], \vec{b} = \left[\begin{matrix}0 \\ 3\end{matrix}\right]\)</span>，然后方程组可以写成这样子： <span class="math display">\[
 A\vec{x} = \vec{b}
 \]</span></p>
-<h5 id="是否有解">是否有解？</h5>
+<h4 id="是否有解">是否有解？</h4>
 <p>这时要考虑一个问题：是否任意 <span class="math inline">\(\vec{b}\)</span> 都能让上面那个方程有解呢？</p>
 <p>从<strong>行图像</strong>的角度来讲，如果方程组有解，则所有方程在坐标系上对应的图像（直线、平面、体积）存在交集。如果某一个 <span class="math inline">\(\vec{b}\)</span> 不能满足上面条件，则无解（反之有解）。</p>
 <p>从<strong>列图像</strong>的角度来讲，如果某一个 <span class="math inline">\(\vec{b}\)</span> 不能成为 <span class="math inline">\({A}\)</span> 列向量的线性组合，则无解（反之有解）。</p>
-<h5 id="如何求解">如何求解？</h5>
+<h4 id="如何求解">如何求解？</h4>
 <p>计算机软件（以及人类）计算时最常用的方法是<strong>高斯消元法</strong>，将原方程 <span class="math inline">\({A}\vec{x} = \vec{b}\)</span> 转换为新的方程 <span class="math inline">\({U}\vec{x}=\vec{c}\)</span>。</p>
 <blockquote>
 <p>其中 <span class="math inline">\({U}\)</span> 为行阶梯最简型矩阵。</p>
 </blockquote>
-<h5 id="消元过程">消元过程</h5>
+<h4 id="消元过程">消元过程</h4>
 <p>每一步消元都可以视为将原矩阵乘上一个<strong>置换矩阵</strong>。左乘置换矩阵可以完成原矩阵的行变换，右乘置换矩阵则为列变换。</p>
-<h5 id="逆矩阵">逆矩阵</h5>
+<h4 id="逆矩阵">逆矩阵</h4>
 <p>对于消元过程，每一步都是可逆的。对于一个置换矩阵 $ E_1$，我做了其相反的操作即可得到原矩阵，若这一相反的操作用 $ E_1^{'}$ 表示，则有 $ E_1^{'} E_1 A = A$ 。</p>
 <p>得到 $ E_1^{'} E_1 = {I}$，从而可以用 $ E_1^{'} = { E_1}^{-1}$ 表示逆矩阵。第一个式子代表了逆矩阵的定义与性质。同样也有 <span class="math inline">\(( E_1^{&#39;})^{-1} = { E_1}\)</span> 且 $ E_1 E_1^{'} = {I}$ 。</p>
 <blockquote>
 <p>其中 $ I$ 是<strong>单位矩阵</strong>（对角线元素全为 1，其它元素全为 0 的方阵）</p>
 </blockquote>
-<h5 id="怎么求逆矩阵">怎么求逆矩阵？</h5>
+<h4 id="怎么求逆矩阵">怎么求逆矩阵？</h4>
 <p><strong>高斯-若尔当消元法</strong>(Gauss-Jordan Elimination)告诉我们，通过构造 <span class="math inline">\(\left[\begin{matrix}\ {A}\ |\ {I}\ \end{matrix}\right]\)</span>，再通过消元法将左侧矩阵变为单位矩阵 <span class="math inline">\({I}\)</span>，易得这一系列行变换操作对应的矩阵是 <span class="math inline">\({A}^{-1}\)</span>，相当于左乘了一个矩阵 <span class="math inline">\({A}^{-1}\)</span>，则右侧矩阵乘完后自然就变为了 <span class="math inline">\({A}^{-1}\)</span>。</p>
-<h4 id="接下来引入拓展到向量空间">接下来引入拓展到向量空间</h4>
-<h5 id="向量空间">向量空间</h5>
+<h3 id="接下来引入拓展到向量空间">接下来引入拓展到向量空间</h3>
+<h4 id="向量空间">向量空间</h4>
 <p>一个向量空间应该满足这样一个<strong>封闭性</strong>条件：对于空间中的任意向量 <span class="math inline">\(\vec{u}, \vec{v}\)</span>，其任意线性组合 <span class="math inline">\(a\vec{u}+b\vec{v}(a, b\in R)\)</span> 必然存在于空间中。显然，所有向量空间必须包括零向量。</p>
-<h5 id="子空间">子空间</h5>
+<h4 id="子空间">子空间</h4>
 <p>包含于向量空间之内的一个向量空间称为原向量空间的一个子空间。</p>
 <p>以 <span class="math inline">\({R}^3\)</span> 为例（它代表具有三个实数分量的所有向量的集合），其子空间包括：</p>
 <ul>
@@ -302,11 +308,11 @@ A\vec{x} = \vec{b}
 <li>任一过原点的直线（一维）</li>
 <li>零向量</li>
 </ul>
-<h5 id="列空间">列空间</h5>
+<h4 id="列空间">列空间</h4>
 <p>矩阵 <span class="math inline">\({A}_{m\times n}\)</span> 的所有列向量张成的空间称为其列空间，以 <span class="math inline">\(C({A})\)</span> 表示。<span class="math inline">\(C({A})\subset R^m\)</span></p>
-<h5 id="零空间">零空间</h5>
+<h4 id="零空间">零空间</h4>
 <p>所有满足方程 <span class="math inline">\({A}\vec{x} = \vec{0}\)</span> 的解的集合称为矩阵 <span class="math inline">\({A}_{m\times n}\)</span> 的零空间，以 <span class="math inline">\(N({A})\)</span> 表示。<span class="math inline">\(N({A})\subset R^n\)</span></p>
-<h5 id="计算零空间">计算零空间</h5>
+<h4 id="计算零空间">计算零空间</h4>
 <p>相当于求方程 <span class="math inline">\({A}\vec{x} = \vec{0}\)</span> 的所有解。通过<strong>消元法与列交换</strong>构造出新的方程 <span class="math inline">\({U}\vec{x}=\vec{0}\)</span>，其中 <span class="math inline">\({U}\)</span> 是由 <span class="math inline">\(r\)</span> 个<strong>主元列</strong>与 <span class="math inline">\(n-r\)</span> 个<strong>自由列</strong>组成的形如下式的行阶梯型矩阵： <span class="math display">\[
 U =
 \left[
@@ -324,10 +330,10 @@ U =
 N =
 \left[\begin{matrix}\ {-F}_{r\times n-r} \ \\ \ I_{n-r\times n-r} \ \end{matrix}\right]
 \]</span> 其中 <span class="math inline">\({-F}\)</span> 对应 <span class="math inline">\(\vec{x}_{pivot}\)</span>，<span class="math inline">\({I}\)</span> 对应 <span class="math inline">\(\vec{x}_{free}\)</span></p>
-<h5 id="如果方程右侧不为零向量">如果方程右侧不为零向量</h5>
+<h4 id="如果方程右侧不为零向量">如果方程右侧不为零向量</h4>
 <p>首先抛出结论：若 <span class="math inline">\(\vec{b} \in C({A})\)</span>，则方程 <span class="math inline">\({A}\vec{x} = \vec{b}\)</span> 有解。</p>
 <p>当方程有解时，可以先找到方程一个特解，再与 <span class="math inline">\(N({A})\)</span> 进行线性组合，即可得到最后的解。</p>
-<h5 id="秩">秩</h5>
+<h4 id="秩">秩</h4>
 <p>矩阵的<strong>秩</strong>等于矩阵的主元数。若 <span class="math inline">\(rank({A}_{m\times n}) = r\)</span>，则必有 <span class="math inline">\(r\leq m, r\leq n\)</span> 。</p>
 <ol type="1">
 <li><strong>列满秩</strong>：即 <span class="math inline">\(r=n&lt;m\)</span>，每一列都是主元列，矩阵没有自由列，<span class="math inline">\(N({A})\)</span> 中只有零向量，方程 <span class="math inline">\({A}\vec{x} = \vec{b}\)</span> 要么无解，要么有唯一解。</li>
@@ -335,13 +341,13 @@ N =
 <li><strong>方阵满秩</strong>：即 <span class="math inline">\(r=m=n\)</span>，方程 <span class="math inline">\({A}\vec{x} = \vec{b}\)</span> 总有唯一解。</li>
 <li><strong>行列均不满秩</strong>：即 <span class="math inline">\(r&lt;m, r&lt;n\)</span>，方程 <span class="math inline">\({A}\vec{x} = \vec{b}\)</span> 要么无解，要么有无穷多解。</li>
 </ol>
-<h5 id="线性相关性">线性相关性</h5>
+<h4 id="线性相关性">线性相关性</h4>
 <p>若一组向量的非零线性组合可以得到零向量，则称这组向量<strong>线性相关</strong>；反之，则称其<strong>线性无关</strong>。</p>
-<h5 id="基">基</h5>
+<h4 id="基">基</h4>
 <p>向量空间的<strong>基</strong>是一组<strong>线性无关的向量</strong>，且这些向量能够张成该向量空间。</p>
-<h5 id="维数">维数</h5>
+<h4 id="维数">维数</h4>
 <p>空间中的每一组基都有相同的向量数，这个数值就是空间的<strong>维数</strong>，通常用 <span class="math inline">\(dim\)</span> 表示。</p>
-<h5 id="基本子空间">基本子空间</h5>
+<h4 id="基本子空间">基本子空间</h4>
 <p>除了列空间和零空间，还有</p>
 <ol type="1">
 <li><strong>行空间</strong>：矩阵 <span class="math inline">\({A}_{m\times n}\)</span> 的所有行向量张成的空间称为其列空间，以 <span class="math inline">\(R({A})\)</span> 表示。<span class="math inline">\(R({A})\subset R^n\)</span></li>
@@ -440,7 +446,7 @@ dim(L(A)) = m-r
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%8E%E7%BA%BF%E6%80%A7%E6%96%B9%E7%A8%8B%E7%BB%84%E5%BC%80%E5%A7%8B"><span class="nav-text">从线性方程组开始</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%98%AF%E5%90%A6%E6%9C%89%E8%A7%A3"><span class="nav-text">是否有解？</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E6%B1%82%E8%A7%A3"><span class="nav-text">如何求解？</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%B6%88%E5%85%83%E8%BF%87%E7%A8%8B"><span class="nav-text">消元过程</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%80%86%E7%9F%A9%E9%98%B5"><span class="nav-text">逆矩阵</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%80%8E%E4%B9%88%E6%B1%82%E9%80%86%E7%9F%A9%E9%98%B5"><span class="nav-text">怎么求逆矩阵？</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8E%A5%E4%B8%8B%E6%9D%A5%E5%BC%95%E5%85%A5%E6%8B%93%E5%B1%95%E5%88%B0%E5%90%91%E9%87%8F%E7%A9%BA%E9%97%B4"><span class="nav-text">接下来引入拓展到向量空间</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%90%91%E9%87%8F%E7%A9%BA%E9%97%B4"><span class="nav-text">向量空间</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AD%90%E7%A9%BA%E9%97%B4"><span class="nav-text">子空间</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%97%E7%A9%BA%E9%97%B4"><span class="nav-text">列空间</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%9B%B6%E7%A9%BA%E9%97%B4"><span class="nav-text">零空间</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97%E9%9B%B6%E7%A9%BA%E9%97%B4"><span class="nav-text">计算零空间</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%A6%82%E6%9E%9C%E6%96%B9%E7%A8%8B%E5%8F%B3%E4%BE%A7%E4%B8%8D%E4%B8%BA%E9%9B%B6%E5%90%91%E9%87%8F"><span class="nav-text">如果方程右侧不为零向量</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%A7%A9"><span class="nav-text">秩</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%BA%BF%E6%80%A7%E7%9B%B8%E5%85%B3%E6%80%A7"><span class="nav-text">线性相关性</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%9F%BA"><span class="nav-text">基</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%BB%B4%E6%95%B0"><span class="nav-text">维数</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E5%AD%90%E7%A9%BA%E9%97%B4"><span class="nav-text">基本子空间</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8E%E7%BA%BF%E6%80%A7%E6%96%B9%E7%A8%8B%E7%BB%84%E5%BC%80%E5%A7%8B"><span class="nav-text">从线性方程组开始</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%98%AF%E5%90%A6%E6%9C%89%E8%A7%A3"><span class="nav-text">是否有解？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E6%B1%82%E8%A7%A3"><span class="nav-text">如何求解？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B6%88%E5%85%83%E8%BF%87%E7%A8%8B"><span class="nav-text">消元过程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%86%E7%9F%A9%E9%98%B5"><span class="nav-text">逆矩阵</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%80%8E%E4%B9%88%E6%B1%82%E9%80%86%E7%9F%A9%E9%98%B5"><span class="nav-text">怎么求逆矩阵？</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A5%E4%B8%8B%E6%9D%A5%E5%BC%95%E5%85%A5%E6%8B%93%E5%B1%95%E5%88%B0%E5%90%91%E9%87%8F%E7%A9%BA%E9%97%B4"><span class="nav-text">接下来引入拓展到向量空间</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%90%91%E9%87%8F%E7%A9%BA%E9%97%B4"><span class="nav-text">向量空间</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AD%90%E7%A9%BA%E9%97%B4"><span class="nav-text">子空间</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%97%E7%A9%BA%E9%97%B4"><span class="nav-text">列空间</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9B%B6%E7%A9%BA%E9%97%B4"><span class="nav-text">零空间</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97%E9%9B%B6%E7%A9%BA%E9%97%B4"><span class="nav-text">计算零空间</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A6%82%E6%9E%9C%E6%96%B9%E7%A8%8B%E5%8F%B3%E4%BE%A7%E4%B8%8D%E4%B8%BA%E9%9B%B6%E5%90%91%E9%87%8F"><span class="nav-text">如果方程右侧不为零向量</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A7%A9"><span class="nav-text">秩</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BA%BF%E6%80%A7%E7%9B%B8%E5%85%B3%E6%80%A7"><span class="nav-text">线性相关性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA"><span class="nav-text">基</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%B4%E6%95%B0"><span class="nav-text">维数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E5%AD%90%E7%A9%BA%E9%97%B4"><span class="nav-text">基本子空间</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -456,7 +462,7 @@ dim(L(A)) = m-r
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-count">25</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

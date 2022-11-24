@@ -18,20 +18,24 @@
     var CONFIG = {"hostname":"leager-zju.github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"b2t":true},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="6.824 的第二篇论文是 VMware-FaultTolerance(VMware-FT)，其描述了一个提供容错虚拟机的商业企业级系统——如果主服务器(primary)发生故障，备份服务器(backup)始终可以接管。backup 的状态必须始终保持与 primary 几乎相同，以便在其发生故障时，backup 可以立即接管，并且外部客户端看来并未发生故障且没有数据丢失。">
+  <meta name="description" content="6.824 的第十二篇论文是 COPS——一种可提供具有收敛冲突处理的因果一致性(Causal Plus, Causal+)的 ALPS 键值存储系统，并且具有高可扩展性。在 COPS-GT 中引入的 Get 事务还能够在不锁定或阻塞的情况下获得多个 Key 的一致视图。COPS-GT 也能为常见工作负载提供与 COPS 类似的延迟、吞吐量和扩展性。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="VMware-FT">
-<meta property="og:url" content="http://leager-zju.github.com/6-824/vmware-ft/index.html">
+<meta property="og:title" content="COPS">
+<meta property="og:url" content="http://leager-zju.github.com/6-824/COPS/index.html">
 <meta property="og:site_name" content="没什么看头的地方">
-<meta property="og:description" content="6.824 的第二篇论文是 VMware-FaultTolerance(VMware-FT)，其描述了一个提供容错虚拟机的商业企业级系统——如果主服务器(primary)发生故障，备份服务器(backup)始终可以接管。backup 的状态必须始终保持与 primary 几乎相同，以便在其发生故障时，backup 可以立即接管，并且外部客户端看来并未发生故障且没有数据丢失。">
+<meta property="og:description" content="6.824 的第十二篇论文是 COPS——一种可提供具有收敛冲突处理的因果一致性(Causal Plus, Causal+)的 ALPS 键值存储系统，并且具有高可扩展性。在 COPS-GT 中引入的 Get 事务还能够在不锁定或阻塞的情况下获得多个 Key 的一致视图。COPS-GT 也能为常见工作负载提供与 COPS 类似的延迟、吞吐量和扩展性。">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2022-10-03T07:31:03.000Z">
-<meta property="article:modified_time" content="2022-11-24T06:55:55.863Z">
+<meta property="og:image" content="http://leager-zju.github.com/6-824/COPS/COPS/image-20221123152400801.png">
+<meta property="og:image" content="http://leager-zju.github.com/6-824/COPS/COPS/image-20221123154038807.png">
+<meta property="og:image" content="http://leager-zju.github.com/6-824/COPS/COPS/image-20221123233736790.png">
+<meta property="article:published_time" content="2022-11-23T05:45:49.000Z">
+<meta property="article:modified_time" content="2022-11-24T06:55:04.916Z">
 <meta property="article:author" content="Leager">
 <meta property="article:tag" content="paperReading">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://leager-zju.github.com/6-824/COPS/COPS/image-20221123152400801.png">
 
-<link rel="canonical" href="http://leager-zju.github.com/6-824/vmware-ft/">
+<link rel="canonical" href="http://leager-zju.github.com/6-824/COPS/">
 
 
 <script id="page-configurations">
@@ -44,7 +48,7 @@
   };
 </script>
 
-  <title>VMware-FT | 没什么看头的地方</title>
+  <title>COPS | 没什么看头的地方</title>
   
 
 
@@ -193,7 +197,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/6-824/vmware-ft/">
+    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/6-824/COPS/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/Avatar.jpg">
@@ -206,7 +210,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          VMware-FT
+          COPS
         </h1>
 
         <div class="post-meta">
@@ -216,14 +220,14 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2022-10-03 15:31:03" itemprop="dateCreated datePublished" datetime="2022-10-03T15:31:03+08:00">2022-10-03</time>
+              <time title="创建时间：2022-11-23 13:45:49" itemprop="dateCreated datePublished" datetime="2022-11-23T13:45:49+08:00">2022-11-23</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-11-24 14:55:55" itemprop="dateModified" datetime="2022-11-24T14:55:55+08:00">2022-11-24</time>
+                <time title="修改时间：2022-11-24 14:55:04" itemprop="dateModified" datetime="2022-11-24T14:55:04+08:00">2022-11-24</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -253,20 +257,69 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>6.824 的第二篇论文是 VMware-FaultTolerance(<strong>VMware-FT</strong>)，其描述了一个提供容错虚拟机的商业企业级系统——如果主服务器(<strong>primary</strong>)发生故障，备份服务器(<strong>backup</strong>)始终可以接管。backup 的状态必须始终保持与 primary 几乎相同，以便在其发生故障时，backup 可以立即接管，并且外部客户端看来并未发生故障且没有数据丢失。</p>
+        <p>6.824 的第十二篇论文是 <strong>COPS</strong>——一种可提供<strong>具有收敛冲突处理的因果一致性</strong>(Causal Plus, Causal+)的 ALPS 键值存储系统，并且具有高可扩展性。在 COPS-GT 中引入的 Get 事务还能够在不锁定或阻塞的情况下获得多个 Key 的一致视图。COPS-GT 也能为常见工作负载提供与 COPS 类似的延迟、吞吐量和扩展性。</p>
 <span id="more"></span>
-<h3 id="两种容错方式">两种容错方式</h3>
-<h4 id="状态转移">状态转移</h4>
-<p>在 backup 上复制状态的一种方法是每次同步时，primary 将其<strong>所有状态</strong>（包括 CPU、内存和 I/O 设备）<strong>变化</strong>进行完整地拷贝，并发送到 backup。但发送此状态所需的带宽会非常大。为了提升效率，可以优化为：每次同步只发送上次同步之后改变了的状态。</p>
-<h4 id="操作转移">操作转移</h4>
-<p>将服务器建模为<strong>确定性状态机</strong>，并实现以下两个条件：</p>
+<h3 id="cops-架构">COPS 架构</h3>
+<p>COPS(Clusters of Order-Preserving Servers, 保序服务器集群)的 Causal+ 提供以下两个组件</p>
 <ol type="1">
-<li>从相同的初始状态开始</li>
-<li>以相同的顺序执行相同的操作</li>
+<li><strong>因果一致性</strong>：确保数据存储尊重操作之间的因果依赖关系。</li>
+<li><strong>收敛冲突处理</strong>：确保副本不会永久性发散，并且对同一 Key 的冲突更新在所有站点上得到相同的处理。</li>
 </ol>
-<p>如果能确保以上两个条件，那么它们会一直互为副本，并且一直保持一致。由于大多数服务器或服务都有一些不确定的操作，因此必须使用额外的协调来确保 primary 和 backup 保持同步，而这一协调所需的额外信息量远远少于 primary 中正在更改的状态量。</p>
-<h3 id="总结">总结</h3>
-<p>操作 Log 的复制与状态机的思路给后续以启迪。</p>
+<p>基于以上两点，Causal+ 可确保 client 看到因果正确、无冲突且始终在进行中的数据存储。</p>
+<p>COPS 有多个数据中心，每个数据中心都由前端服务器和后端 kv 数据存储组成。本地数据中心执行读写操作，在后台以 Causal+ 的顺序跨数据中心复制数据。</p>
+<p><img src="COPS/image-20221123152400801.png" alt="image-20221123152400801" style="zoom:67%;" /></p>
+<h3 id="alps-系统与-trade-off">ALPS 系统与 Trade-off</h3>
+<p><a target="_blank" rel="noopener" href="https://www.ruanyifeng.com/blog/2018/07/cap.html">CAP 定理</a>证明不存在一个同时满足这三个条件的系统。大多数现代 Web 服务选择牺牲强一致性(<strong>C</strong>onsistency)为代价（取而代之的是因果一致性）来满足可用性(<strong>A</strong>vailability)和分区容错性(<strong>P</strong>artition tolerance)，因为这样做还能够为 client 操作提供低延迟(low <strong>L</strong>atancy)和高可扩展性(high <strong>S</strong>calability)。我们将具有这四个属性的系统称为 ALPS 系统。</p>
+<h3 id="causal-consistency">Causal+ Consistency</h3>
+<blockquote>
+<p>有关因果一致性，具体可参考这篇<a href="(http://zhangtielei.com/posts/blog-distributed-causal-consistency.html)">博客</a>。</p>
+</blockquote>
+<p>考虑 kv 数据存储定义了以下两个基本操作：<code>put (key, val)</code> 和 <code>get (key) = val</code>。模型中的一个重要概念是操作之间的<strong>潜在因果关系</strong>，表示为 <span class="math inline">\(\leadsto\)</span>。这一关系受以下三条规则定义：</p>
+<ol type="1">
+<li><strong>单线程内有序</strong>：如果 a 和 b 是单个执行线程中的两个操作，如果操作 a 发生在操作 b 之前，则 a <span class="math inline">\(\leadsto\)</span> b；</li>
+<li><strong>Gets From</strong>：如果 a 是一个 <code>put</code> 操作，b 是一个 <code>get</code> 操作且返回 a 写入的值，那么 a <span class="math inline">\(\leadsto\)</span> b；</li>
+<li><strong>传递性</strong>：对于操作 a、b 和 c，如果 a <span class="math inline">\(\leadsto\)</span> b 和 b <span class="math inline">\(\leadsto\)</span> c，则有 a <span class="math inline">\(\leadsto\)</span> c；</li>
+</ol>
+<p>下图为一个示例：</p>
+<p><img src="COPS/image-20221123154038807.png" alt="image-20221123154038807" style="zoom:67%;" /></p>
+<ul>
+<li>根据<strong>单线程内有序规则</strong>得到 <code>get (y) = 2</code> <span class="math inline">\(\leadsto\)</span> <code>put (x, 4)</code>；</li>
+<li>根据 <strong>Gets From 规则</strong>得到 <code>put (y, 2)</code> <span class="math inline">\(\leadsto\)</span> <code>get (y) = 2</code>；</li>
+<li>根据<strong>传递性规则</strong>得到 <code>put (y, 2)</code> <span class="math inline">\(\leadsto\)</span> <code>put (x, 4)</code>。</li>
+</ul>
+<h4 id="定义">定义</h4>
+<ul>
+<li><p><strong>因果一致</strong>：<code>get</code> 操作返回的值与定义的顺序一致，即写入值的操作必须出现在它之前的所有操作之后。</p>
+<blockquote>
+<p>上图中，<code>put (y, 2)</code> 必须出现在 <code>put (x, 4)</code> 之前，后者又发生在 <code>put (z, 5)</code> 之前。如果 Client2 看到 <code>get (x) = 1</code> 在 <code>get (x) = 4</code> 之后，便违反了因果一致性。</p>
+</blockquote>
+<p>根据博客所述，因果关系是一个<strong>偏序关系</strong>，可能存在 a <span class="math inline">\(\not\leadsto\)</span> b 和 b <span class="math inline">\(\not\leadsto\)</span> a，此时称 a 和 b 是<strong>并发</strong>的。系统可以按任何顺序复制两个不相关的 <code>put</code> 操作，但如果 a 和 b 对同一个 Key 进行 <code>put</code>，那么它们则会<strong>冲突</strong>，最终得到的值是不确定的，此时需要收敛冲突处理。</p></li>
+<li><p><strong>收敛冲突处理</strong>：使用处理函数 <span class="math inline">\(h\)</span> 以相同的方式在所有副本上处理所有冲突的 <code>put</code>。COPS 可以自定义 <span class="math inline">\(h\)</span>，默认使用<strong>最后写入者获胜规则</strong>，即后来的写入会覆盖较早的写入。</p></li>
+</ul>
+<h4 id="与其它模型对比">与其它模型对比</h4>
+<p>下图展示了几种主流的一致性模型及其一致性强弱关系。</p>
+<p><img src="COPS/image-20221123233736790.png" alt="image-20221123233736790" style="zoom:80%;" /></p>
+<ol type="1">
+<li><strong>线性化</strong>：它保持全局、实时排序；</li>
+<li><strong>可串行化</strong>：至少确保全局排序；</li>
+<li><strong>因果一致性</strong>：确保相关操作之间的部分排序；</li>
+<li><strong>FIFO 一致性</strong>：它只保留执行线程内部的顺序，而不是线程之间；</li>
+<li><strong>键可串行化</strong>：这确保对于每个单独的 Key，所有操作都具有全局顺序；</li>
+<li><strong>最终一致性</strong>：副本最终会收敛于某个值。</li>
+</ol>
+<p>前两者无法在 ALPS 系统中实现。</p>
+<h4 id="cops-中实现-causal">COPS 中实现 Causal+</h4>
+<p>COPS 系统中使用两个抽象概念：</p>
+<ol type="1">
+<li><strong>version</strong>：每个 Key 的不同值都能被表示为 <span class="math inline">\(key_{verision}\)</span>，COPS 确保如果 <span class="math inline">\(x_i \leadsto y_j\)</span>，则 <span class="math inline">\(i&lt;j\)</span>。一旦 COPS 中的副本返回 <code>version = i</code> 的 <span class="math inline">\(key_i\)</span>，则 Causal 确保之后只会返回因果序下 <code>version</code> 更大的值；</li>
+<li><strong>dependency</strong>：因果一致性规定如果 <span class="math inline">\(x_i \leadsto y_j\)</span>，则 <span class="math inline">\(y_j\)</span> 依赖于 <span class="math inline">\(x_i\)</span>。COPS 确保仅在其所有依赖项 <span class="math inline">\(x_i\)</span> 操作被复制后才复制对 <span class="math inline">\(y_j\)</span> 的操作。</li>
+</ol>
+<h4 id="可扩展的因果关系">可扩展的因果关系</h4>
+<p>COPS 通过采用以下方法实现了可扩展性：</p>
+<ol type="1">
+<li>每个数据中心的节点负责 Key 空间的不同分区，但系统可以跟踪和强制存储在不同节点上的 Key 之间的依赖关系；</li>
+<li>COPS 在与每个 Key 版本关联的元数据中明确编码依赖关系，这样当 Key 被远程复制时，接收方能在提交传入版本之前执行依赖性检查。</li>
+</ol>
 
     </div>
 
@@ -285,13 +338,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/LeetCode/weekCompetition313/" rel="prev" title="weekCompetition313">
-      <i class="fa fa-chevron-left"></i> weekCompetition313
+    <a href="/6-824/6.824lab4/" rel="prev" title="6.824 Lab4 Sharded Key/Value Service">
+      <i class="fa fa-chevron-left"></i> 6.824 Lab4 Sharded Key/Value Service
     </a></div>
-      <div class="post-nav-item">
-    <a href="/6-824/6.824lab2/" rel="next" title="6.824 Lab2 RAFT">
-      6.824 Lab2 RAFT <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -350,7 +400,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%A4%E7%A7%8D%E5%AE%B9%E9%94%99%E6%96%B9%E5%BC%8F"><span class="nav-text">两种容错方式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E8%BD%AC%E7%A7%BB"><span class="nav-text">状态转移</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%93%8D%E4%BD%9C%E8%BD%AC%E7%A7%BB"><span class="nav-text">操作转移</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#cops-%E6%9E%B6%E6%9E%84"><span class="nav-text">COPS 架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#alps-%E7%B3%BB%E7%BB%9F%E4%B8%8E-trade-off"><span class="nav-text">ALPS 系统与 Trade-off</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#causal-consistency"><span class="nav-text">Causal+ Consistency</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89"><span class="nav-text">定义</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%8E%E5%85%B6%E5%AE%83%E6%A8%A1%E5%9E%8B%E5%AF%B9%E6%AF%94"><span class="nav-text">与其它模型对比</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#cops-%E4%B8%AD%E5%AE%9E%E7%8E%B0-causal"><span class="nav-text">COPS 中实现 Causal+</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%AF%E6%89%A9%E5%B1%95%E7%9A%84%E5%9B%A0%E6%9E%9C%E5%85%B3%E7%B3%BB"><span class="nav-text">可扩展的因果关系</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 

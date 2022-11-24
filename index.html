@@ -132,7 +132,7 @@
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">24</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">25</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -189,6 +189,87 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/6-824/COPS/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/Avatar.jpg">
+      <meta itemprop="name" content="Leager">
+      <meta itemprop="description" content="【数据删除】">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="没什么看头的地方">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/6-824/COPS/" class="post-title-link" itemprop="url">COPS</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-11-23 13:45:49" itemprop="dateCreated datePublished" datetime="2022-11-23T13:45:49+08:00">2022-11-23</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-11-24 14:55:04" itemprop="dateModified" datetime="2022-11-24T14:55:04+08:00">2022-11-24</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/6-824/" itemprop="url" rel="index"><span itemprop="name">6.824</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>6.824 的第十二篇论文是 <strong>COPS</strong>——一种可提供<strong>具有收敛冲突处理的因果一致性</strong>(Causal Plus, Causal+)的 ALPS 键值存储系统，并且具有高可扩展性。在 COPS-GT 中引入的 Get 事务还能够在不锁定或阻塞的情况下获得多个 Key 的一致视图。COPS-GT 也能为常见工作负载提供与 COPS 类似的延迟、吞吐量和扩展性。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/6-824/COPS/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/6-824/6.824lab4/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -220,7 +301,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-11-23 13:39:18" itemprop="dateModified" datetime="2022-11-23T13:39:18+08:00">2022-11-23</time>
+                <time title="修改时间：2022-11-24 15:03:05" itemprop="dateModified" datetime="2022-11-24T15:03:05+08:00">2022-11-24</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -302,7 +383,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-11-20 14:26:10" itemprop="dateModified" datetime="2022-11-20T14:26:10+08:00">2022-11-20</time>
+                <time title="修改时间：2022-11-23 13:46:28" itemprop="dateModified" datetime="2022-11-23T13:46:28+08:00">2022-11-23</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -326,36 +407,14 @@
 
       
           <p>一份面向所有初学/入门 C 语言学生的指南。本文旨在帮助读者快速降低编(zuo)程(ti)难度，而不会涉及过多 C 语言语法知识。</p>
-<h3 id="代码风格-programming-style">0. 代码风格 Programming Style</h3>
-<p>代码风格好不好就像字写得好不好看一样，如果一个公司招聘文职人员，肯定不要字写得难看的，同理，代码风格糟糕的程序员肯定也是不称职的。虽然编译器不会挑剔难看的代码，只要语法没问题照样能编译通过并运行，但是你并不一定每次都会写出 bugfree 的代码——当你得到错误结果并回过头来 debug 的时候，自己肯定受不了，都不知道自己写的是什么，更别说看出哪里出错了。</p>
-<p>而一段<strong>可读性</strong>非常高的代码不但有助于 debug，还能让完全没接触过这段代码的人（助教）快速读懂。这也是为什么把这一块放在最前面的原因。</p>
-<blockquote>
-<p>对比以下两种代码，显然是前面那种更容易阅读吧</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (hours &lt; <span class="number">24</span> &amp;&amp; minutes &lt; <span class="number">60</span> &amp;&amp; seconds &lt; <span class="number">60</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>  ( hours   &lt; <span class="number">24</span></span><br><span class="line">   &amp;&amp; minutes &lt; <span class="number">60</span></span><br><span class="line">   &amp;&amp; seconds &lt; <span class="number">60</span></span><br><span class="line">)</span><br><span class="line">&#123;<span class="keyword">return</span>    <span class="literal">true</span></span><br><span class="line">;&#125;         <span class="keyword">else</span></span><br><span class="line">&#123;<span class="keyword">return</span>   <span class="literal">false</span></span><br><span class="line">;&#125;</span><br></pre></td></tr></table></figure>
-</blockquote>
-<p>总结程序设计实践中的经验，代码风格的要素包括（但不限于）以下几点：</p>
-<ul>
-<li>变量命名</li>
-<li><del>
-表达式与语句
-</del></li>
-<li><del>
-常量的使用
-</del></li>
-<li><del>
-注释的使用
-</del></li>
-<li><strong>缩进</strong></li>
-<li>代码的布局</li>
-</ul>
-<blockquote>
-<del>
-划掉的内容
-</del>
-<p>是我认为初学者不太会接触的，<strong>加粗的内容</strong>是值得重点关注的</p>
-</blockquote>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/ZJU-CLASS/CProgramGuide/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -397,10 +456,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2022-11-15 17:05:59 / 修改时间：11:14:41" itemprop="dateCreated datePublished" datetime="2022-11-15T17:05:59+08:00">2022-11-15</time>
+              <time title="创建时间：2022-11-15 17:05:59" itemprop="dateCreated datePublished" datetime="2022-11-15T17:05:59+08:00">2022-11-15</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-11-24 15:02:09" itemprop="dateModified" datetime="2022-11-24T15:02:09+08:00">2022-11-24</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -472,10 +537,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2022-11-15 11:35:42 / 修改时间：18:05:17" itemprop="dateCreated datePublished" datetime="2022-11-15T11:35:42+08:00">2022-11-15</time>
+              <time title="创建时间：2022-11-15 11:35:42" itemprop="dateCreated datePublished" datetime="2022-11-15T11:35:42+08:00">2022-11-15</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-11-24 15:02:52" itemprop="dateModified" datetime="2022-11-24T15:02:52+08:00">2022-11-24</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -556,7 +627,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-11-15 22:31:13" itemprop="dateModified" datetime="2022-11-15T22:31:13+08:00">2022-11-15</time>
+                <time title="修改时间：2022-11-24 15:02:29" itemprop="dateModified" datetime="2022-11-24T15:02:29+08:00">2022-11-24</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -638,7 +709,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-11-07 17:00:26" itemprop="dateModified" datetime="2022-11-07T17:00:26+08:00">2022-11-07</time>
+                <time title="修改时间：2022-11-24 15:01:53" itemprop="dateModified" datetime="2022-11-24T15:01:53+08:00">2022-11-24</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -711,10 +782,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2022-10-23 13:39:34 / 修改时间：22:04:35" itemprop="dateCreated datePublished" datetime="2022-10-23T13:39:34+08:00">2022-10-23</time>
+              <time title="创建时间：2022-10-23 13:39:34" itemprop="dateCreated datePublished" datetime="2022-10-23T13:39:34+08:00">2022-10-23</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-11-24 15:01:12" itemprop="dateModified" datetime="2022-11-24T15:01:12+08:00">2022-11-24</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -795,7 +872,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-10-27 18:34:56" itemprop="dateModified" datetime="2022-10-27T18:34:56+08:00">2022-10-27</time>
+                <time title="修改时间：2022-11-24 15:01:39" itemprop="dateModified" datetime="2022-11-24T15:01:39+08:00">2022-11-24</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -876,7 +953,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-10-20 18:59:00" itemprop="dateModified" datetime="2022-10-20T18:59:00+08:00">2022-10-20</time>
+                <time title="修改时间：2022-11-24 14:59:19" itemprop="dateModified" datetime="2022-11-24T14:59:19+08:00">2022-11-24</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -903,88 +980,6 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/6-824/Spanner/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/LeetCode/weekCompetition315/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/Avatar.jpg">
-      <meta itemprop="name" content="Leager">
-      <meta itemprop="description" content="【数据删除】">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="没什么看头的地方">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/LeetCode/weekCompetition315/" class="post-title-link" itemprop="url">weekCompetition315</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2022-10-16 12:50:37" itemprop="dateCreated datePublished" datetime="2022-10-16T12:50:37+08:00">2022-10-16</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-10-17 18:46:59" itemprop="dateModified" datetime="2022-10-17T18:46:59+08:00">2022-10-17</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/LeetCode/" itemprop="url" rel="index"><span itemprop="name">LeetCode</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p><a target="_blank" rel="noopener" href="https://leetcode.cn/contest/weekly-contest-315/">第 315 场周赛</a>复盘。</p>
-<p><strong>排名</strong> 2768 / 6490</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/LeetCode/weekCompetition315/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -1075,7 +1070,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-count">25</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

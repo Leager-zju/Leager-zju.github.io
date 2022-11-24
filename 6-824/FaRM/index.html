@@ -32,7 +32,7 @@
 <meta property="og:image" content="http://leager-zju.github.com/6-824/FaRM/image-20221026112640579.png">
 <meta property="og:image" content="http://leager-zju.github.com/6-824/FaRM/image-20221026140042960.png">
 <meta property="article:published_time" content="2022-10-20T10:57:46.000Z">
-<meta property="article:modified_time" content="2022-10-27T10:34:56.337Z">
+<meta property="article:modified_time" content="2022-11-24T07:01:39.900Z">
 <meta property="article:author" content="Leager">
 <meta property="article:tag" content="paperReading">
 <meta name="twitter:card" content="summary">
@@ -142,7 +142,7 @@
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">24</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">25</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -230,7 +230,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-10-27 18:34:56" itemprop="dateModified" datetime="2022-10-27T18:34:56+08:00">2022-10-27</time>
+                <time title="修改时间：2022-11-24 15:01:39" itemprop="dateModified" datetime="2022-11-24T15:01:39+08:00">2022-11-24</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -292,12 +292,12 @@
 </ol>
 </blockquote></li>
 </ul>
-<h4 id="硬件趋势">硬件趋势</h4>
-<h5 id="非易失-dram">非易失 DRAM</h5>
+<h3 id="硬件趋势">硬件趋势</h3>
+<h4 id="非易失-dram">非易失 DRAM</h4>
 <p>发生电源故障时，分布式不间断电源(<strong>UPS</strong>)使用电源中的能量将内存中的数据保存到 SSD，从而提高 DRAM 耐用性。</p>
-<h5 id="rdma-网络">RDMA 网络</h5>
+<h4 id="rdma-网络">RDMA 网络</h4>
 <p>FaRM 尽可能使用单侧 RDMA 操作，从而有效减少了 CPU 开销与需传递的消息数量——RPC 需要的消息量是单侧 RDMA 的两倍。</p>
-<h4 id="编程模型">编程模型</h4>
+<h3 id="编程模型">编程模型</h3>
 <p>FaRM 提供<strong>全局地址空间</strong>的抽象，其 API 为事务提供对对象的透明访问。</p>
 <p>FaRM 事务使用<strong>乐观并发控制</strong>。对数据的修改会先在本地缓存，且只在成功提交后才对其他事务可见。</p>
 <p>FaRM 为所有成功提交的事务提供严格的<strong>可串行化</strong>：</p>
@@ -305,17 +305,17 @@
 <li><strong>单对象读取</strong>是原子的：只读取已提交的值，且由事务写入的对象的读取返回最新写入的值。FaRM API 还为单对象 RO 事务提供<strong>无锁读取</strong>和<strong>位置提示</strong>，使程序员能够在同一组机器上共同定位相关对象。</li>
 <li><strong>多对象读取</strong>不保证原子性：保证事务不会提交，同时确保提交的事务是严格可串行化的。这样可以将一致性检查推迟到提交时间。</li>
 </ul>
-<h4 id="整体架构">整体架构</h4>
+<h3 id="整体架构">整体架构</h3>
 <p><img src="image-20221021142633067.png" alt="image-20221021142633067" style="zoom:67%;" /></p>
-<h5 id="协调与配置">协调与配置</h5>
+<h4 id="协调与配置">协调与配置</h4>
 <p>FaRM 使用 Zookeeper 作为协调服务。</p>
 <p>FaRM 实例会随着时间的推移更新<strong>配置</strong>。配置是一个元组 <code>(i, S, F, CM)</code>，其中 <code>i</code> 是<strong>配置标识符</strong>，<code>S</code> 是配置中的<strong>机器集合</strong>，<code>F</code> 是从机器到 <strong>failure region</strong> 的<strong>映射</strong>，<code>CM</code> 是<strong>配置管理器</strong>，且 CM ∈ S。</p>
 <p><strong>CM</strong>(Configuration Manager) 实现管理租约、检测故障或协调恢复。每次配置更改时，CM 都会调用 Zookeeper 来更新配置以达成共识。</p>
-<h5 id="内存管理">内存管理</h5>
+<h4 id="内存管理">内存管理</h4>
 <p>FaRM 中的地址空间由多个 2GB 大小的 <strong>region</strong> 组成。每个 region 分布在一个 primary 和 <span class="math inline">\(f\)</span> 个 backup 上，对于每个机器而言，region 存储在其 DRAM 中并且可以被 RDMA 读取。</p>
 <p>所有的 read 都落到 primary 上（如果 region 在本地，则直接通过本地内存访问；反之，则使用单侧 RDMA 读取）。</p>
 <p>CM 存储 region 标识符到其 primary/backup 的映射。这些映射可被其他机器按需获取、缓存到本地并复制。</p>
-<h5 id="region-分配">region 分配</h5>
+<h4 id="region-分配">region 分配</h4>
 <p>机器联系 CM 以分配新 region。CM 为 new region 分配一个标识符，并为其选择 replicas。对 replica 的选择应尽量<strong>均衡负载</strong>，并且满足：</p>
 <ul>
 <li>有足够的容量；</li>
@@ -323,18 +323,18 @@
 <li>当应用程序指定局部性约束时，该 region 与目标 region 位于同一位置。</li>
 </ul>
 <p>然后 CM 利用 <strong>2PC</strong> 进行 region 分配。</p>
-<h5 id="logmsg-队列">Log/Msg 队列</h5>
+<h4 id="logmsg-队列">Log/Msg 队列</h4>
 <p>每台机器存储一个基于 <strong>FIFO</strong> 的环形缓冲区，用于<strong>事务日志或消息队列</strong>。每个接收者都有单独的 log queue 和 msg queue。发送者使用单侧 RDMA 将记录附加到日志尾部，写入由 NIC 发送 ack，不涉及 CPU；接收者定期轮询日志的头部以处理记录。</p>
-<h4 id="分布式事务与复制">分布式事务与复制</h4>
+<h3 id="分布式事务与复制">分布式事务与复制</h3>
 <p>下图展示了 FaRM 事务提交时间线。</p>
 <p><img src="image-20221025170135679.png" alt="image-20221025170135679" style="zoom:67%;" /></p>
-<h5 id="执行阶段">执行阶段</h5>
+<h4 id="执行阶段">执行阶段</h4>
 <ul>
 <li>事务使用单侧 RDMA 读取对象并写入本地缓存。</li>
 <li>coordinator 记录所有访问对象的地址和版本号。</li>
 <li>对于与 coordinator 在同一台机器上的 primary/backup，对象对日志的读取和写入使用本地内存访问而不是 RDMA。</li>
 </ul>
-<h5 id="提交阶段">提交阶段</h5>
+<h4 id="提交阶段">提交阶段</h4>
 <p><img src="image-20221025172808292.png" alt="image-20221025172808292" style="zoom:70%;" /></p>
 <ol type="1">
 <li><p><strong>Lock</strong>：coordinator 将 LOCK 记录写入每台涉及写的 primary。primary 通过尝试使用 compare-and-swap 将对象在指定版本处 lock，并回复是否成功获取所有锁。若失败，则中止事务。</p></li>
@@ -347,15 +347,15 @@
 <li><p><strong>Truncate</strong>：primary/backup 将记录保留在其日志中直到被截断。coordinator 在收到所有 primary 的确认后，它会在其他日志记录中捎带截断事务的标识符会从而延迟截断。backup 在截断时将更新应用于其对象副本。</p></li>
 </ol>
 <p><img src="image-20221025172832254.png" alt="image-20221025172832254" style="zoom:70%;" /></p>
-<h4 id="故障恢复">故障恢复</h4>
-<h5 id="故障检测">故障检测</h5>
+<h3 id="故障恢复">故障恢复</h3>
+<h4 id="故障检测">故障检测</h4>
 <p>FaRM 使用 <strong>lease</strong> 来检测故障。每台机器都在 CM 处持有 lease，而 CM 在其他每台机器上都持有 lease。任何 lease 到期都会触发故障恢复。FaRM 使用 <strong>3 次握手</strong>授予 lease。每台机器都会向 CM 发送一个 lease 请求，CM 在授权响应中捎带 CM 的 lease 请求，最后机器回复 CM 的 lease 许可。</p>
 <blockquote>
 <p>FaRM 租期很短，以保证高可用性。</p>
 </blockquote>
 <p>FaRM 为 lease 维护一个专用消息队列，以及时处理请求。可靠传输将要求 CM 为每台机器添加一个额外的队列。</p>
 <p>默认情况下，每过租期的 1/5 会尝试更新租约，以防止消息丢失。还必须及时在 CPU 上安排续租。 FaRM 使用以最高用户空间优先级运行的专用租用管理器线程。</p>
-<h5 id="重新配置">重新配置</h5>
+<h4 id="重新配置">重新配置</h4>
 <p>单侧 RDMA 要求重新配置协议使用 <strong>lease</strong> 实现一致性，服务器在回复访问对象的请求之前检查它们是否持有对象的lease。从配置中被驱逐的服务器存储的对象在 lease 到期之前不被改变。</p>
 <p>但由于 CPU 无法检查是否持有 lease，且 NIC 也不支持 lease。这一问题可用 <strong>precise membership</strong> 来解决：发生故障后，新配置中的所有机器必须在允许对象变更之前就其成员关系达成共识。配置内的机器不会发起/接受配置外机器的 RDMA 请求。</p>
 <p><img src="image-20221026112640579.png" alt="image-20221026112640579" style="zoom:80%;" /></p>
@@ -374,7 +374,7 @@
 <li><p><strong>Apply New Configuration</strong>：当机器接收到配置标识符大于自己的配置标识符的 <code>NEW-CONFIG</code> 时，它会应用新配置，此后拒绝任何配置外机器的请求。机器用 <code>NEW-CONFIG-ACK</code> 消息回复 CM。如果 CM 发生了变化，则会向新 CM 重新授予/请求 lease。</p></li>
 <li><p><strong>Commit New Configuration</strong>：一旦 CM 接收到所有 <code>NEW-CONFIG-ACK</code> 消息，它就会等待配置外的机器的 lease 都已过期。然后 CM 向所有配置成员发送 <code>NEW-CONFIG-COMMIT</code>（同时授予 lease）。之后所有成员都解除 <strong>Suspect</strong> 中对外部 client 请求的阻止，并启动事务恢复。</p></li>
 </ol>
-<h5 id="事务状态恢复">事务状态恢复</h5>
+<h4 id="事务状态恢复">事务状态恢复</h4>
 <p>FaRM 在配置更改后使用日志来恢复事务状态。下图为事务恢复时间线：</p>
 <p><img src="image-20221026140042960.png" alt="image-20221026140042960" style="zoom:80%;" /></p>
 <ol type="1">
@@ -412,10 +412,10 @@
 </ul>
 <p>然后它向所有 replicas 发送 <code>COMMIT-RECOVERY</code> 或 <code>ABORT-RECOVERY</code>。在 coordinator 收到来自所有 primary/backup 的 ack 后，它会发送一条 <code>TRUNCATE-RECOVERY</code> 消息。</p></li>
 </ol>
-<h5 id="数据恢复">数据恢复</h5>
+<h4 id="数据恢复">数据恢复</h4>
 <p>当 primary 的所有 region 可访问时，每台机器都会向 CM 发送 <code>REGIONS-ACTIVE</code> 消息。然后 CM 向配置中的所有机器发送 <code>ALL-REGIONS-ACTIVE</code> 消息，此时开始数据恢复。</p>
 <p>如果对象的版本高于本地版本，则 replicas 会通过 CAS 上锁，更新后解锁；否则，不应用恢复。</p>
-<h5 id="分配器状态恢复">分配器状态恢复</h5>
+<h4 id="分配器状态恢复">分配器状态恢复</h4>
 <p>FaRM 分配器将 region 拆分为 <strong>block</strong> (1 MB)，这些 block 用作分配小对象的 <strong>slab</strong>。它保留了两个元数据：</p>
 <ul>
 <li>block header：包含对象大小；</li>
@@ -424,7 +424,7 @@
 <p>分配新 block 时，BH 会复制到 replica 中。由于块头用于数据恢复，因此新 primary 在收到 <code>NEW-CONFIG-COMMIT</code> 后立即将它们发送到所有 replicas。</p>
 <p>slab 空闲列表仅保留在 primary 中，以减少对象分配的开销。</p>
 <p>每个对象的 header 中都有一个 bit 位，表示该对象已分配或被清理。这一 bit 也会在事务提交期间被复制。通过并行扫描故障 region 中的对象，在新的 primary 上恢复空闲列表。为了尽量减少对事务 lock recovery 的影响，分配器恢复在收到 <code>ALL-REGIONS-ACTIVE</code> 后开始，在 slab 空闲列表恢复后释放对象。</p>
-<h4 id="总结">总结</h4>
+<h3 id="总结">总结</h3>
 <p>这是 6.824 事务与复制的最后一个系列了，用 RDMA 而不是 RPC 很有创新点。</p>
 
     </div>
@@ -509,7 +509,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A1%AC%E4%BB%B6%E8%B6%8B%E5%8A%BF"><span class="nav-text">硬件趋势</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%9D%9E%E6%98%93%E5%A4%B1-dram"><span class="nav-text">非易失 DRAM</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#rdma-%E7%BD%91%E7%BB%9C"><span class="nav-text">RDMA 网络</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%96%E7%A8%8B%E6%A8%A1%E5%9E%8B"><span class="nav-text">编程模型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84"><span class="nav-text">整体架构</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8D%8F%E8%B0%83%E4%B8%8E%E9%85%8D%E7%BD%AE"><span class="nav-text">协调与配置</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86"><span class="nav-text">内存管理</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#region-%E5%88%86%E9%85%8D"><span class="nav-text">region 分配</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#logmsg-%E9%98%9F%E5%88%97"><span class="nav-text">Log&#x2F;Msg 队列</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E4%B8%8E%E5%A4%8D%E5%88%B6"><span class="nav-text">分布式事务与复制</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%89%A7%E8%A1%8C%E9%98%B6%E6%AE%B5"><span class="nav-text">执行阶段</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8F%90%E4%BA%A4%E9%98%B6%E6%AE%B5"><span class="nav-text">提交阶段</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%85%E9%9A%9C%E6%81%A2%E5%A4%8D"><span class="nav-text">故障恢复</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%95%85%E9%9A%9C%E6%A3%80%E6%B5%8B"><span class="nav-text">故障检测</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%87%8D%E6%96%B0%E9%85%8D%E7%BD%AE"><span class="nav-text">重新配置</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%E7%8A%B6%E6%80%81%E6%81%A2%E5%A4%8D"><span class="nav-text">事务状态恢复</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%81%A2%E5%A4%8D"><span class="nav-text">数据恢复</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%86%E9%85%8D%E5%99%A8%E7%8A%B6%E6%80%81%E6%81%A2%E5%A4%8D"><span class="nav-text">分配器状态恢复</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A1%AC%E4%BB%B6%E8%B6%8B%E5%8A%BF"><span class="nav-text">硬件趋势</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9D%9E%E6%98%93%E5%A4%B1-dram"><span class="nav-text">非易失 DRAM</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#rdma-%E7%BD%91%E7%BB%9C"><span class="nav-text">RDMA 网络</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E7%A8%8B%E6%A8%A1%E5%9E%8B"><span class="nav-text">编程模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84"><span class="nav-text">整体架构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8D%8F%E8%B0%83%E4%B8%8E%E9%85%8D%E7%BD%AE"><span class="nav-text">协调与配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86"><span class="nav-text">内存管理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#region-%E5%88%86%E9%85%8D"><span class="nav-text">region 分配</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#logmsg-%E9%98%9F%E5%88%97"><span class="nav-text">Log&#x2F;Msg 队列</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E4%B8%8E%E5%A4%8D%E5%88%B6"><span class="nav-text">分布式事务与复制</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%89%A7%E8%A1%8C%E9%98%B6%E6%AE%B5"><span class="nav-text">执行阶段</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8F%90%E4%BA%A4%E9%98%B6%E6%AE%B5"><span class="nav-text">提交阶段</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%85%E9%9A%9C%E6%81%A2%E5%A4%8D"><span class="nav-text">故障恢复</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%85%E9%9A%9C%E6%A3%80%E6%B5%8B"><span class="nav-text">故障检测</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%87%8D%E6%96%B0%E9%85%8D%E7%BD%AE"><span class="nav-text">重新配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%E7%8A%B6%E6%80%81%E6%81%A2%E5%A4%8D"><span class="nav-text">事务状态恢复</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%81%A2%E5%A4%8D"><span class="nav-text">数据恢复</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%86%E9%85%8D%E5%99%A8%E7%8A%B6%E6%80%81%E6%81%A2%E5%A4%8D"><span class="nav-text">分配器状态恢复</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -525,7 +525,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-count">25</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

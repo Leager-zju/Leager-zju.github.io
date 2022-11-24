@@ -32,7 +32,7 @@
 <meta property="og:image" content="http://leager-zju.github.com/6-824/Memcache/image-20221112163919753.png">
 <meta property="og:image" content="http://leager-zju.github.com/6-824/Memcache/image-20221109201537652.png">
 <meta property="article:published_time" content="2022-11-15T09:05:59.000Z">
-<meta property="article:modified_time" content="2022-11-15T03:14:41.178Z">
+<meta property="article:modified_time" content="2022-11-24T07:02:09.193Z">
 <meta property="article:author" content="Leager">
 <meta property="article:tag" content="paperReading">
 <meta name="twitter:card" content="summary">
@@ -142,7 +142,7 @@
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">24</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">25</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -222,10 +222,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2022-11-15 17:05:59 / 修改时间：11:14:41" itemprop="dateCreated datePublished" datetime="2022-11-15T17:05:59+08:00">2022-11-15</time>
+              <time title="创建时间：2022-11-15 17:05:59" itemprop="dateCreated datePublished" datetime="2022-11-15T17:05:59+08:00">2022-11-15</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-11-24 15:02:09" itemprop="dateModified" datetime="2022-11-24T15:02:09+08:00">2022-11-24</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -269,8 +275,8 @@
 <li>将读取瞬态数据的可能性作为参数进行调整。FB 通过略微公开旧数据，以降低后端存储服务的负载。</li>
 </ol>
 <p>下文使用 <strong>memcached</strong> 来引用源代码或运行二进制文件，使用 <strong>memcache</strong> 来描述分布式系统。</p>
-<h4 id="集群层次延迟与负载">集群层次：延迟与负载</h4>
-<h5 id="降低延迟">降低延迟</h5>
+<h3 id="集群层次延迟与负载">集群层次：延迟与负载</h3>
+<h4 id="降低延迟">降低延迟</h4>
 <p><strong>memcached 的响应延迟</strong>是影响用户请求响应时间的关键因素。</p>
 <p>尽管集群中提供了数百个 <strong>memcached server, ms</strong> 以减少负载，但 Web server 必须定期与多个 ms 通信以交换数据。这种通信模式可能会导致 <a target="_blank" rel="noopener" href="https://www.mtyun.com/library/an-brief-intro-to-tcp-incast">Incast 拥塞</a>，或是任意单个 ms 成为短板。<strong>Replication</strong> 通常可以缓解短板问题，但总会导致显著的内存效率低下。</p>
 <p>FB 主要通过关注在每个 Web server 上运行的 <strong>memcache client, mc</strong> 来降低延迟。mc 维护所有可用 ms 的映射，并通过辅助配置系统进行更新。</p>
@@ -290,8 +296,8 @@
 </blockquote>
 <p><img src="image-20221109211610473.png" alt="image-20221109211610473" style="zoom:67%;" /></p></li>
 </ul>
-<h5 id="降低负载">降低负载</h5>
-<h6 id="lease">Lease</h6>
+<h4 id="降低负载">降低负载</h4>
+<h5 id="lease">Lease</h5>
 <p>lease 的提出是用来解决以下两个问题：</p>
 <ol type="1">
 <li><strong>失效集</strong>：对 memcache 的并发更新被重新排序时，会导致 memcache 中的值并不是最新值。</li>
@@ -302,10 +308,10 @@
 <ul>
 <li><strong>旧值</strong>：在某些情况下返回旧值能够进一步减少这一等待时间。有一个数据结构暂存近期被删除的值，但很快就会被刷掉。<code>Get</code> 或是返回 lease，或是返回这些被标记为过时的数据。可以继续向前推进的应用不需要等待从数据库中获取的最新值。</li>
 </ul>
-<h6 id="memcache-pool">Memcache Pool</h6>
+<h5 id="memcache-pool">Memcache Pool</h5>
 <p>不同应用的工作负载在共享存储时会对彼此产生负面干扰，从而降低命中率。可以通过将集群的 ms 划分到不同的池中，具有相似工作负载的 ms 共享同一个池。下图为两个不同负载的工作集。</p>
 <p><img src="image-20221112145220737.png" alt="image-20221112145220737" style="zoom: 80%;" /></p>
-<h6 id="replication-with-pools">Replication with pools</h6>
+<h5 id="replication-with-pools">Replication with pools</h5>
 <p>若池满足以下条件：</p>
 <ol type="1">
 <li>应用同时请求许多 key；</li>
@@ -313,7 +319,7 @@
 <li>请求率远高于单个 ms 可以承受的水平。</li>
 </ol>
 <p>则可以选择在池中复制某一类 key 来降低 ms 的延迟并提高效率。</p>
-<h5 id="故障处理">故障处理</h5>
+<h4 id="故障处理">故障处理</h4>
 <p>无法从 memcache 中获取数据会导致后端服务负载过重，这可能会导致进一步的级联故障：</p>
 <ol type="1">
 <li>网络或服务器故障导致少量主机无法被访问；</li>
@@ -324,9 +330,9 @@
 <li>当 client 未收到请求的答复时，它认为相应 ms 故障，接着重新将请求发送至 <strong>Gutter Pool</strong>；</li>
 <li>如果此请求仍未命中，client 将在查询数据库后将适当的 kv 对插入到 Gutter 机器中，这些 kv 对的有效期很短，以防止 Gutter 无效。</li>
 </ul>
-<h4 id="区域层次复制">区域层次：复制</h4>
+<h3 id="区域层次复制">区域层次：复制</h3>
 <p>单纯通过增加服务器来扩展集群而不扩展系统并不能解决负载问题。需要将 web server 和 memcached server 拆分为多个<strong>前端集群</strong>(Frontend Cluster, FC)，与<strong>存储集群</strong>(Storage Cluster, SC)一起组成了一个 <strong>region</strong>。</p>
-<h5 id="区域无效化">区域无效化</h5>
+<h4 id="区域无效化">区域无效化</h4>
 <p>SC 拥有数据的最新版本，FC 拥有数据复制，SC 负责发送 cache <strong>无效化</strong>(invalidation)命令来保持一致性。修改 SC 的 SQL 语句会附上需要在事务提交后无效的 memcache key。每个数据库中都有一个 <strong>mcsqueal</strong> 来检查其数据库提交的 SQL 语句，提取 <code>Delete</code> 并广播到该 region 中每个 FC 中的 ms。如下图所示。</p>
 <p><img src="image-20221112163919753.png" alt="image-20221112163919753" style="zoom:67%;" /></p>
 <ul>
@@ -337,15 +343,15 @@
 <li>当系统层面的 invalidation 问题（如错误路由删除和配置错误）发生时，依靠 mcsqueal 的补救措施更简单。</li>
 </ol></li>
 </ul>
-<h5 id="区域池">区域池</h5>
+<h4 id="区域池">区域池</h4>
 <p>若每个集群都持有数据的副本，则会导致内存效率低下。可以让多个 FC 共享相同的多个 ms，称为<strong>区域池</strong>。</p>
-<h5 id="冷集群预热">冷集群预热</h5>
+<h4 id="冷集群预热">冷集群预热</h4>
 <p>新集群加入时为空缓存的“冷集群”，大部分请求（因为 cache miss）都会指向数据库。<strong>Cold Cluster Warmup</strong> 系统允许“冷集群”中的 client 从“热集群”中获取数据，从而使得“冷集群”的 Cache 尽快填满。</p>
 <p>然而当冷集群中的客户端 A 更新数据库，同时另一个客户端 B 在热集群收到 invalidation 之前从热集群中请求旧值时，会产生不一致性。memcached 选择在 <code>Delete</code> 后指定的延迟时间（默认 2s）内拒绝 <code>add</code>操作。</p>
 <blockquote>
 <p>当在冷集群中 cache miss 时，client 从热集群重新请求 key 并将其添加到冷集群中。<code>add</code> 失败表明数据库上有更新的数据，因此 client 将从数据库中重新请求值。</p>
 </blockquote>
-<h4 id="跨区域一致性">跨区域：一致性</h4>
+<h3 id="跨区域一致性">跨区域：一致性</h3>
 <p>在多个地理位置部署数据中心有以下好处：</p>
 <ol type="1">
 <li>将网络服务器放置在更靠近最终用户的位置可以显著降低延迟；</li>
@@ -450,7 +456,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9B%86%E7%BE%A4%E5%B1%82%E6%AC%A1%E5%BB%B6%E8%BF%9F%E4%B8%8E%E8%B4%9F%E8%BD%BD"><span class="nav-text">集群层次：延迟与负载</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%99%8D%E4%BD%8E%E5%BB%B6%E8%BF%9F"><span class="nav-text">降低延迟</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%99%8D%E4%BD%8E%E8%B4%9F%E8%BD%BD"><span class="nav-text">降低负载</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#lease"><span class="nav-text">Lease</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#memcache-pool"><span class="nav-text">Memcache Pool</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#replication-with-pools"><span class="nav-text">Replication with pools</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86"><span class="nav-text">故障处理</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8C%BA%E5%9F%9F%E5%B1%82%E6%AC%A1%E5%A4%8D%E5%88%B6"><span class="nav-text">区域层次：复制</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8C%BA%E5%9F%9F%E6%97%A0%E6%95%88%E5%8C%96"><span class="nav-text">区域无效化</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8C%BA%E5%9F%9F%E6%B1%A0"><span class="nav-text">区域池</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%86%B7%E9%9B%86%E7%BE%A4%E9%A2%84%E7%83%AD"><span class="nav-text">冷集群预热</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B7%A8%E5%8C%BA%E5%9F%9F%E4%B8%80%E8%87%B4%E6%80%A7"><span class="nav-text">跨区域：一致性</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9B%86%E7%BE%A4%E5%B1%82%E6%AC%A1%E5%BB%B6%E8%BF%9F%E4%B8%8E%E8%B4%9F%E8%BD%BD"><span class="nav-text">集群层次：延迟与负载</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%99%8D%E4%BD%8E%E5%BB%B6%E8%BF%9F"><span class="nav-text">降低延迟</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%99%8D%E4%BD%8E%E8%B4%9F%E8%BD%BD"><span class="nav-text">降低负载</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#lease"><span class="nav-text">Lease</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#memcache-pool"><span class="nav-text">Memcache Pool</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#replication-with-pools"><span class="nav-text">Replication with pools</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86"><span class="nav-text">故障处理</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8C%BA%E5%9F%9F%E5%B1%82%E6%AC%A1%E5%A4%8D%E5%88%B6"><span class="nav-text">区域层次：复制</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8C%BA%E5%9F%9F%E6%97%A0%E6%95%88%E5%8C%96"><span class="nav-text">区域无效化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8C%BA%E5%9F%9F%E6%B1%A0"><span class="nav-text">区域池</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%B7%E9%9B%86%E7%BE%A4%E9%A2%84%E7%83%AD"><span class="nav-text">冷集群预热</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B7%A8%E5%8C%BA%E5%9F%9F%E4%B8%80%E8%87%B4%E6%80%A7"><span class="nav-text">跨区域：一致性</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -466,7 +472,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-count">25</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

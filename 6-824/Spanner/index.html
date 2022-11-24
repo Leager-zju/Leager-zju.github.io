@@ -33,7 +33,7 @@
 <meta property="og:image" content="http://leager-zju.github.com/6-824/Spanner/image-20221017132537748.png">
 <meta property="og:image" content="http://leager-zju.github.com/6-824/Spanner/image-20221017142509253.png">
 <meta property="article:published_time" content="2022-10-17T08:52:40.000Z">
-<meta property="article:modified_time" content="2022-10-20T10:59:00.801Z">
+<meta property="article:modified_time" content="2022-11-24T06:59:19.363Z">
 <meta property="article:author" content="Leager">
 <meta property="article:tag" content="paperReading">
 <meta name="twitter:card" content="summary">
@@ -143,7 +143,7 @@
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">24</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">25</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -231,7 +231,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-10-20 18:59:00" itemprop="dateModified" datetime="2022-10-20T18:59:00+08:00">2022-10-20</time>
+                <time title="修改时间：2022-11-24 14:59:19" itemprop="dateModified" datetime="2022-11-24T14:59:19+08:00">2022-11-24</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -263,7 +263,7 @@
       
         <p>6.824 的第八篇论文是 <strong>Spanner</strong>—— Google 的可扩展、多版本、全球分布和同步复制的数据库。它是第一个在全球范围内分发数据并支持外部一致的分布式事务的系统。</p>
 <span id="more"></span>
-<h4 id="简介">简介</h4>
+<h3 id="简介">简介</h3>
 <p>Spanner 中的数据是<strong>多时间版本化</strong>的，每个版本都会自动加上其提交时间的<strong>时间戳</strong>(timestamp)。ts 反映序列化顺序，即：如果事务 <span class="math inline">\(T_1\)</span> 在另一个事务 <span class="math inline">\(T_2\)</span> 开始之前提交，则 <span class="math inline">\(T_1\)</span> 的 commit ts 小于 <span class="math inline">\(T_2\)</span>。 这一机制归功于 <strong>TrueTime API </strong> 设计，通过使用多个现代时钟参考（GPS 和原子钟）来保持较小的不确定性。</p>
 <blockquote>
 <p>Spanner 是第一个在全球范围内提供此类保证的系统。</p>
@@ -279,10 +279,10 @@
 <li>满足<strong>外部一致性</strong>的读取和写入；</li>
 <li>利用 <strong>TrueTime</strong> 实现基于 ts 的跨数据库的全局一致读取。</li>
 </ol>
-<h4 id="实现">实现</h4>
+<h3 id="实现">实现</h3>
 <p>Spanner 部署称之为 <strong>universe</strong>，它由一系列<strong>区域</strong>(zones)组成，每个 zone 都是管理部署的单位。一个 zone 有一个 <strong>zonemaster</strong> 和若干 <strong>spanservers</strong>，前者负责将数据分配给后者，后者负责向客户提供数据。其结构如图所示：</p>
 <p><img src="image-20221015173114863.png" alt="image-20221015173114863" style="zoom:80%;" /></p>
-<h5 id="spanserver-软件栈结构">SpanServer 软件栈结构</h5>
+<h4 id="spanserver-软件栈结构">SpanServer 软件栈结构</h4>
 <p>每个 spanserver 在底层负责若干个称为 <strong>tablet</strong> 的数据结构实例，每个 tablet 是表中的部分数据。</p>
 <p>spanserver 采用 <strong>Paxos</strong> 协议来实现复制。为了提高 Paxos 算法的性能，他们并不是将整个机器作为 Paxos 的处理单位，而是将 spanserver 上的数据进行划分，并分配到不同的 Paxos Group，每次运行 Paxos 都仅由相关的 Paxos Group 参与。写操作必须发给 Leader，而读操作可以发给任意足够 up-to-date 的 replica 然后从其 tablet 中读取。</p>
 <p><img src="image-20221016231043963.png" alt="image-20221016231043963" style="zoom:50%;" /></p>
@@ -296,14 +296,14 @@
 <li>一个<strong>锁表</strong>(lock table)来实现并发控制。锁表用于<strong>两阶段锁定</strong>(2PL)。只有需要同步的操作才会获取锁。</li>
 <li>一个<strong>事务管理器</strong>(transaction manager)来支持分布式事务。只有当一个事务涉及多个 Paxos Group 时，事务管理器才参与其中，其中一个 Paxos Group 被选为<strong>协调者</strong>(coordinator)，该组的 <strong>participant Leader</strong> 将成为 <strong>coordinate Leader</strong>。每个事务管理器的状态存储在底层 Paxos Group 中（因此也会被复制）。</li>
 </ol>
-<h5 id="目录">目录</h5>
+<h4 id="目录">目录</h4>
 <p>为了进一步提高性能，将 Paxos Group 进一步划分为<strong>目录</strong>(Directory)——它是一组<strong>共享公共连续前缀</strong>的键。Directory 是数据迁移和负载均衡的基本单位，其所有数据都具有相同的复制配置。如下图所示。</p>
 <blockquote>
 <p>事实上，Spanner 会将一个过大的目录分片成多个<strong>片段</strong>（片段可能来自不同的 Paxos 组）。 Movedir 在组间移动片段，而不是整个目录。</p>
 </blockquote>
 <p><img src="image-20221016170724711.png" alt="image-20221016170724711" style="zoom:70%;" /></p>
 <p><strong>Movedir</strong> 是用于在 Paxos 组之间移动目录以及向 Paxos 组添加或删除副本的后台任务。Movedir 并不作为单个事务实现，操作的时候是先将实际数据移动到指定位置，然后再用一个原子的操作更新元数据，完成整个移动过程。故 Movdir 不会阻塞当前 client 的操作。</p>
-<h5 id="数据模型">数据模型</h5>
+<h4 id="数据模型">数据模型</h4>
 <p>Spanner 从原先 BigTable 的类关系型数据库变成了采用以下键值映射的类 KV 型数据库： <span class="math display">\[
 (key:string,\quad timestamp:int64) \rightarrow string
 \]</span> 同时 Spanner 向应用程序提供</p>
@@ -316,7 +316,7 @@
 <p>Spanner 的数据模型是<strong>半关系</strong>的原因在于，每个表都需要有一组有序的 primary key。这使得 Spanner 仍然看起来像 KV 存储。</p>
 <p>下图包含一个示例 Spanner 模式。客户端应用程序通过 <code>INTERLEAVE IN</code> 声明层次结构。<code>ON DELETE CASCADE</code> 表示删除目录表中的行会删除任何关联的子行。这种将表交错形成目录的设计允许客户端描述存在于多个表之间的局部关系，这能够提升分片分布式数据库的性能。</p>
 <p><img src="image-20221017112002830.png" alt="image-20221017112002830" style="zoom:67%;" /></p>
-<h4 id="truetime">TrueTime</h4>
+<h3 id="truetime">TrueTime</h3>
 <p>考虑到时间不确定性（如通信延迟），<strong>TrueTime</strong>并不表示某一特定时刻，而是将时间表示为一个具有有限时间不确定性的时间区间 <strong>TTinterval: [earliest, latest]</strong>。 TTinterval 的端点是 <strong>TTstamp</strong> 类型。 TrueTime API 包括以下方法：</p>
 <ol type="1">
 <li><strong>TT.now()</strong>：返回 TTinterval，并保证调用该方法的绝对时刻属于该区间；</li>
@@ -324,8 +324,8 @@
 <li><strong>TT.before(t)</strong>：若时刻 <span class="math inline">\(t\)</span> 还未到，则返回 true。</li>
 </ol>
 <p>TrueTime 利用 GPS 和原子钟两种策略进行时钟参考，因为它们会以和彼此无关的方式出现故障，故其中一个方法发生故障后，可以立刻采用另一种方法。每个 data center 都有一组 <strong>time master</strong>，大多数使用 GPS，剩下的配备了原子钟。通过定期综合比较两种 master 得到一个时间点。</p>
-<h4 id="并发控制">并发控制</h4>
-<h5 id="timestamp-管理">timestamp 管理</h5>
+<h3 id="并发控制">并发控制</h3>
+<h4 id="timestamp-管理">timestamp 管理</h4>
 <p>Spanner 支持 <strong>read-write 事务</strong>、<strong>read-only 事务</strong>和 <strong>snapshot read</strong>，单独写入为 RW 事务；非快照单独读取为 RO 事务。如下表所示：</p>
 <p><img src="image-20221017132537748.png" alt="image-20221017132537748" style="zoom:67%;" /></p>
 <p>RO 事务是一种具有快照隔离性能优势的事务，其以系统指定的 ts 执行，而无需锁定。</p>
@@ -334,10 +334,10 @@
 <blockquote>
 <p>RW: ts = COMMIT TIME；RO: ts = START TIME</p>
 </blockquote>
-<h5 id="paxos-leader-lease">Paxos Leader Lease</h5>
+<h4 id="paxos-leader-lease">Paxos Leader Lease</h4>
 <p>Spanner 中 Paxos 的 <strong>lease</strong> 默认为 10 秒。如果租约到期，Leader 会请求延长 lease 投票。同时，Spanner 允许 Paxos Leader 主动退位。</p>
 <p>每个 Paxos Group 中不同 Leader 的 lease 互不相交。为了保持这一 <strong>lease 不相交性</strong>，定义 <span class="math inline">\(s_{max}\)</span> 为旧 Leader 的最大 ts，新 Leader 必须等到 <span class="math inline">\(TT.after ( s_{max} ) = true\)</span> 才能开始工作。</p>
-<h5 id="rw-事务">RW 事务</h5>
+<h4 id="rw-事务">RW 事务</h4>
 <p>RW 事务使用 2PL，故只能在获取所有锁之后与释放所有锁之前的任意时刻分配 ts。对于给定的写事务，Spanner 会选择 Paxos 为提交事务的那次 Paxos Write 分配的时间戳。</p>
 <p>在每个 Paxos Group 内，Spanner 以单调递增的顺序为 Paxos Write 分配 ts。这一约束通过 <strong>lease 不相交性</strong>在不同 Leader 之间进行约束：Leader 只在其 lease 内分配 ts。</p>
 <p>Spanner 使用 2PC 提交事务，为保证<strong>外部一致性</strong>，Spanner 作出以下约束：如果事务 <span class="math inline">\(T_2\)</span> 的 start 发生在事务 <span class="math inline">\(T_1\)</span> commit 之后，则 <span class="math inline">\(T_2\)</span> 的 commit ts 必须大于 <span class="math inline">\(T_1\)</span> 的 commit ts。并且执行事务和分配 ts 的协议遵循以下两条规则：</p>
@@ -365,7 +365,7 @@
 <blockquote>
 <p>read-write 事务中的 read 使用 <strong>wound-wait</strong> 来避免死锁。</p>
 </blockquote>
-<h5 id="ro-事务">RO 事务</h5>
+<h4 id="ro-事务">RO 事务</h4>
 <p>RO 事务分两个阶段执行：</p>
 <ul>
 <li>先分配一个时间戳 <span class="math inline">\(s_{read}\)</span>；</li>
@@ -377,7 +377,7 @@
 <li>如果事务只涉及一个 Paxos Group，则 client 直接向该 Group 的 Leader 发出 RO 事务。将 <span class="math inline">\(LastTS()\)</span> 定义为 Paxos Group 中最后 commit 的 write 的 ts。如果没有事务 prepared，则令 <span class="math inline">\(s_{read} = LastTS()\)</span> 即可满足外部一致性：事务将看到最后一次 write 的结果；</li>
 <li>反之，需要所有参与 read 的 Paxos Group 之间进行协商来决定 ts。Spanner 目前避免了一轮沟通，而是令 client 只在 <span class="math inline">\(s_{read} = TT.now().latest\)</span> 处执行 read（可能会等待 <span class="math inline">\(t_{safe}\)</span>）。事务中的所有 read 都可以发送到足够 up-to-date 的 replica。</li>
 </ol>
-<h4 id="总结">总结</h4>
+<h3 id="总结">总结</h3>
 <p>Spanner 优雅地利用了 TrueTime 实现了外部一致性以及其它强大特性，这是前所未有的创新设计。</p>
 
     </div>
@@ -462,7 +462,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-text">简介</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0"><span class="nav-text">实现</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#spanserver-%E8%BD%AF%E4%BB%B6%E6%A0%88%E7%BB%93%E6%9E%84"><span class="nav-text">SpanServer 软件栈结构</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%9B%AE%E5%BD%95"><span class="nav-text">目录</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B"><span class="nav-text">数据模型</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#truetime"><span class="nav-text">TrueTime</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E6%8E%A7%E5%88%B6"><span class="nav-text">并发控制</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#timestamp-%E7%AE%A1%E7%90%86"><span class="nav-text">timestamp 管理</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#paxos-leader-lease"><span class="nav-text">Paxos Leader Lease</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#rw-%E4%BA%8B%E5%8A%A1"><span class="nav-text">RW 事务</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#ro-%E4%BA%8B%E5%8A%A1"><span class="nav-text">RO 事务</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-text">简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0"><span class="nav-text">实现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#spanserver-%E8%BD%AF%E4%BB%B6%E6%A0%88%E7%BB%93%E6%9E%84"><span class="nav-text">SpanServer 软件栈结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%9B%AE%E5%BD%95"><span class="nav-text">目录</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B"><span class="nav-text">数据模型</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#truetime"><span class="nav-text">TrueTime</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E6%8E%A7%E5%88%B6"><span class="nav-text">并发控制</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#timestamp-%E7%AE%A1%E7%90%86"><span class="nav-text">timestamp 管理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#paxos-leader-lease"><span class="nav-text">Paxos Leader Lease</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#rw-%E4%BA%8B%E5%8A%A1"><span class="nav-text">RW 事务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ro-%E4%BA%8B%E5%8A%A1"><span class="nav-text">RO 事务</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -478,7 +478,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-count">25</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
