@@ -164,6 +164,394 @@
       </tags>
   </entry>
   <entry>
+    <title>6.824 Lab3 FTkvserver</title>
+    <url>/6-824/6.824lab3/</url>
+    <content><![CDATA[<p>本实验要求在每一个 raft 节点上实现一个 K/V 服务器(server)，向上接受客户端(client)的请求并返回请求结果，向下生成日志应用到 raft 节点中。</p>
+<p>整个模式大概长<a href="https://pdos.csail.mit.edu/6.824/notes/raft_diagram.pdf">这样</a>。</p>
+<p>主要流程是这样的：</p>
+<ol type="1">
+<li>client 寻找对应 raft 节点是 leader 的 server，并发起一个请求(Put/Append/Get)；</li>
+<li>server 收到请求后，调用 raft 的 Start() 函数；</li>
+<li>raft 节点间互相 AppendEntries 之后，将消息 apply 到 applyChannel 里；</li>
+<li>server 从 applyChannel 中取出消息，之后正式将命令应用到数据库中。</li>
+</ol>
+<span id="more"></span>
+<h3 id="part-a-keyvalue-service-without-snapshots">PART A-Key/value service without snapshots</h3>
+<h4 id="发送请求">发送请求</h4>
+<p>由于 Start() 函数会立即返回 isleader 信息，所以如果一个 server 节点调用了 Start() 后发现不是 leader，则返回一个 <strong>ErrWrongLeader</strong></p>
+<p>当且仅当 client RPC 成功并且发送给正确的 leader 后，才算成功；否则：</p>
+<ol type="1">
+<li>If the Clerk sends an RPC to the wrong kvserver, or if it cannot reach the kvserver, the Clerk should re-try by sending to a different kvserver.</li>
+<li>If the operation failed to commit (for example, if the leader was replaced), the server reports an error, and the Clerk retries with a different server.</li>
+</ol>
+<h4 id="server-向下调用">server 向下调用</h4>
+<p>首先是根据 Start() 返回的 isleader 来确定是否需要返回 ErrWrongLeader 错误。若成功，则等待流程 4。</p>
+<p>注意到，在等待的过程中 server 是上了锁的，那必然被阻塞，此时就需要在 startKVserver 的时候额外开启一个叫 Applier() 的 goroutine 来进行 applyChannel 的读取。</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(kv *KVServer)</span></span> Applier() &#123;</span><br><span class="line">    <span class="keyword">for</span> !kv.killed() &#123;</span><br><span class="line">        msg := &lt;-kv.applyCh</span><br><span class="line">        <span class="keyword">if</span> msg.CommandValid &#123;</span><br><span class="line">            <span class="comment">// 应用操作</span></span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> msg.SnapshotValid &#123;</span><br><span class="line">            <span class="comment">// 应用快照</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>同时遇到这样一个问题： 有一个网络分区 [1] | [2，3，4，5]，1 是分区前的 leader，分区后 1 仍然是 leader。第二个分区由于选主导致其 term 大于 1 的 term。 有一个 client A 一直给 [1] 发送请求，某一个请求 （requestID：x，clientID：A）发过去调用 1 的 start 并返回日志所在索引 index 后，网络恢复，[1] 收到新的 leader 消息后执行 appendEntries 并将原先 index 处的日志覆盖，更新 commitindex 后将覆盖后的日志传回 applyCh，而我采用的是 map[commandIndex] chan 的形式，由于同一索引处的日志被覆盖了，导致 server Applier 处理管道发回的错误请求，比如 get 到错误的值 or 未进行 append</p>
+<p>解决方法为：在 arg 中开一个 channel，当 applier 处理完消息时通过该 channel 返回处理结果，同时判断当前 msg 中的 term 和 kv.rf.currentTerm 是否匹配，如果不匹配，说明可能被其他日志覆盖，返回一个 ErrWrongLeader 让上层重发。</p>
+<blockquote>
+<p>发现 6.824 labrpc 的 call 函数在传的时候会把 chan 给弄没掉。于是只能在 server 里 args.ch = make(chan int)，同时为了防止遇到的 chan 是 nil，还要加个判断当前是否为 leader，因为只有 leader 的 chan 是有效的，用 call 发给 follower 后会 arg 里的 chan 会变成 nil</p>
+</blockquote>
+<h4 id="应用到状态机">应用到状态机</h4>
+<p>Applier() 对 applyChannel 进行一个 for 的等待，收到消息后，根据收到消息的命令类型的不同，执行不同的应用操作。</p>
+<blockquote>
+<p>Put(key, value) replaces the value for a particular key in the database, Append(key, arg) appends arg to key's value, and Get(key) fetches the current value for the key. A Get for a non-existent key should return an empty string. An Append to a non-existent key should act like Put.</p>
+</blockquote>
+<p>执行完后，返回消息到 waitchannel[index]，唤醒 server。</p>
+<h4 id="other">Other</h4>
+<ol type="1">
+<li><p>刚开始想到和 Raft 里发送请求投票一样的手段，为每一个 server 开一个 goroutine 去发送 RPC，后来发现最后成功发送的只有一个，其它 goroutine 都是在占 cpu，遂放弃，直接用 for 循环。另外，有时候 leader 会在相当一段时间内保持不变，我们可以保存上一次发送请求成功时的 serverId，认为这是 leader，每次发请求时都可以利用这一信息，避免了不必要的 RPC，加快速度。当 RPC 失败，或发生了 ErrWrongLeader，只需要简单的令 leader 切换到下一个即可（0-&gt;1-&gt;...-&gt;n-1-&gt;0-&gt;...）</p>
+<p><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ck *Clerk)</span></span> SendRequest(args *Args) <span class="type">string</span> &#123;</span><br><span class="line">    ck.mu.Lock()</span><br><span class="line">    <span class="keyword">defer</span> ck.mu.Unlock()</span><br><span class="line">    args.RequestId, args.ClerkId = ck.RequestId, ck.ClerkId</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> &#123;</span><br><span class="line">        reply := &amp;Reply&#123;&#125;</span><br><span class="line">        ok := ck.servers[ck.volatileLeader].Call(<span class="string">&quot;KVServer.HandleRequest&quot;</span>, args, reply)</span><br><span class="line">        <span class="keyword">if</span> ok &amp;&amp; reply.Err != ErrWrongLeader &#123;</span><br><span class="line">            ck.RequestId++</span><br><span class="line">            <span class="keyword">return</span> reply.Value</span><br><span class="line">        &#125;</span><br><span class="line">        ck.volatileLeader = (ck.volatileLeader + <span class="number">1</span>) % <span class="built_in">len</span>(ck.servers)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p></li>
+<li><p>在分区测试中，有可能发生 leader 超时未 apply 的情况（即一个 leader 被分到了 minority 的网络区），此时需要在 server 等待环节加一个 &lt;-time.After() 的信号接受判断，若超时，则直接返回，并且认为超时也是一种“WrongLeader”。</p></li>
+<li><p>lab3A 还要求我们不能执行同一个 client 的重复请求，那么需要在每个 server 上放一个 clientID 到其最近一次命令序号 requestID 的映射，如果 Worker 收到的这个命令序号已经被执行过了，那么就不再执行，直接返回 ErrDuplicated。Get 是否重复执行无所谓，因为它并不会对数据库产生实质性的影响，主要是防止多次 Put/Append 同一个值。</p></li>
+</ol>
+<p>总体代码量比 raft 少太多，但因为论文中并没有给出很详细的指示，就走了很多弯路，以至于绝大多数时间都在 debug...</p>
+<h3 id="part-b-keyvalue-service-with-snapshots">PART B-Key/value service with snapshots</h3>
+<p>本实验要求在 3A 的基础上加上 snapshot 功能。</p>
+<blockquote>
+<p>虽然标的是hard，但代码量更少了</p>
+</blockquote>
+<p>server 不断检测 raftStateSize，如果过大，即当 persist.RaftStateSize() &gt;= kv.maxRaftState 时，将当前 db 状态保存下来，调用 raft 层的 snapshot() 并将 db 状态传入。</p>
+<p>要实现有两个函数：</p>
+<ol type="1">
+<li><strong>MakeSnapshot()</strong> ：当 raftStateSize 过大时保存 db 状态。</li>
+<li><strong>ApplySnapshot()</strong> ：raft 层将 snapshotValid 发到 applyCh，被 server 接收到后执行的操作。</li>
+</ol>
+<blockquote>
+<p>persist 里的 raftstate 和 index 没有直接关系，所以不能用在 snapshot 里的 index 参数。</p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>6.824</category>
+      </categories>
+      <tags>
+        <tag>lab</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Aurora</title>
+    <url>/6-824/Aurora/</url>
+    <content><![CDATA[<p>6.824 的第六篇论文是 <strong>Aurora</strong>——一个高性能，高可靠的关系数据库服务。在处理事务的速度上，Aurora 宣称比其他数据库快 35 倍。同时，其完全抛弃了通用存储，转而构建了自己<strong>应用定制的存储</strong>。</p>
+<span id="more"></span>
+<h3 id="aurora-产生背景">Aurora 产生背景</h3>
+<h4 id="ec2elastic-cloud-2">EC2(Elastic Cloud 2)</h4>
+<p>这是 Amazon 最早的云产品。Amazon 有装满了服务器的数据中心，并且每个服务器上都会运行一个 VMM(<strong>Virtual Machine Monitor</strong>)，以及一些 EC2 实例。每个实例在运行一个标准的操作系统的同时，出租给不同的用户。每个 EC2 的操作系统之上运行着 Web 服务或数据库等应用程序。这种方式成本低，且相对容易配置，在早期是一个成功的服务模式。</p>
+<p>最早的时候，EC2 使用的都是服务器上的硬盘，每个 EC2 实例都会分到硬盘的一部分空间。</p>
+<p>对于无状态的 Web 应用，如果客户数量增加了，可以通过租用更多 EC2 实例来对 Web 服务扩容，尽管服务器崩溃了，只需要在另一台服务器上启动一个新的 EC2 实例就好了。而对于数据库而言，一旦服务器崩溃了，其本地硬盘将无法访问，运行在服务器上的数据库 EC2 实例也将失效——因为数据丢失了。</p>
+<p>Amazon 本身有实现块存储的服务，叫 S3。可以定期对数据库做快照，然后存到 S3 上，并基于快照来实现故障恢复。但也有可能失去两次快照之间的数据，</p>
+<h4 id="ebselastic-block-store">EBS(Elastic Block Store)</h4>
+<p>它表现得像个硬盘，具有容错性，且支持持久化存储的服务，其底层是一对互为副本的存储服务器。当用户要使用数据库 EC2 时，可以将一个 EBS 挂载为自己的硬盘。</p>
+<p>当数据库执行写操作时，数据会通过网络传输到 EBS 服务器，之后，那一对存储服务器会使用 <strong>Chain Replication</strong> 进行数据复制。</p>
+<blockquote>
+<p>第一个服务器处理写，第二个服务器处理读。</p>
+</blockquote>
+<p>虽然 EBS 的出现能够在一定程度上避免因服务器崩溃而导致的数据丢失，但却会产生大量的网络流量，并且容错性并没有得到很好的保障——两个存储服务器会放在同个数据中心（在 paper 中称为 <strong>AZ, Available Zone</strong>）中，也就意味着一旦数据中心崩溃了，那就没辙了。</p>
+<h4 id="rdsrelational-database-service">RDS(Relational Database Service)</h4>
+<p>RDS 尝试将数据进行跨 AZ 复制，这样就算整个 AZ 挂了，用户还可以从另一个 AZ 中获取数据。</p>
+<p>对于 RDS 而言，有且仅有一个 EC2 实例作为<strong>主数据库</strong>，这个数据库将其 data page 和 WAL log 存在 EBS，EC2 和 EBS 都在同一个 AZ <span class="math inline">\(AZ_1\)</span> 中。每次数据库执行写操作时，RDS 会自动将写操作拷贝到另一个 AZ <span class="math inline">\(AZ_2\)</span> 中的<strong>副数据库</strong> EC2 实例上，这个 EC2 的工作就是执行和主数据库相同的操作，写入成功后，会发一个 ack 给主数据库，主数据库看到了这个 ack 后才会认为真正意义上的写入成功。</p>
+<p>但实际上，这样还是会通过网络传输相当大量的数据。</p>
+<h3 id="aurora">Aurora</h3>
+<p>在 Aurora 的架构中，会有 <span class="math inline">\(V\)</span> 个数据副本代替 EBS 的位置，分别存放在 <span class="math inline">\(z\)</span> 个不同的 AZ 中。与此同时，Aurora 通过网络传输的是 <strong>log 条目</strong>而非 data page，这也大大提高了网络性能。当然，这也就导致了 Aurora 的存储系统不再是只能理解 data 的通用存储了，变成了<strong>能够理解 log 的应用定制存储系统</strong>。</p>
+<h4 id="复制与相关故障">复制与相关故障</h4>
+<p>Aurora 采用<strong>基于仲裁的投票协议</strong>来保证容错，即不需要所有副本都确认了读/写操作后才能继续执行。这个协议是这样的：</p>
+<ol type="1">
+<li>每次读操作都需要获得 <span class="math inline">\(V_r\)</span> 个确认；</li>
+<li>每次写操作都需要获得 <span class="math inline">\(V_w\)</span> 个确认；</li>
+<li><span class="math inline">\(V_r + V_w &gt; V\)</span>，保证每次读都能知道最近的写入；</li>
+<li><span class="math inline">\(V_w &gt; V/2\)</span>，保证每次写入必须知道最近的写入从而避免写入冲突；</li>
+</ol>
+<p>这样一来，Aurora 可以有更多的副本和 AZ，而不需要付出过大的性能代价——因为它无需等待所有副本，只需要等待最快的 <span class="math inline">\(V_r/V_w\)</span> 个副本就好了。这也容忍了少数副本的 crash 或是偶尔的慢响应。</p>
+<p>这里又会出现一个问题，客户端读请求可能会得到 <span class="math inline">\(V_r\)</span> 个不同的结果，却并不知道哪个结果是正确的。解决这一问题的方法就是设置<strong>版本号</strong>，每次写请求都会将新的数值与一个递增的版本号绑定，于是读请求便可以从所有结果中取版本号最高的那个结果。</p>
+<h4 id="容错目标">容错目标</h4>
+<p>在 Aurora 中，我们希望</p>
+<ul>
+<li>在整个 AZ 和一个额外的副本崩溃后而不丢失数据；</li>
+<li>整个 AZ 崩溃后不会影响写入数据；</li>
+</ul>
+<p>于是设置 <span class="math inline">\(V = 6,\ V_w = 4,\ V_r = 3,\ z = 3\)</span>，这样每个 AZ 存放 2 个副本。在这样的设置下，一个 AZ 和一个副本崩溃不会影响读性能，且任意两个副本崩溃后也能保持写入可用性。</p>
+<h4 id="数据分片sharding">数据分片(Sharding)</h4>
+<p>对于 Aurora 而言，每个副本都是一个计算机，其内存是有限的，且尽管我们有 6 个副本，我们并没有得到 6 倍大小的内存——每个副本上存放的数据都是一致的。对于数百 TB 甚至更多的数据，需要找一个明智的策略进行存储。</p>
+<p>这一策略是：将数据库的数据，分割到多组(<strong>PG, Protection Group</strong>)存储服务器上，每一个 PG 都包含若干存储服务器作为副本，存该 data page 10GB 的数据。</p>
+<blockquote>
+<p>这里的 PG 是个<strong>逻辑概念</strong>。</p>
+</blockquote>
+<p>Sharding 后，如果要进行 log 处理，则会查看 log 所修改的数据，并找到存储该数据的 PG，并将 log 只发送给该 PG 的副本。这也就意味着，每个 PG 只存储部分 data page 和所有与这些 data page 相关的 log 条目。</p>
+<p>如果某个副本挂了，希望能尽快生成新的副本。事实上，尽管每个 PG 存了某个数据库的 10GB 数据，但一个副本所拥有的存储容量可能高达 10TB，也就是说该副本可能存了成百上千个 PG 的“10GB”，一旦该副本挂了，会牵连到与之相关的所有数据库。一个简单的策略是找到另一台存储服务器，通过拷贝的形式将该副本的所有数据都通过网络传输到新的副本中，但对于 10Gb/s 的网络来说，需要的时间还是太久了。</p>
+<p>Aurora 是这么做的：若某个副本保存了 <span class="math inline">\(PG_1,\ PG_2,\ \dots,\ PG_n\)</span> 的数据，则将这 <span class="math inline">\(n\)</span> 个 PG 的数据并行传输到 <span class="math inline">\(n\)</span> 个新的存储服务器上。也就是说这 <span class="math inline">\(n\)</span> 个存储服务器，每个都会加入到一个新的 PG 中。比起上面的策略，我们获得了 <span class="math inline">\(n\)</span> 倍的性能提升。</p>
+]]></content>
+      <categories>
+        <category>6.824</category>
+      </categories>
+      <tags>
+        <tag>paperReading</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>C Program Guide</title>
+    <url>/ZJU-CLASS/CProgramGuide/</url>
+    <content><![CDATA[<p>一份面向所有初学/入门 C 语言学生的指南。本文旨在帮助读者快速降低编(zuo)程(ti)难度，而不会涉及过多 C 语言语法知识。</p>
+<span id="more"></span>
+<h3 id="代码风格-programming-style">0. 代码风格 Programming Style</h3>
+<p>代码风格好不好就像字写得好不好看一样，如果一个公司招聘文职人员，肯定不要字写得难看的，同理，代码风格糟糕的程序员肯定也是不称职的。虽然编译器不会挑剔难看的代码，只要语法没问题照样能编译通过并运行，但是你并不一定每次都会写出 bugfree 的代码——当你得到错误结果并回过头来 debug 的时候，自己肯定受不了，都不知道自己写的是什么，更别说看出哪里出错了。</p>
+<p>而一段<strong>可读性</strong>非常高的代码不但有助于 debug，还能让完全没接触过这段代码的人（助教）快速读懂。这也是为什么把这一块放在最前面的原因。</p>
+<blockquote>
+<p>对比以下两种代码，显然是前面那种更容易阅读吧</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (hours &lt; <span class="number">24</span> &amp;&amp; minutes &lt; <span class="number">60</span> &amp;&amp; seconds &lt; <span class="number">60</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span>  ( hours   &lt; <span class="number">24</span></span><br><span class="line">   &amp;&amp; minutes &lt; <span class="number">60</span></span><br><span class="line">   &amp;&amp; seconds &lt; <span class="number">60</span></span><br><span class="line">)</span><br><span class="line">&#123;<span class="keyword">return</span>    <span class="literal">true</span></span><br><span class="line">;&#125;         <span class="keyword">else</span></span><br><span class="line">&#123;<span class="keyword">return</span>   <span class="literal">false</span></span><br><span class="line">;&#125;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>总结程序设计实践中的经验，代码风格的要素包括（但不限于）以下几点：</p>
+<ul>
+<li>变量命名</li>
+<li><del>
+表达式与语句
+</del></li>
+<li><del>
+常量的使用
+</del></li>
+<li><del>
+注释的使用
+</del></li>
+<li><strong>缩进</strong></li>
+<li>代码的布局</li>
+</ul>
+<blockquote>
+<del>
+划掉的内容
+</del>
+<p>是我认为初学者不太会接触的，<strong>加粗的内容</strong>是值得重点关注的</p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>ZJU CLASS</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>COPS</title>
+    <url>/6-824/COPS/</url>
+    <content><![CDATA[<p>6.824 的第十二篇论文是 <strong><a href="https://pdos.csail.mit.edu/6.824/papers/cops.pdf">COPS</a></strong>——一种可提供<strong>具有收敛冲突处理的因果一致性</strong>(Causal Plus, Causal+)的 ALPS 键值存储系统，并且具有高可扩展性。在 COPS-GT 中引入的 GET 事务还能够在不锁定或阻塞的情况下获得多个 Key 的一致视图。COPS-GT 也能为常见工作负载提供与 COPS 类似的延迟、吞吐量和扩展性。</p>
+<span id="more"></span>
+<h3 id="cops-架构">COPS 架构</h3>
+<p>COPS(Clusters of Order-Preserving Servers, 保序服务器集群)的 Causal+ 提供以下两个组件</p>
+<ol type="1">
+<li><strong>因果一致性</strong>：确保数据存储尊重操作之间的因果依赖关系。</li>
+<li><strong>收敛冲突处理</strong>：确保副本不会永久性发散，并且对同一 Key 的冲突更新在所有站点上得到相同的处理。</li>
+</ol>
+<p>基于以上两点，Causal+ 可确保 client 看到因果正确、无冲突且始终在进行中的数据存储。</p>
+<p>COPS 有多个数据中心，每个数据中心都由前端服务器和后端 KV 数据存储组成。本地数据中心执行读写操作，在后台以 Causal+ 的顺序跨数据中心复制数据。</p>
+<p><img src="image-20221123152400801.png" alt="image-20221123152400801" style="zoom:67%;" /></p>
+<h3 id="alps-系统与-trade-off">ALPS 系统与 Trade-off</h3>
+<p><a href="https://www.ruanyifeng.com/blog/2018/07/cap.html">CAP 定理</a>证明不存在一个同时满足这三个条件的系统。大多数现代 Web 服务选择牺牲强一致性(<strong>C</strong>onsistency)为代价（取而代之的是因果一致性）来满足可用性(<strong>A</strong>vailability)和分区容错性(<strong>P</strong>artition tolerance)，因为这样做还能够为 client 操作提供低延迟(low <strong>L</strong>atancy)和高可扩展性(high <strong>S</strong>calability)。我们将具有这四个属性的系统称为 ALPS 系统。</p>
+<h3 id="causal-consistency">Causal+ Consistency</h3>
+<blockquote>
+<p>有关因果一致性，具体可参考这篇<a href="(http://zhangtielei.com/posts/blog-distributed-causal-consistency.html)">博客</a>。</p>
+</blockquote>
+<p>考虑 KV 数据存储定义了以下两个基本操作：<code>put (key, val)</code> 和 <code>get (key) = val</code>。模型中的一个重要概念是操作之间的<strong>潜在因果关系</strong>，表示为 <span class="math inline">\(\leadsto\)</span>。这一关系受以下三条规则定义：</p>
+<ol type="1">
+<li><strong>单线程内有序</strong>：如果 a 和 b 是单个执行线程中的两个操作，如果操作 a 发生在操作 b 之前，则 a <span class="math inline">\(\leadsto\)</span> b；</li>
+<li><strong>Gets From</strong>：如果 a 是一个 <code>put</code> 操作，b 是一个 <code>get</code> 操作且返回 a 写入的值，那么 a <span class="math inline">\(\leadsto\)</span> b；</li>
+<li><strong>传递性</strong>：对于操作 a、b 和 c，如果 a <span class="math inline">\(\leadsto\)</span> b 和 b <span class="math inline">\(\leadsto\)</span> c，则有 a <span class="math inline">\(\leadsto\)</span> c；</li>
+</ol>
+<p>下图为一个示例：</p>
+<p><img src="image-20221123154038807.png" alt="image-20221123154038807" style="zoom:67%;" /></p>
+<ul>
+<li>根据<strong>单线程内有序规则</strong>得到 <code>get (y) = 2</code> <span class="math inline">\(\leadsto\)</span> <code>put (x, 4)</code>；</li>
+<li>根据 <strong>Gets From 规则</strong>得到 <code>put (y, 2)</code> <span class="math inline">\(\leadsto\)</span> <code>get (y) = 2</code>；</li>
+<li>根据<strong>传递性规则</strong>得到 <code>put (y, 2)</code> <span class="math inline">\(\leadsto\)</span> <code>put (x, 4)</code>。</li>
+</ul>
+<h4 id="定义">定义</h4>
+<ul>
+<li><p><strong>因果一致</strong>：<code>get</code> 操作返回的值与定义的顺序一致，即写入值的操作必须出现在它之前的所有操作之后。</p>
+<blockquote>
+<p>上图中，<code>put (y, 2)</code> 必须出现在 <code>put (x, 4)</code> 之前，后者又发生在 <code>put (z, 5)</code> 之前。如果 Client2 看到 <code>get (x) = 1</code> 在 <code>get (x) = 4</code> 之后，便违反了因果一致性。</p>
+</blockquote>
+<p>根据博客所述，因果关系是一个<strong>偏序关系</strong>，可能存在 a <span class="math inline">\(\not\leadsto\)</span> b 和 b <span class="math inline">\(\not\leadsto\)</span> a，此时称 a 和 b 是<strong>并发</strong>的。系统可以按任何顺序复制两个不相关的 <code>put</code> 操作，但如果 a 和 b 对同一个 Key 进行 <code>put</code>，那么它们则会<strong>冲突</strong>，最终得到的值是不确定的，此时需要收敛冲突处理。</p></li>
+<li><p><strong>收敛冲突处理</strong>：使用处理函数 <span class="math inline">\(h\)</span> 以相同的方式在所有副本上处理所有冲突的 <code>put</code>。COPS 可以自定义 <span class="math inline">\(h\)</span>，默认使用 <strong>last-writer-wins 规则</strong>，即后来的写入会覆盖较早的写入。</p></li>
+</ul>
+<h4 id="与其它模型对比">与其它模型对比</h4>
+<p>下图展示了几种主流的一致性模型及其一致性强弱关系。</p>
+<p><img src="image-20221123233736790.png" alt="image-20221123233736790" style="zoom:80%;" /></p>
+<ol type="1">
+<li><strong>线性化</strong>：它保持全局、实时排序；</li>
+<li><strong>可串行化</strong>：至少确保全局排序；</li>
+<li><strong>因果一致性</strong>：确保相关操作之间的部分排序；</li>
+<li><strong>FIFO 一致性</strong>：它只保留执行线程内部的顺序，而不是线程之间；</li>
+<li><strong>键可串行化</strong>：这确保对于每个单独的 Key，所有操作都具有全局顺序；</li>
+<li><strong>最终一致性</strong>：副本最终会收敛于某个值。</li>
+</ol>
+<p>前两者无法在 ALPS 系统中实现。</p>
+<h4 id="cops-中实现-causal">COPS 中实现 Causal+</h4>
+<p>COPS 系统中使用两个抽象概念：</p>
+<ol type="1">
+<li><strong>version</strong>：每个 Key 的不同值都能被表示为 <span class="math inline">\(key_{verision}\)</span>，COPS 确保如果 <span class="math inline">\(x_i \leadsto y_j\)</span>，则 <span class="math inline">\(i&lt;j\)</span>。一旦 COPS 中的副本返回 <code>version = i</code> 的 <span class="math inline">\(key_i\)</span>，则 Causal 确保之后只会返回因果序下 <code>version</code> 更大的值；</li>
+<li><strong>dependency</strong>：因果一致性规定如果 <span class="math inline">\(x_i \leadsto y_j\)</span>，则 <span class="math inline">\(y_j\)</span> 依赖于 <span class="math inline">\(x_i\)</span>。COPS 确保仅在其所有依赖项 <span class="math inline">\(x_i\)</span> 操作被复制后才复制对 <span class="math inline">\(y_j\)</span> 的操作。</li>
+</ol>
+<h4 id="可扩展的因果关系">可扩展的因果关系</h4>
+<p>COPS 通过采用以下方法实现了可扩展性：</p>
+<ol type="1">
+<li>每个数据中心的节点负责 Key 空间的不同分区，且系统可以跟踪和强制存储在不同节点上的 Key 之间的依赖关系；</li>
+<li>在元数据中表明依赖关系，这样复制 Key 时，接收方就能在提交前执行依赖性检查。</li>
+</ol>
+<h3 id="cops-系统设计">COPS 系统设计</h3>
+<h4 id="cops-总览">COPS 总览</h4>
+<p>COPS 旨在跨数据中心运行，如下图所示。</p>
+<figure>
+<img src="image-20221124160439714.png" alt="image-20221124160439714" /><figcaption aria-hidden="true">image-20221124160439714</figcaption>
+</figure>
+<p>客户端仅与本地 COPS 集群通信。系统将 Key 空间划分为若干分区，集群包含数据的完整副本，而集群内部节点存放单个分区。</p>
+<p>为了提供与现有最终一致系统类似的 Causal+ 以及资源和性能开销。COPS/COPS-GT 必须做到以下几点：</p>
+<ol type="1">
+<li><strong>最小化一致性保持复制的开销</strong>：通过利用因果依赖性固有的图形结构，无需检查所有依赖项。</li>
+<li>(COPS-GT)<strong>最小化空间需求</strong>：允许存储每个 Key 的多个版本与相关元数据，并使用 GC 来减少空间开销。</li>
+<li>(COPS-GT)<strong>确保快速获取传输操作</strong>：使用 <code>get_trans</code> 算法减少 <code>get_by_version</code> 操作次数。</li>
+</ol>
+<h4 id="cops-键值存储">COPS 键值存储</h4>
+<p>公开的 API 为：<code>get_by_version</code>、<code>put_after</code> 和 <code>dep_check</code>。</p>
+<p>对于 COPS-GT，系统保留旧版本的 KV 对，以支持 GET 事务。</p>
+<h5 id="数据格式">数据格式</h5>
+<p>COPS 中是 <code>&lt; key: &#123;version, value&#125; &gt;</code>；而 COPS-GT 中是 <code>&lt; key: &#123;version, value, deps&#125; &gt;</code>。</p>
+<blockquote>
+<p>其中 <code>deps</code> 字段是多个依赖项 <code>&lt; other_key: version &gt;</code> 的列表。</p>
+</blockquote>
+<h5 id="分区">分区</h5>
+<p>使用一致哈希对 Key 空间进行划分。每个 Key 都使用 Chain Replication 在少量节点上进行复制以保证容错。</p>
+<blockquote>
+<p>即每个 Key 在每个集群中都有一个 Primary 节点。跨所有集群的 Key 的 Primary Set 称为其<strong>等效节点</strong>，等效节点总数与数据中心的数量成正比。</p>
+</blockquote>
+<p>集群内部的 <code>get</code> 和 <code>put</code> 是可线性化的；跨集群操作则异步进行。</p>
+<p>本地完成 Key 的写入后，Primary 将其放入复制队列中并异步发送到其它等效节点。这些节点收到后会执行依赖性检查，确保写入以因果一致的顺序发生，并且不阻塞读。</p>
+<h4 id="cops-客户端库">COPS 客户端库</h4>
+<p>公开的 API 为：<code>get</code>(in COPS) / <code>get trans</code>(in COPS-GT) 和 <code>put</code>。</p>
+<p>客户端 API 由四个操作组成：</p>
+<p><img src="image-20221124183914409.png" alt="image-20221124183914409" style="zoom:67%;" /></p>
+<p>所有函数都有一个<strong>上下文</strong>参数，客户端库使用它跟踪每个操作之间的因果依赖关系。不同版本的 COPS 略有不同。</p>
+<h5 id="cops-gt-中的上下文">COPS-GT 中的上下文</h5>
+<p>客户端库将上下文存储在 <code>&lt; key, version, deps &gt;</code> 表中。客户端使用 <code>ctx_id</code> 引用上下文。</p>
+<ul>
+<li><code>get</code>：库会将该操作的 Key 及其因果关系添加到上下文中。</li>
+<li><code>put</code>：库找出当前上下文中对应 Key 的最新依赖 <code>deps: D</code>；一次成功的写入返回分配给写入值的 <code>version: v</code>。然后客户端库将 <code>&lt; key, v, D &gt;</code> 添加到上下文中。</li>
+</ul>
+<p>上下文包括最近的依赖项与所有的依赖项，如下图所示。</p>
+<p><img src="image-20221124190342458.png" alt="image-20221124190342458" style="zoom:80%;" /></p>
+<p>为了减少跟踪依赖关系所需的<strong>空间开销</strong>，COPS-GT 提供 GC 功能，一旦数据被所有 COPS 副本提交，其依赖关系就会被删除。</p>
+<p>为了减少依赖性检查带来的<strong>时间开销</strong>，作出以下优化：考虑有依赖关系 <span class="math inline">\(a\leadsto b\leadsto c\)</span>，如果提交 <span class="math inline">\(c\)</span> 的节点经过检查得出 <span class="math inline">\(b\)</span> 已提交，则无需检查 <span class="math inline">\(a\)</span> 是否提交。这种必须检查的依赖关系（<span class="math inline">\(b\leadsto c\)</span>）称为<strong>最近依赖关系</strong>，必须在客户端发送请求之前计算出。</p>
+<blockquote>
+<p><code>get_trans</code> 需要所有依赖关系，所以上下文需要存全部依赖。</p>
+</blockquote>
+<h5 id="cops-中的上下文">COPS 中的上下文</h5>
+<p>客户端库只需要知道最近的依赖关系。因为检索到的值在因果序下更新——比它的任何依赖项更接近，故只需存 <code>&lt; key, version &gt;</code> 即可，无需存储依赖项。</p>
+<ul>
+<li><p><code>get</code>：检索到的 <code>&lt; key, version &gt;</code> 被添加到上下文中。</p></li>
+<li><p><code>put</code>：库使用当前上下文作为最近的依赖项，然后清除上下文，仅用本次 <code>put</code> 结果重新填充它。</p>
+<blockquote>
+<p>这个 <code>put</code> 依赖于所有以前的 <code>&lt; key, version&gt;</code>，因此比它们更接近。</p>
+</blockquote></li>
+</ul>
+<h4 id="在-cops-和-cops-gt-中写入">在 COPS 和 COPS-GT 中写入</h4>
+<p>COPS 中的写操作有两个步骤：</p>
+<ol type="1">
+<li><strong>同步</strong>写入本地集群；</li>
+<li><strong>异步</strong>复制到远程集群。</li>
+</ol>
+<p>KV 存储公开以下 API 调用以提供这两种操作：</p>
+<figure>
+<img src="image-20221124202053597.png" alt="image-20221124202053597" /><figcaption aria-hidden="true">image-20221124202053597</figcaption>
+</figure>
+<h5 id="写入本地">写入本地</h5>
+<p>客户端会计算完整的依赖集 <code>deps</code>，并识别出该值的最近依赖 <code>nearest</code>，然后将 <code>put_after</code> 的 <code>version</code> 设为 0。</p>
+<ul>
+<li>在 COPS-GT 中，API 调用必须包含 <code>deps</code>；</li>
+<li>在 COPS 中，只需包括 <code>nearest</code> 且不包括 <code>deps</code>。</li>
+</ul>
+<p>本地集群中的 Primary 为 Key 分配一个版本号并返回给客户端库。</p>
+<p>版本号使用 <strong><a href="https://blog.xiaohansong.com/lamport-logic-clock.html">Lamport 时间戳</a></strong>技术，高位为 Lamport 时钟，低位为唯一的节点标识符。 一旦 Lamport 得到确定，每个 Key 的所有写入的全局顺序也能确定，且隐式采用 last-writer-wins 策略进行收敛冲突处理。</p>
+<blockquote>
+<p>基于 Lamport 的全局排序尊重 COPS 的因果一致性，<em>即</em>如果 <span class="math inline">\(a\leadsto b\)</span>，则必有 <span class="math inline">\(Lamport(a) &lt; Lamport(b)\)</span>；反之不然。</p>
+</blockquote>
+<p><code>put after</code> 操作确保因果序——仅在其依赖列表中的所有条目都已写入后才将值提交给每个集群。</p>
+<h5 id="复制到远程">复制到远程</h5>
+<p>本地写入提交后，Primary 将写入操作异步复制到等效节点。此时 <code>put_after</code> 的调用包含 <code>version</code>。且与本地一样，<code>deps</code> 参数包含在 COPS-GT 中，但不包含在 COPS 中。</p>
+<p>当然，这种方法需要接收方执行依赖性检查——向负责这些依赖项的本地节点发出 <code>dep_check</code>，当节点收到 <code>dep_check</code> 请求时，它会检查其本地状态：</p>
+<ul>
+<li>如果依赖项已提交，它会立即响应该操作；</li>
+<li>反之，它将阻塞直到所需的依赖项被写入。</li>
+</ul>
+<p>仅当对最近依赖项的所有 <code>dep_check</code> 操作都成功时，处理 <code>put_after</code> 的节点才会提交写入的值。计算最近依赖关系的方式确保在提交值之前满足所有依赖关系，这反过来又确保了因果一致性。</p>
+<h4 id="在-cops-中读取">在 COPS 中读取</h4>
+<p>客户端库向本地集群中负责 Key 的节点依次发起 <code>get_by_version</code>：</p>
+<p><img src="image-20221125004741571.png" alt="image-20221125004741571" style="zoom:80%;" /></p>
+<p>此读取可以读取 Key 的任一版本，在 COPS 中总是读取最新版本。收到响应后，客户端库将 <code>&lt; key, version, [deps] &gt;</code> 添加到上下文，并返回结果值。</p>
+<h4 id="cops-gt-中的-get-事务">COPS-GT 中的 GET 事务</h4>
+<p>COPS-GT 提供 <code>get_trans</code> 接口，仅需两轮 <code>get_by_version</code>。算法实现如下。</p>
+<p><img src="image-20221125005327803.png" alt="image-20221125005327803" style="zoom:80%;" /></p>
+<p>如果它检索到的版本 &gt;= 依赖列表中的版本，则该结果的因果依赖关系得到满足。</p>
+<h3 id="垃圾故障和冲突">垃圾、故障和冲突</h3>
+<h4 id="gc-系统">GC 系统</h4>
+<p>COPS/COPS-GT 客户端存储上下文数据，COPS-GT 还保留多个版本的 Key 和依赖项。需要通过 GC 机制防止这些数据无限增长。</p>
+<h5 id="版本-gconly-cops-gt">版本 GC（only COPS-GT）</h5>
+<p>COPS-GT 存储 Key 的旧版本，以响应 <code>get_by_version</code> 请求，但不会存所有版本。新版本写入后，旧版本仍会被保留一段时间，之后，就不会再有 <code>get_by_version</code> 调用请求旧版本，此时可以将旧数据回收。</p>
+<p>而由于 <code>get_trans</code> 的第二轮需要访问旧版本数据，需通过可配置参数 <code>trans_time</code> 限制运行时间。如果超时，客户端库将重试 <code>get_trans</code>。</p>
+<h5 id="依赖-gconly-cops-gt">依赖 GC（only COPS-GT）</h5>
+<p>COPS-GT 存储依赖关系，以允许 GET 事务获取数据存储的一致视图。</p>
+<p>和版本一样，依赖也不会无限存储。其它数据中心提交完写入并等待 <code>trans_time</code> 后回复 ACK 给本地数据中心，一旦得到所有数据中心的 ACK，本地数据中心就会执行清理，并通知其他数据中心也这样做。旧依赖项清理完后，COPS/COPS-GT 可以将 Key 的对应版本设置为 <code>never-depend</code>。</p>
+<h5 id="客户端上下文-gc">客户端上下文 GC</h5>
+<p>客户端库存储上下文来跟踪每个操作之间的因果依赖关系。同理，不需要的可以被删除。</p>
+<p>COPS 通过两种方式进行上下文 GC：</p>
+<ol type="1">
+<li><p>一旦 <code>put_after</code> 所有数据中心被提交，COPS 就会将该 Key 的对应版本标记为 <code>never-depend</code>。客户端库调用 <code>get_by_verision</code> 后删除该项。</p>
+<blockquote>
+<p>这个过程是可传递的：任何一个 <code>never-depend</code> 项所依赖的键必被标记为 <code>never-depend</code>，所以它也可以从上下文中被 GC。</p>
+</blockquote></li>
+<li><p>COPS 节点根据 <code>put_after</code> 操作移除自身依赖列表中 <code>version</code> 早于<strong>全局检查点时间</strong>（整个系统所有节点都满足的最新 Lamport 时间戳）的项，并将此检查点时间返回给客户端库，允许库从上下文中清除这些依赖项。</p>
+<blockquote>
+<p>全局检查点时间的计算：</p>
+<ol type="1">
+<li>节点首先从未完成的 <code>put_after</code> 中，找出管辖 Key 范围内最小的 Lamport 时间戳；</li>
+<li>节点联系其他等效节点，并交换这一信息；</li>
+<li>节点然后将这一信息 gossip 给数据中心内其它节点，最终找出整个 Key 空间的最小 Lamport。</li>
+</ol>
+</blockquote></li>
+</ol>
+<h4 id="容错">容错</h4>
+<h5 id="客户端故障">客户端故障</h5>
+<p>如果客户端出现故障，它只会停止发出新的请求，无需恢复。</p>
+<h5 id="键值节点故障">键值节点故障</h5>
+<p>COPS 使用 ChainReplication 来提供容错，并参考了 FAWN-KV。</p>
+<p>本地操作在之前的论文中有提到。而对于跨集群操作，本地 tail 将 <code>put_after</code> 操作复制到远程 head。远程 head 然后将 <code>dep_check</code> 操作发送到远程 tail。一旦检查完成，值将从 head 沿着链传播到 tail，tail 提交后回复本地数据中心。</p>
+<p>依赖 GC 遵循类似模式；版本 GC 在每个节点上单独完成，并且可以像在单节点情况下一样运行；客户端上下文 GC 的全局检查点时间计算正常运行，并从 tail 处得到。</p>
+<h5 id="数据中心故障">数据中心故障</h5>
+<p>面对此类故障，COPS 继续正常运行，但存在一些 Key 不一致。</p>
+<ul>
+<li><strong>本地故障</strong>：尚未复制的 <code>put_After</code> 操作都将丢失。若数据中心仅网络分区，则只会出现数据不一致直到分区恢复；</li>
+<li><strong>远程故障</strong>：本地复制队列所需的存储将会增长，因为无法将 <code>put_after</code> 操作发送到故障数据中心，COPS/COPS-GT 将无法对这些依赖项进行 GC。系统管理员有两个选择：如果分区可能很快恢复，则允许队列增长；否则重新配置 COPS 以不再使用发生故障的数据中心。</li>
+</ul>
+<h4 id="冲突检测">冲突检测</h4>
+<p>COPS 默认使用 last-writer-wins 策略避免冲突检测，“last” 取决于版本号。</p>
+<p>COPS 也可以为特定应用程序调用自定义收敛冲突处理程序，此时称为 <strong>COPS-CD</strong>。该系统加入了三个新策略：</p>
+<ol type="1">
+<li>所有 <code>put</code> 操作都带有<strong>先前版本</strong>的元数据，其指明在本地集群上可见的最近的先前版本的 Key。</li>
+<li>所有 <code>put</code> 操作都隐式依赖于先前版本，这确保了新版本只会在其先前版本之后编写。这需要一个额外的 <code>dep_check</code> 操作。</li>
+<li>COPS-CD 有一个应用程序指定的收敛冲突处理程序，当检测到冲突时会调用该处理程序。</li>
+</ol>
+<p>COPS-CD 写入 <code>Key</code> 的新版本 <code>new</code> 时会捎带该 Key 的上一个版本 <code>prev</code>，该 Key 的当前可见版本为 <code>curr</code>。当且仅当 <code>prev != curr</code> 时发生冲突。</p>
+<h3 id="总结">总结</h3>
+<p>CPOS 基于因果一致性并进行了良好的扩展：</p>
+<ol type="1">
+<li>利用 Lamport 时间戳分配版本号及基于 Lamport 构建的因果依赖图很好地满足了 Causal+；</li>
+<li>只需至多两轮查询，就能获取一个多 Key 且满足因果约束的视图；</li>
+<li>GC 机制在不破坏 Causal+ 的前提下大大减少空间开销；</li>
+<li>在版本号的技术支持下，last-writer-wins 策略也提供了较好的安全性。</li>
+</ol>
+<p>在不追求线性一致性的应用场景下，因果一致性相比于最终一致性更能保证安全性，而代价仅仅是牺牲一些性能，这是非常有意义的。</p>
+]]></content>
+      <categories>
+        <category>6.824</category>
+      </categories>
+      <tags>
+        <tag>paperReading</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>6.824 Lab4 Sharded Key/Value Service</title>
     <url>/6-824/6.824lab4/</url>
     <content><![CDATA[<p>对于单个副本组而言，所有机器存储共享同一存储空间，机器数量的增加并不会扩大存储能力。而当 kv 对数量不断增长时，副本组的存储能力成为瓶颈。</p>
@@ -316,114 +704,9 @@
       </tags>
   </entry>
   <entry>
-    <title>C Program Guide</title>
-    <url>/ZJU-CLASS/CProgramGuide/</url>
-    <content><![CDATA[<p>一份面向所有初学/入门 C 语言学生的指南。本文旨在帮助读者快速降低编(zuo)程(ti)难度，而不会涉及过多 C 语言语法知识。</p>
-<span id="more"></span>
-<h3 id="代码风格-programming-style">0. 代码风格 Programming Style</h3>
-<p>代码风格好不好就像字写得好不好看一样，如果一个公司招聘文职人员，肯定不要字写得难看的，同理，代码风格糟糕的程序员肯定也是不称职的。虽然编译器不会挑剔难看的代码，只要语法没问题照样能编译通过并运行，但是你并不一定每次都会写出 bugfree 的代码——当你得到错误结果并回过头来 debug 的时候，自己肯定受不了，都不知道自己写的是什么，更别说看出哪里出错了。</p>
-<p>而一段<strong>可读性</strong>非常高的代码不但有助于 debug，还能让完全没接触过这段代码的人（助教）快速读懂。这也是为什么把这一块放在最前面的原因。</p>
-<blockquote>
-<p>对比以下两种代码，显然是前面那种更容易阅读吧</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (hours &lt; <span class="number">24</span> &amp;&amp; minutes &lt; <span class="number">60</span> &amp;&amp; seconds &lt; <span class="number">60</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span>  ( hours   &lt; <span class="number">24</span></span><br><span class="line">   &amp;&amp; minutes &lt; <span class="number">60</span></span><br><span class="line">   &amp;&amp; seconds &lt; <span class="number">60</span></span><br><span class="line">)</span><br><span class="line">&#123;<span class="keyword">return</span>    <span class="literal">true</span></span><br><span class="line">;&#125;         <span class="keyword">else</span></span><br><span class="line">&#123;<span class="keyword">return</span>   <span class="literal">false</span></span><br><span class="line">;&#125;</span><br></pre></td></tr></table></figure>
-</blockquote>
-<p>总结程序设计实践中的经验，代码风格的要素包括（但不限于）以下几点：</p>
-<ul>
-<li>变量命名</li>
-<li><del>
-表达式与语句
-</del></li>
-<li><del>
-常量的使用
-</del></li>
-<li><del>
-注释的使用
-</del></li>
-<li><strong>缩进</strong></li>
-<li>代码的布局</li>
-</ul>
-<blockquote>
-<del>
-划掉的内容
-</del>
-<p>是我认为初学者不太会接触的，<strong>加粗的内容</strong>是值得重点关注的</p>
-</blockquote>
-]]></content>
-      <categories>
-        <category>ZJU CLASS</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>6.824 Lab3 FTkvserver</title>
-    <url>/6-824/6.824lab3/</url>
-    <content><![CDATA[<p>本实验要求在每一个 raft 节点上实现一个 K/V 服务器(server)，向上接受客户端(client)的请求并返回请求结果，向下生成日志应用到 raft 节点中。</p>
-<p>整个模式大概长<a href="https://pdos.csail.mit.edu/6.824/notes/raft_diagram.pdf">这样</a>。</p>
-<p>主要流程是这样的：</p>
-<ol type="1">
-<li>client 寻找对应 raft 节点是 leader 的 server，并发起一个请求(Put/Append/Get)；</li>
-<li>server 收到请求后，调用 raft 的 Start() 函数；</li>
-<li>raft 节点间互相 AppendEntries 之后，将消息 apply 到 applyChannel 里；</li>
-<li>server 从 applyChannel 中取出消息，之后正式将命令应用到数据库中。</li>
-</ol>
-<span id="more"></span>
-<h3 id="part-a-keyvalue-service-without-snapshots">PART A-Key/value service without snapshots</h3>
-<h4 id="发送请求">发送请求</h4>
-<p>由于 Start() 函数会立即返回 isleader 信息，所以如果一个 server 节点调用了 Start() 后发现不是 leader，则返回一个 <strong>ErrWrongLeader</strong></p>
-<p>当且仅当 client RPC 成功并且发送给正确的 leader 后，才算成功；否则：</p>
-<ol type="1">
-<li>If the Clerk sends an RPC to the wrong kvserver, or if it cannot reach the kvserver, the Clerk should re-try by sending to a different kvserver.</li>
-<li>If the operation failed to commit (for example, if the leader was replaced), the server reports an error, and the Clerk retries with a different server.</li>
-</ol>
-<h4 id="server-向下调用">server 向下调用</h4>
-<p>首先是根据 Start() 返回的 isleader 来确定是否需要返回 ErrWrongLeader 错误。若成功，则等待流程 4。</p>
-<p>注意到，在等待的过程中 server 是上了锁的，那必然被阻塞，此时就需要在 startKVserver 的时候额外开启一个叫 Applier() 的 goroutine 来进行 applyChannel 的读取。</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(kv *KVServer)</span></span> Applier() &#123;</span><br><span class="line">    <span class="keyword">for</span> !kv.killed() &#123;</span><br><span class="line">        msg := &lt;-kv.applyCh</span><br><span class="line">        <span class="keyword">if</span> msg.CommandValid &#123;</span><br><span class="line">            <span class="comment">// 应用操作</span></span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> msg.SnapshotValid &#123;</span><br><span class="line">            <span class="comment">// 应用快照</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>同时遇到这样一个问题： 有一个网络分区 [1] | [2，3，4，5]，1 是分区前的 leader，分区后 1 仍然是 leader。第二个分区由于选主导致其 term 大于 1 的 term。 有一个 client A 一直给 [1] 发送请求，某一个请求 （requestID：x，clientID：A）发过去调用 1 的 start 并返回日志所在索引 index 后，网络恢复，[1] 收到新的 leader 消息后执行 appendEntries 并将原先 index 处的日志覆盖，更新 commitindex 后将覆盖后的日志传回 applyCh，而我采用的是 map[commandIndex] chan 的形式，由于同一索引处的日志被覆盖了，导致 server Applier 处理管道发回的错误请求，比如 get 到错误的值 or 未进行 append</p>
-<p>解决方法为：在 arg 中开一个 channel，当 applier 处理完消息时通过该 channel 返回处理结果，同时判断当前 msg 中的 term 和 kv.rf.currentTerm 是否匹配，如果不匹配，说明可能被其他日志覆盖，返回一个 ErrWrongLeader 让上层重发。</p>
-<blockquote>
-<p>发现 6.824 labrpc 的 call 函数在传的时候会把 chan 给弄没掉。于是只能在 server 里 args.ch = make(chan int)，同时为了防止遇到的 chan 是 nil，还要加个判断当前是否为 leader，因为只有 leader 的 chan 是有效的，用 call 发给 follower 后会 arg 里的 chan 会变成 nil</p>
-</blockquote>
-<h4 id="应用到状态机">应用到状态机</h4>
-<p>Applier() 对 applyChannel 进行一个 for 的等待，收到消息后，根据收到消息的命令类型的不同，执行不同的应用操作。</p>
-<blockquote>
-<p>Put(key, value) replaces the value for a particular key in the database, Append(key, arg) appends arg to key's value, and Get(key) fetches the current value for the key. A Get for a non-existent key should return an empty string. An Append to a non-existent key should act like Put.</p>
-</blockquote>
-<p>执行完后，返回消息到 waitchannel[index]，唤醒 server。</p>
-<h4 id="other">Other</h4>
-<ol type="1">
-<li><p>刚开始想到和 Raft 里发送请求投票一样的手段，为每一个 server 开一个 goroutine 去发送 RPC，后来发现最后成功发送的只有一个，其它 goroutine 都是在占 cpu，遂放弃，直接用 for 循环。另外，有时候 leader 会在相当一段时间内保持不变，我们可以保存上一次发送请求成功时的 serverId，认为这是 leader，每次发请求时都可以利用这一信息，避免了不必要的 RPC，加快速度。当 RPC 失败，或发生了 ErrWrongLeader，只需要简单的令 leader 切换到下一个即可（0-&gt;1-&gt;...-&gt;n-1-&gt;0-&gt;...）</p>
-<p><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ck *Clerk)</span></span> SendRequest(args *Args) <span class="type">string</span> &#123;</span><br><span class="line">    ck.mu.Lock()</span><br><span class="line">    <span class="keyword">defer</span> ck.mu.Unlock()</span><br><span class="line">    args.RequestId, args.ClerkId = ck.RequestId, ck.ClerkId</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> &#123;</span><br><span class="line">        reply := &amp;Reply&#123;&#125;</span><br><span class="line">        ok := ck.servers[ck.volatileLeader].Call(<span class="string">&quot;KVServer.HandleRequest&quot;</span>, args, reply)</span><br><span class="line">        <span class="keyword">if</span> ok &amp;&amp; reply.Err != ErrWrongLeader &#123;</span><br><span class="line">            ck.RequestId++</span><br><span class="line">            <span class="keyword">return</span> reply.Value</span><br><span class="line">        &#125;</span><br><span class="line">        ck.volatileLeader = (ck.volatileLeader + <span class="number">1</span>) % <span class="built_in">len</span>(ck.servers)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p></li>
-<li><p>在分区测试中，有可能发生 leader 超时未 apply 的情况（即一个 leader 被分到了 minority 的网络区），此时需要在 server 等待环节加一个 &lt;-time.After() 的信号接受判断，若超时，则直接返回，并且认为超时也是一种“WrongLeader”。</p></li>
-<li><p>lab3A 还要求我们不能执行同一个 client 的重复请求，那么需要在每个 server 上放一个 clientID 到其最近一次命令序号 requestID 的映射，如果 Worker 收到的这个命令序号已经被执行过了，那么就不再执行，直接返回 ErrDuplicated。Get 是否重复执行无所谓，因为它并不会对数据库产生实质性的影响，主要是防止多次 Put/Append 同一个值。</p></li>
-</ol>
-<p>总体代码量比 raft 少太多，但因为论文中并没有给出很详细的指示，就走了很多弯路，以至于绝大多数时间都在 debug...</p>
-<h3 id="part-b-keyvalue-service-with-snapshots">PART B-Key/value service with snapshots</h3>
-<p>本实验要求在 3A 的基础上加上 snapshot 功能。</p>
-<blockquote>
-<p>虽然标的是hard，但代码量更少了</p>
-</blockquote>
-<p>server 不断检测 raftStateSize，如果过大，即当 persist.RaftStateSize() &gt;= kv.maxRaftState 时，将当前 db 状态保存下来，调用 raft 层的 snapshot() 并将 db 状态传入。</p>
-<p>要实现有两个函数：</p>
-<ol type="1">
-<li><strong>MakeSnapshot()</strong> ：当 raftStateSize 过大时保存 db 状态。</li>
-<li><strong>ApplySnapshot()</strong> ：raft 层将 snapshotValid 发到 applyCh，被 server 接收到后执行的操作。</li>
-</ol>
-<blockquote>
-<p>persist 里的 raftstate 和 index 没有直接关系，所以不能用在 snapshot 里的 index 参数。</p>
-</blockquote>
-]]></content>
-      <categories>
-        <category>6.824</category>
-      </categories>
-      <tags>
-        <tag>lab</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>CRAQ</title>
     <url>/6-824/CRAQ/</url>
-    <content><![CDATA[<p>6.824 的第五篇论文是 <strong>CRAQ</strong>——一种以读取为主的工作负载的高吞吐量链式复制。它对原先的 Chain Replication 进行了一定的改进，在保持强一致性的同时大大提高了读取吞吐量。通过在所有对象副本之间分配负载，CRAQ 随链大小线性扩展，而不会增加一致性协调。</p>
+    <content><![CDATA[<p>6.824 的第五篇论文是 <strong><a href="https://pdos.csail.mit.edu/6.824/papers/cr-osdi04.pdf">CRAQ</a></strong>——一种以读取为主的工作负载的高吞吐量链式复制。它对原先的 Chain Replication 进行了一定的改进，在保持强一致性的同时大大提高了读取吞吐量。通过在所有对象副本之间分配负载，CRAQ 随链大小线性扩展，而不会增加一致性协调。</p>
 <span id="more"></span>
 <h3 id="chain-replication">Chain Replication</h3>
 <p>在传统的 CR 策略中，所有服务器按照链排列，第一个服务器称为 <strong>HEAD</strong>，最后一个服务器称为 <strong>TAIL</strong>。HEAD 处理所有写请求，TAIL 处理所有读请求。写请求沿链传播，TAIL 收到后会返回 ack。</p>
@@ -518,7 +801,7 @@
   <entry>
     <title>FaRM</title>
     <url>/6-824/FaRM/</url>
-    <content><![CDATA[<p>6.824 的第九篇论文是 <strong>FaRM</strong>——一个通过为分布式事务提供序列化、高性能、持久性和高可用性的<strong>主存分布式计算平台</strong>。</p>
+    <content><![CDATA[<p>6.824 的第九篇论文是 <strong><a href="https://pdos.csail.mit.edu/6.824/papers/farm-2015.pdf">FaRM</a></strong>——一个通过为分布式事务提供序列化、高性能、持久性和高可用性的<strong>主存分布式计算平台</strong>。</p>
 <span id="more"></span>
 <p>FaRM 利用以下两种<strong>硬件趋势</strong>做到这一点：</p>
 <ul>
@@ -695,7 +978,7 @@
   <entry>
     <title>Frangipani</title>
     <url>/6-824/Frangipani/</url>
-    <content><![CDATA[<p>6.824 的第七篇论文是 <strong>Frangipani</strong>——一种建立在 Petal（一种可扩展、高可用性、自动管理的分布式存储服务）上的可扩展的分布式文件系统，并使用分布式锁来确保一致性。</p>
+    <content><![CDATA[<p>6.824 的第七篇论文是 <strong><a href="https://pdos.csail.mit.edu/6.824/papers/thekkath-frangipani.pdf">Frangipani</a></strong>——一种建立在 Petal（一种可扩展、高可用性、自动管理的分布式存储服务）上的可扩展的分布式文件系统，并使用分布式锁来确保一致性。</p>
 <span id="more"></span>
 <h3 id="frangipani-初探">Frangipani 初探</h3>
 <h4 id="特点">特点</h4>
@@ -743,9 +1026,103 @@
       </tags>
   </entry>
   <entry>
+    <title>Spark</title>
+    <url>/6-824/SPARK/</url>
+    <content><![CDATA[<p>6.824 的第十篇论文是 <strong><a href="https://pdos.csail.mit.edu/6.824/papers/zaharia-spark.pdf">Spark</a></strong>——一个基于弹性分布式数据集(<strong>Resilient Distributed Dataset, RDD</strong>)的容错数据处理框架，能够帮助用户简单的开发快速，统一的大数据应用，对数据进行，协处理，流式处理，交互式分析等。</p>
+<span id="more"></span>
+<h3 id="背景">背景</h3>
+<p>大多数计算框架在处理需要重复使用中间结果的问题（如迭代机器学习和图算法）时，重用数据的唯一方法是将其写入外存，这会导致大量开销，从而效率低下。然而，当前能解决该问题的专用计算框架只支持特定的计算模式，却没有为更一般的数据重用提供抽象。</p>
+<p>于是 RDD 被提出。这是一种容错的分布式内存抽象，它允许用户将中间结果保存在内存中以实现高效的数据重用，同时控制其分区以优化数据放置，并支持广泛的计算模式，从而提供高性能与高兼容性。</p>
+<blockquote>
+<p>但 RDD 不太适合对共享状态进行异步细粒度更新的应用程序，例如 Web 应用程序的存储系统或增量 Web 爬虫。使用执行传统更新日志记录和数据检查点的系统更有效。</p>
+</blockquote>
+<p>与之前的系统相比，RDD 提供了一个基于<strong>粗粒度</strong>变换(<strong>transformation, Trans</strong>)的接口，将相同的变换操作应用于多个数据项。只要记录下用于构建数据集的 Trans 操作，就能在一个分区丢失时很快地恢复数据，而无需进行昂贵的复制。<strong>容错性</strong>于是得到了保证。</p>
+<h3 id="rdd">RDD</h3>
+<p>RDD 本质上是一个<strong>只读</strong>且<strong>分区</strong>的记录集合。Spark 将 RDD 表示为对象，使用对象的方法来操作 RDD：</p>
+<ul>
+<li><p><strong>Transformation/Trans</strong>：基于持久化存储中的源数据或其他 RDD 派生出新的 RDD。如 map(), filter(), join()；</p></li>
+<li><p><strong>Actions/Acts</strong>：对 RDD 中的数据进行计算并将计算结果返回给上层或导出到存储系统。如 count(), collect(), save()；</p>
+<p><img src="image-20221029183028035.png" alt="image-20221029183028035" style="zoom:60%;" /></p>
+<blockquote>
+<p>Trans 不会触发 Spark；只有在首次进行 Acts 时，Spark 才真正开始运作并调度计算任务。这是典型的<strong>惰性计算</strong>。</p>
+</blockquote></li>
+</ul>
+<p>read-only 属性决定了 RDD 只能通过通过 Trans 派生而来。RDD 会记录足够多的 Trans 信息（比如是从哪个 RDD 派生）， 即 <strong>Lineage</strong>，以便在分区丢失时进行数据恢复，且只恢复丢失的那个分区。而如果 RDD 丢失了 Lineage 信息，它将不能被任何程序调用。下图为一个包含 3 个 Trans 的 Lineage 图：</p>
+<p><img src="image-20221029164150596.png" alt="image-20221029164150596" style="zoom:80%;" /></p>
+<p>用户还可以控制 RDD 的另外两个方面：</p>
+<ol type="1">
+<li><strong>持久性</strong>：用户可以调用 <strong>persist</strong> 方法来持久化 RDD 以重用。 Spark 默认将 RDD 持久化在内存中，但如果 RAM 不足，则会 split 到磁盘。通过修改 persist 方法中的 <strong>flag</strong>，用户还可以请求其他持久化策略。还可以在每个 RDD 上设置一个持久化优先级，以指定哪些内存中的数据应该首先 split 到磁盘。</li>
+<li><strong>分区</strong>：用户可以要求基于每条记录中的 key 将 RDD 的元素跨机器分区。</li>
+</ol>
+<h4 id="rdd-作为分布式内存抽象的优势">RDD 作为分布式内存抽象的优势</h4>
+<p><img src="image-20221029183627267.png" alt="image-20221029183627267" style="zoom:67%;" /></p>
+<p>分布式共享内存(Distributed Shared Memory, DSM) 系统是一个非常通用的抽象，但是这种通用性使得在集群上难以实现高效和容错的方式。RDD 和 DSM 之间的区别在以下几点：</p>
+<ol type="1">
+<li>RDD 只能通过粗粒度 Trans 来创建，这限制了 RDD 只能批量执行写入，但能通过 Lineage 实现更有效的容错；而 DSM 允许对每个内存位置进行读写，但一旦数据损坏，所有数据都要重新还原或重做。</li>
+<li>RDD 允许系统启动 backups 来并行执行慢节点的任务从而缓解短板；而在 DSM 中慢节点会拖累所有节点。</li>
+</ol>
+<p>RDD 还有两大优势：</p>
+<ol type="1">
+<li>在 RDD 的批量操作中，可以通过物理上更近的节点调度任务以提高性能。</li>
+<li>当没有足够的内存来存储 RDD 时，溢出的分区可以存储在磁盘上，并将提供与当前数据并行系统相似的性能。</li>
+</ol>
+<h4 id="spark-集群">Spark 集群</h4>
+<p>Spark 由 Driver 程序启动，并将任务分发至多个 Worker 节点。Driver 跟踪 RDD 的 Lineage；Worker 将 RDD 分区存储在 RAM 中。如下图所示：</p>
+<p><img src="image-20221029192204791.png" alt="image-20221029192204791" style="zoom:80%;" /></p>
+<h4 id="rdd-表示">RDD 表示</h4>
+<p>一个 RDD 由以下部分组成：</p>
+<ul>
+<li>数据集的原子分区；</li>
+<li>对父 RDD 的依赖；</li>
+<li>基于父分区计算当前分区的 Trans 函数；</li>
+<li>分区方案和数据地址相关的元数据。</li>
+</ul>
+<h4 id="rdd-依赖">RDD 依赖</h4>
+<p>RDD 在物理形式上是分区的，其完整数据被分散在集群内若干机器的内存上。在利用 Trans 进行派生时，根据 Trans 操作的不同， 子 RDD 会与父 RDD 产生不同依赖关系：</p>
+<ul>
+<li><strong>Narrow Dependency</strong>：每个父分区最多生成一个子分区，如 map(), filter()；</li>
+<li><strong>Wide Dependency</strong>：每个父分区能够生成多个子分区，而每个子分区可能都只依赖各个父分区中的一部分，如 groupBy(), join()。</li>
+</ul>
+<p><img src="image-20221029202838415.png" alt="image-20221029202838415" style="zoom:80%;" /></p>
+<p>进行上述区分有以下两点好处：</p>
+<ol type="1">
+<li><strong>数据传输</strong>：Narrow Dependency 的每个父分区只会传入到一个子分区中，可以在一个节点内流水线式地完成转换；而 Wide Dependency 需要将父分区的数据传输到多个子分区中，往往有 shuffle 操作。</li>
+<li><strong>故障恢复</strong>：Narrow Dependency 下的节点故障后的恢复效率更高，且可以在不同的节点上并行进行；而在 Wide Dependency 中，单个故障节点需要多个分区联合执行恢复，且对父分区的重新计算会产生冗余数据。</li>
+</ol>
+<h3 id="任务调度">任务调度</h3>
+<p><img src="image-20221029235718195.png" alt="image-20221029235718195" style="zoom:80%;" /></p>
+<p>每当用户在 RDD 上运行 Acts 时，调度器(<strong>Scheduler</strong>)根据 Lineage 图与该 RDD 的依赖关系，对不同 Acts 过程的执行进行阶段(<strong>stage</strong>)划分，如上图所示。stage 的<strong>划分依据</strong>即宽窄依赖：从后往前，遇到宽依赖的 Acts 便进行划分。之后，Scheduler 便生成任务(<strong>task</strong>)并将其分配给不同节点。</p>
+<p>task 的分配基于<strong>数据局部性</strong>。如果 task 需要的分区存储在某个节点的内存中，则将其发送到该节点；否则，将 task 发送给 RDD 指定的 preferred 节点。对于 WD，在持有父分区的节点上保存中间产物以加速故障恢复。</p>
+<p>一旦 task 失败，只要它的父 RDD 仍然可用，Spark 就会在另一个节点上重新执行该 task。反之，则根据 Lineage 图重新生成父 RDD，随后再执行任务即可。目前 Spark 还不能容忍 Scheduler 的故障，所以一旦 Scheduler 挂了，所有的工作也白费了。</p>
+<h3 id="内存管理">内存管理</h3>
+<p>Spark 为 RDD 持久化存储提供了三种方案：</p>
+<ol type="1">
+<li><strong>内存中的反序列化 Java 对象</strong>：这提供了最快的性能，因为 JVM 可以在本地访问每个 RDD 元素；</li>
+<li><strong>内存中的序列化数据</strong>：这允许用户在空间有限时选择比 Java 对象图更节省内存的表示，但会降低性能；</li>
+<li><strong>磁盘存储</strong>：这对于那些太大而无法保存在 RAM 中但每次使用时重新计算成本高昂的 RDD 很有用；</li>
+</ol>
+<p>当计算出一个新的 RDD 分区但没有足够的空间来存储它时，会使用 <strong>LRU</strong> 策略进行内存回收，以给新分区提供空间。除此之外，还可以通过设置每个 RDD 的持久性优先级提供进一步的控制。</p>
+<h3 id="检查点">检查点</h3>
+<p>前文提到 Lineage 可以有效进行故障恢复，但对于具有长 Lineage 链的 RDD 则容易耗费太多时间，无法体现较好性能。将一些 <strong>checkpoint</strong> 持久化到存储能很好的解决此问题。</p>
+<p>一般来说，检查点对于 WD 的长 Lineage 图很有用，因为集群中的节点故障可能会导致每个父 RDD 丢失一些数据片段，需要完全重新计算。而对于对 ND 的 RDD，checkpoint 则没那么必要，如果一个节点发生故障，这些 RDD 中丢失的分区可以在其他节点上并行重新计算，而成本只是复制整个 RDD 的一小部分。</p>
+<p>Spark 目前提供了一个用于检查点的 API，将决策权留给了用户，即 <strong>REPLICATE</strong> 标志。</p>
+<figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">rdd.persist(<span class="type">REPLICATE</span>)</span><br></pre></td></tr></table></figure>
+<p>RDD 的 read-only 性质使得它们比一般的共享内存更容易实现 checkpoint，因为一致性不是问题，RDD 可以在后台创建，而不需要程序暂停或分布式快照方案。</p>
+<h3 id="总结">总结</h3>
+<p>RDD 是一种分布式内存抽象，允许用户将中间结果保存在内存中以实现高效的数据重用，同时支持广泛的计算模式。</p>
+<p>RDD 利用了 Lineage 大大简化了节点失效后的数据恢复过程。</p>
+]]></content>
+      <categories>
+        <category>6.824</category>
+      </categories>
+      <tags>
+        <tag>paperReading</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>GFS</title>
     <url>/6-824/GFS/</url>
-    <content><![CDATA[<p>6.824 的第一篇论文是 Google “<strong>三驾马车</strong>”之一的 <strong>GFS</strong>(Google File System)——一个用于大型分布式数据密集型应用程序的可扩展分布式文件系统。</p>
+    <content><![CDATA[<p>6.824 的第一篇论文是 Google “<strong>三驾马车</strong>”之一的 <strong><a href="https://pdos.csail.mit.edu/6.824/papers/gfs.pdf">GFS</a></strong>(Google File System)——一个用于大型分布式数据密集型应用程序的可扩展分布式文件系统。</p>
 <span id="more"></span>
 <h3 id="问题的提出背景">问题的提出背景</h3>
 <ol type="1">
@@ -987,7 +1364,7 @@
   <entry>
     <title>Memcache</title>
     <url>/6-824/Memcache/</url>
-    <content><![CDATA[<p>6.824 的第十一篇论文基于 <strong>Memcache</strong>——一款高性能的分布式内存对象缓存系统，以低成本提供对共享存储池的低延迟访问。Facebook 扩展了 Memcache 的架构，大大提高了性能与内存效率。</p>
+    <content><![CDATA[<p>6.824 的第十一篇论文基于 <strong><a href="https://pdos.csail.mit.edu/6.824/papers/memcache-fb.pdf">Memcache</a></strong>——一款高性能的分布式内存对象缓存系统，以低成本提供对共享存储池的低延迟访问。Facebook 扩展了 Memcache 的架构，大大提高了性能与内存效率。</p>
 <span id="more"></span>
 <p>Facebook 的业务场景中决定了其工作负载以<strong>读取</strong>为主，在该情况下对数据进行缓存拥有显著优势。此外，其读取操作从多种来源（MySQL、HDFS 等）获取数据，这种异构性需要一种灵活的缓存策略，能够存储来自不同来源的数据。之所以选择 Memcache 是因为其提供的 api 简单（<code>Get, Set, Delete</code>）。</p>
 <p>memcache 的相关操作如下图所示。</p>
@@ -1109,91 +1486,101 @@
       </tags>
   </entry>
   <entry>
-    <title>Spark</title>
-    <url>/6-824/SPARK/</url>
-    <content><![CDATA[<p>6.824 的第十篇论文是 <strong>Spark</strong>——一个基于弹性分布式数据集(<strong>Resilient Distributed Dataset, RDD</strong>)的容错数据处理框架，能够帮助用户简单的开发快速，统一的大数据应用，对数据进行，协处理，流式处理，交互式分析等。</p>
-<span id="more"></span>
-<h3 id="背景">背景</h3>
-<p>大多数计算框架在处理需要重复使用中间结果的问题（如迭代机器学习和图算法）时，重用数据的唯一方法是将其写入外存，这会导致大量开销，从而效率低下。然而，当前能解决该问题的专用计算框架只支持特定的计算模式，却没有为更一般的数据重用提供抽象。</p>
-<p>于是 RDD 被提出。这是一种容错的分布式内存抽象，它允许用户将中间结果保存在内存中以实现高效的数据重用，同时控制其分区以优化数据放置，并支持广泛的计算模式，从而提供高性能与高兼容性。</p>
+    <title>Zookeeper</title>
+    <url>/6-824/Zookeeper/</url>
+    <content><![CDATA[<p>6.824 的第四篇论文是 <strong><a href="https://pdos.csail.mit.edu/6.824/papers/zookeeper.pdf">ZooKeeper</a></strong>——用于协调分布式应用程序进程，同时提供消息群发、共享寄存器和分布式锁等集中式服务。</p>
 <blockquote>
-<p>但 RDD 不太适合对共享状态进行异步细粒度更新的应用程序，例如 Web 应用程序的存储系统或增量 Web 爬虫。使用执行传统更新日志记录和数据检查点的系统更有效。</p>
+<p>关于“ZooKeeper”这个项目的名字，考虑到之前内部很多项目都是使用动物的名字来命名的，Yahoo 的工程师希望给这个项目也取一个动物的名字。时任研究院的首席科学家 Raghu Ramakrishnan 开玩笑地说：“再这样下去，我们这儿就变成动物园了！”此话一出，大家纷纷表示就叫动物园管理员吧一一一因为各个以动物命名的分布式组件放在一起，Yahoo 的整个分布式系统看上去就像一个大型的动物园了，而 Zookeeper 正好要用来进行分布式环境的协调一一于是，Zookeeper 的名字也就由此诞生了。</p>
 </blockquote>
-<p>与之前的系统相比，RDD 提供了一个基于<strong>粗粒度</strong>变换(<strong>transformation, Trans</strong>)的接口，将相同的变换操作应用于多个数据项。只要记录下用于构建数据集的 Trans 操作，就能在一个分区丢失时很快地恢复数据，而无需进行昂贵的复制。<strong>容错性</strong>于是得到了保证。</p>
-<h3 id="rdd">RDD</h3>
-<p>RDD 本质上是一个<strong>只读</strong>且<strong>分区</strong>的记录集合。Spark 将 RDD 表示为对象，使用对象的方法来操作 RDD：</p>
-<ul>
-<li><p><strong>Transformation/Trans</strong>：基于持久化存储中的源数据或其他 RDD 派生出新的 RDD。如 map(), filter(), join()；</p></li>
-<li><p><strong>Actions/Acts</strong>：对 RDD 中的数据进行计算并将计算结果返回给上层或导出到存储系统。如 count(), collect(), save()；</p>
-<p><img src="image-20221029183028035.png" alt="image-20221029183028035" style="zoom:60%;" /></p>
+<span id="more"></span>
+<h4 id="协调服务">协调服务</h4>
+<p>ZooKeeper 采用的协调形式有：配置、组成员、领导者选举和锁。由于实现了更强大的原语的服务可以用来实现不那么强大的原语，ZooKeeper 不再在服务端实现特定原语，而是公开一个 API，令开发者实现自己的原语，为协调提供灵活性。</p>
+<p>ZooKeeper 在设计 API 时避免了阻塞原语，转而实现简单的<strong>无等待数据对象</strong>，同时也需要保证所有操作按客户端顺序 <strong>FIFO</strong> 以及<strong>可线性化的写入</strong>。</p>
+<p>ZooKeeper 服务由一组使用 <strong>Replicate</strong> 的服务器组成（实际上有点像 Raft），同时利用简单的<strong>管道</strong>架构来实现高吞吐和低延迟——既能以 FIFO 顺序从单个客户端执行操作，又能使其能够异步提交操作。</p>
+<p>为了保证更新操作满足<strong>线性化</strong>，ZooKeeper 采用基于领导者的原子广播协议 <strong>Zab</strong>；读取操作在本地处理，无需排序。</p>
+<p>ZooKeeper 使用<strong>监视机制</strong>使客户端能够缓存数据，同时在给定数据对象更新时得到通知。</p>
+<h4 id="znode">Znode</h4>
+<p>ZooKeeper 向其客户端提供一组数据节点(<strong>znode</strong>)的抽象，这些节点根据分层名称空间进行组织。如下图：</p>
+<p><img src="image-20221008155321613.png" alt="image-20221008155321613" style="zoom:70%;" /></p>
+<p>所有 znode 都存储数据，且除了临时节点(<strong>ephemeral znode</strong>)外的所有 znode 都可以有子节点。</p>
+<p>有以下两种 znode：</p>
+<ol type="1">
+<li><strong>Regular</strong>：显式创建和删除。</li>
+<li><strong>Ephemeral</strong>：创建后，或显示删除，或在会话终止时自动删除。</li>
+</ol>
+<p>创建 znode 时，客户端可以设置一个 <code>SEQUENTIAL</code> 标志，这种 znode 具有全局单调增的值。</p>
+<p>ZooKeeper 实现监视(<strong>watch</strong>)机制允许 client 及时接收数据更改通知，这个通知是一次性的，一旦触发或会话关闭，它们就会失效。</p>
+<p><strong>数据模型</strong>：本质上是一个具有简化 api 且只有完整数据读写的文件系统，或是具有分层 key 的 key-value 表。<strong>分层命名空间</strong>对于为不同应用程序的命名空间分配子树以及分配访问权限很有用。事实上，znode 的设计并非为了一般的数据存储，而是提供一个到客户端应用程序映射的抽象，通常对应于用于协调目的的元数据，如一些可用于元数据或分布式计算中的配置信息。</p>
+<p><strong>会话</strong>：client 连接到 ZooKeeper 并启动会话，用于标识 client。</p>
+<h4 id="客户端-api">客户端 API</h4>
+<h5 id="createpath-data-flags">create(path, data, flags)</h5>
+<p>创建一个路径名为 <code>path</code> 的 znode，并将 <code>data</code> 存储在其中，返回该 znode 的名称。<code>flag</code> 代表 znode 类型。</p>
+<h5 id="deletepath-version">delete(path, version)</h5>
+<p>若 <code>path</code> 上的 znode 版本号等于 <code>version</code>，则将其删除。</p>
+<h5 id="existspath-watch">exists(path, watch)</h5>
+<p>若 <code>path</code> 上的 znode 存在，则返回 true；反之返回 false。<code>watch</code> 使得客户端在该 znode 上设置一个监视器。</p>
+<h5 id="getdatapath-watch">getData(path, watch)</h5>
+<p>返回 <code>path</code> 上 znode 关联的数据和元数据。若 znode 不存在，则不设置监视器。</p>
+<h5 id="setdatapath-data-version">setData(path, data, version)</h5>
+<p>若 <code>path</code> 上的 znode 版本号等于 <code>version</code>，则将 <code>data</code> 写入。</p>
+<h5 id="getchildrenpath-watch">getChildren(path, watch)</h5>
+<p>返回 <code>path</code> 上 znode 的子节点集合。</p>
+<h5 id="sycnpath">sycn(path)</h5>
+<p>等待所有未完成的更新，<code>path</code> 没啥用。</p>
 <blockquote>
-<p>Trans 不会触发 Spark；只有在首次进行 Acts 时，Spark 才真正开始运作并调度计算任务。这是典型的<strong>惰性计算</strong>。</p>
+<p>以上 api 都提供了同步和异步版本，若 <code>version = -1</code>，则不进行版本检查。</p>
+</blockquote>
+<h4 id="zookeeper-保证">ZooKeeper 保证</h4>
+<ul>
+<li><p><strong>线性化写入</strong>：所有更新 ZooKeeper 状态的请求都是可序列化的，并且服从优先级。</p></li>
+<li><p><strong>FIFO 客户端顺序</strong>：所有请求都按照客户端发送的顺序执行。</p></li>
+</ul>
+<p>要实现这两个保证，需要选出一个领导者来指挥工作进程。而当一个新的领导者接管系统时，它必须修改配置，然后通知其它进程。这样的话，需要满足以下两点：</p>
+<ol type="1">
+<li>领导者在修改配置时，其它进程无法使用正在被修改的配置；</li>
+<li>若领导者在完全修改完配置前崩溃，则其他进程无法使用这一未完全更新的配置。</li>
+</ol>
+<p>ZooKeeper 使用 <strong>ready znode</strong> 来满足上述约束，其他进程仅在 ready 存在期间使用配置。领导者通过删除 ready、更新配置 znode 和创建 ready 来更改配置。若一个进程看到了 ready znode，它必能看到新领导者所做的所有配置修改；若领导者在创建 ready 前崩溃，则其他进程就知道配置尚未完全更新完毕，也不会使用该配置。</p>
+<p>如果一个进程在新领导者修改配置前看到 ready，而在更改配置时读取配置，则会产生问题。为了解决这一问题，采用 <strong>watch</strong> 机制，即客户端会在读取任何新配置前收到更新通知。</p>
+<blockquote>
+<p>ZooKeeper 放弃了线性一致读，使得读请求能够分布在副本上，以提高性能。但由于写请求是线性化的，而且任何一个客户端的请求都会按照其指定的顺序进行，故所有写请求都是按客户端确定的顺序执行的，且每个读请求必然要在某个特定的 Log 点执行，即如果日志没有到这个点，它不会执行读请求，同时后续读请求必须在不早于当前读请求的位置进行。从而ZooKeeper 也能保证它（定义）的一致性。</p>
+</blockquote>
+<p>ZooKeeper 还有以下两个保证：</p>
+<ul>
+<li><strong>活跃性</strong>：若大多数 ZooKeeper Server 处于活跃状态，则服务可用。</li>
+<li><strong>持久性</strong>：若 ZooKeeper Server 成功响应了更改请求，只要多数服务器最终能恢复，则该更改就会持续存在。</li>
+</ul>
+<h4 id="原语">原语</h4>
+<h5 id="配置管理">配置管理</h5>
+<p>配置存储在 znode <span class="math inline">\(z_c\)</span> 中，进程通过读取 <span class="math inline">\(z_c\)</span> 并通过 watch 标志来获取配置更新通知。</p>
+<h5 id="会合">会合</h5>
+<p>将 master 信息放在 zonode <span class="math inline">\(z_r\)</span> 中，以便 worker 寻找。</p>
+<h5 id="组成员关系">组成员关系</h5>
+<p>当组成员进程启动时，会在一个指定的 znode <span class="math inline">\(z_g\)</span> （用以表示组）下创建一个临时子 znode，该子 znode 存放进程信息。若进程结束，则该子 znode 自动删除。故可通过 <span class="math inline">\(z_g\)</span> 来获取该组的所有组成员信息。</p>
+<h5 id="简单锁">简单锁</h5>
+<ol type="1">
+<li><p><strong>锁文件</strong>——最简单的实现：为了获取锁，client 会尝试创建 ephemeral znode，若成功则持有锁；若 znode 存在，则说明有其它 client 正在持有锁，设置 watch 后进入等待状态，一旦该 znode 删除，则会再次尝试获得锁。</p>
+<blockquote>
+<p>这个策略会受到<strong>羊群效应</strong>(Herd Effect)的影响：若有很多客户端在等待获取锁，即便只有一个客户端可以获取锁，当锁被释放时，所有客户端都会尝试获得锁，就像羊群一样阻塞着。当有 <span class="math inline">\(n\)</span> 个客户端在等待时，最坏情况下需要 <span class="math inline">\(O(n^2)\)</span> 的尝试。</p>
 </blockquote></li>
-</ul>
-<p>read-only 属性决定了 RDD 只能通过通过 Trans 派生而来。RDD 会记录足够多的 Trans 信息（比如是从哪个 RDD 派生）， 即 <strong>Lineage</strong>，以便在分区丢失时进行数据恢复，且只恢复丢失的那个分区。而如果 RDD 丢失了 Lineage 信息，它将不能被任何程序调用。下图为一个包含 3 个 Trans 的 Lineage 图：</p>
-<p><img src="image-20221029164150596.png" alt="image-20221029164150596" style="zoom:80%;" /></p>
-<p>用户还可以控制 RDD 的另外两个方面：</p>
-<ol type="1">
-<li><strong>持久性</strong>：用户可以调用 <strong>persist</strong> 方法来持久化 RDD 以重用。 Spark 默认将 RDD 持久化在内存中，但如果 RAM 不足，则会 split 到磁盘。通过修改 persist 方法中的 <strong>flag</strong>，用户还可以请求其他持久化策略。还可以在每个 RDD 上设置一个持久化优先级，以指定哪些内存中的数据应该首先 split 到磁盘。</li>
-<li><strong>分区</strong>：用户可以要求基于每条记录中的 key 将 RDD 的元素跨机器分区。</li>
+<li><p><strong>无羊群效应的简单锁</strong>：所有请求锁的 client 排成一排，按请求到达的顺序<strong>链式</strong>获得锁。每个 client 按照 <code>SEQUENTIAL</code> 在 <span class="math inline">\(z_l\)</span> 下创建 ephemeral znode，并获取 <span class="math inline">\(z_l\)</span> 所有子节点的信息。当且仅当其序号为 <span class="math inline">\(z_l\)</span> 所有子节点的序号中最低时，获得锁；否则，client 会 watch 前一个 znode。释放锁时只需要删除对应 znode 即可。</p>
+<p><code>Lock</code></p>
+<p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">n = create(l + &#x27;/lock-&#x27;, EPHEMERAL | SEQUENTIAL)</span><br><span class="line">C = getChildren(l, false)</span><br><span class="line">if n is lowest znode in C, exit</span><br><span class="line">p = znode in C ordered just before n</span><br><span class="line">if exists(p, true), wait for watch event</span><br><span class="line">goto 2</span><br></pre></td></tr></table></figure></p>
+<p><code>Unlock</code></p>
+<p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">delete(n)</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>前一个 znode 消失后还需要获取 <span class="math inline">\(z_l\)</span> 所有子节点的信息，并检查自己的序号是否为最小，因为有可能只是前一个 znode 崩溃，而有更小的 znode 持有锁。</p>
+<p>这样一来，每次释放锁时只会唤醒一个进程，从而将复杂度降为 <span class="math inline">\(O(n)\)</span></p>
+</blockquote></li>
+<li><p><strong>读写锁</strong>：写锁同上。读锁需要等待前面的写锁全部结束后才能持有。</p>
+<p><code>Write Lock</code></p>
+<p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">n = create(l + &#x27;/write-&#x27;, EPHEMERAL | SEQUENTIAL)</span><br><span class="line">C = getChildren(l, false)</span><br><span class="line">if n is lowest znode in C, exit</span><br><span class="line">p = znode in C ordered just before n</span><br><span class="line">if exists(p, true), wait for watch event</span><br><span class="line">goto 2</span><br></pre></td></tr></table></figure></p>
+<p><code>Read Lock</code></p>
+<p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">n = create(l + &#x27;/read-&#x27;, EPHEMERAL | SEQUENTIAL)</span><br><span class="line">C = getChildren(l, false)</span><br><span class="line">if no write znodes lower than n in C, exit</span><br><span class="line">p = write znode in C ordered just before n</span><br><span class="line">if exists(p, true), wait for watch event</span><br><span class="line">goto 3</span><br></pre></td></tr></table></figure></p></li>
+<li><p><strong>双屏障</strong>：使客户端能够同步计算的开始与结束。用 znode <span class="math inline">\(b\)</span> 表示 ZooKeeper 中的屏障。每个进程在准备开始时，会在 <span class="math inline">\(b\)</span> 下注册——创建一个子 znode，而在准备退出时注销——删除该子 znode。当 <span class="math inline">\(b\)</span> 的子节点数超过一定数量后，所有注册的进程都会真正开始计算，只有当 <span class="math inline">\(b\)</span> 的所有子节点都被删除时，进程才会真正退出。这两点都可通过 ready 来实现。</p></li>
 </ol>
-<h4 id="rdd-作为分布式内存抽象的优势">RDD 作为分布式内存抽象的优势</h4>
-<p><img src="image-20221029183627267.png" alt="image-20221029183627267" style="zoom:67%;" /></p>
-<p>分布式共享内存(Distributed Shared Memory, DSM) 系统是一个非常通用的抽象，但是这种通用性使得在集群上难以实现高效和容错的方式。RDD 和 DSM 之间的区别在以下几点：</p>
-<ol type="1">
-<li>RDD 只能通过粗粒度 Trans 来创建，这限制了 RDD 只能批量执行写入，但能通过 Lineage 实现更有效的容错；而 DSM 允许对每个内存位置进行读写，但一旦数据损坏，所有数据都要重新还原或重做。</li>
-<li>RDD 允许系统启动 backups 来并行执行慢节点的任务从而缓解短板；而在 DSM 中慢节点会拖累所有节点。</li>
-</ol>
-<p>RDD 还有两大优势：</p>
-<ol type="1">
-<li>在 RDD 的批量操作中，可以通过物理上更近的节点调度任务以提高性能。</li>
-<li>当没有足够的内存来存储 RDD 时，溢出的分区可以存储在磁盘上，并将提供与当前数据并行系统相似的性能。</li>
-</ol>
-<h4 id="spark-集群">Spark 集群</h4>
-<p>Spark 由 Driver 程序启动，并将任务分发至多个 Worker 节点。Driver 跟踪 RDD 的 Lineage；Worker 将 RDD 分区存储在 RAM 中。如下图所示：</p>
-<p><img src="image-20221029192204791.png" alt="image-20221029192204791" style="zoom:80%;" /></p>
-<h4 id="rdd-表示">RDD 表示</h4>
-<p>一个 RDD 由以下部分组成：</p>
-<ul>
-<li>数据集的原子分区；</li>
-<li>对父 RDD 的依赖；</li>
-<li>基于父分区计算当前分区的 Trans 函数；</li>
-<li>分区方案和数据地址相关的元数据。</li>
-</ul>
-<h4 id="rdd-依赖">RDD 依赖</h4>
-<p>RDD 在物理形式上是分区的，其完整数据被分散在集群内若干机器的内存上。在利用 Trans 进行派生时，根据 Trans 操作的不同， 子 RDD 会与父 RDD 产生不同依赖关系：</p>
-<ul>
-<li><strong>Narrow Dependency</strong>：每个父分区最多生成一个子分区，如 map(), filter()；</li>
-<li><strong>Wide Dependency</strong>：每个父分区能够生成多个子分区，而每个子分区可能都只依赖各个父分区中的一部分，如 groupBy(), join()。</li>
-</ul>
-<p><img src="image-20221029202838415.png" alt="image-20221029202838415" style="zoom:80%;" /></p>
-<p>进行上述区分有以下两点好处：</p>
-<ol type="1">
-<li><strong>数据传输</strong>：Narrow Dependency 的每个父分区只会传入到一个子分区中，可以在一个节点内流水线式地完成转换；而 Wide Dependency 需要将父分区的数据传输到多个子分区中，往往有 shuffle 操作。</li>
-<li><strong>故障恢复</strong>：Narrow Dependency 下的节点故障后的恢复效率更高，且可以在不同的节点上并行进行；而在 Wide Dependency 中，单个故障节点需要多个分区联合执行恢复，且对父分区的重新计算会产生冗余数据。</li>
-</ol>
-<h3 id="任务调度">任务调度</h3>
-<p><img src="image-20221029235718195.png" alt="image-20221029235718195" style="zoom:80%;" /></p>
-<p>每当用户在 RDD 上运行 Acts 时，调度器(<strong>Scheduler</strong>)根据 Lineage 图与该 RDD 的依赖关系，对不同 Acts 过程的执行进行阶段(<strong>stage</strong>)划分，如上图所示。stage 的<strong>划分依据</strong>即宽窄依赖：从后往前，遇到宽依赖的 Acts 便进行划分。之后，Scheduler 便生成任务(<strong>task</strong>)并将其分配给不同节点。</p>
-<p>task 的分配基于<strong>数据局部性</strong>。如果 task 需要的分区存储在某个节点的内存中，则将其发送到该节点；否则，将 task 发送给 RDD 指定的 preferred 节点。对于 WD，在持有父分区的节点上保存中间产物以加速故障恢复。</p>
-<p>一旦 task 失败，只要它的父 RDD 仍然可用，Spark 就会在另一个节点上重新执行该 task。反之，则根据 Lineage 图重新生成父 RDD，随后再执行任务即可。目前 Spark 还不能容忍 Scheduler 的故障，所以一旦 Scheduler 挂了，所有的工作也白费了。</p>
-<h3 id="内存管理">内存管理</h3>
-<p>Spark 为 RDD 持久化存储提供了三种方案：</p>
-<ol type="1">
-<li><strong>内存中的反序列化 Java 对象</strong>：这提供了最快的性能，因为 JVM 可以在本地访问每个 RDD 元素；</li>
-<li><strong>内存中的序列化数据</strong>：这允许用户在空间有限时选择比 Java 对象图更节省内存的表示，但会降低性能；</li>
-<li><strong>磁盘存储</strong>：这对于那些太大而无法保存在 RAM 中但每次使用时重新计算成本高昂的 RDD 很有用；</li>
-</ol>
-<p>当计算出一个新的 RDD 分区但没有足够的空间来存储它时，会使用 <strong>LRU</strong> 策略进行内存回收，以给新分区提供空间。除此之外，还可以通过设置每个 RDD 的持久性优先级提供进一步的控制。</p>
-<h3 id="检查点">检查点</h3>
-<p>前文提到 Lineage 可以有效进行故障恢复，但对于具有长 Lineage 链的 RDD 则容易耗费太多时间，无法体现较好性能。将一些 <strong>checkpoint</strong> 持久化到存储能很好的解决此问题。</p>
-<p>一般来说，检查点对于 WD 的长 Lineage 图很有用，因为集群中的节点故障可能会导致每个父 RDD 丢失一些数据片段，需要完全重新计算。而对于对 ND 的 RDD，checkpoint 则没那么必要，如果一个节点发生故障，这些 RDD 中丢失的分区可以在其他节点上并行重新计算，而成本只是复制整个 RDD 的一小部分。</p>
-<p>Spark 目前提供了一个用于检查点的 API，将决策权留给了用户，即 <strong>REPLICATE</strong> 标志。</p>
-<figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">rdd.persist(<span class="type">REPLICATE</span>)</span><br></pre></td></tr></table></figure>
-<p>RDD 的 read-only 性质使得它们比一般的共享内存更容易实现 checkpoint，因为一致性不是问题，RDD 可以在后台创建，而不需要程序暂停或分布式快照方案。</p>
-<h3 id="总结">总结</h3>
-<p>RDD 是一种分布式内存抽象，允许用户将中间结果保存在内存中以实现高效的数据重用，同时支持广泛的计算模式。</p>
-<p>RDD 利用了 Lineage 大大简化了节点失效后的数据恢复过程。</p>
+<h4 id="总结">总结</h4>
+<p>ZooKeeper 是一个容错的，通用的协调服务。</p>
 ]]></content>
       <categories>
         <category>6.824</category>
@@ -1203,55 +1590,22 @@
       </tags>
   </entry>
   <entry>
-    <title>Aurora</title>
-    <url>/6-824/aurora/</url>
-    <content><![CDATA[<p>6.824 的第六篇论文是 <strong>Aurora</strong>——一个高性能，高可靠的关系数据库服务。在处理事务的速度上，Aurora 宣称比其他数据库快 35 倍。同时，其完全抛弃了通用存储，转而构建了自己<strong>应用定制的存储</strong>。</p>
+    <title>VMware-FT</title>
+    <url>/6-824/Vmware-ft/</url>
+    <content><![CDATA[<p>6.824 的第二篇论文是 <strong><a href="https://pdos.csail.mit.edu/6.824/papers/vm-ft.pdf">VMware-FT</a></strong>(VMware-FaultTolerance)，其描述了一个提供容错虚拟机的商业企业级系统——如果主服务器(<strong>primary</strong>)发生故障，备份服务器(<strong>backup</strong>)始终可以接管。backup 的状态必须始终保持与 primary 几乎相同，以便在其发生故障时，backup 可以立即接管，并且外部客户端看来并未发生故障且没有数据丢失。</p>
 <span id="more"></span>
-<h3 id="aurora-产生背景">Aurora 产生背景</h3>
-<h4 id="ec2elastic-cloud-2">EC2(Elastic Cloud 2)</h4>
-<p>这是 Amazon 最早的云产品。Amazon 有装满了服务器的数据中心，并且每个服务器上都会运行一个 VMM(<strong>Virtual Machine Monitor</strong>)，以及一些 EC2 实例。每个实例在运行一个标准的操作系统的同时，出租给不同的用户。每个 EC2 的操作系统之上运行着 Web 服务或数据库等应用程序。这种方式成本低，且相对容易配置，在早期是一个成功的服务模式。</p>
-<p>最早的时候，EC2 使用的都是服务器上的硬盘，每个 EC2 实例都会分到硬盘的一部分空间。</p>
-<p>对于无状态的 Web 应用，如果客户数量增加了，可以通过租用更多 EC2 实例来对 Web 服务扩容，尽管服务器崩溃了，只需要在另一台服务器上启动一个新的 EC2 实例就好了。而对于数据库而言，一旦服务器崩溃了，其本地硬盘将无法访问，运行在服务器上的数据库 EC2 实例也将失效——因为数据丢失了。</p>
-<p>Amazon 本身有实现块存储的服务，叫 S3。可以定期对数据库做快照，然后存到 S3 上，并基于快照来实现故障恢复。但也有可能失去两次快照之间的数据，</p>
-<h4 id="ebselastic-block-store">EBS(Elastic Block Store)</h4>
-<p>它表现得像个硬盘，具有容错性，且支持持久化存储的服务，其底层是一对互为副本的存储服务器。当用户要使用数据库 EC2 时，可以将一个 EBS 挂载为自己的硬盘。</p>
-<p>当数据库执行写操作时，数据会通过网络传输到 EBS 服务器，之后，那一对存储服务器会使用 <strong>Chain Replication</strong> 进行数据复制。</p>
-<blockquote>
-<p>第一个服务器处理写，第二个服务器处理读。</p>
-</blockquote>
-<p>虽然 EBS 的出现能够在一定程度上避免因服务器崩溃而导致的数据丢失，但却会产生大量的网络流量，并且容错性并没有得到很好的保障——两个存储服务器会放在同个数据中心（在 paper 中称为 <strong>AZ, Available Zone</strong>）中，也就意味着一旦数据中心崩溃了，那就没辙了。</p>
-<h4 id="rdsrelational-database-service">RDS(Relational Database Service)</h4>
-<p>RDS 尝试将数据进行跨 AZ 复制，这样就算整个 AZ 挂了，用户还可以从另一个 AZ 中获取数据。</p>
-<p>对于 RDS 而言，有且仅有一个 EC2 实例作为<strong>主数据库</strong>，这个数据库将其 data page 和 WAL log 存在 EBS，EC2 和 EBS 都在同一个 AZ <span class="math inline">\(AZ_1\)</span> 中。每次数据库执行写操作时，RDS 会自动将写操作拷贝到另一个 AZ <span class="math inline">\(AZ_2\)</span> 中的<strong>副数据库</strong> EC2 实例上，这个 EC2 的工作就是执行和主数据库相同的操作，写入成功后，会发一个 ack 给主数据库，主数据库看到了这个 ack 后才会认为真正意义上的写入成功。</p>
-<p>但实际上，这样还是会通过网络传输相当大量的数据。</p>
-<h3 id="aurora">Aurora</h3>
-<p>在 Aurora 的架构中，会有 <span class="math inline">\(V\)</span> 个数据副本代替 EBS 的位置，分别存放在 <span class="math inline">\(z\)</span> 个不同的 AZ 中。与此同时，Aurora 通过网络传输的是 <strong>log 条目</strong>而非 data page，这也大大提高了网络性能。当然，这也就导致了 Aurora 的存储系统不再是只能理解 data 的通用存储了，变成了<strong>能够理解 log 的应用定制存储系统</strong>。</p>
-<h4 id="复制与相关故障">复制与相关故障</h4>
-<p>Aurora 采用<strong>基于仲裁的投票协议</strong>来保证容错，即不需要所有副本都确认了读/写操作后才能继续执行。这个协议是这样的：</p>
+<h3 id="两种容错方式">两种容错方式</h3>
+<h4 id="状态转移">状态转移</h4>
+<p>在 backup 上复制状态的一种方法是每次同步时，primary 将其<strong>所有状态</strong>（包括 CPU、内存和 I/O 设备）<strong>变化</strong>进行完整地拷贝，并发送到 backup。但发送此状态所需的带宽会非常大。为了提升效率，可以优化为：每次同步只发送上次同步之后改变了的状态。</p>
+<h4 id="操作转移">操作转移</h4>
+<p>将服务器建模为<strong>确定性状态机</strong>，并实现以下两个条件：</p>
 <ol type="1">
-<li>每次读操作都需要获得 <span class="math inline">\(V_r\)</span> 个确认；</li>
-<li>每次写操作都需要获得 <span class="math inline">\(V_w\)</span> 个确认；</li>
-<li><span class="math inline">\(V_r + V_w &gt; V\)</span>，保证每次读都能知道最近的写入；</li>
-<li><span class="math inline">\(V_w &gt; V/2\)</span>，保证每次写入必须知道最近的写入从而避免写入冲突；</li>
+<li>从相同的初始状态开始</li>
+<li>以相同的顺序执行相同的操作</li>
 </ol>
-<p>这样一来，Aurora 可以有更多的副本和 AZ，而不需要付出过大的性能代价——因为它无需等待所有副本，只需要等待最快的 <span class="math inline">\(V_r/V_w\)</span> 个副本就好了。这也容忍了少数副本的 crash 或是偶尔的慢响应。</p>
-<p>这里又会出现一个问题，客户端读请求可能会得到 <span class="math inline">\(V_r\)</span> 个不同的结果，却并不知道哪个结果是正确的。解决这一问题的方法就是设置<strong>版本号</strong>，每次写请求都会将新的数值与一个递增的版本号绑定，于是读请求便可以从所有结果中取版本号最高的那个结果。</p>
-<h4 id="容错目标">容错目标</h4>
-<p>在 Aurora 中，我们希望</p>
-<ul>
-<li>在整个 AZ 和一个额外的副本崩溃后而不丢失数据；</li>
-<li>整个 AZ 崩溃后不会影响写入数据；</li>
-</ul>
-<p>于是设置 <span class="math inline">\(V = 6,\ V_w = 4,\ V_r = 3,\ z = 3\)</span>，这样每个 AZ 存放 2 个副本。在这样的设置下，一个 AZ 和一个副本崩溃不会影响读性能，且任意两个副本崩溃后也能保持写入可用性。</p>
-<h4 id="数据分片sharding">数据分片(Sharding)</h4>
-<p>对于 Aurora 而言，每个副本都是一个计算机，其内存是有限的，且尽管我们有 6 个副本，我们并没有得到 6 倍大小的内存——每个副本上存放的数据都是一致的。对于数百 TB 甚至更多的数据，需要找一个明智的策略进行存储。</p>
-<p>这一策略是：将数据库的数据，分割到多组(<strong>PG, Protection Group</strong>)存储服务器上，每一个 PG 都包含若干存储服务器作为副本，存该 data page 10GB 的数据。</p>
-<blockquote>
-<p>这里的 PG 是个<strong>逻辑概念</strong>。</p>
-</blockquote>
-<p>Sharding 后，如果要进行 log 处理，则会查看 log 所修改的数据，并找到存储该数据的 PG，并将 log 只发送给该 PG 的副本。这也就意味着，每个 PG 只存储部分 data page 和所有与这些 data page 相关的 log 条目。</p>
-<p>如果某个副本挂了，希望能尽快生成新的副本。事实上，尽管每个 PG 存了某个数据库的 10GB 数据，但一个副本所拥有的存储容量可能高达 10TB，也就是说该副本可能存了成百上千个 PG 的“10GB”，一旦该副本挂了，会牵连到与之相关的所有数据库。一个简单的策略是找到另一台存储服务器，通过拷贝的形式将该副本的所有数据都通过网络传输到新的副本中，但对于 10Gb/s 的网络来说，需要的时间还是太久了。</p>
-<p>Aurora 是这么做的：若某个副本保存了 <span class="math inline">\(PG_1,\ PG_2,\ \dots,\ PG_n\)</span> 的数据，则将这 <span class="math inline">\(n\)</span> 个 PG 的数据并行传输到 <span class="math inline">\(n\)</span> 个新的存储服务器上。也就是说这 <span class="math inline">\(n\)</span> 个存储服务器，每个都会加入到一个新的 PG 中。比起上面的策略，我们获得了 <span class="math inline">\(n\)</span> 倍的性能提升。</p>
+<p>如果能确保以上两个条件，那么它们会一直互为副本，并且一直保持一致。由于大多数服务器或服务都有一些不确定的操作，因此必须使用额外的协调来确保 primary 和 backup 保持同步，而这一协调所需的额外信息量远远少于 primary 中正在更改的状态量。</p>
+<h3 id="总结">总结</h3>
+<p>操作 Log 的复制与状态机的思路给后续以启迪。</p>
 ]]></content>
       <categories>
         <category>6.824</category>
@@ -1263,7 +1617,7 @@
   <entry>
     <title>Spanner</title>
     <url>/6-824/Spanner/</url>
-    <content><![CDATA[<p>6.824 的第八篇论文是 <strong>Spanner</strong>—— Google 的可扩展、多版本、全球分布和同步复制的数据库。它是第一个在全球范围内分发数据并支持外部一致的分布式事务的系统。</p>
+    <content><![CDATA[<p>6.824 的第八篇论文是 <strong><a href="https://pdos.csail.mit.edu/6.824/papers/spanner.pdf">Spanner</a></strong>—— Google 的可扩展、多版本、全球分布和同步复制的数据库。它是第一个在全球范围内分发数据并支持外部一致的分布式事务的系统。</p>
 <span id="more"></span>
 <h3 id="简介">简介</h3>
 <p>Spanner 中的数据是<strong>多时间版本化</strong>的，每个版本都会自动加上其提交时间的<strong>时间戳</strong>(timestamp)。ts 反映序列化顺序，即：如果事务 <span class="math inline">\(T_1\)</span> 在另一个事务 <span class="math inline">\(T_2\)</span> 开始之前提交，则 <span class="math inline">\(T_1\)</span> 的 commit ts 小于 <span class="math inline">\(T_2\)</span>。 这一机制归功于 <strong>TrueTime API </strong> 设计，通过使用多个现代时钟参考（GPS 和原子钟）来保持较小的不确定性。</p>
@@ -1568,81 +1922,6 @@ dim(L(A)) = m-r
       </categories>
       <tags>
         <tag>MIT18.06</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>weekCompetition312</title>
-    <url>/LeetCode/weekCompetition312/</url>
-    <content><![CDATA[<p><a href="https://leetcode.cn/contest/weekly-contest-312/">第 312 场周赛</a>复盘。</p>
-<p><strong>排名</strong> 1273 / 6638</p>
-<span id="more"></span>
-<h3 id="按身高排序">1. <a href="https://leetcode.cn/problems/sort-the-people/">按身高排序</a></h3>
-<blockquote>
-<p>给你一个字符串数组 <code>names</code> ，和一个由 <strong>互不相同</strong> 的正整数组成的数组 <code>heights</code> 。两个数组的长度均为 n 。</p>
-<p>对于每个下标 i，<code>names[i]</code> 和 <code>heights[i]</code> 表示第 i 个人的名字和身高。</p>
-<p>请按身高 <strong>降序</strong> 顺序返回对应的名字数组 <code>names</code> 。</p>
-</blockquote>
-<h4 id="思路">思路</h4>
-<p>由于人名可能有重复，故不能建 map，而是将 name 与其对应的 height 作为一个整体，然后排序。</p>
-<h4 id="code">code</h4>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// c++</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">vector&lt;string&gt; <span class="title">sortPeople</span><span class="params">(vector&lt;string&gt;&amp; names, vector&lt;<span class="type">int</span>&gt;&amp; heights)</span> </span>&#123;</span><br><span class="line">        vector&lt;string&gt; res;</span><br><span class="line">        vector&lt;pair&lt;string, <span class="type">int</span>&gt;&gt; temp;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; names.<span class="built_in">size</span>(); i++) &#123;</span><br><span class="line">            temp.<span class="built_in">emplace_back</span>(<span class="built_in">make_pair</span>(names[i], heights[i]));</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="built_in">sort</span>(temp.<span class="built_in">begin</span>(), temp.<span class="built_in">end</span>(), [&amp;](<span class="type">const</span> pair&lt;string, <span class="type">int</span>&gt; &amp;a, <span class="type">const</span> pair&lt;string, <span class="type">int</span>&gt; &amp;b) &#123;</span><br><span class="line">            <span class="keyword">return</span> a.second &gt; b.second;</span><br><span class="line">        &#125;);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">auto</span> &amp;it : temp) &#123;</span><br><span class="line">            res.<span class="built_in">emplace_back</span>(it.first);</span><br><span class="line">        &#125;</span><br><span class="line">            </span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-<h3 id="按位与最大的最长子数组">2. <a href="https://leetcode.cn/problems/longest-subarray-with-maximum-bitwise-and/">按位与最大的最长子数组</a></h3>
-<blockquote>
-<p>给你一个长度为 n 的整数数组 <code>nums</code> 。</p>
-<p>考虑 <code>nums</code> 中进行 <strong>按位与</strong>运算得到的值 <strong>最大</strong> 的 <strong>非空</strong> 子数组。</p>
-<ul>
-<li>换句话说，令 k 是 <code>nums</code> <strong>任意</strong> 子数组执行按位与运算所能得到的最大值。那么，只需要考虑那些执行一次按位与运算后等于 k 的子数组。</li>
-</ul>
-<p>返回满足要求的 <strong>最长</strong> 子数组的长度。</p>
-<p>数组的按位与就是对数组中的所有数字进行按位与运算。</p>
-<p><strong>子数组</strong> 是数组中的一个连续元素序列。</p>
-</blockquote>
-<h4 id="思路-1">思路</h4>
-<p>首先有一个性质：<code>a AND b ≤ min(a, b)</code>，那么 AND 运算能够得到的最大值必然是整个数组的最大值。从而问题转换为，找到一个最长的连续子数组，其中所有元素都是 <code>nums[]</code> 中的最大值。</p>
-<h4 id="code-1">code</h4>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// c++</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">longestSubarray</span><span class="params">(vector&lt;<span class="type">int</span>&gt;&amp; nums)</span> </span>&#123;</span><br><span class="line">        <span class="type">int</span> maxm = *<span class="built_in">max_element</span>(nums.<span class="built_in">begin</span>(), nums.<span class="built_in">end</span>());</span><br><span class="line">        <span class="type">int</span> res = <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; nums.<span class="built_in">size</span>(); i++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (nums[i] == maxm) &#123;</span><br><span class="line">                <span class="type">int</span> j = i + <span class="number">1</span>;</span><br><span class="line">                <span class="keyword">for</span> (j = i + <span class="number">1</span>; j &lt; nums.<span class="built_in">size</span>(); j++) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (nums[j] != nums[i]) &#123;</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                res = <span class="built_in">max</span>(res, j - i);</span><br><span class="line">                i = j<span class="number">-1</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-<h3 id="找到所有好下标">3. <a href="https://leetcode.cn/problems/find-all-good-indices/">找到所有好下标</a></h3>
-<blockquote>
-<p>给你一个大小为 n 下标从 <strong>0</strong> 开始的整数数组 <code>nums</code> 和一个正整数 k 。</p>
-<p>对于 <code>k &lt;= i &lt; n - k</code> 之间的一个下标 i ，如果它满足以下条件，我们就称它为一个 <strong>好</strong> 下标：</p>
-<ul>
-<li>下标 i <strong>之前</strong> 的 k 个元素是 <strong>非递增的</strong> 。</li>
-<li>下标 i <strong>之后</strong> 的 k 个元素是 <strong>非递减的</strong> 。</li>
-</ul>
-<p>按 <strong>升序</strong> 返回所有好下标。</p>
-</blockquote>
-<h4 id="思路-2">思路</h4>
-<p>定义 <code>assend[]</code> 与 <code>dessend[]</code>：如果一个数比它前面那个数大，则 <code>assend[i] = 1</code>；如果一个数比它后面那个数小，则 <code>dessend[i] = 1</code></p>
-<p>问题就变为：找到一个下标，它前面 k-1 个下标的 assend 值均为 0，后面 k-1 个下标的 dessend 值也均为 0</p>
-<p>用滑动窗口来维护前后 k-1 个下标的 assend/dessend 值中 1 的个数，每个迭代的过程只需判断个数是否均为 0 即可。</p>
-<h4 id="code-2">code</h4>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">goodIndices</span><span class="params">(nums []<span class="type">int</span>, k <span class="type">int</span>)</span></span> []<span class="type">int</span> &#123;</span><br><span class="line">    n := <span class="built_in">len</span>(nums)</span><br><span class="line">    </span><br><span class="line">    res := <span class="built_in">make</span>([]<span class="type">int</span>, <span class="number">0</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> n - k &lt;= k &#123;</span><br><span class="line">        <span class="keyword">return</span> res</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    assend := <span class="built_in">make</span>([]<span class="type">int</span>, n)</span><br><span class="line">    dessend := <span class="built_in">make</span>([]<span class="type">int</span>, n)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> i := <span class="keyword">range</span> nums &#123;</span><br><span class="line">        <span class="keyword">if</span> i &gt; <span class="number">0</span> &amp;&amp; nums[i] &gt; nums[i<span class="number">-1</span>] &#123;</span><br><span class="line">            assend[i] = <span class="number">1</span></span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            assend[i] = <span class="number">0</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> i &lt; n<span class="number">-1</span> &amp;&amp; nums[i] &gt; nums[i+<span class="number">1</span>] &#123;</span><br><span class="line">            dessend[i] = <span class="number">1</span></span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            dessend[i] = <span class="number">0</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    left1, right1, left2, right2 := <span class="number">1</span>, k<span class="number">-1</span>, k+<span class="number">1</span>, <span class="number">2</span>*k<span class="number">-1</span></span><br><span class="line">    cnt1, cnt2 := <span class="number">0</span>, <span class="number">0</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> i := left1; i &lt;= right1; i++ &#123;</span><br><span class="line">        cnt1 += assend[i]</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> i := left2; i &lt;= right2; i++ &#123;</span><br><span class="line">        cnt2 += dessend[i]</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> cnt1 == <span class="number">0</span> &amp;&amp; cnt2 == <span class="number">0</span> &#123;</span><br><span class="line">        res = <span class="built_in">append</span>(res, k)</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> i := k+<span class="number">1</span>; i &lt; n-k; i++ &#123;</span><br><span class="line">        right1++</span><br><span class="line">        cnt1 = cnt1 + assend[right1] - assend[left1]</span><br><span class="line">        left1++</span><br><span class="line">        </span><br><span class="line">        right2++</span><br><span class="line">        cnt2 = cnt2 + dessend[right2] - dessend[left2]</span><br><span class="line">        left2++</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> cnt1 == <span class="number">0</span> &amp;&amp; cnt2 == <span class="number">0</span> &#123;</span><br><span class="line">            res = <span class="built_in">append</span>(res, i)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="好路径的数目">4. <a href="https://leetcode.cn/problems/number-of-good-paths/">好路径的数目</a></h3>
-<blockquote>
-<p>给你一棵 n 个节点的树（连通无向无环的图），节点编号从 0 到 n - 1 且恰好有 n - 1 条边。</p>
-<p>给你一个长度为 n 下标从 <strong>0</strong> 开始的整数数组 <code>vals</code> ，分别表示每个节点的值。同时给你一个二维整数数组 <code>edges</code> ，其中 <code>edges[i] = [ai, bi]</code> 表示节点 ai 和 bi 之间有一条 <strong>无向</strong> 边。</p>
-<p>一条 <strong>好路径</strong> 需要满足以下条件：</p>
-<ul>
-<li>开始节点和结束节点的值 <strong>相同</strong> 。</li>
-<li>开始节点和结束节点中间的所有节点值都 <strong>小于等于</strong> 开始节点的值（也就是说开始节点的值应该是路径上所有节点的最大值）。</li>
-</ul>
-<p>请你返回不同好路径的数目。</p>
-<p>注意，一条路径和它反向的路径算作 同一 路径。比方说， <code>0 -&gt; 1</code> 与 <code>1 -&gt; 0</code> 视为同一条路径。单个节点也视为一条合法路径。</p>
-</blockquote>
-<h4 id="思路-3">思路</h4>
-<p>参考了 <a href="https://leetcode.cn/problems/number-of-good-paths/solution/bing-cha-ji-by-endlesscheng-tbz8/">这位大佬的解法</a>。</p>
-<p>朴素的考虑是，找到连通分量中所有的最大值节点，若有 <span class="math inline">\(x\)</span> 个，则共可以生成 <span class="math inline">\(\displaystyle C(x, 2) = \frac{x(x-1)}{2}\)</span> 条好路径；之后，将这些节点删除，对剩下的所有连通分量应用上述步骤。但这种方法实现起来较为复杂。</p>
-<p>不妨逆向思维，从小到大走，同时将删除操作改为合并操作。于是可以考虑用<strong>并查集</strong>来完成这一操作。</p>
-<p>刚开始所有节点都是 standalone 的，我们遍历 <code>edges[]</code> 时，不断合并节点，并让较大元素作为较小元素的<strong>代表元</strong>，一旦在合并过程中发现有两个节点的代表元相等（也就意味着这两个代表元满足<strong>好路径</strong>的要求），如果用 <code>size[]</code> 表示当前节点作为代表元时，所在并查集中最大值的数量，则可以用乘法解得合并后的连通分量里的好路径数量。</p>
-<p>由于我们按照节点值升序访问节点，故每次只需和比自己小的邻居合并，则可以保证对于节点 <span class="math inline">\(v\)</span> 的任意邻居，其所在并查集的最大值不会超过 <span class="math inline">\(vals[v]\)</span>，好路径的数量也就不会遗漏。合并后 <span class="math inline">\(v\)</span> 即为代表元。</p>
-<h4 id="code-3">code</h4>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">findfather</span><span class="params">(father []<span class="type">int</span>, x <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    a, temp := x, x</span><br><span class="line">    <span class="keyword">for</span> father[x] != x &#123;</span><br><span class="line">        x = father[x]</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> a != x &#123;</span><br><span class="line">        a = father[a]</span><br><span class="line">        father[temp] = x</span><br><span class="line">        temp = a</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> x</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">numberOfGoodPaths</span><span class="params">(vals []<span class="type">int</span>, edges [][]<span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    n := <span class="built_in">len</span>(vals)</span><br><span class="line">    res := n  <span class="comment">// 所有单节点好路径数量</span></span><br><span class="line">    father := <span class="built_in">make</span>([]<span class="type">int</span>, n)  <span class="comment">// 代表元</span></span><br><span class="line">    size := <span class="built_in">make</span>([]<span class="type">int</span>, n)    <span class="comment">// 当前节点为代表元时, 所在并查集中最大值的数量</span></span><br><span class="line">    ids := <span class="built_in">make</span>([]<span class="type">int</span>, n)     <span class="comment">// 序号, 根据 vals[id] 来排序</span></span><br><span class="line">    graph := <span class="built_in">make</span>([][]<span class="type">int</span>, n) <span class="comment">// 图</span></span><br><span class="line">    <span class="comment">// 初始化</span></span><br><span class="line">    <span class="keyword">for</span> i := <span class="keyword">range</span> father &#123;</span><br><span class="line">        father[i] = i</span><br><span class="line">        size[i] = <span class="number">1</span></span><br><span class="line">        ids[i] = i</span><br><span class="line">        graph[i] = <span class="built_in">make</span>([]<span class="type">int</span>, <span class="number">0</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> _, edge := <span class="keyword">range</span> edges &#123;</span><br><span class="line">        x, y := edge[<span class="number">0</span>], edge[<span class="number">1</span>]</span><br><span class="line">        graph[x] = <span class="built_in">append</span>(graph[x], y)</span><br><span class="line">        graph[y] = <span class="built_in">append</span>(graph[y], x)</span><br><span class="line">    &#125;</span><br><span class="line">    sort.Slice(ids, <span class="function"><span class="keyword">func</span><span class="params">(i, j <span class="type">int</span>)</span></span> <span class="type">bool</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> vals[ids[i]] &lt; vals[ids[j]]</span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> _, id := <span class="keyword">range</span> ids &#123;</span><br><span class="line">        fx := findfather(father, id)</span><br><span class="line">        <span class="keyword">for</span> _, neighbor := <span class="keyword">range</span> graph[id] &#123;</span><br><span class="line">            fy := findfather(father, neighbor)</span><br><span class="line">            <span class="keyword">if</span> fx == fy || vals[fy] &gt; vals[id] &#123; <span class="comment">// fx == fy 则无需合并, 只考虑比自己小的邻居</span></span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">if</span> vals[fx] == vals[fy] &#123;</span><br><span class="line">                res += size[fx] * size[fy]</span><br><span class="line">                size[fx] += size[fy]</span><br><span class="line">            &#125;</span><br><span class="line">            father[fy] = fx</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>LeetCode</category>
-      </categories>
-      <tags>
-        <tag>周赛</tag>
       </tags>
   </entry>
   <entry>
@@ -1983,28 +2262,78 @@ S\Lambda
       </tags>
   </entry>
   <entry>
-    <title>VMware-FT</title>
-    <url>/6-824/vmware-ft/</url>
-    <content><![CDATA[<p>6.824 的第二篇论文是 VMware-FaultTolerance(<strong>VMware-FT</strong>)，其描述了一个提供容错虚拟机的商业企业级系统——如果主服务器(<strong>primary</strong>)发生故障，备份服务器(<strong>backup</strong>)始终可以接管。backup 的状态必须始终保持与 primary 几乎相同，以便在其发生故障时，backup 可以立即接管，并且外部客户端看来并未发生故障且没有数据丢失。</p>
+    <title>weekCompetition312</title>
+    <url>/LeetCode/weekCompetition312/</url>
+    <content><![CDATA[<p><a href="https://leetcode.cn/contest/weekly-contest-312/">第 312 场周赛</a>复盘。</p>
+<p><strong>排名</strong> 1273 / 6638</p>
 <span id="more"></span>
-<h3 id="两种容错方式">两种容错方式</h3>
-<h4 id="状态转移">状态转移</h4>
-<p>在 backup 上复制状态的一种方法是每次同步时，primary 将其<strong>所有状态</strong>（包括 CPU、内存和 I/O 设备）<strong>变化</strong>进行完整地拷贝，并发送到 backup。但发送此状态所需的带宽会非常大。为了提升效率，可以优化为：每次同步只发送上次同步之后改变了的状态。</p>
-<h4 id="操作转移">操作转移</h4>
-<p>将服务器建模为<strong>确定性状态机</strong>，并实现以下两个条件：</p>
-<ol type="1">
-<li>从相同的初始状态开始</li>
-<li>以相同的顺序执行相同的操作</li>
-</ol>
-<p>如果能确保以上两个条件，那么它们会一直互为副本，并且一直保持一致。由于大多数服务器或服务都有一些不确定的操作，因此必须使用额外的协调来确保 primary 和 backup 保持同步，而这一协调所需的额外信息量远远少于 primary 中正在更改的状态量。</p>
-<h3 id="总结">总结</h3>
-<p>操作 Log 的复制与状态机的思路给后续以启迪。</p>
+<h3 id="按身高排序">1. <a href="https://leetcode.cn/problems/sort-the-people/">按身高排序</a></h3>
+<blockquote>
+<p>给你一个字符串数组 <code>names</code> ，和一个由 <strong>互不相同</strong> 的正整数组成的数组 <code>heights</code> 。两个数组的长度均为 n 。</p>
+<p>对于每个下标 i，<code>names[i]</code> 和 <code>heights[i]</code> 表示第 i 个人的名字和身高。</p>
+<p>请按身高 <strong>降序</strong> 顺序返回对应的名字数组 <code>names</code> 。</p>
+</blockquote>
+<h4 id="思路">思路</h4>
+<p>由于人名可能有重复，故不能建 map，而是将 name 与其对应的 height 作为一个整体，然后排序。</p>
+<h4 id="code">code</h4>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// c++</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">vector&lt;string&gt; <span class="title">sortPeople</span><span class="params">(vector&lt;string&gt;&amp; names, vector&lt;<span class="type">int</span>&gt;&amp; heights)</span> </span>&#123;</span><br><span class="line">        vector&lt;string&gt; res;</span><br><span class="line">        vector&lt;pair&lt;string, <span class="type">int</span>&gt;&gt; temp;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; names.<span class="built_in">size</span>(); i++) &#123;</span><br><span class="line">            temp.<span class="built_in">emplace_back</span>(<span class="built_in">make_pair</span>(names[i], heights[i]));</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="built_in">sort</span>(temp.<span class="built_in">begin</span>(), temp.<span class="built_in">end</span>(), [&amp;](<span class="type">const</span> pair&lt;string, <span class="type">int</span>&gt; &amp;a, <span class="type">const</span> pair&lt;string, <span class="type">int</span>&gt; &amp;b) &#123;</span><br><span class="line">            <span class="keyword">return</span> a.second &gt; b.second;</span><br><span class="line">        &#125;);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">auto</span> &amp;it : temp) &#123;</span><br><span class="line">            res.<span class="built_in">emplace_back</span>(it.first);</span><br><span class="line">        &#125;</span><br><span class="line">            </span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="按位与最大的最长子数组">2. <a href="https://leetcode.cn/problems/longest-subarray-with-maximum-bitwise-and/">按位与最大的最长子数组</a></h3>
+<blockquote>
+<p>给你一个长度为 n 的整数数组 <code>nums</code> 。</p>
+<p>考虑 <code>nums</code> 中进行 <strong>按位与</strong>运算得到的值 <strong>最大</strong> 的 <strong>非空</strong> 子数组。</p>
+<ul>
+<li>换句话说，令 k 是 <code>nums</code> <strong>任意</strong> 子数组执行按位与运算所能得到的最大值。那么，只需要考虑那些执行一次按位与运算后等于 k 的子数组。</li>
+</ul>
+<p>返回满足要求的 <strong>最长</strong> 子数组的长度。</p>
+<p>数组的按位与就是对数组中的所有数字进行按位与运算。</p>
+<p><strong>子数组</strong> 是数组中的一个连续元素序列。</p>
+</blockquote>
+<h4 id="思路-1">思路</h4>
+<p>首先有一个性质：<code>a AND b ≤ min(a, b)</code>，那么 AND 运算能够得到的最大值必然是整个数组的最大值。从而问题转换为，找到一个最长的连续子数组，其中所有元素都是 <code>nums[]</code> 中的最大值。</p>
+<h4 id="code-1">code</h4>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// c++</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">longestSubarray</span><span class="params">(vector&lt;<span class="type">int</span>&gt;&amp; nums)</span> </span>&#123;</span><br><span class="line">        <span class="type">int</span> maxm = *<span class="built_in">max_element</span>(nums.<span class="built_in">begin</span>(), nums.<span class="built_in">end</span>());</span><br><span class="line">        <span class="type">int</span> res = <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; nums.<span class="built_in">size</span>(); i++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (nums[i] == maxm) &#123;</span><br><span class="line">                <span class="type">int</span> j = i + <span class="number">1</span>;</span><br><span class="line">                <span class="keyword">for</span> (j = i + <span class="number">1</span>; j &lt; nums.<span class="built_in">size</span>(); j++) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (nums[j] != nums[i]) &#123;</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                res = <span class="built_in">max</span>(res, j - i);</span><br><span class="line">                i = j<span class="number">-1</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="找到所有好下标">3. <a href="https://leetcode.cn/problems/find-all-good-indices/">找到所有好下标</a></h3>
+<blockquote>
+<p>给你一个大小为 n 下标从 <strong>0</strong> 开始的整数数组 <code>nums</code> 和一个正整数 k 。</p>
+<p>对于 <code>k &lt;= i &lt; n - k</code> 之间的一个下标 i ，如果它满足以下条件，我们就称它为一个 <strong>好</strong> 下标：</p>
+<ul>
+<li>下标 i <strong>之前</strong> 的 k 个元素是 <strong>非递增的</strong> 。</li>
+<li>下标 i <strong>之后</strong> 的 k 个元素是 <strong>非递减的</strong> 。</li>
+</ul>
+<p>按 <strong>升序</strong> 返回所有好下标。</p>
+</blockquote>
+<h4 id="思路-2">思路</h4>
+<p>定义 <code>assend[]</code> 与 <code>dessend[]</code>：如果一个数比它前面那个数大，则 <code>assend[i] = 1</code>；如果一个数比它后面那个数小，则 <code>dessend[i] = 1</code></p>
+<p>问题就变为：找到一个下标，它前面 k-1 个下标的 assend 值均为 0，后面 k-1 个下标的 dessend 值也均为 0</p>
+<p>用滑动窗口来维护前后 k-1 个下标的 assend/dessend 值中 1 的个数，每个迭代的过程只需判断个数是否均为 0 即可。</p>
+<h4 id="code-2">code</h4>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">goodIndices</span><span class="params">(nums []<span class="type">int</span>, k <span class="type">int</span>)</span></span> []<span class="type">int</span> &#123;</span><br><span class="line">    n := <span class="built_in">len</span>(nums)</span><br><span class="line">    </span><br><span class="line">    res := <span class="built_in">make</span>([]<span class="type">int</span>, <span class="number">0</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> n - k &lt;= k &#123;</span><br><span class="line">        <span class="keyword">return</span> res</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    assend := <span class="built_in">make</span>([]<span class="type">int</span>, n)</span><br><span class="line">    dessend := <span class="built_in">make</span>([]<span class="type">int</span>, n)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> i := <span class="keyword">range</span> nums &#123;</span><br><span class="line">        <span class="keyword">if</span> i &gt; <span class="number">0</span> &amp;&amp; nums[i] &gt; nums[i<span class="number">-1</span>] &#123;</span><br><span class="line">            assend[i] = <span class="number">1</span></span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            assend[i] = <span class="number">0</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> i &lt; n<span class="number">-1</span> &amp;&amp; nums[i] &gt; nums[i+<span class="number">1</span>] &#123;</span><br><span class="line">            dessend[i] = <span class="number">1</span></span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            dessend[i] = <span class="number">0</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    left1, right1, left2, right2 := <span class="number">1</span>, k<span class="number">-1</span>, k+<span class="number">1</span>, <span class="number">2</span>*k<span class="number">-1</span></span><br><span class="line">    cnt1, cnt2 := <span class="number">0</span>, <span class="number">0</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> i := left1; i &lt;= right1; i++ &#123;</span><br><span class="line">        cnt1 += assend[i]</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> i := left2; i &lt;= right2; i++ &#123;</span><br><span class="line">        cnt2 += dessend[i]</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> cnt1 == <span class="number">0</span> &amp;&amp; cnt2 == <span class="number">0</span> &#123;</span><br><span class="line">        res = <span class="built_in">append</span>(res, k)</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> i := k+<span class="number">1</span>; i &lt; n-k; i++ &#123;</span><br><span class="line">        right1++</span><br><span class="line">        cnt1 = cnt1 + assend[right1] - assend[left1]</span><br><span class="line">        left1++</span><br><span class="line">        </span><br><span class="line">        right2++</span><br><span class="line">        cnt2 = cnt2 + dessend[right2] - dessend[left2]</span><br><span class="line">        left2++</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> cnt1 == <span class="number">0</span> &amp;&amp; cnt2 == <span class="number">0</span> &#123;</span><br><span class="line">            res = <span class="built_in">append</span>(res, i)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="好路径的数目">4. <a href="https://leetcode.cn/problems/number-of-good-paths/">好路径的数目</a></h3>
+<blockquote>
+<p>给你一棵 n 个节点的树（连通无向无环的图），节点编号从 0 到 n - 1 且恰好有 n - 1 条边。</p>
+<p>给你一个长度为 n 下标从 <strong>0</strong> 开始的整数数组 <code>vals</code> ，分别表示每个节点的值。同时给你一个二维整数数组 <code>edges</code> ，其中 <code>edges[i] = [ai, bi]</code> 表示节点 ai 和 bi 之间有一条 <strong>无向</strong> 边。</p>
+<p>一条 <strong>好路径</strong> 需要满足以下条件：</p>
+<ul>
+<li>开始节点和结束节点的值 <strong>相同</strong> 。</li>
+<li>开始节点和结束节点中间的所有节点值都 <strong>小于等于</strong> 开始节点的值（也就是说开始节点的值应该是路径上所有节点的最大值）。</li>
+</ul>
+<p>请你返回不同好路径的数目。</p>
+<p>注意，一条路径和它反向的路径算作 同一 路径。比方说， <code>0 -&gt; 1</code> 与 <code>1 -&gt; 0</code> 视为同一条路径。单个节点也视为一条合法路径。</p>
+</blockquote>
+<h4 id="思路-3">思路</h4>
+<p>参考了 <a href="https://leetcode.cn/problems/number-of-good-paths/solution/bing-cha-ji-by-endlesscheng-tbz8/">这位大佬的解法</a>。</p>
+<p>朴素的考虑是，找到连通分量中所有的最大值节点，若有 <span class="math inline">\(x\)</span> 个，则共可以生成 <span class="math inline">\(\displaystyle C(x, 2) = \frac{x(x-1)}{2}\)</span> 条好路径；之后，将这些节点删除，对剩下的所有连通分量应用上述步骤。但这种方法实现起来较为复杂。</p>
+<p>不妨逆向思维，从小到大走，同时将删除操作改为合并操作。于是可以考虑用<strong>并查集</strong>来完成这一操作。</p>
+<p>刚开始所有节点都是 standalone 的，我们遍历 <code>edges[]</code> 时，不断合并节点，并让较大元素作为较小元素的<strong>代表元</strong>，一旦在合并过程中发现有两个节点的代表元相等（也就意味着这两个代表元满足<strong>好路径</strong>的要求），如果用 <code>size[]</code> 表示当前节点作为代表元时，所在并查集中最大值的数量，则可以用乘法解得合并后的连通分量里的好路径数量。</p>
+<p>由于我们按照节点值升序访问节点，故每次只需和比自己小的邻居合并，则可以保证对于节点 <span class="math inline">\(v\)</span> 的任意邻居，其所在并查集的最大值不会超过 <span class="math inline">\(vals[v]\)</span>，好路径的数量也就不会遗漏。合并后 <span class="math inline">\(v\)</span> 即为代表元。</p>
+<h4 id="code-3">code</h4>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">findfather</span><span class="params">(father []<span class="type">int</span>, x <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    a, temp := x, x</span><br><span class="line">    <span class="keyword">for</span> father[x] != x &#123;</span><br><span class="line">        x = father[x]</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> a != x &#123;</span><br><span class="line">        a = father[a]</span><br><span class="line">        father[temp] = x</span><br><span class="line">        temp = a</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> x</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">numberOfGoodPaths</span><span class="params">(vals []<span class="type">int</span>, edges [][]<span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    n := <span class="built_in">len</span>(vals)</span><br><span class="line">    res := n  <span class="comment">// 所有单节点好路径数量</span></span><br><span class="line">    father := <span class="built_in">make</span>([]<span class="type">int</span>, n)  <span class="comment">// 代表元</span></span><br><span class="line">    size := <span class="built_in">make</span>([]<span class="type">int</span>, n)    <span class="comment">// 当前节点为代表元时, 所在并查集中最大值的数量</span></span><br><span class="line">    ids := <span class="built_in">make</span>([]<span class="type">int</span>, n)     <span class="comment">// 序号, 根据 vals[id] 来排序</span></span><br><span class="line">    graph := <span class="built_in">make</span>([][]<span class="type">int</span>, n) <span class="comment">// 图</span></span><br><span class="line">    <span class="comment">// 初始化</span></span><br><span class="line">    <span class="keyword">for</span> i := <span class="keyword">range</span> father &#123;</span><br><span class="line">        father[i] = i</span><br><span class="line">        size[i] = <span class="number">1</span></span><br><span class="line">        ids[i] = i</span><br><span class="line">        graph[i] = <span class="built_in">make</span>([]<span class="type">int</span>, <span class="number">0</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> _, edge := <span class="keyword">range</span> edges &#123;</span><br><span class="line">        x, y := edge[<span class="number">0</span>], edge[<span class="number">1</span>]</span><br><span class="line">        graph[x] = <span class="built_in">append</span>(graph[x], y)</span><br><span class="line">        graph[y] = <span class="built_in">append</span>(graph[y], x)</span><br><span class="line">    &#125;</span><br><span class="line">    sort.Slice(ids, <span class="function"><span class="keyword">func</span><span class="params">(i, j <span class="type">int</span>)</span></span> <span class="type">bool</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> vals[ids[i]] &lt; vals[ids[j]]</span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> _, id := <span class="keyword">range</span> ids &#123;</span><br><span class="line">        fx := findfather(father, id)</span><br><span class="line">        <span class="keyword">for</span> _, neighbor := <span class="keyword">range</span> graph[id] &#123;</span><br><span class="line">            fy := findfather(father, neighbor)</span><br><span class="line">            <span class="keyword">if</span> fx == fy || vals[fy] &gt; vals[id] &#123; <span class="comment">// fx == fy 则无需合并, 只考虑比自己小的邻居</span></span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">if</span> vals[fx] == vals[fy] &#123;</span><br><span class="line">                res += size[fx] * size[fy]</span><br><span class="line">                size[fx] += size[fy]</span><br><span class="line">            &#125;</span><br><span class="line">            father[fy] = fx</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
-        <category>6.824</category>
+        <category>LeetCode</category>
       </categories>
       <tags>
-        <tag>paperReading</tag>
+        <tag>周赛</tag>
       </tags>
   </entry>
   <entry>
@@ -2070,78 +2399,6 @@ S\Lambda
 <p>那么很容易想到用动态规划。定义 <code>dp[i]</code> 为删除 <code>s[i-1:]</code> 所需最大操作数，那么对于任意 <code>1 ≤ i &lt; j ≤ len(s)-1</code>，如果 <code>s[i:j] == s[j:2*j-i]</code>，则 <code>dp[i] = max(dp[i], dp[j] + 1)</code></p>
 <h4 id="code-3">code</h4>
 <figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">deleteString</span><span class="params">(s <span class="type">string</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    n := <span class="built_in">len</span>(s)</span><br><span class="line">    dp := <span class="built_in">make</span>([]<span class="type">int</span>, n)  <span class="comment">// dp[i]: s[i:] 所需最大删除数</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i := n<span class="number">-1</span>; i &gt;= <span class="number">0</span>; i-- &#123;</span><br><span class="line">        dp[i] = <span class="number">1</span></span><br><span class="line">        l := n-i</span><br><span class="line">        <span class="keyword">for</span> j := i+<span class="number">1</span>; j &lt;= i+l/<span class="number">2</span>; j++ &#123;</span><br><span class="line">            <span class="keyword">if</span> temp[i:j] == temp[j:<span class="number">2</span>*j-i] &amp;&amp; dp[i] &lt; dp[j] + <span class="number">1</span> &#123;</span><br><span class="line">                dp[i] = dp[j] + <span class="number">1</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> dp[<span class="number">0</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>LeetCode</category>
-      </categories>
-      <tags>
-        <tag>周赛</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>weekCompetition314</title>
-    <url>/LeetCode/weekCompetition314/</url>
-    <content><![CDATA[<p><a href="https://leetcode.cn/contest/weekly-contest-314/">第 314 场周赛</a>复盘。</p>
-<p><strong>排名</strong> 1130 / 4838</p>
-<span id="more"></span>
-<h3 id="处理用时最长的那个任务的员工">1. <a href="https://leetcode.cn/problems/the-employee-that-worked-on-the-longest-task/">处理用时最长的那个任务的员工</a></h3>
-<blockquote>
-<p>共有 n 位员工，每位员工都有一个从 0 到 n - 1 的唯一 id。</p>
-<p>给你一个二维整数数组 <code>logs</code>，其中 <code>logs[i] = [id_i, leaveTime_i]</code>：</p>
-<p><code>id_i</code> 是处理第 i 个任务的员工的 id，且 <code>leaveTime_i</code> 是员工完成第 i 个任务的时刻。所有 <code>leaveTime_i</code> 的值都是 <strong>唯一</strong> 的。</p>
-<p>注意，第 i 个任务在第 i - 1 个任务结束后立即开始，且第 0 个任务从时刻 0 开始。</p>
-<p>返回处理用时最长的那个任务的员工的 id。如果存在两个或多个员工同时满足，则返回几人中 <strong>最小</strong> 的 id。</p>
-</blockquote>
-<h4 id="思路">思路</h4>
-<p>找使得 <code>log[i][1] - log[i-1][1]</code> 最大的 <code>log[i]</code>，并取其中最小的那个 <code>log[i][0]</code></p>
-<h4 id="code">code</h4>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">hardestWorker</span><span class="params">(n <span class="type">int</span>, logs [][]<span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    res, max := logs[<span class="number">0</span>][<span class="number">0</span>], logs[<span class="number">0</span>][<span class="number">1</span>]</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">1</span>; i &lt; <span class="built_in">len</span>(logs); i++ &#123;</span><br><span class="line">        diff := logs[i][<span class="number">1</span>] - logs[i<span class="number">-1</span>][<span class="number">1</span>]</span><br><span class="line">        <span class="keyword">if</span> diff &gt; max &#123;</span><br><span class="line">            max = diff</span><br><span class="line">            res = logs[i][<span class="number">0</span>]</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> diff == max &amp;&amp; res &gt; logs[i][<span class="number">0</span>] &#123;</span><br><span class="line">            res = logs[i][<span class="number">0</span>]</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">     </span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="找出前缀异或的原始数组">2. <a href="https://leetcode.cn/problems/find-the-original-array-of-prefix-xor/">找出前缀异或的原始数组</a></h3>
-<blockquote>
-<p>给你一个长度为 n 的 <strong>整数</strong> 数组 <code>pref</code> 。找出并返回满足下述条件且长度为 n 的数组 <code>arr</code>：</p>
-<p><code>pref[i] = arr[0] ^ arr[1] ^ ... ^ arr[i]</code></p>
-<p>注意 ^ 表示 按位异或运算。</p>
-</blockquote>
-<h4 id="思路-1">思路</h4>
-<p><code>pref[i+1] = pref[i] ^ arr[i]</code>，两边同时异或 <code>pref[i]</code>，得到 <code>arr[i] = pref[i] ^ pref[i+1]</code></p>
-<h4 id="code-1">code</h4>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">findArray</span><span class="params">(p []<span class="type">int</span>)</span></span> []<span class="type">int</span> &#123;</span><br><span class="line">    res := <span class="built_in">make</span>([]<span class="type">int</span>, <span class="built_in">len</span>(p))</span><br><span class="line">    res[<span class="number">0</span>] = p[<span class="number">0</span>]</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">1</span>; i &lt; <span class="built_in">len</span>(p); i++ &#123;</span><br><span class="line">        res[i] = p[i] ^ p[i<span class="number">-1</span>]</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="使用机器人打印字典序最小的字符串">3. <a href="https://leetcode.cn/problems/using-a-robot-to-print-the-lexicographically-smallest-string/">使用机器人打印字典序最小的字符串</a></h3>
-<blockquote>
-<p>给你一个字符串 s 和一个机器人，机器人当前有一个空字符串 t。执行以下操作之一，直到 s 和 t 都变成空字符串：</p>
-<p>删除字符串 s 的 <strong>第一个</strong> 字符，并将该字符给机器人。机器人把这个字符添加到 t 的尾部。</p>
-<p>删除字符串 t 的 <strong>最后一个</strong> 字符，并将该字符给机器人。机器人将该字符写到纸上。</p>
-<p>请你返回纸上能写出的字典序最小的字符串。</p>
-</blockquote>
-<h4 id="思路-2">思路</h4>
-<p>题目可以转为，给定一个字符串的入栈顺序，求所有出栈顺序中字典序最小的那个。所以需要把 t 等效为栈。</p>
-<p>我们需要遍历 s，同时，在任意时刻，对于 t 栈顶（尾部）的字符而言：</p>
-<ol type="1">
-<li><p>如果 s 中尚存的字符中没有比它更小的，则将其 append 到结果字符串的末尾（写到纸上）；</p>
-<blockquote>
-<p>不难证明，这样贪心的做法一定会使字典序最小。</p>
-</blockquote></li>
-<li><p>反之，先将其加入栈中（添加到 t 的尾部），最后一并写出。</p></li>
-</ol>
-<p>可以用一个数组 <code>minm[]</code> 来表示 s 的当前 index 到末尾这一子串中 ASSIC 码最小的字符，那么 (1) 中的比较就变成了 <code>t.top()</code> 与 <code>minm[i]</code> 之间的比较。</p>
-<h4 id="code-2">code</h4>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// c++</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">string <span class="title">robotWithString</span><span class="params">(string s)</span> </span>&#123;</span><br><span class="line">        <span class="type">int</span> n = s.<span class="built_in">length</span>();</span><br><span class="line">        <span class="function">vector&lt;<span class="type">char</span>&gt; <span class="title">minm</span><span class="params">(n)</span></span>;</span><br><span class="line">        stack&lt;<span class="type">char</span>&gt; t;</span><br><span class="line">        string res;</span><br><span class="line">        </span><br><span class="line">        minm[n<span class="number">-1</span>] = s[n<span class="number">-1</span>];</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = n<span class="number">-2</span>; i &gt;= <span class="number">0</span>; i--) &#123;</span><br><span class="line">            minm[i] = s[i] &lt; minm[i+<span class="number">1</span>] ? s[i] : minm[i+<span class="number">1</span>];</span><br><span class="line">        &#125;        </span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n<span class="number">-1</span>; i++) &#123;</span><br><span class="line">            t.<span class="built_in">push</span>(s[i]);	<span class="comment">// 删除 s 的第一个字符并添加到 t 的尾部</span></span><br><span class="line">            <span class="keyword">while</span> (!t.<span class="built_in">empty</span>() &amp;&amp; t.<span class="built_in">top</span>() &lt;= minm[i+<span class="number">1</span>]) &#123;	<span class="comment">// 若后面没有比 t 尾部字符更小的，写到纸上</span></span><br><span class="line">                res.<span class="built_in">push_back</span>(st.<span class="built_in">top</span>());</span><br><span class="line">                t.<span class="built_in">pop</span>();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 将 t 中所有字符写到纸上</span></span><br><span class="line">        res.<span class="built_in">push_back</span>(s[n<span class="number">-1</span>]);</span><br><span class="line">        <span class="keyword">while</span> (!t.<span class="built_in">empty</span>()) &#123;</span><br><span class="line">            res.<span class="built_in">push_back</span>(t.<span class="built_in">top</span>());</span><br><span class="line">            t.<span class="built_in">pop</span>();</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-<h3 id="矩阵中和能被-k-整除的路径">4. <a href="https://leetcode.cn/problems/paths-in-matrix-whose-sum-is-divisible-by-k/">矩阵中和能被 K 整除的路径</a></h3>
-<blockquote>
-<p>给你一个下标从 0 开始的 m x n 整数矩阵 grid 和一个整数 k 。你从起点 (0, 0) 出发，每一步只能往 <strong>下</strong> 或者往 <strong>右</strong> ，你想要到达终点 (m - 1, n - 1) 。</p>
-<p>请你返回路径和能被 k 整除的路径数目，由于答案可能很大，返回答案对 <span class="math inline">\(10^9 + 7\)</span> 取余 的结果。</p>
-</blockquote>
-<h4 id="思路-3">思路</h4>
-<p><em>知道用动态规划，但没想出来，下面参考了别人的</em></p>
-<p>定义 <code>dp[i][j][v]</code> 表示从 <code>(0, 0)</code> 走到 <code>(i, j)</code>，且路径和模 k 的结果为 v 时的路径数。</p>
-<p>要使得从 <code>(0, 0)</code> 处走到 <code>(i, j)</code> 且路径和模 k 的结果为 v，前一个点只能是 <code>(i-1, j)</code> 或 <code>(i, j-1)</code>，且有</p>
-<ul>
-<li><code>(pathsum(i-1, j) + grid[i][j]) % k = pathsum(i, j) = v</code></li>
-<li><code>(pathsum(i, j-1) + grid[i][j]) % k = pathsum(i, j) = v</code></li>
-</ul>
-<p>那么有如下状态转移方程：<code>dp[i][j][v] = dp[i-1][j][(v - grid[i][j]) % k] + dp[i][j-1][(v - grid[i][j]) % k]</code></p>
-<h4 id="code-3">code</h4>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">numberOfPaths</span><span class="params">(grid [][]<span class="type">int</span>, k <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    mod := <span class="number">1000000007</span></span><br><span class="line">    m, n := <span class="built_in">len</span>(grid), <span class="built_in">len</span>(grid[<span class="number">0</span>])</span><br><span class="line">    dp := <span class="built_in">make</span>([][][]<span class="type">int</span>, m)</span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; m; i++ &#123;</span><br><span class="line">        dp[i] = <span class="built_in">make</span>([][]<span class="type">int</span>, n)</span><br><span class="line">        <span class="keyword">for</span> j := <span class="number">0</span>; j &lt; n; j++ &#123;</span><br><span class="line">            dp[i][j] = <span class="built_in">make</span>([]<span class="type">int</span>, k)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    dp[<span class="number">0</span>][<span class="number">0</span>][grid[<span class="number">0</span>][<span class="number">0</span>] % k] = <span class="number">1</span></span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; m; i++ &#123;</span><br><span class="line">        <span class="keyword">for</span> j := <span class="number">0</span>; j &lt; n; j++ &#123;</span><br><span class="line">            <span class="keyword">for</span> v := <span class="number">0</span>; v &lt; k; v++ &#123;</span><br><span class="line">                <span class="keyword">if</span> i &gt; <span class="number">0</span> &#123;</span><br><span class="line">                    dp[i][j][v] += dp[i<span class="number">-1</span>][j][(v - grid[i][j] + <span class="number">100</span>*k) % k]</span><br><span class="line">                    dp[i][j][v] %= mod</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span> j &gt; <span class="number">0</span> &#123;</span><br><span class="line">                    dp[i][j][v] += dp[i][j<span class="number">-1</span>][(v - grid[i][j] + <span class="number">100</span>*k) % k]</span><br><span class="line">                    dp[i][j][v] %= mod</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> dp[m<span class="number">-1</span>][n<span class="number">-1</span>][<span class="number">0</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>LeetCode</category>
@@ -2283,6 +2540,78 @@ S\Lambda
 <p>同时还要考虑奇偶，因为奇数总是变成奇数，偶数总是变成偶数。</p>
 <h4 id="code-3">code</h4>
 <figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">makeSimilar</span><span class="params">(nums []<span class="type">int</span>, target []<span class="type">int</span>)</span></span> <span class="type">int64</span> &#123;</span><br><span class="line">    <span class="comment">// 考虑奇偶</span></span><br><span class="line">    n1, n2, t1, t2 := <span class="built_in">make</span>([]<span class="type">int</span>, <span class="number">0</span>), <span class="built_in">make</span>([]<span class="type">int</span>, <span class="number">0</span>), <span class="built_in">make</span>([]<span class="type">int</span>, <span class="number">0</span>), <span class="built_in">make</span>([]<span class="type">int</span>, <span class="number">0</span>)</span><br><span class="line">    <span class="keyword">for</span> _, n := <span class="keyword">range</span> nums &#123;</span><br><span class="line">        <span class="keyword">if</span> n % <span class="number">2</span> != <span class="number">0</span> &#123;</span><br><span class="line">            n1 = <span class="built_in">append</span>(n1, n)</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            n2 = <span class="built_in">append</span>(n2, n)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> _, t := <span class="keyword">range</span> target &#123;</span><br><span class="line">        <span class="keyword">if</span> t % <span class="number">2</span> != <span class="number">0</span> &#123;</span><br><span class="line">            t1 = <span class="built_in">append</span>(t1, t)</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            t2 = <span class="built_in">append</span>(t2, t)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    sort.Ints(n1)</span><br><span class="line">    sort.Ints(n2)</span><br><span class="line">    sort.Ints(t1)</span><br><span class="line">    sort.Ints(t2)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">var</span> d1, d2 <span class="type">int64</span> = <span class="number">0</span>, <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> i := <span class="keyword">range</span> n1 &#123;</span><br><span class="line">        <span class="keyword">if</span> t1[i] &gt; n1[i] &#123;</span><br><span class="line">            d1 += <span class="type">int64</span>(t1[i]-n1[i])</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> i := <span class="keyword">range</span> n2 &#123;</span><br><span class="line">        <span class="keyword">if</span> t2[i] &gt; n2[i] &#123;</span><br><span class="line">            d2 += <span class="type">int64</span>(t2[i] - n2[i])</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> (d1+d2)/<span class="number">2</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>LeetCode</category>
+      </categories>
+      <tags>
+        <tag>周赛</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>weekCompetition314</title>
+    <url>/LeetCode/weekCompetition314/</url>
+    <content><![CDATA[<p><a href="https://leetcode.cn/contest/weekly-contest-314/">第 314 场周赛</a>复盘。</p>
+<p><strong>排名</strong> 1130 / 4838</p>
+<span id="more"></span>
+<h3 id="处理用时最长的那个任务的员工">1. <a href="https://leetcode.cn/problems/the-employee-that-worked-on-the-longest-task/">处理用时最长的那个任务的员工</a></h3>
+<blockquote>
+<p>共有 n 位员工，每位员工都有一个从 0 到 n - 1 的唯一 id。</p>
+<p>给你一个二维整数数组 <code>logs</code>，其中 <code>logs[i] = [id_i, leaveTime_i]</code>：</p>
+<p><code>id_i</code> 是处理第 i 个任务的员工的 id，且 <code>leaveTime_i</code> 是员工完成第 i 个任务的时刻。所有 <code>leaveTime_i</code> 的值都是 <strong>唯一</strong> 的。</p>
+<p>注意，第 i 个任务在第 i - 1 个任务结束后立即开始，且第 0 个任务从时刻 0 开始。</p>
+<p>返回处理用时最长的那个任务的员工的 id。如果存在两个或多个员工同时满足，则返回几人中 <strong>最小</strong> 的 id。</p>
+</blockquote>
+<h4 id="思路">思路</h4>
+<p>找使得 <code>log[i][1] - log[i-1][1]</code> 最大的 <code>log[i]</code>，并取其中最小的那个 <code>log[i][0]</code></p>
+<h4 id="code">code</h4>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">hardestWorker</span><span class="params">(n <span class="type">int</span>, logs [][]<span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    res, max := logs[<span class="number">0</span>][<span class="number">0</span>], logs[<span class="number">0</span>][<span class="number">1</span>]</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">1</span>; i &lt; <span class="built_in">len</span>(logs); i++ &#123;</span><br><span class="line">        diff := logs[i][<span class="number">1</span>] - logs[i<span class="number">-1</span>][<span class="number">1</span>]</span><br><span class="line">        <span class="keyword">if</span> diff &gt; max &#123;</span><br><span class="line">            max = diff</span><br><span class="line">            res = logs[i][<span class="number">0</span>]</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> diff == max &amp;&amp; res &gt; logs[i][<span class="number">0</span>] &#123;</span><br><span class="line">            res = logs[i][<span class="number">0</span>]</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">     </span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="找出前缀异或的原始数组">2. <a href="https://leetcode.cn/problems/find-the-original-array-of-prefix-xor/">找出前缀异或的原始数组</a></h3>
+<blockquote>
+<p>给你一个长度为 n 的 <strong>整数</strong> 数组 <code>pref</code> 。找出并返回满足下述条件且长度为 n 的数组 <code>arr</code>：</p>
+<p><code>pref[i] = arr[0] ^ arr[1] ^ ... ^ arr[i]</code></p>
+<p>注意 ^ 表示 按位异或运算。</p>
+</blockquote>
+<h4 id="思路-1">思路</h4>
+<p><code>pref[i+1] = pref[i] ^ arr[i]</code>，两边同时异或 <code>pref[i]</code>，得到 <code>arr[i] = pref[i] ^ pref[i+1]</code></p>
+<h4 id="code-1">code</h4>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">findArray</span><span class="params">(p []<span class="type">int</span>)</span></span> []<span class="type">int</span> &#123;</span><br><span class="line">    res := <span class="built_in">make</span>([]<span class="type">int</span>, <span class="built_in">len</span>(p))</span><br><span class="line">    res[<span class="number">0</span>] = p[<span class="number">0</span>]</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">1</span>; i &lt; <span class="built_in">len</span>(p); i++ &#123;</span><br><span class="line">        res[i] = p[i] ^ p[i<span class="number">-1</span>]</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="使用机器人打印字典序最小的字符串">3. <a href="https://leetcode.cn/problems/using-a-robot-to-print-the-lexicographically-smallest-string/">使用机器人打印字典序最小的字符串</a></h3>
+<blockquote>
+<p>给你一个字符串 s 和一个机器人，机器人当前有一个空字符串 t。执行以下操作之一，直到 s 和 t 都变成空字符串：</p>
+<p>删除字符串 s 的 <strong>第一个</strong> 字符，并将该字符给机器人。机器人把这个字符添加到 t 的尾部。</p>
+<p>删除字符串 t 的 <strong>最后一个</strong> 字符，并将该字符给机器人。机器人将该字符写到纸上。</p>
+<p>请你返回纸上能写出的字典序最小的字符串。</p>
+</blockquote>
+<h4 id="思路-2">思路</h4>
+<p>题目可以转为，给定一个字符串的入栈顺序，求所有出栈顺序中字典序最小的那个。所以需要把 t 等效为栈。</p>
+<p>我们需要遍历 s，同时，在任意时刻，对于 t 栈顶（尾部）的字符而言：</p>
+<ol type="1">
+<li><p>如果 s 中尚存的字符中没有比它更小的，则将其 append 到结果字符串的末尾（写到纸上）；</p>
+<blockquote>
+<p>不难证明，这样贪心的做法一定会使字典序最小。</p>
+</blockquote></li>
+<li><p>反之，先将其加入栈中（添加到 t 的尾部），最后一并写出。</p></li>
+</ol>
+<p>可以用一个数组 <code>minm[]</code> 来表示 s 的当前 index 到末尾这一子串中 ASSIC 码最小的字符，那么 (1) 中的比较就变成了 <code>t.top()</code> 与 <code>minm[i]</code> 之间的比较。</p>
+<h4 id="code-2">code</h4>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// c++</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">string <span class="title">robotWithString</span><span class="params">(string s)</span> </span>&#123;</span><br><span class="line">        <span class="type">int</span> n = s.<span class="built_in">length</span>();</span><br><span class="line">        <span class="function">vector&lt;<span class="type">char</span>&gt; <span class="title">minm</span><span class="params">(n)</span></span>;</span><br><span class="line">        stack&lt;<span class="type">char</span>&gt; t;</span><br><span class="line">        string res;</span><br><span class="line">        </span><br><span class="line">        minm[n<span class="number">-1</span>] = s[n<span class="number">-1</span>];</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = n<span class="number">-2</span>; i &gt;= <span class="number">0</span>; i--) &#123;</span><br><span class="line">            minm[i] = s[i] &lt; minm[i+<span class="number">1</span>] ? s[i] : minm[i+<span class="number">1</span>];</span><br><span class="line">        &#125;        </span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n<span class="number">-1</span>; i++) &#123;</span><br><span class="line">            t.<span class="built_in">push</span>(s[i]);	<span class="comment">// 删除 s 的第一个字符并添加到 t 的尾部</span></span><br><span class="line">            <span class="keyword">while</span> (!t.<span class="built_in">empty</span>() &amp;&amp; t.<span class="built_in">top</span>() &lt;= minm[i+<span class="number">1</span>]) &#123;	<span class="comment">// 若后面没有比 t 尾部字符更小的，写到纸上</span></span><br><span class="line">                res.<span class="built_in">push_back</span>(st.<span class="built_in">top</span>());</span><br><span class="line">                t.<span class="built_in">pop</span>();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 将 t 中所有字符写到纸上</span></span><br><span class="line">        res.<span class="built_in">push_back</span>(s[n<span class="number">-1</span>]);</span><br><span class="line">        <span class="keyword">while</span> (!t.<span class="built_in">empty</span>()) &#123;</span><br><span class="line">            res.<span class="built_in">push_back</span>(t.<span class="built_in">top</span>());</span><br><span class="line">            t.<span class="built_in">pop</span>();</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="矩阵中和能被-k-整除的路径">4. <a href="https://leetcode.cn/problems/paths-in-matrix-whose-sum-is-divisible-by-k/">矩阵中和能被 K 整除的路径</a></h3>
+<blockquote>
+<p>给你一个下标从 0 开始的 m x n 整数矩阵 grid 和一个整数 k 。你从起点 (0, 0) 出发，每一步只能往 <strong>下</strong> 或者往 <strong>右</strong> ，你想要到达终点 (m - 1, n - 1) 。</p>
+<p>请你返回路径和能被 k 整除的路径数目，由于答案可能很大，返回答案对 <span class="math inline">\(10^9 + 7\)</span> 取余 的结果。</p>
+</blockquote>
+<h4 id="思路-3">思路</h4>
+<p><em>知道用动态规划，但没想出来，下面参考了别人的</em></p>
+<p>定义 <code>dp[i][j][v]</code> 表示从 <code>(0, 0)</code> 走到 <code>(i, j)</code>，且路径和模 k 的结果为 v 时的路径数。</p>
+<p>要使得从 <code>(0, 0)</code> 处走到 <code>(i, j)</code> 且路径和模 k 的结果为 v，前一个点只能是 <code>(i-1, j)</code> 或 <code>(i, j-1)</code>，且有</p>
+<ul>
+<li><code>(pathsum(i-1, j) + grid[i][j]) % k = pathsum(i, j) = v</code></li>
+<li><code>(pathsum(i, j-1) + grid[i][j]) % k = pathsum(i, j) = v</code></li>
+</ul>
+<p>那么有如下状态转移方程：<code>dp[i][j][v] = dp[i-1][j][(v - grid[i][j]) % k] + dp[i][j-1][(v - grid[i][j]) % k]</code></p>
+<h4 id="code-3">code</h4>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">numberOfPaths</span><span class="params">(grid [][]<span class="type">int</span>, k <span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    mod := <span class="number">1000000007</span></span><br><span class="line">    m, n := <span class="built_in">len</span>(grid), <span class="built_in">len</span>(grid[<span class="number">0</span>])</span><br><span class="line">    dp := <span class="built_in">make</span>([][][]<span class="type">int</span>, m)</span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; m; i++ &#123;</span><br><span class="line">        dp[i] = <span class="built_in">make</span>([][]<span class="type">int</span>, n)</span><br><span class="line">        <span class="keyword">for</span> j := <span class="number">0</span>; j &lt; n; j++ &#123;</span><br><span class="line">            dp[i][j] = <span class="built_in">make</span>([]<span class="type">int</span>, k)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    dp[<span class="number">0</span>][<span class="number">0</span>][grid[<span class="number">0</span>][<span class="number">0</span>] % k] = <span class="number">1</span></span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; m; i++ &#123;</span><br><span class="line">        <span class="keyword">for</span> j := <span class="number">0</span>; j &lt; n; j++ &#123;</span><br><span class="line">            <span class="keyword">for</span> v := <span class="number">0</span>; v &lt; k; v++ &#123;</span><br><span class="line">                <span class="keyword">if</span> i &gt; <span class="number">0</span> &#123;</span><br><span class="line">                    dp[i][j][v] += dp[i<span class="number">-1</span>][j][(v - grid[i][j] + <span class="number">100</span>*k) % k]</span><br><span class="line">                    dp[i][j][v] %= mod</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span> j &gt; <span class="number">0</span> &#123;</span><br><span class="line">                    dp[i][j][v] += dp[i][j<span class="number">-1</span>][(v - grid[i][j] + <span class="number">100</span>*k) % k]</span><br><span class="line">                    dp[i][j][v] %= mod</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> dp[m<span class="number">-1</span>][n<span class="number">-1</span>][<span class="number">0</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>LeetCode</category>
@@ -2434,184 +2763,6 @@ S\Lambda
       </categories>
       <tags>
         <tag>周赛</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Zookeeper</title>
-    <url>/6-824/zookeeper/</url>
-    <content><![CDATA[<p>6.824 的第四篇论文是 <strong>ZooKeeper</strong>——用于协调分布式应用程序进程，同时提供消息群发、共享寄存器和分布式锁等集中式服务。</p>
-<blockquote>
-<p>关于“ZooKeeper”这个项目的名字，考虑到之前内部很多项目都是使用动物的名字来命名的，Yahoo 的工程师希望给这个项目也取一个动物的名字。时任研究院的首席科学家 Raghu Ramakrishnan 开玩笑地说：“再这样下去，我们这儿就变成动物园了！”此话一出，大家纷纷表示就叫动物园管理员吧一一一因为各个以动物命名的分布式组件放在一起，Yahoo 的整个分布式系统看上去就像一个大型的动物园了，而 Zookeeper 正好要用来进行分布式环境的协调一一于是，Zookeeper 的名字也就由此诞生了。</p>
-</blockquote>
-<span id="more"></span>
-<h4 id="协调服务">协调服务</h4>
-<p>ZooKeeper 采用的协调形式有：配置、组成员、领导者选举和锁。由于实现了更强大的原语的服务可以用来实现不那么强大的原语，ZooKeeper 不再在服务端实现特定原语，而是公开一个 API，令开发者实现自己的原语，为协调提供灵活性。</p>
-<p>ZooKeeper 在设计 API 时避免了阻塞原语，转而实现简单的<strong>无等待数据对象</strong>，同时也需要保证所有操作按客户端顺序 <strong>FIFO</strong> 以及<strong>可线性化的写入</strong>。</p>
-<p>ZooKeeper 服务由一组使用 <strong>Replicate</strong> 的服务器组成（实际上有点像 Raft），同时利用简单的<strong>管道</strong>架构来实现高吞吐和低延迟——既能以 FIFO 顺序从单个客户端执行操作，又能使其能够异步提交操作。</p>
-<p>为了保证更新操作满足<strong>线性化</strong>，ZooKeeper 采用基于领导者的原子广播协议 <strong>Zab</strong>；读取操作在本地处理，无需排序。</p>
-<p>ZooKeeper 使用<strong>监视机制</strong>使客户端能够缓存数据，同时在给定数据对象更新时得到通知。</p>
-<h4 id="znode">Znode</h4>
-<p>ZooKeeper 向其客户端提供一组数据节点(<strong>znode</strong>)的抽象，这些节点根据分层名称空间进行组织。如下图：</p>
-<p><img src="image-20221008155321613.png" alt="image-20221008155321613" style="zoom:70%;" /></p>
-<p>所有 znode 都存储数据，且除了临时节点(<strong>ephemeral znode</strong>)外的所有 znode 都可以有子节点。</p>
-<p>有以下两种 znode：</p>
-<ol type="1">
-<li><strong>Regular</strong>：显式创建和删除。</li>
-<li><strong>Ephemeral</strong>：创建后，或显示删除，或在会话终止时自动删除。</li>
-</ol>
-<p>创建 znode 时，客户端可以设置一个 <code>SEQUENTIAL</code> 标志，这种 znode 具有全局单调增的值。</p>
-<p>ZooKeeper 实现监视(<strong>watch</strong>)机制允许 client 及时接收数据更改通知，这个通知是一次性的，一旦触发或会话关闭，它们就会失效。</p>
-<p><strong>数据模型</strong>：本质上是一个具有简化 api 且只有完整数据读写的文件系统，或是具有分层 key 的 key-value 表。<strong>分层命名空间</strong>对于为不同应用程序的命名空间分配子树以及分配访问权限很有用。事实上，znode 的设计并非为了一般的数据存储，而是提供一个到客户端应用程序映射的抽象，通常对应于用于协调目的的元数据，如一些可用于元数据或分布式计算中的配置信息。</p>
-<p><strong>会话</strong>：client 连接到 ZooKeeper 并启动会话，用于标识 client。</p>
-<h4 id="客户端-api">客户端 API</h4>
-<h5 id="createpath-data-flags">create(path, data, flags)</h5>
-<p>创建一个路径名为 <code>path</code> 的 znode，并将 <code>data</code> 存储在其中，返回该 znode 的名称。<code>flag</code> 代表 znode 类型。</p>
-<h5 id="deletepath-version">delete(path, version)</h5>
-<p>若 <code>path</code> 上的 znode 版本号等于 <code>version</code>，则将其删除。</p>
-<h5 id="existspath-watch">exists(path, watch)</h5>
-<p>若 <code>path</code> 上的 znode 存在，则返回 true；反之返回 false。<code>watch</code> 使得客户端在该 znode 上设置一个监视器。</p>
-<h5 id="getdatapath-watch">getData(path, watch)</h5>
-<p>返回 <code>path</code> 上 znode 关联的数据和元数据。若 znode 不存在，则不设置监视器。</p>
-<h5 id="setdatapath-data-version">setData(path, data, version)</h5>
-<p>若 <code>path</code> 上的 znode 版本号等于 <code>version</code>，则将 <code>data</code> 写入。</p>
-<h5 id="getchildrenpath-watch">getChildren(path, watch)</h5>
-<p>返回 <code>path</code> 上 znode 的子节点集合。</p>
-<h5 id="sycnpath">sycn(path)</h5>
-<p>等待所有未完成的更新，<code>path</code> 没啥用。</p>
-<blockquote>
-<p>以上 api 都提供了同步和异步版本，若 <code>version = -1</code>，则不进行版本检查。</p>
-</blockquote>
-<h4 id="zookeeper-保证">ZooKeeper 保证</h4>
-<ul>
-<li><p><strong>线性化写入</strong>：所有更新 ZooKeeper 状态的请求都是可序列化的，并且服从优先级。</p></li>
-<li><p><strong>FIFO 客户端顺序</strong>：所有请求都按照客户端发送的顺序执行。</p></li>
-</ul>
-<p>要实现这两个保证，需要选出一个领导者来指挥工作进程。而当一个新的领导者接管系统时，它必须修改配置，然后通知其它进程。这样的话，需要满足以下两点：</p>
-<ol type="1">
-<li>领导者在修改配置时，其它进程无法使用正在被修改的配置；</li>
-<li>若领导者在完全修改完配置前崩溃，则其他进程无法使用这一未完全更新的配置。</li>
-</ol>
-<p>ZooKeeper 使用 <strong>ready znode</strong> 来满足上述约束，其他进程仅在 ready 存在期间使用配置。领导者通过删除 ready、更新配置 znode 和创建 ready 来更改配置。若一个进程看到了 ready znode，它必能看到新领导者所做的所有配置修改；若领导者在创建 ready 前崩溃，则其他进程就知道配置尚未完全更新完毕，也不会使用该配置。</p>
-<p>如果一个进程在新领导者修改配置前看到 ready，而在更改配置时读取配置，则会产生问题。为了解决这一问题，采用 <strong>watch</strong> 机制，即客户端会在读取任何新配置前收到更新通知。</p>
-<blockquote>
-<p>ZooKeeper 放弃了线性一致读，使得读请求能够分布在副本上，以提高性能。但由于写请求是线性化的，而且任何一个客户端的请求都会按照其指定的顺序进行，故所有写请求都是按客户端确定的顺序执行的，且每个读请求必然要在某个特定的 Log 点执行，即如果日志没有到这个点，它不会执行读请求，同时后续读请求必须在不早于当前读请求的位置进行。从而ZooKeeper 也能保证它（定义）的一致性。</p>
-</blockquote>
-<p>ZooKeeper 还有以下两个保证：</p>
-<ul>
-<li><strong>活跃性</strong>：若大多数 ZooKeeper Server 处于活跃状态，则服务可用。</li>
-<li><strong>持久性</strong>：若 ZooKeeper Server 成功响应了更改请求，只要多数服务器最终能恢复，则该更改就会持续存在。</li>
-</ul>
-<h4 id="原语">原语</h4>
-<h5 id="配置管理">配置管理</h5>
-<p>配置存储在 znode <span class="math inline">\(z_c\)</span> 中，进程通过读取 <span class="math inline">\(z_c\)</span> 并通过 watch 标志来获取配置更新通知。</p>
-<h5 id="会合">会合</h5>
-<p>将 master 信息放在 zonode <span class="math inline">\(z_r\)</span> 中，以便 worker 寻找。</p>
-<h5 id="组成员关系">组成员关系</h5>
-<p>当组成员进程启动时，会在一个指定的 znode <span class="math inline">\(z_g\)</span> （用以表示组）下创建一个临时子 znode，该子 znode 存放进程信息。若进程结束，则该子 znode 自动删除。故可通过 <span class="math inline">\(z_g\)</span> 来获取该组的所有组成员信息。</p>
-<h5 id="简单锁">简单锁</h5>
-<ol type="1">
-<li><p><strong>锁文件</strong>——最简单的实现：为了获取锁，client 会尝试创建 ephemeral znode，若成功则持有锁；若 znode 存在，则说明有其它 client 正在持有锁，设置 watch 后进入等待状态，一旦该 znode 删除，则会再次尝试获得锁。</p>
-<blockquote>
-<p>这个策略会受到<strong>羊群效应</strong>(Herd Effect)的影响：若有很多客户端在等待获取锁，即便只有一个客户端可以获取锁，当锁被释放时，所有客户端都会尝试获得锁，就像羊群一样阻塞着。当有 <span class="math inline">\(n\)</span> 个客户端在等待时，最坏情况下需要 <span class="math inline">\(O(n^2)\)</span> 的尝试。</p>
-</blockquote></li>
-<li><p><strong>无羊群效应的简单锁</strong>：所有请求锁的 client 排成一排，按请求到达的顺序<strong>链式</strong>获得锁。每个 client 按照 <code>SEQUENTIAL</code> 在 <span class="math inline">\(z_l\)</span> 下创建 ephemeral znode，并获取 <span class="math inline">\(z_l\)</span> 所有子节点的信息。当且仅当其序号为 <span class="math inline">\(z_l\)</span> 所有子节点的序号中最低时，获得锁；否则，client 会 watch 前一个 znode。释放锁时只需要删除对应 znode 即可。</p>
-<p><code>Lock</code></p>
-<p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">n = create(l + &#x27;/lock-&#x27;, EPHEMERAL | SEQUENTIAL)</span><br><span class="line">C = getChildren(l, false)</span><br><span class="line">if n is lowest znode in C, exit</span><br><span class="line">p = znode in C ordered just before n</span><br><span class="line">if exists(p, true), wait for watch event</span><br><span class="line">goto 2</span><br></pre></td></tr></table></figure></p>
-<p><code>Unlock</code></p>
-<p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">delete(n)</span><br></pre></td></tr></table></figure></p>
-<blockquote>
-<p>前一个 znode 消失后还需要获取 <span class="math inline">\(z_l\)</span> 所有子节点的信息，并检查自己的序号是否为最小，因为有可能只是前一个 znode 崩溃，而有更小的 znode 持有锁。</p>
-<p>这样一来，每次释放锁时只会唤醒一个进程，从而将复杂度降为 <span class="math inline">\(O(n)\)</span></p>
-</blockquote></li>
-<li><p><strong>读写锁</strong>：写锁同上。读锁需要等待前面的写锁全部结束后才能持有。</p>
-<p><code>Write Lock</code></p>
-<p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">n = create(l + &#x27;/write-&#x27;, EPHEMERAL | SEQUENTIAL)</span><br><span class="line">C = getChildren(l, false)</span><br><span class="line">if n is lowest znode in C, exit</span><br><span class="line">p = znode in C ordered just before n</span><br><span class="line">if exists(p, true), wait for watch event</span><br><span class="line">goto 2</span><br></pre></td></tr></table></figure></p>
-<p><code>Read Lock</code></p>
-<p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">n = create(l + &#x27;/read-&#x27;, EPHEMERAL | SEQUENTIAL)</span><br><span class="line">C = getChildren(l, false)</span><br><span class="line">if no write znodes lower than n in C, exit</span><br><span class="line">p = write znode in C ordered just before n</span><br><span class="line">if exists(p, true), wait for watch event</span><br><span class="line">goto 3</span><br></pre></td></tr></table></figure></p></li>
-<li><p><strong>双屏障</strong>：使客户端能够同步计算的开始与结束。用 znode <span class="math inline">\(b\)</span> 表示 ZooKeeper 中的屏障。每个进程在准备开始时，会在 <span class="math inline">\(b\)</span> 下注册——创建一个子 znode，而在准备退出时注销——删除该子 znode。当 <span class="math inline">\(b\)</span> 的子节点数超过一定数量后，所有注册的进程都会真正开始计算，只有当 <span class="math inline">\(b\)</span> 的所有子节点都被删除时，进程才会真正退出。这两点都可通过 ready 来实现。</p></li>
-</ol>
-<h4 id="总结">总结</h4>
-<p>ZooKeeper 是一个容错的，通用的协调服务。</p>
-]]></content>
-      <categories>
-        <category>6.824</category>
-      </categories>
-      <tags>
-        <tag>paperReading</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>COPS</title>
-    <url>/6-824/COPS/</url>
-    <content><![CDATA[<p>6.824 的第十二篇论文是 <strong>COPS</strong>——一种可提供<strong>具有收敛冲突处理的因果一致性</strong>(Causal Plus, Causal+)的 ALPS 键值存储系统，并且具有高可扩展性。在 COPS-GT 中引入的 Get 事务还能够在不锁定或阻塞的情况下获得多个 Key 的一致视图。COPS-GT 也能为常见工作负载提供与 COPS 类似的延迟、吞吐量和扩展性。</p>
-<span id="more"></span>
-<h3 id="cops-架构">COPS 架构</h3>
-<p>COPS(Clusters of Order-Preserving Servers, 保序服务器集群)的 Causal+ 提供以下两个组件</p>
-<ol type="1">
-<li><strong>因果一致性</strong>：确保数据存储尊重操作之间的因果依赖关系。</li>
-<li><strong>收敛冲突处理</strong>：确保副本不会永久性发散，并且对同一 Key 的冲突更新在所有站点上得到相同的处理。</li>
-</ol>
-<p>基于以上两点，Causal+ 可确保 client 看到因果正确、无冲突且始终在进行中的数据存储。</p>
-<p>COPS 有多个数据中心，每个数据中心都由前端服务器和后端 kv 数据存储组成。本地数据中心执行读写操作，在后台以 Causal+ 的顺序跨数据中心复制数据。</p>
-<p><img src="COPS/image-20221123152400801.png" alt="image-20221123152400801" style="zoom:67%;" /></p>
-<h3 id="alps-系统与-trade-off">ALPS 系统与 Trade-off</h3>
-<p><a href="https://www.ruanyifeng.com/blog/2018/07/cap.html">CAP 定理</a>证明不存在一个同时满足这三个条件的系统。大多数现代 Web 服务选择牺牲强一致性(<strong>C</strong>onsistency)为代价（取而代之的是因果一致性）来满足可用性(<strong>A</strong>vailability)和分区容错性(<strong>P</strong>artition tolerance)，因为这样做还能够为 client 操作提供低延迟(low <strong>L</strong>atancy)和高可扩展性(high <strong>S</strong>calability)。我们将具有这四个属性的系统称为 ALPS 系统。</p>
-<h3 id="causal-consistency">Causal+ Consistency</h3>
-<blockquote>
-<p>有关因果一致性，具体可参考这篇<a href="(http://zhangtielei.com/posts/blog-distributed-causal-consistency.html)">博客</a>。</p>
-</blockquote>
-<p>考虑 kv 数据存储定义了以下两个基本操作：<code>put (key, val)</code> 和 <code>get (key) = val</code>。模型中的一个重要概念是操作之间的<strong>潜在因果关系</strong>，表示为 <span class="math inline">\(\leadsto\)</span>。这一关系受以下三条规则定义：</p>
-<ol type="1">
-<li><strong>单线程内有序</strong>：如果 a 和 b 是单个执行线程中的两个操作，如果操作 a 发生在操作 b 之前，则 a <span class="math inline">\(\leadsto\)</span> b；</li>
-<li><strong>Gets From</strong>：如果 a 是一个 <code>put</code> 操作，b 是一个 <code>get</code> 操作且返回 a 写入的值，那么 a <span class="math inline">\(\leadsto\)</span> b；</li>
-<li><strong>传递性</strong>：对于操作 a、b 和 c，如果 a <span class="math inline">\(\leadsto\)</span> b 和 b <span class="math inline">\(\leadsto\)</span> c，则有 a <span class="math inline">\(\leadsto\)</span> c；</li>
-</ol>
-<p>下图为一个示例：</p>
-<p><img src="COPS/image-20221123154038807.png" alt="image-20221123154038807" style="zoom:67%;" /></p>
-<ul>
-<li>根据<strong>单线程内有序规则</strong>得到 <code>get (y) = 2</code> <span class="math inline">\(\leadsto\)</span> <code>put (x, 4)</code>；</li>
-<li>根据 <strong>Gets From 规则</strong>得到 <code>put (y, 2)</code> <span class="math inline">\(\leadsto\)</span> <code>get (y) = 2</code>；</li>
-<li>根据<strong>传递性规则</strong>得到 <code>put (y, 2)</code> <span class="math inline">\(\leadsto\)</span> <code>put (x, 4)</code>。</li>
-</ul>
-<h4 id="定义">定义</h4>
-<ul>
-<li><p><strong>因果一致</strong>：<code>get</code> 操作返回的值与定义的顺序一致，即写入值的操作必须出现在它之前的所有操作之后。</p>
-<blockquote>
-<p>上图中，<code>put (y, 2)</code> 必须出现在 <code>put (x, 4)</code> 之前，后者又发生在 <code>put (z, 5)</code> 之前。如果 Client2 看到 <code>get (x) = 1</code> 在 <code>get (x) = 4</code> 之后，便违反了因果一致性。</p>
-</blockquote>
-<p>根据博客所述，因果关系是一个<strong>偏序关系</strong>，可能存在 a <span class="math inline">\(\not\leadsto\)</span> b 和 b <span class="math inline">\(\not\leadsto\)</span> a，此时称 a 和 b 是<strong>并发</strong>的。系统可以按任何顺序复制两个不相关的 <code>put</code> 操作，但如果 a 和 b 对同一个 Key 进行 <code>put</code>，那么它们则会<strong>冲突</strong>，最终得到的值是不确定的，此时需要收敛冲突处理。</p></li>
-<li><p><strong>收敛冲突处理</strong>：使用处理函数 <span class="math inline">\(h\)</span> 以相同的方式在所有副本上处理所有冲突的 <code>put</code>。COPS 可以自定义 <span class="math inline">\(h\)</span>，默认使用<strong>最后写入者获胜规则</strong>，即后来的写入会覆盖较早的写入。</p></li>
-</ul>
-<h4 id="与其它模型对比">与其它模型对比</h4>
-<p>下图展示了几种主流的一致性模型及其一致性强弱关系。</p>
-<p><img src="COPS/image-20221123233736790.png" alt="image-20221123233736790" style="zoom:80%;" /></p>
-<ol type="1">
-<li><strong>线性化</strong>：它保持全局、实时排序；</li>
-<li><strong>可串行化</strong>：至少确保全局排序；</li>
-<li><strong>因果一致性</strong>：确保相关操作之间的部分排序；</li>
-<li><strong>FIFO 一致性</strong>：它只保留执行线程内部的顺序，而不是线程之间；</li>
-<li><strong>键可串行化</strong>：这确保对于每个单独的 Key，所有操作都具有全局顺序；</li>
-<li><strong>最终一致性</strong>：副本最终会收敛于某个值。</li>
-</ol>
-<p>前两者无法在 ALPS 系统中实现。</p>
-<h4 id="cops-中实现-causal">COPS 中实现 Causal+</h4>
-<p>COPS 系统中使用两个抽象概念：</p>
-<ol type="1">
-<li><strong>version</strong>：每个 Key 的不同值都能被表示为 <span class="math inline">\(key_{verision}\)</span>，COPS 确保如果 <span class="math inline">\(x_i \leadsto y_j\)</span>，则 <span class="math inline">\(i&lt;j\)</span>。一旦 COPS 中的副本返回 <code>version = i</code> 的 <span class="math inline">\(key_i\)</span>，则 Causal 确保之后只会返回因果序下 <code>version</code> 更大的值；</li>
-<li><strong>dependency</strong>：因果一致性规定如果 <span class="math inline">\(x_i \leadsto y_j\)</span>，则 <span class="math inline">\(y_j\)</span> 依赖于 <span class="math inline">\(x_i\)</span>。COPS 确保仅在其所有依赖项 <span class="math inline">\(x_i\)</span> 操作被复制后才复制对 <span class="math inline">\(y_j\)</span> 的操作。</li>
-</ol>
-<h4 id="可扩展的因果关系">可扩展的因果关系</h4>
-<p>COPS 通过采用以下方法实现了可扩展性：</p>
-<ol type="1">
-<li>每个数据中心的节点负责 Key 空间的不同分区，但系统可以跟踪和强制存储在不同节点上的 Key 之间的依赖关系；</li>
-<li>COPS 在与每个 Key 版本关联的元数据中明确编码依赖关系，这样当 Key 被远程复制时，接收方能在提交传入版本之前执行依赖性检查。</li>
-</ol>
-]]></content>
-      <categories>
-        <category>6.824</category>
-      </categories>
-      <tags>
-        <tag>paperReading</tag>
       </tags>
   </entry>
 </search>

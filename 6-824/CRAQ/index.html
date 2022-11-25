@@ -28,7 +28,7 @@
 <meta property="og:image" content="http://leager-zju.github.com/6-824/CRAQ/image-20221009141338449.png">
 <meta property="og:image" content="http://leager-zju.github.com/6-824/CRAQ/image-20221009142355628.png">
 <meta property="article:published_time" content="2022-10-08T06:52:16.000Z">
-<meta property="article:modified_time" content="2022-11-24T07:00:42.502Z">
+<meta property="article:modified_time" content="2022-11-25T08:46:19.846Z">
 <meta property="article:author" content="Leager">
 <meta property="article:tag" content="paperReading">
 <meta name="twitter:card" content="summary">
@@ -226,7 +226,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-11-24 15:00:42" itemprop="dateModified" datetime="2022-11-24T15:00:42+08:00">2022-11-24</time>
+                <time title="修改时间：2022-11-25 16:46:19" itemprop="dateModified" datetime="2022-11-25T16:46:19+08:00">2022-11-25</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -256,7 +256,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>6.824 的第五篇论文是 <strong>CRAQ</strong>——一种以读取为主的工作负载的高吞吐量链式复制。它对原先的 Chain Replication 进行了一定的改进，在保持强一致性的同时大大提高了读取吞吐量。通过在所有对象副本之间分配负载，CRAQ 随链大小线性扩展，而不会增加一致性协调。</p>
+        <p>6.824 的第五篇论文是 <strong><a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/papers/cr-osdi04.pdf">CRAQ</a></strong>——一种以读取为主的工作负载的高吞吐量链式复制。它对原先的 Chain Replication 进行了一定的改进，在保持强一致性的同时大大提高了读取吞吐量。通过在所有对象副本之间分配负载，CRAQ 随链大小线性扩展，而不会增加一致性协调。</p>
 <span id="more"></span>
 <h3 id="chain-replication">Chain Replication</h3>
 <p>在传统的 CR 策略中，所有服务器按照链排列，第一个服务器称为 <strong>HEAD</strong>，最后一个服务器称为 <strong>TAIL</strong>。HEAD 处理所有写请求，TAIL 处理所有读请求。写请求沿链传播，TAIL 收到后会返回 ack。</p>
@@ -358,7 +358,7 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/6-824/zookeeper/" rel="prev" title="Zookeeper">
+    <a href="/6-824/Zookeeper/" rel="prev" title="Zookeeper">
       <i class="fa fa-chevron-left"></i> Zookeeper
     </a></div>
       <div class="post-nav-item">
