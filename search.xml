@@ -395,9 +395,7 @@
 <h3 id="cops-系统设计">COPS 系统设计</h3>
 <h4 id="cops-总览">COPS 总览</h4>
 <p>COPS 旨在跨数据中心运行，如下图所示。</p>
-<figure>
-<img src="image-20221124160439714.png" alt="image-20221124160439714" /><figcaption aria-hidden="true">image-20221124160439714</figcaption>
-</figure>
+<p><img src="image-20221124160439714.png" style="zoom:80%;" /></p>
 <p>客户端仅与本地 COPS 集群通信。系统将 Key 空间划分为若干分区，集群包含数据的完整副本，而集群内部节点存放单个分区。</p>
 <p>为了提供与现有最终一致系统类似的 Causal+ 以及资源和性能开销。COPS/COPS-GT 必须做到以下几点：</p>
 <ol type="1">
