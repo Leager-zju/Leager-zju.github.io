@@ -395,7 +395,7 @@
 <h3 id="cops-系统设计">COPS 系统设计</h3>
 <h4 id="cops-总览">COPS 总览</h4>
 <p>COPS 旨在跨数据中心运行，如下图所示。</p>
-<p><img src="image-20221124160439714.png" style="zoom:80%;" /></p>
+<p><img src="image-20221124160439714.png" style="zoom:80%;"/></p>
 <p>客户端仅与本地 COPS 集群通信。系统将 Key 空间划分为若干分区，集群包含数据的完整副本，而集群内部节点存放单个分区。</p>
 <p>为了提供与现有最终一致系统类似的 Causal+ 以及资源和性能开销。COPS/COPS-GT 必须做到以下几点：</p>
 <ol type="1">
@@ -452,9 +452,7 @@
 <li><strong>异步</strong>复制到远程集群。</li>
 </ol>
 <p>KV 存储公开以下 API 调用以提供这两种操作：</p>
-<figure>
-<img src="image-20221124202053597.png" alt="image-20221124202053597" /><figcaption aria-hidden="true">image-20221124202053597</figcaption>
-</figure>
+<p><img src="image-20221124202053597.png" alt="image-20221124202053597" /></p>
 <h5 id="写入本地">写入本地</h5>
 <p>客户端会计算完整的依赖集 <code>deps</code>，并识别出该值的最近依赖 <code>nearest</code>，然后将 <code>put_after</code> 的 <code>version</code> 设为 0。</p>
 <ul>
