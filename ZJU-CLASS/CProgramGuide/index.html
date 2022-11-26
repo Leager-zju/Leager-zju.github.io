@@ -18,17 +18,22 @@
     var CONFIG = {"hostname":"leager-zju.github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"b2t":true},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="一份面向所有初学&#x2F;入门 C 语言学生的指南。本文旨在帮助读者快速降低编(zuo)程(ti)难度，而不会涉及过多 C 语言语法知识。">
+  <meta name="description" content="一份面向所有初学&#x2F;入门 C 语言学生的指南。本文旨在帮助读者快速降低编(zuo)程(ti)难度，而不会涉及过多 C 语言语法知识。  上课可不会讲">
 <meta property="og:type" content="article">
 <meta property="og:title" content="C Program Guide">
 <meta property="og:url" content="http://leager-zju.github.com/ZJU-CLASS/CProgramGuide/index.html">
 <meta property="og:site_name" content="没什么看头的地方">
-<meta property="og:description" content="一份面向所有初学&#x2F;入门 C 语言学生的指南。本文旨在帮助读者快速降低编(zuo)程(ti)难度，而不会涉及过多 C 语言语法知识。">
+<meta property="og:description" content="一份面向所有初学&#x2F;入门 C 语言学生的指南。本文旨在帮助读者快速降低编(zuo)程(ti)难度，而不会涉及过多 C 语言语法知识。  上课可不会讲">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://leager-zju.github.com/ZJU-CLASS/CProgramGuide/image-20221126111527528.png">
+<meta property="og:image" content="http://leager-zju.github.com/ZJU-CLASS/CProgramGuide/image-20221126113259469.png">
+<meta property="og:image" content="http://leager-zju.github.com/ZJU-CLASS/CProgramGuide/image-20221126130110399.png">
+<meta property="og:image" content="http://leager-zju.github.com/ZJU-CLASS/CProgramGuide/image-20221126142543945.png">
 <meta property="article:published_time" content="2022-11-18T15:29:03.000Z">
-<meta property="article:modified_time" content="2022-11-23T05:46:28.845Z">
+<meta property="article:modified_time" content="2022-11-26T07:14:38.127Z">
 <meta property="article:author" content="Leager">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://leager-zju.github.com/ZJU-CLASS/CProgramGuide/image-20221126111527528.png">
 
 <link rel="canonical" href="http://leager-zju.github.com/ZJU-CLASS/CProgramGuide/">
 
@@ -222,7 +227,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-11-23 13:46:28" itemprop="dateModified" datetime="2022-11-23T13:46:28+08:00">2022-11-23</time>
+                <time title="修改时间：2022-11-26 15:14:38" itemprop="dateModified" datetime="2022-11-26T15:14:38+08:00">2022-11-26</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -253,36 +258,198 @@
 
       
         <p>一份面向所有初学/入门 C 语言学生的指南。本文旨在帮助读者快速降低编(zuo)程(ti)难度，而不会涉及过多 C 语言语法知识。</p>
+<blockquote>
+<p>上课可不会讲</p>
+</blockquote>
 <span id="more"></span>
-<h3 id="代码风格-programming-style">0. 代码风格 Programming Style</h3>
+<h3 id="get-started代码风格">Get Started：代码风格</h3>
 <p>代码风格好不好就像字写得好不好看一样，如果一个公司招聘文职人员，肯定不要字写得难看的，同理，代码风格糟糕的程序员肯定也是不称职的。虽然编译器不会挑剔难看的代码，只要语法没问题照样能编译通过并运行，但是你并不一定每次都会写出 bugfree 的代码——当你得到错误结果并回过头来 debug 的时候，自己肯定受不了，都不知道自己写的是什么，更别说看出哪里出错了。</p>
-<p>而一段<strong>可读性</strong>非常高的代码不但有助于 debug，还能让完全没接触过这段代码的人（助教）快速读懂。这也是为什么把这一块放在最前面的原因。</p>
+<p>而一段<strong>可读性</strong>非常高的代码不但有助于 debug，即使出错了查错也会很方便，还能让完全没接触过这段代码的人（助教）快速读懂。程序的格式追求清晰、美观，是程序风格的重要构成元素。这也是为什么把这一块放在最前面的原因。</p>
+<p>不得不多提一句，编码风格是非常个人化的，我的观点<strong>仅供参考</strong>，但在做好准备敲一段优雅的代码前，至少考虑这里提出的观点。根据个人经验及参考互联网上各大博主文章，对初学者而言，培养良好的代码风格需要关注（但不限于）以下几点👇</p>
+<h4 id="缩进与空格">缩进与空格</h4>
+<p>代码美不美观，就看缩进到不到位。目前有非常多成体系的缩进规范，如 <a target="_blank" rel="noopener" href="https://google.github.io/styleguide/">Google Style</a>、<a target="_blank" rel="noopener" href="https://www.kancloud.cn/nikola0618/astyle/830865#Allman__5">Allman</a> 等等。对初学者而言，虽说不一定要严格按照规范来，但你的“自定义风格”至少要将缩进统一且清楚。目前总能看到大家写成类似下面这种样子👇</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 错误示范 1</span></span><br><span class="line"><span class="keyword">if</span>(hours&lt;<span class="number">24</span>&amp;&amp;minutes&lt;<span class="number">60</span>&amp;&amp;seconds&lt;<span class="number">60</span>)&#123;<span class="keyword">return</span> <span class="literal">true</span>;&#125;</span><br><span class="line"><span class="keyword">else</span>&#123;<span class="keyword">return</span> <span class="literal">false</span>;&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 错误示范 2</span></span><br><span class="line"><span class="keyword">if</span>(hours&lt;<span class="number">24</span> &amp;&amp; minutes&lt;<span class="number">60</span> &amp;&amp; seconds&lt;<span class="number">60</span>)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;&#125;</span><br></pre></td></tr></table></figure>
+<p>1 的代码虽然统一了缩进，但写得过于紧凑，代码密度太大，看着很费劲；2 的代码比 1 稍微松弛了些，但缩进是乱的，看不出来哪个 <code>&#123;</code> 和哪个 <code>&#125;</code> 配对。两种代码的可读性都非常低。如果我是编程老师，遇到这种代码一定看的脑溢血😫(os:我 ppt 上可没这样写代码)</p>
+<p>在 Google Style 下，上面的代码能改写成这个样子👇</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (hours &lt; <span class="number">24</span> &amp;&amp; minutes &lt; <span class="number">60</span> &amp;&amp; seconds &lt; <span class="number">60</span>) &#123;</span><br><span class="line"> <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line"> <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <blockquote>
-<p>对比以下两种代码，显然是前面那种更容易阅读吧</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (hours &lt; <span class="number">24</span> &amp;&amp; minutes &lt; <span class="number">60</span> &amp;&amp; seconds &lt; <span class="number">60</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>  ( hours   &lt; <span class="number">24</span></span><br><span class="line">   &amp;&amp; minutes &lt; <span class="number">60</span></span><br><span class="line">   &amp;&amp; seconds &lt; <span class="number">60</span></span><br><span class="line">)</span><br><span class="line">&#123;<span class="keyword">return</span>    <span class="literal">true</span></span><br><span class="line">;&#125;         <span class="keyword">else</span></span><br><span class="line">&#123;<span class="keyword">return</span>   <span class="literal">false</span></span><br><span class="line">;&#125;</span><br></pre></td></tr></table></figure>
+<p>对比以上两种代码，显然是后者阅读起来更舒服吧。</p>
 </blockquote>
-<p>总结程序设计实践中的经验，代码风格的要素包括（但不限于）以下几点：</p>
-<ul>
-<li>变量命名</li>
-<li><del>
-表达式与语句
-</del></li>
-<li><del>
-常量的使用
-</del></li>
-<li><del>
-注释的使用
-</del></li>
-<li><strong>缩进</strong></li>
-<li>代码的布局</li>
-</ul>
+<p>这只是一个简单的示范，C/C++ 语言对代码缩进与空格的具体规则大概有以下几点：</p>
+<ol type="1">
+<li><p>关键字 <code>if</code>、<code>while</code>、<code>for</code> 与其后的 <code>(</code> 之间需插入一个空格分隔，以突出关键字，但括号内的表达式应紧贴括号。在部分代码规范中，<code>)</code> 与 <code>&#123;</code> 之间也需插入一个空格分隔，例如👇</p>
+<p><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p></li>
+<li><p>双目运算符的两侧需各插入一个空格分隔，单目运算符、数组括号和操作数之间不加空格，例如👇</p>
+<p><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">i = i + <span class="number">1</span>;</span><br><span class="line">i++;</span><br><span class="line">i -= <span class="number">1</span>;</span><br><span class="line">!(i &lt; <span class="number">1</span>);</span><br></pre></td></tr></table></figure></p>
+<p>有时候为了突出运算符优先级也可以写得更紧凑一些，应灵活应对，例如👇</p>
+<p><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">distance = <span class="built_in">sqrt</span>(x*x + y*y)</span><br></pre></td></tr></table></figure></p></li>
+<li><p><code>,</code> 和 <code>;</code> 之后要加空格（这是英文书写习惯），例如👇</p>
+<p><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p></li>
+<li><p><code>if/else</code>、<code>while</code>、<code>do/while</code>、<code>for</code>、<code>switch</code> 这些可以带语句块的语句，语句块的 <code>&#123;</code> 或 <code>&#125;</code> 应该和关键字写在同一行，用空格隔开。同时，<code>&#123; &#125;</code> 之内的代码要向右缩进一个 Tab，同一地位的要左对齐，地位不同的继续缩进。例如👇</p>
+<p><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (...) &#123;	<span class="comment">// 判断表达式用...代替，下同</span></span><br><span class="line">    <span class="keyword">if</span> (...) &#123;</span><br><span class="line">        </span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">&#125; <span class="keyword">else</span> <span class="keyword">if</span> (...) &#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>当然这样写也是可以的👇</p>
+<p><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (...)</span><br><span class="line">&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span> <span class="keyword">if</span> (...)</span><br><span class="line">&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这两种写法用得都很广泛，只要在同一个项目中保持统一就行。</p>
 <blockquote>
-<del>
-划掉的内容
-</del>
-<p>是我认为初学者不太会接触的，<strong>加粗的内容</strong>是值得重点关注的</p>
+<p>当然，像 <code>if</code>, <code>for</code>, <code>while</code> 这些关键字之后的大括号并不是必要的，但如果不加大括号，则只识别最近的那一句。往往有些初学者偷懒不加大括号，出错了也不知道为什么。下面这两块代码是等价的👇</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (...)</span><br><span class="line">    语句 a</span><br><span class="line">    语句 b</span><br><span class="line">    语句 c</span><br><span class="line"></span><br><span class="line"><span class="comment">//-------等价于-------//</span></span><br><span class="line">    </span><br><span class="line"><span class="keyword">if</span> (...) &#123;</span><br><span class="line">    语句 a</span><br><span class="line">&#125;</span><br><span class="line">语句 b</span><br><span class="line">语句 c</span><br></pre></td></tr></table></figure>
+</blockquote></li>
+<li><p>函数定义的 <code>&#123;</code> 和 <code>&#125;</code> 单独占一行，这一点和语句块的规定不同，例如👇</p>
+<p><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">foobar</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p></li>
+<li><p>代码中每个相对独立的逻辑段落之间，比如各函数定义之间，头文件、全局变量定义和函数定义之间，函数内部各语句块之间，应该插入空行分隔。空行得体将使程序的布局更加清晰，且不会浪费内存（虽然打印含有空行的程序会多消耗一些纸张，但是值得）。例如👇</p>
+<p><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> a;</span><br><span class="line"><span class="type">double</span> b;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">foo</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">bar</span><span class="params">(<span class="type">int</span> a)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> a;</span><br><span class="line">    </span><br><span class="line">    语句块 <span class="number">1</span></span><br><span class="line">    </span><br><span class="line">    语句块 <span class="number">2</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p></li>
+</ol>
+<p>一般的编辑器都会在输入左括号时自动补充右括号，且敲回车后会自动进行缩进。如果希望人为控制缩进，可以鼠标点击一行并按 <code>Tab</code> 键。你甚至可以选中一段代码后按 <code>Tab</code> 键以使选中的这段同时进行一个制表符的缩进。与缩进相反的是“退格”，用快捷键 <code>shift + Tab</code> 即可做到（Windows 和 Mac 都是这样）。</p>
+<h4 id="变量命名">变量命名</h4>
+<p>初学者往往喜欢这样命名：或是单个英文字母，或是拼音，或是拼音首字母的缩写。看到这样的命名，我往往需要费一些力气根据前后代码来理解这个变量是做什么的。作为中国程序员，将变量作拼音的命名已经算是矮个子里拔高个了，但拼音缩写是真的让人云里雾里，恐怕只有写代码的人（还真不一定🤣）能看懂。比如👇</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">f</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (a &lt; b) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">f</span>(b, a);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (a % b == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> b;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">f</span>(b, a % b);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> a = <span class="number">9</span>, b = <span class="number">12</span>;</span><br><span class="line">    <span class="type">int</span> gys = <span class="built_in">f</span>(a, b);</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当我看到 <code>gys</code> 这样一个无法理解的变量名（总之它不是任何英文单词缩写），我会尝试看函数 <code>f</code> 是干嘛的……这里还是比较好看懂的，<code>f</code> 是辗转相除法求最大公因数。那么 <code>gys</code>……噢原来是公因数的缩写。</p>
+<p>普遍认为，<strong>标识符命名要清晰明了，可以使用完整的单词和易于理解的缩写</strong>。当然这一条规则并不包括拼音——有针对中国程序员的一条特别规定：<strong>禁止用拼音做标识符</strong>，可读性极差。</p>
+<blockquote>
+<p>不是我不爱中国汉字，只是你用输入法敲 gys 得到的汉字组合太多了，供应商？更衣室？还是观音山？😢</p>
 </blockquote>
+<p>关于缩写，<strong>短的单词可以通过去元音形成缩写，较长的单词可以取单词的头几个字母形成缩写</strong>，例如 <code>count</code> 写成 <code>cnt</code>，<code>length</code> 写成 <code>len</code>，<code>message</code> 写成 <code>msg</code>，<code>number</code> 写成 <code>num</code>，<code>temporary</code> 可以写成 <code>temp</code>，也可以进一步写成 <code>tmp</code>，等等。</p>
+<p>关于变量命名规则，一般主流的有以下几种👇</p>
+<table>
+<thead>
+<tr class="header">
+<th>命名规则</th>
+<th>描述</th>
+<th>举例</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>小驼峰命名法</strong></td>
+<td>第一个单词首字母小写，后面其他单词首字母大写</td>
+<td>int fooBar;</td>
+</tr>
+<tr class="even">
+<td><strong>大驼峰命名法</strong></td>
+<td>所有单词首字母均大写</td>
+<td>int FooBar;</td>
+</tr>
+<tr class="odd">
+<td><strong>下划线命名法</strong></td>
+<td>名称中的每一个逻辑断点都用一个下划线来标记</td>
+<td>int foo_bar</td>
+</tr>
+<tr class="even">
+<td><strong>匈牙利命名法</strong></td>
+<td>变量名 = 属性 + 类型 + 对象描述</td>
+<td>int iFooBar</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>目前大多数 IDE 会帮我们识别变量的属性，所以基本没人用匈牙利命名法了。和缩进一样，同一个项目中的命名规则应该统一。</p>
+</blockquote>
+<p>根据上述结论，最大公因数就可以命名为 <code>GreatestCommonDivisor</code>，也可以简单写作 <code>GCD</code> or <code>gcd</code>。尽管在命名变量时会花一些时间去打字，但目前大部分编辑器都自带<strong>代码补全</strong>功能——你输入 <code>g</code>, <code>r</code>, <code>e</code> 三个字母后就可以敲回车把整个变量给打出来了。</p>
+<p>另外，<strong>全局变量和全局函数的命名一定要详细</strong>。因为它们在整个项目的许多源文件中都会用到，必须让使用者明确这个变量或函数是干什么用的，不要怕麻烦，无非首次命名时多用几个单词多写几个下划线。例如求最大公因数的函数名用下划线命名法应当写作 <code>get_greatest_common_divisor</code> 或 <code>get_gcd</code>。</p>
+<p>局部变量和只在一个源文件中调用的内部函数的命名可以简略一些，但不能太短，<strong>尽量不要使用单个字母做变量名</strong>，除非用 <code>i</code>、<code>j</code>、<code>k</code> 这种做循环变量。</p>
+<h3 id="使用-pta-过程中的常见问题及解决方法">使用 PTA 过程中的常见问题及解决方法</h3>
+<p>也可点击提交结果处的这个地方进行详细查看👇</p>
+<p><img src="image-20221126111527528.png" alt="image-20221126111527528" style="zoom:80%;" /></p>
+<h4 id="格式错误">格式错误</h4>
+<p>这是最简单的错误类型，请检查你的程序 <code>printf</code> 结果是否有多余/缺漏的空格/换行。一般题目会指明<strong>行末没有多余空格</strong>或类似要求。</p>
+<blockquote>
+<p>出现这种问题请尽可能独立解决，而不是求助助教/老师，因为他们在处理这个问题的水平上并不会比你高太多。</p>
+</blockquote>
+<h4 id="浮点错误">浮点错误</h4>
+<p>请检查你的程序是否出现了除以 0 的情况。</p>
+<h4 id="运行时错误">运行时错误</h4>
+<p>请检查你的程序是否发生了数组越界访问，例如👇</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> nums[<span class="number">10</span>];</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;%d&quot;</span>, nums[<span class="number">-1</span>]);	<span class="comment">// 下越界</span></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;%d&quot;</span>, nums[<span class="number">10</span>]);	<span class="comment">// 上越界</span></span><br></pre></td></tr></table></figure>
+<h4 id="段错误">段错误</h4>
+<p>同样也有可能是数组越界访问，但和前者不同之处在于，这里可能访问了<strong>不可访问</strong>的那块内存。</p>
+<p>当然段错误更可能发生在错误使用指针的场景下，对初学者而言，最常见的是 <code>scanf</code> 函数的参数未加取地址符 <code>&amp;</code>。例如👇</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> n;</span><br><span class="line"><span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>, n);	<span class="comment">// 应写为 scanf(&quot;%d&quot;, &amp;n);</span></span><br></pre></td></tr></table></figure>
+<p>如果没有，则可能是你的某一递归函数未正确结束。比如求阶乘的代码，当你调用 <code>getFactorial(0)</code> 的时候，这段代码会无限递归，最终返回段错误。如下所示👇</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">getFactorial</span><span class="params">(<span class="type">int</span> n)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (n == <span class="number">1</span>) &#123;	<span class="comment">// 应写为 n &lt;= 1</span></span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> n * <span class="built_in">getFactorial</span>(n<span class="number">-1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="运行超时">运行超时</h4>
+<p>在作业题<a target="_blank" rel="noopener" href="https://pintia.cn/problem-sets/1589811783538343936/exam/problems/1589811846574530593">求最大子序列和</a>中，如果你尝试用暴力解法（<span class="math inline">\(O(n^3)\)</span>），则会报出该错误。</p>
+<p><img src="image-20221126113259469.png" alt="image-20221126113259469" style="zoom:50%;" /></p>
+<center>
+访问不了链接就看这张图吧&gt;_&lt;
+</center>
+<p>意思是你的代码耗时过多，甚至超过了题目规定的时间限制。此时需要对代码进行一些优化，省去不必要的循环操作（我认为对初学者而言优化算法是比较难的，实在搞不定就求助 CSDN 吧）。</p>
+<h4 id="编译错误">编译错误</h4>
+<p>说明你的代码未能被编译器正确通过，完全无法运行。但好在 PTA 会给你编译器 error 信息，比如我写了这样的代码👇</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">for</span>(i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">        <span class="built_in">foobar</span>(i);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这段代码显然是漏洞百出的。编译器于是给我输出这样一串信息👇</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">a.c: In function ‘main’:</span><br><span class="line">a.c:3:9: error: ‘i’ undeclared (first use in this function)</span><br><span class="line">     for(i = 0; i &lt; n; i++) &#123;</span><br><span class="line">         ^</span><br><span class="line">a.c:3:9: note: each undeclared identifier is reported only once for each function it appears in</span><br><span class="line">a.c:3:20: error: ‘n’ undeclared (first use in this function)</span><br><span class="line">     for(i = 0; i &lt; n; i++) &#123;</span><br><span class="line">                    ^</span><br><span class="line">a.c:4:9: warning: implicit declaration of function ‘foobar’ [-Wimplicit-function-declaration]</span><br><span class="line">         foobar(i);</span><br><span class="line">         ^~~~</span><br><span class="line">a.c:7:1: error: expected ‘;’ before ‘&#125;’ token</span><br><span class="line"> &#125;</span><br><span class="line"> ^</span><br></pre></td></tr></table></figure>
+<p>一句报错信息由以下几部分组成：行号、列号、报错原因、实际位置。</p>
+<p>比如这一句错误信息旨在提示我们：<strong>第 3 行第 9 列处的变量 <code>i</code> 未定义</strong>（undeclared）。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">a.c:3:9: error: ‘i’ undeclared (first use in this function)</span><br><span class="line">     for(i = 0; i &lt; n; i++) &#123;</span><br><span class="line">         ^</span><br></pre></td></tr></table></figure>
+<p>而这一句是为了告诉我们：<strong>在第 7 行第 1 列处的 <code>&#125;</code> 之前的某处需要加上 <code>;</code></strong>。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">a.c:7:1: error: expected ‘;’ before ‘&#125;’ token</span><br><span class="line"> &#125;</span><br><span class="line"> ^</span><br></pre></td></tr></table></figure>
+<p>报错信息其实并不难看懂，只要你写的代码足够烂（这并不是一件值得夸赞的事），你就能见识到各种各样的报错信息，尽管你的英文水平或许并不那么出色，但见多了也就记住了，实在不行，咱们还有各种翻译软件。一般来说，只要知道报错处的<strong>行号与列号</strong>就能很快找到问题所在，前提是你的代码能够像最开始说的那样足够规范🤔。</p>
+<h4 id="答案错误">答案错误</h4>
+<blockquote>
+<p>我愿称之为最难的错误😱</p>
+</blockquote>
+<p>最开始写的时候会告诉你测试点都是什么，后面就不会了。事实上是不会告诉你测试点是啥的，要你自己测试并判断。最常见的 <strong>Sample 等价</strong>是指，测试数据和样例近似，可能是改动若干数字或调整顺序，但绝不会和样例一模一样——不然你直接把输出样例 printf 出来不就能得分了？所以并不一定用了题目给的输入，结果和题目给的输出一样就觉得自己全对了，一个 bugfree 的代码要考量的 <strong>corner case</strong> 还是非常多的。</p>
+<p>这就要求我们掌握自己编写测试用例的能力。比如给定日期求这是一年中的第几天，如果不考虑闰年的 2 月有 29 天这种 corner case，那一定是无法全通过的。当然，在闰年的判断中，还需要特别关注那些能被 400 整除的年份。</p>
+<p>在像 DEV-C++ 这种 IDE 中，我们可以利用其自带的<strong>调试</strong>功能进行 debug。但 PTA 没有调试功能。如果想仅通过 PTA 进行 debug，最简单的做法自然是利用它的<strong>测试区</strong>。</p>
+<p><img src="image-20221126130110399.png" alt="image-20221126130110399" style="zoom: 50%;" /></p>
+<p>输入一段符合题目规定的数据，再点击<strong>运行测试</strong>，你就可以得到程序的所有打印输出。而且，如果把题给的输入样例直接复制过来进行测试，则会显示你的代码输出与输出样例之间的差异。</p>
+<p>但有的时候我们希望能像 IDE 的调试功能那样查看每一步的中间变量是什么样的，开发过程中的做法是输出 LOG，对于初学者而言，则可以直接在合适的位置使用 printf 来查看当前状态下某一变量的值，最后运行测试的时候看一下输出，就知道在你添加 printf 的地方那些个变量都是啥样的。</p>
+<p>很常用的做法是这样的👇</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> nums[MAXN];</span><br><span class="line"><span class="comment">// 输入数组部分略</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;执行操作前数组为：&quot;</span>)</span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; MAXN; i++) &#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d&quot;</span>, nums[i]);</span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;\n&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="built_in">func</span>(nums);</span><br><span class="line"></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;执行操作后数组为：&quot;</span>)</span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; MAXN; i++) &#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d&quot;</span>, nums[i]);</span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;\n&quot;</span>);</span><br></pre></td></tr></table></figure>
+<p>当然，这只是一个示范。</p>
+<p>最后你需要把这些调试用代码给删除，如果你不确定后续是否会继续用到，那请尽量使用快捷键 <code>ctrl + /</code> 将这段代码注释掉，同样的快捷键可以将注释行取消注释。</p>
+<blockquote>
+<p>如果你选择直接 <code>Backspace</code> 删除，万一提交后发现代码还是有问题，需要重新用这段代码进行调试，那你要么重新打一遍，要么用 <code>ctrl + z</code> 进行撤回，但显然这费力不讨好。</p>
+</blockquote>
+<h3 id="how-to-ask-a-question">How To Ask A Question</h3>
+<p>一般性的可参考<a target="_blank" rel="noopener" href="https://www.betterup.com/blog/how-to-ask-good-questions">这个主页</a>。</p>
+<h4 id="截图而不是拍照">截图而不是拍照</h4>
+<p>任何人看到用手机拍电脑屏幕照片的行为都会给你发这张图：</p>
+<p><img src="image-20221126142543945.png" alt="image-20221126142543945" style="zoom:80%;" /></p>
+<p>手机拍屏幕会产生令人看着非常不适的<a target="_blank" rel="noopener" href="http://www.xinhuanet.com/science/2021-03/30/c_139846551.htm">摩尔纹</a>——没人喜欢看这种照片。如果你是 Win10 用户，请使用快捷键 <code>win + shift + s</code> 进行截图；如果你是 Mac 用户，请使用快捷键 <code>command + shift + 4</code> 进行截图。粘贴到钉钉/QQ/微信/其它软件的输入框，再发送给你想问的人。</p>
+<h4 id="更好地提问">更好地提问</h4>
+<p>现在你已经学会如何写出优美的代码，并且学会用截图而不是拍照的方式进行提问了，做到这一步，你已经超越了绝大多数的初学者。</p>
+<p>但，如果你只是将提交结果截图，然后问一句“哪里错了？”，“为什么不对？”。对于简短的代码这是可以容忍的，但随着学习的深入，写题所需代码量会越来越大，我想水平再高的人遇到这样的问题短时间内都无从下手。尤其是，你从一些独特的角度切入题目，写出了非同寻常的解法，但 TA 并没有那么快 get 到你的点，就需要费一些劲来理解你的思路。如果你能像👇这么做，不但能节省 TA 的时间，还能更快得到你想要的解答：</p>
+<ol type="1">
+<li>请<strong>准确、具体、简洁、完整</strong>地表述你遇到的问题；</li>
+<li>必须附上<strong>相关代码</strong>；</li>
+<li>如果是格式错误，请自行检查；</li>
+<li>如果是编译错误，请附上编译器<strong>报错信息</strong>；</li>
+<li>如果是答案错误，请不要仅仅给 TA 看你的代码 + 提交结果，然后问为什么答案错误。PTA 上的用例不是 TA 出的，TA 也不知道这个用例具体是哪一些数据，TA 能做的只有肉眼 debug，有的代码不一定能很快看出问题，还需要把代码拿到本地自己运行一遍——这相当费时。所以，请尽量先尝试自定义 sample 并测试，然后把<strong>测试结果</strong>和你的<strong>解题思路</strong>发给 TA。当然，最好可以像上文提到的那样，打印<strong>中间变量</strong>，方便回答者，同时也说明你自己尝试过；</li>
+<li>如果可以，请为你的代码添加一些简单的注释，如某个变量/函数/代码段的作用；</li>
+<li>得到想要的答案后，不要吝啬感谢😃</li>
+</ol>
+<p>一个糟糕问题的例子😡</p>
+<blockquote>
+<p>为什么这样？</p>
+<p>（一大段代码截图）</p>
+</blockquote>
+<p>一个好问题的例子😀</p>
+<blockquote>
+<p>当局部变量与全局变量取同一个名字时，优先服从谁？</p>
+<p>（相关代码截图）</p>
+</blockquote>
+<p>一个更好问题的例子🥰</p>
+<blockquote>
+<p>C 语言中，当局部变量与全局变量取同一个名字时，优先服从谁？这是我的输出结果。</p>
+<p>（相关代码截图）（运行结果截图，有相关变量的输出）</p>
+</blockquote>
+<p>最后，<strong>提问的本质还是思考</strong> 。如果你能提出一个好问题，必定是对问题思考后的结果。这对你本身也是一种锻炼。不思考就直接提问，既浪费了锻炼的机会，也很难得到满意答复。但不是说不应该提问，相反，该问还得问， <strong>要敢于提问和讨论</strong>，不但要问，还要回答。当你能向别人解释清楚一个东西时，才是你真的理解了它。何乐而不为？</p>
+<h3 id="写优雅的代码">写优雅的代码</h3>
+<p>代码的缩进和空格是优美的外表，而代码的简洁和干练是优雅的灵魂。所谓好看的皮囊千篇一律，有趣的灵魂万里挑一，如何写出优雅的代码，这是程序员入门必须要思考的一件事。</p>
+<blockquote>
+<p>如果你只是为了通过这门课，那可以忽略。</p>
+</blockquote>
+<h4 id="边输入边输出">边输入边输出</h4>
+<p>PTA 允许<strong>边输入边输出</strong>的做法。某些情况下无需将所有输入数据保存至数组中再对数组进行处理，可以在输入的过程中进行判断，然后直接输出结果。比如<code>给定一个字母和一个以回车结束的字符串，删除字符串中所有的该字母，然后输出剩下内容</code>。初学者可能会这样写👇</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MAXN 100</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> i = <span class="number">0</span>;</span><br><span class="line">    <span class="type">char</span> target;</span><br><span class="line">    <span class="type">char</span> ch[MAXN];</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">&quot;%c&quot;</span>, &amp;target);</span><br><span class="line">    <span class="keyword">while</span> ((ch[i] = <span class="built_in">getchar</span>()) != <span class="string">&#x27;\n&#x27;</span>) &#123;</span><br><span class="line">        i++;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; ch[i] != <span class="string">&#x27;\n&#x27;</span>; i++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (ch[i] != target) &#123;</span><br><span class="line">            <span class="built_in">putchar</span>(ch[i]);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>利用 PTA 这一特性，我们可以把上面的代码改写为👇</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">char</span> target, ch;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">&quot;%c&quot;</span>, &amp;target);</span><br><span class="line">    <span class="keyword">while</span> ((ch = <span class="built_in">getchar</span>()) != <span class="string">&#x27;\n&#x27;</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (ch != target) &#123;</span><br><span class="line">            <span class="built_in">putchar</span>(ch);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>是否简洁多了？</p>
+<h4 id="强大的三目运算符">强大的三目运算符</h4>
+<p>这是我个人比较喜欢的一个优雅的写法。在某些情况下，可以用条件运算符 <code>? :</code> 来简化 <code>if</code> 语句。<code>? :</code> 是一个三目运算符，其格式为：<code>&lt;表达式 1&gt; ? &lt;表达式 2&gt; : &lt;表达式 3&gt;</code>，即，如果<code>表达式 1</code> 为真，则执行<code>表达式 2</code>，反之执行<code>表达式 3</code>。以下两段代码是等价的👇</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (表达式 <span class="number">1</span>) &#123;</span><br><span class="line">    表达式 <span class="number">2</span></span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    表达式 <span class="number">3</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//-------等价于-------//</span></span><br><span class="line"></span><br><span class="line">&lt;表达式 <span class="number">1</span>&gt; ? &lt;表达式 <span class="number">2</span>&gt; : &lt;表达式 <span class="number">3</span>&gt;</span><br></pre></td></tr></table></figure>
+<p>所以，求两个数中的最大值就可以写为 <code>maxm = a &gt; b ? a : b</code>。</p>
 
     </div>
 
@@ -363,7 +530,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E9%A3%8E%E6%A0%BC-programming-style"><span class="nav-text">0. 代码风格 Programming Style</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#get-started%E4%BB%A3%E7%A0%81%E9%A3%8E%E6%A0%BC"><span class="nav-text">Get Started：代码风格</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%A9%E8%BF%9B%E4%B8%8E%E7%A9%BA%E6%A0%BC"><span class="nav-text">缩进与空格</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%98%E9%87%8F%E5%91%BD%E5%90%8D"><span class="nav-text">变量命名</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-pta-%E8%BF%87%E7%A8%8B%E4%B8%AD%E7%9A%84%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E5%8F%8A%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95"><span class="nav-text">使用 PTA 过程中的常见问题及解决方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A0%BC%E5%BC%8F%E9%94%99%E8%AF%AF"><span class="nav-text">格式错误</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B5%AE%E7%82%B9%E9%94%99%E8%AF%AF"><span class="nav-text">浮点错误</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E6%97%B6%E9%94%99%E8%AF%AF"><span class="nav-text">运行时错误</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%AE%B5%E9%94%99%E8%AF%AF"><span class="nav-text">段错误</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E8%B6%85%E6%97%B6"><span class="nav-text">运行超时</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E9%94%99%E8%AF%AF"><span class="nav-text">编译错误</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AD%94%E6%A1%88%E9%94%99%E8%AF%AF"><span class="nav-text">答案错误</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#how-to-ask-a-question"><span class="nav-text">How To Ask A Question</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%88%AA%E5%9B%BE%E8%80%8C%E4%B8%8D%E6%98%AF%E6%8B%8D%E7%85%A7"><span class="nav-text">截图而不是拍照</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9B%B4%E5%A5%BD%E5%9C%B0%E6%8F%90%E9%97%AE"><span class="nav-text">更好地提问</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%99%E4%BC%98%E9%9B%85%E7%9A%84%E4%BB%A3%E7%A0%81"><span class="nav-text">写优雅的代码</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BE%B9%E8%BE%93%E5%85%A5%E8%BE%B9%E8%BE%93%E5%87%BA"><span class="nav-text">边输入边输出</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%BA%E5%A4%A7%E7%9A%84%E4%B8%89%E7%9B%AE%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="nav-text">强大的三目运算符</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
