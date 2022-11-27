@@ -295,6 +295,8 @@
 <p>上课可不会讲</p>
 </blockquote>
 <span id="more"></span>
+<p>如果你还不知道在哪里可以编写代码并运行，那么请参考我的另一篇文章：<a href="../DevC-使用指南">DevC++ 使用指南</a>。</p>
+<p>如果你已经对 C 语言有所熟悉，希望使用更强大的工具进行代码的编辑，那可以参考另一位前辈的文章：<a href="https://shimo.im/docs/HWQ8XvHrVtPDRxPJ/read">写给小白的环境配置指南</a>（未完结）。</p>
 <h3 id="get-started代码风格">Get Started：代码风格</h3>
 <p>代码风格好不好就像字写得好不好看一样，如果一个公司招聘文职人员，肯定不要字写得难看的，同理，代码风格糟糕的程序员肯定也是不称职的。虽然编译器不会挑剔难看的代码，只要语法没问题照样能编译通过并运行，但是你并不一定每次都会写出 bugfree 的代码——当你得到错误结果并回过头来 debug 的时候，自己肯定受不了，都不知道自己写的是什么，更别说看出哪里出错了。</p>
 <p>而一段<strong>可读性</strong>非常高的代码不但有助于 debug，即使出错了查错也会很方便，还能让完全没接触过这段代码的人（助教）快速读懂。程序的格式追求清晰、美观，是程序风格的重要构成元素。这也是为什么把这一块放在最前面的原因。</p>
@@ -2935,6 +2937,131 @@ S\Lambda
       </categories>
       <tags>
         <tag>周赛</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Dev C++ 使用指南</title>
+    <url>/ZJU-CLASS/DevC-%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97/</url>
+    <content><![CDATA[<p>作为一款免费、开源的 C/C++ IDE，Dev C++ 内嵌 GCC 编译器和 GDB 调试器，既能编译、运行程序，也能调试程序。本次 C 程序设计基础我们建议初学者采用 <a href="https://sourceforge.net/projects/orwelldevcpp/">Dev C++ 5.11 版本</a>（点击即可跳转到下载页面）</p>
+<span id="more"></span>
+<h3 id="dev-c安装">Dev C++安装</h3>
+<p><img src="image-20220912150157093.png" style="zoom:30%;" /></p>
+<p>点击 <strong>Download</strong> 进行下载安装。（建议在 D 盘新建一个文件夹作为安装目录，并将文件夹名改为“Devcpp”，方便文件查找）。</p>
+<p>下载完成后在文件夹中打开 <strong>Dev-Cpp 5.11 TDM-GCC 4.9.2 Setup.exe</strong> 文件，语言选择 <strong>English</strong>（这个无所谓，后面可以选择界面语言），之后 <strong>I agree</strong> -&gt; <strong>Next</strong> -&gt; 选择刚才新建的文件夹作为安装目录 -&gt; <strong>Install</strong> 等待安装完成。</p>
+<p>首次安装时会让你进行一些配置，如图：</p>
+<p><img src="image-20220912151248213.png" alt="image-20220912151248213" style="zoom: 70%;" /></p>
+<p>这里的 <strong>Language</strong> 就是最后的界面语言，选择简体中文。之后一路点 <strong>Next</strong> <strong>Ok</strong> 即可。</p>
+<h3 id="关于界面">关于界面</h3>
+<p>5.11 版本的菜单栏长这样</p>
+<p><img src="image-20221127134409186.png" alt="image-20221127134409186" style="zoom:80%;" /></p>
+<p>点击菜单栏中的<strong>工具</strong> -&gt; <strong>编辑器选项</strong>，则可以对界面进行自定义，具体自行探索。</p>
+<p>同时，5.11 版本 的 Dev C++ 菜单栏有一个 <strong>AStyle</strong> 的按钮，可以将你的代码进行格式化。<strong>AStyle</strong> -&gt; <strong>格式化选项</strong> 则可以进一步自定义代码风格。如果你看过我的<a href="../CProgramGuide/">另一篇文章</a>，则应该对代码风格的重要性有一个清楚的认识。</p>
+<h3 id="第一个源程序">第一个源程序</h3>
+<p>我们在之前新建的文件夹(<strong>D:/Devcpp/</strong>)下新建一个文件夹 <strong>src</strong>，用来存放我们之后的 C 源代码文件。</p>
+<p>打开 Dev C++，点击菜单栏中的<strong>文件</strong> -&gt; <strong>新建</strong> -&gt; <strong>源代码</strong>，界面中自动出现一个<strong>未命名1</strong>的文件，<strong>文件</strong> -&gt; <strong>另存为</strong>，将文件保存在文件夹 <strong>D:/Devcpp/src/</strong> 下，并命名为 <strong>demo.c</strong>。（保存类型选 <strong>C source files</strong>）</p>
+<p>输入以下代码</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Hello World!\n&quot;</span>);	<span class="comment">// 在屏幕上打印 &quot;Hello World!&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>点击菜单栏中的<strong>编译并运行</strong>，或者按下键盘上的 <strong>F11</strong> 键，此时跳出一个黑框，说明程序运行成功。</p>
+<p><img src="image-20220912213816204.png" alt="image-20220912213816204" style="zoom: 67%;" /></p>
+<blockquote>
+<p>具体 C 语言的语法会在课堂上讲</p>
+</blockquote>
+<h3 id="从-c-语言到可执行程序">从 C 语言到可执行程序</h3>
+<p>如果你细心，你会发现下方有这样这样一条信息👇</p>
+<p><img src="image-20221127141649879.png" alt="image-20221127141649879" style="zoom: 60%;" /></p>
+<p>我们来分析一下这信息都是些啥玩意。</p>
+<h4 id="编译单个文件">编译单个文件</h4>
+<p>先说说什么是<strong>编译</strong>吧。C 语言其实是一种比较<strong>高级的语言</strong>，为什么说它高级呢，是因为这是写给<strong>人</strong>看的，各种关键字 <code>for</code>, <code>if</code> 其实都是根据人类语言来设计的。</p>
+<blockquote>
+<p>想象一下在某个平行世界里，英文中<strong>如果</strong>的单词不是 <code>if</code> 而是其它的什么乱七八糟的文字组合，那么在那个世界里 C 语言的条件判断关键字就不是 <code>if</code> 了，而会变成其它形状。</p>
+</blockquote>
+<p>但计算机并不能识别高级语言，更何况在那个 <a href="https://baike.baidu.com/item/%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E5%A4%84%E7%90%86/365730">NLP 技术</a>并未兴起的年代。事实上，计算机只能识别二进制文件，称为<strong>机器语言</strong>，把不同指令编码为二进制文本，然后发给机器，从而进行工作。为此，程序员不得不敲只含 0, 1 的二进制代码，这给当时的工作带来了极大困扰——可读性真的很差。为了让人类看懂代码，计算机科学家们设计出了一系列高级语言（我瞎猜的）。但问题也随之产生：<strong>怎样让机器看得懂这些高级编程语言呢？</strong></p>
+<p>所谓<strong>编译 Compile</strong>，简单来说就是根据一定规则，将 C 语言这种高级语言“翻译”成机器能看懂的机器语言，这样机器就能工作了。</p>
+<blockquote>
+<p>当然真正的过程还包括预处理、汇编、链接，感兴趣的请自行了解。</p>
+</blockquote>
+<p>那么这一段就很好理解了。</p>
+<h4 id="处理-c-源文件">处理 C 源文件</h4>
+<p>再来看第二段。<strong>C 编译器</strong>就是那些专门将 C 语言“翻译”成机器语言的程序，这里 DevC++ 采用的编译器名字叫 <strong>gcc</strong>。</p>
+<p>第二行命令，其实我们只需要知道前面那部分即可👇</p>
+<p><code>gcc.exe "D:\Devcpp\src\demo.c" -o "D:\Devcpp\src\demo.exe"</code></p>
+<p><code>gcc.exe</code> 指明了编译程序，也可以用其它的；第一个双引号内容是我们要进行编译的源文件；<code>-o 路径名</code> 是指我们希望在指定路径下生成可执行文件 <code>demo.exe</code>。</p>
+<blockquote>
+<p>如果你经常接触电脑，你会发现很多软件的名字都带有 <code>.exe</code> 后缀，这是英文单词 <strong>execution</strong> 的缩写，实际效果就是你双击那个图标就能打开软件了。可执行文件实际上就是之前所说的<strong>二进制机器语言文件</strong>，这是机器能看懂的，所以你双击它的时候就能被正确的运行。</p>
+</blockquote>
+<h4 id="编译结果">编译结果</h4>
+<p>输出文件名恰好就是上面那个生成的可执行文件的名字。</p>
+<h4 id="另一种编译运行的方法">另一种编译运行的方法</h4>
+<p>进入文件夹 D:，删除 demo.exe 文件，然后在上方输入 cmd 然后回车，如下👇</p>
+<p><img src="image-20221127144407793.png" alt="image-20221127144407793" style="zoom:80%;" /></p>
+<p>我们就直接进入命令行，并且处于当前目录。然后把上面那串命令 <code>gcc.exe "D:\Devcpp\src\demo.c" -o "D:\Devcpp\src\demo.exe"</code> 复制粘贴过来，按回车后稍等片刻，我们就能在文件夹里看到 demo.exe 文件了。</p>
+<blockquote>
+<p>也可以把那串命令简化为 <strong>gcc demo.c -o demo.exe</strong>，效果是一样的。</p>
+<p><strong>总结</strong>：此方法的格式为 <code>gcc 文件名.c -o 希望得到的可执行文件名.exe</code>。可执行文件名不一定要和源文件名一样，但尽量保持一致。</p>
+</blockquote>
+<p><img src="image-20221127144550115.png" alt="image-20221127144550115" style="zoom:67%;" /></p>
+<p>双击它，会发现啥也没发生，又好像有啥东西一闪而过，这是正常的。把上面代码改为</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Hello World!\n&quot;</span>);	<span class="comment">// 在屏幕上打印 &quot;Hello World!&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="built_in">system</span>(<span class="string">&quot;pause&quot;</span>); </span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>重新来一遍，中途黑框里会出现一个 <strong>warning</strong>，不用管。再双击 demo.exe，得到下面这个结果，成功了。</p>
+<p><img src="image-20221127144758462.png" alt="image-20221127144758462" style="zoom:80%;" /></p>
+<h3 id="dev-c调试程序方法">Dev C++调试程序方法</h3>
+<p>所谓调试程序，就是控制编译器一行一行地执行代码，过程中可以清楚看到每个变量值的变化情况、函数的调用过程等，进而发现程序中隐藏的错误或者低效的代码。</p>
+<p>本文中，我们以一段完整的 C 语言程序为例，系统地学一下如何用 Dev C++ 调试程序。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">add</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="type">int</span> c = a + b;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> c;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="type">int</span> a = <span class="number">10</span>, b = <span class="number">20</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="type">int</span> sum = add(a, b);</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;sum = %d&quot;</span>, sum);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="dev-c调试程序">1、Dev C++调试程序</h4>
+<p>默认情况下，程序会瞬间从开头执行到结尾，除非中途出现错误（称为“<strong>运行时错误</strong>”，比如读写内存失败、数组越界等）。要想让程序暂停执行，就需要设置一个断点。</p>
+<p>所谓<strong>断点</strong>（BreakPoint），可以简单地理解成障碍物，汽车遇到障碍物不能通行，程序遇到断点就会暂停执行。</p>
+<p>Dev C++ 给程序设置断点的方法很简单，想在哪一行代码处暂停执行，直接单击代码所在行的行号即可。例如：</p>
+<p><img src="image-20220912141612109.png" alt="image-20220912141612109" style="zoom:67%;" /></p>
+<center>
+图 1 Dev C++添加断点
+</center>
+<p>如上图所示，我们成功地在第 13 行代码处添加了一个断点。注意，以正常方式点击“<strong>编译并运行</strong>”按钮（快捷键是 "Fn+F11"）运行程序，断点是不会生效的，只有点击“<strong>调试</strong>”按钮（快捷键是"Fn+F5"）运行程序时才有效。</p>
+<p>点击“<strong>调试</strong>”按钮，或者按下快捷键"Fn+F5"，程序开始执行，直到第 13 行代码处（当前行代码尚未运行）暂停，如下图所示：</p>
+<p><img src="image-20220912145126238.png" alt="image-20220912145126238" style="zoom:50%;" /></p>
+<center>
+图 2 进行调试
+</center>
+<h4 id="断点发挥的作用">2、断点发挥的作用</h4>
+<p>当程序暂时执行时，借助调试窗口中的按钮可以查看某些变量的值，还可以控制编译器继续往下执行程序。整个调试窗口中，常用的按钮以及含义分别是：</p>
+<ul>
+<li><strong>添加查看</strong>：查看某个变量的值，还可以看到值的变化情况；</li>
+<li><strong>下一步</strong>：控制编译器向下执行一行语句；</li>
+<li><strong>单步进入</strong>：功能和“下一步”按钮类似，不同之处在于，当程序中调用某个自定义的函数时，此按钮可以进入到函数内部，继续调试函数内部的代码，而 "下一步" 按钮不会；</li>
+<li><strong>跳过</strong>：继续执行程序，遇到下一个断点暂停执行；</li>
+<li><strong>停止执行</strong>：停止调试程序。</li>
+</ul>
+<p>举个例子，在“<strong>调试</strong>”框中单击右键，点击“<strong>添加查看</strong>”按钮监视变量 sum 值的变化情况，添加之后如下图所示：</p>
+<p><img src="image-20220912145320723.png" alt="image-20220912145320723" style="zoom:50%;" /></p>
+<center>
+图 3 添加要监控的变量
+</center>
+<p>初始状态下，变量 sum 的值为 0。点击“<strong>下一步</strong>”，执行第 13 行代码，箭头光标指向第 15 行，变量 sum 的值仍为 0。再点击“<strong>下一步</strong>”，执行第 15 行代码，箭头光标指向第 17 行，变量 sum 的值变为 30。</p>
+<p>当箭头光标指向第 15 行代码时，点击“<strong>单步进入</strong>”按钮，箭头光标会进入 add() 函数并指向第 5 行代码，感兴趣的同学可自行尝试。</p>
+<p>调试过程中，Dev C++ 支持同时监控多个变量，还支持在程序中设置多个断点，如下图所示：</p>
+<p><img src="image-20220912145731171.png" alt="image-20220912145731171" style="zoom:50%;" /></p>
+<center>
+图 4 监控多个变量与添加多个断点
+</center>
+<p>如果点击调试时出现下图报错</p>
+<p><img src="image-20220912151606838.png" alt="image-20220912151606838" style="zoom:80%;" /></p>
+<p>并在点击 Yes 后闪退，则重新打开 Dev C++，点击 菜单栏中的<strong>工具</strong> -&gt; <strong>编译选项</strong>，在“<strong>代码生成/优化</strong>”中点击“<strong>连接器</strong>”，将“产生调试信息”改为 <strong>Yes</strong> 即可。</p>
+<p><img src="image-20220912151814628.png" alt="image-20220912151814628" style="zoom: 67%;" /></p>
+]]></content>
+      <categories>
+        <category>ZJU CLASS</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>SUNDR</title>
+    <url>/6-824/SUNDR/</url>
+    <content><![CDATA[<p>6.824 的第十三篇论文是<a href="https://pdos.csail.mit.edu/6.824/papers/li-sundr.pdf">SUNDR</a>——</p>
+]]></content>
+      <categories>
+        <category>6.824</category>
+      </categories>
+      <tags>
+        <tag>paperReading</tag>
       </tags>
   </entry>
 </search>
