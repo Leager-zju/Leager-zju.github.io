@@ -21,7 +21,7 @@
   <meta name="description" content="对于单个副本组而言，所有机器存储共享同一存储空间，机器数量的增加并不会扩大存储能力。而当 kv 对数量不断增长时，副本组的存储能力成为瓶颈。 参考 Aurora 的做法，不妨将数据划分为多个片段，每个副本组负责分片(Shard)的一个子集。组内机器使用 Raft 来复制分片。此外还有一个分片控制器(Shardctrler)，决定哪个副本组应该为每个分片服务，此信息称为配置(Config)。本实验">
 <meta property="og:type" content="article">
 <meta property="og:title" content="6.824 Lab4 Sharded Key&#x2F;Value Service">
-<meta property="og:url" content="http://leager-zju.github.com/6-824/6.824lab4/index.html">
+<meta property="og:url" content="http://leager-zju.github.com/6-824/6-824lab4/index.html">
 <meta property="og:site_name" content="没什么看头的地方">
 <meta property="og:description" content="对于单个副本组而言，所有机器存储共享同一存储空间，机器数量的增加并不会扩大存储能力。而当 kv 对数量不断增长时，副本组的存储能力成为瓶颈。 参考 Aurora 的做法，不妨将数据划分为多个片段，每个副本组负责分片(Shard)的一个子集。组内机器使用 Raft 来复制分片。此外还有一个分片控制器(Shardctrler)，决定哪个副本组应该为每个分片服务，此信息称为配置(Config)。本实验">
 <meta property="og:locale" content="zh_CN">
@@ -31,7 +31,7 @@
 <meta property="article:tag" content="lab">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://leager-zju.github.com/6-824/6.824lab4/">
+<link rel="canonical" href="http://leager-zju.github.com/6-824/6-824lab4/">
 
 
 <script id="page-configurations">
@@ -135,7 +135,7 @@
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">27</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">30</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -193,7 +193,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/6-824/6.824lab4/">
+    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/6-824/6-824lab4/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/Avatar.jpg">
@@ -416,8 +416,8 @@
       <i class="fa fa-chevron-left"></i> C Program Guide
     </a></div>
       <div class="post-nav-item">
-    <a href="/6-824/COPS/" rel="next" title="COPS">
-      COPS <i class="fa fa-chevron-right"></i>
+    <a href="/6-824/COPS/" rel="next" title="COPS 论文阅读">
+      COPS 论文阅读 <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
@@ -493,7 +493,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">27</span>
+          <span class="site-state-item-count">30</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

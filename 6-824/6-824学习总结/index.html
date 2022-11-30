@@ -18,20 +18,19 @@
     var CONFIG = {"hostname":"leager-zju.github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"b2t":true},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="本实验要求在每一个 raft 节点上实现一个 K&#x2F;V 服务器(server)，向上接受客户端(client)的请求并返回请求结果，向下生成日志应用到 raft 节点中。 整个模式大概长这样。 主要流程是这样的：  client 寻找对应 raft 节点是 leader 的 server，并发起一个请求(Put&#x2F;Append&#x2F;Get)； server 收到请求后，调用 raft 的 Sta">
+  <meta name="description" content="磨蹭 3 个月，神课分布式系统 MIT 6.824 终于完结了。学习这门课的起因是被同年 6 月份 pingCAP 训练营橄榄了，虽然同为 raft 算法，但工业级的实现显然要比教学级难更多。我对分布式的理解还是太浅，于是决心从基础打起，好好体会一下这门神课的洗礼。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="6.824 Lab3 FTkvserver">
-<meta property="og:url" content="http://leager-zju.github.com/6-824/6.824lab3/index.html">
+<meta property="og:title" content="MIT6.824 学习总结">
+<meta property="og:url" content="http://leager-zju.github.com/6-824/6-824%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/index.html">
 <meta property="og:site_name" content="没什么看头的地方">
-<meta property="og:description" content="本实验要求在每一个 raft 节点上实现一个 K&#x2F;V 服务器(server)，向上接受客户端(client)的请求并返回请求结果，向下生成日志应用到 raft 节点中。 整个模式大概长这样。 主要流程是这样的：  client 寻找对应 raft 节点是 leader 的 server，并发起一个请求(Put&#x2F;Append&#x2F;Get)； server 收到请求后，调用 raft 的 Sta">
+<meta property="og:description" content="磨蹭 3 个月，神课分布式系统 MIT 6.824 终于完结了。学习这门课的起因是被同年 6 月份 pingCAP 训练营橄榄了，虽然同为 raft 算法，但工业级的实现显然要比教学级难更多。我对分布式的理解还是太浅，于是决心从基础打起，好好体会一下这门神课的洗礼。">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2022-10-08T06:24:54.000Z">
-<meta property="article:modified_time" content="2022-11-24T06:57:24.486Z">
+<meta property="article:published_time" content="2022-11-27T16:48:07.000Z">
+<meta property="article:modified_time" content="2022-11-30T06:22:27.433Z">
 <meta property="article:author" content="Leager">
-<meta property="article:tag" content="lab">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://leager-zju.github.com/6-824/6.824lab3/">
+<link rel="canonical" href="http://leager-zju.github.com/6-824/6-824%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/">
 
 
 <script id="page-configurations">
@@ -44,7 +43,7 @@
   };
 </script>
 
-  <title>6.824 Lab3 FTkvserver | 没什么看头的地方</title>
+  <title>MIT6.824 学习总结 | 没什么看头的地方</title>
   
 
 
@@ -135,7 +134,7 @@
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">27</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">30</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -193,7 +192,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/6-824/6.824lab3/">
+    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/6-824/6-824%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/Avatar.jpg">
@@ -206,7 +205,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          6.824 Lab3 FTkvserver
+          MIT6.824 学习总结
         </h1>
 
         <div class="post-meta">
@@ -216,14 +215,14 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2022-10-08 14:24:54" itemprop="dateCreated datePublished" datetime="2022-10-08T14:24:54+08:00">2022-10-08</time>
+              <time title="创建时间：2022-11-28 00:48:07" itemprop="dateCreated datePublished" datetime="2022-11-28T00:48:07+08:00">2022-11-28</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-11-24 14:57:24" itemprop="dateModified" datetime="2022-11-24T14:57:24+08:00">2022-11-24</time>
+                <time title="修改时间：2022-11-30 14:22:27" itemprop="dateModified" datetime="2022-11-30T14:22:27+08:00">2022-11-30</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -253,61 +252,42 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>本实验要求在每一个 raft 节点上实现一个 K/V 服务器(server)，向上接受客户端(client)的请求并返回请求结果，向下生成日志应用到 raft 节点中。</p>
-<p>整个模式大概长<a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/notes/raft_diagram.pdf">这样</a>。</p>
-<p>主要流程是这样的：</p>
-<ol type="1">
-<li>client 寻找对应 raft 节点是 leader 的 server，并发起一个请求(Put/Append/Get)；</li>
-<li>server 收到请求后，调用 raft 的 Start() 函数；</li>
-<li>raft 节点间互相 AppendEntries 之后，将消息 apply 到 applyChannel 里；</li>
-<li>server 从 applyChannel 中取出消息，之后正式将命令应用到数据库中。</li>
-</ol>
+        <p>磨蹭 3 个月，神课分布式系统 <a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/">MIT 6.824</a> 终于完结了。学习这门课的起因是被同年 6 月份 pingCAP 训练营橄榄了，虽然同为 raft 算法，但工业级的实现显然要比教学级难更多。我对分布式的理解还是太浅，于是决心从基础打起，好好体会一下这门神课的洗礼。</p>
 <span id="more"></span>
-<h3 id="part-a-keyvalue-service-without-snapshots">PART A-Key/value service without snapshots</h3>
-<h4 id="发送请求">发送请求</h4>
-<p>由于 Start() 函数会立即返回 isleader 信息，所以如果一个 server 节点调用了 Start() 后发现不是 leader，则返回一个 <strong>ErrWrongLeader</strong></p>
-<p>当且仅当 client RPC 成功并且发送给正确的 leader 后，才算成功；否则：</p>
-<ol type="1">
-<li>If the Clerk sends an RPC to the wrong kvserver, or if it cannot reach the kvserver, the Clerk should re-try by sending to a different kvserver.</li>
-<li>If the operation failed to commit (for example, if the leader was replaced), the server reports an error, and the Clerk retries with a different server.</li>
-</ol>
-<h4 id="server-向下调用">server 向下调用</h4>
-<p>首先是根据 Start() 返回的 isleader 来确定是否需要返回 ErrWrongLeader 错误。若成功，则等待流程 4。</p>
-<p>注意到，在等待的过程中 server 是上了锁的，那必然被阻塞，此时就需要在 startKVserver 的时候额外开启一个叫 Applier() 的 goroutine 来进行 applyChannel 的读取。</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(kv *KVServer)</span></span> Applier() &#123;</span><br><span class="line">    <span class="keyword">for</span> !kv.killed() &#123;</span><br><span class="line">        msg := &lt;-kv.applyCh</span><br><span class="line">        <span class="keyword">if</span> msg.CommandValid &#123;</span><br><span class="line">            <span class="comment">// 应用操作</span></span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> msg.SnapshotValid &#123;</span><br><span class="line">            <span class="comment">// 应用快照</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>同时遇到这样一个问题： 有一个网络分区 [1] | [2，3，4，5]，1 是分区前的 leader，分区后 1 仍然是 leader。第二个分区由于选主导致其 term 大于 1 的 term。 有一个 client A 一直给 [1] 发送请求，某一个请求 （requestID：x，clientID：A）发过去调用 1 的 start 并返回日志所在索引 index 后，网络恢复，[1] 收到新的 leader 消息后执行 appendEntries 并将原先 index 处的日志覆盖，更新 commitindex 后将覆盖后的日志传回 applyCh，而我采用的是 map[commandIndex] chan 的形式，由于同一索引处的日志被覆盖了，导致 server Applier 处理管道发回的错误请求，比如 get 到错误的值 or 未进行 append</p>
-<p>解决方法为：在 arg 中开一个 channel，当 applier 处理完消息时通过该 channel 返回处理结果，同时判断当前 msg 中的 term 和 kv.rf.currentTerm 是否匹配，如果不匹配，说明可能被其他日志覆盖，返回一个 ErrWrongLeader 让上层重发。</p>
-<blockquote>
-<p>发现 6.824 labrpc 的 call 函数在传的时候会把 chan 给弄没掉。于是只能在 server 里 args.ch = make(chan int)，同时为了防止遇到的 chan 是 nil，还要加个判断当前是否为 leader，因为只有 leader 的 chan 是有效的，用 call 发给 follower 后会 arg 里的 chan 会变成 nil</p>
-</blockquote>
-<h4 id="应用到状态机">应用到状态机</h4>
-<p>Applier() 对 applyChannel 进行一个 for 的等待，收到消息后，根据收到消息的命令类型的不同，执行不同的应用操作。</p>
-<blockquote>
-<p>Put(key, value) replaces the value for a particular key in the database, Append(key, arg) appends arg to key's value, and Get(key) fetches the current value for the key. A Get for a non-existent key should return an empty string. An Append to a non-existent key should act like Put.</p>
-</blockquote>
-<p>执行完后，返回消息到 waitchannel[index]，唤醒 server。</p>
-<h4 id="other">Other</h4>
-<ol type="1">
-<li><p>刚开始想到和 Raft 里发送请求投票一样的手段，为每一个 server 开一个 goroutine 去发送 RPC，后来发现最后成功发送的只有一个，其它 goroutine 都是在占 cpu，遂放弃，直接用 for 循环。另外，有时候 leader 会在相当一段时间内保持不变，我们可以保存上一次发送请求成功时的 serverId，认为这是 leader，每次发请求时都可以利用这一信息，避免了不必要的 RPC，加快速度。当 RPC 失败，或发生了 ErrWrongLeader，只需要简单的令 leader 切换到下一个即可（0-&gt;1-&gt;...-&gt;n-1-&gt;0-&gt;...）</p>
-<p><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ck *Clerk)</span></span> SendRequest(args *Args) <span class="type">string</span> &#123;</span><br><span class="line">    ck.mu.Lock()</span><br><span class="line">    <span class="keyword">defer</span> ck.mu.Unlock()</span><br><span class="line">    args.RequestId, args.ClerkId = ck.RequestId, ck.ClerkId</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> &#123;</span><br><span class="line">        reply := &amp;Reply&#123;&#125;</span><br><span class="line">        ok := ck.servers[ck.volatileLeader].Call(<span class="string">&quot;KVServer.HandleRequest&quot;</span>, args, reply)</span><br><span class="line">        <span class="keyword">if</span> ok &amp;&amp; reply.Err != ErrWrongLeader &#123;</span><br><span class="line">            ck.RequestId++</span><br><span class="line">            <span class="keyword">return</span> reply.Value</span><br><span class="line">        &#125;</span><br><span class="line">        ck.volatileLeader = (ck.volatileLeader + <span class="number">1</span>) % <span class="built_in">len</span>(ck.servers)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p></li>
-<li><p>在分区测试中，有可能发生 leader 超时未 apply 的情况（即一个 leader 被分到了 minority 的网络区），此时需要在 server 等待环节加一个 &lt;-time.After() 的信号接受判断，若超时，则直接返回，并且认为超时也是一种“WrongLeader”。</p></li>
-<li><p>lab3A 还要求我们不能执行同一个 client 的重复请求，那么需要在每个 server 上放一个 clientID 到其最近一次命令序号 requestID 的映射，如果 Worker 收到的这个命令序号已经被执行过了，那么就不再执行，直接返回 ErrDuplicated。Get 是否重复执行无所谓，因为它并不会对数据库产生实质性的影响，主要是防止多次 Put/Append 同一个值。</p></li>
-</ol>
-<p>总体代码量比 raft 少太多，但因为论文中并没有给出很详细的指示，就走了很多弯路，以至于绝大多数时间都在 debug...</p>
-<h3 id="part-b-keyvalue-service-with-snapshots">PART B-Key/value service with snapshots</h3>
-<p>本实验要求在 3A 的基础上加上 snapshot 功能。</p>
-<blockquote>
-<p>虽然标的是hard，但代码量更少了</p>
-</blockquote>
-<p>server 不断检测 raftStateSize，如果过大，即当 persist.RaftStateSize() &gt;= kv.maxRaftState 时，将当前 db 状态保存下来，调用 raft 层的 snapshot() 并将 db 状态传入。</p>
-<p>要实现有两个函数：</p>
-<ol type="1">
-<li><strong>MakeSnapshot()</strong> ：当 raftStateSize 过大时保存 db 状态。</li>
-<li><strong>ApplySnapshot()</strong> ：raft 层将 snapshotValid 发到 applyCh，被 server 接收到后执行的操作。</li>
-</ol>
-<blockquote>
-<p>persist 里的 raftstate 和 index 没有直接关系，所以不能用在 snapshot 里的 index 参数。</p>
-</blockquote>
+<h4 id="课程架构">课程架构</h4>
+<p><a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/">👉课程主页传送门👈</a></p>
+<p>该课程由神级程序员 <a target="_blank" rel="noopener" href="https://zh.wikipedia.org/zh-cn/%E7%BD%97%E4%BC%AF%E7%89%B9%C2%B7%E6%B3%B0%E6%BD%98%C2%B7%E8%8E%AB%E9%87%8C%E6%96%AF">Robert Tappan Morris</a> 讲授。整门课程共有 22 节课，共需进行 <strong>16</strong> 篇论文的阅读。除去最后涉及到系统安全的部分本人因为不感兴趣没看，对其余所有论文都做了适当解读。</p>
+<ul>
+<li><a href="../MapReduce">MapReduce</a>：一种基于策略，用于处理和生成大型数据集的模型。</li>
+<li><a href="../GFS">GFS</a>：一个用于大型分布式数据密集型应用程序的可扩展分布式文件系统。</li>
+<li><a href="../Vmware-ft">VMware-FT</a>：一个提供容错虚拟机的商业企业级系统。</li>
+<li><a href="../Raft">Raft</a>：一种基于多数原则的用于管理复制日志的共识算法。</li>
+<li><a href="../Zookeeper">Zookeeper</a>：用于协调分布式应用程序进程，同时提供消息群发、共享寄存器和分布式锁等集中式服务。</li>
+<li><a href="../CRAQ">CRAQ</a>：一种以读取为主的工作负载的高吞吐量链式复制。</li>
+<li><a href="../Aurora">Aurora</a>：一个高性能，高可靠的关系数据库服务。</li>
+<li><a href="../Frangipani">Frangipani</a>：一种建立在 Petal 上的可扩展的分布式文件系统，并使用分布式锁来确保一致性。</li>
+<li><a href="../Spanner">Spanner</a>：Google 基于 TrueTime 的可扩展、多版本、全球分布和同步复制的数据库。</li>
+<li><a href="../FaRM">FaRM</a>：一个通过为分布式事务提供序列化、高性能、持久性和高可用性的主存分布式计算平台。</li>
+<li><a href="../Spark">Spark</a>：一个基于弹性分布式数据集的容错数据处理框架，能够帮助用户简单的开发快速，统一的大数据应用，对数据进行，协处理，流式处理，交互式分析等。</li>
+<li><a href="../Memcache">Memcache</a>：一款高性能的分布式内存对象缓存系统，以低成本提供对共享存储池的低延迟访问，并在 Facebook 手下得到了拓展。</li>
+<li><a href="../COPS">COPS</a>：一种可提供具有收敛冲突处理的因果一致性的 ALPS 键值存储系统，并且具有高可扩展性。</li>
+</ul>
+<p>另外，本课程设计了 4 个 lab。分别为</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/labs/lab-mr.html">MapReduce</a></li>
+<li><a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/labs/lab-raft.html">Raft</a></li>
+<li><a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/labs/lab-kvraft.html">Fault-tolerant Key/Value Service</a></li>
+<li><a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/labs/lab-shard.html">Sharded Key/Value Service</a></li>
+</ul>
+<p>我的实现通过所有 test，将代码 push 在了我的 <a target="_blank" rel="noopener" href="https://github.com/Leager-zju/MIT6.824">github 仓库</a>中，并写了说明文档：</p>
+<ul>
+<li><a href="../6-824lab1">Lab1 doc</a></li>
+<li><a href="../6-824lab2">Lab2 doc</a></li>
+<li><a href="../6-824lab3">Lab3 doc</a></li>
+<li><a href="../6-824lab4">Lab4 doc</a></li>
+</ul>
+<h4 id="学习感悟">学习感悟</h4>
+<p>每节课看一篇论文对我而言还是比较硬的，但确实能够从中学到许多知识，复制、容错、一致、性能优化……这些无一不是分布式领域中的人类思想的精华。在进一步经历了 4 个 lab 的虐待后，无论是对 go 还是对整个分布式系统的实现都有了更深的认识。这也难怪 MIT 的学生一直以来都是各大互联网企业争相抢夺的人才资源，能够把这门课完整的学下来已经能让一个人进步非常多了。</p>
 
     </div>
 
@@ -316,9 +296,6 @@
     
 
       <footer class="post-footer">
-          <div class="post-tags">
-              <a href="/tags/lab/" rel="tag"># lab</a>
-          </div>
 
         
 
@@ -326,13 +303,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/6-824/6.824lab2/" rel="prev" title="6.824 Lab2 RAFT">
-      <i class="fa fa-chevron-left"></i> 6.824 Lab2 RAFT
+    <a href="/ZJU-CLASS/DevC-%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97/" rel="prev" title="Dev C++ 使用指南">
+      <i class="fa fa-chevron-left"></i> Dev C++ 使用指南
     </a></div>
-      <div class="post-nav-item">
-    <a href="/6-824/Zookeeper/" rel="next" title="Zookeeper">
-      Zookeeper <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -391,7 +365,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#part-a-keyvalue-service-without-snapshots"><span class="nav-text">PART A-Key&#x2F;value service without snapshots</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%91%E9%80%81%E8%AF%B7%E6%B1%82"><span class="nav-text">发送请求</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#server-%E5%90%91%E4%B8%8B%E8%B0%83%E7%94%A8"><span class="nav-text">server 向下调用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E5%88%B0%E7%8A%B6%E6%80%81%E6%9C%BA"><span class="nav-text">应用到状态机</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#other"><span class="nav-text">Other</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#part-b-keyvalue-service-with-snapshots"><span class="nav-text">PART B-Key&#x2F;value service with snapshots</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AF%BE%E7%A8%8B%E6%9E%B6%E6%9E%84"><span class="nav-text">课程架构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AD%A6%E4%B9%A0%E6%84%9F%E6%82%9F"><span class="nav-text">学习感悟</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -407,7 +381,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">27</span>
+          <span class="site-state-item-count">30</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

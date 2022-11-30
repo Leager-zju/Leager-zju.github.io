@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/largeicon.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/smallicon.jpg">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"leager-zju.github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"b2t":true},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="6.824 的第四篇论文是 Raft——一种基于多数原则的用于管理复制日志的共识算法。在容错性和性能方面，它相当于 Paxos，但比 Paxos 更易于理解，也为构建实际系统提供了更好的基础。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Raft 论文阅读">
+<meta property="og:url" content="http://leager-zju.github.com/6-824/Raft/index.html">
+<meta property="og:site_name" content="没什么看头的地方">
+<meta property="og:description" content="6.824 的第四篇论文是 Raft——一种基于多数原则的用于管理复制日志的共识算法。在容错性和性能方面，它相当于 Paxos，但比 Paxos 更易于理解，也为构建实际系统提供了更好的基础。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://leager-zju.github.com/6-824/Raft/image-20221129133628657.png">
+<meta property="og:image" content="http://leager-zju.github.com/6-824/Raft/image-20221129160151832.png">
+<meta property="og:image" content="http://leager-zju.github.com/6-824/Raft/image-20221129160256071.png">
+<meta property="og:image" content="http://leager-zju.github.com/6-824/Raft/image-20221129160356757.png">
+<meta property="og:image" content="http://leager-zju.github.com/6-824/Raft/image-20221129160523060.png">
+<meta property="og:image" content="http://leager-zju.github.com/6-824/Raft/image-20221129161622628.png">
+<meta property="og:image" content="http://leager-zju.github.com/6-824/Raft/image-20221129161839040.png">
+<meta property="og:image" content="http://leager-zju.github.com/6-824/Raft/image-20221129231528485.png">
+<meta property="og:image" content="http://leager-zju.github.com/6-824/Raft/image-20221129234745344.png">
+<meta property="og:image" content="http://leager-zju.github.com/6-824/Raft/image-20221130000046184.png">
+<meta property="og:image" content="http://leager-zju.github.com/6-824/Raft/image-20221130001356775.png">
+<meta property="article:published_time" content="2022-10-03T16:59:29.000Z">
+<meta property="article:modified_time" content="2022-11-29T16:26:07.046Z">
+<meta property="article:author" content="Leager">
+<meta property="article:tag" content="paperReading">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://leager-zju.github.com/6-824/Raft/image-20221129133628657.png">
+
+<link rel="canonical" href="http://leager-zju.github.com/6-824/Raft/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Raft 论文阅读 | 没什么看头的地方</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">没什么看头的地方</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里可能没有你想看的...</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于我</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">5</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">4</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">30</span></a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/6-824/Raft/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/Avatar.jpg">
+      <meta itemprop="name" content="Leager">
+      <meta itemprop="description" content="【数据删除】">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="没什么看头的地方">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Raft 论文阅读
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-10-04 00:59:29" itemprop="dateCreated datePublished" datetime="2022-10-04T00:59:29+08:00">2022-10-04</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-11-30 00:26:07" itemprop="dateModified" datetime="2022-11-30T00:26:07+08:00">2022-11-30</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/6-824/" itemprop="url" rel="index"><span itemprop="name">6.824</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>6.824 的第四篇论文是 <a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/papers/raft-extended.pdf"><strong>Raft</strong></a>——一种基于<strong>多数原则</strong>的用于管理复制日志的<strong>共识算法</strong>。在容错性和性能方面，它相当于 <a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/Paxos%E7%AE%97%E6%B3%95"><strong>Paxos</strong></a>，但比 Paxos 更易于理解，也为构建实际系统提供了更好的基础。</p>
+<span id="more"></span>
+<h3 id="背景">背景</h3>
+<p>一直以来，在<a target="_blank" rel="noopener" href="https://www.8btc.com/article/6663559">共识算法</a>方面，无论工业还是教学领域，Paxos 均占据主导地位，大多数共识的实现都基于它。但 Paxos 很难理解，且其架构需要进行复杂的更改才能支持实际系统。</p>
+<p>Raft 算法的主要目标是为了提高<strong>可理解性</strong>，又能提供与其他算法相近的效率。虽然它在很多方面与现有的共识算法类似，但它具有以下几个新特性：</p>
+<ol type="1">
+<li><strong>强领导</strong>：Leader 具有更强的话语权，Entry 仅从 Leader 流向其他服务器。这简化了复制日志的管理，并使 Raft 更容易理解。</li>
+<li><strong>领导人选举</strong>：Raft 使用随机 timer 来选举 Leader。这简单快速地解决了冲突，代价只是添加了少量机制。</li>
+<li><strong>成员变更</strong>：Raft 使用了一种新的<strong>联合共识</strong>方法，这允许集群在配置更改期间继续正常运行。</li>
+</ol>
+<h3 id="复制状态机">复制状态机</h3>
+<p>复制状态机指的是一组机器计算相同状态的相同副本，并且即使某些服务器停机也可以继续运行，通常使用复制日志实现，如下图所示。</p>
+<p><img src="image-20221129133628657.png" alt="image-20221129133628657" style="zoom:80%;" /></p>
+<ul>
+<li><p><strong>日志 LOG</strong>：包含一系列命令，所有服务器日志中的命令及其顺序均相同；</p></li>
+<li><p><strong>状态机 STATE MACHINE</strong>：按序处理命令序列，由于命令序列都是一致的，故执行的结果都是一致的；</p></li>
+<li><p><strong>共识模块 CONSENSUS MODULE</strong>：接收来自客户端的命令并将它们添加到其日志中，它与其他服务器上的共识模块通信，以确保每个日志最终包含相同顺序的相同请求，从而保持复制日志的一致性。</p>
+<blockquote>
+<p>即使某些服务器出现故障，一旦命令被正确复制，每个服务器的状态机就会按日志顺序处理它们，并将输出返回给客户端。</p>
+</blockquote></li>
+</ul>
+<h3 id="raft-实现">Raft 实现</h3>
+<p>关于 lab2 Raft 的具体实现请参考<a href="../6-824lab2">这篇文章</a>。</p>
+<p>Raft 的核心就是下面这张图了。</p>
+<p><img src="image-20221129160151832.png" alt="image-20221129160151832" style="zoom:80%;" /></p>
+<p>另外，Raft 还保证以下属性：</p>
+<p><img src="image-20221129160256071.png" alt="image-20221129160256071" style="zoom:80%;" /></p>
+<blockquote>
+<p>上面两张图是 Raft 的重中之重。</p>
+</blockquote>
+<p>一个 Raft 集群包含多个服务器。任意时刻，每个服务器都处于三种状态之一： <code>Leader</code> 、 <code>Follower</code> 或 <code>Candidate</code>。Raft 首先选举出一个 Leader ，然后令其全权负责管理复制日志。正常情况下，每个集群只有一个 Leader，其他服务器都是 Follower。</p>
+<ul>
+<li><strong>Leader</strong>：处理所有客户端请求，打包为 Entry 后将其复制到其他服务器上，并告诉服务器何时可以安全地将 Entry 应用到它们的状态机。</li>
+<li><strong>Follower</strong>：被动响应 Leader 和 Candidate 的请求。如果超时未响应消息，则转为 Candidate；</li>
+<li><strong>Candidate</strong>：向其它节点发起选举投票请求，以成为 Leader；</li>
+</ul>
+<p>下图显示了不同状态之间的迁移过程：</p>
+<p><img src="image-20221129160356757.png" alt="image-20221129160356757" style="zoom:80%;" /></p>
+<p>Raft 将时间划分为任意长度的任期 <strong>Term</strong>，如下图所示。</p>
+<p><img src="image-20221129160523060.png" alt="image-20221129160523060" style="zoom:80%;" /></p>
+<p>Term 用连续的整数编号。每个 Term 都以选举开始。Term 在 Raft 中充当<strong>逻辑时钟</strong>，允许服务器检测过时的信息。为此，每个服务器存储一个 <code>CurrentTerm</code> 变量，并在进行通信时交换该变量以保证一致性。一旦收到的消息中包含更新的 Term，服务器会将 CurrentTerm 更新为较大的那个，并转换为 Follwer。</p>
+<p>基于上述讨论，Raft 将共识问题分解为以下三个相对独立的子问题。</p>
+<h4 id="leader-选举">Leader 选举</h4>
+<p>Raft 使用<strong>心跳机制</strong>来触发 Leader 选举。每个服务器初始化为 Follwer。Leader 定期向所有 Follower 发送 Heartbeat（特殊 <code>AppendEntries RPC</code>，不携带日志Entry），以维护自己的权威。只要服务器收到来自 Leader/Candidate 的有效 RPC，它就会保持 Follwer 状态；否则，如果 Follwer 在 <strong>ElectionTimeOut</strong> 时间内没有收到任何通信，那么它会认为没有 Leader 并发起选举。</p>
+<p>为了开始选举，Follwer 首先增加其 CurrentTerm 并转换至 Candidate。然后它为自己投票并向集群中的每个其他服务器并行发出 <code>RequestVote RPC</code>。这段时间内，可能有以下三种情况会发生：</p>
+<ol type="1">
+<li><p>Candidate 收到集群中同一 Term 下<strong>多数</strong>服务器的同意回复，则成功当选 Leader，并立即发送一轮 Heartbeat；</p>
+<blockquote>
+<p>多数规则确保最多一个 Candidate 可以赢得特定任期的选举。</p>
+</blockquote></li>
+<li><p>集群中的另一服务器当选 Leader，此时 Candidate 可能会收到 Heartbeat/AppendEntries 消息，如果消息捎带的 Term &gt;= CurrentTerm，则其退为 Follwer；反之，拒绝该消息并保持 Candidate 状态。</p></li>
+<li><p>出现分裂投票导致选举超时未成功，则重新开始选举。为了防止该情况无限重复，Raft 使用<strong>随机 ElectionTimeOut</strong> 来解决——这在大多数情况下只有一个服务器会首先超时。同样的，每个 Candidate 在选举开始时重新随机其 ElectionTimeOut，这减少了在新选举中再次出现分裂投票的可能性。</p></li>
+</ol>
+<h4 id="日志复制">日志复制</h4>
+<p>日志的组织方式如下图所示。每个日志 Entry 都存储一个命令以及 Leader 收到该 Entry 时的任期号。每个 Entry 还有一个 Index 标识其在日志中的位置。</p>
+<p><img src="image-20221129161622628.png" alt="image-20221129161622628" style="zoom:80%;" /></p>
+<p>Raft 日志机制能够保证不同服务器上之间日志的高度一致性。这不仅简化了系统的行为并使其更具可预测性，而且还是确保安全的重要组成部分。 Raft 保证以下日志匹配属性：<strong>如果不同日志中的两个 Entry 具有相同的 Index 和 Term，则它们存储相同的命令，且之前所有的 Entry 都是相同的</strong>。</p>
+<p>但 Leader 崩溃可能会导致日志不一致，比如下图这种情况。</p>
+<p><img src="image-20221129161839040.png" alt="image-20221129161839040" style="zoom:80%;" /></p>
+<p>此时需要一些机制。Raft 的做法是令 <strong>Follower 无条件服从 Leader 的日志</strong>。使用这种机制，服务器当选 Leader 后无需要采取任何特殊措施来恢复日志一致性，因为日志会随时间自动收敛。</p>
+<p>日志复制流程如下：</p>
+<ol type="1">
+<li><p>Leader 将每个客户端请求中包含的命令作为新 Entry 附加到其日志中，然后向其他服务器并行发出 <code>AppendEntries RPC</code> 以复制日志，<code>AppendEntries RPC</code> 捎带第一个新 Entry 的 <code>PrevLogIndex</code> 和 <code>PrevLogTerm</code>；</p>
+<blockquote>
+<p>事实上 Leader 并不会每次都发送所有 Entry，而是会为每个 Follower 维护一个 <code>nextIndex</code>，表明 Leader 将发送给该 Follower 的下一个 Entry 的 Index。当一个节点首次当选 Leader 时，它会将所有 <code>nextIndex</code> 值初始化为它最后一个 Entry 的下一个 Index。</p>
+</blockquote></li>
+<li><p>如果 Follwer 在其日志中没有找到 <code>Index == PrevLogIndex &amp;&amp; Term == PrevLogTerm</code> 的 Entry，它会拒绝该消息。收到拒绝后，Leader 减少 <code>nextIndex</code> 并重试 <code>AppendEntries RPC</code>。最终 <code>nextIndex</code> 将达到 Leader 和 Follower 日志匹配的点；</p>
+<blockquote>
+<p>在这样的一致性检查下，每当 <code>AppendEntries</code> 成功返回时，Leader 就知道 Follower 的日志已与自己的日志同步。</p>
+<p>如果需要，可以优化协议以快速定位 nextIndex。例如，当拒绝 AppendEntries 请求时，Follwer 可以包括冲突 Entry 的 Term 和日志里该 Term 的第一个 Index，这样一来，Leader 可以绕过该 Term 中的所有冲突Entry。</p>
+</blockquote></li>
+<li><p>Follwer 通过 AppendEntries 一致性检查，删除日志中的所有冲突 Entry 并追加 Leader 日志中的 Entry，这样一来 Follower 的日志与 Leader 的一致，并且长久保持；</p></li>
+<li><p>被复制到多数服务器的 Entry 会被 Leader 标为 <code>Committed</code>，Leader 将这部分 Entry Apply 于其状态机并将该执行的结果返回给客户端。所有服务器维护一个 <code>CommitIndex</code> 变量，表示其提交的最后一个 Entry 的索引，Leader 会将该变量包含在将来的 AppendEntries RPC 中；</p></li>
+<li><p>一旦 Follwer 收到一个更大的 <code>CommitIndex</code>，说明有新的 Entry 已提交，它会按序将其 Apply 于其本地状态机。</p></li>
+</ol>
+<p>日志复制机制使得只要大多数服务器正常运行，Raft 就可以接受、复制和应用新的日志 Entry。在正常情况下，一轮 RPC 即可将新 Entry 复制到集群的大多数，并且少数“短板”不会影响性能。</p>
+<h4 id="安全性">安全性</h4>
+<h5 id="选举约束">选举约束</h5>
+<p>Leader 最终必须存储所有 committed 的 Entry。Raft 保证所有来自之前 Term 的 committed 的 Entry 在选举时就存在于每个新 Leader 的日志中，无需将这些条目转移给领导者。这意味着 Entry 仅沿 Leader-&gt;Follower 方向流动，而 Leader 永远不会覆盖其日志中的现有条目。</p>
+<p>为此，需对选举加入这一约束——<strong>Candidate 的 LastEntry 应与 Follower 的 LastEntry 一样新或更新，否则 Follower 拒绝其投票申请</strong>。这样能保证当选 Leader 的服务器日志比多数服务器新，也就包含了所有 committed 的 Entry。</p>
+<blockquote>
+<p>如果日志的 LastEntry 具有不同的 Term，则具有 Term 大的的 Entry 更新；反之，Index 大的那个更新。</p>
+</blockquote>
+<h5 id="提交旧-entry">提交旧 Entry</h5>
+<p>Leader 知道一旦某一 Entry 存储在多数服务器上，它就会被提交。如果 Leader 在提交条目之前崩溃，新 Leader 将尝试完成复制条目。但新 Leader 不能立即断定上一 Term 的 Entry 是否存储在大多数服务器上且已提交。下图说明了一种情况，其中旧 Entry 存储在大多数服务器上，但可能被新 Leader 覆盖。</p>
+<p><img src="image-20221129231528485.png" alt="image-20221129231528485" style="zoom:80%;" /></p>
+<p>为了应对这一问题，Raft 规定<strong>只提交当前 Term 的 Entry，而不能提交旧 Term 的 Entry</strong>。一旦以这种方式提交了 Entry，则根据日志匹配属性，所有先前的 Entry 都将间接被提交。</p>
+<blockquote>
+<p>这样一来，上图的 (c) 中尽管 <code>Term 2 Entry</code> 已被复制到大部分服务器上，但因为 S1 的 Term 此时已变成了 4，不能提交 <code>Term 2 Entry</code>，只有出现 (e) 这样的情况才能间接提交。而一旦出现 (d) 这种情况，<code>Term 2 Entry</code> 并不会被提交，从而客户端检测到超时，后续会重新发送该命令，那么即便覆盖也不会出现问题。</p>
+</blockquote>
+<h5 id="follower-与-candidate-崩溃">Follower 与 Candidate 崩溃</h5>
+<p>如果一个 Follower/Candidate 崩溃了，那么未来发送给它的 <code>RequestVote</code> 和 <code>AppendEntries RPC</code> 将失败。Leader 将无限重试 RPC，一旦崩溃的服务器重新启动，则 RPC 将成功完成。如果服务器在完成 RPC 之后但在响应之前崩溃，那么它将在重新启动后再次收到相同的 RPC。考虑到 Raft RPC 是<strong>幂等</strong>的，所以这不会出现问题。</p>
+<blockquote>
+<p>例如，如果 Follower 收到一个 <code>AppendEntries RPC</code>，其中包含已存在于其日志中的 Entry，则它会忽略这些 Entry。</p>
+</blockquote>
+<h4 id="集群成员变更">集群成员变更</h4>
+<blockquote>
+<p>这一部分在 lab 中并未体现，但在 pingCAP 训练营中有涉及。</p>
+</blockquote>
+<p>Raft 支持配置自动化更改并将其合并到 Raft 算法中。</p>
+<p>为了使配置更改机制安全，在过渡期间不能存在在同一 Term 有两个 Leader 当选。不幸的是，任何切换配置的方法都是不安全的——不可能一次原子地切换所有服务器，因此集群在转换期间可能会分裂成两个独立的部分，如下图所示。</p>
+<p><img src="image-20221129234745344.png" alt="image-20221129234745344" style="zoom:80%;" /></p>
+<p>为了确保安全，配置更改必须使用<strong>两阶段</strong>的方法。在 Raft 中，集群首先切换到一种称为<strong>联合共识</strong>的过渡配置；一旦达到这一配置，系统就会过渡到新的配置。联合共识对新旧配置进行了结合：</p>
+<ul>
+<li>Entry 被复制到两种配置中的所有服务器；</li>
+<li>来自任一配置的任何服务器都可以充当 Leader；</li>
+<li>用于选举和提交 Entry 的协议需要来自 <strong>both</strong> 旧配置和新配置的不同多数派。</li>
+</ul>
+<p>联合共识允许各个服务器在不同时间在配置之间转换，而不会影响安全性。此外，联合共识允许集群在整个配置更改期间继续为客户端请求提供服务。</p>
+<h3 id="日志压缩">日志压缩</h3>
+<p>实际系统中，Raft 日志不能无限增长。需要一种机制来丢弃日志中的过时信息，避免可用性问题。</p>
+<p>这一机制就是<strong>快照</strong>(Snapshot)。下图描述了快照的基本思想。</p>
+<p><img src="image-20221130000046184.png" alt="image-20221130000046184" style="zoom:80%;" /></p>
+<p>快照包含服务器当前状态，以及少量元数据：</p>
+<ul>
+<li><strong>Last Included Index</strong>：快照覆盖的日志中最后一个 Entry（状态机 Apply 的最后一个 Entry）的 Index；</li>
+<li><strong>Last Included Term</strong>：该 Entry 的 Term。</li>
+</ul>
+<p>这些元数据用于对快照后的第一个 Entry 的 AppendEntries 一致性检查，因为该 Entry 需要 PrevLogIndex 与 PrevLogTerm。为了启用集群成员更改，快照还包括日志中截至 Last Included Index 的最新配置。一旦服务器完成写入快照，它可能会删除 Last Included Index 前的所有 Entry，以及任何先前的快照。</p>
+<p>每个服务器独立建立快照，且仅覆盖其日志中已提交的 Entry，但当 Leader 因建立快照而丢弃了它需要发送给 Follower 的下一个 Entry 时，则必须使用一个名为 <code>InstallSnapshot</code> 的新 RPC 将其写入的最新快照发送给“短板” Follower，如下图所示。</p>
+<p><img src="image-20221130001356775.png" alt="image-20221130001356775" style="zoom:80%;" /></p>
+<p>当 Follower 收到此 RPC 时：</p>
+<ol type="1">
+<li>如果 LastIncludedIndex &gt;= Last Log Index of Follower，则 Follower 丢弃整个日志，并令其被快照覆盖；</li>
+<li>相反，快照覆盖的 Entry 将被删除，但快照之后的条目仍然有效并且必须保留。</li>
+</ol>
+<p>虽然这种机制与 Raft 的强领导者原则相违背，但在快照时已经达成共识，因此没有决策冲突。数据仍然只从 Leader 流向 Follower。</p>
+<p>还有两个影响快照性能的问题：</p>
+<ol type="1">
+<li><p>服务器必须决定何时进行快照。如果快照过于频繁，则会浪费磁盘带宽和能量；反之，则可能会耗尽其存储容量，并且会增加重新启动期间重放日志所需的时间。</p>
+<blockquote>
+<p>一种简单的策略是在日志达到固定大小（以字节为单位）时建立快照。如果此大小设置为明显大于快照的预期大小，则快照的磁盘带宽开销将很小。</p>
+</blockquote></li>
+<li><p>写快照会花费大量时间。</p>
+<blockquote>
+<p>解决方案是使用<strong>写时复制技术</strong>，这样可以在不影响正在写入的快照的情况下接受新的更新。例如，使用功能数据结构构建的状态机自然支持这一点，或者操作系统的<strong>写时复制支持</strong>（例如，Linux 上的 fork）可用于创建整个状态机的内存快照。</p>
+</blockquote></li>
+</ol>
+<h3 id="总结">总结</h3>
+<p>论文的图 2 与图 8 值得细细品味。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/paperReading/" rel="tag"># paperReading</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/6-824/Vmware-ft/" rel="prev" title="VMware-FT 论文阅读">
+      <i class="fa fa-chevron-left"></i> VMware-FT 论文阅读
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/6-824/6-824lab2/" rel="next" title="6.824 Lab2 RAFT">
+      6.824 Lab2 RAFT <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-text">背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%8D%E5%88%B6%E7%8A%B6%E6%80%81%E6%9C%BA"><span class="nav-text">复制状态机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#raft-%E5%AE%9E%E7%8E%B0"><span class="nav-text">Raft 实现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#leader-%E9%80%89%E4%B8%BE"><span class="nav-text">Leader 选举</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%A5%E5%BF%97%E5%A4%8D%E5%88%B6"><span class="nav-text">日志复制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%89%E5%85%A8%E6%80%A7"><span class="nav-text">安全性</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%80%89%E4%B8%BE%E7%BA%A6%E6%9D%9F"><span class="nav-text">选举约束</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8F%90%E4%BA%A4%E6%97%A7-entry"><span class="nav-text">提交旧 Entry</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#follower-%E4%B8%8E-candidate-%E5%B4%A9%E6%BA%83"><span class="nav-text">Follower 与 Candidate 崩溃</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9B%86%E7%BE%A4%E6%88%90%E5%91%98%E5%8F%98%E6%9B%B4"><span class="nav-text">集群成员变更</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%A5%E5%BF%97%E5%8E%8B%E7%BC%A9"><span class="nav-text">日志压缩</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Leager"
+      src="/images/Avatar.jpg">
+  <p class="site-author-name" itemprop="name">Leager</p>
+  <div class="site-description" itemprop="description">【数据删除】</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">30</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Leager-zju" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Leager-zju" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div>
+<span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("09/25/2022 00:00:00");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "本站已存活 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+    }
+setInterval("createtime()",250);
+</script>
+</div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Leager</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,0' opacity='0.5' zIndex='-1' count='160' src="//cdn.jsdelivr.net/gh/theme-next/theme-next-canvas-nest@1.0.0/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>
