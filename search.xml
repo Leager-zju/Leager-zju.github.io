@@ -3429,4 +3429,833 @@ S\Lambda
 </video>
 ]]></content>
   </entry>
+  <entry>
+    <title>15445 Project#0 C++ Primer</title>
+    <url>/15445/15445project0/</url>
+    <content><![CDATA[<p>本项目与课程教学内容无关，仅作 C++ 水平检验用，但我在 code 过程中发现还是涉及到部分比较重要的知识点，故作记录。</p>
+<p><a href="https://15445.courses.cs.cmu.edu/fall2022/project0/">&gt;&gt;&gt; LAB 主页传送门 &lt;&lt;&lt;</a></p>
+<span id="more"></span>
+<p>此项目要求我们实现一个基于并发 Trie 的 k/v 存储，支持 Insert, Remove, GetValue 三种操作。</p>
+<blockquote>
+<p>有关 Trie 这种数据结构可以参考<a href="https://en.wikipedia.org/wiki/Trie">维基百科</a>。</p>
+</blockquote>
+<p>为了简化，这里假设 Key 都是非空的可变长度字符串，即 <code>std::string</code>。Value 存储在该键最后一个字符所处的节点（<strong>Terminal Node</strong>）中。例如，考虑将 kv 对 <code>("ab", 1)</code> 和 <code>("ac", "val")</code> 插入到 Trie 中，将如下所示。</p>
+<p><img src="graph.png" style="zoom: 80%;" /></p>
+<h3 id="task-1---templated-trie">Task #1 - templated trie</h3>
+<h4 id="trienode">TrieNode</h4>
+<blockquote>
+<p>该类定义了 Trie 中的单个节点。<code>TrieNode</code> 保存单个字符，<code>is_end_</code> 标志表示它是否为 Terminal Node。可以根据字符通过 <code>map&lt;char, unique_ptr&lt;TrieNode&gt;&gt; children</code> 访问子节点。</p>
+</blockquote>
+<p>其它成员函数实现都很简单，这里需要关注类的移动构造函数 <code>TrieNode(TrieNode&amp;&amp; )</code> 和插入子节点函数 <code>InsertChildNode(char , std::unique_ptr&lt;TrieNode&gt; )</code>。这里涉及到智能指针和左值右值，以及移动语义。</p>
+<blockquote>
+<p>这里<strong>智能指针</strong>只涉及 <strong>unique_ptr</strong>，我的理解是将裸指针封装成类以保证析构释放资源，同时独占该指针的使用权，既能防止其它指针指向该地址导致错误释放，也能在不生成副本的情况下访问数据。</p>
+<p>具体可参考<a href="https://xhy3054.github.io/cpp-unique-ptr/">这篇文章</a>。</p>
+</blockquote>
+<blockquote>
+<p><strong>左值</strong>简单来说是指有名的、可通过地址访问的变量，一般在等号左侧；相反，<strong>右值</strong>就是字面量，一般在等号右侧。<strong>左值引用</strong>只能绑定到左值，<strong>右值引用</strong>只能绑定到右值。然而，<strong>右值引用</strong>既可以是左值（函数形参）也可以是右值（函数返回值）。</p>
+<p>具体可参考<a href="https://zhuanlan.zhihu.com/p/335994370">这篇文章</a>。</p>
+</blockquote>
+<blockquote>
+<p>与深拷贝不同，<strong>移动语义</strong>直接移动数据的所有权。与 <strong>unique_ptr</strong> 结合就变成了转移指针的所有权。</p>
+<p>具体可参考<a href="https://www.cnblogs.com/zhangyi1357/p/16018810.html">这篇文章</a>。</p>
+</blockquote>
+<p>再来看这两个函数。移动构造函数需要接管所有数据，基本类型变量直接赋值即可，对 <strong>unique_ptr</strong> 而言需使用 <code>std::move()</code> 转移所有权。如果参数声明为 <code>const Type&amp;</code> 则无法使用移动语义。</p>
+<h4 id="trienodewithvalue">TrieNodeWithValue</h4>
+<blockquote>
+<p>继承自 <code>TrieNode</code>，并代表一个可以保存任意类型值的 Terminal Node，它的 <code>is_end_</code> 总为 true。</p>
+</blockquote>
+<p>该类会在 Insert 一个 Key 的最后一个字符时从 TrieNode 变化而来，由于 TrieNode 没有无参构造函数，所以在 TrieNodeWithValue 构造函数中需显式声明父类构造。</p>
+<p>这里构造函数参数中的 <code>TrieNode &amp;&amp;trieNode</code> 虽然是右值引用，但是左值，故利用它执行父类构造时需使用 <code>std::move()</code> 将左值强转为右值。</p>
+<h4 id="trie">Trie</h4>
+<blockquote>
+<p>根节点是所有键的起始节点，它本身不存储任何字符。</p>
+</blockquote>
+<h5 id="插入">插入</h5>
+<p>如果待插入的 key 已存在，即 key 的所有字符都在 Trie 中存在且最后一个字符所处节点为 Terminal Node，则插入失败。</p>
+<p>反之，对于不存在的字符，调用 <code>TrieNode.InsertChildNode()</code> 方法。当遍历至最后一个字符时，需将该节点转为 <code>TrieNodeWithValue</code>，我的方法是维护父节点指针 <code>prev</code>，届时对 <code>prev</code> 中的 <code>children</code> 变量作修改即可。在 C++ 多态特性下，基类指针也可以指向子类。</p>
+<h5 id="删除">删除</h5>
+<p>删除需要递归式地去判断是否删除子节点，于是开个新函数 <code>RecursivelyRemove</code>。需要注意的是，即便成功删除了该键，也不一定需要将对应的节点删除，故需要用一个变量来通知父节点是否需要将自身移除。而对于该键的 non-Terminal Node，需要判断自身是不是其它键的 Terminal Node，不能随意删除。</p>
+<blockquote>
+<p>考虑对于两个 Trie 中的键 “Hi” 和 “High”，按不同顺序删除。</p>
+</blockquote>
+<h5 id="取值">取值</h5>
+<p>和插入一样，但若下个节点不存在，或最后一个字符不是 Terminal Node，或最后一个是 Terminal Node 但存的值类型不一致，则取值失败。在使用 <code>dynamic_cast</code> 的时候我选择转为指针类型，是因为方便判断是否转成功。</p>
+]]></content>
+      <categories>
+        <category>15445</category>
+      </categories>
+      <tags>
+        <tag>lab</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>15445 Project#1 Buffer Pool</title>
+    <url>/15445/15445project1/</url>
+    <content><![CDATA[<p>从这个 lab 起，就正式开始构建本课程 bustub DBMS 数据库系统了。</p>
+<p><a href="https://15445.courses.cs.cmu.edu/fall2022/project1/">&gt;&gt;&gt; LAB 主页传送门 &lt;&lt;&lt;</a></p>
+<span id="more"></span>
+<p>本项目要求我们实现存储管理器的 <strong>Buffer Pool</strong> 部分，即完善对物理页面进行调度的过程。Buffer Pool Manager 对上层公开一系列页面相关的 API，如获取页（FetchPage）、结束访问页（UnpinPage）等。上层根据 <code>page_id</code> 通过调用这些 API 从内存中获取相应数据。本项目的整体框架如下：</p>
+<p><img src="image-20221217221523177.png" alt="image-20221217221523177" style="zoom:60%;" /></p>
+<ul>
+<li><strong>pages</strong>：每个数组元素（即Page 对象）存放数据。模拟了实际内存对存储空间进行分页。</li>
+<li><strong>page_table</strong>：存放 <code>page_id</code> 到 <code>frame_id</code> 的映射。在本项目中，页表的设计基于<strong>可扩展哈希表</strong>。</li>
+<li><strong>lru_k_replacer</strong>：不存储数据。仅当内存发生页面置换时，其根据 LRU-K 算法提供最先被换出的帧号。</li>
+</ul>
+<p>基于上述讨论，可以开始进行 lab tasks 的构思了。</p>
+<h3 id="task-1-extendable-hash-table">Task #1-Extendable Hash Table</h3>
+<p>具体概念请参考<a href="https://zhuanlan.zhihu.com/p/537292608">可扩展哈希实现</a>。</p>
+<p>由于今年不需要实现删除元素后哈希表的收缩，所以这里的关键部分就是桶满了之后的 Split 操作。若 <code>Indexof(Key) = index</code> 的键值对插入前对应桶满了：</p>
+<ol type="1">
+<li><p>增加对应桶 <span class="math inline">\(bucket_i\)</span> 的 <span class="math inline">\(local\_depth\)</span>；</p></li>
+<li><p>如果此时 <span class="math inline">\(local\_depth\)</span> 超过了 <span class="math inline">\(global\_ depth\)</span>，则对目录进行扩展；</p></li>
+<li><p>对所有指向桶 <span class="math inline">\(bucket_i\)</span> 的索引，作一次数据的再分配；</p>
+<blockquote>
+<p>若 <span class="math inline">\(bucket_i\)</span> 原先的 <span class="math inline">\(local\_ depth\)</span> 为 <span class="math inline">\(l\)</span>，则指向该桶的所有索引的低 <span class="math inline">\(l\)</span> 位都是一致的。当桶进行分裂时，第 <span class="math inline">\(l+1\)</span> 位出现了差异，则令与 <code>index</code> 的二进制表示中低 <span class="math inline">\(l\)</span> 位相同，第 <span class="math inline">\(l+1\)</span> 不同的索引指向新的桶 <span class="math inline">\(new\_bucket_i\)</span>。取出 <span class="math inline">\(bucket_i\)</span> 中所有键值对，对其重新插入。</p>
+</blockquote></li>
+<li><p>重复插入 Key 的操作直至不再分裂。</p></li>
+</ol>
+<h3 id="task-2---lru-k-replacement-policy">Task #2 - LRU-K Replacement Policy</h3>
+<p>在 LRU 策略中，每次页面置换都会选择最近最不常访问的帧号。其原理是符合直觉的。但是，考虑这种情况，存在某一热点页面，之后 buffer pool 发生了偶然性的冷页面的读取，根据 LRU 策略，热页面会被换出。但我们并不希望其被换出，因为这些冷页面可能在很长一段时间内仅仅只有此次访问。LRU 策略的缺点就在于，其不能跟踪某一页面是否为热点页面，我们希望读取的代价最小，也就是热点页面在大多数情况下都不会被置换出。</p>
+<p>于是诞生了 LRU-K 策略。在本 lab 中，该策略是在原来的 LRU 基础上，新增维护了某一帧最近 K 次的访问记录，当需要置换页面时，replacer 会选出 <span class="math inline">\(k-distance\)</span> 最大的那一帧。如果有多个 <span class="math inline">\(k-distance = inf\)</span> 的帧，则换出最早被访问的那一个。</p>
+<blockquote>
+<p><span class="math inline">\(k-distance\)</span>：与倒数第 <span class="math inline">\(k\)</span> 次访问的时间差。若访问次数不足 <span class="math inline">\(k\)</span> 次，则认为该值为 <span class="math inline">\(inf\)</span>。</p>
+</blockquote>
+<p>在 LRU-K 策略下，上述热点页的问题就能得到解决，即便发生了多个偶然性的冷页面访问，置换也仅仅发生在固定一帧，其余热点页面则会受到保护。</p>
+<p>以上是对本 Task 核心部分的讨论，接下来是一些细节。</p>
+<h4 id="成员函数">成员函数</h4>
+<ul>
+<li><code>Evict(frame_id_t *frame_id)</code>：根据已有访问记录，挑选合适的 frame_id 进行置换，同时这里有个坑点，即选出一个 frame_id_t 后需清空其访问记录；</li>
+<li><code>RecordAccess(frame_id_t frame_id)</code>：追加一条关于 frame_id 的访问记录；</li>
+<li><code>SetEvictable(frame_id_t frame_id, bool set_evictable)</code>：设置 frame_id 的可置换性，即能否在 Evict 操作中参与 <span class="math inline">\(k-d\)</span> 的比较；</li>
+<li><code>Remove(frame_id_t frame_id)</code>：移除 frame_id 在 replacer 中的所有信息；</li>
+</ul>
+<p>为了支持并发，需在上述所有函数中上锁。</p>
+<h4 id="成员变量设计">成员变量设计</h4>
+<p>基于提供的成员函数，作出如下成员变量设计。</p>
+<h5 id="访问记录表">访问记录表</h5>
+<p>在 bustub 框架下，帧号永远从 0 开始，于是访问记录表可以不采用 <code>unordered_map&lt;frame_id_t, AccessRecord&gt;</code>，而是 <code>std::vector&lt;AccessRecord&gt;</code>。每个 <code>AccessRecord</code> 记录最近 K 次访问的时间戳。</p>
+<p>在本 Task 中，我采用了 <code>std::list&lt;timestamp&gt;</code> 实现 <code>AccessRecord</code>。对于访问记录而言，只需维护 K 条记录，在追加记录时，若记录数已达 K 次，则移除最早的那次。显然，访问记录需要频繁的插入删除，以及末尾（倒数第 K 次记录）的访问，而 list 底层为一个双向链表，支持 <span class="math inline">\(O(1)\)</span> 的增删查。</p>
+<h5 id="置换队列与队列位置信息">置换队列与队列位置信息</h5>
+<p>每次置换时，可以选择遍历一遍访问记录表，再取合适的帧进行置换，但这样每次置换的时间开销为 <span class="math inline">\(O(n)\)</span>。不难想到可以定义一个“<strong>置换队列</strong>”，按照 <span class="math inline">\(k-dis\)</span> 大小进行排序，使得队首恒为下一次进行置换的帧号，用空间换时间，将置换开销提升至 <span class="math inline">\(O(1)\)</span>。</p>
+<p>在本 Task 中，我依然采用了 <code>std::list&lt;frame_id_t&gt;</code> 来实现 replace_queue。在 replace_queue 中，只需访问队首元素，且需要频繁的插入删除——<code>SetEvictable(true)</code> 将本来 unevictable 的帧设为 evictable，需要将 frame_id 插入置换队列中合适的位置；<code>SetEvictable(false)</code> 将本来 evictable 的帧设为 unevictable，需要将 frame_id 从置换队列中移除。</p>
+<p>这就导致插入/删除位置并不一定在首尾，查找插入/删除位置时需要进行 <span class="math inline">\(O(n)\)</span> 遍历，为了减少这一开销，可以维护所有帧号在置换队列中的<strong>位置</strong>（迭代器），从而将开销降至 <span class="math inline">\(O(1)\)</span>。</p>
+<p>有了这一信息，就无需单独维护某个 frame_id 是否 evictable 了——若 frame_id 对应的迭代器为 <code>replace_queue.end()</code>，则认为其 unevictable，反之同理。</p>
+<p>另外，若对一个 evictable 的帧进行 <code>RecordAccess</code>，则其访问记录会被修改，需改变其在 replace_queue 中的位置。</p>
+<h3 id="task-3---buffer-pool-manager-instance">Task #3 - Buffer Pool Manager Instance</h3>
+<p>到这里，就需要我们整合前两个 Task 的内容，对内存中的页面进行管理了。</p>
+<p>根据 lab guide 所述，<code>BufferPoolManagerInstance</code> 负责从 <code>DiskManager</code> 中获取页面并将它们存储在内存中，当它被明确指示这样做或者当它需要驱逐一个页面为新页面腾出空间时，它也可以将脏页写出到磁盘。系统中的所有内存页面都由 <code>Page</code> 对象表示。<code>BufferPoolManagerInstance</code> 不需要理解这些页面的内容。但作为系统开发人员，重要的是要了解 <code>Page</code> 对象只是缓冲池中内存的容器，因此并不特定于唯一页面。也就是说，每个 <code>Page</code> 对象都包含一个内存块，<code>DiskManager</code> 将使用这块内存存放从磁盘读取的物理页的内容的副本。</p>
+<h4 id="page-类">Page 类</h4>
+<p>Page 类维护以下元信息：</p>
+<ul>
+<li><code>data_[]</code>：实际的数据信息，下面三个并非真实页面所拥有的变量；</li>
+<li><code>page_id_</code>：用于唯一标识当前 Page；</li>
+<li><code>pin_count_</code>：表明当前访问该 Page 的线程数；</li>
+<li><code>is_dirty_</code>：若数据被线程修改且未写回磁盘，则为 true。进行页面置换时，若被换出的页面的 is_dirty_ = true，则需写回磁盘；</li>
+</ul>
+<h4 id="成员变量">成员变量</h4>
+<p>BPM 的成员变量无需额外设计，故研究一下其提供的变量。</p>
+<ul>
+<li><code>std::atomic&lt;page_id_t&gt; next_page_id_</code>：新建 Page 对象时赋予的 page_id，每次新建均自增；</li>
+<li><code>Page *pages_</code>：Page 对象数组，即帧，根据 frame_id 作为下标进行访问，相当于一个容器，只是存放实际存储中的一个副本；</li>
+<li><code>ExtendibleHashTable&lt;page_id_t, frame_id_t&gt; *page_table_</code>：哈希表，存放 page_id 到 frame_id 的映射，每次对 pages 数组进行修改时，都要对该变量进行操作；</li>
+<li><code>std::list&lt;frame_id_t&gt; free_list_</code>：跟踪未存放任何 Page 对象的帧，当从磁盘中取出页面时优先使用 free_list 中的帧；</li>
+</ul>
+<h4 id="成员函数-1">成员函数</h4>
+<ul>
+<li><p><code>NewPgImp(page_id_t *page_id)</code>：新建一个 Page，并将其插入到帧中，插入时优先使用 free_list 中的帧，其次再考虑利用 replacer 挑选一帧进行页面置换，置换时若页面为脏，则需写回磁盘。之后，除了修改 Page 对象的元信息，还需修改哈希表，构建新的映射；</p></li>
+<li><p><code>FetchPgImp(page_id_t page_id)</code>：表明某一线程需要访问 Page。如果 BPM 中已经有该 Page，则直接访问；反之，从磁盘中读取 Page，执行和 NewPgImp 一样的插入 Page 操作。这里访问 Page 实际上也是访问帧，Page 层面的就是修改 <code>pin_count_</code> 变量，而对于帧层面的，除了要调用 <code>RecordAccess()</code> 函数追加访问记录，还要将该帧设为 unevictable；</p></li>
+<li><p><code>UnpinPgImp(page_id_t page_id, bool is_dirty)</code>：表明某一线程终止了对该 Page 的访问。若该 Page 并不在 BPM 中，直接返回。减少 <code>pin_count_</code> 后，若其降至 0，则表明无任何线程正在访问，可以参与到页面替换的评比之中，需将对应帧设置为 evictable；</p>
+<blockquote>
+<p>这里有一个<strong>坑点</strong>在于，仅当 <code>is_dirty = true</code> 时才修改 BPM 中对应 Page 对象的 <code>is_dirty_</code> 变量，这是因为其为 <code>true</code> 时必定代表对该 Page 进行了修改，而为 <code>false</code> 仅仅表明这一线程只读不写，不代表其它线程没有对其进行操作，故不能不加判断直接修改。</p>
+</blockquote></li>
+<li><p><code>FlushPgImp(page_id_t page_id)</code>：无条件将对应 Page 的内容写回磁盘；</p></li>
+<li><p><code>FlushAllPgsImp()</code>：对所有 Page 执行一次 <code>FlushPgImp</code> 操作；</p></li>
+<li><p><code>DeletePgImp(page_id_t page_id)</code>：删除 page_id 对应的 Page 的所有信息。如果该 Page 不在帧中，则直接返回，否则，判断对应 Page 对象是否仍有线程在访问，若有，则直接返回，反之需修改所有与该 Page 对象及所在帧相关的信息，无需考虑磁盘中的情况，<code>next_page_id_</code> 也不会随之变化；</p>
+<blockquote>
+<p>就是在这里调用 replacer 的 <code>Remove()</code> 函数了。</p>
+</blockquote></li>
+</ul>
+<h3 id="总结">总结</h3>
+<p>总体实现并不难，跟着注释以及 lab guide 一步步来即可。</p>
+<p>善用框架提供的 <code>BUSTUB_ASSERT</code> 进行防御性编程，以便 DEBUG 时针对性地检测异常。</p>
+<p>并发所采用的 <code>std::scope_lock</code> 实际上采用了 <a href="https://zhuanlan.zhihu.com/p/34660259">RAII</a> 的思想，简单来说就是利用类析构函数的特性来保证退出函数时必定能够释放锁，而无需手动释放，效果相当于 Go 里面的 <code>lock, defer unlock</code>。</p>
+]]></content>
+      <categories>
+        <category>15445</category>
+      </categories>
+      <tags>
+        <tag>lab</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>15445 Project#2 B+ Tree</title>
+    <url>/15445/15445project2/</url>
+    <content><![CDATA[<p>到目前为止，咱们已经完成了存储与索引部分的功能实现，接下来就进入执行层面的内容了。</p>
+<p><a href="https://15445.courses.cs.cmu.edu/fall2022/project2/">&gt;&gt;&gt; LAB 主页传送门 &lt;&lt;&lt;</a></p>
+<span id="more"></span>
+<h3 id="task-1---btree-pages">Task #1 - B+Tree Pages</h3>
+<p>首先，在本 lab 中，B+ 树的所有节点都以 <code>BPlusTreePage</code> 即页的形式存在，其包含若干元数据。其中，根据所处位置不同，B+ 树的节点又分为内部节点(<strong>Internal node</strong>)与叶节点(<strong>Leaf node</strong>)。B+ 树的特点就是 internal node 仅用于索引，leaf node 存放真实数据，故这两者的键值对类型略有不同：</p>
+<ol type="1">
+<li>前者（<code>BPlusTreeInternalPage</code>）的 Value 为 child node 的索引；</li>
+<li>后者（<code>BPlusTreeLeafPage</code>）的 Value 为元组 RID。</li>
+</ol>
+<p>这便是第一个 Task 的主要任务——完善这三个数据结构。</p>
+<h4 id="bplustreepage">BPlusTreePage</h4>
+<p>基类，包含一些公共变量。</p>
+<h5 id="成员变量">成员变量</h5>
+<ul>
+<li><code>page_type_</code>：指明该节点为内部节点还是叶节点，无需强转后判断；</li>
+<li><code>lsn_</code>：事务序列号，lab 4 中用到；</li>
+<li><code>size_</code>：当前存放的键值对数量；</li>
+<li><code>max_size_</code>：当前节点能容纳的最大键值对数量；</li>
+<li><code>parent_page_id_</code>：父节点 page_id，用于查找父节点；</li>
+<li><code>page_id_</code>：自身所处 Page 对象的 page_id；</li>
+</ul>
+<p>这些变量，或者说信息，都是 internal page 和 leaf page 共有的，这总共 <strong>24B</strong> 的不包含键值对的信息被称为 <strong>HEADER</strong>。</p>
+<p>其相关的成员函数实现起来也比较简单，不再赘述。</p>
+<p>btw，尽管名字里都带个 “Page”，但 lab1 和 lab2 的 “Page” 其实是不同的，<code>BPlusTreePage</code> 实际上对应了 BPM 里面 Page 对象的 <code>data_</code> 部分，因此在访问节点时，首先通过 BPM.FetchPage 方法获取 Page 对象，再将其 <code>data_</code> 部分 <code>reinterpret_cast</code> 为 <code>BPlusTreePage</code>，最后根据对应的 <code>page_type_</code> 强转为 Internal/Leaf page。具体数据排布如下图所示：</p>
+<p><img src="image-20230111164135789.png" alt="image-20230111164135789" style="zoom:60%;" /></p>
+<p>HEADER 内的 <code>page_id</code> 实际上和外层 Page 对象的 <code>page_id</code> 是相等的。</p>
+<h4 id="bplusinternalpage">BPlusInternalPage</h4>
+<p>内部节点，不存放数据，仅用于索引，且 m 个 Key 对应 m+1 个 Child。基于 lab1 BPM 的实现，所有的 node 都可以通过 page_id 来进行获取，故这里的索引实际上就是 child node 对应的 page_id。</p>
+<p>关于其成员函数的实现，除了原本给的，我还添加了以下函数：</p>
+<ol type="1">
+<li><code>Insert(const KeyType &amp;key, const ValueType &amp;value, int index)</code>：在 index 处插入 kv 对，后面所有 kv 对后移一位；</li>
+<li><code>Remove(int index)</code>：移除 index 处的 kv 对，后面所有元素前移一位；</li>
+</ol>
+<p>这在后续 BPlusTree 的 Insert/Remove 的实现中比较重要。当然，<code>BPlusLeafPage</code> 类中也包含以上两个方法。</p>
+<h4 id="bplusleafpage">BPlusLeafPage</h4>
+<p>叶节点，存放实际数据，且 m 个 Key 对应 m 个 Value。</p>
+<p>根据 B+ 树的性质，所有叶节点同时以链表形式排布，从而支持 range-search。故 leaf page 的 HEADER 还要加上 4B 的 next_page_id，以索引到下一个叶节点。如果是最右边那个叶节点，则该变量为 <code>INVALID_PAGE_ID</code>。</p>
+<h3 id="task-2---btree-data-structure">Task #2 - B+Tree Data Structure</h3>
+<p>本 Task 是本 lab 的核心部分，也是最难的部分，相比于 Task1 仅仅是实现各节点的数据结构，Task2 就要开始真正手撕 B+ 树了。</p>
+<h4 id="getvaluekey">GetValue(Key)</h4>
+<p>查操作较为简单，只需根据 Key 从根节点开始不断往下走即可，重点在于找 child，而不涉及多余的操作。根据 B+ 树的特性，对于 <span class="math inline">\(Page\_id_i\)</span> 对应节点为根的子树中，所有 key <span class="math inline">\(K\)</span> 均满足 <span class="math inline">\(Key_i \leq K &lt; Key_{i+1}\)</span>，且作索引的内部节点的第一个 Key 不参与比较。故查找子节点 page_id 所在索引的函数可以实现为：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">GetChildPageIndex</span><span class="params">(InternalPage *internal_node, <span class="type">const</span> KeyType &amp;key)</span> </span>&#123;</span><br><span class="line">  <span class="type">int</span> child_index;</span><br><span class="line">  <span class="keyword">for</span> (child_index = <span class="number">0</span>; child_index &lt; internal_node-&gt;<span class="built_in">GetSize</span>() - <span class="number">1</span>; child_index++) &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">comparator_</span>(key, internal_node-&gt;<span class="built_in">KeyAt</span>(child_index + <span class="number">1</span>)) == <span class="number">-1</span>) &#123;</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> child_index;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="insertkey-value">Insert(Key, Value)</h4>
+<p>B+ 树的插入规则如下：</p>
+<ol type="1">
+<li><p>若整棵树为空，则新建 root node 并作为 leaf node，进行插入；</p></li>
+<li><p>反之，根据 key 找到相应的叶节点 <strong>src</strong>，直接插入，注意叶节点的所有 kv 对均按照 key 递增排序；</p></li>
+<li><p>若插入后 src 满足 split 条件，进行 <strong>node split</strong>：</p>
+<ol type="1">
+<li><p>新建一个节点 <strong>sibling</strong>；</p>
+<blockquote>
+<p>这里注意，新建 <code>BPlusTreePage</code> 对象后必须调用其 <code>Init()</code> 函数来初始化其元数据。</p>
+</blockquote></li>
+<li><p>将 src 中的后一半 kv 对迁移到 sibling 中，若 src 为叶节点，则还需要修改 src 和 sibling 的 next page id；</p></li>
+<li><p>若 src 同时也是 root node，则创建一个新的根节点 new root node，插入一个新条目；</p></li>
+<li><p>反之，在其 parent 中插入一个新条目；</p></li>
+</ol></li>
+<li><p>若 parent 因 child split 行为而导致其满足 split 条件，则继续进行 node split，直至不再满足 split 条件；</p></li>
+</ol>
+<blockquote>
+<p>split 条件：</p>
+<ol type="1">
+<li>对于 leaf node，在插入后 size = max_size；</li>
+<li>对于 internal node，在插入后 size &gt; max_size；</li>
+</ol>
+</blockquote>
+<p>实际上 Insert 是一个递归行为，每选择一个 child，就是对一棵新的 B+ 树进行 Insert 操作，故在我的实现中，定义了一个名为 <code>bool RecursivelyInsert(Key, Value, Root)</code> 的函数，其返回值表示的含义为：若为 <code>true</code>，则说明 child 满足 split 条件，由 parent 来执行 child node split，最后告知 parent 的 “grandparent” 其是否满足 split 条件；反之，此节点不进行任何操作，直接返回 <code>false</code>。</p>
+<p>在 <code>Insert()</code> 中调用 <code>RecursivelyInsert()</code> 实际上是对 root 进行递归插入，所以如果返回值为 true，需要进行 root 的 split，相比其它节点而言多了一个新建 new root node 的操作。</p>
+<blockquote>
+<p>有个需要注意的点是，这里的 B+ 树仅支持 <strong>unique key</strong>，对相同 key 的重复插入会被认为是插入失败。</p>
+</blockquote>
+<p>基于上述讨论，总体过程大概如下所示：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">bool</span> <span class="title">Insert</span><span class="params">(<span class="type">const</span> KeyType &amp;key, <span class="type">const</span> ValueType &amp;value)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (<span class="built_in">IsEmpty</span>()) &#123;</span><br><span class="line">    <span class="comment">// 新建 root node 后直接插入</span></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="type">bool</span> need_split = <span class="built_in">RecursivelyInsert</span>(key, value, root_node);</span><br><span class="line">  <span class="keyword">if</span> (need_split) &#123;</span><br><span class="line">    <span class="comment">// 1. 新建 new root node 和 sibling node</span></span><br><span class="line">    <span class="comment">// 2. 若为叶节点，需修改 next_page_id</span></span><br><span class="line">    <span class="comment">// 3. 移动一半 kv 对</span></span><br><span class="line">    <span class="comment">// 4. 插入新条目</span></span><br><span class="line">    <span class="comment">// 5. 修改 root_page_id_</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> success;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">RecursivelyInsert</span><span class="params">(<span class="type">const</span> KeyType &amp;key, <span class="type">const</span> ValueType &amp;value, BPlusTreePage *cur_node)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (cur_node-&gt;<span class="built_in">IsLeafPage</span>()) &#123;</span><br><span class="line">    <span class="comment">// 直接插入 leaf node</span></span><br><span class="line">    <span class="keyword">return</span> leaf_node-&gt;<span class="built_in">GetSize</span>() &gt;= leaf_node-&gt;<span class="built_in">GetMaxSize</span>();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="type">bool</span> res = <span class="literal">false</span>;</span><br><span class="line">  <span class="type">bool</span> need_split = <span class="built_in">RecursivelyInsert</span>(key, value, child_node);</span><br><span class="line">  <span class="keyword">if</span> (need_split) &#123;</span><br><span class="line">    <span class="comment">// 1. 新建 sibling node</span></span><br><span class="line">    <span class="comment">// 2. 若为叶节点，需修改 next_page_id</span></span><br><span class="line">    <span class="comment">// 3. 移动一半 kv 对</span></span><br><span class="line">    <span class="comment">// 4. 插入新条目</span></span><br><span class="line">    res = cur_node-&gt;<span class="built_in">GetSize</span>() &gt; cur_node-&gt;<span class="built_in">GetMaxSize</span>();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="removekey">Remove(Key)</h4>
+<p>删除规则和插入大体类似：</p>
+<ol type="1">
+<li>根据 key 找到相应的叶节点 <strong>src</strong>；</li>
+<li>若删除后 src 满足 merge 条件，则进行 <strong>node merge</strong>：
+<ol type="1">
+<li>先看看自己的左右兄弟中任何一个是否能借一个 kv 对，条件是其借出后不会使得自身满足 merge 条件；</li>
+<li>若能借到，则修改 parent 相应条目；</li>
+<li>反之，挑选一个 sibling，将它俩合并，规则为，右侧的 node 将其所有 kv 对迁移到左侧的 node 中，并删除 parent 中相应条目；</li>
+</ol></li>
+<li>若父节点因 child merge 行为而导致其满足 merge 条件，则继续进行 node merge，直至不再满足 merge 条件；</li>
+</ol>
+<blockquote>
+<p>merge 条件：</p>
+<ol type="1">
+<li>对于 root node
+<ol type="1">
+<li>若为 leaf node，删除后 size = 0；</li>
+<li>若为 internal node，删除后 size = 1；</li>
+</ol></li>
+<li>对于非 root node
+<ol type="1">
+<li>若为 leaf node，删除后 size &lt; min_size；</li>
+<li>若为 internal node，删除后 size &lt;= min_size；</li>
+</ol></li>
+</ol>
+<blockquote>
+<p>min_size = max_size / 2</p>
+</blockquote>
+</blockquote>
+<p>它同样是个递归行为，我也定义了一个 <code>RecursivelyRemove()</code> 函数，流程和 insert 大体一致，不同之处在于 sibling 的挑选，需要考虑当前 child 是否为 parent 最左侧/最右侧的 child。</p>
+<h3 id="task-3---index-iterator">Task #3 - Index Iterator</h3>
+<p>这一 Task 相对而言简单许多，首先需要我们完善 <code>IndexIterator</code> 类，实现其四个运算符（<code>*</code>, <code>++</code>, <code>==</code>, <code>!=</code>）以及一个 <code>IsEnd()</code> 函数，还需要我们完善 <code>BPlusTreePage</code> 类中的 <code>Begin()</code> 与 <code>End()</code> 函数，其分别返回一个 <code>IndexIterator</code>。总体而言还是不难的。</p>
+<h4 id="indexiterator">IndexIterator</h4>
+<p>由于 <code>IndexIterator</code> 是遍历 leaf node 的迭代器，故需要记录当前 kv 对的一些信息，如所在的 leaf page 以及当前 kv 对所在下标，即：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">BPlusTreeLeafPage&lt;KeyType, ValueType, KeyComparator&gt; *cur_page_;</span><br><span class="line"><span class="type">int</span> cur_index_;</span><br></pre></td></tr></table></figure>
+<p><code>IsEnd()</code> 只需判断当前 Page 指针是否为 <code>nullptr</code> 即可。</p>
+<p><code>==</code> 运算符不仅需要判断两个迭代器所处的 Page 的 page_id 及 index 是否相等，还需要在最开始加上 IsEnd() 的判断。</p>
+<h4 id="begin-end">Begin / End</h4>
+<p><code>Begin</code> 有两个重载函数，一个是无参 <code>Begin()</code>，只要找到 B+ 树中最左边那个叶节点即可。</p>
+<p>另一个是 <code>Begin(Key)</code>，返回的 <code>IndexIterator</code> 需满足对应的 key <span class="math inline">\(K &lt;= Key\)</span>，这与之前实现的 <code>GetValue</code> 有异曲同工之妙。</p>
+<h3 id="task-4---concurrent-index">Task #4 - Concurrent Index</h3>
+<p>这一 Task 要求我们在原先的基础上，令 B+ 树支持并发操作，这里需要用到的一个思路就是 <strong>Lock Crabbing</strong>。</p>
+<p>如果要实现不冲突的并发操作，最朴素的想法是从 root 开始，一直到 leaf 这条路径上的所有 node 依次上锁，完成递归操作后依次解锁，直至所有锁都释放。</p>
+<p>但这样就将并发变成了纯粹的 Serialized Operation，还不如直接对整个 B+ 树上一把大锁。实际上有些 node 可能并不需要这把锁，也就是说事务的这次 Insert/Remove 操作并不会对该 node 造成任何影响，完全可以直接解锁，让其它事务尽快获得该 node 上的锁，从而提高吞吐率。而对于 GetValue 操作，目的是读取 leaf node 上的数据，internal node 在索引完后就失去了其作用，因此也可以直接解锁。</p>
+<p>那么问题来了，如何判断当前 node 需不需要提早解锁呢？在 B+ 树中，如果一个 node 无论是否 Insert/Remove 某一 kv 对都不满足 split/merge 条件，那么其 parent 也不会因为本次操作而改变自身所存放的 kv 对数量，我们就认为这样一个 node 是 <strong>Safe</strong> 的。如果在 Insert/Remove 操作中，某一 node 所引导的 child node 是 safe 的，那么无论什么情况，本次操作都不会对该 node 及其所有祖先产生影响，可以直接解除从 root 到该 node 的所有锁。</p>
+<p>于是之前的 Insert/Remove 操作流程就变成了：</p>
+<ol type="1">
+<li>找到 child node；</li>
+<li>判断是否 safe，若是，则解锁，反之，等待操作结束后马上要退出递归了再解锁；</li>
+<li>对 child node 进行递归操作；</li>
+<li>操作结束后，根据是否提前解锁来判断此时是否需要解锁；</li>
+<li>返回至上层；</li>
+</ol>
+<blockquote>
+<p>不能直接通过判断 child node 是否 safe 来判断有无提早解锁，因为 child node 可能在操作的过程中 size 发生了改变。实际上，Insert/Remove 函数的参数中有一个名为 <code>Transaction</code> 的变量，其内部有一个双端队列(<strong>std::deque</strong>)用来维护持有锁的情况，从队首到队尾依次为 root 到 leaf 这条路径上的所有 <code>BPlusTreePage</code>，提前解锁相当于 <code>pop_front()</code>。而当操作结束后，若当前锁队列非空，说明未提前解锁，故需要解锁，相当于 <code>pop_back()</code>。</p>
+<p>这样加就能够保证递归返回时，所有子孙后代都已经解锁，若当前锁队列非空，说明当前 node 一直到 leaf 这条路径上都没发生过提前解锁事件，队列末端必定为当前 node。</p>
+</blockquote>
+<p>我这里是上了一把大锁，防止 root node 出现改变的情况，在锁队列中表现为一个空指针，即如果待解锁页面为 <code>nullptr</code>，则说明需要把大锁给解锁了。</p>
+<p>当然也可以改为持续获取 root node，直至其为真正的 root node（事务首次访问到 root 时尝试上锁，然后等待至持有时 root 可能已经发生变化，即当前 node 已不为 root，需要重复之前的操作），但经过分析，这和上一把大锁没有区别：</p>
+<ol type="1">
+<li>若 root 不会发生变化，说明到 leaf 的这条路径上必然有一个 node 是 safe 的，会直接将大锁解除；</li>
+<li>反之，大锁会在 root page id 完成更新后解除，若采用法 2，解锁时机并没有发生变化，下一个事务依然会在同一时刻获取到最新 root node 的锁；</li>
+</ol>
+<h3 id="总结">总结</h3>
+<p>课程组很贴心地为我们提供了 <strong>b_plus_tree_printer</strong> 这样的工具，生成 <code>.dot</code> 文件后可以直接复制到<a href="http://dreampuf.github.io/GraphvizOnline/">这个网站</a>上进行图像生成。当然，也可以<a href="https://15445.courses.cs.cmu.edu/fall2022/bpt-printer/">直接在浏览器上运行命令行</a>。将 B+ 树可视化，更方便我们 debug。</p>
+<p><a href="https://www.cs.usfca.edu/~galles/visualization/BPlusTree.html">这个网站</a>也为我们提供了 B+ 树各个操作的可视化过程，适合入门学习。</p>
+<p>本 lab 的实现难度还是挺大的，debug 过程非常吃力，尤其是 GradeScope 不提供测试代码，打印 LOG 还有概率发生 error，跟 6.824 直接公开测试用例的做法比起来还是对小白恶意更大一些，不过手撕完 B+ 树的那种神清气爽还是前所未有的。</p>
+<p>当然，还是要善用 BUSTUB_ASSERT 进行防御性编程。</p>
+]]></content>
+      <categories>
+        <category>15445</category>
+      </categories>
+      <tags>
+        <tag>lab</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>15445 Project#3 Query Execution</title>
+    <url>/15445/15445project3/</url>
+    <content><![CDATA[<p>到目前为止，咱们已经完成了存储与索引部分的功能实现，接下来就进入执行层面的内容了。</p>
+<p><a href="https://15445.courses.cs.cmu.edu/fall2022/project3/">&gt;&gt;&gt; LAB 主页传送门 &lt;&lt;&lt;</a></p>
+<span id="more"></span>
+<p>在 Bustub 框架下，执行层面采用<a href="https://zhuanlan.zhihu.com/p/219516250">火山模型</a>，又称 Iterator 模型。该计算模型将关系代数中每一种操作抽象为一个 Operator，将整个 SQL 构建成一个 Operator 树，从根节点到叶子结点自上而下地递归调用 <code>Next()</code> 函数，结果就如同流水线一般自底向上返回，并被处理。</p>
+<p>这里的结果均用表中的行，或称元组(<strong>Tuple</strong>)，表示。</p>
+<blockquote>
+<p>Tuple 实际上是虚拟表的一行或一行中某几个连续的单元格按照规定模式组成的集合。</p>
+</blockquote>
+<p>换句话说，上层节点的 <code>Next()</code> 会调用下层节点的 <code>Next()</code> 函数取得一个 Tuple，将其处理后返回给更上层节点。</p>
+<blockquote>
+<p>跟另一种方式（节点一次处理完所有数据后一并返回给上层）相比，增加了吞吐率，但缺点在于增加了函数递归调用的开销。</p>
+</blockquote>
+<p>该 Task 在 code 层面难度并不大，甚至不如 lab1，真正的难度在于熟悉整个框架下数据的排布以及不同数据结构的含义。</p>
+<p>课程组已经为我们提供了一部分 Operator 的实现，就先从 Projection 算子开始熟悉一下整个执行层所涉及到的内容。</p>
+<h3 id="sample---projectionexcecutor">Sample - ProjectionExcecutor</h3>
+<p>Projection 算子的构造函数如下</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">ProjectionExecutor::<span class="built_in">ProjectionExecutor</span>(ExecutorContext *exec_ctx, <span class="type">const</span> ProjectionPlanNode *plan, std::unique_ptr&lt;AbstractExecutor&gt; &amp;&amp;child_executor):</span><br><span class="line">  <span class="built_in">AbstractExecutor</span>(exec_ctx),</span><br><span class="line">  <span class="built_in">plan_</span>(plan),</span><br><span class="line">  <span class="built_in">child_executor_</span>(std::<span class="built_in">move</span>(child_executor)) &#123;&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="executorcontext">ExecutorContext</h4>
+<p>这是每个算子在构造时都会获得的一个参数，即执行上下文，其包含当前 SQL 语句处理时相应的信息，包含：<code>Transaction</code>，<code>BufferPoolManager</code>，<code>TransactionManager</code>，<code>LockManager</code> 以及 <code>Catalog</code>。</p>
+<blockquote>
+<p>这里最关键的就是 <code>Catalog</code>，下面单独讲。</p>
+</blockquote>
+<h4 id="catalog">Catalog</h4>
+<p>它维护当前数据库的目录信息，包括所有表信息(<strong>TableInfo</strong>)以及索引信息(<strong>IndexInfo</strong>)。Bustub 框架下，所有 Table/Index 都有一个唯一标识符 <code>table_oid</code> / <code>index_oid</code>，以及唯一的表名 <code>table_name</code> / 索引名 <code>index_name</code>，在 <code>Catalog</code> 中，可以通过这些标识符通过自带的 <code>GetTable()</code> / <code>GetIndex()</code> 函数来检索到信息。</p>
+<h5 id="tableinfo">TableInfo</h5>
+<p>特定 Table 的所有信息，包括：</p>
+<ul>
+<li><code>schema_</code>：表的输出模式，指明 Table 每一列的类型、列名；</li>
+<li><code>name_</code>：表名；</li>
+<li><code>table_</code>：指向 TableHeap，其实就是表在磁盘上的所有物理页面组成的双向链表；</li>
+<li><code>oid</code>：表标识符；</li>
+</ul>
+<h5 id="indexinfo">IndexInfo</h5>
+<p>某一 Table 上特定 Index 的所有信息，包括：</p>
+<ul>
+<li><code>key_schema_</code>：指明在哪些列（Key）上建立的 Index；</li>
+<li><code>name_</code>：索引名；</li>
+<li><code>index_</code>：指向对应索引的数据结构，这里是之前就实现过的 B+ 树；</li>
+<li><code>index_oid_</code>：索引标识符；</li>
+<li><code>table_name_</code>：索引所在表名；</li>
+</ul>
+<h4 id="plannode">PlanNode</h4>
+<p>当用户输入一句 SQL 查询时，SQL 层会先解析该语句，先生成一棵 AST 抽象语法树，接下来 Plan 层将该 AST 经过 Optimization 层优化后生成一棵 PlanNodeTree，指明该 SQL 语句应该以怎样的顺序从 Table 中获取数据.</p>
+<p>下图就是语句 <code>(SELECT * FROM table_1, table_2 WHERE colA = colB) GROUP BY colA;</code> 对应的 PNT：</p>
+<p><img src="image-20230112151707548.png" alt="image-20230112151707548" style="zoom:67%;" /></p>
+<blockquote>
+<p>在火山模型下，执行顺序为顺序扫描-&gt;嵌套循环连接-&gt;聚合</p>
+</blockquote>
+<p>PNT 上的所有 node 在执行层就对应了不同的 Operator，Operator 接收 Plan 作为参数，就知道自己的工作具体细节是什么。一个 Plan 根据类型不同，可能包含（但不限于）以下信息：</p>
+<ul>
+<li><code>output_schema_</code>：输出模式，规定了传递给上层算子的 Tuple 格式；</li>
+<li><code>children_</code>：子节点；</li>
+<li><code>expressions_</code>：用于筛选，像上面的 <code>ColA = ColB</code> 就是一个 Expression。其自身带有一个 <code>Evaluate()</code> 函数，接受一个 Tuple，并判断其是否满足条件。在 Join 操作中，其也有一个 <code>EvaluateJoin</code> 函数，适用于<code>xx join xx on (Expression)</code> 型的查询；</li>
+</ul>
+<h4 id="projection-执行过程">Projection 执行过程</h4>
+<p>Projection 操作实际上是语句 <code>SELECT col_name FROM table_name</code> 的具象化，在 PNT 中其接收 <code>SELECT</code> 部分对应算子返回表的所有 Tuple，然后选取 col_name 对应的列，构造新的 Tuple 进行返回。</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">bool</span> <span class="title">ProjectionExecutor::Next</span><span class="params">(Tuple *tuple, RID *rid)</span> </span>&#123;</span><br><span class="line">  Tuple child_tuple&#123;&#125;;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 从下层算子中获取一条 Tuple</span></span><br><span class="line">  <span class="type">const</span> <span class="keyword">auto</span> status = child_executor_-&gt;<span class="built_in">Next</span>(&amp;child_tuple, rid);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (!status) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;	<span class="comment">// 无法继续输出 Tuple，返回 false 告知上层终止调用</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Tuple 本质上是由 Value 数组构成，故需要从 child_tuple 中选取对应 Value 再进行构造</span></span><br><span class="line">  std::vector&lt;Value&gt; values&#123;&#125;;</span><br><span class="line">  values.<span class="built_in">reserve</span>(<span class="built_in">GetOutputSchema</span>().<span class="built_in">GetColumnCount</span>());</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">const</span> <span class="keyword">auto</span> &amp;expr : plan_-&gt;<span class="built_in">GetExpressions</span>()) &#123;</span><br><span class="line">    values.<span class="built_in">push_back</span>(expr-&gt;<span class="built_in">Evaluate</span>(&amp;child_tuple, child_executor_-&gt;<span class="built_in">GetOutputSchema</span>()));</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  *tuple = Tuple&#123;values, &amp;<span class="built_in">GetOutputSchema</span>()&#125;;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="task-1---access-method-executors">Task #1 - Access Method Executors</h3>
+<p>诸如上述 Projection 算子，只是对真实表中的 Tuple 副本进行一系列操作，并不涉及磁盘中的 TableHeap。本 Task 需要我们与 TableHeap 打交道，实现 SeqScan，Insert，Delete 这三个算子。</p>
+<h4 id="seqscan">SeqScan</h4>
+<p>对应 <code>SELECT * FROM table_name</code> 语句，需要获取 TableHeap 并从中读取所有 Tuple。</p>
+<p>ExecutorContext 所有算子都是一样的，先来看看 Plan 为我们提供的额外信息：</p>
+<ul>
+<li><code>table_oid_</code>：当需要对 Table 进行读写操作时提供，为 Operator 指明需要操作的 Table，从而通过 Catalog 索引到具体的物理页面；</li>
+<li><code>table_name_</code>：同上；</li>
+<li><code>filter_predicate_</code>：这是一个 Expression，如果在上述语句中加入 <code>WHERE ...</code>，则该值即为对应的运算表达式，用于利用 <code>Evaluate()</code> 过滤 Tuple；</li>
+</ul>
+<p>既然有了 table id，那 TableHeap 就能获取了，通过 Guide 可知，我们需要通过一个叫 <code>TableIterator</code> 的对象来迭代表中 Tuple，并且适当地利用 <code>filter_predicate_</code> 进行过滤，规则为：</p>
+<ol type="1">
+<li><p>若其为 <code>nullptr</code>，则不作过滤，直接返回 Tuple；</p></li>
+<li><p>反之，利用 <code>Evaluate()</code> 判断返回值。若为 <code>true</code>，则返回 Tuple，反之，跳过当前 Tuple，迭代器继续向前，重复之前的步骤；</p>
+<blockquote>
+<p>该函数返回值为 <code>Value</code> 类型（底层包括数据类型与值），在过滤条件的判断中，认为其返回 Value 具体类型为 <code>bool</code>，故可以通过 <code>GetAs&lt;bool&gt;()</code> 来获取具体值；</p>
+</blockquote></li>
+</ol>
+<h4 id="insertdelete">Insert/Delete</h4>
+<p>下层算子返回需要 Insert/Delete 的 Tuple。</p>
+<p>这里分别需要调用 TableHeap 中的 <code>InsertTuple()</code> 和 <code>MarkDelete()</code> 来进行实际的插入和删除。同时，所操作的 Table 可能建有索引，需要对所有建立好的 Index 调用 <code>InsertEntry()</code> 和 <code>DeleteEntry()</code> 操作。</p>
+<p>除了对表的操作，Task 还要求我们输出一共操作了多少条 Tuple。很容易想到在算子里定义一个计数器 <code>cnt_</code>，初始化为 0，之后每操作一次便自增一次，直至下层没有 Tuple 输出后再将 <code>cnt_</code> 包装为 <code>Value(INTEGER, cnt_)</code>，最后构造为 Tuple 进行返回。</p>
+<p>但有个测试点显示：如果没有任何操作，需返回 0。也就是说，对于下层不再返回元组的情况，不能简单返回 <code>false</code>，这样会导致 0 的情况不会输出——只有调用结果为 <code>true</code> 才会采用该 Tuple。</p>
+<p>考虑到这两个算子实际上是在单次 <code>Next()</code> 调用中就将所有操作完成，后续的调用直接返回 <code>false</code>，也就是说上层最多调用 Insert/Delete 算子的 <code>Next()</code> 两次。那么事情就好办了，我的做法是参考了 TEST-AND-SET 思想：定义了一个 <code>still_need_read</code> 变量，初始化为 <code>true</code>，然后</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="type">bool</span> res = still_need_read_;</span><br><span class="line"><span class="keyword">if</span> (still_need_read_) &#123;</span><br><span class="line">  still_need_read_ = <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">return</span> res;</span><br></pre></td></tr></table></figure>
+<p>从而保证首次调用无论是否有操作都必然返回 <code>true</code>。</p>
+<h4 id="indexscan">IndexScan</h4>
+<p>这个算子需要利用我们在 lab2 中实现的 B+ 树迭代器进行 Tuple 的获取。之前提到所有 leaf node 存的 kv 对中的 Value 都是 <code>RID</code>，故对于在某一列上作的索引，所有 Tuple 在该列上的值作为了 B+ 树的 Key，且根据索引的特性可知，这些值互不相同。</p>
+<p>根据 Guide，我们可以通过以下语句来将 Index 对象变为 B+ 树</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">tree_ = <span class="built_in">dynamic_cast</span>&lt;BPlusTreeIndexForOneIntegerColumn *&gt;(index_info_-&gt;index_.<span class="built_in">get</span>());</span><br></pre></td></tr></table></figure>
+<p>这个对象里面有一个函数为 <code>GetBeginIterator()</code>，用以初始化我们的 Iterator。接下来就是不断获取 rid，然后根据 rid 获取 Table 中对应的 Tuple。</p>
+<h3 id="task-2---aggregation-join-executors">Task #2 - Aggregation &amp; Join Executors</h3>
+<h4 id="aggregation">Aggregation</h4>
+<p>跟其余算子的流水线式运作不同，Aggregation 操作可以说是“Pipeline breaker”——对于一些诸如 <code>max()</code>，<code>sum()</code> 等的聚合函数，它们只能通过扫描全表来进行输出，而不能每取一个 Tuple 就能作出正确的判断。故这里我们的策略转变为：不断获取下层 Tuple，然后完善一个名为 <code>SimpleAggregationHashTable</code> 的对象，直至下层不再返回，此时利用构建好的聚合表，获取我们想要的聚合结果，根据输出模式构造 Tuple 并返回。</p>
+<blockquote>
+<p>相当于是最开始提到的方法 2 了。</p>
+</blockquote>
+<p>Plan 中为我们提供了如下新变量：</p>
+<ul>
+<li><code>group_bys_</code>：依次对应 SQL 语句中 <code>GROUP BY (Expression)</code> 中的表达式；</li>
+<li><code>aggregates_</code>：依次对应 SQL 语句中的待执行聚合函数的列表达式；</li>
+<li><code>agg_types_</code>：依次对应所有聚合类型；</li>
+</ul>
+<p>同时在 Plan 头文件中还为我们提供了 <code>AggregateKey</code> / <code>AggregateValue</code> 的类定义。前者就是 <code>group_bys_</code>，后者则是 <code>aggregates_</code>。当然，课程组已经为我们提供了根据 Tuple 构造这两个数据类型的函数，直接调用即可。</p>
+<p><code>SimpleAggregationHashTable</code> 是课程组专门为本算子提供的一个数据结构，可以视为一张常驻内存的哈希表，其底层采用 <code>std::unordered_map</code> 实现。整张表的数据排布如下图所示：</p>
+<blockquote>
+<p>以语句 <code>SELECT MAX(colB), COUNT(colC) FROM table1 GROUP BY colA;</code> 为例。</p>
+</blockquote>
+<p><img src="image-20230112224841085.png" alt="image-20230112224841085" style="zoom:67%;" /></p>
+<p>该数据结构的其余 api 都有现成的，同时还有一个 <code>SimpleAggregationHashTable::Iterator</code> 用来遍历表，我们要做的仅仅是完善 <code>CombineAggregateValues()</code> 函数。</p>
+<p>该函数会在聚合表的另一个函数 <code>InsertCombine()</code> 中被调用，简单来说就是根据输入的 <code>AggregateValue</code> 去更新聚合表中具体的聚合函数值。生成这些聚合函数值所使用的聚合函数与 <code>agg_types_</code> 一一对应，所以遍历时需要</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="type">uint32_t</span> i = <span class="number">0</span>; i &lt; agg_types_.<span class="built_in">size</span>(); i++) &#123;</span><br><span class="line">    <span class="keyword">switch</span>(agg_types_[i]) &#123;</span><br><span class="line">      <span class="comment">// 根据不同聚合类型采用不同方式更新聚合函数值</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>聚合类型有以下五种：</p>
+<ul>
+<li><p><strong>CountStarAggregate</strong>：对应 <code>Count(*)</code>。更新时直接加一。注意 Value 对象有自带的各种运算方法（<code>Add</code>，<code>Min</code>，<code>Max</code>），且参数也为 Value 类型，直接调用即可，注意需接受返回值，并不是真正修改了原值；</p>
+<blockquote>
+<p>整数“1”可以通过 <code>ValueFactory::GetIntegerValue(1)</code> 来转为 Value 类型。</p>
+</blockquote></li>
+<li><p><strong>CountAggregate</strong>：对应 <code>Count(col_name)</code>。仅当输入项对应的列非空时才加一。Guide Hint 中有提到：</p>
+<p><font color="grey"><strong>Hint:</strong> When performing aggregation on an empty table, <code>CountStarAggregate</code> should return zero and all other aggregate types should return <code>integer_null</code>. This is why <code>GenerateInitialAggregateValue</code> initializes most aggregate values as NULL.</font></p>
+<p>仔细观察 <code>GenerateInitialAggregateValue</code> 函数，会发现除了 CountStarAggregate 类型，其余所有聚合函数值都被初始化为了 NULL，而在 Value 类型中，其并非为 0。这就需要在更新聚合函数值时增加函数值当前是否为 NULL 的判断，下同；</p></li>
+<li><p><strong>SumAggregate</strong>：对应 <code>sum(col_name)</code>。也是要判断输入项是否非空，并且函数值是否为 NULL；</p></li>
+<li><p><strong>MinAggregate</strong>：对应 <code>min(col_name)</code>。同上；</p></li>
+<li><p><strong>MaxAggregate</strong>：对应 <code>max(col_name)</code>。同上；</p></li>
+</ul>
+<p>这里有个易错点需要注意，SQL 语句中是否有 <code>GROUP BY</code> 关键字需分情况讨论：</p>
+<ol type="1">
+<li>无。此时我们的输出 Tuple 只需包含 <code>aggregates_</code> 所对应的列即可，并且如果表为空，需生成一个完全初始化的 Tuple，这里需跟 Insert/Delete 一样采用 TEST-AND-SET 的手段；</li>
+<li>有。此时我们的输出 Tuple 不仅要包含 <code>aggregates_</code> 列，还需要在前面加上 <code>group_bys_</code> 列，这里就不需要考虑表是否为空的情况了，直接构造输出 Tuple，并在迭代器到达表 End 时返回 <code>false</code> 即可；</li>
+</ol>
+<h4 id="nestedloopjoin">NestedLoopJoin</h4>
+<p>嵌套循环连接的朴素思路很简单，对于外表每一个 Tuple，遍历内表中所有 Tuple，进行连接条件判断（即 <code>Expression.EvaluateJoin</code>），若满足条件则构造输出元组。但在火山模型下，每次调用只输出一个 Tuple，这就意味着我们需要保留一些信息，防止下次调用时 Tuple 顺序错乱。</p>
+<p>在 <code>Init()</code> 中就把所有输出 Tuple 构造好放到数组里，然后定义一个迭代器逐个输出是可以的，但这样就与火山模型的初衷背道而驰了。想要既能以正确顺序输出 Tuple，又满足流水线模式，就需要在算子内部存储外表 Tuple，并且在合适的时机对外表调用 <code>Next()</code>。</p>
+<p>此外，在本 lab 中，NLJ 算子仅支持内连接和左外连接，这两种连接方式有所不同：</p>
+<ul>
+<li>内连接时，如果外表 Tuple 找不到任何内表满足条件的 Tuple，则直接跳过该 Tuple；</li>
+<li>左外连接时，如果外表 Tuple 找不到任何内表满足条件的 Tuple，则输出 <code>&lt;outer_tuple, NULL&gt;</code> 形式的 Tuple；</li>
+</ul>
+<p>故需要一个变量 <code>join_empty</code> 来记录当前外表 Tuple 是否找到了相应内表 Tuple。</p>
+<p>代码框架大概长这样：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">  <span class="keyword">if</span> (next_) &#123;</span><br><span class="line">    <span class="keyword">if</span> (!outer_executor_-&gt;<span class="built_in">Next</span>(...)) &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    next_ = <span class="literal">false</span>;</span><br><span class="line">    join_empty_ = <span class="literal">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">while</span> (inner_executor_-&gt;<span class="built_in">Next</span>()) &#123;</span><br><span class="line">    <span class="keyword">if</span> (plan_-&gt;<span class="built_in">Predicate</span>().<span class="built_in">EvaluateJoin</span>(...).<span class="built_in">GetAs</span>&lt;<span class="type">bool</span>&gt;()) &#123;</span><br><span class="line">      join_empty_ = <span class="literal">false</span>;</span><br><span class="line">      <span class="comment">// 构造 Tuple</span></span><br><span class="line">      <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  next_ = <span class="literal">true</span>;			  <span class="comment">// 内表已经无法继续输出 Tuple，更新 next_</span></span><br><span class="line">  inner_executor.<span class="built_in">Init</span>();  <span class="comment">// 需定期初始化内表</span></span><br><span class="line">  <span class="keyword">if</span> (plan_-&gt;<span class="built_in">GetJoinType</span>() == JoinType::LEFT &amp;&amp; join_empty_) &#123;</span><br><span class="line">    <span class="comment">// 构造空值 Tuple</span></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line">    </span><br><span class="line">  <span class="comment">// INNER JOIN &amp;&amp; JOIN EMPTY，需要外表继续 Next()，故外层用 while(true)</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="nestedindexjoin">NestedIndexJoin</h4>
+<p>和 NLJ 思路大体一致，不同之处在于，内表相关的列已经建好了 Index，对于外表中的每一行 Tuple，我们需要利用外表对应的列通过 <code>key_predicate</code> 构建 probe key，从 Index 中获取相应内表的 RID，从而进一步去物理页面中获取 Tuple。</p>
+<p><code>key_predicate</code> 是一个 Expression 变量，利用 <code>Evaluate()</code> 找到传入 Tuple 中建立了索引的列上的 Value，然后再根据 <code>key_schema</code> 模式来构造元组。probe key 的构建大概长这样：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">probe_value = plan_-&gt;<span class="built_in">KeyPredicate</span>()-&gt;<span class="built_in">Evaluate</span>(&amp;outer_tuple_, outer_schema_);</span><br><span class="line">probe_key = <span class="built_in">Tuple</span>(&#123;probe_value&#125;, index_info_-&gt;index_-&gt;<span class="built_in">GetKeySchema</span>());</span><br></pre></td></tr></table></figure>
+<p>其余关于何时调用外表 <code>Next()</code> 以及连接类型的讨论同 NLJ。</p>
+<h3 id="task-3---sort-limit-executors-and-top-n-optimization">Task #3 - Sort + Limit Executors and Top-N Optimization</h3>
+<h4 id="sort">Sort</h4>
+<p>用于 <code>ORDER BY</code> 关键字，同时还规定了排序类型：<code>ASC</code> / <code>DeSC</code>。若没有明确表示，则默认为 <code>ASC</code>。</p>
+<p>Sort 也是个 Pipeline Breaker，因为其需要等到获取完所有 Tuple 再返回结果。于是乎，需要在算子中定义一个 Tuple 数组，在 <code>Init()</code> 阶段构建好以后，用一个迭代器逐个输出即可。</p>
+<p>构建的过程也很简单，不断调用下层算子获取 Tuple 后加入数组，然后调用 <code>std::sort()</code> 并自定义排序方法。对于每个 <code>ORDER BY</code> 对应的列，若相等则比较下一列，否则按照排序类型直接返回 true or false。由于不会出现完全相同的两行，故自定义排序方法必定能在 <code>for</code> 循环中退出。</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 自定义排序方法</span></span><br><span class="line">[&amp;](<span class="type">const</span> Tuple &amp;a, <span class="type">const</span> Tuple &amp;b) -&gt; <span class="type">bool</span> &#123;</span><br><span class="line">    <span class="type">bool</span> res = <span class="literal">false</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">const</span> <span class="keyword">auto</span> &amp;orderby : plan_-&gt;<span class="built_in">GetOrderBy</span>()) &#123;</span><br><span class="line">      AbstractExpression *expr = orderby.second.<span class="built_in">get</span>();</span><br><span class="line">      <span class="comment">// expr-&gt;Evaluate 返回的是 Tuple 在对应列下的 Value，利用 Value.Comparexxx 方法进行比较</span></span><br><span class="line">      <span class="keyword">if</span> (相等) &#123;</span><br><span class="line">        <span class="keyword">continue</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">if</span> (DESC) &#123;</span><br><span class="line">        res = a 的 Value &gt; b 的 Value</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        res = a 的 Value &lt; b 的 Value</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="limit">Limit</h4>
+<p>这个就更简单了，略。</p>
+<h4 id="top-n-optimization-rule">Top-N Optimization Rule</h4>
+<p>默认情况下，<code>ORDER BY col_name LIMIT n</code> 会先经过 Sort 算子，再经过 Limit 算子，如果 n &lt;&lt; Tuple 数量，则有相当一部分 Tuple 并没有参与到最终的输出，这显然是低效的，因为我们只需要 n 个结果。</p>
+<p>Top-N 将以上两个算子融合到一起，它动态维护当前所需的最多 n 条 Tuple，排序方式同 Sort 中讨论的那样。</p>
+<blockquote>
+<p>尽管这也需要下层算子返回所有 Tuple，但优势在于时空的开销——它本质上采用了类似于<strong>优先队列</strong>的方式，若 Tuple 数量为 N，则原先的 Sort+Limit 的方式需要 <span class="math inline">\(N\log(N)\)</span> 的时间开销，<span class="math inline">\(N\)</span> 的空间开销，而 Top-N 时空开销分别只需要 <span class="math inline">\(N\log(n)\)</span> 与 <span class="math inline">\(n\)</span>。</p>
+</blockquote>
+<p>与此同时，我们还要实现 Optimizer 中的 <code>sort_limit_as_topn</code> 优化策略，观察其它策略我们发现，都有这样一段代码:</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">std::vector&lt;AbstractPlanNodeRef&gt; children;</span><br><span class="line"><span class="keyword">for</span> (<span class="type">const</span> <span class="keyword">auto</span> &amp;child : plan-&gt;<span class="built_in">GetChildren</span>()) &#123;</span><br><span class="line">  children.<span class="built_in">emplace_back</span>(<span class="built_in">OptimizeSortLimitAsTopN</span>(child));</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">auto</span> optimized_plan = plan-&gt;<span class="built_in">CloneWithChildren</span>(std::<span class="built_in">move</span>(children));</span><br></pre></td></tr></table></figure>
+<p>易得 Bustub 的 Optimizer 采用后序遍历的方法，先优化下层算子，再逐个向上。</p>
+<p>需要注意的是 Top-N 优化有严格要求，必须是上层 Limit 下层 Sort 这样的形式才能进行优化。其余部分并不难。</p>
+<h3 id="leaderboard-task-optional">Leaderboard Task (Optional)</h3>
+<h4 id="query-1-wheres-the-index">Query 1: Where's the Index?</h4>
+<p>Guide 叽里呱啦讲了一堆，实际上就是让我们实现 Hash Join。思路很简单，构建一个哈希表，内外表在 Hash 函数下映射到同一个 HashKey 的进行 Join 即可。</p>
+<p>这里哈希表的数据结构设计其实可以完全照搬 Aggregation 里的那个哈希表。</p>
+<p>由于有左连接的设定，我选择用内表 Tuple 在 <code>Init()</code> 阶段构建哈希表，然后再用外表 Tuple 构建 HashJoinKey，到哈希表中进行查找。注意这里 HashJoinValue 应当为一个 Tuple 数组，毕竟内表的多个 Tuple 的 Hash 值可能会是相等的。</p>
+<p>此外，为了按序输出以及流水线运作，还需要在 HashJoinValue 中额外定义一个 <code>index_</code> 变量，表明当前 <code>Next()</code> 进行到哪一步了，这次应该挑选数组中哪一个 Tuple。在 <code>index_</code> 到达数组末尾后，外表才调用 <code>Next()</code>，并且 <code>index_</code> 需要初始化为 0——防止后续外表 Tuple 继续 Hash 到这个 HashJoinKey 上。</p>
+<p>关于左连接的特殊情况讨论同上。</p>
+<h4 id="query-2-too-many-joins">Query 2: Too Many Joins!</h4>
+<h4 id="query-3-the-mad-data-scientist">Query 3: The Mad Data Scientist</h4>
+<p>这两个时间原因没做，之后再更新。</p>
+<h3 id="总结">总结</h3>
+<p>火山模型的执行过程还是挺有意思的，整体实现起来也不难，更令人感到友好的是 Bustub 直接提供了所有 test sample，可以直接在本地运行并 debug，不需要到 GradeScope 上等了。</p>
+]]></content>
+      <categories>
+        <category>15445</category>
+      </categories>
+      <tags>
+        <tag>lab</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>15445project4</title>
+    <url>/15445/15445project4/</url>
+    <content><![CDATA[<p>接下来，需要完善对事务并发的支持。</p>
+<p><a href="https://15445.courses.cs.cmu.edu/fall2022/project4/">&gt;&gt;&gt; LAB 主页传送门 &lt;&lt;&lt;</a></p>
+<span id="more"></span>
+<h3 id="task-1---lock-manager">Task #1 - Lock Manager</h3>
+<p>LM 负责以五种不同的模式保持 Table 和 Tuple 两个粒度的锁：<code>IntensionShared(IS)</code>，<code>Shared(S)</code>，<code>IntensionExclusive(IX)</code>，<code>Exclusive(X)</code>，<code>SharedIntensionExclusive(SIX)</code>。LM 将处理来自事务的锁请求，向事务授予锁，并根据事务的隔离级别检查锁是否被适当释放。</p>
+<p>先来看看各个类的数据定义。</p>
+<h4 id="lockrequest">LockRequest</h4>
+<p>锁请求，包含请求事务的标识符 <code>txn_id</code>，待上锁 Table 标识符 <code>oid</code>，待上锁表行标识符 <code>rid</code>，本次请求的上锁类型 <code>lock_mode</code>，以及指明该请求是否授予的变量 <code>granted</code>。</p>
+<h4 id="lockrequestqueue">LockRequestQueue</h4>
+<p>将实际队列 <code>std::list&lt;std::shared_ptr&lt;LockRequest&gt;&gt;</code> 进行封装，额外添加了一把锁 <code>latch</code> 以及条件变量 <code>cv</code>，以便锁释放后通知其余等待中的锁。此外还有一个 <code>upgrading</code> 用来标识当前锁请求队列是否有锁正在进行升级。</p>
+<h4 id="lockmanager">LockManager</h4>
+<p>首先是定义了锁类型 <code>LockMode</code>，就是上面提到的 5 种。除此之外，还有以下变量：</p>
+<ul>
+<li><code>table_lock_map_</code>：每个 Table 都对应了一个锁请求队列，通过 table oid 获取；</li>
+<li><code>row_lock_map_</code>：每一 Row 同样也有一个锁请求队列，通过 rid 获取；</li>
+<li><code>waits_for_</code>：邻接表，表示某一事务正在等待的所有事务的集合，Task2 中会用到；</li>
+</ul>
+<p>还有以上每个变量对应的锁。</p>
+<h4 id="locktable-lockrow">LockTable() / LockRow()</h4>
+<p>⚠<font color=red><strong><em>在实现上锁过程之前，务必反复阅读并理解头文件中的 Lock Note。</em></strong></font></p>
+<p>表锁和行锁的上锁过程基本类似，行锁在上锁前多了一个所在表是否正确上锁的判断，其余一致。这里就先讲<strong>表锁</strong>的上锁流程。</p>
+<p>首先，判断以下三个变量是否兼容：</p>
+<ol type="1">
+<li><p><code>txn.TransactionState</code></p>
+<blockquote>
+<p>GROWING, SHRINKING, ABORTED, COMMITTED</p>
+</blockquote></li>
+<li><p><code>txn.IsolationLevel</code></p>
+<blockquote>
+<p>Bustub 只规定了 3 个隔离级别：</p>
+<ul>
+<li><code>READ_UNCOMMITTED</code>：该隔离级别下，不加 S 锁。会出现<strong>脏读</strong>问题，即会读到其它事务修改但未提交的数据；</li>
+<li><code>READ_COMMITTED</code>：该隔离级别下，读操作会加 S 锁，但单次读结束会直接释放 S 锁，并且即便在 SHRINKING 阶段也可以再次加 S 锁。解决脏读，但会出现<strong>不可重复读</strong>问题，即由于中途释放了锁，同一事务的两次读中间可能会出现其它事务的写操作，从而前后读到不同的数据；</li>
+<li><code>REPEATED_READ</code>：该隔离级别下，所有操作均遵循 2PL，支持所有上锁，但等到事务 ABORTED/COMMITTED 后才释放所有锁，解决不可重复读，但会出现<strong>幻读</strong>问题，例如第一个事务对一个表中的数据进行了修改，且涉及到表中的全部数据行，同时，第二个事务向该表中插入一行新数据，那么，第一个事务的用户之后就会发现表中还存在没有修改的数据行，仿佛出现幻觉。</li>
+</ul>
+</blockquote></li>
+<li><p><code>lock_mode</code></p></li>
+</ol>
+<p>具体规则如下：</p>
+<ol type="1">
+<li>如果 State 为 <code>ABORTED</code> / <code>COMMITTED</code>，则直接返回；</li>
+<li>如果 State 为 <code>GROWING</code>，IL 为 <code>READ_COMMITTED</code> 的事务不能上 S/IS/SIX 锁，否则抛出异常，其余上锁行为通过；</li>
+<li>如果 State 为 <code>SHRINKING</code>，只有 <code>READ_UNCOMMITTED</code> 能在此阶段上 S/IS/SIX 锁，其余所有上锁行为均抛出异常；</li>
+</ol>
+<p>接下来，尝试获取锁请求队列，并在获取到后立刻释放 <code>lock_map</code> 锁，紧接着尝试获取 <code>lock_request_queue</code> 的锁。</p>
+<p>接着，遍历队列，检查同一事务是否已经上过锁，若有，则认为这是一次<strong>锁升级尝试</strong>：如果已经有其它事务正在进行锁升级，则抛出异常，否则，如果升级未遵循如下规则，也要抛出异常。</p>
+<blockquote>
+<p>IS -&gt; [S, X, IX, SIX]</p>
+<p>S -&gt; [X, SIX]</p>
+<p>IX -&gt; [X, SIX]</p>
+<p>SIX -&gt; [X]</p>
+</blockquote>
+<p>检查通过后，需要将原来的锁取出队列，并修改事务维护的相应锁集合，再将新的锁请求插到等待区的最前面。Lock Note 中提到，锁升级是优先级最高的请求，故将其插到所有 <code>granted = false</code> 的请求中的第一个位置，以便前面不兼容的锁释放后，其能够最先被授予。</p>
+<blockquote>
+<p>原来的锁如果存在请求队列中，则必然已经授予，如若不然，事务不会退出，只会一直等待锁请求授予。</p>
+</blockquote>
+<p>当然，如果本次上锁并非锁升级，则将请求插到队列的末尾。</p>
+<p>插入请求后，就进入停等状态。这里就要用到 <code>lock_request_queue</code> 中的条件变量了，通过调用 <code>cv_.wait</code> 使得当前线程挂起，直到被唤醒，具体用法如下：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function">std::unique_lock&lt;std::mutex&gt; <span class="title">lock</span><span class="params">(lock_request_queue-&gt;latch_)</span></span>;	<span class="comment">// 必须为 unique_lock</span></span><br><span class="line"><span class="keyword">while</span>(!不满足授予条件) &#123;</span><br><span class="line">    lock_request_queue-&gt;cv_.<span class="built_in">wait</span>(lock);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>每次被唤醒，都会先检查授予条件是否满足，如果满足则直接退出循环，不再 <code>wait</code>。这里的授予条件是指，排在前面的所有锁（无论是否授予）的类型与其均兼容。只要有一个不兼容的锁，那就不满足条件。为了简化判断代码，我定义了一个锁兼容矩阵，如下所示：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">compatibility_matrix_[LockMode::SHARED][LockMode::SHARED] = <span class="literal">true</span>;</span><br><span class="line">compatibility_matrix_[LockMode::SHARED][LockMode::INTENTION_SHARED] = <span class="literal">true</span>;</span><br><span class="line">compatibility_matrix_[LockMode::SHARED][LockMode::EXCLUSIVE] = <span class="literal">false</span>;</span><br><span class="line">compatibility_matrix_[LockMode::SHARED][LockMode::INTENTION_EXCLUSIVE] = <span class="literal">false</span>;</span><br><span class="line">compatibility_matrix_[LockMode::SHARED][LockMode::SHARED_INTENTION_EXCLUSIVE] = <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">compatibility_matrix_[LockMode::INTENTION_SHARED][LockMode::SHARED] = <span class="literal">true</span>;</span><br><span class="line">compatibility_matrix_[LockMode::INTENTION_SHARED][LockMode::INTENTION_SHARED] = <span class="literal">true</span>;</span><br><span class="line">compatibility_matrix_[LockMode::INTENTION_SHARED][LockMode::EXCLUSIVE] = <span class="literal">false</span>;</span><br><span class="line">compatibility_matrix_[LockMode::INTENTION_SHARED][LockMode::INTENTION_EXCLUSIVE] = <span class="literal">true</span>;</span><br><span class="line">compatibility_matrix_[LockMode::INTENTION_SHARED][LockMode::SHARED_INTENTION_EXCLUSIVE] = <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line">compatibility_matrix_[LockMode::EXCLUSIVE][LockMode::SHARED] = <span class="literal">false</span>;</span><br><span class="line">compatibility_matrix_[LockMode::EXCLUSIVE][LockMode::INTENTION_SHARED] = <span class="literal">false</span>;</span><br><span class="line">compatibility_matrix_[LockMode::EXCLUSIVE][LockMode::EXCLUSIVE] = <span class="literal">false</span>;</span><br><span class="line">compatibility_matrix_[LockMode::EXCLUSIVE][LockMode::INTENTION_EXCLUSIVE] = <span class="literal">false</span>;</span><br><span class="line">compatibility_matrix_[LockMode::EXCLUSIVE][LockMode::SHARED_INTENTION_EXCLUSIVE] = <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">compatibility_matrix_[LockMode::INTENTION_EXCLUSIVE][LockMode::SHARED] = <span class="literal">false</span>;</span><br><span class="line">compatibility_matrix_[LockMode::INTENTION_EXCLUSIVE][LockMode::INTENTION_SHARED] = <span class="literal">true</span>;</span><br><span class="line">compatibility_matrix_[LockMode::INTENTION_EXCLUSIVE][LockMode::EXCLUSIVE] = <span class="literal">false</span>;</span><br><span class="line">compatibility_matrix_[LockMode::INTENTION_EXCLUSIVE][LockMode::INTENTION_EXCLUSIVE] = <span class="literal">true</span>;</span><br><span class="line">compatibility_matrix_[LockMode::INTENTION_EXCLUSIVE][LockMode::SHARED_INTENTION_EXCLUSIVE] = <span class="literal">false</span>;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>由于 <code>wait</code> 操作实际上是释放锁+挂起两个步骤，所以不用担心请求队列的 latch 出现死锁情况。而唤醒实际上也是执行一次获取锁的操作。</p>
+</blockquote>
+<p>最后就是授予锁了，将对应锁请求的 <code>granted</code> 改为 <code>true</code>，并修改事务维护的相应锁集合。如果这是一次锁升级请求，则说明升级完成，还需要修改请求队列的 <code>upgrading</code> 变量。</p>
+<h4 id="unlocktable-unlockrow">UnlockTable() / UnlockRow()</h4>
+<p>⚠<font color=red><strong><em>在实现解锁过程之前，务必反复阅读并理解头文件中的 Unlock Note。</em></strong></font></p>
+<p>解锁过程相比上锁过程简单许多，表锁和行锁的解锁流程也几乎一样，只是表锁在解锁时需要判断表中是否还有未解锁的行锁，其余一致。这里就先讲<strong>表锁</strong>的解锁流程。</p>
+<p>首先判断锁是否存在，如果不存在，则抛出异常。</p>
+<p>判断表中是否还有未解锁的行锁，如果有，则抛出异常。</p>
+<p>接下来就是获取锁请求队列，根据 <code>txn_id</code> 找到事务对应的那个锁请求，从队列中移除，修改事务维护的相应锁集合，然后利用 <code>cv_.notify_all()</code> 通知所有挂起的线程。由于同一个事务在同一个表/行上最多仅能上一把锁，所以不会出现两个相同 <code>txn_id</code> 的请求。</p>
+<h3 id="task-2---deadlock-detection">Task #2 - Deadlock Detection</h3>
+<p>死锁检测需要我们构建一个事务等待图，然后利用 DFS 算法检测环是否存在环，每次检测需打破所有环，并且 Aborted 环上 <code>txn_id</code> 最大的事务。</p>
+<p>由于要求我们每次需从 <code>txn_id</code> 最小的事务开始执行 DFS，并且在挑选邻居的时候也要按照 <code>txn_id</code> 递增的顺序，所以进行 <code>wait_for</code> 等待图构建的时候，每次添加边都需要找到合适的位置进行插入。</p>
+<p>另外，lab 要求我们在每次检测开始时进行图构建，检测完后再把图销毁，于是 <code>RunCycleDetection()</code> 函数就变成了</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">LockManager::RunCycleDetection</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">while</span> (enable_cycle_detection_) &#123;</span><br><span class="line">    std::this_thread::<span class="built_in">sleep_for</span>(cycle_detection_interval);</span><br><span class="line">    &#123;</span><br><span class="line">      waits_for_latch_.<span class="built_in">lock</span>();</span><br><span class="line">      <span class="built_in">MakeGraph</span>();</span><br><span class="line">      <span class="comment">// cycle detection</span></span><br><span class="line">      <span class="built_in">DestoryGraph</span>();</span><br><span class="line">      waits_for_latch_.<span class="built_in">unlock</span>();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>本 Task 的核心也显而易见，就是环检测算法了。</p>
+<p>这里易错点比较多，首先是 Guide 中 <code>txn_id</code> 前面的形容词 youngest 和 lowest 就傻傻分不清，实际上 youngest 指的就是 <code>txn_id</code> 大，因为 <code>txn_manager</code> 中是按照事务 id 递增来生成事务的，所以 <code>txn_id</code> 越大必然就越“年轻”嘛~</p>
+<p>第二，图上不一定只有一个连通分量，这是要小心的。</p>
+<p>第三，图上也不一定只有一个环，而我们需要打破所有环，所以这里要用一个 <code>while</code> 循环。</p>
+<p>其余的环路径的维护，点访问的去重，需要自己慢慢琢磨。</p>
+<p>在选出 youngest transaction 之后，要将其 Abort，并且以 LockManager 的名义通知所有锁等待队列。本来应该只通知该事务相关的队列即可，但我图省事，就直接全部通知一遍。事务在收到通知后，首先检查自身 State，如果变成了 <code>ABORTED</code>，则把队列中自己的锁请求给移除，并且再一次通知队列中的其它事务。</p>
+<blockquote>
+<p>这是因为排在后面的事务在被唤醒时可能先一步获取锁，检查前面所有锁兼容性失败后继续 wait，但实际上只要被 Aborted 的那个事务移除锁请求，后面事务就能获取锁了。</p>
+</blockquote>
+<h3 id="task-3---concurrent-query-execution">Task #3 - Concurrent Query Execution</h3>
+<p>在 lab3 中实现的 3 个与真实物理页面打交道的算子 SeqScan，Insert，Delete 中加上锁。并且根据上述讨论提到的不同隔离级别的不同表现进行额外的判断，难度不大，略。</p>
+<h3 id="总结">总结</h3>
+<p>本 lab 最大的收获就是理解了隔离级别以及锁类型之间的关系，以及死锁检测是如何进行的。</p>
+]]></content>
+      <categories>
+        <category>15445</category>
+      </categories>
+      <tags>
+        <tag>lab</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>C++ の Stream</title>
+    <url>/C/C-Stream/</url>
+    <content><![CDATA[<p>C++ 程序常用 <code>cin</code>，<code>cout</code> 进行标准 I/O（从键盘读取数据，或输出数据到屏幕），当然也可以进行文件 I/O （基于文件的数据读写）。这些行为本质上都是进行数据传输——数据向水流一样从一个地方流到另一个地方。C++11 中，将这些操作统一为“流(<strong>stream</strong>)”。</p>
+<span id="more"></span>
+<p>整个“流式家族”的类继承图长这样：</p>
+<p><img src="image-20230114162631819.png" alt="image-20230114162631819" style="zoom:67%;" /></p>
+<blockquote>
+<p>其中 istream 与 ostream 共同派生了 iostream，为了避免“菱形继承”，其对 ios 的继承采用虚继承。</p>
+</blockquote>
+<h2 id="抽象-io">抽象 I/O</h2>
+<h3 id="ios_base">ios_base</h3>
+<p>作为所有输入/输出流类的基类，维护多个数据如状态信息</p>
+<h4 id="iostate">iostate</h4>
+<p>静态变量，指定流状态标志，为 <strong>bit mask</strong>，即出现情况时将对应 bit 置位。有以下四种标志：</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">标志</th>
+<th style="text-align: center;">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><strong>goodbit</strong></td>
+<td style="text-align: center;">即 0x0，表示输入输出无错误</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>eofbit</strong></td>
+<td style="text-align: center;">表示操作已到达缓冲区末尾</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>failbit</strong></td>
+<td style="text-align: center;">表明出现了可挽回的失败操作，比如格式化错误</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>badbit</strong></td>
+<td style="text-align: center;">表明出现了无法挽回的致命错误</td>
+</tr>
+</tbody>
+</table>
+<h4 id="openmode">openmode</h4>
+<p>指定流打开标志，既可以是文件流也可以是字符串流，为 <strong>bit mask</strong>。有以下六种标志：</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">标志</th>
+<th style="text-align: center;">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><strong>app</strong></td>
+<td style="text-align: center;">每次写入前将指针定位到流结尾，append</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>binary</strong></td>
+<td style="text-align: center;">以二进制模式打开</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>in</strong></td>
+<td style="text-align: center;">以读模式打开</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>out</strong></td>
+<td style="text-align: center;">以写模式打开</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>trunc</strong></td>
+<td style="text-align: center;">在打开时清空流的内容，truncate</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>ate</strong></td>
+<td style="text-align: center;">将指针定位到流结尾处，at end</td>
+</tr>
+</tbody>
+</table>
+<h3 id="basic_ios">basic_ios</h3>
+<p>类模板，直接与缓冲区打交道，并提供若干 api。基于父类 ios_base 的状态标志，其提供了若干状态函数：</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">状态函数</th>
+<th style="text-align: center;">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><strong>good()</strong></td>
+<td style="text-align: center;">若流的 goodbit 置位，则返回 true</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>eof()</strong></td>
+<td style="text-align: center;">若流的 eofbit 置位，则返回 true</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>fail()</strong></td>
+<td style="text-align: center;">若流的 failbit 置位，则返回 true</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>bad()</strong></td>
+<td style="text-align: center;">若流的 badbit 置位，则返回 true</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>operator !</strong></td>
+<td style="text-align: center;">等同于 !fail()</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>operator bool</strong></td>
+<td style="text-align: center;">等同于 fail()</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>rdstate()</strong></td>
+<td style="text-align: center;">返回当前状态</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>setstate()</strong></td>
+<td style="text-align: center;">设置状态信息</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>clear()</strong></td>
+<td style="text-align: center;">清空状态信息</td>
+</tr>
+</tbody>
+</table>
+<h3 id="istream-ostream-iostream">istream / ostream / iostream</h3>
+<p>分别为用于输入与输出的流类，头文件 <code>&lt;iostream&gt;</code> 中定义了四个全局变量对象 <code>cin</code>，<code>cout</code>，<code>cerr</code>，<code>clog</code>。</p>
+<h4 id="cin">cin</h4>
+<p>标准输入流对象，主要用于标准输入，即键盘的输入。用户在键盘上敲入字符串后，需按下回车键后，该字符串才会进入所谓<strong>缓冲区</strong>的区域，并且回车会被转为换行符 <code>\n</code>。以 cin 为例，其读取数据就是从缓冲区获取数据，当缓冲区为空时，它会自我阻塞，直至用户将字符串冲入缓冲区。</p>
+<p>其输入函数主要有以下几种：</p>
+<h5 id="operator">operator &gt;&gt;</h5>
+<p>该函数原型有以下两种重载形式：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">basic_istream&amp; <span class="keyword">operator</span>&gt;&gt; ( Type&amp; value );              <span class="comment">// Type 特化为 int, short, char 等基本类型</span></span><br><span class="line">basic_istream&amp; <span class="keyword">operator</span>&gt;&gt; ( IOtype&amp; (func*)(IOtype&amp;) );	<span class="comment">// IOtype 主要指 istream 及其所有基类</span></span><br></pre></td></tr></table></figure>
+<p>第一种重载模式支持仅基本类型，而第二种重载模式参数为函数指针，常见有 I/O 操纵符，如 <code>std::boolalpha</code>。</p>
+<p>可以看到所有返回值类型都为引用，实际上返回值为自身引用 <code>*this</code>，这也很好的支持了连续输入：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">cin &gt;&gt; a &gt;&gt; b; <span class="comment">// 等价于 (cin.operator&gt;&gt;(a)).operator&gt;&gt;(b);</span></span><br></pre></td></tr></table></figure>
+<p>注意，当 cin 用运算符 <strong>&gt;&gt;</strong> 从缓冲区中读取数据时，会不断忽略并清除缓冲区开始的空白字符（空格、回车、制表符），直至读取成功，读取时也会将字符从缓冲区中取出。剩余部分残留在缓冲区中，不作处理。</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> a;</span><br><span class="line">    <span class="type">double</span> b;</span><br><span class="line">    std::string c;</span><br><span class="line">    std::cin &gt;&gt; a &gt;&gt; b &gt;&gt; c;</span><br><span class="line">    std::cout &lt;&lt; a &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; b &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; c &lt;&lt; std::endl;</span><br><span class="line">    std::cin &gt;&gt; c;</span><br><span class="line">    std::cout &lt;&lt; c;</span><br><span class="line">    <span class="keyword">return</span> EXIT_SUCCESS;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// input: [回车][回车]1 1.2 foo bar</span></span><br><span class="line"><span class="comment">// output: 1 1.2 foo[回车]bar</span></span><br><span class="line"><span class="comment">// 根据 output 的表现易得，第一个 cin 读至 &quot;foo&quot; 后的空格后暂停，此时缓冲区中剩下&#123;&#x27;b&#x27;, &#x27;a&#x27;, &#x27;r&#x27;&#125;，继续被第二个 cin 读取</span></span><br></pre></td></tr></table></figure>
+<h5 id="get">get</h5>
+<p>该函数主要有以下四种重载形式：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 从缓冲区中读并取出单个字符</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">get</span><span class="params">()</span></span>;</span><br><span class="line"><span class="function">basic_istream&amp; <span class="title">get</span><span class="params">( <span class="type">char</span>&amp; ch )</span></span>;</span><br></pre></td></tr></table></figure>
+<p>这两种形式均判断给定字符是否可用，若可用，第一种返回字符 ASCII 码值，否则返回 <code>Traits::eof()</code> 并设置 failbit 和 eofbit；第二种将字符赋给 ch，否则，返回 <code>Traits::eof()</code> 并设置 failbit 和 eofbit。</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 从缓冲区中读并取出多个字符，结束符会保留在缓冲区中</span></span><br><span class="line"><span class="function">basic_istream&amp; <span class="title">get</span><span class="params">( <span class="type">char</span>* s, std::streamsize count )</span></span>;             </span><br><span class="line"><span class="function">basic_istream&amp; <span class="title">get</span><span class="params">( <span class="type">char</span>* s, std::streamsize count, <span class="type">char</span> delim )</span></span>;</span><br></pre></td></tr></table></figure>
+<p>这两种形式均读取至多 <code>count-1</code> 个字符并将其存储到 s 中（字符串最后为 <code>\0</code>，下同），直至满足任一以下条件：</p>
+<ol type="1">
+<li>已读取 <code>count-1</code> 个字符；</li>
+<li>到达文件末尾，此时调用 <code>setstate(eofbit)</code>；</li>
+<li>下一个字符为结束符，第一种的结束符为 <code>\n</code>，第二种的结束符为用户指定字符 <code>delim</code>。此条件下，结束符会保留在缓冲区中；</li>
+</ol>
+<h5 id="getline">getline</h5>
+<p>该函数主要有以下两种重载形式，以及一个同名的全局函数：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 从缓冲区中读并取出多个字符</span></span><br><span class="line"><span class="function">basic_istream&amp; <span class="title">getline</span><span class="params">( <span class="type">char</span>* s, std::streamsize count )</span></span>;</span><br><span class="line"><span class="function">basic_istream&amp; <span class="title">getline</span><span class="params">( <span class="type">char</span>* s, std::streamsize count, <span class="type">char</span> delim )</span></span>;</span><br></pre></td></tr></table></figure>
+<p>这两种形式均读取至多 <code>count-1</code> 个字符并将其存储到 s 中，直至满足任一以下条件：</p>
+<ol type="1">
+<li>已读取 <code>count-1</code> 个字符；</li>
+<li>到达文件末尾，此时调用 <code>setstate(eofbit)</code>；</li>
+<li>下一个字符为结束符。此条件下，结束符会被取出；</li>
+</ol>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 从缓冲区中读并取出多个字符</span></span><br><span class="line"><span class="built_in">getline</span>( basic_istream&amp; input, string&lt;&amp; str );</span><br><span class="line"><span class="built_in">getline</span>( basic_istream&amp; input, string&lt;&amp; str, <span class="type">char</span> delim );</span><br></pre></td></tr></table></figure>
+<p>这两种形式均读取多个字符并将其存储到 s 中，直至满足任一以下条件：</p>
+<ol type="1">
+<li>到达文件末尾，此时调用 <code>setstate(eofbit)</code>；</li>
+<li>下一个字符为结束符。此条件下，结束符会被一并存入 <code>string</code> 中，再转换为 <code>\0</code>；</li>
+</ol>
+<h5 id="ignore">ignore</h5>
+<p>该函数原型为：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function">basic_istream&amp; <span class="title">ignore</span><span class="params">( std::streamsize count = <span class="number">1</span>, <span class="type">int</span> delim = Traits::eof() )</span></span>;</span><br></pre></td></tr></table></figure>
+<p>其从输入流中提取并舍弃元素，直至满足任一以下条件：</p>
+<ol type="1">
+<li>已提取 <code>count</code> 个字符。在 <code>count = std::numeric_limits&lt;std::stream_size&gt;::max()</code> 的特殊情况下忽略此条件；</li>
+<li>到达文件末尾，此时调用 <code>setstate(eofbit)</code>；</li>
+<li>遇到结束符。此条件下，ignore 会将结束符舍弃；</li>
+</ol>
+<p>根据这一特性，可以利用该函数来清空缓冲区。</p>
+<h4 id="cout">cout</h4>
+<p>标准输出流对象，主要用于标准输出，即将数据输出到屏幕上。</p>
+<p>其输出函数主要有以下几种：</p>
+<h5 id="operator-1">operator &lt;&lt;</h5>
+<p>该函数主要有以下两种重载形式：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">basic_istream&amp; <span class="keyword">operator</span>&lt;&lt; ( Type&amp; value );              <span class="comment">// Type 特化为 int, short, char 等基本类型</span></span><br><span class="line">basic_istream&amp; <span class="keyword">operator</span>&lt;&lt; ( IOtype&amp; (func*)(IOtype&amp;) );	<span class="comment">// IOtype 主要指 istream 及其所有基类</span></span><br></pre></td></tr></table></figure>
+<p>两种重载模式和 <code>cin.operator&gt;&gt;</code> 大体相同。</p>
+<h5 id="put">put</h5>
+<p>该函数原型为：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function">basic_ostream&amp; <span class="title">put</span><span class="params">( char_type ch )</span></span>;</span><br></pre></td></tr></table></figure>
+<p>写字符 <code>ch</code> 到输出流。若输出因任何原因失败，则调用 <code>setstate(badbit)</code>。</p>
+<h4 id="cerr">cerr</h4>
+<p>标准错误输出流，用于向屏幕输出出信息。</p>
+<h4 id="clog">clog</h4>
+<p>标准错误输出流，用于向屏幕输出日志信息。</p>
+<h2 id="字符串-io">字符串 I/O</h2>
+<h3 id="istringstream-ostringstream-stringstream">istringstream / ostringstream / stringstream</h3>
+<p>分别实现基于<strong>字符串</strong>的流输入与输出操作，可以直接以字符串为参数构造对象，同时也可以指定打开标志 <code>ios_base::openmode</code>。此外，也可以通过 <code>str()</code> 函数获取对象底层数据结构中的字符串，亦可以通过重载的 <code>str(std::string)</code> 函数修改底层字符串内容。</p>
+<p>下面是一个示例：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sstream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="function">std::istringstream <span class="title">iss</span><span class="params">(<span class="string">&quot;123 1.23 abc&quot;</span>)</span></span>;</span><br><span class="line">    </span><br><span class="line">    <span class="type">int</span> a;</span><br><span class="line">    <span class="type">double</span> b;</span><br><span class="line">    std::string c;</span><br><span class="line"></span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;before: &quot;</span> &lt;&lt; iss.<span class="built_in">str</span>() &lt;&lt; std::endl;  <span class="comment">// 利用 str() 获取流中字符串</span></span><br><span class="line">    iss &gt;&gt; a &gt;&gt; b &gt;&gt; c;</span><br><span class="line">    std::cout &lt;&lt; a &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; b &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; c &lt;&lt; std::endl;</span><br><span class="line"></span><br><span class="line">    iss.<span class="built_in">str</span>(<span class="string">&quot;456 4.56 def&quot;</span>);                            <span class="comment">// 利用 str(string) 修改流中字符串</span></span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;after: &quot;</span> &lt;&lt; iss.<span class="built_in">str</span>() &lt;&lt; std::endl;</span><br><span class="line">    iss &gt;&gt; a &gt;&gt; b &gt;&gt; c;</span><br><span class="line">    std::cout &lt;&lt; a &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; b &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; c &lt;&lt; std::endl;</span><br><span class="line">    </span><br><span class="line">    <span class="function">std::ostringstream <span class="title">oss1</span><span class="params">(<span class="string">&quot;foo&quot;</span>, std::ios_base::ate)</span></span>;  <span class="comment">// 指定打开模式，指针定位到末尾</span></span><br><span class="line">    std::cout &lt;&lt; oss1.<span class="built_in">str</span>() &lt;&lt; std::endl;</span><br><span class="line"></span><br><span class="line">    <span class="function">std::ostringstream <span class="title">oss2</span><span class="params">(<span class="string">&quot;foo&quot;</span>)</span></span>;                      <span class="comment">// 控制变量</span></span><br><span class="line">    oss2 &lt;&lt; <span class="string">&quot;bar&quot;</span>;</span><br><span class="line">    std::cout &lt;&lt; oss2.<span class="built_in">str</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> EXIT_SUCCESS;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>最后输出如下：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">before: <span class="number">123</span> <span class="number">1.23</span> abc</span><br><span class="line"><span class="number">123</span> <span class="number">1.23</span> abcabc</span><br><span class="line">after: <span class="number">456</span> <span class="number">4.56</span> def</span><br><span class="line"><span class="number">123</span> <span class="number">1.23</span> abc</span><br><span class="line">foobar</span><br><span class="line">bar</span><br></pre></td></tr></table></figure>
+<h2 id="文件-io">文件 I/O</h2>
+<h3 id="ifstream-ofstream-fstream">ifstream / ofstream / fstream</h3>
+<p>分别实现基于<strong>文件</strong>的流输入与输出操作，通过文件名构造对象，同时也可以指定打开标志 <code>ios_base::openmode</code>。通过 <code>open()</code> / <code>close()</code> 来打开/取消关联文件，并可以通过 <code>is_open()</code> 检查流是否有关联文件。</p>
+<h2 id="io-操纵符">I/O 操纵符</h2>
+<p>操纵符是令代码能以 <code>operator&lt;&lt;</code> 或 <code>operator&gt;&gt;</code> 控制流输入/输出格式的帮助函数，相当于一个“开关”。其函数原型统一如下：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function">std::ios_base&amp; <span class="title">CONTROL_TYPE</span><span class="params">( std::ios_base&amp; str )</span></span>;</span><br></pre></td></tr></table></figure>
+<h3 id="endl">endl</h3>
+<p>此为仅用于输出的控制符，其函数原型为：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">template</span>&lt; <span class="keyword">class</span> CharT, <span class="keyword">class</span> Traits &gt;</span></span><br><span class="line"><span class="function">std::basic_ostream&lt;CharT, Traits&gt;&amp; <span class="title">endl</span><span class="params">( std::basic_ostream&lt;CharT, Traits&gt;&amp; os )</span></span>;</span><br></pre></td></tr></table></figure>
+<p>其作用为将换行符插入输出流。效果等同于 <code>\n</code>，但开销相对而言更高。</p>
+<h3 id="boolalpha-noboolalpha">boolalpha / noboolalpha</h3>
+<p><code>boolalpha</code> 启用流中的布尔控制开关，表现为：</p>
+<ul>
+<li>输入流中将 <code>true</code> 解析为真值，其余均为非真值；</li>
+<li>输出流中将所有真值表达为 <code>true</code>，非真值为 <code>false</code>。</li>
+</ul>
+<p>而 <code>noboolalpha</code> 则关闭这一开关。示例如下：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sstream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 修改输出</span></span><br><span class="line">    std::cout &lt;&lt; std::boolalpha &lt;&lt; <span class="string">&quot;boolalpha: &quot;</span> &lt;&lt; <span class="literal">true</span> &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; <span class="literal">false</span> &lt;&lt; std::endl;</span><br><span class="line">    std::cout &lt;&lt; std::noboolalpha &lt;&lt; <span class="string">&quot;noboolalpha: &quot;</span> &lt;&lt; <span class="literal">true</span> &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt;  <span class="literal">false</span> &lt;&lt; std::endl;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 解析输入</span></span><br><span class="line">    <span class="type">bool</span> b1, b2;</span><br><span class="line">    <span class="function">std::istringstream <span class="title">iss</span><span class="params">(<span class="string">&quot;true false&quot;</span>)</span></span>;</span><br><span class="line">    iss &gt;&gt; std::boolalpha &gt;&gt; b1 &gt;&gt; b2;</span><br><span class="line">    std::cout &lt;&lt; iss.<span class="built_in">str</span>() &lt;&lt; <span class="string">&quot;: &quot;</span> &lt;&lt; b1 &lt;&lt; <span class="string">&#x27; &#x27;</span> &lt;&lt; b2;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> EXIT_SUCCESS;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出为：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">boolalpha: <span class="literal">true</span> <span class="literal">false</span></span><br><span class="line">noboolalpha: <span class="number">1</span> <span class="number">0</span></span><br><span class="line"><span class="literal">true</span> <span class="literal">false</span>: <span class="number">1</span> <span class="number">0</span></span><br></pre></td></tr></table></figure>
+<h3 id="skipws-noskipws">skipws / noskipws</h3>
+<p><code>skipws</code> 默认为开启状态，使得输入流跳过前导空白字符；而使用 <code>noskipws</code> 后不会跳过。示例：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sstream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">char</span> c1, c2, c3;</span><br><span class="line">    std::<span class="built_in">istringstream</span>(<span class="string">&quot;a b c&quot;</span>) &gt;&gt; c1 &gt;&gt; c2 &gt;&gt; c3;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;skipws: &quot;</span> &lt;&lt; c1 &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; c2 &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; c3 &lt;&lt; std::endl;</span><br><span class="line">    std::<span class="built_in">istringstream</span>(<span class="string">&quot;a b c&quot;</span>) &gt;&gt; std::noskipws &gt;&gt; c1 &gt;&gt; c2 &gt;&gt; c3;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;noskipws: &quot;</span> &lt;&lt; c1 &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; c2 &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; c3;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出为：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">skipws: a b c</span><br><span class="line">noskipws: a   b</span><br></pre></td></tr></table></figure>
+<h3 id="oct-dec-hex">oct / dec / hex</h3>
+<p>开启后修改输入输出数的进制表示，分别对应八/十/十六进制。示例：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sstream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 修改输出</span></span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;octal:   &quot;</span> &lt;&lt; std::oct &lt;&lt; <span class="number">42</span> &lt;&lt; std::endl;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;decimal: &quot;</span> &lt;&lt; std::dec &lt;&lt; <span class="number">42</span> &lt;&lt; std::endl;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;hex:     &quot;</span> &lt;&lt; std::hex &lt;&lt; <span class="number">42</span> &lt;&lt; std::endl;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 解析输入</span></span><br><span class="line">    <span class="type">int</span> n;</span><br><span class="line">    std::<span class="built_in">istringstream</span>(<span class="string">&quot;2A&quot;</span>) &gt;&gt; std::hex &gt;&gt; n;</span><br><span class="line">    std::cout &lt;&lt; std::dec &lt;&lt; <span class="string">&quot;hex to dec: &quot;</span> &lt;&lt; n &lt;&lt; std::endl;</span><br><span class="line">    std::cout &lt;&lt; std::oct &lt;&lt; <span class="string">&quot;hex to oct: &quot;</span> &lt;&lt; n;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出为：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">octal:   <span class="number">52</span></span><br><span class="line">decimal: <span class="number">42</span></span><br><span class="line">hex:     <span class="number">2</span>a</span><br><span class="line">hex to dec: <span class="number">42</span></span><br><span class="line">hex to oct: <span class="number">52</span></span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>C++</category>
+      </categories>
+      <tags>
+        <tag>C++11</tag>
+      </tags>
+  </entry>
 </search>

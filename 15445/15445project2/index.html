@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/largeicon.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/smallicon.jpg">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"leager-zju.github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"b2t":true},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="到目前为止，咱们已经完成了存储与索引部分的功能实现，接下来就进入执行层面的内容了。 &gt;&gt;&gt; LAB 主页传送门 &lt;&lt;&lt;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="15445 Project#2 B+ Tree">
+<meta property="og:url" content="http://leager-zju.github.com/15445/15445project2/index.html">
+<meta property="og:site_name" content="没什么看头的地方">
+<meta property="og:description" content="到目前为止，咱们已经完成了存储与索引部分的功能实现，接下来就进入执行层面的内容了。 &gt;&gt;&gt; LAB 主页传送门 &lt;&lt;&lt;">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://leager-zju.github.com/15445/15445project2/image-20230111164135789.png">
+<meta property="article:published_time" content="2023-01-10T13:42:57.000Z">
+<meta property="article:modified_time" content="2023-01-14T10:19:42.043Z">
+<meta property="article:author" content="Leager">
+<meta property="article:tag" content="lab">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://leager-zju.github.com/15445/15445project2/image-20230111164135789.png">
+
+<link rel="canonical" href="http://leager-zju.github.com/15445/15445project2/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>15445 Project#2 B+ Tree | 没什么看头的地方</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">没什么看头的地方</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里可能没有你想看的...</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于我</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">6</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">6</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">37</span></a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/15445/15445project2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/Avatar.jpg">
+      <meta itemprop="name" content="Leager">
+      <meta itemprop="description" content="【数据删除】">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="没什么看头的地方">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          15445 Project#2 B+ Tree
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-01-10 21:42:57" itemprop="dateCreated datePublished" datetime="2023-01-10T21:42:57+08:00">2023-01-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-01-14 18:19:42" itemprop="dateModified" datetime="2023-01-14T18:19:42+08:00">2023-01-14</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/15445/" itemprop="url" rel="index"><span itemprop="name">15445</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>到目前为止，咱们已经完成了存储与索引部分的功能实现，接下来就进入执行层面的内容了。</p>
+<p><a target="_blank" rel="noopener" href="https://15445.courses.cs.cmu.edu/fall2022/project2/">&gt;&gt;&gt; LAB 主页传送门 &lt;&lt;&lt;</a></p>
+<span id="more"></span>
+<h3 id="task-1---btree-pages">Task #1 - B+Tree Pages</h3>
+<p>首先，在本 lab 中，B+ 树的所有节点都以 <code>BPlusTreePage</code> 即页的形式存在，其包含若干元数据。其中，根据所处位置不同，B+ 树的节点又分为内部节点(<strong>Internal node</strong>)与叶节点(<strong>Leaf node</strong>)。B+ 树的特点就是 internal node 仅用于索引，leaf node 存放真实数据，故这两者的键值对类型略有不同：</p>
+<ol type="1">
+<li>前者（<code>BPlusTreeInternalPage</code>）的 Value 为 child node 的索引；</li>
+<li>后者（<code>BPlusTreeLeafPage</code>）的 Value 为元组 RID。</li>
+</ol>
+<p>这便是第一个 Task 的主要任务——完善这三个数据结构。</p>
+<h4 id="bplustreepage">BPlusTreePage</h4>
+<p>基类，包含一些公共变量。</p>
+<h5 id="成员变量">成员变量</h5>
+<ul>
+<li><code>page_type_</code>：指明该节点为内部节点还是叶节点，无需强转后判断；</li>
+<li><code>lsn_</code>：事务序列号，lab 4 中用到；</li>
+<li><code>size_</code>：当前存放的键值对数量；</li>
+<li><code>max_size_</code>：当前节点能容纳的最大键值对数量；</li>
+<li><code>parent_page_id_</code>：父节点 page_id，用于查找父节点；</li>
+<li><code>page_id_</code>：自身所处 Page 对象的 page_id；</li>
+</ul>
+<p>这些变量，或者说信息，都是 internal page 和 leaf page 共有的，这总共 <strong>24B</strong> 的不包含键值对的信息被称为 <strong>HEADER</strong>。</p>
+<p>其相关的成员函数实现起来也比较简单，不再赘述。</p>
+<p>btw，尽管名字里都带个 “Page”，但 lab1 和 lab2 的 “Page” 其实是不同的，<code>BPlusTreePage</code> 实际上对应了 BPM 里面 Page 对象的 <code>data_</code> 部分，因此在访问节点时，首先通过 BPM.FetchPage 方法获取 Page 对象，再将其 <code>data_</code> 部分 <code>reinterpret_cast</code> 为 <code>BPlusTreePage</code>，最后根据对应的 <code>page_type_</code> 强转为 Internal/Leaf page。具体数据排布如下图所示：</p>
+<p><img src="image-20230111164135789.png" alt="image-20230111164135789" style="zoom:60%;" /></p>
+<p>HEADER 内的 <code>page_id</code> 实际上和外层 Page 对象的 <code>page_id</code> 是相等的。</p>
+<h4 id="bplusinternalpage">BPlusInternalPage</h4>
+<p>内部节点，不存放数据，仅用于索引，且 m 个 Key 对应 m+1 个 Child。基于 lab1 BPM 的实现，所有的 node 都可以通过 page_id 来进行获取，故这里的索引实际上就是 child node 对应的 page_id。</p>
+<p>关于其成员函数的实现，除了原本给的，我还添加了以下函数：</p>
+<ol type="1">
+<li><code>Insert(const KeyType &amp;key, const ValueType &amp;value, int index)</code>：在 index 处插入 kv 对，后面所有 kv 对后移一位；</li>
+<li><code>Remove(int index)</code>：移除 index 处的 kv 对，后面所有元素前移一位；</li>
+</ol>
+<p>这在后续 BPlusTree 的 Insert/Remove 的实现中比较重要。当然，<code>BPlusLeafPage</code> 类中也包含以上两个方法。</p>
+<h4 id="bplusleafpage">BPlusLeafPage</h4>
+<p>叶节点，存放实际数据，且 m 个 Key 对应 m 个 Value。</p>
+<p>根据 B+ 树的性质，所有叶节点同时以链表形式排布，从而支持 range-search。故 leaf page 的 HEADER 还要加上 4B 的 next_page_id，以索引到下一个叶节点。如果是最右边那个叶节点，则该变量为 <code>INVALID_PAGE_ID</code>。</p>
+<h3 id="task-2---btree-data-structure">Task #2 - B+Tree Data Structure</h3>
+<p>本 Task 是本 lab 的核心部分，也是最难的部分，相比于 Task1 仅仅是实现各节点的数据结构，Task2 就要开始真正手撕 B+ 树了。</p>
+<h4 id="getvaluekey">GetValue(Key)</h4>
+<p>查操作较为简单，只需根据 Key 从根节点开始不断往下走即可，重点在于找 child，而不涉及多余的操作。根据 B+ 树的特性，对于 <span class="math inline">\(Page\_id_i\)</span> 对应节点为根的子树中，所有 key <span class="math inline">\(K\)</span> 均满足 <span class="math inline">\(Key_i \leq K &lt; Key_{i+1}\)</span>，且作索引的内部节点的第一个 Key 不参与比较。故查找子节点 page_id 所在索引的函数可以实现为：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">GetChildPageIndex</span><span class="params">(InternalPage *internal_node, <span class="type">const</span> KeyType &amp;key)</span> </span>&#123;</span><br><span class="line">  <span class="type">int</span> child_index;</span><br><span class="line">  <span class="keyword">for</span> (child_index = <span class="number">0</span>; child_index &lt; internal_node-&gt;<span class="built_in">GetSize</span>() - <span class="number">1</span>; child_index++) &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">comparator_</span>(key, internal_node-&gt;<span class="built_in">KeyAt</span>(child_index + <span class="number">1</span>)) == <span class="number">-1</span>) &#123;</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> child_index;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="insertkey-value">Insert(Key, Value)</h4>
+<p>B+ 树的插入规则如下：</p>
+<ol type="1">
+<li><p>若整棵树为空，则新建 root node 并作为 leaf node，进行插入；</p></li>
+<li><p>反之，根据 key 找到相应的叶节点 <strong>src</strong>，直接插入，注意叶节点的所有 kv 对均按照 key 递增排序；</p></li>
+<li><p>若插入后 src 满足 split 条件，进行 <strong>node split</strong>：</p>
+<ol type="1">
+<li><p>新建一个节点 <strong>sibling</strong>；</p>
+<blockquote>
+<p>这里注意，新建 <code>BPlusTreePage</code> 对象后必须调用其 <code>Init()</code> 函数来初始化其元数据。</p>
+</blockquote></li>
+<li><p>将 src 中的后一半 kv 对迁移到 sibling 中，若 src 为叶节点，则还需要修改 src 和 sibling 的 next page id；</p></li>
+<li><p>若 src 同时也是 root node，则创建一个新的根节点 new root node，插入一个新条目；</p></li>
+<li><p>反之，在其 parent 中插入一个新条目；</p></li>
+</ol></li>
+<li><p>若 parent 因 child split 行为而导致其满足 split 条件，则继续进行 node split，直至不再满足 split 条件；</p></li>
+</ol>
+<blockquote>
+<p>split 条件：</p>
+<ol type="1">
+<li>对于 leaf node，在插入后 size = max_size；</li>
+<li>对于 internal node，在插入后 size &gt; max_size；</li>
+</ol>
+</blockquote>
+<p>实际上 Insert 是一个递归行为，每选择一个 child，就是对一棵新的 B+ 树进行 Insert 操作，故在我的实现中，定义了一个名为 <code>bool RecursivelyInsert(Key, Value, Root)</code> 的函数，其返回值表示的含义为：若为 <code>true</code>，则说明 child 满足 split 条件，由 parent 来执行 child node split，最后告知 parent 的 “grandparent” 其是否满足 split 条件；反之，此节点不进行任何操作，直接返回 <code>false</code>。</p>
+<p>在 <code>Insert()</code> 中调用 <code>RecursivelyInsert()</code> 实际上是对 root 进行递归插入，所以如果返回值为 true，需要进行 root 的 split，相比其它节点而言多了一个新建 new root node 的操作。</p>
+<blockquote>
+<p>有个需要注意的点是，这里的 B+ 树仅支持 <strong>unique key</strong>，对相同 key 的重复插入会被认为是插入失败。</p>
+</blockquote>
+<p>基于上述讨论，总体过程大概如下所示：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">bool</span> <span class="title">Insert</span><span class="params">(<span class="type">const</span> KeyType &amp;key, <span class="type">const</span> ValueType &amp;value)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (<span class="built_in">IsEmpty</span>()) &#123;</span><br><span class="line">    <span class="comment">// 新建 root node 后直接插入</span></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="type">bool</span> need_split = <span class="built_in">RecursivelyInsert</span>(key, value, root_node);</span><br><span class="line">  <span class="keyword">if</span> (need_split) &#123;</span><br><span class="line">    <span class="comment">// 1. 新建 new root node 和 sibling node</span></span><br><span class="line">    <span class="comment">// 2. 若为叶节点，需修改 next_page_id</span></span><br><span class="line">    <span class="comment">// 3. 移动一半 kv 对</span></span><br><span class="line">    <span class="comment">// 4. 插入新条目</span></span><br><span class="line">    <span class="comment">// 5. 修改 root_page_id_</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> success;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">RecursivelyInsert</span><span class="params">(<span class="type">const</span> KeyType &amp;key, <span class="type">const</span> ValueType &amp;value, BPlusTreePage *cur_node)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (cur_node-&gt;<span class="built_in">IsLeafPage</span>()) &#123;</span><br><span class="line">    <span class="comment">// 直接插入 leaf node</span></span><br><span class="line">    <span class="keyword">return</span> leaf_node-&gt;<span class="built_in">GetSize</span>() &gt;= leaf_node-&gt;<span class="built_in">GetMaxSize</span>();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="type">bool</span> res = <span class="literal">false</span>;</span><br><span class="line">  <span class="type">bool</span> need_split = <span class="built_in">RecursivelyInsert</span>(key, value, child_node);</span><br><span class="line">  <span class="keyword">if</span> (need_split) &#123;</span><br><span class="line">    <span class="comment">// 1. 新建 sibling node</span></span><br><span class="line">    <span class="comment">// 2. 若为叶节点，需修改 next_page_id</span></span><br><span class="line">    <span class="comment">// 3. 移动一半 kv 对</span></span><br><span class="line">    <span class="comment">// 4. 插入新条目</span></span><br><span class="line">    res = cur_node-&gt;<span class="built_in">GetSize</span>() &gt; cur_node-&gt;<span class="built_in">GetMaxSize</span>();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="removekey">Remove(Key)</h4>
+<p>删除规则和插入大体类似：</p>
+<ol type="1">
+<li>根据 key 找到相应的叶节点 <strong>src</strong>；</li>
+<li>若删除后 src 满足 merge 条件，则进行 <strong>node merge</strong>：
+<ol type="1">
+<li>先看看自己的左右兄弟中任何一个是否能借一个 kv 对，条件是其借出后不会使得自身满足 merge 条件；</li>
+<li>若能借到，则修改 parent 相应条目；</li>
+<li>反之，挑选一个 sibling，将它俩合并，规则为，右侧的 node 将其所有 kv 对迁移到左侧的 node 中，并删除 parent 中相应条目；</li>
+</ol></li>
+<li>若父节点因 child merge 行为而导致其满足 merge 条件，则继续进行 node merge，直至不再满足 merge 条件；</li>
+</ol>
+<blockquote>
+<p>merge 条件：</p>
+<ol type="1">
+<li>对于 root node
+<ol type="1">
+<li>若为 leaf node，删除后 size = 0；</li>
+<li>若为 internal node，删除后 size = 1；</li>
+</ol></li>
+<li>对于非 root node
+<ol type="1">
+<li>若为 leaf node，删除后 size &lt; min_size；</li>
+<li>若为 internal node，删除后 size &lt;= min_size；</li>
+</ol></li>
+</ol>
+<blockquote>
+<p>min_size = max_size / 2</p>
+</blockquote>
+</blockquote>
+<p>它同样是个递归行为，我也定义了一个 <code>RecursivelyRemove()</code> 函数，流程和 insert 大体一致，不同之处在于 sibling 的挑选，需要考虑当前 child 是否为 parent 最左侧/最右侧的 child。</p>
+<h3 id="task-3---index-iterator">Task #3 - Index Iterator</h3>
+<p>这一 Task 相对而言简单许多，首先需要我们完善 <code>IndexIterator</code> 类，实现其四个运算符（<code>*</code>, <code>++</code>, <code>==</code>, <code>!=</code>）以及一个 <code>IsEnd()</code> 函数，还需要我们完善 <code>BPlusTreePage</code> 类中的 <code>Begin()</code> 与 <code>End()</code> 函数，其分别返回一个 <code>IndexIterator</code>。总体而言还是不难的。</p>
+<h4 id="indexiterator">IndexIterator</h4>
+<p>由于 <code>IndexIterator</code> 是遍历 leaf node 的迭代器，故需要记录当前 kv 对的一些信息，如所在的 leaf page 以及当前 kv 对所在下标，即：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">BPlusTreeLeafPage&lt;KeyType, ValueType, KeyComparator&gt; *cur_page_;</span><br><span class="line"><span class="type">int</span> cur_index_;</span><br></pre></td></tr></table></figure>
+<p><code>IsEnd()</code> 只需判断当前 Page 指针是否为 <code>nullptr</code> 即可。</p>
+<p><code>==</code> 运算符不仅需要判断两个迭代器所处的 Page 的 page_id 及 index 是否相等，还需要在最开始加上 IsEnd() 的判断。</p>
+<h4 id="begin-end">Begin / End</h4>
+<p><code>Begin</code> 有两个重载函数，一个是无参 <code>Begin()</code>，只要找到 B+ 树中最左边那个叶节点即可。</p>
+<p>另一个是 <code>Begin(Key)</code>，返回的 <code>IndexIterator</code> 需满足对应的 key <span class="math inline">\(K &lt;= Key\)</span>，这与之前实现的 <code>GetValue</code> 有异曲同工之妙。</p>
+<h3 id="task-4---concurrent-index">Task #4 - Concurrent Index</h3>
+<p>这一 Task 要求我们在原先的基础上，令 B+ 树支持并发操作，这里需要用到的一个思路就是 <strong>Lock Crabbing</strong>。</p>
+<p>如果要实现不冲突的并发操作，最朴素的想法是从 root 开始，一直到 leaf 这条路径上的所有 node 依次上锁，完成递归操作后依次解锁，直至所有锁都释放。</p>
+<p>但这样就将并发变成了纯粹的 Serialized Operation，还不如直接对整个 B+ 树上一把大锁。实际上有些 node 可能并不需要这把锁，也就是说事务的这次 Insert/Remove 操作并不会对该 node 造成任何影响，完全可以直接解锁，让其它事务尽快获得该 node 上的锁，从而提高吞吐率。而对于 GetValue 操作，目的是读取 leaf node 上的数据，internal node 在索引完后就失去了其作用，因此也可以直接解锁。</p>
+<p>那么问题来了，如何判断当前 node 需不需要提早解锁呢？在 B+ 树中，如果一个 node 无论是否 Insert/Remove 某一 kv 对都不满足 split/merge 条件，那么其 parent 也不会因为本次操作而改变自身所存放的 kv 对数量，我们就认为这样一个 node 是 <strong>Safe</strong> 的。如果在 Insert/Remove 操作中，某一 node 所引导的 child node 是 safe 的，那么无论什么情况，本次操作都不会对该 node 及其所有祖先产生影响，可以直接解除从 root 到该 node 的所有锁。</p>
+<p>于是之前的 Insert/Remove 操作流程就变成了：</p>
+<ol type="1">
+<li>找到 child node；</li>
+<li>判断是否 safe，若是，则解锁，反之，等待操作结束后马上要退出递归了再解锁；</li>
+<li>对 child node 进行递归操作；</li>
+<li>操作结束后，根据是否提前解锁来判断此时是否需要解锁；</li>
+<li>返回至上层；</li>
+</ol>
+<blockquote>
+<p>不能直接通过判断 child node 是否 safe 来判断有无提早解锁，因为 child node 可能在操作的过程中 size 发生了改变。实际上，Insert/Remove 函数的参数中有一个名为 <code>Transaction</code> 的变量，其内部有一个双端队列(<strong>std::deque</strong>)用来维护持有锁的情况，从队首到队尾依次为 root 到 leaf 这条路径上的所有 <code>BPlusTreePage</code>，提前解锁相当于 <code>pop_front()</code>。而当操作结束后，若当前锁队列非空，说明未提前解锁，故需要解锁，相当于 <code>pop_back()</code>。</p>
+<p>这样加就能够保证递归返回时，所有子孙后代都已经解锁，若当前锁队列非空，说明当前 node 一直到 leaf 这条路径上都没发生过提前解锁事件，队列末端必定为当前 node。</p>
+</blockquote>
+<p>我这里是上了一把大锁，防止 root node 出现改变的情况，在锁队列中表现为一个空指针，即如果待解锁页面为 <code>nullptr</code>，则说明需要把大锁给解锁了。</p>
+<p>当然也可以改为持续获取 root node，直至其为真正的 root node（事务首次访问到 root 时尝试上锁，然后等待至持有时 root 可能已经发生变化，即当前 node 已不为 root，需要重复之前的操作），但经过分析，这和上一把大锁没有区别：</p>
+<ol type="1">
+<li>若 root 不会发生变化，说明到 leaf 的这条路径上必然有一个 node 是 safe 的，会直接将大锁解除；</li>
+<li>反之，大锁会在 root page id 完成更新后解除，若采用法 2，解锁时机并没有发生变化，下一个事务依然会在同一时刻获取到最新 root node 的锁；</li>
+</ol>
+<h3 id="总结">总结</h3>
+<p>课程组很贴心地为我们提供了 <strong>b_plus_tree_printer</strong> 这样的工具，生成 <code>.dot</code> 文件后可以直接复制到<a target="_blank" rel="noopener" href="http://dreampuf.github.io/GraphvizOnline/">这个网站</a>上进行图像生成。当然，也可以<a target="_blank" rel="noopener" href="https://15445.courses.cs.cmu.edu/fall2022/bpt-printer/">直接在浏览器上运行命令行</a>。将 B+ 树可视化，更方便我们 debug。</p>
+<p><a target="_blank" rel="noopener" href="https://www.cs.usfca.edu/~galles/visualization/BPlusTree.html">这个网站</a>也为我们提供了 B+ 树各个操作的可视化过程，适合入门学习。</p>
+<p>本 lab 的实现难度还是挺大的，debug 过程非常吃力，尤其是 GradeScope 不提供测试代码，打印 LOG 还有概率发生 error，跟 6.824 直接公开测试用例的做法比起来还是对小白恶意更大一些，不过手撕完 B+ 树的那种神清气爽还是前所未有的。</p>
+<p>当然，还是要善用 BUSTUB_ASSERT 进行防御性编程。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/lab/" rel="tag"># lab</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/15445/15445project1/" rel="prev" title="15445 Project#1 Buffer Pool">
+      <i class="fa fa-chevron-left"></i> 15445 Project#1 Buffer Pool
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/15445/15445project3/" rel="next" title="15445 Project#3 Query Execution">
+      15445 Project#3 Query Execution <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#task-1---btree-pages"><span class="nav-text">Task #1 - B+Tree Pages</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#bplustreepage"><span class="nav-text">BPlusTreePage</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%88%90%E5%91%98%E5%8F%98%E9%87%8F"><span class="nav-text">成员变量</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#bplusinternalpage"><span class="nav-text">BPlusInternalPage</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#bplusleafpage"><span class="nav-text">BPlusLeafPage</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#task-2---btree-data-structure"><span class="nav-text">Task #2 - B+Tree Data Structure</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#getvaluekey"><span class="nav-text">GetValue(Key)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#insertkey-value"><span class="nav-text">Insert(Key, Value)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#removekey"><span class="nav-text">Remove(Key)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#task-3---index-iterator"><span class="nav-text">Task #3 - Index Iterator</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#indexiterator"><span class="nav-text">IndexIterator</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#begin-end"><span class="nav-text">Begin &#x2F; End</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#task-4---concurrent-index"><span class="nav-text">Task #4 - Concurrent Index</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Leager"
+      src="/images/Avatar.jpg">
+  <p class="site-author-name" itemprop="name">Leager</p>
+  <div class="site-description" itemprop="description">【数据删除】</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Leager-zju" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Leager-zju" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div>
+<span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("09/25/2022 00:00:00");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "本站已存活 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+    }
+setInterval("createtime()",250);
+</script>
+</div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Leager</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,0' opacity='0.5' zIndex='-1' count='160' src="//cdn.jsdelivr.net/gh/theme-next/theme-next-canvas-nest@1.0.0/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>
