@@ -3427,6 +3427,10 @@ S\Lambda
 <h4 id="绝望之墙">绝望之墙</h4>
 <video src="bnbq.webm" position="absolute" width="100%" height="100%" controls="controls">
 </video>
+<h3 id="盼盼">盼盼</h3>
+<h4 id="大三元">大三元</h4>
+<video src="dsy.webm" position="absolute" width="100%" height="100%" controls="controls">
+</video>
 ]]></content>
   </entry>
   <entry>
@@ -3925,7 +3929,7 @@ S\Lambda
       </tags>
   </entry>
   <entry>
-    <title>15445project4</title>
+    <title>15445 Project#4 Concurrency Control</title>
     <url>/15445/15445project4/</url>
     <content><![CDATA[<p>接下来，需要完善对事务并发的支持。</p>
 <p><a href="https://15445.courses.cs.cmu.edu/fall2022/project4/">&gt;&gt;&gt; LAB 主页传送门 &lt;&lt;&lt;</a></p>
@@ -4049,24 +4053,57 @@ S\Lambda
 <tbody>
 <tr class="odd">
 <td style="text-align: center;"><strong>goodbit</strong></td>
-<td style="text-align: center;">即 0x0，表示输入输出无错误</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;"><strong>eofbit</strong></td>
-<td style="text-align: center;">表示操作已到达缓冲区末尾</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;"><strong>failbit</strong></td>
-<td style="text-align: center;">表明出现了可挽回的失败操作，比如格式化错误</td>
+<td style="text-align: center;"><strong>0x0</strong>，表示输入输出无错误</td>
 </tr>
 <tr class="even">
 <td style="text-align: center;"><strong>badbit</strong></td>
-<td style="text-align: center;">表明出现了无法挽回的致命错误</td>
+<td style="text-align: center;"><strong>0x1</strong>，表明出现了无法挽回的致命错误</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>eofbit</strong></td>
+<td style="text-align: center;"><strong>0x2</strong>，表示操作已到达缓冲区末尾</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>failbit</strong></td>
+<td style="text-align: center;"><strong>0x4</strong>，表明出现了可挽回的失败操作，比如格式化错误（如试图读取整数变量却遇到字母）</td>
+</tr>
+</tbody>
+</table>
+<p>当非 goodbit 状态位被打开时，一切读取会被阻塞。</p>
+<h4 id="fmtflags">fmtflags</h4>
+<p>指定流格式控制标志，为 <strong>bit mask</strong>。通过 <code>setf()</code> / <code>unsetf()</code> 函数进行开关。常见有以下五种标志：</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">标志</th>
+<th style="text-align: center;">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><strong>boolalpha</strong></td>
+<td style="text-align: center;"><strong>0x1</strong>，控制 <code>true</code> / <code>false</code> 与真值/非真值的互相解析</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>dec</strong></td>
+<td style="text-align: center;"><strong>0x2</strong>，修改输出数据为十进制表示</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>hex</strong></td>
+<td style="text-align: center;"><strong>0x8</strong>，修改输出数据为十六进制表示</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>oct</strong></td>
+<td style="text-align: center;"><strong>0x40</strong>，修改输出数据为八进制表示</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>skipws</strong></td>
+<td style="text-align: center;"><strong>0x1000</strong>，默认为开启状态，使得输入流跳过前导空白字符</td>
 </tr>
 </tbody>
 </table>
 <h4 id="openmode">openmode</h4>
-<p>指定流打开标志，既可以是文件流也可以是字符串流，为 <strong>bit mask</strong>。有以下六种标志：</p>
+<p>指定流打开标志，为 <strong>bit mask</strong>。有以下六种标志：</p>
 <table>
 <thead>
 <tr class="header">
@@ -4077,27 +4114,31 @@ S\Lambda
 <tbody>
 <tr class="odd">
 <td style="text-align: center;"><strong>app</strong></td>
-<td style="text-align: center;">每次写入前将指针定位到流结尾，append</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;"><strong>binary</strong></td>
-<td style="text-align: center;">以二进制模式打开</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;"><strong>in</strong></td>
-<td style="text-align: center;">以读模式打开</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;"><strong>out</strong></td>
-<td style="text-align: center;">以写模式打开</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;"><strong>trunc</strong></td>
-<td style="text-align: center;">在打开时清空流的内容，truncate</td>
+<td style="text-align: center;"><strong>0x1</strong>，每次写入前将指针定位到流结尾，即 append</td>
 </tr>
 <tr class="even">
 <td style="text-align: center;"><strong>ate</strong></td>
-<td style="text-align: center;">将指针定位到流结尾处，at end</td>
+<td style="text-align: center;"><strong>0x2</strong>，将指针定位到流结尾处，即 at end</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>bin</strong></td>
+<td style="text-align: center;"><strong>0x4</strong>，以二进制模式打开，即 binary</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>in</strong></td>
+<td style="text-align: center;"><strong>0x8</strong>，以读模式打开</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>out</strong></td>
+<td style="text-align: center;"><strong>0x10</strong>，以写模式打开</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>trunc</strong></td>
+<td style="text-align: center;"><strong>0x20</strong>，在打开时清空流的内容，即 truncate</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
 </tr>
 </tbody>
 </table>
@@ -4156,7 +4197,7 @@ S\Lambda
 <p>其输入函数主要有以下几种：</p>
 <h5 id="operator">operator &gt;&gt;</h5>
 <p>该函数原型有以下两种重载形式：</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">basic_istream&amp; <span class="keyword">operator</span>&gt;&gt; ( Type&amp; value );              <span class="comment">// Type 特化为 int, short, char 等基本类型</span></span><br><span class="line">basic_istream&amp; <span class="keyword">operator</span>&gt;&gt; ( IOtype&amp; (func*)(IOtype&amp;) );	<span class="comment">// IOtype 主要指 istream 及其所有基类</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">std::basic_istream&amp; <span class="keyword">operator</span>&gt;&gt; ( Type&amp; value );                   <span class="comment">// Type 特化为 int, short, char 等基本类型</span></span><br><span class="line">std::basic_istream&amp; <span class="keyword">operator</span>&gt;&gt; ( std::IOtype&amp; (func*)(IOtype&amp;) ); <span class="comment">// IOtype 主要指 istream 及其所有基类</span></span><br></pre></td></tr></table></figure>
 <p>第一种重载模式支持仅基本类型，而第二种重载模式参数为函数指针，常见有 I/O 操纵符，如 <code>std::boolalpha</code>。</p>
 <p>可以看到所有返回值类型都为引用，实际上返回值为自身引用 <code>*this</code>，这也很好的支持了连续输入：</p>
 <figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">cin &gt;&gt; a &gt;&gt; b; <span class="comment">// 等价于 (cin.operator&gt;&gt;(a)).operator&gt;&gt;(b);</span></span><br></pre></td></tr></table></figure>
@@ -4164,9 +4205,9 @@ S\Lambda
 <figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> a;</span><br><span class="line">    <span class="type">double</span> b;</span><br><span class="line">    std::string c;</span><br><span class="line">    std::cin &gt;&gt; a &gt;&gt; b &gt;&gt; c;</span><br><span class="line">    std::cout &lt;&lt; a &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; b &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; c &lt;&lt; std::endl;</span><br><span class="line">    std::cin &gt;&gt; c;</span><br><span class="line">    std::cout &lt;&lt; c;</span><br><span class="line">    <span class="keyword">return</span> EXIT_SUCCESS;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// input: [回车][回车]1 1.2 foo bar</span></span><br><span class="line"><span class="comment">// output: 1 1.2 foo[回车]bar</span></span><br><span class="line"><span class="comment">// 根据 output 的表现易得，第一个 cin 读至 &quot;foo&quot; 后的空格后暂停，此时缓冲区中剩下&#123;&#x27;b&#x27;, &#x27;a&#x27;, &#x27;r&#x27;&#125;，继续被第二个 cin 读取</span></span><br></pre></td></tr></table></figure>
 <h5 id="get">get</h5>
 <p>该函数主要有以下四种重载形式：</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 从缓冲区中读并取出单个字符</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">get</span><span class="params">()</span></span>;</span><br><span class="line"><span class="function">basic_istream&amp; <span class="title">get</span><span class="params">( <span class="type">char</span>&amp; ch )</span></span>;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 从缓冲区中读并取出单个字符</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">get</span><span class="params">()</span></span>;</span><br><span class="line"><span class="function">std::basic_istream&amp; <span class="title">get</span><span class="params">( <span class="type">char</span>&amp; ch )</span></span>;</span><br></pre></td></tr></table></figure>
 <p>这两种形式均判断给定字符是否可用，若可用，第一种返回字符 ASCII 码值，否则返回 <code>Traits::eof()</code> 并设置 failbit 和 eofbit；第二种将字符赋给 ch，否则，返回 <code>Traits::eof()</code> 并设置 failbit 和 eofbit。</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 从缓冲区中读并取出多个字符，结束符会保留在缓冲区中</span></span><br><span class="line"><span class="function">basic_istream&amp; <span class="title">get</span><span class="params">( <span class="type">char</span>* s, std::streamsize count )</span></span>;             </span><br><span class="line"><span class="function">basic_istream&amp; <span class="title">get</span><span class="params">( <span class="type">char</span>* s, std::streamsize count, <span class="type">char</span> delim )</span></span>;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 从缓冲区中读并取出多个字符，结束符会保留在缓冲区中</span></span><br><span class="line"><span class="function">std::basic_istream&amp; <span class="title">get</span><span class="params">( <span class="type">char</span>* s, std::streamsize count )</span></span>;             </span><br><span class="line"><span class="function">std::basic_istream&amp; <span class="title">get</span><span class="params">( <span class="type">char</span>* s, std::streamsize count, <span class="type">char</span> delim )</span></span>;</span><br></pre></td></tr></table></figure>
 <p>这两种形式均读取至多 <code>count-1</code> 个字符并将其存储到 s 中（字符串最后为 <code>\0</code>，下同），直至满足任一以下条件：</p>
 <ol type="1">
 <li>已读取 <code>count-1</code> 个字符；</li>
@@ -4175,14 +4216,14 @@ S\Lambda
 </ol>
 <h5 id="getline">getline</h5>
 <p>该函数主要有以下两种重载形式，以及一个同名的全局函数：</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 从缓冲区中读并取出多个字符</span></span><br><span class="line"><span class="function">basic_istream&amp; <span class="title">getline</span><span class="params">( <span class="type">char</span>* s, std::streamsize count )</span></span>;</span><br><span class="line"><span class="function">basic_istream&amp; <span class="title">getline</span><span class="params">( <span class="type">char</span>* s, std::streamsize count, <span class="type">char</span> delim )</span></span>;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 从缓冲区中读并取出多个字符</span></span><br><span class="line"><span class="function">std::basic_istream&amp; <span class="title">getline</span><span class="params">( <span class="type">char</span>* s, std::streamsize count )</span></span>;</span><br><span class="line"><span class="function">std::basic_istream&amp; <span class="title">getline</span><span class="params">( <span class="type">char</span>* s, std::streamsize count, <span class="type">char</span> delim )</span></span>;</span><br></pre></td></tr></table></figure>
 <p>这两种形式均读取至多 <code>count-1</code> 个字符并将其存储到 s 中，直至满足任一以下条件：</p>
 <ol type="1">
 <li>已读取 <code>count-1</code> 个字符；</li>
 <li>到达文件末尾，此时调用 <code>setstate(eofbit)</code>；</li>
 <li>下一个字符为结束符。此条件下，结束符会被取出；</li>
 </ol>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 从缓冲区中读并取出多个字符</span></span><br><span class="line"><span class="built_in">getline</span>( basic_istream&amp; input, string&lt;&amp; str );</span><br><span class="line"><span class="built_in">getline</span>( basic_istream&amp; input, string&lt;&amp; str, <span class="type">char</span> delim );</span><br></pre></td></tr></table></figure>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 从缓冲区中读并取出多个字符</span></span><br><span class="line">std::<span class="built_in">getline</span>( std::basic_istream&amp; input, std::string&amp; str );</span><br><span class="line">std::<span class="built_in">getline</span>( std::basic_istream&amp; input, std::string&amp; str, <span class="type">char</span> delim );</span><br></pre></td></tr></table></figure>
 <p>这两种形式均读取多个字符并将其存储到 s 中，直至满足任一以下条件：</p>
 <ol type="1">
 <li>到达文件末尾，此时调用 <code>setstate(eofbit)</code>；</li>
@@ -4190,7 +4231,7 @@ S\Lambda
 </ol>
 <h5 id="ignore">ignore</h5>
 <p>该函数原型为：</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function">basic_istream&amp; <span class="title">ignore</span><span class="params">( std::streamsize count = <span class="number">1</span>, <span class="type">int</span> delim = Traits::eof() )</span></span>;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function">std::basic_istream&amp; <span class="title">ignore</span><span class="params">( std::streamsize count = <span class="number">1</span>, <span class="type">int</span> delim = Traits::eof() )</span></span>;</span><br></pre></td></tr></table></figure>
 <p>其从输入流中提取并舍弃元素，直至满足任一以下条件：</p>
 <ol type="1">
 <li>已提取 <code>count</code> 个字符。在 <code>count = std::numeric_limits&lt;std::stream_size&gt;::max()</code> 的特殊情况下忽略此条件；</li>
@@ -4203,11 +4244,11 @@ S\Lambda
 <p>其输出函数主要有以下几种：</p>
 <h5 id="operator-1">operator &lt;&lt;</h5>
 <p>该函数主要有以下两种重载形式：</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">basic_istream&amp; <span class="keyword">operator</span>&lt;&lt; ( Type&amp; value );              <span class="comment">// Type 特化为 int, short, char 等基本类型</span></span><br><span class="line">basic_istream&amp; <span class="keyword">operator</span>&lt;&lt; ( IOtype&amp; (func*)(IOtype&amp;) );	<span class="comment">// IOtype 主要指 istream 及其所有基类</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">std::basic_istream&amp; <span class="keyword">operator</span>&lt;&lt; ( Type&amp; value );                   <span class="comment">// Type 特化为 int, short, char 等基本类型</span></span><br><span class="line">std::basic_istream&amp; <span class="keyword">operator</span>&lt;&lt; ( std::IOtype&amp; (func*)(IOtype&amp;) ); <span class="comment">// IOtype 主要指 istream 及其所有基类</span></span><br></pre></td></tr></table></figure>
 <p>两种重载模式和 <code>cin.operator&gt;&gt;</code> 大体相同。</p>
 <h5 id="put">put</h5>
 <p>该函数原型为：</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function">basic_ostream&amp; <span class="title">put</span><span class="params">( char_type ch )</span></span>;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function">std::basic_ostream&amp; <span class="title">put</span><span class="params">( <span class="type">char</span> ch )</span></span>;</span><br></pre></td></tr></table></figure>
 <p>写字符 <code>ch</code> 到输出流。若输出因任何原因失败，则调用 <code>setstate(badbit)</code>。</p>
 <h4 id="cerr">cerr</h4>
 <p>标准错误输出流，用于向屏幕输出出信息。</p>
@@ -4215,17 +4256,23 @@ S\Lambda
 <p>标准错误输出流，用于向屏幕输出日志信息。</p>
 <h2 id="字符串-io">字符串 I/O</h2>
 <h3 id="istringstream-ostringstream-stringstream">istringstream / ostringstream / stringstream</h3>
-<p>分别实现基于<strong>字符串</strong>的流输入与输出操作，可以直接以字符串为参数构造对象，同时也可以指定打开标志 <code>ios_base::openmode</code>。此外，也可以通过 <code>str()</code> 函数获取对象底层数据结构中的字符串，亦可以通过重载的 <code>str(std::string)</code> 函数修改底层字符串内容。</p>
+<p>分别实现基于<strong>字符串</strong>的流输入与输出操作，可以直接以字符串为参数构造对象，同时也可以指定打开标志 <code>std::ios_base::openmode</code>。此外，也可以通过 <code>str()</code> 函数获取对象底层数据结构中的字符串，亦可以通过重载的 <code>str(std::string)</code> 函数修改底层字符串内容。</p>
 <p>下面是一个示例：</p>
 <figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sstream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="function">std::istringstream <span class="title">iss</span><span class="params">(<span class="string">&quot;123 1.23 abc&quot;</span>)</span></span>;</span><br><span class="line">    </span><br><span class="line">    <span class="type">int</span> a;</span><br><span class="line">    <span class="type">double</span> b;</span><br><span class="line">    std::string c;</span><br><span class="line"></span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;before: &quot;</span> &lt;&lt; iss.<span class="built_in">str</span>() &lt;&lt; std::endl;  <span class="comment">// 利用 str() 获取流中字符串</span></span><br><span class="line">    iss &gt;&gt; a &gt;&gt; b &gt;&gt; c;</span><br><span class="line">    std::cout &lt;&lt; a &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; b &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; c &lt;&lt; std::endl;</span><br><span class="line"></span><br><span class="line">    iss.<span class="built_in">str</span>(<span class="string">&quot;456 4.56 def&quot;</span>);                            <span class="comment">// 利用 str(string) 修改流中字符串</span></span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;after: &quot;</span> &lt;&lt; iss.<span class="built_in">str</span>() &lt;&lt; std::endl;</span><br><span class="line">    iss &gt;&gt; a &gt;&gt; b &gt;&gt; c;</span><br><span class="line">    std::cout &lt;&lt; a &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; b &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; c &lt;&lt; std::endl;</span><br><span class="line">    </span><br><span class="line">    <span class="function">std::ostringstream <span class="title">oss1</span><span class="params">(<span class="string">&quot;foo&quot;</span>, std::ios_base::ate)</span></span>;  <span class="comment">// 指定打开模式，指针定位到末尾</span></span><br><span class="line">    std::cout &lt;&lt; oss1.<span class="built_in">str</span>() &lt;&lt; std::endl;</span><br><span class="line"></span><br><span class="line">    <span class="function">std::ostringstream <span class="title">oss2</span><span class="params">(<span class="string">&quot;foo&quot;</span>)</span></span>;                      <span class="comment">// 控制变量</span></span><br><span class="line">    oss2 &lt;&lt; <span class="string">&quot;bar&quot;</span>;</span><br><span class="line">    std::cout &lt;&lt; oss2.<span class="built_in">str</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> EXIT_SUCCESS;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>最后输出如下：</p>
 <figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">before: <span class="number">123</span> <span class="number">1.23</span> abc</span><br><span class="line"><span class="number">123</span> <span class="number">1.23</span> abcabc</span><br><span class="line">after: <span class="number">456</span> <span class="number">4.56</span> def</span><br><span class="line"><span class="number">123</span> <span class="number">1.23</span> abc</span><br><span class="line">foobar</span><br><span class="line">bar</span><br></pre></td></tr></table></figure>
+<p>这里不难发现，stringstream 提供了一种将字符串转化为其他不同数据类型的新方式。</p>
 <h2 id="文件-io">文件 I/O</h2>
 <h3 id="ifstream-ofstream-fstream">ifstream / ofstream / fstream</h3>
-<p>分别实现基于<strong>文件</strong>的流输入与输出操作，通过文件名构造对象，同时也可以指定打开标志 <code>ios_base::openmode</code>。通过 <code>open()</code> / <code>close()</code> 来打开/取消关联文件，并可以通过 <code>is_open()</code> 检查流是否有关联文件。</p>
+<p>分别实现基于<strong>文件</strong>的流输入与输出操作，通过文件名构造对象，同时也可以指定打开标志 <code>std::ios_base::openmode</code>。通过 <code>open()</code> / <code>close()</code> 来打开/取消关联文件，并可以通过 <code>is_open()</code> 检查流是否有关联文件。</p>
 <h2 id="io-操纵符">I/O 操纵符</h2>
 <p>操纵符是令代码能以 <code>operator&lt;&lt;</code> 或 <code>operator&gt;&gt;</code> 控制流输入/输出格式的帮助函数，相当于一个“开关”。其函数原型统一如下：</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function">std::ios_base&amp; <span class="title">CONTROL_TYPE</span><span class="params">( std::ios_base&amp; str )</span></span>;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function">std::ios_base&amp; <span class="title">std::CONTROL_TYPE</span><span class="params">( std::ios_base&amp; str )</span></span>;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>这些操纵符的函数名与 <code>ios_base</code> 类中的 <code>fmtflags</code> 标志名几乎一致，但所处命名空间不同：操纵符直接在 <code>std</code> 下，而 <code>fmtflags</code> 在 <code>std::ios_base</code> 下。</p>
+</blockquote>
+<p>传入 <code>operator&lt;&lt;</code> 或 <code>operator&gt;&gt;</code> 后，实际行为如下所示：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 以 std::cin 为例</span></span><br><span class="line"><span class="keyword">operator</span>&gt;&gt; (std::CONTROL_TYPE) &#123;</span><br><span class="line">    std::<span class="built_in">CONTROL_TYPE</span>(*<span class="keyword">this</span>);  <span class="comment">// 对 *this 进行一些流控制比特位的设置，效果等同于 cin.setf(std::ios_base::CONTROL_TYPE)</span></span><br><span class="line">    <span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h3 id="endl">endl</h3>
 <p>此为仅用于输出的控制符，其函数原型为：</p>
 <figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">template</span>&lt; <span class="keyword">class</span> CharT, <span class="keyword">class</span> Traits &gt;</span></span><br><span class="line"><span class="function">std::basic_ostream&lt;CharT, Traits&gt;&amp; <span class="title">endl</span><span class="params">( std::basic_ostream&lt;CharT, Traits&gt;&amp; os )</span></span>;</span><br></pre></td></tr></table></figure>
