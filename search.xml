@@ -4029,7 +4029,7 @@ S\Lambda
       </tags>
   </entry>
   <entry>
-    <title>C++ の Stream</title>
+    <title>C++ の 流(Stream)</title>
     <url>/C/C-Stream/</url>
     <content><![CDATA[<p>C++ 程序常用 <code>cin</code>，<code>cout</code> 进行标准 I/O（从键盘读取数据，或输出数据到屏幕），当然也可以进行文件 I/O （基于文件的数据读写）。这些行为本质上都是进行数据传输——数据向水流一样从一个地方流到另一个地方。C++11 中，将这些操作统一为“流(<strong>stream</strong>)”。</p>
 <span id="more"></span>
@@ -4069,7 +4069,9 @@ S\Lambda
 </tr>
 </tbody>
 </table>
+<blockquote>
 <p>当非 goodbit 状态位被打开时，一切读取会被阻塞。</p>
+</blockquote>
 <h4 id="fmtflags">fmtflags</h4>
 <p>指定流格式控制标志，为 <strong>bit mask</strong>。通过 <code>setf()</code> / <code>unsetf()</code> 函数进行开关。常见有以下五种标志：</p>
 <table>
@@ -4135,10 +4137,6 @@ S\Lambda
 <tr class="even">
 <td style="text-align: center;"><strong>trunc</strong></td>
 <td style="text-align: center;"><strong>0x20</strong>，在打开时清空流的内容，即 truncate</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
 </tr>
 </tbody>
 </table>
@@ -4223,7 +4221,10 @@ S\Lambda
 <li>到达文件末尾，此时调用 <code>setstate(eofbit)</code>；</li>
 <li>下一个字符为结束符。此条件下，结束符会被取出；</li>
 </ol>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 从缓冲区中读并取出多个字符</span></span><br><span class="line">std::<span class="built_in">getline</span>( std::basic_istream&amp; input, std::string&amp; str );</span><br><span class="line">std::<span class="built_in">getline</span>( std::basic_istream&amp; input, std::string&amp; str, <span class="type">char</span> delim );</span><br></pre></td></tr></table></figure>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 从缓冲区中读并取出多个字符</span></span><br><span class="line">std::<span class="built_in">getline</span>( std::basic_istream&amp; input, std::basic_string&amp; str );</span><br><span class="line">std::<span class="built_in">getline</span>( std::basic_istream&amp; input, std::basic_string&amp; str, <span class="type">char</span> delim );</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><code>std::string</code> 其实是 <code>std::basic_string</code> 的特化，即 <code>std::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocate&lt;char&gt;&gt;</code>。</p>
+</blockquote>
 <p>这两种形式均读取多个字符并将其存储到 s 中，直至满足任一以下条件：</p>
 <ol type="1">
 <li>到达文件末尾，此时调用 <code>setstate(eofbit)</code>；</li>
@@ -4256,7 +4257,7 @@ S\Lambda
 <p>标准错误输出流，用于向屏幕输出日志信息。</p>
 <h2 id="字符串-io">字符串 I/O</h2>
 <h3 id="istringstream-ostringstream-stringstream">istringstream / ostringstream / stringstream</h3>
-<p>分别实现基于<strong>字符串</strong>的流输入与输出操作，可以直接以字符串为参数构造对象，同时也可以指定打开标志 <code>std::ios_base::openmode</code>。此外，也可以通过 <code>str()</code> 函数获取对象底层数据结构中的字符串，亦可以通过重载的 <code>str(std::string)</code> 函数修改底层字符串内容。</p>
+<p>分别实现基于<strong>字符串</strong>的流输入与输出操作，可以直接以字符串为参数构造对象，同时也可以指定打开标志 <code>std::ios_base::openmode</code>。此外，也可以通过 <code>str()</code> 函数获取对象底层数据结构中的字符串，亦可以通过重载的 <code>str(std::basic_string)</code> 函数修改底层字符串内容。</p>
 <p>下面是一个示例：</p>
 <figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sstream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="function">std::istringstream <span class="title">iss</span><span class="params">(<span class="string">&quot;123 1.23 abc&quot;</span>)</span></span>;</span><br><span class="line">    </span><br><span class="line">    <span class="type">int</span> a;</span><br><span class="line">    <span class="type">double</span> b;</span><br><span class="line">    std::string c;</span><br><span class="line"></span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;before: &quot;</span> &lt;&lt; iss.<span class="built_in">str</span>() &lt;&lt; std::endl;  <span class="comment">// 利用 str() 获取流中字符串</span></span><br><span class="line">    iss &gt;&gt; a &gt;&gt; b &gt;&gt; c;</span><br><span class="line">    std::cout &lt;&lt; a &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; b &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; c &lt;&lt; std::endl;</span><br><span class="line"></span><br><span class="line">    iss.<span class="built_in">str</span>(<span class="string">&quot;456 4.56 def&quot;</span>);                            <span class="comment">// 利用 str(string) 修改流中字符串</span></span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;after: &quot;</span> &lt;&lt; iss.<span class="built_in">str</span>() &lt;&lt; std::endl;</span><br><span class="line">    iss &gt;&gt; a &gt;&gt; b &gt;&gt; c;</span><br><span class="line">    std::cout &lt;&lt; a &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; b &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; c &lt;&lt; std::endl;</span><br><span class="line">    </span><br><span class="line">    <span class="function">std::ostringstream <span class="title">oss1</span><span class="params">(<span class="string">&quot;foo&quot;</span>, std::ios_base::ate)</span></span>;  <span class="comment">// 指定打开模式，指针定位到末尾</span></span><br><span class="line">    std::cout &lt;&lt; oss1.<span class="built_in">str</span>() &lt;&lt; std::endl;</span><br><span class="line"></span><br><span class="line">    <span class="function">std::ostringstream <span class="title">oss2</span><span class="params">(<span class="string">&quot;foo&quot;</span>)</span></span>;                      <span class="comment">// 控制变量</span></span><br><span class="line">    oss2 &lt;&lt; <span class="string">&quot;bar&quot;</span>;</span><br><span class="line">    std::cout &lt;&lt; oss2.<span class="built_in">str</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> EXIT_SUCCESS;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>最后输出如下：</p>
@@ -4302,7 +4303,104 @@ S\Lambda
         <category>C++</category>
       </categories>
       <tags>
-        <tag>C++11</tag>
+        <tag>C++ basic</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>C++ の 类型推导(Auto &amp; Decltype)</title>
+    <url>/C/C-AutoDeclType/</url>
+    <content><![CDATA[<p>C++11引入了 <code>auto</code> 和 <code>decltype</code> 这两个关键字，从而可以在编译期就推导出变量或者表达式的类型，方便开发者编码也简化了代码。</p>
+<span id="more"></span>
+<h3 id="auto">auto</h3>
+<p>关键字 <code>auto</code> 的作用便是自动推导变量/函数(C++14起)/模板(C++20起)的类型，例如这样推导是可以的：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">auto</span> foobar = <span class="number">0</span>;           <span class="comment">// OK! 此时 auto 被编译器推导为 int</span></span><br><span class="line"><span class="keyword">auto</span> foo = <span class="number">1</span>, *bar = &amp;foo; <span class="comment">// OK! foo, bar 分别为 int 与 int*，此时 auto 被推导为 int（若将 * 删去则报错）</span></span><br></pre></td></tr></table></figure>
+<p>但不能这样推导：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">auto</span> foobar;               <span class="comment">// ERROR! 必须初始化，否则编译器无法推导。毕竟 auto 只是一个占位符，不能真正代替数据类型进行声明</span></span><br><span class="line"><span class="keyword">auto</span> foo = <span class="number">0</span>, bar = <span class="number">1.0</span>;   <span class="comment">// ERROR! foo, bar 分别为 int 和 double 类型，auto 会产生二义性，非良构</span></span><br></pre></td></tr></table></figure>
+<h4 id="推导规则">推导规则</h4>
+<p>除了上面讲的外，关于 <code>auto</code> 还有以下几条规则：</p>
+<ol type="1">
+<li><p>不允许在一个声明中混合 <code>auto</code> 的变量和函数，如 <code>auto f() -&gt; int, i = 0;</code> 是错误的；</p></li>
+<li><p>不允许用于<strong>函数形参</strong>的类型推导，如 <code>void func(auto i);</code> 是错误的；</p></li>
+<li><p>在有 <strong>cv 限定符</strong>的类型推导中，若不声明为引用，<code>auto</code> 会忽略等号右边的 cv 限定；反之则保留。例如：</p>
+<p><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> i = <span class="number">0</span>;</span><br><span class="line"><span class="type">const</span> <span class="keyword">auto</span> con_i = i;          <span class="comment">// con_i 为 const int, auto 推导为 int</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// no reference</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">auto</span> auto_i = i;             <span class="comment">// auto_i 为 const int, auto 推导为 int</span></span><br><span class="line">  <span class="keyword">auto</span> auto_con_i = con_i;     <span class="comment">// auto_con_i 为 const int, auto 推导为 int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// reference</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">auto</span> &amp;autoref_i = i;         <span class="comment">// autoref_i 为 int&amp;, auto 推导为 int&amp;</span></span><br><span class="line">  <span class="keyword">auto</span> &amp;autoref_con_i = con_i; <span class="comment">// autoref_con_i 为 const int&amp;, auto 推导为 const int&amp;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>其中，cv 限定符指关键字 <code>const</code> 和 <code>volatile</code>。</p></li>
+<li><p>不允许用作类的<strong>非静态成员变量</strong>；</p></li>
+<li><p>不允许用于推导<strong>数组</strong>类型，如 <code>auto arr[3] = &#123;1, 2, 3&#125;;</code> 是不允许的；</p></li>
+<li><p>不允许用作<strong>模板参数</strong>，如 <code>std::vector&lt;auto&gt; f&#123;1, 2, 3&#125;;</code> 是不允许的，编译器会报 <code>'auto' not allowed in template argument</code> 错误；</p></li>
+</ol>
+<h4 id="应用场景">应用场景</h4>
+<p>将变量声明为迭代器类型是一件非常痛苦的事，尤其是 <code>std::unordered_map&lt;Typename1, Typename2&gt;::iterator it = map.begin();</code> 这样的语句，对本人这样的懒惰程序员而言简直是灾祸🤦‍♂️……</p>
+<p>在有了 <code>auto</code> 后，就可以把上面的语句改写为 <code>auto it = map.begin()</code>，懒癌福音🥰</p>
+<p>一般地，我个人认为，使用 <code>auto</code>的前提是不能影响代码可读性，对于一些不重要的中间变量，使用 <code>auto</code> 不会破坏可读性，还能大大提高 code 效率，但对于一些关键的变量，如函数返回值，或是利用到类多态特性的地方，则不建议用 <code>auto</code>。</p>
+<h3 id="decltype">decltype</h3>
+<p>尽管都是在编译器进行类型推导，但与 <code>auto</code> 不同，<code>decltype</code> 根据已声明的变量或表达式推导其类型，无需初始化，例如：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> foo = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">decltype</span>(foo) bar; <span class="comment">// 由于 foo 为 int，则 decltype(foo) 被推导为 int</span></span><br></pre></td></tr></table></figure>
+<p>上面的 <code>foo</code> 可以为任意有类型的表达式，但不能是 <code>void</code> 类型。</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">func</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">decltype</span>(func) p;   <span class="comment">// OK! p 为 void* 的函数指针</span></span><br><span class="line"><span class="keyword">decltype</span>(<span class="built_in">func</span>()) q; <span class="comment">// ERROR!</span></span><br></pre></td></tr></table></figure>
+<h4 id="推导规则-1">推导规则</h4>
+<p>除了上面讲的外，关于 <code>decltype</code> 还有以下几条规则：</p>
+<ol type="1">
+<li><p>若推导对象为不被括号包裹的变量表达式或函数调用，则推导结果为该表达式声明时的类型或函数的返回值类型。例如：</p>
+<p><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> i = <span class="number">0</span>;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> &amp;j = i;</span><br><span class="line"><span class="keyword">auto</span> lambda = [](<span class="type">int</span> a, <span class="type">int</span> b) -&gt; <span class="type">int</span> &#123; <span class="keyword">return</span> a + b; &#125;;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">func</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123; <span class="keyword">public</span>: <span class="type">double</span> bar; &#125;</span><br><span class="line"><span class="type">const</span> Foo *foo;</span><br><span class="line"></span><br><span class="line"><span class="keyword">decltype</span>(i) di = i;         <span class="comment">// 推导结果为 int</span></span><br><span class="line"><span class="keyword">decltype</span>(j) dj = j;         <span class="comment">// 推导结果为 const int&amp;</span></span><br><span class="line"><span class="keyword">decltype</span>(i+j) k;            <span class="comment">// 推导结果为 int</span></span><br><span class="line"><span class="keyword">decltype</span>(lambda) l;         <span class="comment">// 推导结果为 lambda [](int, int) -&gt; int</span></span><br><span class="line"><span class="keyword">decltype</span>(<span class="built_in">func</span>()) f;         <span class="comment">// 推导结果为 int</span></span><br><span class="line"><span class="keyword">decltype</span>(foo-&gt;bar) foo_bar; <span class="comment">// 推导结果为 double</span></span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>不难发现，<code>decltype</code>会保留表达式的引用和 cv 限定符。</p>
+</blockquote>
+<p>反之，如果表达式类别为左值，则返回 <code>T&amp;</code>；如果为右值，则返回 <code>T</code>，其中 <code>T</code> 为表达式类型。例如将上面的代码改为下面这样：</p>
+<p><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">decltype</span>((i)) di = i;                    <span class="comment">// 左值，推导结果为 int&amp;</span></span><br><span class="line"><span class="keyword">decltype</span>((j)) dj = j;                    <span class="comment">// 左值。推导结果为 const int&amp;</span></span><br><span class="line"><span class="keyword">decltype</span>((i+j)) k;                       <span class="comment">// 右值，推导结果为 int</span></span><br><span class="line"><span class="keyword">decltype</span>((lambda)) l;                    <span class="comment">// 左值，推导结果为 lambda [](int, int) -&gt; int&amp;</span></span><br><span class="line"><span class="keyword">decltype</span>((<span class="built_in">func</span>())) f;                    <span class="comment">// 右值，推导结果为 int</span></span><br><span class="line"><span class="keyword">decltype</span>((foo-&gt;bar)) foo_bar = foo-&gt;bar; <span class="comment">// 左值，推导结果为 const double&amp;</span></span><br></pre></td></tr></table></figure></p></li>
+<li><p>若推导对象为函数名，则不允许出现有多个重载的函数，否则会产生二义性，例如：</p>
+<p><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">func</span><span class="params">(<span class="type">int</span> a)</span></span>;</span><br><span class="line"><span class="keyword">decltype</span>(func) f1; <span class="comment">// OK! func 仅有一个重载</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">double</span> <span class="title">func</span><span class="params">(<span class="type">double</span> b)</span></span>;</span><br><span class="line"><span class="keyword">decltype</span>(func) f2; <span class="comment">// ERROR! func 有两个重载</span></span><br></pre></td></tr></table></figure></p></li>
+</ol>
+<h4 id="应用场景-1">应用场景</h4>
+<p>当类模板中需要根据传入的模板参数类中的成员变量来进一步确定类型的变量时，则用 <code>decltype</code> 是个很好的选择。常见于推导函数返回值类型的情况，例如：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T, <span class="keyword">typename</span> U&gt;</span><br><span class="line">? <span class="built_in">func</span>(T t, U u) &#123;</span><br><span class="line">    <span class="keyword">return</span> t + u;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>由于 T 和 U 不确定，故返回值类型无法判断。一个好的想法是试图用 <code>decltype(t + u)</code> 来代替 “?” 的位置，但这样会因为 <code>t, u</code> 未定义而报错。但如果与<strong>返回值类型后置</strong>相配合，则完美解决该问题：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T, <span class="keyword">typename</span> U&gt;</span></span><br><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">func</span><span class="params">(T t, U u)</span> -&gt; <span class="title">decltype</span><span class="params">(t + u)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> t + u;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>返回值类型后置</strong>也是 C++ 11 新特性之一，就是用在这种需要根据函数形参类型判断返回值类型的场景中。</p>
+]]></content>
+      <categories>
+        <category>C++</category>
+      </categories>
+      <tags>
+        <tag>C++ 11</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>C++ の 别名(Alias)</title>
+    <url>/C/C-Alias/</url>
+    <content><![CDATA[<p>虽然使用 <code>auto</code> 可以大大简化代码，但对于一些使用 <code>dynamic_cast</code> 的结果不能用 <code>auto</code> 作为占位符。将冗长的变量类型简化仍然是很头疼的一个问题，幸好 C++ 11 提供了用关键字 <code>using</code> 给类型起别名的特性，既能有效简化代码，又不影响可读性</p>
+<span id="more"></span>
+<h3 id="define-与-typedef">#define 与 typedef</h3>
+<p>C 中就已经存在使用 <code>#define</code> / <code>typedef</code> 来给类型取别名的用法，但为什么还要多此一举用 <code>using</code>？它们的区别在哪？</p>
+<p><code>#define</code> 是宏定义指令，其在预处理阶段直接将源码文本进行替换，不进行类型检查。</p>
+<blockquote>
+<p>也就是说，如果 <code>#define</code> 为一个不存在的类型取了别名，写代码的时候 IDE 并不会给你飘红线，但编译时就会报一堆错误。</p>
+</blockquote>
+<p>而对于 <code>typedef</code>，其在编译时期执行，故可以进行类型检查，但它不能直接进行模板替换，只能采用外面套一个结构体的方式。也就是说，如果定义了这样一个类模板：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">A</span> &#123;&#125;;</span><br></pre></td></tr></table></figure>
+<p>如果试图用 <code>typedef</code> 取<strong>模板别名</strong>，则必须用上面那种写法，下面那种写法会报错：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// OK</span></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Alias</span> &#123;</span><br><span class="line">    <span class="keyword">typedef</span> A&lt;T&gt; <span class="type">a_t</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ERROR</span></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">typedef</span> A&lt;T&gt; <span class="type">a_t</span>;</span><br></pre></td></tr></table></figure>
+<p>这样起别名的方式又增加了冗余的结构体名，降低了可读性与 code 效率。</p>
+<p>不仅如此，<code>typedef</code> 在定义<strong>函数指针</strong>时也存在降低可读性的情况：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">typedef</span> <span class="title">void</span> <span class="params">(*func)</span> <span class="params">(<span class="type">int</span>, <span class="type">int</span>)</span></span>; <span class="comment">// func 为函数指针 void*(int, int) 的别名</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在网上找到很多说 <code>typedef</code> / <code>#define</code> 无法起模板别名的文章，但实际操作了一遍，发现或许是编译器更新了，一些以前认为无法实现的代码如今都能编译通过。所以还是绝知此事要躬行。</p>
+</blockquote>
+<h3 id="using">using</h3>
+<p><code>using</code> 不仅可以用于导入命名空间或类成员，还可以用于起别名。事实上，<code>using</code> 能够实现的功能也已经完全将 <code>typedef</code> 能做的包含在内，完全可以舍弃功能单一并且代码反人类直觉的 <code>typedef</code>，改用可读性更高的 <code>using</code>。</p>
+<blockquote>
+<p>委员会既然推出了这一新特性，照着用就完事了~</p>
+</blockquote>
+<p>关于 <code>using</code> 的用法，简单来说就是这样的：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">using</span> new_alias = old_typename;</span><br><span class="line"></span><br><span class="line"><span class="comment">// or</span></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">using</span> new_alias = old_typename&lt;T&gt;;</span><br></pre></td></tr></table></figure>
+<p>如果需要使用 <code>using</code> 为函数指针取别名，则可以直接用类似赋值的方式，即</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">using</span> func = <span class="type">void</span>* (<span class="type">int</span>, <span class="type">int</span>);</span><br></pre></td></tr></table></figure>
+<p>一目了然，符合直觉。</p>
+]]></content>
+      <categories>
+        <category>C++</category>
+      </categories>
+      <tags>
+        <tag>C++ 11</tag>
       </tags>
   </entry>
 </search>

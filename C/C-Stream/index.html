@@ -20,16 +20,16 @@
 
   <meta name="description" content="C++ 程序常用 cin，cout 进行标准 I&#x2F;O（从键盘读取数据，或输出数据到屏幕），当然也可以进行文件 I&#x2F;O （基于文件的数据读写）。这些行为本质上都是进行数据传输——数据向水流一样从一个地方流到另一个地方。C++11 中，将这些操作统一为“流(stream)”。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="C++ の Stream">
+<meta property="og:title" content="C++ の 流(Stream)">
 <meta property="og:url" content="http://leager-zju.github.com/C/C-Stream/index.html">
 <meta property="og:site_name" content="没什么看头的地方">
 <meta property="og:description" content="C++ 程序常用 cin，cout 进行标准 I&#x2F;O（从键盘读取数据，或输出数据到屏幕），当然也可以进行文件 I&#x2F;O （基于文件的数据读写）。这些行为本质上都是进行数据传输——数据向水流一样从一个地方流到另一个地方。C++11 中，将这些操作统一为“流(stream)”。">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://leager-zju.github.com/C/C-Stream/image-20230114162631819.png">
 <meta property="article:published_time" content="2023-01-14T07:21:59.000Z">
-<meta property="article:modified_time" content="2023-01-15T10:38:34.940Z">
+<meta property="article:modified_time" content="2023-01-18T04:22:04.951Z">
 <meta property="article:author" content="Leager">
-<meta property="article:tag" content="C++11">
+<meta property="article:tag" content="C++ basic">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http://leager-zju.github.com/C/C-Stream/image-20230114162631819.png">
 
@@ -46,7 +46,7 @@
   };
 </script>
 
-  <title>C++ の Stream | 没什么看头的地方</title>
+  <title>C++ の 流(Stream) | 没什么看头的地方</title>
   
 
 
@@ -127,7 +127,7 @@
   </li>
         <li class="menu-item menu-item-tags">
 
-    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">6</span></a>
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">7</span></a>
 
   </li>
         <li class="menu-item menu-item-categories">
@@ -137,7 +137,7 @@
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">37</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">39</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -208,7 +208,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          C++ の Stream
+          C++ の 流(Stream)
         </h1>
 
         <div class="post-meta">
@@ -225,7 +225,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-01-15 18:38:34" itemprop="dateModified" datetime="2023-01-15T18:38:34+08:00">2023-01-15</time>
+                <time title="修改时间：2023-01-18 12:22:04" itemprop="dateModified" datetime="2023-01-18T12:22:04+08:00">2023-01-18</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -293,7 +293,9 @@
 </tr>
 </tbody>
 </table>
+<blockquote>
 <p>当非 goodbit 状态位被打开时，一切读取会被阻塞。</p>
+</blockquote>
 <h4 id="fmtflags">fmtflags</h4>
 <p>指定流格式控制标志，为 <strong>bit mask</strong>。通过 <code>setf()</code> / <code>unsetf()</code> 函数进行开关。常见有以下五种标志：</p>
 <table>
@@ -359,10 +361,6 @@
 <tr class="even">
 <td style="text-align: center;"><strong>trunc</strong></td>
 <td style="text-align: center;"><strong>0x20</strong>，在打开时清空流的内容，即 truncate</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
 </tr>
 </tbody>
 </table>
@@ -447,7 +445,10 @@
 <li>到达文件末尾，此时调用 <code>setstate(eofbit)</code>；</li>
 <li>下一个字符为结束符。此条件下，结束符会被取出；</li>
 </ol>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 从缓冲区中读并取出多个字符</span></span><br><span class="line">std::<span class="built_in">getline</span>( std::basic_istream&amp; input, std::string&amp; str );</span><br><span class="line">std::<span class="built_in">getline</span>( std::basic_istream&amp; input, std::string&amp; str, <span class="type">char</span> delim );</span><br></pre></td></tr></table></figure>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 从缓冲区中读并取出多个字符</span></span><br><span class="line">std::<span class="built_in">getline</span>( std::basic_istream&amp; input, std::basic_string&amp; str );</span><br><span class="line">std::<span class="built_in">getline</span>( std::basic_istream&amp; input, std::basic_string&amp; str, <span class="type">char</span> delim );</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><code>std::string</code> 其实是 <code>std::basic_string</code> 的特化，即 <code>std::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocate&lt;char&gt;&gt;</code>。</p>
+</blockquote>
 <p>这两种形式均读取多个字符并将其存储到 s 中，直至满足任一以下条件：</p>
 <ol type="1">
 <li>到达文件末尾，此时调用 <code>setstate(eofbit)</code>；</li>
@@ -480,7 +481,7 @@
 <p>标准错误输出流，用于向屏幕输出日志信息。</p>
 <h2 id="字符串-io">字符串 I/O</h2>
 <h3 id="istringstream-ostringstream-stringstream">istringstream / ostringstream / stringstream</h3>
-<p>分别实现基于<strong>字符串</strong>的流输入与输出操作，可以直接以字符串为参数构造对象，同时也可以指定打开标志 <code>std::ios_base::openmode</code>。此外，也可以通过 <code>str()</code> 函数获取对象底层数据结构中的字符串，亦可以通过重载的 <code>str(std::string)</code> 函数修改底层字符串内容。</p>
+<p>分别实现基于<strong>字符串</strong>的流输入与输出操作，可以直接以字符串为参数构造对象，同时也可以指定打开标志 <code>std::ios_base::openmode</code>。此外，也可以通过 <code>str()</code> 函数获取对象底层数据结构中的字符串，亦可以通过重载的 <code>str(std::basic_string)</code> 函数修改底层字符串内容。</p>
 <p>下面是一个示例：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sstream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="function">std::istringstream <span class="title">iss</span><span class="params">(<span class="string">&quot;123 1.23 abc&quot;</span>)</span></span>;</span><br><span class="line">    </span><br><span class="line">    <span class="type">int</span> a;</span><br><span class="line">    <span class="type">double</span> b;</span><br><span class="line">    std::string c;</span><br><span class="line"></span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;before: &quot;</span> &lt;&lt; iss.<span class="built_in">str</span>() &lt;&lt; std::endl;  <span class="comment">// 利用 str() 获取流中字符串</span></span><br><span class="line">    iss &gt;&gt; a &gt;&gt; b &gt;&gt; c;</span><br><span class="line">    std::cout &lt;&lt; a &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; b &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; c &lt;&lt; std::endl;</span><br><span class="line"></span><br><span class="line">    iss.<span class="built_in">str</span>(<span class="string">&quot;456 4.56 def&quot;</span>);                            <span class="comment">// 利用 str(string) 修改流中字符串</span></span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;after: &quot;</span> &lt;&lt; iss.<span class="built_in">str</span>() &lt;&lt; std::endl;</span><br><span class="line">    iss &gt;&gt; a &gt;&gt; b &gt;&gt; c;</span><br><span class="line">    std::cout &lt;&lt; a &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; b &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; c &lt;&lt; std::endl;</span><br><span class="line">    </span><br><span class="line">    <span class="function">std::ostringstream <span class="title">oss1</span><span class="params">(<span class="string">&quot;foo&quot;</span>, std::ios_base::ate)</span></span>;  <span class="comment">// 指定打开模式，指针定位到末尾</span></span><br><span class="line">    std::cout &lt;&lt; oss1.<span class="built_in">str</span>() &lt;&lt; std::endl;</span><br><span class="line"></span><br><span class="line">    <span class="function">std::ostringstream <span class="title">oss2</span><span class="params">(<span class="string">&quot;foo&quot;</span>)</span></span>;                      <span class="comment">// 控制变量</span></span><br><span class="line">    oss2 &lt;&lt; <span class="string">&quot;bar&quot;</span>;</span><br><span class="line">    std::cout &lt;&lt; oss2.<span class="built_in">str</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> EXIT_SUCCESS;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>最后输出如下：</p>
@@ -530,7 +531,7 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/C-11/" rel="tag"># C++11</a>
+              <a href="/tags/C-basic/" rel="tag"># C++ basic</a>
           </div>
 
         
@@ -542,7 +543,10 @@
     <a href="/15445/15445project4/" rel="prev" title="15445 Project#4 Concurrency Control">
       <i class="fa fa-chevron-left"></i> 15445 Project#4 Concurrency Control
     </a></div>
-      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/C/C-AutoDeclType/" rel="next" title="C++ の 类型推导(Auto & Decltype)">
+      C++ の 类型推导(Auto & Decltype) <i class="fa fa-chevron-right"></i>
+    </a></div>
     </div>
       </footer>
     
@@ -617,7 +621,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-count">39</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -630,7 +634,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-count">7</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
