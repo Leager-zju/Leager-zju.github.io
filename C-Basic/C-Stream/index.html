@@ -21,19 +21,19 @@
   <meta name="description" content="C++ 程序常用 cin，cout 进行标准 I&#x2F;O（从键盘读取数据，或输出数据到屏幕），当然也可以进行文件 I&#x2F;O （基于文件的数据读写）。这些行为本质上都是进行数据传输——数据向水流一样从一个地方流到另一个地方。C++11 中，将这些操作统一为“流(stream)”。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="C++ の 流(Stream)">
-<meta property="og:url" content="http://leager-zju.github.com/C/C-Stream/index.html">
+<meta property="og:url" content="http://leager-zju.github.com/C-Basic/C-Stream/index.html">
 <meta property="og:site_name" content="没什么看头的地方">
 <meta property="og:description" content="C++ 程序常用 cin，cout 进行标准 I&#x2F;O（从键盘读取数据，或输出数据到屏幕），当然也可以进行文件 I&#x2F;O （基于文件的数据读写）。这些行为本质上都是进行数据传输——数据向水流一样从一个地方流到另一个地方。C++11 中，将这些操作统一为“流(stream)”。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://leager-zju.github.com/C/C-Stream/image-20230114162631819.png">
+<meta property="og:image" content="http://leager-zju.github.com/C-Basic/C-Stream/image-20230114162631819.png">
 <meta property="article:published_time" content="2023-01-14T07:21:59.000Z">
-<meta property="article:modified_time" content="2023-01-18T04:22:04.951Z">
+<meta property="article:modified_time" content="2023-01-18T06:24:43.425Z">
 <meta property="article:author" content="Leager">
-<meta property="article:tag" content="C++ basic">
+<meta property="article:tag" content="C++">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://leager-zju.github.com/C/C-Stream/image-20230114162631819.png">
+<meta name="twitter:image" content="http://leager-zju.github.com/C-Basic/C-Stream/image-20230114162631819.png">
 
-<link rel="canonical" href="http://leager-zju.github.com/C/C-Stream/">
+<link rel="canonical" href="http://leager-zju.github.com/C-Basic/C-Stream/">
 
 
 <script id="page-configurations">
@@ -132,12 +132,12 @@
   </li>
         <li class="menu-item menu-item-categories">
 
-    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">6</span></a>
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">8</span></a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">39</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">43</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -195,7 +195,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/C/C-Stream/">
+    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/C-Basic/C-Stream/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/Avatar.jpg">
@@ -225,7 +225,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-01-18 12:22:04" itemprop="dateModified" datetime="2023-01-18T12:22:04+08:00">2023-01-18</time>
+                <time title="修改时间：2023-01-18 14:24:43" itemprop="dateModified" datetime="2023-01-18T14:24:43+08:00">2023-01-18</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -233,7 +233,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/C/" itemprop="url" rel="index"><span itemprop="name">C++</span></a>
+                  <a href="/categories/C-Basic/" itemprop="url" rel="index"><span itemprop="name">C++ Basic</span></a>
                 </span>
             </span>
 
@@ -522,6 +522,7 @@
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sstream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 修改输出</span></span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;octal:   &quot;</span> &lt;&lt; std::oct &lt;&lt; <span class="number">42</span> &lt;&lt; std::endl;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;decimal: &quot;</span> &lt;&lt; std::dec &lt;&lt; <span class="number">42</span> &lt;&lt; std::endl;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;hex:     &quot;</span> &lt;&lt; std::hex &lt;&lt; <span class="number">42</span> &lt;&lt; std::endl;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 解析输入</span></span><br><span class="line">    <span class="type">int</span> n;</span><br><span class="line">    std::<span class="built_in">istringstream</span>(<span class="string">&quot;2A&quot;</span>) &gt;&gt; std::hex &gt;&gt; n;</span><br><span class="line">    std::cout &lt;&lt; std::dec &lt;&lt; <span class="string">&quot;hex to dec: &quot;</span> &lt;&lt; n &lt;&lt; std::endl;</span><br><span class="line">    std::cout &lt;&lt; std::oct &lt;&lt; <span class="string">&quot;hex to oct: &quot;</span> &lt;&lt; n;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>输出为：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">octal:   <span class="number">52</span></span><br><span class="line">decimal: <span class="number">42</span></span><br><span class="line">hex:     <span class="number">2</span>a</span><br><span class="line">hex to dec: <span class="number">42</span></span><br><span class="line">hex to oct: <span class="number">52</span></span><br></pre></td></tr></table></figure>
+<p>1</p>
 
     </div>
 
@@ -531,7 +532,7 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/C-basic/" rel="tag"># C++ basic</a>
+              <a href="/tags/C/" rel="tag"># C++</a>
           </div>
 
         
@@ -544,7 +545,7 @@
       <i class="fa fa-chevron-left"></i> 15445 Project#4 Concurrency Control
     </a></div>
       <div class="post-nav-item">
-    <a href="/C/C-AutoDeclType/" rel="next" title="C++ の 类型推导(Auto & Decltype)">
+    <a href="/C-11/C-AutoDeclType/" rel="next" title="C++ の 类型推导(Auto & Decltype)">
       C++ の 类型推导(Auto & Decltype) <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
@@ -621,14 +622,14 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">39</span>
+          <span class="site-state-item-count">43</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-count">8</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">

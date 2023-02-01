@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/largeicon.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/smallicon.jpg">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"leager-zju.github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"b2t":true},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="早年的 C++ 中已经出现了左值与右值这两个基本概念，但并不重要，平时也不怎么会用到。直到 C++ 11 引入了右值引用等新特性，这俩概念终于翻身做起了主人——它们是理解移动与转发语义的重要基础。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="C++ の 左值与右值(Lvalue &amp; Rvalue)">
+<meta property="og:url" content="http://leager-zju.github.com/C-11/C-Value/index.html">
+<meta property="og:site_name" content="没什么看头的地方">
+<meta property="og:description" content="早年的 C++ 中已经出现了左值与右值这两个基本概念，但并不重要，平时也不怎么会用到。直到 C++ 11 引入了右值引用等新特性，这俩概念终于翻身做起了主人——它们是理解移动与转发语义的重要基础。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://leager-zju.github.com/C-11/C-Value/C-Value/image-20230120230912975.png">
+<meta property="article:published_time" content="2023-01-20T07:10:57.000Z">
+<meta property="article:modified_time" content="2023-01-28T12:08:18.046Z">
+<meta property="article:author" content="Leager">
+<meta property="article:tag" content="C++">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://leager-zju.github.com/C-11/C-Value/C-Value/image-20230120230912975.png">
+
+<link rel="canonical" href="http://leager-zju.github.com/C-11/C-Value/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>C++ の 左值与右值(Lvalue & Rvalue) | 没什么看头的地方</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">没什么看头的地方</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里可能没有你想看的...</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于我</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">7</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">8</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">43</span></a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/C-11/C-Value/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/Avatar.jpg">
+      <meta itemprop="name" content="Leager">
+      <meta itemprop="description" content="【数据删除】">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="没什么看头的地方">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          C++ の 左值与右值(Lvalue & Rvalue)
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-01-20 15:10:57" itemprop="dateCreated datePublished" datetime="2023-01-20T15:10:57+08:00">2023-01-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-01-28 20:08:18" itemprop="dateModified" datetime="2023-01-28T20:08:18+08:00">2023-01-28</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-11/" itemprop="url" rel="index"><span itemprop="name">C++ 11</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>早年的 C++ 中已经出现了<strong>左值</strong>与<strong>右值</strong>这两个基本概念，但并不重要，平时也不怎么会用到。直到 C++ 11 引入了<strong>右值引用</strong>等新特性，这俩概念终于翻身做起了主人——它们是理解<strong>移动</strong>与<strong>转发</strong>语义的重要基础。</p>
+<span id="more"></span>
+<h3 id="值">值</h3>
+<p>所有<strong>值类别</strong>可用以下韦恩图描述：</p>
+<p><img src="C-Value/image-20230120230912975.png" alt="image-20230120230912975" style="zoom:50%;" /></p>
+<h4 id="左值lvalue右值rvalue">左值(Lvalue)，右值(Rvalue)</h4>
+<p>先来谈谈什么是<strong>左值</strong>与<strong>右值</strong>。</p>
+<p>一般来说，可以放在等号左边的就是左值，只能放在等号右边的就是右值。</p>
+<p>更准确的说，可以取地址并具有变量名的是左值，左值 <strong>L-value</strong> 中的 <strong>L</strong> 既可以认为是 <strong>Left</strong>，也可以理解为 <strong>Location</strong>，即<strong>地址</strong>，换句话说就是其在内存中有<strong>可访问</strong>的地址。</p>
+<p>相反，不是左值的值，就是右值，其只存在于<strong>临时寄存器</strong>中，无法在内存中寻址，不具有持久性，因而无法放在等号左侧进行赋值操作，并且同一个作用域里的两个相等的右值事实上是两个<strong>不同</strong>的右值。例如：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">char</span> *ch = <span class="string">&quot;hello&quot;</span>; <span class="comment">// ch 是左值，&quot;hello&quot; 是字符串字面量，也是左值</span></span><br><span class="line"><span class="type">int</span> b = <span class="number">1</span>, c = <span class="number">2</span>;   <span class="comment">// b, c 是左值，1, 2 是右值</span></span><br><span class="line"><span class="type">int</span> a = b + c;      <span class="comment">// a 是左值，b + c 是右值</span></span><br><span class="line">a = b; a += c; ++a; <span class="comment">// 这些表达式都是左值</span></span><br><span class="line">a++;                <span class="comment">// 自增后置返回的是一个自增前的临时副本，故为右值</span></span><br><span class="line"><span class="type">int</span> *p = &amp;a;        <span class="comment">// a 的地址不在内存中存着，故 &amp;a 为右值</span></span><br><span class="line"></span><br><span class="line"><span class="number">3</span> = a;              <span class="comment">// ERROR! 3 是右值，不能放在等号左边</span></span><br><span class="line">b + c = &amp;<span class="number">3</span>;         <span class="comment">// ERROR! 右值不能放左边，且不能取地址</span></span><br></pre></td></tr></table></figure>
+<h4 id="亡值xvalue纯右值prvalue泛左值glvalue">亡值(Xvalue)，纯右值(PRvalue)，泛左值(GLvalue)</h4>
+<p>右值又分为<strong>亡值</strong>与<strong>纯右值</strong>。</p>
+<p>在 C++ 11 之前，右值与纯右值就是同个概念，<strong>亡值</strong>是随着 C++ 11 的<strong>右值引用</strong>概念引入的。如果用左值初始化对象，则会调用<strong>复制构造函数</strong>或 <code>operator=(const type &amp;)</code> 来进行一次数据的拷贝；而如果用右值初始化，则会调用<strong>移动构造函数</strong>或 <code>operator=(const type &amp;&amp;)</code> 来移动数据，避免了拷贝，提高了效率。当数据移动完成后，用于初始化的右值已经完成了任务，马上消亡，故称其为<strong>亡值</strong>。亡值常见的有以下两种：</p>
+<ul>
+<li>返回类型为对象右值引用的表达式，如 <code>std::move(x)</code>；</li>
+<li>转换到对象右值引用类型的表达式，例如 <code>static_cast&lt;char&amp;&amp;&gt;(x)</code>；</li>
+</ul>
+<p><strong>纯右值</strong>就是右值中不属于亡值的那一部分值，也就是常见的（除字符串外的）字面量、运算表达式、<strong>lambda 表达式</strong>、非引用类型的函数返回值等无法在内存中占据存储空间的值。</p>
+<p><strong>泛左值</strong>就是<strong>亡值</strong>+<strong>左值</strong>。</p>
+<h3 id="左值引用右值引用">左值引用，右值引用</h3>
+<h4 id="左值引用">左值引用</h4>
+<p>C++ 11 以前，所有的引用都是<strong>左值引用</strong>，用 <code>Type&amp;</code> 表示，只能用左值进行初始化，初始化时即绑定，不能更改绑定对象，其效果相当于为指定变量起“别名”，对引用变量的所有操作都会等效地施加在原变量上（对应内存中的实际数据是一致的），例如：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> x = <span class="number">0</span>;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> y = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span>&amp; ref_a = x;          <span class="comment">// ref_a 为 int&amp; 型，绑定在 int 型的 x 上。这里 x 是否初始化不影响</span></span><br><span class="line">ref_a++; std::cout &lt;&lt; x; <span class="comment">// output: 1  通过引用修改原变量</span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span>&amp; ref_b;              <span class="comment">// ERROR! 引用类型必须初始化</span></span><br><span class="line"><span class="type">int</span>&amp; ref_c = <span class="number">3</span>;          <span class="comment">// ERROR! 左值引用必须用左值进行初始化</span></span><br><span class="line"><span class="type">int</span>&amp; ref_d = y;          <span class="comment">// ERROR! 常量类型只能绑定到常量引用（确实很符合直觉）</span></span><br><span class="line"></span><br><span class="line"><span class="type">const</span> <span class="type">int</span>&amp; ref_d = x;    <span class="comment">// OK! 但常量引用可以绑定非常量变量</span></span><br><span class="line"><span class="type">const</span> <span class="type">int</span>&amp; ref_e = <span class="number">3</span>;    <span class="comment">// OK! 常量引用甚至还可以用右值初始化，此时 3 存储在内存中，视为变量。但由于是 const，无法通过 ref_e 修改。</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注意，<strong>引用不是对象</strong>，其不必占用存储，尽管编译器会在需要实现所需语义的情况下分配存储（如引用类型的非静态数据成员），所以<strong>不存在</strong>引用的数组、指向引用的指针、引用的引用。</p>
+</blockquote>
+<p>由于引用只是取别名，为引用变量初始化绑定对象的过程并不发生拷贝操作，能大大提高程序运行效率，故函数形参常采用<strong>引用传值</strong>的方式，避免不必要的拷贝操作。</p>
+<blockquote>
+<p>另一个很相似的概念是<strong>指针</strong>，它也可以提供修改原变量的另一种途径，但引用的优势在于更安全，引用变量必须被初始化，故不像指针会出现 <code>nullptr</code> 或野指针的情况。</p>
+</blockquote>
+<h4 id="右值引用">右值引用</h4>
+<p>上面说到常量左值引用可以被右值初始化，但无法修改变量；非常量左值引用可以修改，但无法被右值初始化。如果我们在写某个函数时出现了实参为右值，并且函数体内还需要对该参数进行一定修改的情况，现有的工具无法满足可行性，如果在传参前将右值赋给左值后再传入左值，则增加了内存开销。C++ 作为一门对内存开销非常敏感的语言，在这一点上提出了优化，那就是<strong>右值引用</strong>。</p>
+<p>右值引用类型用 <code>Type&amp;&amp;</code> 表示，与左值引用相反，其只能用<strong>右值</strong>进行初始化，即便是常量右值引用也不例外。在引入了右值引用后，函数就可以写为：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">func</span><span class="params">( <span class="type">int</span>&amp;&amp; num )</span> </span>&#123;</span><br><span class="line">  std::cout &lt;&lt; ++num;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">func</span>(<span class="number">6</span>); <span class="comment">// output: 7</span></span><br></pre></td></tr></table></figure>
+<p>这样函数就可以以右值为实参传入函数 <code>func(int&amp;&amp;)</code> 中。在引入右值引用这一概念之前，传统常量左值引用传递 <code>func(const int&amp;)</code> 无法实现这一功能。</p>
+<p>当右值绑定给一个右值引用 <code>rref</code> 时，该右值的生命周期就会被延长至与 <code>rref</code> 相同。</p>
+<blockquote>
+<p>以右值参数调用函数时优先选择接收右值引用参数的重载版本。</p>
+</blockquote>
+<h4 id="引用折叠">引用折叠</h4>
+<p>通过模板或 <code>typedef</code> / <code>using</code> 中的类型操作可以构成引用的引用，即右值引用的右值引用折叠成右值引用，其余组合均折叠成左值引用：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">using</span> lref = <span class="type">int</span>&amp;;</span><br><span class="line"><span class="keyword">using</span> rref = <span class="type">int</span>&amp;&amp;;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> n; </span><br><span class="line">lref&amp;  r1 = n; <span class="comment">// r1 的类型是 int&amp;</span></span><br><span class="line">lref&amp;&amp; r2 = n; <span class="comment">// r2 的类型是 int&amp;</span></span><br><span class="line">rref&amp;  r3 = n; <span class="comment">// r3 的类型是 int&amp;</span></span><br><span class="line">rref&amp;&amp; r4 = <span class="number">1</span>; <span class="comment">// r4 的类型是 int&amp;&amp;</span></span><br></pre></td></tr></table></figure>
+<h4 id="万能引用">万能引用</h4>
+<p>对于模板函数，希望传入的参数类型既能是左值，又能是右值，对于初学者而言，或许会通过以下代码实现：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">template</span>&lt; <span class="keyword">class</span> T &gt;</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">func</span><span class="params">( T&amp; t )</span> </span>&#123;&#125;  <span class="comment">// 接受左值</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">template</span>&lt; <span class="keyword">class</span> T &gt;</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">func</span><span class="params">( T&amp;&amp; t )</span> </span>&#123;&#125; <span class="comment">// 接受右值</span></span><br></pre></td></tr></table></figure>
+<p>以上为两种重载形式，显得很累赘。一种简化代码的方式是<strong>万能引用</strong>，只需一个函数就能实现既能接受左值又能接受右值：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">template</span>&lt; <span class="keyword">class</span> T &gt;</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">func</span><span class="params">( T&amp;&amp; t )</span> </span>&#123;&#125;</span><br></pre></td></tr></table></figure>
+<p>看似只保留了初始版本形参为右值引用的那一个重载版本，但事实上如果一个变量或者参数被声明为 <code>T&amp;&amp;</code>，其中 <code>T</code> 是<strong>被推导</strong>的类型，那这个变量或者参数就会被视为<strong>万能引用</strong>——当传入参数为左值时，模板类型推导会将 <code>T&amp;&amp;</code> 推导为左值引用；当传入参数为右值时，模板类型推导会将 <code>T&amp;&amp;</code> 推导为右值引用。从而大大提高了编程灵活性以及代码的简洁程度。</p>
+<blockquote>
+<p>虽然为初学者加大了代码理解的难度</p>
+</blockquote>
+<h3 id="移动语义">移动语义</h3>
+<h4 id="深浅拷贝">深浅拷贝</h4>
+<p>谈移动语义，就绕不开先谈<strong>深浅拷贝</strong>。C++ 11 之前，当我们要进行字符数组 <code>char*</code> 的拷贝操作时，只有这两种拷贝方式。</p>
+<p><strong>浅拷贝</strong>是指，将新字符数组 <code>char* dst</code> 指针指向原字符数组 <code>char* src</code> 所在地址，开销低，但容易产生<strong>重复释放同一片内存</strong>的糟糕情况，不安全。</p>
+<p><strong>深拷贝</strong>是指，为新字符数组 <code>char* dst</code> 分配一片新的等大内存，然后将原字符数组 <code>char* src</code> 的所有字符依次拷贝，缺点是时间开销大，并且存在原字符数组。</p>
+<h4 id="移动拷贝">移动拷贝</h4>
+<p>C++ 11 引入了移动语义，旨在进行一些<strong>转移所有权</strong>的操作，顾名思义就是资源转为己有，而另一方则失去资源所有权，采用 <code>std::move()</code> 函数实现。</p>
+<h4 id="stdmove">std::move</h4>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt; <span class="keyword">class</span> <span class="title class_">T</span> &gt;</span><br><span class="line"><span class="keyword">typename</span> std::remove_reference&lt;T&gt;::<span class="function">type&amp;&amp; <span class="title">move</span><span class="params">( T&amp;&amp; t )</span> <span class="keyword">noexcept</span></span>;</span><br></pre></td></tr></table></figure>
+<p>其作用就是返回实参相应的右值引用，其中 <code>std::remove_reference</code> 相当于是做了一个去除引用保留原始数据类型的操作。调用结束后，变量 <code>t</code> 会被销毁，而函数返回值会被新变量接收，进行右值的赋值，从而实现“移动”的语义。</p>
+<h4 id="移动构造函数">移动构造函数</h4>
+<p>引入移动语义这一新特性之后，移动构造函数也随之产生，其接收同类型右值引用的实参，进行资源的迁移，将深浅拷贝两者的优势集中，既减少了开销，也无需担心出现 double free 的情况。</p>
+<h3 id="完美转发">完美转发</h3>
+<p><strong>完美转发</strong>指的是利用一个接受任意实参的函数模板将参数转发到其它函数，目标函数会收到与转发函数完全相同的实参，从而转发调用。转发函数实参是左值那目标函数实参也是左值，转发函数实参是右值那目标函数实参也是右值。并且转发参数必然要用到引用特性，否则无法准确实现功能，这里就要用到 <code>std::forward</code>。</p>
+<h4 id="stdforward">std::forward</h4>
+<p>函数原型如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">template</span>&lt; <span class="keyword">class</span> T &gt;</span></span><br><span class="line"><span class="function">T&amp;&amp; <span class="title">forward</span><span class="params">( <span class="keyword">typename</span> std::remove_reference&lt;T&gt;::type&amp; t )</span> <span class="keyword">noexcept</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">template</span>&lt; <span class="keyword">class</span> T &gt;</span></span><br><span class="line"><span class="function">T&amp;&amp; <span class="title">forward</span><span class="params">( <span class="keyword">typename</span> std::remove_reference&lt;T&gt;::type&amp;&amp; t )</span> <span class="keyword">noexcept</span></span>;</span><br></pre></td></tr></table></figure>
+<p>其作用就是返回参数对应的引用形式：传入左值返回左值引用，传入右值返回右值引用。</p>
+<h4 id="转发函数">转发函数</h4>
+<p>直接上例子：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">func</span><span class="params">( <span class="type">int</span>&amp; t )</span> </span>&#123; std::cout &lt;&lt; <span class="string">&quot;lvalue\n&quot;</span>; &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">func</span><span class="params">( <span class="type">int</span>&amp;&amp; t )</span> </span>&#123; std::cout &lt;&lt; <span class="string">&quot;rvalue\n&quot;</span>; &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">template</span>&lt; <span class="keyword">class</span> T &gt;</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">FORWARD</span><span class="params">( T&amp;&amp; t )</span> </span>&#123;</span><br><span class="line">  <span class="built_in">func</span>(t);                  <span class="comment">// t 因为能被取地址，故认为是左值，恒定输出 lvalue</span></span><br><span class="line">  <span class="built_in">func</span>(std::forward&lt;T&gt;(t)); <span class="comment">// 此处 T 会按实际传参类型进行推导</span></span><br><span class="line">  <span class="built_in">func</span>(std::<span class="built_in">move</span>(t));       <span class="comment">// std::move 转为右值，恒定输出 rvalue</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> a = <span class="number">0</span>;</span><br><span class="line"><span class="built_in">FORWARD</span>(a);                      <span class="comment">// output: lvalue lvalue rvalue</span></span><br><span class="line"><span class="built_in">FORWARD</span>(<span class="number">1</span>);                      <span class="comment">// output: lvalue rvalue rvalue</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* </span></span><br><span class="line"><span class="comment"> * std::forward&lt;int&gt;(a), std::forward&lt;int&amp;&gt;(a), std::forward&lt;int&amp;&amp;&gt;(a) 分别会被转为</span></span><br><span class="line"><span class="comment"> * 右值引用、左值引用、右值引用</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="built_in">FORWARD</span>(std::forward&lt;<span class="type">int</span>&gt;(a));   <span class="comment">// output: lvalue rvalue rvalue</span></span><br><span class="line"><span class="built_in">FORWARD</span>(std::forward&lt;<span class="type">int</span>&amp;&gt;(a));  <span class="comment">// output: lvalue lvalue rvalue</span></span><br><span class="line"><span class="built_in">FORWARD</span>(std::forward&lt;<span class="type">int</span>&amp;&amp;&gt;(a)); <span class="comment">// output: lvalue rvalue rvalue</span></span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/C/" rel="tag"># C++</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/C-11/C-Function/" rel="prev" title="C++ の 函数调用(Function Call)">
+      <i class="fa fa-chevron-left"></i> C++ の 函数调用(Function Call)
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/C/C-Init/" rel="next" title="C++ の 列表初始化(List Initialize)">
+      C++ の 列表初始化(List Initialize) <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%80%BC"><span class="nav-text">值</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B7%A6%E5%80%BClvalue%E5%8F%B3%E5%80%BCrvalue"><span class="nav-text">左值(Lvalue)，右值(Rvalue)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%A1%E5%80%BCxvalue%E7%BA%AF%E5%8F%B3%E5%80%BCprvalue%E6%B3%9B%E5%B7%A6%E5%80%BCglvalue"><span class="nav-text">亡值(Xvalue)，纯右值(PRvalue)，泛左值(GLvalue)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B7%A6%E5%80%BC%E5%BC%95%E7%94%A8%E5%8F%B3%E5%80%BC%E5%BC%95%E7%94%A8"><span class="nav-text">左值引用，右值引用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B7%A6%E5%80%BC%E5%BC%95%E7%94%A8"><span class="nav-text">左值引用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%B3%E5%80%BC%E5%BC%95%E7%94%A8"><span class="nav-text">右值引用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%95%E7%94%A8%E6%8A%98%E5%8F%A0"><span class="nav-text">引用折叠</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%87%E8%83%BD%E5%BC%95%E7%94%A8"><span class="nav-text">万能引用</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A7%BB%E5%8A%A8%E8%AF%AD%E4%B9%89"><span class="nav-text">移动语义</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B7%B1%E6%B5%85%E6%8B%B7%E8%B4%9D"><span class="nav-text">深浅拷贝</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A7%BB%E5%8A%A8%E6%8B%B7%E8%B4%9D"><span class="nav-text">移动拷贝</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#stdmove"><span class="nav-text">std::move</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A7%BB%E5%8A%A8%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0"><span class="nav-text">移动构造函数</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%8C%E7%BE%8E%E8%BD%AC%E5%8F%91"><span class="nav-text">完美转发</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#stdforward"><span class="nav-text">std::forward</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BD%AC%E5%8F%91%E5%87%BD%E6%95%B0"><span class="nav-text">转发函数</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Leager"
+      src="/images/Avatar.jpg">
+  <p class="site-author-name" itemprop="name">Leager</p>
+  <div class="site-description" itemprop="description">【数据删除】</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">43</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Leager-zju" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Leager-zju" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div>
+<span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("09/25/2022 00:00:00");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "本站已存活 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+    }
+setInterval("createtime()",250);
+</script>
+</div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Leager</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,0' opacity='0.5' zIndex='-1' count='160' src="//cdn.jsdelivr.net/gh/theme-next/theme-next-canvas-nest@1.0.0/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

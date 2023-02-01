@@ -21,17 +21,17 @@
   <meta name="description" content="虽然使用 auto 可以大大简化代码，但对于一些使用 dynamic_cast 的结果不能用 auto 作为占位符。将冗长的变量类型简化仍然是很头疼的一个问题，幸好 C++ 11 提供了用关键字 using 给类型起别名的特性，既能有效简化代码，又不影响可读性">
 <meta property="og:type" content="article">
 <meta property="og:title" content="C++ の 别名(Alias)">
-<meta property="og:url" content="http://leager-zju.github.com/C/C-Alias/index.html">
+<meta property="og:url" content="http://leager-zju.github.com/C-11/C-Alias/index.html">
 <meta property="og:site_name" content="没什么看头的地方">
 <meta property="og:description" content="虽然使用 auto 可以大大简化代码，但对于一些使用 dynamic_cast 的结果不能用 auto 作为占位符。将冗长的变量类型简化仍然是很头疼的一个问题，幸好 C++ 11 提供了用关键字 using 给类型起别名的特性，既能有效简化代码，又不影响可读性">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2023-01-17T12:55:25.000Z">
-<meta property="article:modified_time" content="2023-01-18T04:22:29.782Z">
+<meta property="article:modified_time" content="2023-01-18T06:24:17.880Z">
 <meta property="article:author" content="Leager">
-<meta property="article:tag" content="C++ 11">
+<meta property="article:tag" content="C++">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://leager-zju.github.com/C/C-Alias/">
+<link rel="canonical" href="http://leager-zju.github.com/C-11/C-Alias/">
 
 
 <script id="page-configurations">
@@ -130,12 +130,12 @@
   </li>
         <li class="menu-item menu-item-categories">
 
-    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">6</span></a>
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">8</span></a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">39</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">43</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -193,7 +193,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/C/C-Alias/">
+    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/C-11/C-Alias/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/Avatar.jpg">
@@ -223,7 +223,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-01-18 12:22:29" itemprop="dateModified" datetime="2023-01-18T12:22:29+08:00">2023-01-18</time>
+                <time title="修改时间：2023-01-18 14:24:17" itemprop="dateModified" datetime="2023-01-18T14:24:17+08:00">2023-01-18</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -231,7 +231,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/C/" itemprop="url" rel="index"><span itemprop="name">C++</span></a>
+                  <a href="/categories/C-11/" itemprop="url" rel="index"><span itemprop="name">C++ 11</span></a>
                 </span>
             </span>
 
@@ -290,7 +290,7 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/C-11/" rel="tag"># C++ 11</a>
+              <a href="/tags/C/" rel="tag"># C++</a>
           </div>
 
         
@@ -299,10 +299,13 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/C/C-AutoDeclType/" rel="prev" title="C++ の 类型推导(Auto & Decltype)">
+    <a href="/C-11/C-AutoDeclType/" rel="prev" title="C++ の 类型推导(Auto & Decltype)">
       <i class="fa fa-chevron-left"></i> C++ の 类型推导(Auto & Decltype)
     </a></div>
-      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/C-11/C-Function/" rel="next" title="C++ の 函数调用(Function Call)">
+      C++ の 函数调用(Function Call) <i class="fa fa-chevron-right"></i>
+    </a></div>
     </div>
       </footer>
     
@@ -377,14 +380,14 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">39</span>
+          <span class="site-state-item-count">43</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-count">8</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
