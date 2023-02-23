@@ -4776,7 +4776,7 @@ S\Lambda
 <span id="more"></span>
 <h3 id="值">值</h3>
 <p>所有<strong>值类别</strong>可用以下韦恩图描述：</p>
-<p><img src="C-Value/image-20230120230912975.png" alt="image-20230120230912975" style="zoom:50%;" /></p>
+<p><img src="image-20230120230912975.png" alt="image-20230120230912975" style="zoom:50%;" /></p>
 <h4 id="左值lvalue右值rvalue">左值(Lvalue)，右值(Rvalue)</h4>
 <p>先来谈谈什么是<strong>左值</strong>与<strong>右值</strong>。</p>
 <p>一般来说，可以放在等号左边的就是左值，只能放在等号右边的就是右值。</p>
@@ -4855,7 +4855,7 @@ S\Lambda
   </entry>
   <entry>
     <title>C++ の 常量(Const)</title>
-    <url>/C-11/C-Const/</url>
+    <url>/C-Basic/C-Const/</url>
     <content><![CDATA[<p>const 与 volatile 一起并称 <strong>CV 限定符</strong>，用于指定被声明对象或被命名类型的常量性或易变性。</p>
 <span id="more"></span>
 <p>const 全称 <strong>constant</strong>，其指定一个约束，告知编译器该变量无法被修改。对于那些明确不发生改变的变量，应尽可能使用 <code>const</code>，以获得编译器的帮助。</p>
@@ -4903,7 +4903,7 @@ S\Lambda
 <p><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">A</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="type">const</span> <span class="type">int</span> foo&#123;<span class="number">0</span>&#125;;</span><br><span class="line">  <span class="type">int</span> bar[foo];          <span class="comment">// ERROR! invalid use of non-static A::foo</span></span><br><span class="line">  <span class="comment">// A() &#123; foo = 1; &#125;    // ERROR!</span></span><br><span class="line">  <span class="built_in">A</span>(): <span class="built_in">foo</span>(<span class="number">1</span>) &#123;&#125;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123; foo++; &#125; <span class="comment">// ERROR! foo is const</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p></li>
 </ol>
 <h3 id="const-类成员函数">const 类成员函数</h3>
-<p>除了普通函数的用法外，类成员函数还可以在函数体前加上 <code>const</code> 修饰符，表明该成员函数不会修改任何成员变量。此时 this 隐式为 <code>const *</code>，表明在该函数体内，编译器将该对象视为 const 对象。对于 const 对象，只能调用 const 成员函数，因为非 const 函数无法保证是否修改了成员变量。</p>
+<p>除了普通函数的用法外，类成员函数还可以在函数体前加上 <code>const</code> 修饰符，表明该成员函数不会修改任何成员变量。此时 this 隐式为 <code>const *</code>（更严谨地说应该为 <code>const *const</code>，因为 this 不可修改指向），表明在该函数体内，编译器将该对象视为 const 对象。对于 const 对象，只能调用 const 成员函数，因为非 const 函数无法保证是否修改了成员变量。</p>
 <figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">show</span><span class="params">()</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">    std::cout &lt;&lt; bar;</span><br><span class="line">    bar++;               <span class="comment">// ERROR!</span></span><br><span class="line">    Foo* p = <span class="keyword">this</span>;       <span class="comment">// ERROR! this 为 const Foo*</span></span><br><span class="line">    <span class="type">const</span> Foo* q = <span class="keyword">this</span>; <span class="comment">// OK!</span></span><br><span class="line">  &#125;</span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="type">int</span> bar&#123;<span class="number">1</span>&#125;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 <p>此外，<code>const</code> 类成员函数亦可与不加 <code>const</code> 的同名成员函数产生不同重载版本。至于调用哪个重载版本，就看调用的对象是否为常量，如果是常量，则调用 const 版本，否则调用非 const 版本。</p>
 <figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="comment">// 两个重载版本</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">show</span><span class="params">()</span> <span class="type">const</span> </span>&#123; std::cout &lt;&lt; <span class="string">&quot;const\n&quot;</span>; &#125;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">show</span><span class="params">()</span> </span>&#123; std::cout &lt;&lt; <span class="string">&quot;non-const\n&quot;</span>; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  Foo a;</span><br><span class="line">  <span class="type">const</span> Foo b;</span><br><span class="line">  <span class="type">const</span> Foo* c = &amp;a;</span><br><span class="line">  a.<span class="built_in">show</span>();</span><br><span class="line">  b.<span class="built_in">show</span>();</span><br><span class="line">  c-&gt;<span class="built_in">show</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// output:</span></span><br><span class="line"><span class="comment">// non-const</span></span><br><span class="line"><span class="comment">// const</span></span><br><span class="line"><span class="comment">// const</span></span><br></pre></td></tr></table></figure>
@@ -4944,7 +4944,7 @@ S\Lambda
 </table>
 ]]></content>
       <categories>
-        <category>C++ 11</category>
+        <category>C++ Basic</category>
       </categories>
       <tags>
         <tag>C++</tag>
@@ -5027,9 +5027,11 @@ S\Lambda
     <title>C++ 11 の 其它特性(Else)</title>
     <url>/C-11/C-Else/</url>
     <content><![CDATA[<p>有些 C++ 11 特性比较琐碎，单纯用一篇文章描述浪费，还有灌水嫌疑(bushi)，于是整合到同一篇来讲。</p>
+<span id="more"></span>
 <h3 id="范围-for-循环">范围 for 循环</h3>
 <p>允许 for 循环中使用 <code>for (范围变量声明 : 范围表达式)</code> 的形式进行遍历，无需 <code>for(...;...;...)</code> 式的写法。</p>
 <figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">std::vector&lt;<span class="type">int</span>&gt; v;</span><br><span class="line"></span><br><span class="line"><span class="comment">// C++ 11 前</span></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">auto</span> iter = v.<span class="built_in">begin</span>(); iter != v.<span class="built_in">end</span>(); iter++) &#123;</span><br><span class="line">  <span class="built_in">DoSomeThing</span>(*iter);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// C++ 11 起</span></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">auto</span>&amp;&amp; item : v) &#123; <span class="comment">// item 为 int&amp; 型</span></span><br><span class="line">  <span class="built_in">DoSomeThing</span>(item);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><a id="constexpr"></a></p>
 <h3 id="constexpr">constexpr</h3>
 <p><code>constexpr</code> 和 <code>const</code> 很像，两者的共同之处在于都是<strong>修饰词</strong>，可以用于修饰变量与函数，不同之处在于，<code>const</code> 修饰的对象仅包含一层 <strong>read-only</strong> 含义，即仅保证该对象在运行时不会被改变，但其仍有可能为动态变量。</p>
 <p>而 <code>constexpr</code> 可以说是 <code>const</code> 的升华版本，用 <code>constexpr</code> 修饰的对象<strong>在编译时便能计算出来</strong>，整个运行过程中都不可以被改变，直接自带一层 <code>const</code> 语义。这可以说是一个非常强大的优化，有些操作能够直接在编译时完成，就不用再在运行时多次耗费时间。</p>
@@ -5060,6 +5062,7 @@ S\Lambda
 <li>仅有 constexpr 对象可以调用声明为 <code>constexpr</code> 的成员函数；</li>
 </ol>
 <figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Test</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">constexpr</span> <span class="title">Test</span><span class="params">(<span class="type">int</span> val_)</span>: val(val_) &#123;</span>&#125;</span><br><span class="line">  <span class="function"><span class="keyword">constexpr</span> <span class="type">int</span> <span class="title">get_val</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> val; &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="type">int</span> val;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="type">int</span> x = <span class="number">1</span>;</span><br><span class="line">  <span class="comment">// constexpr Test foo(x);            // ERROR! x 不是 constexpr 变量</span></span><br><span class="line">  <span class="function">Test <span class="title">foo</span><span class="params">(x)</span></span>;                         <span class="comment">// OK! 视为普通构造函数</span></span><br><span class="line">  <span class="comment">// constexpr int val = foo.get_val() // ERROR! 非 constexpr 对象</span></span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">constexpr</span> Test <span class="title">bar</span><span class="params">(<span class="number">1</span>)</span></span>;           <span class="comment">// OK! 此时 bar 为 constexpr 对象</span></span><br><span class="line">  <span class="keyword">constexpr</span> <span class="type">int</span> val = t.<span class="built_in">get_val</span>(); <span class="comment">// OK!</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><a id="nullptr"></a></p>
 <h3 id="nullptr">nullptr</h3>
 <p>C++ 11 以前使用宏 <code>NULL</code> 来表示空指针。本质上它是 <code>#define NULL 0</code>，也就是一个数字 0，并不算真正意义上的指针。如果遇到以下代码，则会出现二义性：</p>
 <figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">func</span><span class="params">(<span class="type">int</span>)</span> </span>&#123;&#125;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">func</span><span class="params">(<span class="type">void</span>*)</span> </span>&#123;&#125;</span><br></pre></td></tr></table></figure>
@@ -5068,12 +5071,15 @@ S\Lambda
 </blockquote>
 <p>C++ 11 引入的新关键词 <code>nullptr</code> 代表指针<strong>字面量</strong>，它是 <code>std::nullptr_t</code> 类型的纯右值，该类型可以隐式转换到任何指针类型及任何成员指针类型。注意这个转换是<strong>单向</strong>的！</p>
 <figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">template</span>&lt;<span class="keyword">class</span> T&gt;</span></span><br><span class="line"><span class="function"><span class="keyword">constexpr</span> T <span class="title">clone</span><span class="params">(<span class="type">const</span> T&amp; t)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> t;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">func</span><span class="params">(<span class="type">int</span>)</span> </span>&#123;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;函数 func(int) 已调用\n&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">func</span><span class="params">(<span class="type">int</span>*)</span> </span>&#123;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;函数 func(int*) 已调用\n&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="built_in">func</span>(<span class="literal">nullptr</span>);         <span class="comment">// OK!</span></span><br><span class="line">  <span class="built_in">func</span>(<span class="number">0</span>);               <span class="comment">// OK!</span></span><br><span class="line">  <span class="comment">// func(NULL);         // ERROR! 二义性</span></span><br><span class="line"> </span><br><span class="line">  <span class="built_in">func</span>(<span class="built_in">clone</span>(<span class="literal">nullptr</span>));  <span class="comment">// OK!</span></span><br><span class="line">  <span class="comment">//  func(clone(0));    // ERROR! 非字面量的零不能为空指针常量</span></span><br><span class="line">  <span class="comment">//  func(clone(NULL)); // ERROR! 非字面量的零不能为空指针常量</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// output:</span></span><br><span class="line"><span class="comment">// 函数 func(int*) 已调用</span></span><br><span class="line"><span class="comment">// 函数 func(int) 已调用</span></span><br><span class="line"><span class="comment">// 函数 func(int*) 已调用</span></span><br></pre></td></tr></table></figure>
+<p><a id="override"></a></p>
 <h3 id="override">override</h3>
 <p><code>override</code> 用于修饰派生类中的<strong>虚函数</strong>，告诉编译器（与程序员）该函数进行了重写。如果一个函数声明为 <code>override</code> 但父类却没有这个虚函数，编译报错，故可以避免程序员在重写基类函数时无意产生的错误，提高代码规范性。</p>
 <figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">A</span> &#123;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">foo</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">bar</span><span class="params">()</span></span>;</span><br><span class="line">&#125;;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">B</span> : A &#123;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">foo</span><span class="params">()</span> <span class="type">const</span> <span class="keyword">override</span></span>; <span class="comment">// ERROR! A::foo 非 const，签名不匹配</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">foo</span><span class="params">()</span> <span class="keyword">override</span></span>;       <span class="comment">// OK!</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">bar</span><span class="params">()</span> <span class="keyword">override</span></span>;       <span class="comment">// ERROR! A::bar 非虚</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p><a id="final"></a></p>
 <h3 id="final">final</h3>
 <p><code>final</code> 用于指定某个<strong>虚函数</strong>不能在派生类中被重写，或者某个类不能被派生。</p>
 <figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">Base</span> &#123;</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">foo</span><span class="params">()</span></span>;</span><br><span class="line">&#125;;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">A</span> : Base &#123;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">foo</span><span class="params">()</span> <span class="keyword">final</span></span>;    <span class="comment">// OK! A::foo 为 final</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">bar</span><span class="params">()</span> <span class="keyword">final</span></span>;    <span class="comment">// ERROR! A::bar 非虚，因此它不能是 final 的</span></span><br><span class="line">&#125;;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">B</span> <span class="keyword">final</span> : A &#123;   <span class="comment">// OK! B 为 final</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">foo</span><span class="params">()</span> <span class="keyword">override</span></span>; <span class="comment">// ERROR! foo 不能被重写，A::foo 为 final</span></span><br><span class="line">&#125;;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">C</span> : B&#123;&#125;;        <span class="comment">// ERROR! B 为 final，无法进一步派生</span></span><br></pre></td></tr></table></figure>
+<p><a id="enum"></a></p>
 <h3 id="enum-class">enum class</h3>
 <p>C++ 11 以前，<strong>枚举</strong>并不限定作用域，所有枚举成员均暴露在外层作用域下，并且所有枚举值都可自动转换为整型。这也就导致：</p>
 <ol type="1">
@@ -5084,11 +5090,13 @@ S\Lambda
 <p>C++ 11 引入了<strong>限定作用域的枚举</strong>来解决以上问题。</p>
 <figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">enum</span> <span class="title class_">Color</span> &#123; red, blue, green &#125;;</span><br><span class="line"><span class="keyword">enum class</span> <span class="title class_">newColor</span> &#123; red, blue, green &#125;;  <span class="comment">// OK! 此限定域内自成一派，与其它枚举类型无影响</span></span><br><span class="line"><span class="comment">// enum class newColor: typename &#123;...&#125;;    // 枚举类型底层默认为 int，可以如此进行修改</span></span><br><span class="line"></span><br><span class="line">Color c1 = <span class="number">1</span>;             <span class="comment">// ERROR! C++ 11 起不能通过整型来初始化枚举类型</span></span><br><span class="line">Color c2 = red;           <span class="comment">// OK! red 在该作用域中可访问，并且这里 red 的类型为 Color</span></span><br><span class="line">Color c3 = Color::red;    <span class="comment">// OK! 可以通过 枚举类型::枚举成员名 访问成员</span></span><br><span class="line"></span><br><span class="line">newColor l1 = red;        <span class="comment">// ERROR! red 为 Color 类型，不能用于初始化 newColor 类型</span></span><br><span class="line">newColor l2 = Light::red; <span class="comment">// OK! 仅能通过 枚举类型::枚举成员名 访问成员</span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> foo = Color::red;     <span class="comment">// OK! 无限定作用域的枚举成员可转化为整数</span></span><br><span class="line"><span class="type">int</span> bar = newColor::red;  <span class="comment">// ERROR! 限定作用域的枚举成员不可转化为整数</span></span><br><span class="line"></span><br><span class="line">std::cout &lt;&lt; std::boolalpha;</span><br><span class="line">std::cout &lt;&lt; (red == <span class="number">0</span>);  <span class="comment">// output: true</span></span><br></pre></td></tr></table></figure>
 <p>虽然限制很多，但也更安全。应当尽可能使用带限定域的枚举。</p>
+<p><a id="assert"></a></p>
 <h3 id="static_assert">static_assert</h3>
 <p>说到这个，就不得不提另一个很像的叫 <code>assert</code> 的玩意。这两者都起到<strong>断言</strong>的作用，区别在于：</p>
 <p><code>static_assert</code> 作为 C++ 11 新引入的<strong>关键字</strong>，为<strong>静态断言</strong>，即编译时进行断言，若表达式为 false，则编译错误。这样一来不会生成目标代码，也不会影响程序性能。用法为：</p>
 <figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="built_in">static_assert</span>(expr, msg); <span class="comment">// 如果 expr == false，则输出 msg</span></span><br></pre></td></tr></table></figure>
 <p><code>assert</code> 为<strong>动态断言</strong>，在运行时执行，不影响编译（其实就是一个<strong>宏</strong>）。通过 <code>static_cast&lt;bool&gt;</code> 把表达式转换成 <code>bool</code> 类型，从而实现断言。缺点在于影响程序性能，常用于 debug 模式，在 release 模式中一般会关掉。</p>
+<p><a id="literal"></a></p>
 <h3 id="自定义字面量">自定义字面量</h3>
 <p>C++ 自带如下字面量（及其对应引用）：</p>
 <ol type="1">
@@ -5127,6 +5135,7 @@ S\Lambda
 </ul>
 </blockquote>
 <p>如果希望在编译时就调用字面量后缀函数，则需要把函数定义为 <code>constexpr</code>。</p>
+<p><a id="ds"></a></p>
 <h3 id="新的数据结构">新的数据结构</h3>
 <h4 id="stdforward_list">std::forward_list</h4>
 <blockquote>
@@ -5259,6 +5268,7 @@ S\Lambda
 <li><p><code>tuple_cat(tuples...)</code> 连接任意数量的 tuple；</p></li>
 </ul>
 <p>并可以通过全局函数 <code>std::get&lt;index&gt;(tuple)</code> 访问 tuple 对象的第 index 个元素。</p>
+<p><a id="algorithm"></a></p>
 <h3 id="新的算法">新的算法</h3>
 <blockquote>
 <p>定义于头文件 <code>&lt;algorithm&gt;</code></p>
@@ -5563,6 +5573,284 @@ S\Lambda
 ]]></content>
       <categories>
         <category>C++ 11</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>C++ の 内联函数(Inline)</title>
+    <url>/C-Basic/C-Inline/</url>
+    <content><![CDATA[<p><code>inline</code> 只能用于修饰函数，能够解决一些频繁调用的小函数大量消耗栈内存的问题，是一种提高程序运行效率的手段。</p>
+<span id="more"></span>
+<h3 id="inline-基本">inline 基本</h3>
+<p>众所周知，函数的调用需要消耗栈内存，每次调用一个函数，就会在栈中分配一片函数所需内存（如参数压栈），但栈内存大小是有限的，频繁使用就会造成因栈内存不足而导致程序出错的问题（经典<strong>段错误</strong>），比如函数的死循环递归调用。</p>
+<p>关键字 <code>inline</code> 所带来的就是在编译时期在函数调用处进行函数体内容展开（代码<strong>复制</strong>），换句话说就是不用执行正常的进入函数的步骤，直接执行函数体，这样一来就无需进行栈内存的分配。</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">inline</span> <span class="type">void</span> <span class="title">func1</span><span class="params">()</span> </span>&#123; std::cout &lt;&lt; <span class="string">&quot;inline func1&quot;</span>; &#125;</span><br><span class="line"><span class="function"><span class="keyword">inline</span> <span class="type">void</span> <span class="title">func2</span><span class="params">()</span></span>;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">func2</span><span class="params">()</span> </span>&#123; std::cout &lt;&lt; <span class="string">&quot;non-inline func2&quot;</span>; &#125; <span class="comment">// inline 必须与定义在一起，否则不生效</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="built_in">func2</span>();     <span class="comment">// 等价于写作 std::cout &lt;&lt; &quot;inline&quot;;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>乍一看跟宏定义 <code>#define</code> 很像，但 <code>inline</code> 修饰的函数具有<strong>类型检查</strong>功能，更加安全。</p>
+<p>但 <code>inline</code> 也不是万能的，它只适用于短小精悍，最好只有没几行的函数，并且不能有 <code>while</code>、<code>switch</code> 这类结构控制语句，更不能是递归函数，因为这类函数最大的特点在于，执行函数体的开销小于调用函数的开销。</p>
+<blockquote>
+<p>毕竟如果调用函数开销相比于直接执行函数体的开销很小或忽略不计，那 <code>inline</code> 就收效甚微了，甚至可能因为代码的复制导致内存消耗反而进一步增大，这是适得其反的。</p>
+</blockquote>
+<p><code>inline</code> 还可以进行类成员函数的修饰。事实上，在类内定义的函数，除了虚函数以外，均会隐式地视作 <code>inline</code> 函数；类外定义的函数则需要程序员显式 <code>inline</code>，否则当作普通成员函数对待。</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">func1</span><span class="params">()</span> </span>&#123; ... &#125;             <span class="comment">// 类内定义，隐式 inline</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">func2</span><span class="params">()</span></span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">inline</span> <span class="type">void</span> <span class="title">Foo::func2</span><span class="params">()</span> </span>&#123; ... &#125;   <span class="comment">// 类外定义，显式 inline</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>by the way，<code>inline</code> 只作为程序员对编译器的<strong>建议</strong>，具体是否进行内联还是由编译器来决定。如果它决定对一个函数进行内联，那它会执行以下操作：</p>
+<ol type="1">
+<li>将 inline 函数体复制到 inline 函数调用点处；</li>
+<li>为所用 inline 函数中的局部变量分配内存空间；</li>
+<li>将 inline 函数的的输入参数和返回值映射到调用方法的局部变量空间中；</li>
+<li>如果 inline 函数有多个返回点，将其转变为 inline 函数代码块末尾的分支（使用 <code>goto</code>）。</li>
+</ol>
+</blockquote>
+<p>上面说到，“在类内定义的函数，除了虚函数以外，均会隐式地视作 <code>inline</code> 函数”，那么，<strong>虚函数</strong>能否用 <code>inline</code> 修饰？</p>
+<p>根据上面的讨论我们知道，<code>inline</code> 是编译时期的作为，而当虚函数表现为多态特性时，则需要在运行时进行虚表的查询以及调用，此时如果虚函数为 <code>inline</code> 那就不太合适了——编译器并不知道运行时会调用哪个版本的函数，也就无法执行代码复制。</p>
+<p>仅当编译器能够确定调用函数的类时，才能对虚函数应用 <code>inline</code>，比如用对象实例而非指针或引用。</p>
+]]></content>
+      <categories>
+        <category>C++ Basic</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>C++ の 内存分配(Memory Allocation)</title>
+    <url>/C-Basic/C-Memory/</url>
+    <content><![CDATA[<p>众所周知，C++ 是一门与内存紧密相关的语言，本文就来聊聊 C++ 眼中的内存分配。</p>
+<span id="more"></span>
+<h3 id="内存布局">内存布局</h3>
+<p>C++ 程序的内存分为 5 大区域，从<strong>低地址</strong>开始分别为<strong>代码区</strong>、<strong>数据区</strong>、<strong>BSS 区</strong>、<strong>堆区</strong>、<strong>栈区</strong>，每个区域存放不同类型的数据：</p>
+<ul>
+<li><p><strong>代码区</strong>：存放可执行程序(.exe)的机器码；</p></li>
+<li><p><strong>数据区</strong>：存放<strong>已初始化</strong>的<strong>全局变量</strong>、<strong>静态变量</strong>与<strong>常量</strong>；</p></li>
+<li><p><strong>BSS 区</strong>：存放<strong>未初始化</strong>的<strong>全局变量</strong>与<strong>静态变量</strong>；</p>
+<blockquote>
+<p>当全局/静态变量未初始化的时候，它们记录在 BSS 区，值默认为 0。考虑到这一点，BSS 区内部无需存储大量的零值，而只需记录字节个数即可。</p>
+<p>系统载入可执行程序后，将 BSS 区的数据载入数据，并将内存初始化为 0，再调用程序入口（main函数）。</p>
+</blockquote></li>
+<li><p><strong>堆区</strong>：程序动态分配（<code>new</code>、<code>malloc</code>）的数据所在处，从低地址向高地址增长；</p></li>
+<li><p><strong>栈区</strong>：程序局部变量、函数参数值、函数返回值所在处，由编译器自动管理分配，从高地址向低地址增长；</p></li>
+</ul>
+<h3 id="内存分配-in-c">内存分配 in C</h3>
+<p>在 C 中，使用 <code>alloc</code> 系函数来进行内存的动态分配。</p>
+<h4 id="malloc">malloc</h4>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span>* <span class="title">malloc</span><span class="params">( std::<span class="type">size_t</span> size )</span></span>;</span><br></pre></td></tr></table></figure>
+<p>分配一片连续的 <code>size</code> 个字节的<strong>未初始化</strong>存储。成功时，返回指向分配的适合对任何标量类型对齐的内存块中，最低（首）字节的指针；反之，返回空指针。</p>
+<blockquote>
+<p>使用时需强转为所需类型的指针。</p>
+</blockquote>
+<h4 id="calloc">calloc</h4>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span>* <span class="title">calloc</span><span class="params">( std::<span class="type">size_t</span> num, std::<span class="type">size_t</span> size )</span></span>;</span><br></pre></td></tr></table></figure>
+<p>分配 <code>num</code> 个大小为 <code>size</code> 的对象的数组，并<strong>初始化</strong>所有 bit 为零。成功时，返回指向为任何对象类型适当对齐的，被分配内存块最低（首）字节的指针；反之，返回空指针。</p>
+<blockquote>
+<p>相当于初始化 + <code>malloc(num * size);</code></p>
+</blockquote>
+<h4 id="realloc">realloc</h4>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span>* <span class="title">realloc</span><span class="params">( <span class="type">void</span>* ptr, std::<span class="type">size_t</span> new_size )</span></span>;</span><br></pre></td></tr></table></figure>
+<p>重分配（扩张或收缩）给定的内存区域 <code>ptr</code> 大小至 <code>new_size</code>。注意这里的再分配不一定在原区域的基础上，而有可能重新分配一片新空间。成功时，返回指向新分配内存起始的指针；反之，返回空指针，且原指针保留。</p>
+<blockquote>
+<p>它必须是 <code>malloc()</code>、 <code>calloc()</code> 或 <code>realloc()</code> 先前分配的，且仍未被 <code>free()</code> 释放，否则 UB。</p>
+</blockquote>
+<h4 id="free">free</h4>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">free</span><span class="params">( <span class="type">void</span>* ptr )</span></span>;</span><br></pre></td></tr></table></figure>
+<p>与 <code>alloc</code> 系搭配使用，用于手动释放动态分配的堆内存空间。</p>
+<ul>
+<li>若 <code>ptr</code> 为空指针，则什么也不做；</li>
+<li>若 <code>ptr</code> 并未指向经 <code>alloc</code> 动态分配的空间，则为 UB；</li>
+<li>对同一个 <code>ptr</code> 多次 <code>free</code> 的行为为 UB；</li>
+<li>对已 <code>free</code> 的 <code>ptr</code> 进行内存访问，为 UB；</li>
+</ul>
+<p>注意，<code>free</code> 仅仅是释放了指针指向的那片内存，并没有改变指针的指向，但 <code>free</code> 之后再次使用指针是不合理的，应当置空。</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span>* ptr = (<span class="type">int</span>*)<span class="built_in">malloc</span>(<span class="built_in">sizeof</span>(<span class="type">int</span>));</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;before free: %p\n&quot;</span>, ptr);</span><br><span class="line"></span><br><span class="line"><span class="built_in">free</span>(ptr);</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;after free: %p\n&quot;</span>, ptr); <span class="comment">// WARNING!</span></span><br><span class="line"></span><br><span class="line">ptr = <span class="literal">NULL</span>;                      <span class="comment">// nullptr in C++</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// output:</span></span><br><span class="line"><span class="comment">// before free: 000001EF641FCFB0</span></span><br><span class="line"><span class="comment">// after free: 000001EF641FCFB0</span></span><br></pre></td></tr></table></figure>
+<h3 id="内存分配-in-c-1">内存分配 in C++</h3>
+<p>而在 C++ 中，由于引入了<strong>类</strong>这一概念，<code>alloc</code> / <code>free</code> 这种只能分配/释放内存的函数并不足以满足需求——<code>alloc</code> 分配内存时并不会调用构造函数，并且如果 <code>free</code> 简单地释放了一个类对象的内存，那么其析构函数不会被调用，这搞不好会引发大灾难。于是，它俩被功能更强大的 <code>new</code> / <code>delete</code> 所取代。</p>
+<h4 id="new-delete">new / delete</h4>
+<blockquote>
+<p>定义于头文件 <code>&lt;new&gt;</code></p>
+</blockquote>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">::(opt) <span class="keyword">new</span> (布置参数)(opt) (类型) 初始化器(opt) ;</span><br><span class="line">    </span><br><span class="line"><span class="type">int</span>* p1 = <span class="keyword">new</span> <span class="built_in">int</span> (<span class="number">1</span>);  <span class="comment">// p1 指向 int 变量，并初始化为 1</span></span><br><span class="line"><span class="type">int</span>* p2 = <span class="keyword">new</span> <span class="type">int</span>[<span class="number">2</span>] &#123;<span class="number">114</span>, <span class="number">514</span>&#125;;  <span class="comment">// p2 指向数组 int[2]，并初始化为 &#123;114, 514&#125;</span></span><br><span class="line"><span class="type">int</span>* p3 = <span class="built_in">new</span>(p1) <span class="built_in">int</span> (<span class="number">3</span>);        <span class="comment">// 定位 new，不需要额外分配内存，而是直接在已分配的内存(p1)处调用构造函数即可</span></span><br><span class="line"><span class="type">int</span>* p4 = <span class="built_in">new</span> (std::nothrow) <span class="type">int</span>&#123;<span class="number">4</span>&#125;; <span class="comment">// 分配失败时不抛出异常，而是返回 nullptr</span></span><br><span class="line">std::cout &lt;&lt; *p1 &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; p2[<span class="number">0</span>] &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; p2[<span class="number">1</span>] &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; *p3 &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; *p4;</span><br><span class="line"></span><br><span class="line"><span class="keyword">delete</span> p1;    <span class="comment">// 单变量用 delete</span></span><br><span class="line"><span class="keyword">delete</span>[] p2;  <span class="comment">// 数组用 delete[]</span></span><br><span class="line"><span class="keyword">delete</span> p3;</span><br><span class="line"><span class="keyword">delete</span> p4;</span><br><span class="line"></span><br><span class="line"><span class="comment">// output: 3 114 514 3 4</span></span><br></pre></td></tr></table></figure>
+<p><code>new</code> / <code>new[]</code> 主要完成两件事：</p>
+<ol type="1">
+<li>底层调用 <code>operator new()</code> 动态分配内存；</li>
+<li>在分配的动态内存块上调用构造函数以初始化对象。成功时返回首地址，否则抛出 <code>std::bad_alloc()</code> 异常（可以通过加 <code>std::nothrow</code> 改变）；</li>
+</ol>
+<p><code>delete</code> / <code>delete[]</code> 也主要完成两件事：</p>
+<ol type="1">
+<li>调用析构函数；</li>
+<li>底层调用 <code>operator delete()</code> 释放内存；</li>
+</ol>
+<p>上面提到了一种叫<strong>定位 new</strong> 的操作，它的意义在于将内存的<strong>分配</strong>和<strong>构造</strong>分离，比如在 buffer pool 的 coding 中，我们可以预先申请一块大的连续内存，然后在该内存中使用定位 new 来进行对象的构建，一方面可以避免频繁调用系统 <code>new</code> / <code>delete</code> 带来的开销（并且在该场景下避免了内存不连续的情况），另一方面可以手动控制内存的分配和释放。</p>
+<h4 id="重载-operator-new-operator-delete">重载 operator new() / operator delete()</h4>
+<p><code>new</code> / <code>delete</code> 是关键字，我们无法修改其功能本身，但其底层所使用的运算符 <code>operator new()</code> / <code>operator delete()</code> 则能为我们根据需要所重载使用。</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="type">void</span>* <span class="keyword">operator</span> <span class="title">new</span><span class="params">(<span class="type">size_t</span> size)</span> </span>&#123;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;operator new override\n&quot;</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">malloc</span>(size);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  Foo* f = <span class="keyword">new</span> Foo;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>C++ Basic</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>C++ の 面向对象(OOP)</title>
+    <url>/C-Basic/C-OOP/</url>
+    <content><![CDATA[<p><strong>面向对象程序设计</strong>（Object-oriented programming, OOP）是种具有对象概念的程序编程典范，同时也是一种程序开发的抽象方针。</p>
+<span id="more"></span>
+<h3 id="封装">封装</h3>
+<p><strong>装</strong>是指把数据与操作这些数据的函数绑定到一块，抽象成一个<strong>类</strong>；<strong>封</strong>是指将这些数据与函数对外部隐藏，避免干扰与误用，从而确保安全。C++ 通过三大<strong>访问修饰符</strong>支持这一特性，可以看到，隐藏级别是逐步提高的。</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">可访问性</th>
+<th style="text-align: center;">本类</th>
+<th style="text-align: center;">友元类/函数</th>
+<th style="text-align: center;">派生类</th>
+<th style="text-align: center;">其它</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><code>public</code></td>
+<td style="text-align: center;">√</td>
+<td style="text-align: center;">√</td>
+<td style="text-align: center;">√</td>
+<td style="text-align: center;">√</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><code>protected</code></td>
+<td style="text-align: center;">√</td>
+<td style="text-align: center;">√</td>
+<td style="text-align: center;">√</td>
+<td style="text-align: center;">×</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><code>private</code></td>
+<td style="text-align: center;">√</td>
+<td style="text-align: center;">√</td>
+<td style="text-align: center;">×</td>
+<td style="text-align: center;">×</td>
+</tr>
+</tbody>
+</table>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123;</span><br><span class="line">  <span class="type">int</span> value;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">Foo</span>(<span class="type">int</span> v): <span class="built_in">value</span>(v) &#123;&#125;</span><br><span class="line">  <span class="function"><span class="type">int</span> <span class="title">getValue</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> <span class="keyword">this</span>-&gt;value; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="function">Foo <span class="title">foo</span><span class="params">(<span class="number">1</span>)</span></span>;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;value is &quot;</span> &lt;&lt; foo.value;      <span class="comment">// ERROR! Foo::value is private</span></span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;value is &quot;</span> &lt;&lt; foo.<span class="built_in">getValue</span>(); <span class="comment">// OK! Foo::getValue() is public</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="继承">继承</h3>
+<p><strong>继承</strong>允许一个类（<strong>派生类</strong>）在另一个类（<strong>基类</strong>）的基础上进行设计，这使得创建和维护一个应用程序变得更容易，也达到了重用代码功能和提高执行效率的效果。</p>
+<p>同样的，继承方式也有<strong>公有继承</strong>(public)，<strong>保护继承</strong>(protected)，<strong>私有继承</strong>(private)三种，如果未显式声明继承方式，则默认为私有继承。</p>
+<ul>
+<li><strong>公有继承</strong>：基类的<strong>公有/保护</strong>成员将成为派生类的<strong>公有/保护</strong>成员，基类的<strong>私有</strong>成员仍不能直接被派生类访问；</li>
+<li><strong>保护继承</strong>：基类的<strong>公有/保护</strong>成员将成为派生类的<strong>保护</strong>成员。</li>
+<li><strong>私有继承</strong>：基类的<strong>公有/保护</strong>成员将成为派生类的<strong>私有</strong>成员。</li>
+</ul>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Base</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="type">int</span> value&#123;<span class="number">1</span>&#125;;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">show</span><span class="params">()</span> </span>&#123; std::cout &lt;&lt; value &lt;&lt; <span class="string">&#x27;\n&#x27;</span>; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Derive</span>: <span class="keyword">public</span> Base &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="type">int</span> value&#123;<span class="number">2</span>&#125;; <span class="comment">// 将基类的 value 覆盖，如果要使用基类的成员变量 value，则需要加上 Base::</span></span><br><span class="line">    </span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">show</span><span class="params">()</span> </span>&#123; std::cout &lt;&lt; Base::value &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; value &lt;&lt; <span class="string">&#x27;\n&#x27;</span>; &#125;      <span class="comment">// 分别打印基类的 value 与自身的 value</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  Derive d;</span><br><span class="line">  d.<span class="built_in">show</span>();</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// output:</span></span><br><span class="line"><span class="comment">// 1 2</span></span><br></pre></td></tr></table></figure>
+<p>上面展示了一个基本的继承过程。可以看到 <code>Derive</code> 可以将 <code>Base</code> 中的成员变量/函数进行覆盖，在 <code>Derive</code> 的命名空间中优先取 <code>Derive</code> 的成员。但覆盖后，基类的变量并不是消失了，而是依然可以通过 <code>Base::value</code> 进行访问，这是怎么做到的？类继承时，内存是如何分配的？不妨加入以下代码进行分析：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">std::cout &lt;&lt; <span class="built_in">sizeof</span>(Base) &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; <span class="built_in">sizeof</span>(Derive) &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line"><span class="type">int</span> *q = <span class="built_in">reinterpret_cast</span>&lt;<span class="type">int</span>*&gt;(&amp;d);</span><br><span class="line">std::cout &lt;&lt; q &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; q[<span class="number">0</span>] &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; q[<span class="number">1</span>] &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line"><span class="comment">// output:</span></span><br><span class="line"><span class="comment">// 4 8</span></span><br><span class="line"><span class="comment">// 0x78fe10 1 2</span></span><br></pre></td></tr></table></figure>
+<p>可以看到，<code>Derive</code> 和 <code>Base</code> 的类大小分别为 4 和 8，恰好是 1 个 int 和 2 个 int 的大小，并且将 <code>Derive</code> 对象地址重新解读为 <code>int*</code> 时，发现有连续的一片内存分别存储了两个 int 值 1 与 2——这恰好是 <code>Base</code> 和 <code>Derive</code> 两个类对 <code>value</code> 初始化的值。这样一来就明朗许多——<code>Derive</code> 类对象的内存里最开始那一部分（4B）是专门分配给基类 <code>Base</code> 的，并且其内存布局为：</p>
+<p><img src="image-20230215125309320.png" alt="image-20230215125309320" style="zoom:50%;" /></p>
+<h4 id="虚继承">虚继承</h4>
+<p>再来点更复杂的情况：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Base</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="type">int</span> value&#123;<span class="number">1</span>&#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Derive1</span>: <span class="keyword">public</span> Base &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="type">int</span> value1&#123;<span class="number">2</span>&#125;;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">modify</span><span class="params">()</span> </span>&#123; Base::value *= <span class="number">2</span>; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Derive2</span>: <span class="keyword">public</span> Base &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="type">int</span> value2&#123;<span class="number">3</span>&#125;;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">modify</span><span class="params">()</span> </span>&#123; Base::value *= <span class="number">2</span>; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Final</span>: <span class="keyword">public</span> Derive2, <span class="keyword">public</span> Derive1 &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">modify1</span><span class="params">()</span> </span>&#123; Derive1::<span class="built_in">modify</span>(); &#125;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">modify2</span><span class="params">()</span> </span>&#123; Derive2::<span class="built_in">modify</span>(); &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  Final *f = <span class="keyword">new</span> Final;</span><br><span class="line">  std::cout &lt;&lt; <span class="built_in">sizeof</span>(Base) &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; <span class="built_in">sizeof</span>(Derive1) &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; <span class="built_in">sizeof</span>(Derive2) &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; <span class="built_in">sizeof</span>(Final) &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">    </span><br><span class="line">  <span class="type">int</span> *q = <span class="built_in">reinterpret_cast</span>&lt;<span class="type">int</span>*&gt;(f);</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="built_in">sizeof</span>(Final) / <span class="built_in">sizeof</span>(<span class="type">int</span>); i++) &#123;</span><br><span class="line">    std::cout &lt;&lt; q[i] &lt;&lt; <span class="string">&quot; &quot;</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">    </span><br><span class="line">  f-&gt;<span class="built_in">modify1</span>();</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="built_in">sizeof</span>(Final) / <span class="built_in">sizeof</span>(<span class="type">int</span>); i++) &#123;</span><br><span class="line">    std::cout &lt;&lt; q[i] &lt;&lt; <span class="string">&quot; &quot;</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// output:</span></span><br><span class="line"><span class="comment">// 4 8 8 16</span></span><br><span class="line"><span class="comment">// 1 3 1 2</span></span><br><span class="line"><span class="comment">// 1 3 2 2</span></span><br></pre></td></tr></table></figure>
+<p>根据上面的输出，我们发现，<code>Final</code> 分别继承了 <code>Derive1</code> 与 <code>Derive2</code>，也为这两个直接基类分配了各 8B 的内存空间。并且，<code>Final</code> 中的内存布局也是先 <code>Derive2</code> 后 <code>Derive1</code>，这与 <code>Final</code> 类声明中继承列表中的基类顺序是一致的。</p>
+<p>但很快也就发现了问题：<code>Derive1</code> 与 <code>Derive2</code> 的基类 <code>Base</code> 并不位于同一片内存，这就导致对 <code>Derive1</code> 的那个 <code>Base</code> 进行修改时，并不会影响 <code>Derive2</code> 的 <code>Base</code>，还产生了二义性（上面这段代码中，<code>Final</code> 无法使用 <code>Base</code> 的变量）与数据冗余。这是我们不希望发生的——我们通常反而更希望 <code>Final</code> 的族谱中只有唯一的 <code>Base</code>。</p>
+<p>如何解决这个问题？答案为使用关键字 <code>virtual</code> 的<strong>虚继承</strong>。对于每个指定为 <code>virtual</code> 的不同基类，最终派生对象中仅含有该类型的一个基类子对象，即使该类在继承层级中出现多次也是如此，只要它每次都以 <code>virtual</code> 继承。</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Base</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="type">int</span> value&#123;<span class="number">0</span>&#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Derive1</span>: <span class="keyword">virtual</span> <span class="keyword">public</span> Base &#123;&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Derive2</span>: <span class="keyword">virtual</span> <span class="keyword">public</span> Base &#123;&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Final</span>: <span class="keyword">public</span> Derive2, <span class="keyword">public</span> Derive1 &#123;&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  Final f;</span><br><span class="line">  f.value++;</span><br><span class="line">  f.Derive1::value++;</span><br><span class="line">  f.Derive2::value++;</span><br><span class="line">  std::cout &lt;&lt; f.value;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// output:</span></span><br><span class="line"><span class="comment">// 3</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>多继承在现实应用场景中容易出问题，尽量避免使用多继承。</p>
+</blockquote>
+<h3 id="多态">多态</h3>
+<p><strong>多态</strong>，即多种形态，能够使得不同的对象去完成同一件事时，产生不同的动作和结果。最常见的多态有<strong>静态多态</strong>与<strong>动态多态</strong>两种，</p>
+<h4 id="静态多态">静态多态</h4>
+<p><strong>静态多态</strong>依靠函数<strong>重载</strong>实现，在编译时完成绑定，编译器根据函数实参的类型，推断出要调用的函数，如果有对应的函数就调用该函数，否则出现编译错误。</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">bar</span><span class="params">(<span class="type">int</span> a)</span> </span>&#123; std::cout &lt;&lt; <span class="string">&quot;int &quot;</span> &lt;&lt; a &lt;&lt; <span class="string">&#x27;\n&#x27;</span>; &#125;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">bar</span><span class="params">(<span class="type">char</span> b)</span> </span>&#123; std::cout &lt;&lt; <span class="string">&quot;char &quot;</span> &lt;&lt; b &lt;&lt; <span class="string">&#x27;\n&#x27;</span>; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  Foo f;</span><br><span class="line">  f.<span class="built_in">bar</span>(<span class="number">1</span>);</span><br><span class="line">  f.<span class="built_in">bar</span>(<span class="string">&#x27;2&#x27;</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// output:</span></span><br><span class="line"><span class="comment">// int 1</span></span><br><span class="line"><span class="comment">// char 2</span></span><br></pre></td></tr></table></figure>
+<h4 id="动态多态">动态多态</h4>
+<p><strong>动态多态</strong>依靠类的<strong>虚函数</strong>实现，在运行时完成绑定，编译器根据对象类型执行相应函数。</p>
+<p>先来说说什么是虚函数。前面提到了虚继承，用到 <code>virtual</code> 关键字，事实上，如果一个函数被 <code>virtual</code> 修饰，那么这个函数就成为了<strong>虚函数</strong>。正常情况下，虚函数表现的和普通函数一样，而一旦通过<strong>基类指针</strong>或<strong>引用</strong>调用虚函数，多态发生了。</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Base</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">foo</span><span class="params">()</span> </span>&#123; std::cout &lt;&lt; <span class="string">&quot;Base foo\n&quot;</span>; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Derive1</span>: <span class="keyword">public</span> Base &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">foo</span><span class="params">()</span> </span>&#123; std::cout &lt;&lt; <span class="string">&quot;Derive1 foo\n&quot;</span>; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Derive2</span>: <span class="keyword">public</span> Base &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">foo</span><span class="params">()</span> </span>&#123; std::cout &lt;&lt; <span class="string">&quot;Derive2 foo\n&quot;</span>; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  Base base;</span><br><span class="line">  Derive1 derive1;</span><br><span class="line">  Derive2 derive2;</span><br><span class="line">  base.<span class="built_in">foo</span>();</span><br><span class="line"></span><br><span class="line">  Base* base_ptr = &amp;derive1;</span><br><span class="line">  base_ptr-&gt;<span class="built_in">foo</span>();</span><br><span class="line"></span><br><span class="line">  Base&amp; base_ref = derive2;</span><br><span class="line">  base_ref.<span class="built_in">foo</span>();</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// output:</span></span><br><span class="line"><span class="comment">// Base foo</span></span><br><span class="line"><span class="comment">// Derive1 foo</span></span><br><span class="line"><span class="comment">// Derive2 foo</span></span><br></pre></td></tr></table></figure>
+<p>不难发现，<code>base_ptr</code> 与 <code>base_ref</code> 虽然为 <code>Base*</code> 与 <code>Base&amp;</code> 类型，但却能与派生类 <code>Derive1</code> / <code>Derive2</code> 绑定，并且这两者调用虚函数 <code>foo()</code> 时，执行的效果如同派生类对象执行的那样，并且进一步发现，<strong>调用哪个类型的虚函数，取决于基类指针指向或引用的对象是哪种类型的对象</strong>。这便是多态。</p>
+<p>而不使用指针或引用直接调用，则与普通函数无异，就比如 <code>base.foo()</code> 表现的那样。</p>
+<p>值得注意的是，需要派生类进行了虚函数的<strong>重写/覆盖</strong>才能达到这一效果，即要求<strong>派生类中有一个和基类完全相同的虚函数</strong>。在这里，<code>Base</code> 和 <code>Derive</code> 的 <code>foo()</code> 函数（不管 <code>virtual</code>）正是完全相同的。如果派生类并没有进行重写，则会按照派生类的直接基类来。在多继承语境下，需避免二义性。</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Base</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">foo</span><span class="params">()</span> </span>&#123; std::cout &lt;&lt; <span class="string">&quot;Base foo\n&quot;</span>; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Derive</span> : <span class="keyword">public</span> Base &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">foo</span><span class="params">()</span> </span>&#123; std::cout &lt;&lt; <span class="string">&quot;Derive foo\n&quot;</span>; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Final</span> : <span class="keyword">public</span> Derive &#123;&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  Final f;</span><br><span class="line"></span><br><span class="line">  Base *base_ptr = &amp;f;</span><br><span class="line">  base_ptr-&gt;<span class="built_in">foo</span>();</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// output:</span></span><br><span class="line"><span class="comment">// Derive foo</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>有一个例外，就是<strong>协变</strong>，也就是基类和派生类的返回值类型的相对关系与基类和派生类的相对关系一样，并且继承方式也相同（即族谱路线都一样），此时也满足多态，不需要返回值类型相同。</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">A</span> &#123;&#125;;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">B</span> : <span class="keyword">public</span> A &#123;&#125;;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">C</span> : <span class="keyword">public</span> B &#123;&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Base</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> A *<span class="title">foo</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;Base foo\n&quot;</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> A;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Derive</span> : <span class="keyword">public</span> Base &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function">B *<span class="title">foo</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;Derive foo\n&quot;</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> B;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Final</span> : <span class="keyword">public</span> Derive &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function">C *<span class="title">foo</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;Final foo\n&quot;</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> C;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  Base b;</span><br><span class="line">  Final f;</span><br><span class="line"></span><br><span class="line">  Base *base_ptr = &amp;f;</span><br><span class="line">  base_ptr-&gt;<span class="built_in">foo</span>();</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// output:</span></span><br><span class="line"><span class="comment">// Final foo</span></span><br></pre></td></tr></table></figure>
+<p>继承族谱分别为 A-&gt;B-&gt;C 与 Base-&gt;Derive-&gt;Final，并且均为公有继承，于是<strong>协变</strong>成立。</p>
+</blockquote>
+<h4 id="虚函数表">虚函数表</h4>
+<p>那么问题来了，C++ 是如何实现多态的？先看下面这串代码：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Base</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">foo</span><span class="params">()</span> </span>&#123; std::cout &lt;&lt; <span class="string">&quot;Base foo\n&quot;</span>; &#125;</span><br><span class="line">  <span class="type">int</span> value;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Derive</span> : <span class="keyword">public</span> Base &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">foo</span><span class="params">()</span> </span>&#123; std::cout &lt;&lt; <span class="string">&quot;Derive foo\n&quot;</span>; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  std::cout &lt;&lt; <span class="built_in">sizeof</span>(Base) &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; <span class="built_in">sizeof</span>(Derive);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// output:</span></span><br><span class="line"><span class="comment">// 16 16</span></span><br></pre></td></tr></table></figure>
+<p>类 <code>Base</code>，在仅有一个虚函数和一个 <code>int</code> 型变量的情况下，内存大小竟然是 16B。事实上，任何一个拥有虚函数的类，无论有多少虚函数，都会在内存空间的最开始分配 8B 的空间（64 位电脑的 feature），用于存放指向<strong>虚函数表</strong>的指针。所谓虚函数表，实际上就是存放了所有<strong>虚函数指针</strong>的一片内存。这么一来，<code>Base</code> 大小为 16B 也就好理解了——前面 8B 为虚函数表指针，后面 8B 是为了进行内存对齐，而 <code>Derive</code> 的内存则是完全分配到了基类。</p>
+<p>在上面的代码中将 <code>main()</code> 改为以下语句，则可以比较清楚地观察内存布局：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">using</span> func = <span class="built_in">void</span>(*)();</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  Base base;</span><br><span class="line">  Derive derive;</span><br><span class="line">  Base* base_ptr = &amp;derive;</span><br><span class="line">  func f;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">auto</span> vfptr = <span class="built_in">reinterpret_cast</span>&lt;<span class="type">long</span> <span class="type">long</span>**&gt;(base_ptr)[<span class="number">0</span>]; <span class="comment">// 获取 Derive 的虚函数表指针</span></span><br><span class="line">  std::cout &lt;&lt; vfptr &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; vfptr[<span class="number">0</span>] &lt;&lt; <span class="string">&quot; &quot;</span>;</span><br><span class="line">  f = (func)(vfptr[<span class="number">0</span>]);</span><br><span class="line">  <span class="built_in">f</span>();</span><br><span class="line"></span><br><span class="line">  base_ptr = &amp;base;</span><br><span class="line">  vfptr = <span class="built_in">reinterpret_cast</span>&lt;<span class="type">long</span> <span class="type">long</span>**&gt;(base_ptr)[<span class="number">0</span>];      <span class="comment">// 获取 Base 的虚函数表指针</span></span><br><span class="line">  std::cout &lt;&lt; vfptr &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; vfptr[<span class="number">0</span>] &lt;&lt; <span class="string">&quot; &quot;</span>;</span><br><span class="line">  f = (func)(vfptr[<span class="number">0</span>]);</span><br><span class="line">  <span class="built_in">f</span>();</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// output:</span></span><br><span class="line"><span class="comment">// 0x4c2f50 0x421130 Derive foo</span></span><br><span class="line"><span class="comment">// 0x4c2f30 0x421100 Base foo</span></span><br></pre></td></tr></table></figure>
+<p>不难发现，<code>Derive</code> 与 <code>Base</code> 对应两张不同的虚函数表，并且表中的存的第一个指针正是指向各自的成员函数 <code>foo()</code>。</p>
+<blockquote>
+<p>之所以说动态多态是在运行时绑定，是因为编译时编译器并不确定指向的到底是哪个类型的对象，只有在运行时才能确定，去对应的虚函数表中找到对应虚函数并执行。</p>
+</blockquote>
+<p>再来看看派生类<strong>未进行重写</strong>的情况：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Base</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">foo</span><span class="params">()</span> </span>&#123; std::cout &lt;&lt; <span class="string">&quot;Base foo\n&quot;</span>; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Derive</span> : <span class="keyword">public</span> Base &#123;&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> func = <span class="built_in">void</span>(*)();</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  Base base;</span><br><span class="line">  Derive derive;</span><br><span class="line">  Base* base_ptr = &amp;derive;</span><br><span class="line">  func f;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">auto</span> vfptr = <span class="built_in">reinterpret_cast</span>&lt;<span class="type">long</span> <span class="type">long</span>**&gt;(base_ptr)[<span class="number">0</span>];</span><br><span class="line">  std::cout &lt;&lt; vfptr &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; vfptr[<span class="number">0</span>] &lt;&lt; <span class="string">&quot; &quot;</span>;</span><br><span class="line">  f = (func)(vfptr[<span class="number">0</span>]);</span><br><span class="line">  <span class="built_in">f</span>();</span><br><span class="line"></span><br><span class="line">  base_ptr = &amp;base;</span><br><span class="line">  vfptr = <span class="built_in">reinterpret_cast</span>&lt;<span class="type">long</span> <span class="type">long</span>**&gt;(base_ptr)[<span class="number">0</span>];</span><br><span class="line">  std::cout &lt;&lt; vfptr &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; vfptr[<span class="number">0</span>] &lt;&lt; <span class="string">&quot; &quot;</span>;</span><br><span class="line">  f = (func)(vfptr[<span class="number">0</span>]);</span><br><span class="line">  <span class="built_in">f</span>();</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// output:</span></span><br><span class="line"><span class="comment">// 0x4c2f50 0x421100 Base foo</span></span><br><span class="line"><span class="comment">// 0x4c2f30 0x421100 Base foo</span></span><br></pre></td></tr></table></figure>
+<p>说明在未出现重写的情况下，派生类依然在基类的对应位置新建了一张属于自己的虚函数表，但里面存放的指针仍然指向了 <code>Base::foo()</code>。而上面重写了基类虚函数的派生类，则会将自己的虚函数表对应那一项进行覆盖。</p>
+<p>之前说过，当一个派生类继承基类时，派生会继承基类的函数的调用权。所以如果一个基类包含了虚函数，那么派生类也可调用这些虚函数，换句话说，一个类继承了包含虚函数的基类，那么这个类也拥有自己的虚表。</p>
+<p>于是，一份关于内存分配的构想已经隐隐约约浮现出来了。</p>
+<p><img src="image-20230215194050201.png" alt="image-20230215194050201" style="zoom:70%;" /></p>
+<center>
+<font size=3>派生类未重写时</font>
+</center>
+<p><img src="image-20230215194222982.png" alt="image-20230215194222982" style="zoom:70%;" /></p>
+<center>
+<font size=3>派生类重写时</font>
+</center>
+<blockquote>
+<p>更详细的关于虚函数内存的机制可以看<a href="https://blog.twofei.com/496/">这篇文章</a>。</p>
+</blockquote>
+<h4 id="纯虚函数">纯虚函数</h4>
+<p>说了那么多，虚函数到底有啥用？</p>
+<p>我们目前已经掌握的知识有，可以通过基类指针或引用绑定派生类，并在调用虚函数时实现多态，根据这一特性，如果希望一个函数形参面向目标为所有族谱成员的话，就不需要对所有成员挨个实现，直接将形参设为基类指针，在需要实现多态的功能处设为虚函数即可。这和 <code>std::function</code> 一样，都起到<strong>类型擦除</strong>的作用。</p>
+<blockquote>
+<p>这是最大的作用了。</p>
+</blockquote>
+<p>以及，还有一个特殊的虚函数，称为<strong>纯虚函数</strong>，声明为 <code>virtual type funcname() = 0;</code>。</p>
+<p>拥有纯虚函数的类称为<strong>抽象类</strong>，无法实例化，而仅拥有纯虚函数的类称为<strong>接口类</strong>。纯虚函数只是一个接口（interface），是一个函数的声明而已，需要留给派生类去进行实现。只有实现了该接口的派生类才能进行实例化，否则依然是抽象类，无法实例化。</p>
+<h4 id="注意">注意</h4>
+<p>功能如此强大的特性，必然涉及到一些<strong>限制 or 注意事项</strong>，总的来说有以下几点：</p>
+<ol type="1">
+<li>普通函数（非类成员函数）不能为虚函数。这是显而易见的，因为实现虚函数的基础之一正是类的<strong>继承特性</strong>；</li>
+<li>静态函数不能是虚函数。毕竟是全类共享，不存在继承一说；</li>
+<li>构造函数不能是虚函数。因为在调用构造函数时，虚表指针并没有在对象的内存空间中，更别说去虚表中找对应的虚函数了，必须要构造函数调用完成后才会形成虚表指针；</li>
+<li>内联函数不能是表现多态性时的虚函数。这点在 inline 那篇文章中提到过了；</li>
+<li>当可能用到基类指针/引用绑定派生类时，基类的析构函数必须为虚函数。这是因为当出现 <code>Base* ptr = new Derive</code> 这样的代码时，虽然 <code>ptr</code> 是 <code>Base</code> 类的指针，但我们实际上还分配了一个 <code>Derive</code> 类的空间，如果析构函数非虚，则会执行 <code>Base</code> 类的析构函数，而属于 <code>Derive</code> 的那一部分并没有被析构。为了程序安全运行，我们应该要调用派生类的析构函数，也就是通过将基类析构函数设为虚函数来实现；</li>
+</ol>
+]]></content>
+      <categories>
+        <category>C++ Basic</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>C++ の 静态修饰符(Static)</title>
+    <url>/C-Basic/C-Static/</url>
+    <content><![CDATA[<p><code>static</code> 是 C++ 中很常用的修饰符，它被用来控制变量的存储方式和可见性。</p>
+<span id="more"></span>
+<h3 id="static-普通变量">static 普通变量</h3>
+<p><code>static</code> 修饰的普通变量存储在<strong>静态区</strong>，其生命周期延长至整个程序结束。只有第一次会执行初始化，若无初始值，则用默认值进行初始化。</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">Foo</span>() &#123; std::cout &lt;&lt; <span class="string">&quot;Foo\n&quot;</span>; &#125;</span><br><span class="line">  ~<span class="built_in">Foo</span>() &#123; std::cout &lt;&lt; <span class="string">&quot;~Foo\n&quot;</span>; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">func</span><span class="params">()</span> </span>&#123; <span class="type">static</span> Foo f; &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;Start\n&quot;</span>;</span><br><span class="line">  <span class="built_in">func</span>(); <span class="comment">// 初始化 Foo f</span></span><br><span class="line">  <span class="built_in">func</span>(); <span class="comment">// 不再对 f 初始化</span></span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;End\n&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// output:</span></span><br><span class="line"><span class="comment">// Start</span></span><br><span class="line"><span class="comment">// Foo</span></span><br><span class="line"><span class="comment">// End</span></span><br><span class="line"><span class="comment">// ~Foo</span></span><br></pre></td></tr></table></figure>
+<p>特别的，<code>static</code> 修饰<strong>全局变量</strong>时，这个全局变量只能在本文件中访问，不能在其它文件中访问，即便是 <code>extern</code> 外部声明也不可以。</p>
+<h3 id="static-函数">static 函数</h3>
+<p><code>static</code> 修饰的函数仅在定义该函数的文件内才能使用。一般在多人开发项目时，为了防止与他人命名空间里的函数重名，可以这么做。</p>
+<h3 id="static-类成员变量类成员函数">static 类成员变量/类成员函数</h3>
+<p><code>static</code> 修饰的类成员变量/类成员函数提供一层<strong>类共享</strong>语义，即该成员变量/函数<strong>不属于任一对象，而是属于整个类</strong>，在内存中只占用一份空间，可直接通过 <code>类名::成员变量名</code> 或 <code>类名::成员函数名</code> 访问，而不需要先创建对象。根据这一特点，静态函数中也就不存在 <code>this</code> 指针，也无法使用非静态成员变量。</p>
+<blockquote>
+<p>非静态成员变量依附于特定的对象，而静态成员函数在类实例化之前就已经分配空间，此时非静态成员变量连个影子都见不到，更别说使用了。</p>
+</blockquote>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123;</span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="type">int</span> non_static&#123;<span class="number">0</span>&#125;;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="comment">// 静态函数既可在类内定义，也可在类外定义</span></span><br><span class="line">  <span class="function"><span class="type">static</span> <span class="type">void</span> <span class="title">func1</span><span class="params">()</span></span>;      </span><br><span class="line">  <span class="function"><span class="type">static</span> <span class="type">void</span> <span class="title">func2</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    std::cout &lt;&lt; non_static; <span class="comment">// ERROR! 不能在静态函数中使用非静态变量</span></span><br><span class="line">    <span class="built_in">func</span>();                  <span class="comment">// ERROR! 不能在静态函数中调用非静态函数</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">func</span><span class="params">()</span> </span>&#123; <span class="built_in">func1</span>(); &#125;   <span class="comment">// OK! 可以在非静态函数中调用静态函数，这里的 func1 并不会隐式使用 this</span></span><br><span class="line"></span><br><span class="line">  <span class="type">static</span> <span class="type">int</span> val1；</span><br><span class="line">  <span class="type">static</span> <span class="type">const</span> <span class="type">int</span> val2&#123;<span class="number">0</span>&#125;; <span class="comment">// 静态常量只能在类内定义</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Foo::func1</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line"><span class="type">int</span> Foo::val1 = <span class="number">1</span>;  <span class="comment">// 静态非常量只能在类外定义</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  Foo::<span class="built_in">func1</span>(); <span class="comment">// OK!</span></span><br><span class="line">  Foo::<span class="built_in">func</span>();  <span class="comment">// ERROR! 不能用此法调用非静态函数</span></span><br><span class="line">    </span><br><span class="line">  Foo f;</span><br><span class="line">  f.<span class="built_in">func1</span>();    <span class="comment">// OK! 既然 func1 属于 Foo 类，那么任一对象均可调用该函数</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>需要注意的是：</p>
+<ul>
+<li>静态成员变量必须先初始化；</li>
+<li>构造函数与析构函数、运算符重载这类特殊函数不能用 <code>static</code> 进行修饰；</li>
+</ul>
+]]></content>
+      <categories>
+        <category>C++ Basic</category>
       </categories>
       <tags>
         <tag>C++</tag>
