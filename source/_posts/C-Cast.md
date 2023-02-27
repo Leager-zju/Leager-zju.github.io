@@ -15,6 +15,40 @@ img:
 
 <!--more-->
 
+传统的转换总结来说分为**隐式**与**显式**两种。
+
+## 隐式转换
+
+凡是在语境中使用了某种表达式类型 `T1`，但语境不接受该类型，而接受另一类型 `T2` 的时候，会进行**隐式转换**。
+
+```c++
+int a = 1;
+long long b = a + 1; // int -> long long
+if (a) {             // int -> bool
+  char c = a;        // int -> char
+}
+const int d = a;     // int -> const int
+```
+
+事实上，C++ 的任何的**隐式转换**都是使用 `static_cast` 来实现，所以讲 `static_cast` 的时候已经提了一部分内容。
+
+> 这里有个比较有有意思的例子：**生成了几个 string？**
+> ```c++
+> std::string s = "hi";
+> ```
+>
+> 首先，`“hi”` 会被编译器认为是 `const char*` 型字面量。
+>
+> - 在 C++ 11 之前，会首先调用 `std::string::string(const char *)` 的初始化构造函数，进行隐式转换生成一个临时变量，再调用拷贝构造函数生成 `s`；
+> - 引入移动语义的 C++ 11 之后，依然会隐式转换生成临时变量，但此时由于该变量为右值，于是调用了移动构造函数将临时变量保有的资源 `“hi”` 移至 `s` 中；
+> - 而到了 C++ 17，引入了一个叫[**复制消除**](https://zh.cppreference.com/w/cpp/language/copy_elision)的规则，要求在满足一定的条件下避免对象的复制，于是这里的临时变量不会生成，直接调用 `std::string::string(const char *)` 构造对象。这可比移动构造高效多了；
+>
+> 综上所述，在不同编译器标准下，答案分别为 2 2 1。
+
+## 显式转换
+
+显式转换就是在表达式之前加上想要转换的目标类型。
+
 ### Cast in C
 
 C 中的类型转换语法非常简单粗暴，直接在表达式前加上 `(Target_Type)` 即可，如：
@@ -265,36 +299,44 @@ int main() {
 // a = 1 *pa = 3 ra = 3
 ```
 
-### 隐式转换
+## 用户定义转换
 
-凡是在语境中使用了某种表达式类型 `T1`，但语境不接受该类型，而接受另一类型 `T2` 的时候，会进行**隐式转换**。
+在现代 C++ 中，传统转换已然无法轻易满足日益增长的应用需求，需要用户自己制定转换规则，来提高代码效率。
+
+但用户能修改的只有两种，初始化构造函数与用户定义转换函数。
 
 ```c++
-int a = 1;
-long long b = a + 1; // int -> long long
-if (a) {             // int -> bool
-  char c = a;        // int -> char
+#include <iostream>
+
+class Foo {
+  int val;
+ public:
+  // 初始化构造函数
+  // 其他类型 -> Foo
+  Foo(int v): val(v) { std::cout << "call Foo(int)\n" }
+ 
+  // 用户定义转换函数，不需要显式指定返回值
+  // Foo -> 其他类型
+  operator int() { return val; }               // 可隐式自定义转换
+  explicit operator int*() { return nullptr; } // 强制显式自定义转换
+};
+
+int main() {
+  Foo f(1);
+
+  if (f > 0) {
+    std::cout << "call operator int()\n";
+  }
+
+  if (static_cast<int*>(f) == nullptr) {
+    std::cout << "call explicit operator int* ()\n";
+  }
+  return 0;
 }
+// output:
+// call Foo(int)
+// call operator int()
+// call explicit operator int* ()
 ```
 
-事实上，C++ 的任何的**隐式转换**都是使用 `static_cast` 来实现。所以具体的直接看 `static_cast` 就行了，这里就列几个比较有代表性的例子。
-
-#### 生成了几个 string
-
-```c++
-std::string s = "hi";
-```
-
-首先，`“hi”` 会被编译器认为是 `const char*` 型字面量。
-
-- 在 C++ 11 之前，会首先调用 `std::string::string(const char *)` 的初始化构造函数，进行隐式转换生成一个临时变量，再调用拷贝构造函数生成 `s`；
-- 引入移动语义的 C++ 11 之后，依然会隐式转换生成临时变量，但此时由于该变量为右值，于是调用了移动构造函数将临时变量保有的资源 `“hi”` 移至 `s` 中；
-- 而到了 C++ 17，引入了一个叫[**复制消除**](https://zh.cppreference.com/w/cpp/language/copy_elision)的规则，要求在满足一定的条件下避免对象的复制，于是这里的临时变量不会生成，直接调用 `std::string::string(const char *)` 构造对象；
-
-> 在不同编译器标准下，答案分别为 2 2 1
-
-
-
-### 显示转换
-
-#### User Defined Cast
+有了这一功能，我们就能轻易地使用 `operator bool()` 来将某些类对象直接嵌到条件判断表达式中——直接通过自定义规则隐式转换为可被接收的 `bool` 类型。
