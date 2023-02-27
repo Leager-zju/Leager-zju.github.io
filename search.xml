@@ -9803,4 +9803,146 @@ n 个实例，并返回指向它的指针；</li>
         <tag>C++</tag>
       </tags>
   </entry>
+  <entry>
+    <title>C++ の 类型转换(Cast)</title>
+    <url>/C-Basic/C-Cast/</url>
+    <content><![CDATA[<p>当表达式期望为 <code>T</code> 类型，而我们只能产生 <code>S</code>
+类型的表达式时，就需要利用<strong>类型转换</strong>功能来满足需求。</p>
+<span id="more"></span>
+<p>传统的转换总结来说分为<strong>隐式</strong>与<strong>显式</strong>两种。</p>
+<h2 id="隐式转换">隐式转换</h2>
+<p>凡是在语境中使用了某种表达式类型
+<code>T1</code>，但语境不接受该类型，而接受另一类型 <code>T2</code>
+的时候，会进行<strong>隐式转换</strong>。</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> a = <span class="number">1</span>;</span><br><span class="line"><span class="type">long</span> <span class="type">long</span> b = a + <span class="number">1</span>; <span class="comment">// int -&gt; long long</span></span><br><span class="line"><span class="keyword">if</span> (a) &#123;             <span class="comment">// int -&gt; bool</span></span><br><span class="line">  <span class="type">char</span> c = a;        <span class="comment">// int -&gt; char</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> d = a;     <span class="comment">// int -&gt; const int</span></span><br></pre></td></tr></table></figure>
+<p>事实上，C++ 的任何的<strong>隐式转换</strong>都是使用
+<code>static_cast</code> 来实现，所以讲 <code>static_cast</code>
+的时候已经提了一部分内容。</p>
+<blockquote>
+<p>这里有个比较有有意思的例子：<strong>生成了几个 string？</strong>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">std::string s = <span class="string">&quot;hi&quot;</span>;</span><br></pre></td></tr></table></figure></p>
+<p>首先，<code>“hi”</code> 会被编译器认为是 <code>const char*</code>
+型字面量。</p>
+<ul>
+<li>在 C++ 11 之前，会首先调用
+<code>std::string::string(const char *)</code>
+的初始化构造函数，进行隐式转换生成一个临时变量，再调用拷贝构造函数生成
+<code>s</code>；</li>
+<li>引入移动语义的 C++ 11
+之后，依然会隐式转换生成临时变量，但此时由于该变量为右值，于是调用了移动构造函数将临时变量保有的资源
+<code>“hi”</code> 移至 <code>s</code> 中；</li>
+<li>而到了 C++ 17，引入了一个叫<a
+href="https://zh.cppreference.com/w/cpp/language/copy_elision"><strong>复制消除</strong></a>的规则，要求在满足一定的条件下避免对象的复制，于是这里的临时变量不会生成，直接调用
+<code>std::string::string(const char *)</code>
+构造对象。这可比移动构造高效多了；</li>
+</ul>
+<p>综上所述，在不同编译器标准下，答案分别为 2 2 1。</p>
+</blockquote>
+<h2 id="显式转换">显式转换</h2>
+<p>显式转换就是在表达式之前加上想要转换的目标类型。</p>
+<h3 id="cast-in-c">Cast in C</h3>
+<p>C 中的类型转换语法非常简单粗暴，直接在表达式前加上
+<code>(Target_Type)</code> 即可，如：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="type">double</span> pi = <span class="number">3.14</span>;</span><br><span class="line"><span class="type">int</span> p = (<span class="type">int</span>)pi;</span><br><span class="line">std::cout &lt;&lt; p; <span class="comment">// output: 3</span></span><br></pre></td></tr></table></figure>
+<p>但这种粗暴的强转会带来许多难以察觉的安全性问题。于是，C++
+提供了许多应用场景更广泛的转换算子，用于删除 C
+语言转换中的一些多义性和危险继承。</p>
+<h3 id="cast-in-c-1">Cast in C++</h3>
+<h4 id="static_cast">static_cast</h4>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="built_in">static_cast</span>&lt;new_type&gt;(expr);</span><br></pre></td></tr></table></figure>
+<p>该算子实现的效果与 C
+中的强转差不多，但由于<strong>没有</strong>在运行时进行类型检查来确保安全性，故跟
+<strong>Cast in C</strong>
+一样存在隐患，用于<strong>非多态对象</strong>的转换。</p>
+<blockquote>
+<p>所谓<strong>多态对象</strong>，就是声明或继承了至少一个虚函数的<strong>类类型</strong>的对象。每个多态对象中，实现都会储存额外的信息，它被用于进行虚函数的调用，<strong>RTTI</strong>
+功能特性也用它在运行时确定对象创建时所用的类型，而不管使用它的表达式是什么类型。</p>
+<p>对于<strong>非多态对象</strong>，值的解释方式由使用对象的表达式所确定，这在编译期就已经决定了。</p>
+</blockquote>
+<p>通常用于数值类型的相互转换，比如浮点型到整型（如 <code>double</code>
+到 <code>int</code>），整型到字符型（如 <code>int</code> -&gt;
+<code>char</code>）等。</p>
+<blockquote>
+<p>得到的 <code>char</code> 可能没有足够的位来保存整个 <code>int</code>
+值，故需要程序员来验证转换的结果是否安全。</p>
+</blockquote>
+<p>但在类的层次结构之间进行转换时，比如将基类指针<strong>向下转换</strong>为派生类指针这一操作，由于派生类可能有自己新定义的字段或信息，故<strong>向下转换是不安全</strong>的。但<strong>向上转换一定是安全</strong>的，因为派生类一定包含基类的所有信息。</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">B</span> &#123;&#125;;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">D</span>: <span class="keyword">public</span> B &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="type">int</span> val;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Foo</span><span class="params">(B* pb, D* pd)</span> </span>&#123;</span><br><span class="line">  D* pd1 = <span class="built_in">static_cast</span>&lt;D*&gt;(pb); <span class="comment">// not safe! D::val 不在 B 中。</span></span><br><span class="line">                                <span class="comment">// 如果此时 pb 指向一个非 D 类对象，则调用 pd1-&gt;val 出错。</span></span><br><span class="line">  B* pb1 = <span class="built_in">static_cast</span>&lt;B*&gt;(pd); <span class="comment">// safe! 基类指针一定能指向所有派生类</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="dynamic_cast">dynamic_cast</h4>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="built_in">dynamic_cast</span>&lt;new_type&gt;(expr); <span class="comment">// 其中 new_type/expr 必须为指针或引用。若 new_type 为指针，则 expr 必须为指针；如为引用，则 expr 为左值</span></span><br></pre></td></tr></table></figure>
+<p>与 <code>static_cast</code> 相对，<code>dynamic_cast</code>
+在运行时执行类型检查，故用于<strong>多态对象</strong>的转换，且更加安全。具体表现为：</p>
+<ul>
+<li>如果转型成功，那么 <code>dynamic_cast</code>
+就会正确返回转换后的值；</li>
+<li>如果转型失败且 <code>new_type</code> 是指针类型，那么它会返回
+<code>nullptr</code>；</li>
+<li>如果转型失败且 <code>new_type</code> 是引用类型，那么它会抛出
+<code>std::bad_cast</code> 异常。</li>
+</ul>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">A</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">foo</span><span class="params">()</span> </span>&#123; std::cout &lt;&lt; <span class="string">&quot;A foo()\n&quot;</span>; &#125;</span><br><span class="line">  <span class="keyword">virtual</span> ~<span class="built_in">A</span>() = <span class="keyword">default</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">B</span> : <span class="keyword">public</span> A &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">foo</span><span class="params">()</span> <span class="keyword">override</span> </span>&#123; std::cout &lt;&lt; <span class="string">&quot;B foo()\n&quot;</span>; &#125;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">bar</span><span class="params">()</span> </span>&#123; std::cout &lt;&lt; <span class="string">&quot;B bar()\n&quot;</span>; &#125;</span><br><span class="line">  <span class="keyword">virtual</span> ~<span class="built_in">B</span>() = <span class="keyword">default</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">C</span> : <span class="keyword">public</span> B &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">foo</span><span class="params">()</span> </span>&#123; std::cout &lt;&lt; <span class="string">&quot;C foo()\n&quot;</span>; &#125;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">bar</span><span class="params">()</span> </span>&#123; std::cout &lt;&lt; <span class="string">&quot;C bar()\n&quot;</span>; &#125;</span><br><span class="line">  <span class="keyword">virtual</span> ~<span class="built_in">C</span>() = <span class="keyword">default</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Foo</span><span class="params">(A&amp; a)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    [[__maybe_unused__]] C &amp;c = <span class="built_in">dynamic_cast</span>&lt;C&amp;&gt;(a);</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;Cast to C SUCCESS!\n&quot;</span>;</span><br><span class="line">  &#125; <span class="built_in">catch</span>(std::bad_cast) &#123;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;Cast to C ERROR!\n&quot;</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  A* pa1 = <span class="keyword">new</span> C;</span><br><span class="line">  A* pa2 = <span class="keyword">new</span> B;</span><br><span class="line"></span><br><span class="line">  pa1-&gt;<span class="built_in">foo</span>();</span><br><span class="line"></span><br><span class="line">  B* pb = <span class="built_in">dynamic_cast</span>&lt;B*&gt;(pa1);</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;Try to cast A* pa1 to B* pb ...\n&quot;</span>;</span><br><span class="line">  <span class="keyword">if</span> (pb) &#123;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;Cast success\n&quot;</span>;</span><br><span class="line">    pb-&gt;<span class="built_in">foo</span>();</span><br><span class="line">    pb-&gt;<span class="built_in">bar</span>();</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;Cast failed\n&quot;</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  C* pc = <span class="built_in">dynamic_cast</span>&lt;C*&gt;(pa2);</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;Try to cast A* pa2 to C* pc ...\n&quot;</span>;</span><br><span class="line">  <span class="keyword">if</span> (pc) &#123;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;Cast success\n&quot;</span>;</span><br><span class="line">    pc-&gt;<span class="built_in">foo</span>();</span><br><span class="line">    pc-&gt;<span class="built_in">bar</span>();</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;Cast failed\n&quot;</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  C c;</span><br><span class="line">  <span class="built_in">Foo</span>(c);</span><br><span class="line"></span><br><span class="line">  B b;</span><br><span class="line">  <span class="built_in">Foo</span>(b);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// output:</span></span><br><span class="line"><span class="comment">// C foo()</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Try to cast A* pa1 to B* pb ...</span></span><br><span class="line"><span class="comment">// Cast success</span></span><br><span class="line"><span class="comment">// C foo()</span></span><br><span class="line"><span class="comment">// B bar()</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Try to cast A* pa2 to C* pc ...</span></span><br><span class="line"><span class="comment">// cast failed</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Cast to C SUCCESS!</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Cast to C ERROR!</span></span><br></pre></td></tr></table></figure>
+<p>整体类层次结构为
+<code>A -&gt; B -&gt; C</code>。从上述结果中不难发现：</p>
+<ul>
+<li><code>A* pa1</code> 指向 <code>C</code> 类对象，调用虚函数
+<code>foo()</code> 时实现了多态的效果；</li>
+<li><code>A* pa1</code> 指向 <code>C</code> 类对象，转换为
+<code>B*</code> 指针时成功，因为 <code>C</code> 是 <code>B</code>
+的派生类，拥有基类的所有信息；</li>
+<li><code>A* pa2</code> 指向 <code>B</code> 类对象，转换为
+<code>C*</code> 指针时失败，并返回空指针；</li>
+<li><code>A&amp; a</code> 绑定到 <code>C</code> 类对象时，能够转换到
+<code>C&amp;</code> 型；</li>
+<li><code>A&amp; a</code> 绑定到 <code>B</code> 类对象时，无法转换到
+<code>B&amp;</code> 型，并抛出异常；</li>
+</ul>
+<p>总结出，<code>dynamic_cast&lt;new_type&gt;(expr)</code>
+转换成功与否，关键看指针/引用 <code>expr</code> 指向/绑定的对象是否为
+<code>new_type</code>
+的相同类型或派生类，而不用关心指针/引用类型本身。</p>
+<p>再来看另一种情况。</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">A</span> &#123; <span class="function"><span class="keyword">virtual</span> <span class="title">f</span><span class="params">()</span></span>; &#125;;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">B</span> : <span class="keyword">public</span> A &#123; <span class="function"><span class="keyword">virtual</span> <span class="title">f</span><span class="params">()</span></span>; &#125;;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">C</span> : <span class="keyword">public</span> A &#123;&#125;;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">D</span> &#123; <span class="function"><span class="keyword">virtual</span> <span class="title">f</span><span class="params">()</span></span>; &#125;;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">E</span> : <span class="keyword">public</span> B, <span class="keyword">public</span> C, <span class="keyword">public</span> D &#123; <span class="function"><span class="keyword">virtual</span> <span class="title">f</span><span class="params">()</span></span>; &#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">/********</span></span><br><span class="line"><span class="comment"> A  A</span></span><br><span class="line"><span class="comment"> |  |</span></span><br><span class="line"><span class="comment"> B  C  D</span></span><br><span class="line"><span class="comment"> |__|__|</span></span><br><span class="line"><span class="comment">    |</span></span><br><span class="line"><span class="comment">    E</span></span><br><span class="line"><span class="comment">********/</span></span><br></pre></td></tr></table></figure>
+<p>如果我们拥有一个 <code>D* pd = new E;</code> 的指针，希望将其转换为
+<code>A*</code>，一种可行的思路是先转到 <code>E*</code> 再转到
+<code>B*</code> 最后转到 <code>A*</code>，就像这样进行“crabbing”：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">E* pe = <span class="built_in">dynamic_cast</span>&lt;E*&gt;(pd);</span><br><span class="line">B* pb = pe;</span><br><span class="line">A* pa = pb;</span><br></pre></td></tr></table></figure>
+<p>事实上，如果 <code>new_type</code> 与 <code>expr</code>
+所指代的指针/引用类型处于同一层次（比如这里的 <code>D</code> 与
+<code>B</code>），并且 <code>expr</code>
+所指向/绑定的对象为它俩的共同派生类，则可以进行<strong>横向转换</strong>，比如：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">B* pb = <span class="built_in">dynamic_cast</span>&lt;B*&gt;(pd);</span><br></pre></td></tr></table></figure>
+<p>在一些更复杂的类层次结构中，<strong>横向转换</strong>可以极大地提高
+coding 效率。</p>
+<h4 id="reinterpret_cast">reinterpret_cast</h4>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="built_in">reinterpret_cast</span>&lt;new_type&gt;(expr);</span><br></pre></td></tr></table></figure>
+<p><code>reinterpret_cast</code>
+通过对底层比特位重新解读来进行类型间的转换。当然，这也是不安全的，需要程序员手动检查。</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="type">int</span> a;</span><br><span class="line">  std::cout &lt;&lt; &amp;a &lt;&lt; <span class="string">&#x27;\n&#x27;</span></span><br><span class="line">            &lt;&lt; <span class="built_in">reinterpret_cast</span>&lt;<span class="type">unsigned</span> <span class="type">long</span> <span class="type">long</span>&gt;(&amp;a); <span class="comment">// 将 64 位指针类型的 &amp;a 重新解读为 64 位 unsigned long long 类型。</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// output:</span></span><br><span class="line"><span class="comment">// 0000000169AFFD5C</span></span><br><span class="line"><span class="comment">// 6068108636</span></span><br></pre></td></tr></table></figure>
+<h4 id="const_cast">const_cast</h4>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="built_in">const_cast</span>&lt;new_type&gt;(expr);</span><br></pre></td></tr></table></figure>
+<p><code>const_cast</code> 最大特点就在于它可以移除 <code>expr</code> 的
+cv 限定，这是其余几个算子都做不到的。</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">A</span> &#123;</span><br><span class="line">  <span class="type">int</span> val;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">A</span>(<span class="type">int</span> val_): <span class="built_in">val</span>(val_) &#123;&#125;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">show</span><span class="params">()</span> </span>&#123; std::cout &lt;&lt; val &lt;&lt; <span class="string">&#x27;\n&#x27;</span>; &#125;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">foo</span><span class="params">(<span class="type">int</span> i)</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">    <span class="comment">// val = i;                    // ERROR! A::foo() is const</span></span><br><span class="line">    <span class="built_in">const_cast</span>&lt;A*&gt;(<span class="keyword">this</span>)-&gt;val = i; <span class="comment">// A::foo() const 中，this 为 const A* 型，使用 const_cast 去限定后允许修改成员变量</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="function">A <span class="title">a</span><span class="params">(<span class="number">3</span>)</span></span>;</span><br><span class="line">  a.<span class="built_in">show</span>();</span><br><span class="line">  a.<span class="built_in">foo</span>(<span class="number">6</span>);</span><br><span class="line">  a.<span class="built_in">show</span>();</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// output: 6</span></span><br></pre></td></tr></table></figure>
+<p><code>const_cast</code> 使得到非 <code>const</code> / 非
+<code>volatile</code> 类型的指针/引用能够实际指向/绑定到
+<code>const</code> / <code>volatile</code> 对象。通过非
+<code>const</code> 访问路径修改 <code>const</code> 对象和通过非
+<code>volatile</code> 泛左值指代 <code>volatile</code> 对象是 UB。</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="type">const</span> <span class="type">int</span> a = <span class="number">1</span>;</span><br><span class="line">  <span class="type">int</span>* pa = <span class="built_in">const_cast</span>&lt;<span class="type">int</span>*&gt;(&amp;a);</span><br><span class="line">  <span class="type">int</span>&amp; ra = <span class="built_in">const_cast</span>&lt;<span class="type">int</span>&amp;&gt;(a);</span><br><span class="line">    </span><br><span class="line">  *pa = <span class="number">2</span>;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;a = &quot;</span> &lt;&lt; a &lt;&lt; <span class="string">&quot; *pa = &quot;</span> &lt;&lt; *pa &lt;&lt; <span class="string">&quot; ra = &quot;</span> &lt;&lt; ra &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">    </span><br><span class="line">  ra = <span class="number">3</span>;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;a = &quot;</span> &lt;&lt; a &lt;&lt; <span class="string">&quot; *pa = &quot;</span> &lt;&lt; *pa &lt;&lt; <span class="string">&quot; ra = &quot;</span> &lt;&lt; ra &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// output:</span></span><br><span class="line"><span class="comment">// a = 1 *pa = 2 ra = 2</span></span><br><span class="line"><span class="comment">// a = 1 *pa = 3 ra = 3</span></span><br></pre></td></tr></table></figure>
+<h2 id="用户定义转换">用户定义转换</h2>
+<p>在现代 C++
+中，传统转换已然无法轻易满足日益增长的应用需求，需要用户自己制定转换规则，来提高代码效率。</p>
+<p>但用户能修改的只有两种，初始化构造函数与用户定义转换函数。</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123;</span><br><span class="line">  <span class="type">int</span> val;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="comment">// 初始化构造函数</span></span><br><span class="line">  <span class="comment">// 其他类型 -&gt; Foo</span></span><br><span class="line">  <span class="built_in">Foo</span>(<span class="type">int</span> v): <span class="built_in">val</span>(v) &#123; std::cout &lt;&lt; <span class="string">&quot;call Foo(int)\n&quot;</span> &#125;</span><br><span class="line"> </span><br><span class="line">  <span class="comment">// 用户定义转换函数，不需要显式指定返回值</span></span><br><span class="line">  <span class="comment">// Foo -&gt; 其他类型</span></span><br><span class="line">  <span class="function"><span class="keyword">operator</span> <span class="title">int</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> val; &#125;               <span class="comment">// 可隐式自定义转换</span></span><br><span class="line">  <span class="keyword">explicit</span> <span class="keyword">operator</span> <span class="type">int</span>*() &#123; <span class="keyword">return</span> <span class="literal">nullptr</span>; &#125; <span class="comment">// 强制显式自定义转换</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="function">Foo <span class="title">f</span><span class="params">(<span class="number">1</span>)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (f &gt; <span class="number">0</span>) &#123;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;call operator int()\n&quot;</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (<span class="built_in">static_cast</span>&lt;<span class="type">int</span>*&gt;(f) == <span class="literal">nullptr</span>) &#123;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;call explicit operator int* ()\n&quot;</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// output:</span></span><br><span class="line"><span class="comment">// call Foo(int)</span></span><br><span class="line"><span class="comment">// call operator int()</span></span><br><span class="line"><span class="comment">// call explicit operator int* ()</span></span><br></pre></td></tr></table></figure>
+<p>有了这一功能，我们就能轻易地使用 <code>operator bool()</code>
+来将某些类对象直接嵌到条件判断表达式中——直接通过自定义规则隐式转换为可被接收的
+<code>bool</code> 类型。</p>
+]]></content>
+      <categories>
+        <category>C++ Basic</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+      </tags>
+  </entry>
 </search>
