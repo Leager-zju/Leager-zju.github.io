@@ -27,7 +27,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://leager-zju.github.com/15445/15445project2/image-20230111164135789.png">
 <meta property="article:published_time" content="2023-01-10T13:42:57.000Z">
-<meta property="article:modified_time" content="2023-02-24T15:05:01.892Z">
+<meta property="article:modified_time" content="2023-03-01T14:24:37.307Z">
 <meta property="article:author" content="Leager">
 <meta property="article:tag" content="lab">
 <meta name="twitter:card" content="summary">
@@ -132,12 +132,12 @@
   </li>
         <li class="menu-item menu-item-categories">
 
-    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">7</span></a>
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">8</span></a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">54</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">57</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -225,7 +225,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-02-24 23:05:01" itemprop="dateModified" datetime="2023-02-24T23:05:01+08:00">2023-02-24</time>
+                <time title="修改时间：2023-03-01 22:24:37" itemprop="dateModified" datetime="2023-03-01T22:24:37+08:00">2023-03-01</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -260,7 +260,7 @@
 target="_blank" rel="noopener" href="https://15445.courses.cs.cmu.edu/fall2022/project2/">&gt;&gt;&gt;
 LAB 主页传送门 &lt;&lt;&lt;</a></p>
 <span id="more"></span>
-<h3 id="task-1---btree-pages">Task #1 - B+Tree Pages</h3>
+<h2 id="task-1---btree-pages">Task #1 - B+Tree Pages</h2>
 <p>首先，在本 lab 中，B+ 树的所有节点都以 <code>BPlusTreePage</code>
 即页的形式存在，其包含若干元数据。其中，根据所处位置不同，B+
 树的节点又分为内部节点(<strong>Internal
@@ -273,9 +273,9 @@ internal node 仅用于索引，leaf node
 <li>后者（<code>BPlusTreeLeafPage</code>）的 Value 为元组 RID。</li>
 </ol>
 <p>这便是第一个 Task 的主要任务——完善这三个数据结构。</p>
-<h4 id="bplustreepage">BPlusTreePage</h4>
+<h3 id="bplustreepage">BPlusTreePage</h3>
 <p>基类，包含一些公共变量。</p>
-<h5 id="成员变量">成员变量</h5>
+<h4 id="成员变量">成员变量</h4>
 <ul>
 <li><code>page_type_</code>：指明该节点为内部节点还是叶节点，无需强转后判断；</li>
 <li><code>lsn_</code>：事务序列号，lab 4 中用到；</li>
@@ -298,7 +298,7 @@ internal node 仅用于索引，leaf node
 <p><img src="image-20230111164135789.png" alt="image-20230111164135789" style="zoom:60%;" /></p>
 <p>HEADER 内的 <code>page_id</code> 实际上和外层 Page 对象的
 <code>page_id</code> 是相等的。</p>
-<h4 id="bplusinternalpage">BPlusInternalPage</h4>
+<h3 id="bplusinternalpage">BPlusInternalPage</h3>
 <p>内部节点，不存放数据，仅用于索引，且 m 个 Key 对应 m+1 个 Child。基于
 lab1 BPM 的实现，所有的 node 都可以通过 page_id
 来进行获取，故这里的索引实际上就是 child node 对应的 page_id。</p>
@@ -312,17 +312,17 @@ index 处插入 kv 对，后面所有 kv 对后移一位；</li>
 <p>这在后续 BPlusTree 的 Insert/Remove
 的实现中比较重要。当然，<code>BPlusLeafPage</code>
 类中也包含以上两个方法。</p>
-<h4 id="bplusleafpage">BPlusLeafPage</h4>
+<h3 id="bplusleafpage">BPlusLeafPage</h3>
 <p>叶节点，存放实际数据，且 m 个 Key 对应 m 个 Value。</p>
 <p>根据 B+ 树的性质，所有叶节点同时以链表形式排布，从而支持
 range-search。故 leaf page 的 HEADER 还要加上 4B 的
 next_page_id，以索引到下一个叶节点。如果是最右边那个叶节点，则该变量为
 <code>INVALID_PAGE_ID</code>。</p>
-<h3 id="task-2---btree-data-structure">Task #2 - B+Tree Data
-Structure</h3>
+<h2 id="task-2---btree-data-structure">Task #2 - B+Tree Data
+Structure</h2>
 <p>本 Task 是本 lab 的核心部分，也是最难的部分，相比于 Task1
 仅仅是实现各节点的数据结构，Task2 就要开始真正手撕 B+ 树了。</p>
-<h4 id="getvaluekey">GetValue(Key)</h4>
+<h3 id="getvaluekey">GetValue(Key)</h3>
 <p>查操作较为简单，只需根据 Key 从根节点开始不断往下走即可，重点在于找
 child，而不涉及多余的操作。根据 B+ 树的特性，对于 <span
 class="math inline">\(Page\_id_i\)</span> 对应节点为根的子树中，所有 key
@@ -331,7 +331,7 @@ class="math inline">\(Key_i \leq K &lt;
 Key_{i+1}\)</span>，且作索引的内部节点的第一个 Key
 不参与比较。故查找子节点 page_id 所在索引的函数可以实现为：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">GetChildPageIndex</span><span class="params">(InternalPage *internal_node, <span class="type">const</span> KeyType &amp;key)</span> </span>&#123;</span><br><span class="line">  <span class="type">int</span> child_index;</span><br><span class="line">  <span class="keyword">for</span> (child_index = <span class="number">0</span>; child_index &lt; internal_node-&gt;<span class="built_in">GetSize</span>() - <span class="number">1</span>; child_index++) &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">comparator_</span>(key, internal_node-&gt;<span class="built_in">KeyAt</span>(child_index + <span class="number">1</span>)) == <span class="number">-1</span>) &#123;</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> child_index;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="insertkey-value">Insert(Key, Value)</h4>
+<h3 id="insertkey-value">Insert(Key, Value)</h3>
 <p>B+ 树的插入规则如下：</p>
 <ol type="1">
 <li><p>若整棵树为空，则新建 root node 并作为 leaf
@@ -379,7 +379,7 @@ key</strong>，对相同 key 的重复插入会被认为是插入失败。</p>
 </blockquote>
 <p>基于上述讨论，总体过程大概如下所示：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">bool</span> <span class="title">Insert</span><span class="params">(<span class="type">const</span> KeyType &amp;key, <span class="type">const</span> ValueType &amp;value)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (<span class="built_in">IsEmpty</span>()) &#123;</span><br><span class="line">    <span class="comment">// 新建 root node 后直接插入</span></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="type">bool</span> need_split = <span class="built_in">RecursivelyInsert</span>(key, value, root_node);</span><br><span class="line">  <span class="keyword">if</span> (need_split) &#123;</span><br><span class="line">    <span class="comment">// 1. 新建 new root node 和 sibling node</span></span><br><span class="line">    <span class="comment">// 2. 若为叶节点，需修改 next_page_id</span></span><br><span class="line">    <span class="comment">// 3. 移动一半 kv 对</span></span><br><span class="line">    <span class="comment">// 4. 插入新条目</span></span><br><span class="line">    <span class="comment">// 5. 修改 root_page_id_</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> success;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">RecursivelyInsert</span><span class="params">(<span class="type">const</span> KeyType &amp;key, <span class="type">const</span> ValueType &amp;value, BPlusTreePage *cur_node)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (cur_node-&gt;<span class="built_in">IsLeafPage</span>()) &#123;</span><br><span class="line">    <span class="comment">// 直接插入 leaf node</span></span><br><span class="line">    <span class="keyword">return</span> leaf_node-&gt;<span class="built_in">GetSize</span>() &gt;= leaf_node-&gt;<span class="built_in">GetMaxSize</span>();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="type">bool</span> res = <span class="literal">false</span>;</span><br><span class="line">  <span class="type">bool</span> need_split = <span class="built_in">RecursivelyInsert</span>(key, value, child_node);</span><br><span class="line">  <span class="keyword">if</span> (need_split) &#123;</span><br><span class="line">    <span class="comment">// 1. 新建 sibling node</span></span><br><span class="line">    <span class="comment">// 2. 若为叶节点，需修改 next_page_id</span></span><br><span class="line">    <span class="comment">// 3. 移动一半 kv 对</span></span><br><span class="line">    <span class="comment">// 4. 插入新条目</span></span><br><span class="line">    res = cur_node-&gt;<span class="built_in">GetSize</span>() &gt; cur_node-&gt;<span class="built_in">GetMaxSize</span>();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="removekey">Remove(Key)</h4>
+<h3 id="removekey">Remove(Key)</h3>
 <p>删除规则和插入大体类似：</p>
 <ol type="1">
 <li>根据 key 找到相应的叶节点 <strong>src</strong>；</li>
@@ -415,14 +415,14 @@ merge，直至不再满足 merge 条件；</li>
 <p>它同样是个递归行为，我也定义了一个 <code>RecursivelyRemove()</code>
 函数，流程和 insert 大体一致，不同之处在于 sibling 的挑选，需要考虑当前
 child 是否为 parent 最左侧/最右侧的 child。</p>
-<h3 id="task-3---index-iterator">Task #3 - Index Iterator</h3>
+<h2 id="task-3---index-iterator">Task #3 - Index Iterator</h2>
 <p>这一 Task 相对而言简单许多，首先需要我们完善
 <code>IndexIterator</code> 类，实现其四个运算符（<code>*</code>,
 <code>++</code>, <code>==</code>, <code>!=</code>）以及一个
 <code>IsEnd()</code> 函数，还需要我们完善 <code>BPlusTreePage</code>
 类中的 <code>Begin()</code> 与 <code>End()</code> 函数，其分别返回一个
 <code>IndexIterator</code>。总体而言还是不难的。</p>
-<h4 id="indexiterator">IndexIterator</h4>
+<h3 id="indexiterator">IndexIterator</h3>
 <p>由于 <code>IndexIterator</code> 是遍历 leaf node
 的迭代器，故需要记录当前 kv 对的一些信息，如所在的 leaf page 以及当前 kv
 对所在下标，即：</p>
@@ -431,13 +431,13 @@ child 是否为 parent 最左侧/最右侧的 child。</p>
 <code>nullptr</code> 即可。</p>
 <p><code>==</code> 运算符不仅需要判断两个迭代器所处的 Page 的 page_id 及
 index 是否相等，还需要在最开始加上 IsEnd() 的判断。</p>
-<h4 id="begin-end">Begin / End</h4>
+<h3 id="begin-end">Begin / End</h3>
 <p><code>Begin</code> 有两个重载函数，一个是无参
 <code>Begin()</code>，只要找到 B+ 树中最左边那个叶节点即可。</p>
 <p>另一个是 <code>Begin(Key)</code>，返回的 <code>IndexIterator</code>
 需满足对应的 key <span class="math inline">\(K &lt;=
 Key\)</span>，这与之前实现的 <code>GetValue</code> 有异曲同工之妙。</p>
-<h3 id="task-4---concurrent-index">Task #4 - Concurrent Index</h3>
+<h2 id="task-4---concurrent-index">Task #4 - Concurrent Index</h2>
 <p>这一 Task 要求我们在原先的基础上，令 B+
 树支持并发操作，这里需要用到的一个思路就是 <strong>Lock
 Crabbing</strong>。</p>
@@ -493,7 +493,7 @@ safe 的，会直接将大锁解除；</li>
 2，解锁时机并没有发生变化，下一个事务依然会在同一时刻获取到最新 root
 node 的锁；</li>
 </ol>
-<h3 id="总结">总结</h3>
+<h2 id="总结">总结</h2>
 <p>课程组很贴心地为我们提供了 <strong>b_plus_tree_printer</strong>
 这样的工具，生成 <code>.dot</code> 文件后可以直接复制到<a
 target="_blank" rel="noopener" href="http://dreampuf.github.io/GraphvizOnline/">这个网站</a>上进行图像生成。当然，也可以<a
@@ -590,8 +590,8 @@ B+ 树各个操作的可视化过程，适合入门学习。</p>
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#task-1---btree-pages"><span class="nav-text">Task #1 - B+Tree Pages</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#bplustreepage"><span class="nav-text">BPlusTreePage</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%88%90%E5%91%98%E5%8F%98%E9%87%8F"><span class="nav-text">成员变量</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#bplusinternalpage"><span class="nav-text">BPlusInternalPage</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#bplusleafpage"><span class="nav-text">BPlusLeafPage</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#task-2---btree-data-structure"><span class="nav-text">Task #2 - B+Tree Data
-Structure</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#getvaluekey"><span class="nav-text">GetValue(Key)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#insertkey-value"><span class="nav-text">Insert(Key, Value)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#removekey"><span class="nav-text">Remove(Key)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#task-3---index-iterator"><span class="nav-text">Task #3 - Index Iterator</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#indexiterator"><span class="nav-text">IndexIterator</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#begin-end"><span class="nav-text">Begin &#x2F; End</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#task-4---concurrent-index"><span class="nav-text">Task #4 - Concurrent Index</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#task-1---btree-pages"><span class="nav-text">Task #1 - B+Tree Pages</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#bplustreepage"><span class="nav-text">BPlusTreePage</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%88%90%E5%91%98%E5%8F%98%E9%87%8F"><span class="nav-text">成员变量</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#bplusinternalpage"><span class="nav-text">BPlusInternalPage</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#bplusleafpage"><span class="nav-text">BPlusLeafPage</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#task-2---btree-data-structure"><span class="nav-text">Task #2 - B+Tree Data
+Structure</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#getvaluekey"><span class="nav-text">GetValue(Key)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#insertkey-value"><span class="nav-text">Insert(Key, Value)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#removekey"><span class="nav-text">Remove(Key)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#task-3---index-iterator"><span class="nav-text">Task #3 - Index Iterator</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#indexiterator"><span class="nav-text">IndexIterator</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#begin-end"><span class="nav-text">Begin &#x2F; End</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#task-4---concurrent-index"><span class="nav-text">Task #4 - Concurrent Index</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -607,14 +607,14 @@ Structure</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a cl
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">54</span>
+          <span class="site-state-item-count">57</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-count">8</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">

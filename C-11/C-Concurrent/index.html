@@ -18,15 +18,15 @@
     var CONFIG = {"hostname":"leager-zju.github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"b2t":true},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="C++ 11 新增了官方并发支持库，使得我们能够更好地在系统间移植程序，之前的 Boost 库等也就随之成为历史了。">
+  <meta name="description" content="C++11 新增了官方并发支持库，使得我们能够更好地在系统间移植程序，之前的 Boost 库等也就随之成为历史了。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="C++ 11 の 并发支持(Concurrency)">
+<meta property="og:title" content="C++11 の 并发支持(Concurrency)">
 <meta property="og:url" content="http://leager-zju.github.com/C-11/C-Concurrent/index.html">
 <meta property="og:site_name" content="没什么看头的地方">
-<meta property="og:description" content="C++ 11 新增了官方并发支持库，使得我们能够更好地在系统间移植程序，之前的 Boost 库等也就随之成为历史了。">
+<meta property="og:description" content="C++11 新增了官方并发支持库，使得我们能够更好地在系统间移植程序，之前的 Boost 库等也就随之成为历史了。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2023-01-29T14:44:35.000Z">
-<meta property="article:modified_time" content="2023-02-24T15:05:01.895Z">
+<meta property="article:modified_time" content="2023-03-01T14:24:37.357Z">
 <meta property="article:author" content="Leager">
 <meta property="article:tag" content="C++">
 <meta name="twitter:card" content="summary">
@@ -44,7 +44,7 @@
   };
 </script>
 
-  <title>C++ 11 の 并发支持(Concurrency) | 没什么看头的地方</title>
+  <title>C++11 の 并发支持(Concurrency) | 没什么看头的地方</title>
   
 
 
@@ -130,12 +130,12 @@
   </li>
         <li class="menu-item menu-item-categories">
 
-    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">7</span></a>
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">8</span></a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">54</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">57</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -206,7 +206,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          C++ 11 の 并发支持(Concurrency)
+          C++11 の 并发支持(Concurrency)
         </h1>
 
         <div class="post-meta">
@@ -223,7 +223,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-02-24 23:05:01" itemprop="dateModified" datetime="2023-02-24T23:05:01+08:00">2023-02-24</time>
+                <time title="修改时间：2023-03-01 22:24:37" itemprop="dateModified" datetime="2023-03-01T22:24:37+08:00">2023-03-01</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -231,7 +231,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/C-11/" itemprop="url" rel="index"><span itemprop="name">C++ 11</span></a>
+                  <a href="/categories/C-11/" itemprop="url" rel="index"><span itemprop="name">C++11</span></a>
                 </span>
             </span>
 
@@ -253,7 +253,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>C++ 11
+        <p>C++11
 新增了官方并发支持库，使得我们能够更好地在系统间移植程序，之前的 Boost
 库等也就随之成为历史了。</p>
 <span id="more"></span>
@@ -309,7 +309,7 @@ style="text-align: center;"><code>thread( thread&amp;&amp; other ) noexcept</cod
 <td
 style="text-align: center;"><code>thread&amp; operator=( thread&amp;&amp; other ) noexcept</code></td>
 <td
-style="text-align: center;"><strong>移动赋值函数</strong>。若当前对象此时拥有关联的运行中线程（即
+style="text-align: center;"><strong>移动赋值运算符</strong>。若当前对象此时拥有关联的运行中线程（即
 <code>joinable() == true</code> ），则调用
 <code>std::terminate()</code>。</td>
 </tr>
@@ -380,7 +380,7 @@ exclusion</strong>(互斥体)，用于保护共享数据的<strong>互斥</stron
 相当于一种独占性的资源，仅有 <code>lock</code> /
 <code>try_lock</code>（获取该资源）与
 <code>unlock</code>（释放该资源）两种操作，其余各种锁都是围绕 mutex
-进行封装与变形，故这些锁的<strong>拷贝构造函数</strong>与<strong>拷贝赋值函数</strong>被<strong>弃置</strong>。其<strong>主要特性</strong>如下：</p>
+进行封装与变形，故这些锁的<strong>拷贝构造函数</strong>与<strong>拷贝赋值运算符</strong>被<strong>弃置</strong>。其<strong>主要特性</strong>如下：</p>
 <ul>
 <li><strong>调用方</strong>线程从它成功调用 <code>lock</code> /
 <code>try_lock</code> 开始，到它调用 unlock 为止占有 mutex；</li>
@@ -453,7 +453,7 @@ mutex 的所有权</strong>，以此种方式进行构造时不会上锁。<code
 <h4 id="stdunique_lock">std::unique_lock</h4>
 <p>顾名思义，unique_lock 是独占性的，故不存在两个 unique_lock 对应同一个
 mutex
-对象，故<strong>移动构造函数</strong>与<strong>移动赋值函数</strong>得到了实现，方便转移资源。</p>
+对象，故<strong>移动构造函数</strong>与<strong>移动赋值运算符</strong>得到了实现，方便转移资源。</p>
 <p>类定义如下：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> Mutex&gt;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">unique_lock</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="keyword">using</span> mutex_type = Mutex;</span><br><span class="line"></span><br><span class="line">  <span class="built_in">unique_lock</span>() <span class="keyword">noexcept</span>: <span class="built_in">m_</span>(<span class="literal">nullptr</span>), <span class="built_in">own_</span>(<span class="literal">false</span>) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">explicit</span> <span class="title">unique_lock</span><span class="params">(mutex_type &amp;m_)</span>: m_(std::__addressof(m_)), own_(false) &#123;</span></span><br><span class="line">    <span class="built_in">lock</span>();</span><br><span class="line">    own_ = <span class="literal">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 支持三种上锁模式</span></span><br><span class="line">  <span class="built_in">unique_lock</span>(mutex_type &amp;m_, <span class="type">defer_lock_t</span>) <span class="keyword">noexcept</span>: <span class="built_in">m_</span>(std::__addressof(m_)), <span class="built_in">own_</span>(<span class="literal">false</span>) &#123;&#125;</span><br><span class="line">  <span class="built_in">unique_lock</span>(mutex_type &amp;m_, <span class="type">try_to_lock_t</span>): <span class="built_in">m_</span>(std::__addressof(m_)), <span class="built_in">own_</span>(m_-&gt;<span class="built_in">try_lock</span>()) &#123;&#125;</span><br><span class="line">  <span class="built_in">unique_lock</span>(mutex_type &amp;m_, <span class="type">adopt_lock_t</span>) <span class="keyword">noexcept</span>: <span class="built_in">m_</span>(std::__addressof(m_)), <span class="built_in">own_</span>(<span class="literal">true</span>) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 超时语义</span></span><br><span class="line">  <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Clock, <span class="keyword">typename</span> Duration&gt;</span><br><span class="line">  <span class="built_in">unique_lock</span>(mutex_type &amp;m_, <span class="type">const</span> chrono::time_point&lt;Clock, Duration&gt; &amp;time): <span class="built_in">m_</span>(std::__addressof(m_)), <span class="built_in">own_</span>(m_-&gt;<span class="built_in">try_lock_until</span>(time)) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Rep, <span class="keyword">typename</span> Period&gt;</span><br><span class="line">  <span class="built_in">unique_lock</span>(mutex_type &amp;m_, <span class="type">const</span> chrono::duration&lt;Rep, Period&gt; &amp;time): <span class="built_in">m_</span>(std::__addressof(m_)), <span class="built_in">own_</span>(m_-&gt;<span class="built_in">try_lock_for</span>(time)) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  ~<span class="built_in">unique_lock</span>() &#123;</span><br><span class="line">    <span class="keyword">if</span> (own_)</span><br><span class="line">      <span class="built_in">unlock</span>();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 拷贝被弃置</span></span><br><span class="line">  <span class="built_in">unique_lock</span>(<span class="type">const</span> unique_lock &amp;) = <span class="keyword">delete</span>;</span><br><span class="line">  unique_lock &amp;<span class="keyword">operator</span>=(<span class="type">const</span> unique_lock &amp;) = <span class="keyword">delete</span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 移动被实现</span></span><br><span class="line">  <span class="built_in">unique_lock</span>(unique_lock &amp;&amp;u) <span class="keyword">noexcept</span>: <span class="built_in">m_</span>(u.m_), <span class="built_in">own_</span>(u.own_) &#123;</span><br><span class="line">    u.m_ = <span class="literal">nullptr</span>;</span><br><span class="line">    u.own_ = <span class="literal">false</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  unique_lock &amp;<span class="keyword">operator</span>=(unique_lock &amp;&amp;u) <span class="keyword">noexcept</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (own_)</span><br><span class="line">      <span class="built_in">unlock</span>();</span><br><span class="line">    <span class="built_in">unique_lock</span>(std::<span class="built_in">move</span>(u)).<span class="built_in">swap</span>(*<span class="keyword">this</span>);</span><br><span class="line">    u.m_ = <span class="literal">nullptr</span>;</span><br><span class="line">    u.own_ = <span class="literal">false</span>;</span><br><span class="line">    <span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  mutex_type *m_;</span><br><span class="line">  <span class="type">bool</span> own_;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 <p>unique_lock 在 lock_guard
@@ -613,12 +613,12 @@ wait
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/C-11/C-Init/" rel="prev" title="C++ 11 の 列表初始化(List Initialize)">
-      <i class="fa fa-chevron-left"></i> C++ 11 の 列表初始化(List Initialize)
+    <a href="/C-11/C-Init/" rel="prev" title="C++11 の 列表初始化(List Initialize)">
+      <i class="fa fa-chevron-left"></i> C++11 の 列表初始化(List Initialize)
     </a></div>
       <div class="post-nav-item">
-    <a href="/C-11/C-SmartPtr/" rel="next" title="C++ 11 の 智能指针(Smart Pointer)">
-      C++ 11 の 智能指针(Smart Pointer) <i class="fa fa-chevron-right"></i>
+    <a href="/C-11/C-SmartPtr/" rel="next" title="C++11 の 智能指针(Smart Pointer)">
+      C++11 の 智能指针(Smart Pointer) <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
@@ -694,14 +694,14 @@ wait
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">54</span>
+          <span class="site-state-item-count">57</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-count">8</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">

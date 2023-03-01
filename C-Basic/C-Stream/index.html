@@ -27,7 +27,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://leager-zju.github.com/C-Basic/C-Stream/image-20230114162631819.png">
 <meta property="article:published_time" content="2023-01-14T07:21:59.000Z">
-<meta property="article:modified_time" content="2023-02-24T15:05:01.898Z">
+<meta property="article:modified_time" content="2023-03-01T14:24:37.395Z">
 <meta property="article:author" content="Leager">
 <meta property="article:tag" content="C++">
 <meta name="twitter:card" content="summary">
@@ -132,12 +132,12 @@
   </li>
         <li class="menu-item menu-item-categories">
 
-    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">7</span></a>
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">8</span></a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">54</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">57</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -225,7 +225,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-02-24 23:05:01" itemprop="dateModified" datetime="2023-02-24T23:05:01+08:00">2023-02-24</time>
+                <time title="修改时间：2023-03-01 22:24:37" itemprop="dateModified" datetime="2023-03-01T22:24:37+08:00">2023-03-01</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -267,9 +267,9 @@ I/O（从键盘读取数据，或输出数据到屏幕），当然也可以进�
 ios 的继承采用虚继承。</p>
 </blockquote>
 <h2 id="抽象-io">抽象 I/O</h2>
-<h3 id="ios_base">ios_base</h3>
+<h2 id="ios_base">ios_base</h2>
 <p>作为所有输入/输出流类的基类，维护多个数据如状态信息</p>
-<h4 id="iostate">iostate</h4>
+<h3 id="iostate">iostate</h3>
 <p>静态变量，指定流状态标志，为 <strong>bit
 mask</strong>，即出现情况时将对应 bit 置位。有以下四种标志：</p>
 <table>
@@ -309,7 +309,7 @@ style="text-align: center;"><strong>0x4</strong>，表明出现了可挽回的�
 <blockquote>
 <p>当非 goodbit 状态位被打开时，一切读取会被阻塞。</p>
 </blockquote>
-<h4 id="fmtflags">fmtflags</h4>
+<h3 id="fmtflags">fmtflags</h3>
 <p>指定流格式控制标志，为 <strong>bit mask</strong>。通过
 <code>setf()</code> / <code>unsetf()</code>
 函数进行开关。常见有以下五种标志：</p>
@@ -352,7 +352,7 @@ style="text-align: center;"><strong>0x1000</strong>，默认为开启状态，�
 </tr>
 </tbody>
 </table>
-<h4 id="openmode">openmode</h4>
+<h3 id="openmode">openmode</h3>
 <p>指定流打开标志，为 <strong>bit mask</strong>。有以下六种标志：</p>
 <table>
 <thead>
@@ -396,7 +396,7 @@ truncate</td>
 </tr>
 </tbody>
 </table>
-<h3 id="basic_ios">basic_ios</h3>
+<h2 id="basic_ios">basic_ios</h2>
 <p>类模板，直接与缓冲区打交道，并提供若干 api。基于父类 ios_base
 的状态标志，其提供了若干状态函数：</p>
 <table>
@@ -445,16 +445,16 @@ truncate</td>
 </tr>
 </tbody>
 </table>
-<h3 id="istream-ostream-iostream">istream / ostream / iostream</h3>
+<h2 id="istream-ostream-iostream">istream / ostream / iostream</h2>
 <p>分别为用于输入与输出的流类，头文件 <code>&lt;iostream&gt;</code>
 中定义了四个全局变量对象
 <code>cin</code>，<code>cout</code>，<code>cerr</code>，<code>clog</code>。</p>
-<h4 id="cin">cin</h4>
+<h3 id="cin">cin</h3>
 <p>标准输入流对象，主要用于标准输入，即键盘的输入。用户在键盘上敲入字符串后，需按下回车键后，该字符串才会进入所谓<strong>缓冲区</strong>的区域，并且回车会被转为换行符
 <code>\n</code>。以 cin
 为例，其读取数据就是从缓冲区获取数据，当缓冲区为空时，它会自我阻塞，直至用户将字符串冲入缓冲区。</p>
 <p>其输入函数主要有以下几种：</p>
-<h5 id="operator">operator &gt;&gt;</h5>
+<h4 id="operator">operator &gt;&gt;</h4>
 <p>该函数原型有以下两种重载形式：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">std::basic_istream&amp; <span class="keyword">operator</span>&gt;&gt; ( Type&amp; value );                   <span class="comment">// Type 特化为 int, short, char 等基本类型</span></span><br><span class="line">std::basic_istream&amp; <span class="keyword">operator</span>&gt;&gt; ( std::IOtype&amp; (func*)(IOtype&amp;) ); <span class="comment">// IOtype 主要指 istream 及其所有基类</span></span><br></pre></td></tr></table></figure>
 <p>第一种重载模式支持仅基本类型，而第二种重载模式参数为函数指针，常见有
@@ -465,7 +465,7 @@ I/O 操纵符，如 <code>std::boolalpha</code>。</p>
 <p>注意，当 cin 用运算符 <strong>&gt;&gt;</strong>
 从缓冲区中读取数据时，会不断忽略并清除缓冲区开始的空白字符（空格、回车、制表符），直至读取成功，读取时也会将字符从缓冲区中取出。剩余部分残留在缓冲区中，不作处理。</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> a;</span><br><span class="line">    <span class="type">double</span> b;</span><br><span class="line">    std::string c;</span><br><span class="line">    std::cin &gt;&gt; a &gt;&gt; b &gt;&gt; c;</span><br><span class="line">    std::cout &lt;&lt; a &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; b &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; c &lt;&lt; std::endl;</span><br><span class="line">    std::cin &gt;&gt; c;</span><br><span class="line">    std::cout &lt;&lt; c;</span><br><span class="line">    <span class="keyword">return</span> EXIT_SUCCESS;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// input: [回车][回车]1 1.2 foo bar</span></span><br><span class="line"><span class="comment">// output: 1 1.2 foo[回车]bar</span></span><br><span class="line"><span class="comment">// 根据 output 的表现易得，第一个 cin 读至 &quot;foo&quot; 后的空格后暂停，此时缓冲区中剩下&#123;&#x27;b&#x27;, &#x27;a&#x27;, &#x27;r&#x27;&#125;，继续被第二个 cin 读取</span></span><br></pre></td></tr></table></figure>
-<h5 id="get">get</h5>
+<h4 id="get">get</h4>
 <p>该函数主要有以下四种重载形式：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 从缓冲区中读并取出单个字符</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">get</span><span class="params">()</span></span>;</span><br><span class="line"><span class="function">std::basic_istream&amp; <span class="title">get</span><span class="params">( <span class="type">char</span>&amp; ch )</span></span>;</span><br></pre></td></tr></table></figure>
 <p>这两种形式均判断给定字符是否可用，若可用，第一种返回字符 ASCII
@@ -482,7 +482,7 @@ eofbit；第二种将字符赋给 ch，否则，返回 <code>Traits::eof()</code
 <code>\n</code>，第二种的结束符为用户指定字符
 <code>delim</code>。此条件下，结束符会保留在缓冲区中；</li>
 </ol>
-<h5 id="getline">getline</h5>
+<h4 id="getline">getline</h4>
 <p>该函数主要有以下两种重载形式，以及一个同名的全局函数：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 从缓冲区中读并取出多个字符</span></span><br><span class="line"><span class="function">std::basic_istream&amp; <span class="title">getline</span><span class="params">( <span class="type">char</span>* s, std::streamsize count )</span></span>;</span><br><span class="line"><span class="function">std::basic_istream&amp; <span class="title">getline</span><span class="params">( <span class="type">char</span>* s, std::streamsize count, <span class="type">char</span> delim )</span></span>;</span><br></pre></td></tr></table></figure>
 <p>这两种形式均读取至多 <code>count-1</code> 个字符并将其存储到 s
@@ -504,7 +504,7 @@ eofbit；第二种将字符赋给 ch，否则，返回 <code>Traits::eof()</code
 <li>下一个字符为结束符。此条件下，结束符会被一并存入 <code>string</code>
 中，再转换为 <code>\0</code>；</li>
 </ol>
-<h5 id="ignore">ignore</h5>
+<h4 id="ignore">ignore</h4>
 <p>该函数原型为：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">std::basic_istream&amp; <span class="title">ignore</span><span class="params">( std::streamsize count = <span class="number">1</span>, <span class="type">int</span> delim = Traits::eof() )</span></span>;</span><br></pre></td></tr></table></figure>
 <p>其从输入流中提取并舍弃元素，直至满足任一以下条件：</p>
@@ -516,25 +516,25 @@ eofbit；第二种将字符赋给 ch，否则，返回 <code>Traits::eof()</code
 <li>遇到结束符。此条件下，ignore 会将结束符舍弃；</li>
 </ol>
 <p>根据这一特性，可以利用该函数来清空缓冲区。</p>
-<h4 id="cout">cout</h4>
+<h3 id="cout">cout</h3>
 <p>标准输出流对象，主要用于标准输出，即将数据输出到屏幕上。</p>
 <p>其输出函数主要有以下几种：</p>
-<h5 id="operator-1">operator &lt;&lt;</h5>
+<h4 id="operator-1">operator &lt;&lt;</h4>
 <p>该函数主要有以下两种重载形式：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">std::basic_istream&amp; <span class="keyword">operator</span>&lt;&lt; ( Type&amp; value );                   <span class="comment">// Type 特化为 int, short, char 等基本类型</span></span><br><span class="line">std::basic_istream&amp; <span class="keyword">operator</span>&lt;&lt; ( std::IOtype&amp; (func*)(IOtype&amp;) ); <span class="comment">// IOtype 主要指 istream 及其所有基类</span></span><br></pre></td></tr></table></figure>
 <p>两种重载模式和 <code>cin.operator&gt;&gt;</code> 大体相同。</p>
-<h5 id="put">put</h5>
+<h4 id="put">put</h4>
 <p>该函数原型为：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">std::basic_ostream&amp; <span class="title">put</span><span class="params">( <span class="type">char</span> ch )</span></span>;</span><br></pre></td></tr></table></figure>
 <p>写字符 <code>ch</code> 到输出流。若输出因任何原因失败，则调用
 <code>setstate(badbit)</code>。</p>
-<h4 id="cerr">cerr</h4>
+<h3 id="cerr">cerr</h3>
 <p>标准错误输出流，用于向屏幕输出出信息。</p>
-<h4 id="clog">clog</h4>
+<h3 id="clog">clog</h3>
 <p>标准错误输出流，用于向屏幕输出日志信息。</p>
 <h2 id="字符串-io">字符串 I/O</h2>
-<h3 id="istringstream-ostringstream-stringstream">istringstream /
-ostringstream / stringstream</h3>
+<h2 id="istringstream-ostringstream-stringstream">istringstream /
+ostringstream / stringstream</h2>
 <p>分别实现基于<strong>字符串</strong>的流输入与输出操作，可以直接以字符串为参数构造对象，同时也可以指定打开标志
 <code>std::ios_base::openmode</code>。此外，也可以通过
 <code>str()</code> 函数获取对象底层数据结构中的字符串，亦可以通过重载的
@@ -546,7 +546,7 @@ ostringstream / stringstream</h3>
 <p>这里不难发现，stringstream
 提供了一种将字符串转化为其他不同数据类型的新方式。</p>
 <h2 id="文件-io">文件 I/O</h2>
-<h3 id="ifstream-ofstream-fstream">ifstream / ofstream / fstream</h3>
+<h2 id="ifstream-ofstream-fstream">ifstream / ofstream / fstream</h2>
 <p>分别实现基于<strong>文件</strong>的流输入与输出操作，通过文件名构造对象，同时也可以指定打开标志
 <code>std::ios_base::openmode</code>。通过 <code>open()</code> /
 <code>close()</code> 来打开/取消关联文件，并可以通过
@@ -565,12 +565,12 @@ ostringstream / stringstream</h3>
 <p>传入 <code>operator&lt;&lt;</code> 或 <code>operator&gt;&gt;</code>
 后，实际行为如下所示：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 以 std::cin 为例</span></span><br><span class="line"><span class="keyword">operator</span>&gt;&gt; (std::CONTROL_TYPE) &#123;</span><br><span class="line">    std::<span class="built_in">CONTROL_TYPE</span>(*<span class="keyword">this</span>);  <span class="comment">// 对 *this 进行一些流控制比特位的设置，效果等同于 cin.setf(std::ios_base::CONTROL_TYPE)</span></span><br><span class="line">    <span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="endl">endl</h3>
+<h2 id="endl">endl</h2>
 <p>此为仅用于输出的控制符，其函数原型为：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">template</span>&lt; <span class="keyword">class</span> CharT, <span class="keyword">class</span> Traits &gt;</span></span><br><span class="line"><span class="function">std::basic_ostream&lt;CharT, Traits&gt;&amp; <span class="title">endl</span><span class="params">( std::basic_ostream&lt;CharT, Traits&gt;&amp; os )</span></span>;</span><br></pre></td></tr></table></figure>
 <p>其作用为将换行符插入输出流。效果等同于
 <code>\n</code>，但开销相对而言更高。</p>
-<h3 id="boolalpha-noboolalpha">boolalpha / noboolalpha</h3>
+<h2 id="boolalpha-noboolalpha">boolalpha / noboolalpha</h2>
 <p><code>boolalpha</code> 启用流中的布尔控制开关，表现为：</p>
 <ul>
 <li>输入流中将 <code>true</code> 解析为真值，其余均为非真值；</li>
@@ -581,14 +581,14 @@ ostringstream / stringstream</h3>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sstream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 修改输出</span></span><br><span class="line">    std::cout &lt;&lt; std::boolalpha &lt;&lt; <span class="string">&quot;boolalpha: &quot;</span> &lt;&lt; <span class="literal">true</span> &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; <span class="literal">false</span> &lt;&lt; std::endl;</span><br><span class="line">    std::cout &lt;&lt; std::noboolalpha &lt;&lt; <span class="string">&quot;noboolalpha: &quot;</span> &lt;&lt; <span class="literal">true</span> &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt;  <span class="literal">false</span> &lt;&lt; std::endl;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 解析输入</span></span><br><span class="line">    <span class="type">bool</span> b1, b2;</span><br><span class="line">    <span class="function">std::istringstream <span class="title">iss</span><span class="params">(<span class="string">&quot;true false&quot;</span>)</span></span>;</span><br><span class="line">    iss &gt;&gt; std::boolalpha &gt;&gt; b1 &gt;&gt; b2;</span><br><span class="line">    std::cout &lt;&lt; iss.<span class="built_in">str</span>() &lt;&lt; <span class="string">&quot;: &quot;</span> &lt;&lt; b1 &lt;&lt; <span class="string">&#x27; &#x27;</span> &lt;&lt; b2;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> EXIT_SUCCESS;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>输出为：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">boolalpha: <span class="literal">true</span> <span class="literal">false</span></span><br><span class="line">noboolalpha: <span class="number">1</span> <span class="number">0</span></span><br><span class="line"><span class="literal">true</span> <span class="literal">false</span>: <span class="number">1</span> <span class="number">0</span></span><br></pre></td></tr></table></figure>
-<h3 id="skipws-noskipws">skipws / noskipws</h3>
+<h2 id="skipws-noskipws">skipws / noskipws</h2>
 <p><code>skipws</code>
 默认为开启状态，使得输入流跳过前导空白字符；而使用 <code>noskipws</code>
 后不会跳过。示例：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sstream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">char</span> c1, c2, c3;</span><br><span class="line">    std::<span class="built_in">istringstream</span>(<span class="string">&quot;a b c&quot;</span>) &gt;&gt; c1 &gt;&gt; c2 &gt;&gt; c3;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;skipws: &quot;</span> &lt;&lt; c1 &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; c2 &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; c3 &lt;&lt; std::endl;</span><br><span class="line">    std::<span class="built_in">istringstream</span>(<span class="string">&quot;a b c&quot;</span>) &gt;&gt; std::noskipws &gt;&gt; c1 &gt;&gt; c2 &gt;&gt; c3;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;noskipws: &quot;</span> &lt;&lt; c1 &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; c2 &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; c3;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>输出为：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">skipws: a b c</span><br><span class="line">noskipws: a   b</span><br></pre></td></tr></table></figure>
-<h3 id="oct-dec-hex">oct / dec / hex</h3>
+<h2 id="oct-dec-hex">oct / dec / hex</h2>
 <p>开启后修改输入输出数的进制表示，分别对应八/十/十六进制。示例：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sstream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 修改输出</span></span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;octal:   &quot;</span> &lt;&lt; std::oct &lt;&lt; <span class="number">42</span> &lt;&lt; std::endl;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;decimal: &quot;</span> &lt;&lt; std::dec &lt;&lt; <span class="number">42</span> &lt;&lt; std::endl;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;hex:     &quot;</span> &lt;&lt; std::hex &lt;&lt; <span class="number">42</span> &lt;&lt; std::endl;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 解析输入</span></span><br><span class="line">    <span class="type">int</span> n;</span><br><span class="line">    std::<span class="built_in">istringstream</span>(<span class="string">&quot;2A&quot;</span>) &gt;&gt; std::hex &gt;&gt; n;</span><br><span class="line">    std::cout &lt;&lt; std::dec &lt;&lt; <span class="string">&quot;hex to dec: &quot;</span> &lt;&lt; n &lt;&lt; std::endl;</span><br><span class="line">    std::cout &lt;&lt; std::oct &lt;&lt; <span class="string">&quot;hex to oct: &quot;</span> &lt;&lt; n;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>输出为：</p>
@@ -616,8 +616,8 @@ ostringstream / stringstream</h3>
       <i class="fa fa-chevron-left"></i> 15445 Project#4 Concurrency Control
     </a></div>
       <div class="post-nav-item">
-    <a href="/C-11/C-AutoDeclType/" rel="next" title="C++ 11 の 类型推导(Auto & Decltype)">
-      C++ 11 の 类型推导(Auto & Decltype) <i class="fa fa-chevron-right"></i>
+    <a href="/C-11/C-AutoDeclType/" rel="next" title="C++11 の 类型推导(Auto & Decltype)">
+      C++11 の 类型推导(Auto & Decltype) <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
@@ -677,8 +677,8 @@ ostringstream / stringstream</h3>
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%BD%E8%B1%A1-io"><span class="nav-text">抽象 I&#x2F;O</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ios_base"><span class="nav-text">ios_base</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#iostate"><span class="nav-text">iostate</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#fmtflags"><span class="nav-text">fmtflags</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#openmode"><span class="nav-text">openmode</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#basic_ios"><span class="nav-text">basic_ios</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#istream-ostream-iostream"><span class="nav-text">istream &#x2F; ostream &#x2F; iostream</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#cin"><span class="nav-text">cin</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#operator"><span class="nav-text">operator &gt;&gt;</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#get"><span class="nav-text">get</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#getline"><span class="nav-text">getline</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#ignore"><span class="nav-text">ignore</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#cout"><span class="nav-text">cout</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#operator-1"><span class="nav-text">operator &lt;&lt;</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#put"><span class="nav-text">put</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#cerr"><span class="nav-text">cerr</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#clog"><span class="nav-text">clog</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2-io"><span class="nav-text">字符串 I&#x2F;O</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#istringstream-ostringstream-stringstream"><span class="nav-text">istringstream &#x2F;
-ostringstream &#x2F; stringstream</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%87%E4%BB%B6-io"><span class="nav-text">文件 I&#x2F;O</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ifstream-ofstream-fstream"><span class="nav-text">ifstream &#x2F; ofstream &#x2F; fstream</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#io-%E6%93%8D%E7%BA%B5%E7%AC%A6"><span class="nav-text">I&#x2F;O 操纵符</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#endl"><span class="nav-text">endl</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#boolalpha-noboolalpha"><span class="nav-text">boolalpha &#x2F; noboolalpha</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#skipws-noskipws"><span class="nav-text">skipws &#x2F; noskipws</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#oct-dec-hex"><span class="nav-text">oct &#x2F; dec &#x2F; hex</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%BD%E8%B1%A1-io"><span class="nav-text">抽象 I&#x2F;O</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ios_base"><span class="nav-text">ios_base</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#iostate"><span class="nav-text">iostate</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#fmtflags"><span class="nav-text">fmtflags</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#openmode"><span class="nav-text">openmode</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#basic_ios"><span class="nav-text">basic_ios</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#istream-ostream-iostream"><span class="nav-text">istream &#x2F; ostream &#x2F; iostream</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#cin"><span class="nav-text">cin</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#operator"><span class="nav-text">operator &gt;&gt;</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#get"><span class="nav-text">get</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#getline"><span class="nav-text">getline</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ignore"><span class="nav-text">ignore</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#cout"><span class="nav-text">cout</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#operator-1"><span class="nav-text">operator &lt;&lt;</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#put"><span class="nav-text">put</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#cerr"><span class="nav-text">cerr</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#clog"><span class="nav-text">clog</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2-io"><span class="nav-text">字符串 I&#x2F;O</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#istringstream-ostringstream-stringstream"><span class="nav-text">istringstream &#x2F;
+ostringstream &#x2F; stringstream</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%87%E4%BB%B6-io"><span class="nav-text">文件 I&#x2F;O</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ifstream-ofstream-fstream"><span class="nav-text">ifstream &#x2F; ofstream &#x2F; fstream</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#io-%E6%93%8D%E7%BA%B5%E7%AC%A6"><span class="nav-text">I&#x2F;O 操纵符</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#endl"><span class="nav-text">endl</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#boolalpha-noboolalpha"><span class="nav-text">boolalpha &#x2F; noboolalpha</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#skipws-noskipws"><span class="nav-text">skipws &#x2F; noskipws</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#oct-dec-hex"><span class="nav-text">oct &#x2F; dec &#x2F; hex</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -694,14 +694,14 @@ ostringstream &#x2F; stringstream</span></a></li></ol></li><li class="nav-item n
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">54</span>
+          <span class="site-state-item-count">57</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-count">8</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">

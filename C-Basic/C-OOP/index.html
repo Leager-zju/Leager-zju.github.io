@@ -29,7 +29,7 @@
 <meta property="og:image" content="http://leager-zju.github.com/C-Basic/C-OOP/image-20230215194050201.png">
 <meta property="og:image" content="http://leager-zju.github.com/C-Basic/C-OOP/image-20230215194222982.png">
 <meta property="article:published_time" content="2023-02-14T03:13:46.000Z">
-<meta property="article:modified_time" content="2023-02-24T15:05:01.897Z">
+<meta property="article:modified_time" content="2023-03-01T15:05:07.767Z">
 <meta property="article:author" content="Leager">
 <meta property="article:tag" content="C++">
 <meta name="twitter:card" content="summary">
@@ -134,12 +134,12 @@
   </li>
         <li class="menu-item menu-item-categories">
 
-    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">7</span></a>
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">8</span></a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">54</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">57</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -227,7 +227,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-02-24 23:05:01" itemprop="dateModified" datetime="2023-02-24T23:05:01+08:00">2023-02-24</time>
+                <time title="修改时间：2023-03-01 23:05:07" itemprop="dateModified" datetime="2023-03-01T23:05:07+08:00">2023-03-01</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -260,13 +260,58 @@
         <p><strong>面向对象程序设计</strong>（Object-oriented programming,
 OOP）是种具有对象概念的程序编程典范，同时也是一种程序开发的抽象方针。</p>
 <span id="more"></span>
-<h3 id="封装">封装</h3>
-<p><strong>装</strong>是指把数据与操作这些数据的函数绑定到一块，抽象成一个<strong>类</strong>；<strong>封</strong>是指将这些数据与函数对外部隐藏，避免干扰与误用，从而确保安全。C++
-通过三大<strong>访问修饰符</strong>支持这一特性，可以看到，隐藏级别是逐步提高的。</p>
+<h2 id="封装">封装</h2>
+<h3 id="装">装</h3>
+<p><strong>装</strong>是指把数据与操作这些数据的函数绑定到一块，抽象成一个<strong>类</strong>。</p>
+<p>C++11 引入移动语义之后，对于一个空类，编译器将为其默认生成以下 6
+种特殊成员函数，且访问级别默认为
+<code>public</code>（见下文）：<strong>默认构造函数</strong>、<strong>析构函数</strong>、<strong>拷贝构造函数</strong>、<strong>拷贝赋值运算符</strong>、<strong>移动构造函数</strong>、<strong>移动赋值运算符</strong>。</p>
+<h4 id="构造函数">构造函数</h4>
+<p>所谓<strong>构造函数</strong>，便是以类名为函数名的一种特殊函数，无返回值，任意一个对象在<strong>创建</strong>时都会自动调用（在成员变量初始化之后），完成类成员变量的初始化以及基类（见下文）的初始化等工作。</p>
+<p>其中，<strong>默认构造函数</strong>是初始化构造函数的一种特殊（无参）形式。所谓初始化构造函数，就是<strong>不以其他同类对象引用为参数</strong>的构造函数，即：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">Foo</span>() = <span class="keyword">default</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>用户可以自定义初始化构造函数，但会覆盖编译器原先生成的默认构造函数。如果需要使用默认构造函数，则需显式声明。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">Foo</span>(<span class="type">int</span> i) &#123;&#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Bar</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">Bar</span>() = <span class="keyword">default</span>;</span><br><span class="line">  <span class="built_in">Bar</span>(<span class="type">int</span> i) &#123;&#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  Foo a; <span class="comment">// ERROR! 默认构造函数被覆盖</span></span><br><span class="line">  Bar b; <span class="comment">// OK!</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>拷贝构造函数</strong>/<strong>移动构造函数</strong>就是仅以<strong>同类对象左值引用</strong>/<strong>同类对象右值引用</strong>为参数的构造函数。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">Foo</span>(<span class="type">const</span> Foo&amp;) = <span class="keyword">default</span>;  <span class="comment">// 拷贝构造</span></span><br><span class="line">  <span class="built_in">Foo</span>(<span class="type">const</span> Foo&amp;&amp;) = <span class="keyword">default</span>; <span class="comment">// 移动构造</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>拷贝构造函数的形参也可以写为<strong>值传递</strong>，但这样会发生什么事呢？我们尝试调用值传递版本的拷贝构造函数
+<code>Foo foo(another_foo)</code>，<code>another_foo</code>
+因值传递而进行了一次形参拷贝，此时还需要调用一次拷贝构造函数，然后因值传递进行形参拷贝……直接死循环！而且值拷贝的过程也是申请内存的过程，接下来就看内存和
+CPU
+哪个先撑不住了~基于此，所有拷贝构造函数都应写为<strong>引用传递</strong>。</p>
+<blockquote>
+<p>关于<strong>移动语义</strong>，请参见<a
+href="../../C-11/C-Value">此文</a>。</p>
+</blockquote>
+<p><strong>注意</strong>：想要用到的构造函数需声明为
+<code>public</code>，否则创建对象时将报错，下面也是一样的~</p>
+<h4 id="赋值运算符">赋值运算符</h4>
+<p>与构造函数不同，赋值运算符仅在<strong>对象创建完毕</strong>后才能调用，拷贝语义/移动语义与前面提到的类似。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  Foo&amp; <span class="keyword">operator</span>=(<span class="type">const</span> Foo&amp;) = <span class="keyword">default</span>;  <span class="comment">// 拷贝赋值</span></span><br><span class="line">  Foo&amp; <span class="keyword">operator</span>=(<span class="type">const</span> Foo&amp;&amp;) = <span class="keyword">default</span>; <span class="comment">// 移动赋值</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>需要将返回值写为<strong>本类引用</strong>，以实现连锁赋值。</p>
+</blockquote>
+<p>那么下面这串代码，执行的是哪个函数呢？【<font color=white>拷贝构造函数</font>】</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Foo foo1 = foo2;</span><br></pre></td></tr></table></figure>
+<h4 id="析构函数">析构函数</h4>
+<p>析构函数以类名为函数名，需额外在前面加一个<code>~</code>，没有返回值，无需显式调用，一个对象的生命周期结束时，就会自动调用析构函数。析构函数主要完成释放对象内存的工作，但编译器默认生成析构函数只是尸位素餐，实际上什么都不干，真想利用析构函数做点什么的话，则需要自定义析构函数。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  ~<span class="built_in">Foo</span>() = <span class="keyword">default</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>注意</strong>：析构函数没有参数，不能被重载，因此一个类只能有一个析构函数~</p>
+<p><strong>注意</strong>：<code>new</code> 出来的对象在堆上，如果不
+<code>delete</code> 是不会自动执行析构函数的~</p>
+<blockquote>
+<p>析构函数如果设为
+<code>private</code>，则无法在栈上创建对象。一般情况下都是要声明为
+<code>public</code> 的。</p>
+</blockquote>
+<h3 id="封">封</h3>
+<p><strong>封</strong>是指将这些数据与函数对外部隐藏，避免干扰与误用，从而确保安全。C++
+通过三大<strong>访问修饰符</strong>支持这一特性，可访问级别默认为
+<code>private</code>。</p>
 <table>
 <thead>
 <tr class="header">
-<th style="text-align: center;">可访问性</th>
+<th style="text-align: center;">可访问级别</th>
 <th style="text-align: center;">本类</th>
 <th style="text-align: center;">友元类/函数</th>
 <th style="text-align: center;">派生类</th>
@@ -298,7 +343,7 @@ OOP）是种具有对象概念的程序编程典范，同时也是一种程序�
 </tbody>
 </table>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123;</span><br><span class="line">  <span class="type">int</span> value;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">Foo</span>(<span class="type">int</span> v): <span class="built_in">value</span>(v) &#123;&#125;</span><br><span class="line">  <span class="function"><span class="type">int</span> <span class="title">getValue</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> <span class="keyword">this</span>-&gt;value; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="function">Foo <span class="title">foo</span><span class="params">(<span class="number">1</span>)</span></span>;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;value is &quot;</span> &lt;&lt; foo.value;      <span class="comment">// ERROR! Foo::value is private</span></span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;value is &quot;</span> &lt;&lt; foo.<span class="built_in">getValue</span>(); <span class="comment">// OK! Foo::getValue() is public</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="继承">继承</h3>
+<h2 id="继承">继承</h2>
 <p><strong>继承</strong>允许一个类（<strong>派生类</strong>）在另一个类（<strong>基类</strong>）的基础上进行设计，这使得创建和维护一个应用程序变得更容易，也达到了重用代码功能和提高执行效率的效果。</p>
 <p>同样的，继承方式也有<strong>公有继承</strong>(public)，<strong>保护继承</strong>(protected)，<strong>私有继承</strong>(private)三种，如果未显式声明继承方式，则默认为私有继承。</p>
 <ul>
@@ -323,7 +368,7 @@ OOP）是种具有对象概念的程序编程典范，同时也是一种程序�
 类对象的内存里最开始那一部分（4B）是专门分配给基类 <code>Base</code>
 的，并且其内存布局为：</p>
 <p><img src="image-20230215125309320.png" alt="image-20230215125309320" style="zoom:50%;" /></p>
-<h4 id="虚继承">虚继承</h4>
+<h3 id="虚继承">虚继承</h3>
 <p>再来点更复杂的情况：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Base</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="type">int</span> value&#123;<span class="number">1</span>&#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Derive1</span>: <span class="keyword">public</span> Base &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="type">int</span> value1&#123;<span class="number">2</span>&#125;;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">modify</span><span class="params">()</span> </span>&#123; Base::value *= <span class="number">2</span>; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Derive2</span>: <span class="keyword">public</span> Base &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="type">int</span> value2&#123;<span class="number">3</span>&#125;;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">modify</span><span class="params">()</span> </span>&#123; Base::value *= <span class="number">2</span>; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Final</span>: <span class="keyword">public</span> Derive2, <span class="keyword">public</span> Derive1 &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">modify1</span><span class="params">()</span> </span>&#123; Derive1::<span class="built_in">modify</span>(); &#125;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">modify2</span><span class="params">()</span> </span>&#123; Derive2::<span class="built_in">modify</span>(); &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  Final *f = <span class="keyword">new</span> Final;</span><br><span class="line">  std::cout &lt;&lt; <span class="built_in">sizeof</span>(Base) &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; <span class="built_in">sizeof</span>(Derive1) &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; <span class="built_in">sizeof</span>(Derive2) &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; <span class="built_in">sizeof</span>(Final) &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">    </span><br><span class="line">  <span class="type">int</span> *q = <span class="built_in">reinterpret_cast</span>&lt;<span class="type">int</span>*&gt;(f);</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="built_in">sizeof</span>(Final) / <span class="built_in">sizeof</span>(<span class="type">int</span>); i++) &#123;</span><br><span class="line">    std::cout &lt;&lt; q[i] &lt;&lt; <span class="string">&quot; &quot;</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">    </span><br><span class="line">  f-&gt;<span class="built_in">modify1</span>();</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="built_in">sizeof</span>(Final) / <span class="built_in">sizeof</span>(<span class="type">int</span>); i++) &#123;</span><br><span class="line">    std::cout &lt;&lt; q[i] &lt;&lt; <span class="string">&quot; &quot;</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// output:</span></span><br><span class="line"><span class="comment">// 4 8 8 16</span></span><br><span class="line"><span class="comment">// 1 3 1 2</span></span><br><span class="line"><span class="comment">// 1 3 2 2</span></span><br></pre></td></tr></table></figure>
 <p>根据上面的输出，我们发现，<code>Final</code> 分别继承了
@@ -347,12 +392,28 @@ OOP）是种具有对象概念的程序编程典范，同时也是一种程序�
 <blockquote>
 <p>多继承在现实应用场景中容易出问题，尽量避免使用多继承。</p>
 </blockquote>
-<h3 id="多态">多态</h3>
+<h3 id="派生类构造顺序">派生类构造顺序</h3>
+<p>直接贴代码，有助于理解。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">B1</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">B1</span>() &#123; std::cout &lt;&lt; <span class="string">&quot;B1 cons\n&quot;</span>; &#125;</span><br><span class="line">  ~<span class="built_in">B1</span>() &#123; std::cout &lt;&lt; <span class="string">&quot;B1 des\n&quot;</span>; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">B2</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">B2</span>() &#123; std::cout &lt;&lt; <span class="string">&quot;B2 cons\n&quot;</span>; &#125;</span><br><span class="line">  ~<span class="built_in">B2</span>() &#123; std::cout &lt;&lt; <span class="string">&quot;B2 des\n&quot;</span>; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">B3</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">B3</span>() &#123; std::cout &lt;&lt; <span class="string">&quot;B3 cons\n&quot;</span>; &#125;</span><br><span class="line">  <span class="built_in">B3</span>(<span class="type">int</span> i) &#123; std::cout &lt;&lt; <span class="string">&quot;B3 cons with &quot;</span> &lt;&lt; i &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;  &#125;</span><br><span class="line">  ~<span class="built_in">B3</span>() &#123; std::cout &lt;&lt; <span class="string">&quot;B3 des\n&quot;</span>; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">B4</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">B4</span>() &#123; std::cout &lt;&lt; <span class="string">&quot;B4 cons\n&quot;</span>; &#125;</span><br><span class="line">  ~<span class="built_in">B4</span>() &#123; std::cout &lt;&lt; <span class="string">&quot;B4 des\n&quot;</span>; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">B5</span> : <span class="keyword">public</span> B3, B2 &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  B4 b4;</span><br><span class="line">  B1 b1;</span><br><span class="line">  <span class="built_in">B5</span>() : <span class="built_in">b1</span>(), <span class="built_in">b4</span>(), <span class="built_in">B3</span>(<span class="number">2</span>) &#123; std::cout &lt;&lt; <span class="string">&quot;B5 cons\n&quot;</span>; &#125;</span><br><span class="line">  ~<span class="built_in">B5</span>() &#123; std::cout &lt;&lt; <span class="string">&quot;B5 des\n&quot;</span>; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  B5 b;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// output:</span></span><br><span class="line"><span class="comment">// B3 cons with 2</span></span><br><span class="line"><span class="comment">// B2 cons</span></span><br><span class="line"><span class="comment">// B4 cons</span></span><br><span class="line"><span class="comment">// B1 cons</span></span><br><span class="line"><span class="comment">// B5 cons</span></span><br><span class="line"><span class="comment">// B5 des</span></span><br><span class="line"><span class="comment">// B1 des</span></span><br><span class="line"><span class="comment">// B4 des</span></span><br><span class="line"><span class="comment">// B2 des</span></span><br><span class="line"><span class="comment">// B3 des</span></span><br></pre></td></tr></table></figure>
+<p>不难发现，<strong>构造顺序</strong>为：</p>
+<ol type="1">
+<li>按继承列表顺序构造基类；</li>
+<li>按成员变量列出顺序初始化成员变量，如果成员变量为某个类的对象，则调用相应构造函数；</li>
+<li>调用自身构造函数；</li>
+</ol>
+<p>而自身构造函数中对基类、成员变量的初始化不会影响相对顺序，只会影响调用哪个构造函数，比如
+<code>B3(2)</code> 使得基类 <code>B3</code> 调用了构造函数
+<code>B3(int)</code>。</p>
+<blockquote>
+<p>步骤 1, 2 中的类仍按同样的顺序递归构造。</p>
+</blockquote>
+<p><strong>析构顺序</strong>与构造顺序恰好相反。</p>
+<h2 id="多态">多态</h2>
 <p><strong>多态</strong>，即多种形态，能够使得不同的对象去完成同一件事时，产生不同的动作和结果。最常见的多态有<strong>静态多态</strong>与<strong>动态多态</strong>两种，</p>
-<h4 id="静态多态">静态多态</h4>
+<h3 id="静态多态">静态多态</h3>
 <p><strong>静态多态</strong>依靠函数<strong>重载</strong>实现，在编译时完成绑定，编译器根据函数实参的类型，推断出要调用的函数，如果有对应的函数就调用该函数，否则出现编译错误。</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">bar</span><span class="params">(<span class="type">int</span> a)</span> </span>&#123; std::cout &lt;&lt; <span class="string">&quot;int &quot;</span> &lt;&lt; a &lt;&lt; <span class="string">&#x27;\n&#x27;</span>; &#125;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">bar</span><span class="params">(<span class="type">char</span> b)</span> </span>&#123; std::cout &lt;&lt; <span class="string">&quot;char &quot;</span> &lt;&lt; b &lt;&lt; <span class="string">&#x27;\n&#x27;</span>; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  Foo f;</span><br><span class="line">  f.<span class="built_in">bar</span>(<span class="number">1</span>);</span><br><span class="line">  f.<span class="built_in">bar</span>(<span class="string">&#x27;2&#x27;</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// output:</span></span><br><span class="line"><span class="comment">// int 1</span></span><br><span class="line"><span class="comment">// char 2</span></span><br></pre></td></tr></table></figure>
-<h4 id="动态多态">动态多态</h4>
+<h3 id="动态多态">动态多态</h3>
 <p><strong>动态多态</strong>依靠类的<strong>虚函数</strong>实现，在运行时完成绑定，编译器根据对象类型执行相应函数。</p>
 <p>先来说说什么是虚函数。前面提到了虚继承，用到 <code>virtual</code>
 关键字，事实上，如果一个函数被 <code>virtual</code>
@@ -375,7 +436,7 @@ OOP）是种具有对象概念的程序编程典范，同时也是一种程序�
 <p>继承族谱分别为 A-&gt;B-&gt;C 与
 Base-&gt;Derive-&gt;Final，并且均为公有继承，于是<strong>协变</strong>成立。</p>
 </blockquote>
-<h4 id="虚函数表">虚函数表</h4>
+<h3 id="虚函数表">虚函数表</h3>
 <p>那么问题来了，C++ 是如何实现多态的？先看下面这串代码：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Base</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">foo</span><span class="params">()</span> </span>&#123; std::cout &lt;&lt; <span class="string">&quot;Base foo\n&quot;</span>; &#125;</span><br><span class="line">  <span class="type">int</span> value;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Derive</span> : <span class="keyword">public</span> Base &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">foo</span><span class="params">()</span> </span>&#123; std::cout &lt;&lt; <span class="string">&quot;Derive foo\n&quot;</span>; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  std::cout &lt;&lt; <span class="built_in">sizeof</span>(Base) &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; <span class="built_in">sizeof</span>(Derive);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// output:</span></span><br><span class="line"><span class="comment">// 16 16</span></span><br></pre></td></tr></table></figure>
 <p>类 <code>Base</code>，在仅有一个虚函数和一个 <code>int</code>
@@ -413,7 +474,7 @@ feature），用于存放指向<strong>虚函数表</strong>的指针。所谓�
 <p>更详细的关于虚函数内存的机制可以看<a
 target="_blank" rel="noopener" href="https://blog.twofei.com/496/">这篇文章</a>。</p>
 </blockquote>
-<h4 id="纯虚函数">纯虚函数</h4>
+<h3 id="纯虚函数">纯虚函数</h3>
 <p>说了那么多，虚函数到底有啥用？</p>
 <p>我们目前已经掌握的知识有，可以通过基类指针或引用绑定派生类，并在调用虚函数时实现多态，根据这一特性，如果希望一个函数形参面向目标为所有族谱成员的话，就不需要对所有成员挨个实现，直接将形参设为基类指针，在需要实现多态的功能处设为虚函数即可。这和
 <code>std::function</code>
@@ -424,7 +485,7 @@ target="_blank" rel="noopener" href="https://blog.twofei.com/496/">这篇文章<
 <p>以及，还有一个特殊的虚函数，称为<strong>纯虚函数</strong>，声明为
 <code>virtual type funcname() = 0;</code>。</p>
 <p>拥有纯虚函数的类称为<strong>抽象类</strong>，无法实例化，而仅拥有纯虚函数的类称为<strong>接口类</strong>。纯虚函数只是一个接口（interface），是一个函数的声明而已，需要留给派生类去进行实现。只有实现了该接口的派生类才能进行实例化，否则依然是抽象类，无法实例化。</p>
-<h4 id="注意">注意</h4>
+<h3 id="注意">注意</h3>
 <p>功能如此强大的特性，必然涉及到一些<strong>限制 or
 注意事项</strong>，总的来说有以下几点：</p>
 <ol type="1">
@@ -440,6 +501,7 @@ target="_blank" rel="noopener" href="https://blog.twofei.com/496/">这篇文章<
 <code>Base</code> 类的析构函数，而属于 <code>Derive</code>
 的那一部分并没有被析构。为了程序安全运行，我们应该要调用派生类的析构函数，也就是通过将基类析构函数设为虚函数来实现；</li>
 </ol>
+<h2 id="与-struct-的不同">与 struct 的不同</h2>
 
     </div>
 
@@ -523,7 +585,7 @@ target="_blank" rel="noopener" href="https://blog.twofei.com/496/">这篇文章<
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%81%E8%A3%85"><span class="nav-text">封装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%A7%E6%89%BF"><span class="nav-text">继承</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%99%9A%E7%BB%A7%E6%89%BF"><span class="nav-text">虚继承</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A%E6%80%81"><span class="nav-text">多态</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E5%A4%9A%E6%80%81"><span class="nav-text">静态多态</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E5%A4%9A%E6%80%81"><span class="nav-text">动态多态</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%99%9A%E5%87%BD%E6%95%B0%E8%A1%A8"><span class="nav-text">虚函数表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BA%AF%E8%99%9A%E5%87%BD%E6%95%B0"><span class="nav-text">纯虚函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F"><span class="nav-text">注意</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%81%E8%A3%85"><span class="nav-text">封装</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A3%85"><span class="nav-text">装</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0"><span class="nav-text">构造函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B5%8B%E5%80%BC%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="nav-text">赋值运算符</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9E%90%E6%9E%84%E5%87%BD%E6%95%B0"><span class="nav-text">析构函数</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%81"><span class="nav-text">封</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%A7%E6%89%BF"><span class="nav-text">继承</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%99%9A%E7%BB%A7%E6%89%BF"><span class="nav-text">虚继承</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B4%BE%E7%94%9F%E7%B1%BB%E6%9E%84%E9%80%A0%E9%A1%BA%E5%BA%8F"><span class="nav-text">派生类构造顺序</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E6%80%81"><span class="nav-text">多态</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E5%A4%9A%E6%80%81"><span class="nav-text">静态多态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E5%A4%9A%E6%80%81"><span class="nav-text">动态多态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%99%9A%E5%87%BD%E6%95%B0%E8%A1%A8"><span class="nav-text">虚函数表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%AF%E8%99%9A%E5%87%BD%E6%95%B0"><span class="nav-text">纯虚函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F"><span class="nav-text">注意</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8E-struct-%E7%9A%84%E4%B8%8D%E5%90%8C"><span class="nav-text">与 struct 的不同</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -539,14 +601,14 @@ target="_blank" rel="noopener" href="https://blog.twofei.com/496/">这篇文章<
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">54</span>
+          <span class="site-state-item-count">57</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-count">8</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">

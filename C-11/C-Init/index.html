@@ -18,15 +18,15 @@
     var CONFIG = {"hostname":"leager-zju.github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"b2t":true},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="在 C++ 11 中，可以直接在变量名后面用 &amp;#123;初始化列表&amp;#125; 来进行对象的初始化。">
+  <meta name="description" content="在 C++11 中，可以直接在变量名后面用 &amp;#123;初始化列表&amp;#125; 来进行对象的初始化。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="C++ 11 の 列表初始化(List Initialize)">
+<meta property="og:title" content="C++11 の 列表初始化(List Initialize)">
 <meta property="og:url" content="http://leager-zju.github.com/C-11/C-Init/index.html">
 <meta property="og:site_name" content="没什么看头的地方">
-<meta property="og:description" content="在 C++ 11 中，可以直接在变量名后面用 &amp;#123;初始化列表&amp;#125; 来进行对象的初始化。">
+<meta property="og:description" content="在 C++11 中，可以直接在变量名后面用 &amp;#123;初始化列表&amp;#125; 来进行对象的初始化。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2023-01-28T11:52:46.000Z">
-<meta property="article:modified_time" content="2023-02-24T15:05:01.897Z">
+<meta property="article:modified_time" content="2023-03-01T14:24:37.380Z">
 <meta property="article:author" content="Leager">
 <meta property="article:tag" content="C++">
 <meta name="twitter:card" content="summary">
@@ -44,7 +44,7 @@
   };
 </script>
 
-  <title>C++ 11 の 列表初始化(List Initialize) | 没什么看头的地方</title>
+  <title>C++11 の 列表初始化(List Initialize) | 没什么看头的地方</title>
   
 
 
@@ -130,12 +130,12 @@
   </li>
         <li class="menu-item menu-item-categories">
 
-    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">7</span></a>
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">8</span></a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">54</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">57</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -206,7 +206,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          C++ 11 の 列表初始化(List Initialize)
+          C++11 の 列表初始化(List Initialize)
         </h1>
 
         <div class="post-meta">
@@ -223,7 +223,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-02-24 23:05:01" itemprop="dateModified" datetime="2023-02-24T23:05:01+08:00">2023-02-24</time>
+                <time title="修改时间：2023-03-01 22:24:37" itemprop="dateModified" datetime="2023-03-01T22:24:37+08:00">2023-03-01</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -231,7 +231,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/C-11/" itemprop="url" rel="index"><span itemprop="name">C++ 11</span></a>
+                  <a href="/categories/C-11/" itemprop="url" rel="index"><span itemprop="name">C++11</span></a>
                 </span>
             </span>
 
@@ -253,11 +253,11 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>在 C++ 11 中，可以直接在变量名后面用 <code>&#123;初始化列表&#125;</code>
+        <p>在 C++11 中，可以直接在变量名后面用 <code>&#123;初始化列表&#125;</code>
 来进行对象的初始化。</p>
 <span id="more"></span>
-<h3 id="旧世界">旧世界</h3>
-<p>C++ 11
+<h2 id="旧世界">旧世界</h2>
+<p>C++11
 以前，各种初始化方式如神仙打架，百花齐放，在同一个项目中，你或许可以看到如以下几种不同的初始化方式：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">A</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">A</span>() &#123;&#125;</span><br><span class="line">  <span class="built_in">A</span>(<span class="type">int</span> i): <span class="built_in">i_</span>(i) &#123;&#125;</span><br><span class="line">  <span class="built_in">A</span>(<span class="type">const</span> A &amp;other): <span class="built_in">i_</span>(other.i_) &#123;&#125;</span><br><span class="line">  <span class="type">int</span> i_;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">B</span> &#123;</span><br><span class="line">  <span class="type">int</span> x, y;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> nums[<span class="number">3</span>] = &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>&#125;; <span class="comment">// 数组列表初始化</span></span><br><span class="line">A a0;                    <span class="comment">// 默认初始化</span></span><br><span class="line"><span class="function">A <span class="title">a1</span><span class="params">()</span></span>;                  <span class="comment">// 值初始化</span></span><br><span class="line"><span class="function">A <span class="title">a2</span><span class="params">(<span class="number">2</span>)</span></span>;                 <span class="comment">// 直接初始化</span></span><br><span class="line">A a3 = <span class="number">3</span>;                <span class="comment">// 先通过调用 A(3) 构建临时对象，再复制初始化</span></span><br><span class="line">B b = &#123;<span class="number">0</span>, <span class="number">0</span>&#125;;            <span class="comment">// 聚合初始化</span></span><br></pre></td></tr></table></figure>
 <p>这使得程序员，或者初学者们经常会感到疑惑：这么多的对象初始化方式，怎样去初始化一个变量或者是一个对象？不仅增加了学习成本，也使得代码风格有较大出入，影响了代码的可读性和统一性。</p>
@@ -274,8 +274,8 @@
 <li>没有默认成员初始化器；</li>
 </ol>
 </blockquote>
-<h3 id="新世界列表初始化">新世界！列表初始化</h3>
-<p>为了统一代码，C++ 11
+<h2 id="新世界列表初始化">新世界！列表初始化</h2>
+<p>为了统一代码，C++11
 将列表初始化的功能进行拓展，使其能够应用于绝大多数构造情况，同样的，<code>new</code>
 操作符等可以用圆括号进行初始化的地方，也可以使用初始化列表。如：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">A</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">A</span>(<span class="type">int</span> i): <span class="built_in">i_</span>(i) &#123;&#125;</span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="built_in">A</span>(<span class="type">const</span> A &amp;other): <span class="built_in">i_</span>(other.i_) &#123;&#125;</span><br><span class="line">  <span class="type">int</span> i_;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function">A <span class="title">a0</span><span class="params">(<span class="number">0</span>)</span></span>;</span><br><span class="line">A a1&#123;<span class="number">1</span>&#125;;</span><br><span class="line">A a2 = <span class="number">2</span>;   <span class="comment">// ERROR! A(const A&amp;) 为 private</span></span><br><span class="line">A a3 = &#123;<span class="number">3</span>&#125;; <span class="comment">// OK! 列表初始化，私有拷贝函数无影响，直接应用于其数据 i_</span></span><br><span class="line">A* a4 = <span class="keyword">new</span> A&#123;<span class="number">4</span>&#125;;</span><br></pre></td></tr></table></figure>
@@ -311,12 +311,12 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/C-11/C-Value/" rel="prev" title="C++ 11 の 左值与右值(Lvalue & Rvalue)">
-      <i class="fa fa-chevron-left"></i> C++ 11 の 左值与右值(Lvalue & Rvalue)
+    <a href="/C-11/C-Value/" rel="prev" title="C++11 の 左值与右值(Lvalue & Rvalue)">
+      <i class="fa fa-chevron-left"></i> C++11 の 左值与右值(Lvalue & Rvalue)
     </a></div>
       <div class="post-nav-item">
-    <a href="/C-11/C-Concurrent/" rel="next" title="C++ 11 の 并发支持(Concurrency)">
-      C++ 11 の 并发支持(Concurrency) <i class="fa fa-chevron-right"></i>
+    <a href="/C-11/C-Concurrent/" rel="next" title="C++11 の 并发支持(Concurrency)">
+      C++11 の 并发支持(Concurrency) <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
@@ -376,7 +376,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%A7%E4%B8%96%E7%95%8C"><span class="nav-text">旧世界</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B0%E4%B8%96%E7%95%8C%E5%88%97%E8%A1%A8%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-text">新世界！列表初始化</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%97%A7%E4%B8%96%E7%95%8C"><span class="nav-text">旧世界</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B0%E4%B8%96%E7%95%8C%E5%88%97%E8%A1%A8%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-text">新世界！列表初始化</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -392,14 +392,14 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">54</span>
+          <span class="site-state-item-count">57</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-count">8</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">

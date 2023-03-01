@@ -26,7 +26,7 @@
 <meta property="og:description" content="static 是 C++ 中很常用的修饰符，它被用来控制变量的存储方式和可见性。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2023-02-13T09:02:49.000Z">
-<meta property="article:modified_time" content="2023-02-24T15:05:01.898Z">
+<meta property="article:modified_time" content="2023-03-01T14:24:37.395Z">
 <meta property="article:author" content="Leager">
 <meta property="article:tag" content="C++">
 <meta name="twitter:card" content="summary">
@@ -130,12 +130,12 @@
   </li>
         <li class="menu-item menu-item-categories">
 
-    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">7</span></a>
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">8</span></a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">54</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">57</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -223,7 +223,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-02-24 23:05:01" itemprop="dateModified" datetime="2023-02-24T23:05:01+08:00">2023-02-24</time>
+                <time title="修改时间：2023-03-01 22:24:37" itemprop="dateModified" datetime="2023-03-01T22:24:37+08:00">2023-03-01</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -256,17 +256,17 @@
         <p><code>static</code> 是 C++
 中很常用的修饰符，它被用来控制变量的存储方式和可见性。</p>
 <span id="more"></span>
-<h3 id="static-普通变量">static 普通变量</h3>
+<h2 id="static-普通变量">static 普通变量</h2>
 <p><code>static</code>
 修饰的普通变量存储在<strong>静态区</strong>，其生命周期延长至整个程序结束。只有第一次会执行初始化，若无初始值，则用默认值进行初始化。</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">Foo</span>() &#123; std::cout &lt;&lt; <span class="string">&quot;Foo\n&quot;</span>; &#125;</span><br><span class="line">  ~<span class="built_in">Foo</span>() &#123; std::cout &lt;&lt; <span class="string">&quot;~Foo\n&quot;</span>; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">func</span><span class="params">()</span> </span>&#123; <span class="type">static</span> Foo f; &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;Start\n&quot;</span>;</span><br><span class="line">  <span class="built_in">func</span>(); <span class="comment">// 初始化 Foo f</span></span><br><span class="line">  <span class="built_in">func</span>(); <span class="comment">// 不再对 f 初始化</span></span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;End\n&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// output:</span></span><br><span class="line"><span class="comment">// Start</span></span><br><span class="line"><span class="comment">// Foo</span></span><br><span class="line"><span class="comment">// End</span></span><br><span class="line"><span class="comment">// ~Foo</span></span><br></pre></td></tr></table></figure>
 <p>特别的，<code>static</code>
 修饰<strong>全局变量</strong>时，这个全局变量只能在本文件中访问，不能在其它文件中访问，即便是
 <code>extern</code> 外部声明也不可以。</p>
-<h3 id="static-函数">static 函数</h3>
+<h2 id="static-函数">static 函数</h2>
 <p><code>static</code>
 修饰的函数仅在定义该函数的文件内才能使用。一般在多人开发项目时，为了防止与他人命名空间里的函数重名，可以这么做。</p>
-<h3 id="static-类成员变量类成员函数">static 类成员变量/类成员函数</h3>
+<h2 id="static-类成员变量类成员函数">static 类成员变量/类成员函数</h2>
 <p><code>static</code>
 修饰的类成员变量/类成员函数提供一层<strong>类共享</strong>语义，即该成员变量/函数<strong>不属于任一对象，而是属于整个类</strong>，在内存中只占用一份空间，可直接通过
 <code>类名::成员变量名</code> 或 <code>类名::成员函数名</code>
@@ -365,7 +365,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#static-%E6%99%AE%E9%80%9A%E5%8F%98%E9%87%8F"><span class="nav-text">static 普通变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#static-%E5%87%BD%E6%95%B0"><span class="nav-text">static 函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#static-%E7%B1%BB%E6%88%90%E5%91%98%E5%8F%98%E9%87%8F%E7%B1%BB%E6%88%90%E5%91%98%E5%87%BD%E6%95%B0"><span class="nav-text">static 类成员变量&#x2F;类成员函数</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#static-%E6%99%AE%E9%80%9A%E5%8F%98%E9%87%8F"><span class="nav-text">static 普通变量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#static-%E5%87%BD%E6%95%B0"><span class="nav-text">static 函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#static-%E7%B1%BB%E6%88%90%E5%91%98%E5%8F%98%E9%87%8F%E7%B1%BB%E6%88%90%E5%91%98%E5%87%BD%E6%95%B0"><span class="nav-text">static 类成员变量&#x2F;类成员函数</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -381,14 +381,14 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">54</span>
+          <span class="site-state-item-count">57</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-count">8</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">

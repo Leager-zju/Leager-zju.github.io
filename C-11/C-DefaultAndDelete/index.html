@@ -18,15 +18,15 @@
     var CONFIG = {"hostname":"leager-zju.github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"b2t":true},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="C++ 11 中新增了 default 与 delete 这俩关键字。请不要误会，这里的 delete 并不是与 new 搭配使用释放内存的那个，而是跟 default 相对的用于类成员函数声明的关键字。">
+  <meta name="description" content="C++11 中新增了 default 与 delete 这俩关键字。请不要误会，这里的 delete 并不是与 new 搭配使用释放内存的那个，而是跟 default 相对的用于类成员函数声明的关键字。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="C++ 11 の 预置与弃置(Default &amp; Delete)">
+<meta property="og:title" content="C++11 の 预置与弃置(Default &amp; Delete)">
 <meta property="og:url" content="http://leager-zju.github.com/C-11/C-DefaultAndDelete/index.html">
 <meta property="og:site_name" content="没什么看头的地方">
-<meta property="og:description" content="C++ 11 中新增了 default 与 delete 这俩关键字。请不要误会，这里的 delete 并不是与 new 搭配使用释放内存的那个，而是跟 default 相对的用于类成员函数声明的关键字。">
+<meta property="og:description" content="C++11 中新增了 default 与 delete 这俩关键字。请不要误会，这里的 delete 并不是与 new 搭配使用释放内存的那个，而是跟 default 相对的用于类成员函数声明的关键字。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2023-02-04T04:15:21.000Z">
-<meta property="article:modified_time" content="2023-02-24T15:05:01.896Z">
+<meta property="article:modified_time" content="2023-03-01T14:24:37.366Z">
 <meta property="article:author" content="Leager">
 <meta property="article:tag" content="C++">
 <meta name="twitter:card" content="summary">
@@ -44,7 +44,7 @@
   };
 </script>
 
-  <title>C++ 11 の 预置与弃置(Default & Delete) | 没什么看头的地方</title>
+  <title>C++11 の 预置与弃置(Default & Delete) | 没什么看头的地方</title>
   
 
 
@@ -130,12 +130,12 @@
   </li>
         <li class="menu-item menu-item-categories">
 
-    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">7</span></a>
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">8</span></a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">54</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">57</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -206,7 +206,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          C++ 11 の 预置与弃置(Default & Delete)
+          C++11 の 预置与弃置(Default & Delete)
         </h1>
 
         <div class="post-meta">
@@ -223,7 +223,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-02-24 23:05:01" itemprop="dateModified" datetime="2023-02-24T23:05:01+08:00">2023-02-24</time>
+                <time title="修改时间：2023-03-01 22:24:37" itemprop="dateModified" datetime="2023-03-01T22:24:37+08:00">2023-03-01</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -231,7 +231,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/C-11/" itemprop="url" rel="index"><span itemprop="name">C++ 11</span></a>
+                  <a href="/categories/C-11/" itemprop="url" rel="index"><span itemprop="name">C++11</span></a>
                 </span>
             </span>
 
@@ -253,12 +253,12 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>C++ 11 中新增了 <code>default</code> 与 <code>delete</code>
+        <p>C++11 中新增了 <code>default</code> 与 <code>delete</code>
 这俩关键字。请不要误会，这里的 <code>delete</code> 并不是与
 <code>new</code> 搭配使用释放内存的那个，而是跟 <code>default</code>
 相对的用于类成员函数声明的关键字。</p>
 <span id="more"></span>
-<h3 id="default">default</h3>
+<h2 id="default">default</h2>
 <p>众所周知，如果用户自定义了一个类的构造函数，则编译器不会为其隐式生成默认构造函数。可能它觉得你想根据自己的需求定义构造函数。</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">A</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">A</span>(<span class="type">int</span> i) &#123;&#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">B</span> &#123;&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">C</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">B</span>(<span class="type">int</span> i = <span class="number">1</span>) &#123;&#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">A a;  <span class="comment">// ERROR! 已经有 A(int) 就不会生成 A()</span></span><br><span class="line">B b;  <span class="comment">// OK! 隐式生成默认构造函数</span></span><br><span class="line">C c;  <span class="comment">// OK! 所有形参都具有默认值</span></span><br></pre></td></tr></table></figure>
 <p><strong>默认构造函数</strong>是在没有显式提供初始化式时调用的构造函数。它由不带参数的构造函数，或者为所有的形参提供默认实参的构造函数定义。如果定义某个类的变量时没有提供初始化时就会使用默认构造函数。（抄自百科）</p>
@@ -275,8 +275,8 @@
 <p>这样一来，就避免了程序员定义函数的繁重工作。同时，使用
 <code>default</code>
 修饰的函数也比用户自定义的函数拥有<strong>更高的执行效率</strong>，这也是该特性的一大优势。</p>
-<h3 id="delete">delete</h3>
-<p>在 C++ 11
+<h2 id="delete">delete</h2>
+<p>在 C++11
 以前，如果想要禁止类的某个成员函数被调用，只有两种策略：要么将其声明为私有函数，要么干脆定义为空函数，什么也不做。因为有些类从功能的角度考虑必然不能对某些函数进行实现甚至定义——总不能让程序员在
 <code>human</code> 类中搞了个 <code>fly()</code> 函数吧。</p>
 <p>但问题在于，第一种做法并不能阻止类内调用，和第二种做法一样无法在调用时报错，程序员也就很难找到代码问题所在。两种做法并没有从根本上解决问题——<strong>这些函数不该被定义</strong>。</p>
@@ -285,7 +285,7 @@
 的函数会被视为<strong>弃置</strong>(deleted)，在编译器眼中这个函数<strong>禁止被定义</strong>，对该函数的调用会导致编译错误，继而从根本上解决了这个问题。与
 <code>default</code> 不同，<code>delete</code>
 可以用于修饰任何类成员函数。</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">A</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">A</span>() = <span class="keyword">default</span>;</span><br><span class="line">  <span class="built_in">A</span>(<span class="type">const</span> A&amp; other) = <span class="keyword">delete</span>;</span><br><span class="line">  A&amp; <span class="keyword">operator</span>= (<span class="type">const</span> A&amp; other) = <span class="keyword">delete</span>;</span><br><span class="line">  <span class="built_in">A</span>(<span class="type">int</span> i) = <span class="keyword">delete</span>; <span class="comment">// OK! 如果不想使用这种构造函数，就将其弃置，这样外部也无法进行定义</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">A a1, a3; <span class="comment">// OK! 默认构造函数</span></span><br><span class="line"><span class="function">A <span class="title">a2</span><span class="params">(a1)</span></span>; <span class="comment">// ERROR! 拷贝构造函数被弃置</span></span><br><span class="line">a3 = a1;  <span class="comment">// ERROR! 拷贝赋值函数被弃置</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">A</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">A</span>() = <span class="keyword">default</span>;</span><br><span class="line">  <span class="built_in">A</span>(<span class="type">const</span> A&amp; other) = <span class="keyword">delete</span>;</span><br><span class="line">  A&amp; <span class="keyword">operator</span>= (<span class="type">const</span> A&amp; other) = <span class="keyword">delete</span>;</span><br><span class="line">  <span class="built_in">A</span>(<span class="type">int</span> i) = <span class="keyword">delete</span>; <span class="comment">// OK! 如果不想使用这种构造函数，就将其弃置，这样外部也无法进行定义</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">A a1, a3; <span class="comment">// OK! 默认构造函数</span></span><br><span class="line"><span class="function">A <span class="title">a2</span><span class="params">(a1)</span></span>; <span class="comment">// ERROR! 拷贝构造函数被弃置</span></span><br><span class="line">a3 = a1;  <span class="comment">// ERROR! 拷贝赋值运算符被弃置</span></span><br></pre></td></tr></table></figure>
 <blockquote>
 <p>一个很常用的例子就是
 <code>unique_ptr</code>，<code>unique_lock</code> 这些类通过
@@ -309,12 +309,12 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/C-11/C-Constructor/" rel="prev" title="C++ 11 の 委托与继承的构造函数(Delegating & Inherited Constructors)">
-      <i class="fa fa-chevron-left"></i> C++ 11 の 委托与继承的构造函数(Delegating & Inherited Constructors)
+    <a href="/C-11/C-Constructor/" rel="prev" title="C++11 の 委托与继承的构造函数(Delegating & Inherited Constructors)">
+      <i class="fa fa-chevron-left"></i> C++11 の 委托与继承的构造函数(Delegating & Inherited Constructors)
     </a></div>
       <div class="post-nav-item">
-    <a href="/C-11/C-Regex/" rel="next" title="C++ 11 の 正则表达式(Regex)">
-      C++ 11 の 正则表达式(Regex) <i class="fa fa-chevron-right"></i>
+    <a href="/C-11/C-Regex/" rel="next" title="C++11 の 正则表达式(Regex)">
+      C++11 の 正则表达式(Regex) <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
@@ -374,7 +374,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#default"><span class="nav-text">default</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#delete"><span class="nav-text">delete</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#default"><span class="nav-text">default</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#delete"><span class="nav-text">delete</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -390,14 +390,14 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">54</span>
+          <span class="site-state-item-count">57</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-count">8</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">

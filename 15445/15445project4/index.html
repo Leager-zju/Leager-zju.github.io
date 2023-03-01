@@ -26,7 +26,7 @@
 <meta property="og:description" content="接下来，需要完善对事务并发的支持。 &gt;&gt;&gt; LAB 主页传送门 &lt;&lt;&lt;">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2023-01-12T03:56:16.000Z">
-<meta property="article:modified_time" content="2023-02-24T15:05:01.894Z">
+<meta property="article:modified_time" content="2023-03-01T14:24:37.307Z">
 <meta property="article:author" content="Leager">
 <meta property="article:tag" content="lab">
 <meta name="twitter:card" content="summary">
@@ -130,12 +130,12 @@
   </li>
         <li class="menu-item menu-item-categories">
 
-    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">7</span></a>
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">8</span></a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">54</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">57</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -223,7 +223,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-02-24 23:05:01" itemprop="dateModified" datetime="2023-02-24T23:05:01+08:00">2023-02-24</time>
+                <time title="修改时间：2023-03-01 22:24:37" itemprop="dateModified" datetime="2023-03-01T22:24:37+08:00">2023-03-01</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -258,23 +258,23 @@
 target="_blank" rel="noopener" href="https://15445.courses.cs.cmu.edu/fall2022/project4/">&gt;&gt;&gt;
 LAB 主页传送门 &lt;&lt;&lt;</a></p>
 <span id="more"></span>
-<h3 id="task-1---lock-manager">Task #1 - Lock Manager</h3>
+<h2 id="task-1---lock-manager">Task #1 - Lock Manager</h2>
 <p>LM 负责以五种不同的模式保持 Table 和 Tuple
 两个粒度的锁：<code>IntensionShared(IS)</code>，<code>Shared(S)</code>，<code>IntensionExclusive(IX)</code>，<code>Exclusive(X)</code>，<code>SharedIntensionExclusive(SIX)</code>。LM
 将处理来自事务的锁请求，向事务授予锁，并根据事务的隔离级别检查锁是否被适当释放。</p>
 <p>先来看看各个类的数据定义。</p>
-<h4 id="lockrequest">LockRequest</h4>
+<h3 id="lockrequest">LockRequest</h3>
 <p>锁请求，包含请求事务的标识符 <code>txn_id</code>，待上锁 Table 标识符
 <code>oid</code>，待上锁表行标识符 <code>rid</code>，本次请求的上锁类型
 <code>lock_mode</code>，以及指明该请求是否授予的变量
 <code>granted</code>。</p>
-<h4 id="lockrequestqueue">LockRequestQueue</h4>
+<h3 id="lockrequestqueue">LockRequestQueue</h3>
 <p>将实际队列
 <code>std::list&lt;std::shared_ptr&lt;LockRequest&gt;&gt;</code>
 进行封装，额外添加了一把锁 <code>latch</code> 以及条件变量
 <code>cv</code>，以便锁释放后通知其余等待中的锁。此外还有一个
 <code>upgrading</code> 用来标识当前锁请求队列是否有锁正在进行升级。</p>
-<h4 id="lockmanager">LockManager</h4>
+<h3 id="lockmanager">LockManager</h3>
 <p>首先是定义了锁类型 <code>LockMode</code>，就是上面提到的 5
 种。除此之外，还有以下变量：</p>
 <ul>
@@ -286,7 +286,7 @@ rid 获取；</li>
 中会用到；</li>
 </ul>
 <p>还有以上每个变量对应的锁。</p>
-<h4 id="locktable-lockrow">LockTable() / LockRow()</h4>
+<h3 id="locktable-lockrow">LockTable() / LockRow()</h3>
 <p>⚠<font color=red><strong><em>在实现上锁过程之前，务必反复阅读并理解头文件中的
 Lock Note。</em></strong></font></p>
 <p>表锁和行锁的上锁过程基本类似，行锁在上锁前多了一个所在表是否正确上锁的判断，其余一致。这里就先讲<strong>表锁</strong>的上锁流程。</p>
@@ -356,7 +356,7 @@ Note 中提到，锁升级是优先级最高的请求，故将其插到所有
 <p>最后就是授予锁了，将对应锁请求的 <code>granted</code> 改为
 <code>true</code>，并修改事务维护的相应锁集合。如果这是一次锁升级请求，则说明升级完成，还需要修改请求队列的
 <code>upgrading</code> 变量。</p>
-<h4 id="unlocktable-unlockrow">UnlockTable() / UnlockRow()</h4>
+<h3 id="unlocktable-unlockrow">UnlockTable() / UnlockRow()</h3>
 <p>⚠<font color=red><strong><em>在实现解锁过程之前，务必反复阅读并理解头文件中的
 Unlock Note。</em></strong></font></p>
 <p>解锁过程相比上锁过程简单许多，表锁和行锁的解锁流程也几乎一样，只是表锁在解锁时需要判断表中是否还有未解锁的行锁，其余一致。这里就先讲<strong>表锁</strong>的解锁流程。</p>
@@ -367,7 +367,7 @@ Unlock Note。</em></strong></font></p>
 <code>cv_.notify_all()</code>
 通知所有挂起的线程。由于同一个事务在同一个表/行上最多仅能上一把锁，所以不会出现两个相同
 <code>txn_id</code> 的请求。</p>
-<h3 id="task-2---deadlock-detection">Task #2 - Deadlock Detection</h3>
+<h2 id="task-2---deadlock-detection">Task #2 - Deadlock Detection</h2>
 <p>死锁检测需要我们构建一个事务等待图，然后利用 DFS
 算法检测环是否存在环，每次检测需打破所有环，并且 Aborted 环上
 <code>txn_id</code> 最大的事务。</p>
@@ -397,12 +397,12 @@ State，如果变成了
 wait，但实际上只要被 Aborted
 的那个事务移除锁请求，后面事务就能获取锁了。</p>
 </blockquote>
-<h3 id="task-3---concurrent-query-execution">Task #3 - Concurrent Query
-Execution</h3>
+<h2 id="task-3---concurrent-query-execution">Task #3 - Concurrent Query
+Execution</h2>
 <p>在 lab3 中实现的 3 个与真实物理页面打交道的算子
 SeqScan，Insert，Delete
 中加上锁。并且根据上述讨论提到的不同隔离级别的不同表现进行额外的判断，难度不大，略。</p>
-<h3 id="总结">总结</h3>
+<h2 id="总结">总结</h2>
 <p>本 lab
 最大的收获就是理解了隔离级别以及锁类型之间的关系，以及死锁检测是如何进行的。</p>
 
@@ -488,8 +488,8 @@ SeqScan，Insert，Delete
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#task-1---lock-manager"><span class="nav-text">Task #1 - Lock Manager</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#lockrequest"><span class="nav-text">LockRequest</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#lockrequestqueue"><span class="nav-text">LockRequestQueue</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#lockmanager"><span class="nav-text">LockManager</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#locktable-lockrow"><span class="nav-text">LockTable() &#x2F; LockRow()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#unlocktable-unlockrow"><span class="nav-text">UnlockTable() &#x2F; UnlockRow()</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#task-2---deadlock-detection"><span class="nav-text">Task #2 - Deadlock Detection</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#task-3---concurrent-query-execution"><span class="nav-text">Task #3 - Concurrent Query
-Execution</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#task-1---lock-manager"><span class="nav-text">Task #1 - Lock Manager</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#lockrequest"><span class="nav-text">LockRequest</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#lockrequestqueue"><span class="nav-text">LockRequestQueue</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#lockmanager"><span class="nav-text">LockManager</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#locktable-lockrow"><span class="nav-text">LockTable() &#x2F; LockRow()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#unlocktable-unlockrow"><span class="nav-text">UnlockTable() &#x2F; UnlockRow()</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#task-2---deadlock-detection"><span class="nav-text">Task #2 - Deadlock Detection</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#task-3---concurrent-query-execution"><span class="nav-text">Task #3 - Concurrent Query
+Execution</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -505,14 +505,14 @@ Execution</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" hr
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">54</span>
+          <span class="site-state-item-count">57</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-count">8</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
