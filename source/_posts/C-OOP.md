@@ -265,61 +265,38 @@ int main() {
 
 ### 派生类构造顺序
 
-```c++
-#include <cstdlib>
-#include <iostream>
+直接贴代码，有助于理解。
 
+```c++
 class B1 {
  public:
-  B1() {
-    std::cout << "B1 cons\n";
-  }
-  ~B1() {
-    std::cout << "B1 des\n";
-  }
+  B1() { std::cout << "B1 cons\n"; }
+  ~B1() { std::cout << "B1 des\n"; }
 };
 
 class B2 {
  public:
-  B2() {
-    std::cout << "B2 cons\n";
-  }
-  ~B2() {
-    std::cout << "B2 des\n";
-  }
+  B2() { std::cout << "B2 cons\n"; }
+  ~B2() { std::cout << "B2 des\n"; }
 };
 
 class B3 {
  public:
-  B3() {
-    std::cout << "B3 cons\n";
-  }
-  B3(int i) {
-    std::cout << "B3 cons with " << i << '\n'; 
-  }
-  ~B3() {
-    std::cout << "B3 des\n";
-  }
+  B3() { std::cout << "B3 cons\n"; }
+  B3(int i) { std::cout << "B3 cons with " << i << '\n';  }
+  ~B3() { std::cout << "B3 des\n"; }
 };
 class B4 {
  public:
-  B4() {
-    std::cout << "B4 cons\n";
-  }
-  ~B4() {
-    std::cout << "B4 des\n";
-  }
+  B4() { std::cout << "B4 cons\n"; }
+  ~B4() { std::cout << "B4 des\n"; }
 };
 class B5 : public B3, B2 {
  public:
   B4 b4;
   B1 b1;
-  B5() : b1(), b4(), B3(2) {
-    std::cout << "B5 cons\n";
-  }
-  ~B5() {
-    std::cout << "B5 des\n";
-  }
+  B5() : b1(), b4(), B3(2) { std::cout << "B5 cons\n"; }
+  ~B5() { std::cout << "B5 des\n"; }
 };
 
 int main() {
@@ -338,7 +315,17 @@ int main() {
 // B3 des
 ```
 
-不难发现，构造顺序为：先按继承列表顺序构造基类，再成员变量顺序初始化成员变量，最后调用自身构造函数，而自身构造函数中对基类、成员变量的初始化不会影响相对顺序，只会影响调用哪个构造函数。
+不难发现，**构造顺序**为：
+
+1. 按继承列表顺序构造基类；
+2. 按成员变量列出顺序初始化成员变量，如果成员变量为某个类的对象，则调用相应构造函数；
+3. 调用自身构造函数；
+
+而自身构造函数中对基类、成员变量的初始化不会影响相对顺序，只会影响调用哪个构造函数，比如 `B3(2)` 使得基类 `B3` 调用了构造函数 `B3(int)`。
+
+> 步骤 1, 2 中的类仍按同样的顺序递归构造。
+
+**析构顺序**与构造顺序恰好相反。
 
 ## 多态
 
