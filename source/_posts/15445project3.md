@@ -31,7 +31,7 @@ img:
 
 课程组已经为我们提供了一部分 Operator 的实现，就先从 Projection 算子开始熟悉一下整个执行层所涉及到的内容。
 
-### Sample - ProjectionExcecutor
+## Sample - ProjectionExcecutor
 
 Projection 算子的构造函数如下
 
@@ -42,17 +42,17 @@ ProjectionExecutor::ProjectionExecutor(ExecutorContext *exec_ctx, const Projecti
   child_executor_(std::move(child_executor)) {}
 ```
 
-#### ExecutorContext
+### ExecutorContext
 
 这是每个算子在构造时都会获得的一个参数，即执行上下文，其包含当前 SQL 语句处理时相应的信息，包含：`Transaction`，`BufferPoolManager`，`TransactionManager`，`LockManager` 以及 `Catalog`。
 
 > 这里最关键的就是 `Catalog`，下面单独讲。
 
-#### Catalog
+### Catalog
 
 它维护当前数据库的目录信息，包括所有表信息(**TableInfo**)以及索引信息(**IndexInfo**)。Bustub 框架下，所有 Table/Index 都有一个唯一标识符 `table_oid` / `index_oid`，以及唯一的表名 `table_name` / 索引名 `index_name`，在 `Catalog` 中，可以通过这些标识符通过自带的 `GetTable()` / `GetIndex()` 函数来检索到信息。
 
-##### TableInfo
+#### TableInfo
 
 特定 Table 的所有信息，包括：
 
@@ -61,7 +61,7 @@ ProjectionExecutor::ProjectionExecutor(ExecutorContext *exec_ctx, const Projecti
 - `table_`：指向 TableHeap，其实就是表在磁盘上的所有物理页面组成的双向链表；
 - `oid`：表标识符；
 
-##### IndexInfo
+#### IndexInfo
 
 某一 Table 上特定 Index 的所有信息，包括：
 
@@ -71,7 +71,7 @@ ProjectionExecutor::ProjectionExecutor(ExecutorContext *exec_ctx, const Projecti
 - `index_oid_`：索引标识符；
 - `table_name_`：索引所在表名；
 
-#### PlanNode
+### PlanNode
 
 当用户输入一句 SQL 查询时，SQL 层会先解析该语句，先生成一棵 AST 抽象语法树，接下来 Plan 层将该 AST 经过 Optimization 层优化后生成一棵 PlanNodeTree，指明该 SQL 语句应该以怎样的顺序从 Table 中获取数据.
 
@@ -87,7 +87,7 @@ PNT 上的所有 node 在执行层就对应了不同的 Operator，Operator 接�
 - `children_`：子节点；
 - `expressions_`：用于筛选，像上面的 `ColA = ColB` 就是一个 Expression。其自身带有一个 `Evaluate()` 函数，接受一个 Tuple，并判断其是否满足条件。在 Join 操作中，其也有一个 `EvaluateJoin` 函数，适用于`xx join xx on (Expression)` 型的查询；
 
-#### Projection 执行过程
+### Projection 执行过程
 
 Projection 操作实际上是语句 `SELECT col_name FROM table_name` 的具象化，在 PNT 中其接收 `SELECT` 部分对应算子返回表的所有 Tuple，然后选取 col_name 对应的列，构造新的 Tuple 进行返回。
 
@@ -115,11 +115,11 @@ bool ProjectionExecutor::Next(Tuple *tuple, RID *rid) {
 }
 ```
 
-### Task #1 - Access Method Executors
+## Task #1 - Access Method Executors
 
 诸如上述 Projection 算子，只是对真实表中的 Tuple 副本进行一系列操作，并不涉及磁盘中的 TableHeap。本 Task 需要我们与 TableHeap 打交道，实现 SeqScan，Insert，Delete 这三个算子。
 
-#### SeqScan
+### SeqScan
 
 对应 `SELECT * FROM table_name` 语句，需要获取 TableHeap 并从中读取所有 Tuple。
 
@@ -137,7 +137,7 @@ ExecutorContext 所有算子都是一样的，先来看看 Plan 为我们提供�
 
     > 该函数返回值为 `Value` 类型（底层包括数据类型与值），在过滤条件的判断中，认为其返回 Value 具体类型为 `bool`，故可以通过 `GetAs<bool>()` 来获取具体值；
 
-#### Insert/Delete
+### Insert/Delete
 
 下层算子返回需要 Insert/Delete 的 Tuple。
 
@@ -159,7 +159,7 @@ return res;
 
 从而保证首次调用无论是否有操作都必然返回 `true`。
 
-#### IndexScan
+### IndexScan
 
 这个算子需要利用我们在 lab2 中实现的 B+ 树迭代器进行 Tuple 的获取。之前提到所有 leaf node 存的 kv 对中的 Value 都是 `RID`，故对于在某一列上作的索引，所有 Tuple 在该列上的值作为了 B+ 树的 Key，且根据索引的特性可知，这些值互不相同。
 
@@ -171,9 +171,9 @@ tree_ = dynamic_cast<BPlusTreeIndexForOneIntegerColumn *>(index_info_->index_.ge
 
 这个对象里面有一个函数为 `GetBeginIterator()`，用以初始化我们的 Iterator。接下来就是不断获取 rid，然后根据 rid 获取 Table 中对应的 Tuple。
 
-### Task #2 - Aggregation & Join Executors
+## Task #2 - Aggregation & Join Executors
 
-#### Aggregation
+### Aggregation
 
 跟其余算子的流水线式运作不同，Aggregation 操作可以说是“Pipeline breaker”——对于一些诸如 `max()`，`sum()` 等的聚合函数，它们只能通过扫描全表来进行输出，而不能每取一个 Tuple 就能作出正确的判断。故这里我们的策略转变为：不断获取下层 Tuple，然后完善一个名为 `SimpleAggregationHashTable` 的对象，直至下层不再返回，此时利用构建好的聚合表，获取我们想要的聚合结果，根据输出模式构造 Tuple 并返回。
 
@@ -228,7 +228,7 @@ for (uint32_t i = 0; i < agg_types_.size(); i++) {
 1. 无。此时我们的输出 Tuple 只需包含 `aggregates_` 所对应的列即可，并且如果表为空，需生成一个完全初始化的 Tuple，这里需跟 Insert/Delete 一样采用 TEST-AND-SET 的手段；
 2. 有。此时我们的输出 Tuple 不仅要包含 `aggregates_` 列，还需要在前面加上 `group_bys_` 列，这里就不需要考虑表是否为空的情况了，直接构造输出 Tuple，并在迭代器到达表 End 时返回 `false` 即可；
 
-#### NestedLoopJoin
+### NestedLoopJoin
 
 嵌套循环连接的朴素思路很简单，对于外表每一个 Tuple，遍历内表中所有 Tuple，进行连接条件判断（即 `Expression.EvaluateJoin`），若满足条件则构造输出元组。但在火山模型下，每次调用只输出一个 Tuple，这就意味着我们需要保留一些信息，防止下次调用时 Tuple 顺序错乱。
 
@@ -272,7 +272,7 @@ while (true) {
 }
 ```
 
-#### NestedIndexJoin
+### NestedIndexJoin
 
 和 NLJ 思路大体一致，不同之处在于，内表相关的列已经建好了 Index，对于外表中的每一行 Tuple，我们需要利用外表对应的列通过 `key_predicate` 构建 probe key，从 Index 中获取相应内表的 RID，从而进一步去物理页面中获取 Tuple。
 
@@ -285,9 +285,9 @@ probe_key = Tuple({probe_value}, index_info_->index_->GetKeySchema());
 
 其余关于何时调用外表 `Next()` 以及连接类型的讨论同 NLJ。
 
-### Task #3 - Sort + Limit Executors and Top-N Optimization
+## Task #3 - Sort + Limit Executors and Top-N Optimization
 
-#### Sort
+### Sort
 
 用于 `ORDER BY` 关键字，同时还规定了排序类型：`ASC` / `DeSC`。若没有明确表示，则默认为 `ASC`。
 
@@ -316,11 +316,11 @@ Sort 也是个 Pipeline Breaker，因为其需要等到获取完所有 Tuple 再
 }
 ```
 
-#### Limit
+### Limit
 
 这个就更简单了，略。
 
-#### Top-N Optimization Rule
+### Top-N Optimization Rule
 
 默认情况下，`ORDER BY col_name LIMIT n` 会先经过 Sort 算子，再经过 Limit 算子，如果 n << Tuple 数量，则有相当一部分 Tuple 并没有参与到最终的输出，这显然是低效的，因为我们只需要 n 个结果。
 
@@ -342,9 +342,9 @@ auto optimized_plan = plan->CloneWithChildren(std::move(children));
 
 需要注意的是 Top-N 优化有严格要求，必须是上层 Limit 下层 Sort 这样的形式才能进行优化。其余部分并不难。
 
-### Leaderboard Task (Optional)
+## Leaderboard Task (Optional)
 
-#### Query 1: Where's the Index?
+### Query 1: Where's the Index?
 
 Guide 叽里呱啦讲了一堆，实际上就是让我们实现 Hash Join。思路很简单，构建一个哈希表，内外表在 Hash 函数下映射到同一个 HashKey 的进行 Join 即可。
 
@@ -356,12 +356,12 @@ Guide 叽里呱啦讲了一堆，实际上就是让我们实现 Hash Join。思�
 
 关于左连接的特殊情况讨论同上。
 
-#### Query 2: Too Many Joins!
+### Query 2: Too Many Joins!
 
-#### Query 3: The Mad Data Scientist
+### Query 3: The Mad Data Scientist
 
 这两个时间原因没做，之后再更新。
 
-### 总结
+## 总结
 
 火山模型的执行过程还是挺有意思的，整体实现起来也不难，更令人感到友好的是 Bustub 直接提供了所有 test sample，可以直接在本地运行并 debug，不需要到 GradeScope 上等了。

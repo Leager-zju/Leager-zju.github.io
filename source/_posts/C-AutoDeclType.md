@@ -1,11 +1,11 @@
 ---
-title: C++ 11 の 类型推导(auto & decltype)
+title: C++11 の 类型推导(auto & decltype)
 author: Leager
 mathjax: true
 date: 2023-01-16 12:37:37
 summary:
 categories:
-    - C++ 11
+    - C++11
 tags:
     - C++
 img:
@@ -15,7 +15,7 @@ C++11引入了 `auto` 和 `decltype` 这两个关键字，从而可以在编译�
 
 <!--more-->
 
-### auto
+## auto
 
 关键字 `auto` 的作用便是自动推导变量/函数(C++14起)/模板(C++20起)的类型，例如这样推导是可以的：
 
@@ -31,7 +31,7 @@ auto foobar;               // ERROR! 必须初始化，否则编译器无法推�
 auto foo = 0, bar = 1.0;   // ERROR! foo, bar 分别为 int 和 double 类型，auto 会产生二义性，非良构
 ```
 
-#### 推导规则
+### 推导规则
 
 除了上面讲的外，关于 `auto` 还有以下几条规则：
 
@@ -66,7 +66,7 @@ auto foo = 0, bar = 1.0;   // ERROR! foo, bar 分别为 int 和 double 类型，
 
 6. 不允许用作**模板参数**，如 `std::vector<auto> f{1, 2, 3}; ` 是不允许的，编译器会报 `'auto' not allowed in template argument` 错误；
 
-#### 应用场景
+### 应用场景
 
 将变量声明为迭代器类型是一件非常痛苦的事，尤其是 `std::unordered_map<Typename1, Typename2>::iterator it = map.begin();` 这样的语句，对本人这样的懒惰程序员而言简直是灾祸🤦‍♂️……
 
@@ -74,7 +74,7 @@ auto foo = 0, bar = 1.0;   // ERROR! foo, bar 分别为 int 和 double 类型，
 
 一般地，我个人认为，使用 `auto`的前提是不能影响代码可读性，对于一些不重要的中间变量，使用 `auto` 不会破坏可读性，还能大大提高 code 效率，但对于一些关键的变量，如函数返回值，或是利用到类多态特性的地方，则不建议用 `auto`。
 
-### decltype
+## decltype
 
 尽管都是在编译器进行类型推导，但与 `auto` 不同，`decltype` 根据已声明的变量或表达式推导其类型，无需初始化，例如：
 
@@ -92,7 +92,7 @@ decltype(func) p;   // OK! p 为 void* 的函数指针
 decltype(func()) q; // ERROR!
 ```
 
-#### 推导规则
+### 推导规则
 
 除了上面讲的外，关于 `decltype` 还有以下几条规则：
 
@@ -138,7 +138,7 @@ decltype(func()) q; // ERROR!
     decltype(func) f2; // ERROR! func 有两个重载
     ```
 
-#### 应用场景
+### 应用场景
 
 当类模板中需要根据传入的模板参数类中的成员变量来进一步确定类型的变量时，则用 `decltype` 是个很好的选择。常见于推导函数返回值类型的情况，例如：
 
@@ -158,4 +158,4 @@ auto func(T t, U u) -> decltype(t + u) {
 }
 ```
 
-**尾随返回类型**也是 C++ 11 新特性之一，就是用在这种需要根据函数形参类型判断返回值类型的场景中。 
+**尾随返回类型**也是 C++11 新特性之一，就是用在这种需要根据函数形参类型判断返回值类型的场景中。 

@@ -17,21 +17,21 @@ img:
 
 <!--more-->
 
-### Task #1 - Lock Manager
+## Task #1 - Lock Manager
 
 LM 负责以五种不同的模式保持 Table 和 Tuple 两个粒度的锁：`IntensionShared(IS)`，`Shared(S)`，`IntensionExclusive(IX)`，`Exclusive(X)`，`SharedIntensionExclusive(SIX)`。LM 将处理来自事务的锁请求，向事务授予锁，并根据事务的隔离级别检查锁是否被适当释放。
 
 先来看看各个类的数据定义。
 
-#### LockRequest
+### LockRequest
 
 锁请求，包含请求事务的标识符 `txn_id`，待上锁 Table 标识符 `oid`，待上锁表行标识符 `rid`，本次请求的上锁类型 `lock_mode`，以及指明该请求是否授予的变量 `granted`。
 
-#### LockRequestQueue
+### LockRequestQueue
 
 将实际队列 `std::list<std::shared_ptr<LockRequest>>` 进行封装，额外添加了一把锁 `latch` 以及条件变量 `cv`，以便锁释放后通知其余等待中的锁。此外还有一个 `upgrading` 用来标识当前锁请求队列是否有锁正在进行升级。
 
-#### LockManager
+### LockManager
 
 首先是定义了锁类型 `LockMode`，就是上面提到的 5 种。除此之外，还有以下变量：
 
@@ -41,7 +41,7 @@ LM 负责以五种不同的模式保持 Table 和 Tuple 两个粒度的锁：`In
 
 还有以上每个变量对应的锁。
 
-#### LockTable() / LockRow()
+### LockTable() / LockRow()
 
 ⚠<font color=red>***在实现上锁过程之前，务必反复阅读并理解头文件中的 Lock Note。***</font>
 
@@ -130,7 +130,7 @@ compatibility_matrix_[LockMode::INTENTION_EXCLUSIVE][LockMode::SHARED_INTENTION_
 
 最后就是授予锁了，将对应锁请求的 `granted` 改为 `true`，并修改事务维护的相应锁集合。如果这是一次锁升级请求，则说明升级完成，还需要修改请求队列的 `upgrading` 变量。
 
-#### UnlockTable() / UnlockRow()
+### UnlockTable() / UnlockRow()
 
 ⚠<font color=red>***在实现解锁过程之前，务必反复阅读并理解头文件中的 Unlock Note。***</font>
 
@@ -142,7 +142,7 @@ compatibility_matrix_[LockMode::INTENTION_EXCLUSIVE][LockMode::SHARED_INTENTION_
 
 接下来就是获取锁请求队列，根据 `txn_id` 找到事务对应的那个锁请求，从队列中移除，修改事务维护的相应锁集合，然后利用 `cv_.notify_all()` 通知所有挂起的线程。由于同一个事务在同一个表/行上最多仅能上一把锁，所以不会出现两个相同 `txn_id` 的请求。
 
-### Task #2 - Deadlock Detection
+## Task #2 - Deadlock Detection
 
 死锁检测需要我们构建一个事务等待图，然后利用 DFS 算法检测环是否存在环，每次检测需打破所有环，并且 Aborted 环上 `txn_id` 最大的事务。
 
@@ -179,10 +179,10 @@ void LockManager::RunCycleDetection() {
 
 > 这是因为排在后面的事务在被唤醒时可能先一步获取锁，检查前面所有锁兼容性失败后继续 wait，但实际上只要被 Aborted 的那个事务移除锁请求，后面事务就能获取锁了。
 
-### Task #3 - Concurrent Query Execution
+## Task #3 - Concurrent Query Execution
 
 在 lab3 中实现的 3 个与真实物理页面打交道的算子 SeqScan，Insert，Delete 中加上锁。并且根据上述讨论提到的不同隔离级别的不同表现进行额外的判断，难度不大，略。
 
-### 总结
+## 总结
 
 本 lab 最大的收获就是理解了隔离级别以及锁类型之间的关系，以及死锁检测是如何进行的。

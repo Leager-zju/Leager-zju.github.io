@@ -17,18 +17,18 @@ img:
 
 <!--more-->
 
-### 1. [6220. 可被三整除的偶数的平均值](https://leetcode.cn/problems/average-value-of-even-numbers-that-are-divisible-by-three/)
+## 1. [6220. 可被三整除的偶数的平均值](https://leetcode.cn/problems/average-value-of-even-numbers-that-are-divisible-by-three/)
 
 > 给你一个由正整数组成的整数数组 nums ，返回其中可被 3 整除的所有偶数的平均值。
 >
 > 注意：n 个元素的平均值等于 n 个元素 **求和** 再除以 n ，结果 **向下取整** 到最接近的整数。
 >
 
-#### 思路
+### 思路
 
 能被 3 整除的偶数 ==> 能被 6 整除。
 
-#### code
+### code
 
 ```go
 // go
@@ -47,7 +47,7 @@ func averageValue(nums []int) int {
 }
 ```
 
-### 2. [6221. 最流行的视频创作者](https://leetcode.cn/problems/most-popular-video-creator/)
+## 2. [6221. 最流行的视频创作者](https://leetcode.cn/problems/most-popular-video-creator/)
 
 > 给你两个字符串数组 creators 和 ids ，和一个整数数组 views ，所有数组的长度都是 n 。平台上第 i 个视频者是 `creator[i]`，视频分配的 id 是 `ids[i]`，且播放量为 `views[i]`。
 >
@@ -58,11 +58,11 @@ func averageValue(nums []int) int {
 >
 > 返回一个二维字符串数组 answer，其中 `answer[i] = [creator_i, id_i]` 表示 creatori 的流行度 **最高** 且其最流行的视频 id 是 id_i，可以按任何顺序返回该结果。
 
-#### 思路
+### 思路
 
 大模拟题，开两个 map 分别存 creators 到流行度的映射以及 creators 到其作品集的映射即可。
 
-#### code
+### code
 
 ```go
 // go
@@ -116,7 +116,7 @@ func mostPopularCreator(creators []string, ids []string, views []int) [][]string
 }
 ```
 
-### 3. [6222. 美丽整数的最小增量](https://leetcode.cn/problems/minimum-addition-to-make-integer-beautiful/)
+## 3. [6222. 美丽整数的最小增量](https://leetcode.cn/problems/minimum-addition-to-make-integer-beautiful/)
 
 > 给你两个正整数 n 和 target 。
 >
@@ -125,7 +125,7 @@ func mostPopularCreator(creators []string, ids []string, views []int) [][]string
 > 找出并返回满足 n + x 是 **美丽整数** 的最小非负整数 x 。生成的输入保证总可以使 n 变成一个美丽整数。
 >
 
-#### 思路
+### 思路
 
 定义 `getsum(n)` 表示 n 的每一位上的数字之和。若 `getsum(n) <= target` 则直接返回 0 即可。
 
@@ -136,7 +136,7 @@ func mostPopularCreator(creators []string, ids []string, views []int) [][]string
 
 在这样的一个考虑下，又要 x 最小，我们只需要从 `i = 0` 开始，不断增加其值，直至找到满足要求的答案即可。
 
-#### code
+### code
 
 ```go
 // go
@@ -165,7 +165,7 @@ func makeIntegerBeautiful(n int64, target int) int64 {
 }
 ```
 
-### 4. [2458. 移除子树后的二叉树高度](https://leetcode.cn/problems/height-of-binary-tree-after-subtree-removal-queries/)
+## 4. [2458. 移除子树后的二叉树高度](https://leetcode.cn/problems/height-of-binary-tree-after-subtree-removal-queries/)
 
 > 给你一棵 **二叉树** 的根节点 root ，树中有 n 个节点。每个节点都可以被分配一个从 1 到 n 且互不相同的值。另给你一个长度为 m 的数组 queries 。
 >
@@ -180,7 +180,7 @@ func makeIntegerBeautiful(n int64, target int) int64 {
 > - 查询之间是独立的，所以在每个查询执行后，树会回到其 **初始** 状态。
 > - 树的高度是从根到树中某个节点的 **最长简单路径中的边数** 。
 
-#### 思路
+### 思路
 
 最开始想的是开一些数据结构存放每个节点的 父节点，左子树高度，右子树高度 以及 值对应的节点指针。对于每个 queries[i]，找到对应节点，并通知上层节点 $f_1$ 高度已改变。$f_1$ 收到消息后，会比较被删除的儿子与另一个儿子，更新当前高度后继续通知上层节点 $f_2$。以此类推直至到达根节点。理想状态下它的时间复杂度为 $O(q\log n)$，但极端情况下当二叉树为单链时，时间复杂度就降为 $O(qn)$。其中 $q$ 为查询数，$n$ 为节点数。
 
@@ -189,7 +189,7 @@ func makeIntegerBeautiful(n int64, target int) int64 {
 - 如果删除其左子树，则剩余高度为 $\max(depth(root)+height(right),\ restHeight)$
 - 如果删除其右子树，则剩余高度为 $\max(depth(root)+height(left),\ restHeight)$
 
-#### code
+### code
 
 ```go
 // go

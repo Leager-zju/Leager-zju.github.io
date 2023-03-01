@@ -17,7 +17,7 @@ img:
 
 <!--more-->
 
-#### 协调服务
+### 协调服务
 
 ZooKeeper 采用的协调形式有：配置、组成员、领导者选举和锁。由于实现了更强大的原语的服务可以用来实现不那么强大的原语，ZooKeeper 不再在服务端实现特定原语，而是公开一个 API，令开发者实现自己的原语，为协调提供灵活性。
 
@@ -29,7 +29,7 @@ ZooKeeper 服务由一组使用 **Replicate** 的服务器组成（实际上有�
 
 ZooKeeper 使用**监视机制**使客户端能够缓存数据，同时在给定数据对象更新时得到通知。
 
-#### Znode
+### Znode
 
 ZooKeeper 向其客户端提供一组数据节点(**znode**)的抽象，这些节点根据分层名称空间进行组织。如下图：
 
@@ -50,39 +50,39 @@ ZooKeeper 实现监视(**watch**)机制允许 client 及时接收数据更改通
 
 **会话**：client 连接到 ZooKeeper 并启动会话，用于标识 client。
 
-#### 客户端 API
+### 客户端 API
 
-##### create(path, data, flags)
+#### create(path, data, flags)
 
 创建一个路径名为 `path` 的 znode，并将 `data` 存储在其中，返回该 znode 的名称。`flag` 代表 znode 类型。
 
-##### delete(path, version)
+#### delete(path, version)
 
 若 `path` 上的 znode 版本号等于 `version`，则将其删除。
 
-##### exists(path, watch)
+#### exists(path, watch)
 
 若 `path` 上的 znode 存在，则返回 true；反之返回 false。`watch` 使得客户端在该 znode 上设置一个监视器。
 
-##### getData(path, watch)
+#### getData(path, watch)
 
 返回 `path` 上 znode 关联的数据和元数据。若 znode 不存在，则不设置监视器。
 
-##### setData(path, data, version)
+#### setData(path, data, version)
 
 若 `path` 上的 znode 版本号等于 `version`，则将 `data` 写入。
 
-##### getChildren(path, watch)
+#### getChildren(path, watch)
 
 返回 `path` 上 znode 的子节点集合。
 
-##### sycn(path)
+#### sycn(path)
 
 等待所有未完成的更新，`path` 没啥用。
 
 > 以上 api 都提供了同步和异步版本，若 `version = -1`，则不进行版本检查。
 
-#### ZooKeeper 保证
+### ZooKeeper 保证
 
 - **线性化写入**：所有更新 ZooKeeper 状态的请求都是可序列化的，并且服从优先级。
 
@@ -104,21 +104,21 @@ ZooKeeper 还有以下两个保证：
 - **活跃性**：若大多数 ZooKeeper Server 处于活跃状态，则服务可用。
 - **持久性**：若 ZooKeeper Server 成功响应了更改请求，只要多数服务器最终能恢复，则该更改就会持续存在。
 
-#### 原语
+### 原语
 
-##### 配置管理
+#### 配置管理
 
 配置存储在 znode $z_c$ 中，进程通过读取 $z_c$ 并通过 watch 标志来获取配置更新通知。
 
-##### 会合
+#### 会合
 
 将 master 信息放在 zonode $z_r$ 中，以便 worker 寻找。
 
-##### 组成员关系
+#### 组成员关系
 
 当组成员进程启动时，会在一个指定的 znode $z_g$ （用以表示组）下创建一个临时子 znode，该子 znode 存放进程信息。若进程结束，则该子 znode 自动删除。故可通过 $z_g$ 来获取该组的所有组成员信息。
 
-##### 简单锁
+#### 简单锁
 
 1. **锁文件**——最简单的实现：为了获取锁，client 会尝试创建 ephemeral znode，若成功则持有锁；若 znode 存在，则说明有其它 client 正在持有锁，设置 watch 后进入等待状态，一旦该 znode 删除，则会再次尝试获得锁。
 
@@ -173,6 +173,6 @@ ZooKeeper 还有以下两个保证：
 
 4. **双屏障**：使客户端能够同步计算的开始与结束。用 znode $b$ 表示 ZooKeeper 中的屏障。每个进程在准备开始时，会在 $b$ 下注册——创建一个子 znode，而在准备退出时注销——删除该子 znode。当 $b$ 的子节点数超过一定数量后，所有注册的进程都会真正开始计算，只有当 $b$ 的所有子节点都被删除时，进程才会真正退出。这两点都可通过 ready 来实现。
 
-#### 总结
+### 总结
 
 ZooKeeper 是一个容错的，通用的协调服务。

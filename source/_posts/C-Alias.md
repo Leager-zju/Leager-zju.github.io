@@ -1,21 +1,21 @@
 ---
-title: C++ 11 の 别名(Alias)
+title: C++11 の 别名(Alias)
 author: Leager
 mathjax: true
 date: 2023-01-17 20:55:25
 summary:
 categories:
-    - C++ 11
+    - C++11
 tags:
     - C++
 img:
 ---
 
-虽然使用 `auto` 可以大大简化代码，但对于一些使用 `dynamic_cast` 的结果不能用 `auto` 作为占位符。将冗长的变量类型简化仍然是很头疼的一个问题，幸好 C++ 11 提供了用关键字 `using` 给类型起别名的特性，既能有效简化代码，又不影响可读性
+虽然使用 `auto` 可以大大简化代码，但对于一些使用 `dynamic_cast` 的结果不能用 `auto` 作为占位符。将冗长的变量类型简化仍然是很头疼的一个问题，幸好 C++11 提供了用关键字 `using` 给类型起别名的特性，既能有效简化代码，又不影响可读性
 
 <!--more-->
 
-### #define 与 typedef
+## #define 与 typedef
 
 C 中就已经存在使用 `#define` / `typedef` 来给类型取别名的用法，但为什么还要多此一举用 `using`？它们的区别在哪？
 
@@ -54,7 +54,7 @@ typedef void (*func) (int, int); // func 为函数指针 void*(int, int) 的别�
 
 > 在网上找到很多说 `typedef` / `#define` 无法起模板别名的文章，但实际操作了一遍，发现或许是编译器更新了，一些以前认为无法实现的代码如今都能编译通过。所以还是绝知此事要躬行。
 
-### using
+## using
 
 `using` 不仅可以用于导入命名空间或类成员，还可以用于起别名。事实上，`using` 能够实现的功能也已经完全将 `typedef` 能做的包含在内，完全可以舍弃功能单一并且代码反人类直觉的 `typedef`，改用可读性更高的 `using`。
 

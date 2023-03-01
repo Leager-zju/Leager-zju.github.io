@@ -17,14 +17,14 @@ img:
 
 <!--more-->
 
-### 1. [与对应负数同时存在的最大正整数](https://leetcode.cn/problems/largest-positive-integer-that-exists-with-its-negative/)
+## 1. [与对应负数同时存在的最大正整数](https://leetcode.cn/problems/largest-positive-integer-that-exists-with-its-negative/)
 
 > 给你一个 **不包含** 任何零的整数数组 `nums`，找出自身与对应的负数都在数组中存在的最大正整数 k 。
 >
 > 返回正整数 k ，如果不存在这样的整数，返回 -1 。
 >
 
-#### 思路
+### 思路
 
 遍历数组，对于负数，加入 set；对于正数，判断其对应的负数是否存在于 set 中，若存在则更新最大值。
 
@@ -32,7 +32,7 @@ img:
 
 也可以先对数组进行升序排序，这样负数就集中在左侧，正数集中在右侧，只需一次遍历即可。
 
-#### code
+### code
 
 ```go
 // go
@@ -54,7 +54,7 @@ func findMaxK(nums []int) int {
 }
 ```
 
-### 2. [反转之后不同整数的数目](https://leetcode.cn/problems/count-number-of-distinct-integers-after-reverse-operations/)
+## 2. [反转之后不同整数的数目](https://leetcode.cn/problems/count-number-of-distinct-integers-after-reverse-operations/)
 
 > 给你一个由 **正** 整数组成的数组 `nums`。
 >
@@ -63,11 +63,11 @@ func findMaxK(nums []int) int {
 > 返回结果数组中 **不同** 整数的数目。
 >
 
-#### 思路
+### 思路
 
 对原始数组中每一个值，将其和其反转后的数字加入 set，最后返回 set 大小即可。
 
-#### code
+### code
 
 ```go
 // go
@@ -91,17 +91,17 @@ func countDistinctIntegers(nums []int) int {
 }
 ```
 
-### 3. [反转之后的数字和](https://leetcode.cn/problems/sum-of-number-and-its-reverse/)
+## 3. [反转之后的数字和](https://leetcode.cn/problems/sum-of-number-and-its-reverse/)
 
 > 给你一个 **非负** 整数 `num`。如果存在某个 **非负** 整数 `k` 满足 `k + reverse(k) = num`  ，则返回 true ；否则，返回 false 。
 >
 > `reverse(k)` 表示 `k` 反转每个数位后得到的数字。
 
-#### 思路
+### 思路
 
 直接无脑枚举即可。
 
-#### code
+### code
 
 ```go
 // go
@@ -124,7 +124,7 @@ func sumOfNumberAndReverse(num int) bool {
 }
 ```
 
-### 4. [统计定界子数组的数目](https://leetcode.cn/problems/count-subarrays-with-fixed-bounds/)
+## 4. [统计定界子数组的数目](https://leetcode.cn/problems/count-subarrays-with-fixed-bounds/)
 
 > 给你一个整数数组 `nums` 和两个整数 `minK` 以及 `maxK` 。
 >
@@ -156,7 +156,7 @@ $$
 \min(minIndex, maxIndex) - errIndex
 $$
 
-#### code
+### code
 
 ```go
 func min(a, b int) int {

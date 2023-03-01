@@ -1,17 +1,17 @@
 ---
-title: C++ 11 の 并发支持(Concurrency)
+title: C++11 の 并发支持(Concurrency)
 author: Leager
 mathjax: true
 date: 2023-01-29 22:44:35
 summary:
 categories:
-    - C++ 11
+    - C++11
 tags:
     - C++
 img:
 ---
 
-C++ 11 新增了官方并发支持库，使得我们能够更好地在系统间移植程序，之前的 Boost 库等也就随之成为历史了。
+C++11 新增了官方并发支持库，使得我们能够更好地在系统间移植程序，之前的 Boost 库等也就随之成为历史了。
 
 <!--more-->
 

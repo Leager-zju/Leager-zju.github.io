@@ -17,7 +17,7 @@ img:
 
 <!--more-->
 
-### 1. [判断两个事件是否存在冲突](https://leetcode.cn/problems/determine-if-two-events-have-conflict/)
+## 1. [判断两个事件是否存在冲突](https://leetcode.cn/problems/determine-if-two-events-have-conflict/)
 
 > 给你两个字符串数组 event1 和 event2，表示发生在 **同一天** 的两个闭区间时间段事件，其中：
 >
@@ -32,13 +32,13 @@ img:
 > 如果两个事件之间存在冲突，返回 true；否则，返回 false。
 >
 
-#### 思路
+### 思路
 
 用 `strconv.Atoi()` 将字符串转换为数字。
 
 若 `endTime1 < startTime2` 或 `endTime2 < startTime1` 则认为无冲突。
 
-#### code
+### code
 
 ```go
 // go
@@ -59,7 +59,7 @@ func haveConflict(e1 []string, e2 []string) bool {
 }
 ```
 
-### 2. [最大公因数等于 K 的子数组数目](https://leetcode.cn/problems/number-of-subarrays-with-gcd-equal-to-k/)
+## 2. [最大公因数等于 K 的子数组数目](https://leetcode.cn/problems/number-of-subarrays-with-gcd-equal-to-k/)
 
 > 给你一个整数数组 nums 和一个整数 k ，请你统计并返回 nums 的子数组中元素的最大公因数等于 k 的子数组数目。
 >
@@ -67,13 +67,13 @@ func haveConflict(e1 []string, e2 []string) bool {
 >
 > **数组的最大公因数** 是能整除数组中所有元素的最大整数。
 
-#### 思路
+### 思路
 
 若 $k$ 是 $\{a_1, a_2, \dots, a_n\}$ 的最大公因数，则 $gcd(k, a_{n+1})$ 是 $\{a_1, a_2, \dots, a_n, a_{n+1}\}$ 的最大公因数。
 
 定义 `g[i][j]` 表示 `nums[i:j+1]` 的最大公因数，则 `g[i][j] = gcd(g[i][j-1], nums[j])`
 
-#### code
+### code
 
 ```go
 // go
@@ -108,7 +108,7 @@ func subarrayGCD(nums []int, k int) int {
 }
 ```
 
-### 3. [使数组相等的最小开销](https://leetcode.cn/problems/minimum-cost-to-make-array-equal/)
+## 3. [使数组相等的最小开销](https://leetcode.cn/problems/minimum-cost-to-make-array-equal/)
 
 > 给你两个下标从 **0** 开始的数组 nums 和 cost ，分别包含 n 个 **正** 整数。
 >
@@ -120,11 +120,11 @@ func subarrayGCD(nums []int, k int) int {
 >
 > 请你返回使 nums 中所有元素 **相等** 的 **最少** 总开销。
 
-#### 思路
+### 思路
 
 没做出来，看完 [题解](https://leetcode.cn/problems/minimum-cost-to-make-array-equal/solution/by-endlesscheng-i10r/) 发现我真的蠢。。。
 
-#### code
+### code
 
 ```go
 func minCost(nums, cost []int) int64 {
@@ -160,7 +160,7 @@ func min(a, b int64) int64 {
 }
 ```
 
-### 4. [使数组相似的最少操作次数](https://leetcode.cn/problems/minimum-number-of-operations-to-make-arrays-similar/)
+## 4. [使数组相似的最少操作次数](https://leetcode.cn/problems/minimum-number-of-operations-to-make-arrays-similar/)
 
 > 给你两个正整数数组 nums 和 target ，两个数组长度相等。
 >
@@ -173,13 +173,13 @@ func min(a, b int64) int64 {
 >
 > 请你返回将 nums 变得与 target 相似的最少操作次数。测试数据保证 nums 一定能变得与 target 相似。
 
-#### 思路
+### 思路
 
 因为必然会相似，则更大的一定会通过不断 **减二** 得到小的数，而更小的数一定会通过不断 **加二** 得到大的数，而为了使总操作更小，nums 中最小的数将变成 target 中最小的数，以此类推（所以需要进行排序）。因为这两步算 **同一次操作**，故考虑所有的“加二”操作即可。
 
 同时还要考虑奇偶，因为奇数总是变成奇数，偶数总是变成偶数。
 
-#### code
+### code
 
 ```go
 // go

@@ -15,7 +15,7 @@ img:
 
 <!--more-->
 
-### 内存布局
+## 内存布局
 
 C++ 程序的内存分为 5 大区域，从**低地址**开始分别为**代码区**、**数据区**、**BSS 区**、**堆区**、**栈区**，每个区域存放不同类型的数据：
 
@@ -33,11 +33,11 @@ C++ 程序的内存分为 5 大区域，从**低地址**开始分别为**代码�
 
 - **栈区**：程序局部变量、函数参数值、函数返回值所在处，由编译器自动管理分配，从高地址向低地址增长；
 
-### 内存分配 in C
+## 内存分配 in C
 
 在 C 中，使用 `alloc` 系函数来进行内存的动态分配。
 
-#### malloc
+### malloc
 
 ```c++
 void* malloc( std::size_t size );
@@ -47,7 +47,7 @@ void* malloc( std::size_t size );
 
 > 使用时需强转为所需类型的指针。
 
-#### calloc
+### calloc
 
 ```c++
 void* calloc( std::size_t num, std::size_t size );
@@ -57,7 +57,7 @@ void* calloc( std::size_t num, std::size_t size );
 
 > 相当于初始化 + `malloc(num * size);`
 
-#### realloc
+### realloc
 
 ```c++
 void* realloc( void* ptr, std::size_t new_size );
@@ -67,7 +67,7 @@ void* realloc( void* ptr, std::size_t new_size );
 
 > 它必须是 `malloc()`、 `calloc()` 或 `realloc()` 先前分配的，且仍未被 `free()` 释放，否则 UB。
 
-#### free
+### free
 
 ```c++
 void free( void* ptr );
@@ -96,11 +96,11 @@ ptr = NULL;                      // nullptr in C++
 // after free: 000001EF641FCFB0
 ```
 
-### 内存分配 in C++
+## 内存分配 in C++
 
 而在 C++ 中，由于引入了**类**这一概念，`alloc` / `free` 这种只能分配/释放内存的函数并不足以满足需求——`alloc` 分配内存时并不会调用构造函数，并且如果 `free` 简单地释放了一个类对象的内存，那么其析构函数不会被调用，这搞不好会引发大灾难。于是，它俩被功能更强大的 `new` / `delete` 所取代。
 
-#### new / delete
+### new / delete
 
 > 定义于头文件 `<new>`
 
@@ -131,7 +131,7 @@ delete p4;
 1. 调用析构函数；
 2. 底层 `operator delete()` 释放内存；
 
-#### 定位 new(placement new)
+### 定位 new(placement new)
 
 上面的代码提到了一种叫**定位 new** 的操作，它的意义在于将内存的**分配和构造分离**。
 
@@ -154,7 +154,7 @@ delete p4;
 
 > 使用此法，则不一定会在**堆**上分配内存，而是在对应地址处直接构造。
 
-#### 重载 operator new()
+### 重载 operator new()
 
 `new` / `delete` 是关键字，我们无法修改其功能本身，但其底层所使用的运算符 `operator new()` / `operator delete()` 则能为我们根据需要所重载使用。
 
@@ -200,13 +200,13 @@ int main() {
 
 当然也可以加别的形参，比如 `void* operator new(size_t, int);`，使用时直接 `new(100) type;` 即可（圆括号里就是从除了 `size_t` 以外的实参列表）。之前提到的加上 `std::nothrow` 不会抛出异常则是使用了 `void* opertor new(size_t, nothrow_t&)` 的重载形式。
 
-#### 重载 operator delete()
+### 重载 operator delete()
 
 重载 `operator delete()` 时需注意第一个参数必须为 `void*`，且返回值必须为 `void`。但并没有重载的必要，因为我们无法手动调用。但设置这个的意义在于与 `operator new()` 配套使用，只有 `operator new` 抛异常了，才会调用对应的 `operator delete`。若没有对应的 `operator delete`，则无法释放内存。
 
-#### 其他
+### 其他
 
-##### delete this 合法吗？
+#### delete this 合法吗？
 
 合法，但必须保证：
 
@@ -216,7 +216,7 @@ int main() {
 
     > 内存都没了还调用个 der
 
-##### 如何定义一个只能在堆/栈上生成对象的类？
+#### 如何定义一个只能在堆/栈上生成对象的类？
 
 - **只能在堆上**：将析构函数设置为**非公有**。C++ 是静态绑定语言，编译器管理栈上对象的生命周期，编译器在为类对象分配栈空间时，会先检查类的析构函数的访问性。若析构函数不可访问，则不能在栈上创建对象。
 
@@ -249,11 +249,11 @@ int main() {
 
 - **只能在栈上**：将 `operator new()` 和 `operator delete()` 设置为**私有**。此时 `new` 的第一步操作（上面讲过）无法执行，进而无法在堆上生成。
 
-##### 为什么说 new 效率低
+#### 为什么说 new 效率低
 
 `new` 的动态分配内存涉及到内核级行为，并且存在上锁的可能，会产生一定开销。进行分配时，如果不是定位 new，则会在任意位置进行分配，不易管理。
 
-### 分配器 Allocator
+## 分配器 Allocator
 
 > 定义于头文件 `<memory>`
 
@@ -270,7 +270,7 @@ template<
 
 `std::allocator` 的成员函数如下：
 
-> C++ 20 对分配器的成员函数进行了一些改动
+> C++20 对分配器的成员函数进行了一些改动
 
 - `constexpr T* allocate(size_t n)`：分配足够的存储空间来存储 n 个实例，并返回指向它的指针；
 - `constexpr void deallocate(T* p, size_t n)`：释放分配的内存。p 必须是调用 `allocate()` 获得的指针，n 必须等于调用 `allocate()` 时传入的参数；
@@ -279,7 +279,7 @@ template<
 
 > 如果希望自定义分配器，可以直接继承自 `std::allocator`，然后重写分配/解分配策略。
 
-### 未初始化内存算法
+## 未初始化内存算法
 
 > 定义于头文件 `<memory>`
  
@@ -288,7 +288,7 @@ template<
 - `constexpr ForwardIt destroy_n( ForwardIt first, Size n )`：销毁范围中一定数量的对象；
 - `constexpr T* construct_at( T* p, Args&&... args )`：在给定地址创建对象；
 
-### 智能指针
+## 智能指针
 
-智能指针是针对裸指针进行封装的类，它能够更安全、更方便地使用动态内存。具体见 [C++ 11 の 智能指针](../../C-11/C-SmartPtr)。
+智能指针是针对裸指针进行封装的类，它能够更安全、更方便地使用动态内存。具体见 [C++11 の 智能指针](../../C-11/C-SmartPtr)。
 

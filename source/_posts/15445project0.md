@@ -25,9 +25,9 @@ img:
 
 <img src="graph.png" style="zoom: 80%;" />
 
-### Task #1 - templated trie
+## Task #1 - templated trie
 
-#### TrieNode
+### TrieNode
 
 > 该类定义了 Trie 中的单个节点。`TrieNode` 保存单个字符，`is_end_` 标志表示它是否为 Terminal Node。可以根据字符通过 `map<char, unique_ptr<TrieNode>> children` 访问子节点。
 
@@ -47,7 +47,7 @@ img:
 
 再来看这两个函数。移动构造函数需要接管所有数据，基本类型变量直接赋值即可，对 **unique_ptr** 而言需使用 `std::move()` 转移所有权。如果参数声明为 `const Type&` 则无法使用移动语义。
 
-#### TrieNodeWithValue
+### TrieNodeWithValue
 
 > 继承自 `TrieNode`，并代表一个可以保存任意类型值的 Terminal Node，它的 `is_end_` 总为 true。
 
@@ -55,23 +55,23 @@ img:
 
 这里构造函数参数中的 `TrieNode &&trieNode` 虽然是右值引用，但是左值，故利用它执行父类构造时需使用 `std::move()` 将左值强转为右值。
 
-#### Trie
+### Trie
 
 > 根节点是所有键的起始节点，它本身不存储任何字符。
 
-##### 插入
+#### 插入
 
 如果待插入的 key 已存在，即 key 的所有字符都在 Trie 中存在且最后一个字符所处节点为 Terminal Node，则插入失败。
 
 反之，对于不存在的字符，调用 `TrieNode.InsertChildNode()` 方法。当遍历至最后一个字符时，需将该节点转为 `TrieNodeWithValue`，我的方法是维护父节点指针 `prev`，届时对 `prev` 中的 `children` 变量作修改即可。在 C++ 多态特性下，基类指针也可以指向子类。
 
-##### 删除
+#### 删除
 
 删除需要递归式地去判断是否删除子节点，于是开个新函数 `RecursivelyRemove`。需要注意的是，即便成功删除了该键，也不一定需要将对应的节点删除，故需要用一个变量来通知父节点是否需要将自身移除。而对于该键的 non-Terminal Node，需要判断自身是不是其它键的 Terminal Node，不能随意删除。
 
 > 考虑对于两个 Trie 中的键 “Hi” 和 “High”，按不同顺序删除。
 
-##### 取值
+#### 取值
 
 和插入一样，但若下个节点不存在，或最后一个字符不是 Terminal Node，或最后一个是 Terminal Node 但存的值类型不一致，则取值失败。在使用 `dynamic_cast` 的时候我选择转为指针类型，是因为方便判断是否转成功。
 

@@ -27,7 +27,7 @@ img:
 
 基于上述讨论，可以开始进行 lab tasks 的构思了。
 
-### Task #1-Extendable Hash Table
+## Task #1-Extendable Hash Table
 
 具体概念请参考[可扩展哈希实现](https://zhuanlan.zhihu.com/p/537292608)。
 
@@ -43,7 +43,7 @@ img:
 
 4. 重复插入 Key 的操作直至不再分裂。
 
-### Task #2 - LRU-K Replacement Policy
+## Task #2 - LRU-K Replacement Policy
 
 在 LRU 策略中，每次页面置换都会选择最近最不常访问的帧号。其原理是符合直觉的。但是，考虑这种情况，存在某一热点页面，之后 buffer pool 发生了偶然性的冷页面的读取，根据 LRU 策略，热页面会被换出。但我们并不希望其被换出，因为这些冷页面可能在很长一段时间内仅仅只有此次访问。LRU 策略的缺点就在于，其不能跟踪某一页面是否为热点页面，我们希望读取的代价最小，也就是热点页面在大多数情况下都不会被置换出。
 
@@ -55,7 +55,7 @@ img:
 
 以上是对本 Task 核心部分的讨论，接下来是一些细节。
 
-#### 成员函数
+### 成员函数
 
 - `Evict(frame_id_t *frame_id)`：根据已有访问记录，挑选合适的 frame_id 进行置换，同时这里有个坑点，即选出一个 frame_id_t 后需清空其访问记录；
 - `RecordAccess(frame_id_t frame_id)`：追加一条关于 frame_id 的访问记录；
@@ -64,17 +64,17 @@ img:
 
 为了支持并发，需在上述所有函数中上锁。
 
-#### 成员变量设计
+### 成员变量设计
 
 基于提供的成员函数，作出如下成员变量设计。
 
-##### 访问记录表
+#### 访问记录表
 
 在 bustub 框架下，帧号永远从 0 开始，于是访问记录表可以不采用 `unordered_map<frame_id_t, AccessRecord>`，而是 `std::vector<AccessRecord>`。每个 `AccessRecord` 记录最近 K 次访问的时间戳。
 
 在本 Task 中，我采用了 `std::list<timestamp>` 实现 `AccessRecord`。对于访问记录而言，只需维护 K 条记录，在追加记录时，若记录数已达 K 次，则移除最早的那次。显然，访问记录需要频繁的插入删除，以及末尾（倒数第 K 次记录）的访问，而 list 底层为一个双向链表，支持 $O(1)$ 的增删查。
 
-##### 置换队列与队列位置信息
+#### 置换队列与队列位置信息
 
 每次置换时，可以选择遍历一遍访问记录表，再取合适的帧进行置换，但这样每次置换的时间开销为 $O(n)$。不难想到可以定义一个“**置换队列**”，按照 $k-dis$ 大小进行排序，使得队首恒为下一次进行置换的帧号，用空间换时间，将置换开销提升至 $O(1)$。
 
@@ -86,13 +86,13 @@ img:
 
 另外，若对一个 evictable 的帧进行 `RecordAccess`，则其访问记录会被修改，需改变其在 replace_queue 中的位置。
 
-### Task #3 - Buffer Pool Manager Instance
+## Task #3 - Buffer Pool Manager Instance
 
 到这里，就需要我们整合前两个 Task 的内容，对内存中的页面进行管理了。
 
 根据 lab guide 所述，`BufferPoolManagerInstance` 负责从 `DiskManager` 中获取页面并将它们存储在内存中，当它被明确指示这样做或者当它需要驱逐一个页面为新页面腾出空间时，它也可以将脏页写出到磁盘。系统中的所有内存页面都由 `Page` 对象表示。`BufferPoolManagerInstance` 不需要理解这些页面的内容。但作为系统开发人员，重要的是要了解 `Page` 对象只是缓冲池中内存的容器，因此并不特定于唯一页面。也就是说，每个 `Page` 对象都包含一个内存块，`DiskManager` 将使用这块内存存放从磁盘读取的物理页的内容的副本。
 
-#### Page 类
+### Page 类
 
 Page 类维护以下元信息：
 
@@ -101,7 +101,7 @@ Page 类维护以下元信息：
 - `pin_count_`：表明当前访问该 Page 的线程数；
 - `is_dirty_`：若数据被线程修改且未写回磁盘，则为 true。进行页面置换时，若被换出的页面的 is_dirty_ = true，则需写回磁盘；
 
-#### 成员变量
+### 成员变量
 
 BPM 的成员变量无需额外设计，故研究一下其提供的变量。
 
@@ -110,7 +110,7 @@ BPM 的成员变量无需额外设计，故研究一下其提供的变量。
 - `ExtendibleHashTable<page_id_t, frame_id_t> *page_table_`：哈希表，存放 page_id 到 frame_id 的映射，每次对 pages 数组进行修改时，都要对该变量进行操作；
 - `std::list<frame_id_t> free_list_`：跟踪未存放任何 Page 对象的帧，当从磁盘中取出页面时优先使用 free_list 中的帧；
 
-#### 成员函数
+### 成员函数
 
 - `NewPgImp(page_id_t *page_id)`：新建一个 Page，并将其插入到帧中，插入时优先使用 free_list 中的帧，其次再考虑利用 replacer 挑选一帧进行页面置换，置换时若页面为脏，则需写回磁盘。之后，除了修改 Page 对象的元信息，还需修改哈希表，构建新的映射；
 
@@ -128,7 +128,7 @@ BPM 的成员变量无需额外设计，故研究一下其提供的变量。
 
     > 就是在这里调用 replacer 的 `Remove()` 函数了。
 
-### 总结
+## 总结
 
 总体实现并不难，跟着注释以及 lab guide 一步步来即可。
 

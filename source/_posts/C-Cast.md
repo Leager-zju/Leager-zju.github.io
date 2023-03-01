@@ -1,5 +1,5 @@
 ---
-title: C++ の 类型转换(Cast)
+title: C++ の 类型转换(Type&Cast)
 author: Leager
 mathjax: true
 date: 2023-02-27 10:04:11
@@ -39,9 +39,9 @@ const int d = a;     // int -> const int
 >
 > 首先，`“hi”` 会被编译器认为是 `const char*` 型字面量。
 >
-> - 在 C++ 11 之前，会首先调用 `std::string::string(const char *)` 的初始化构造函数，进行隐式转换生成一个临时变量，再调用拷贝构造函数生成 `s`；
-> - 引入移动语义的 C++ 11 之后，依然会隐式转换生成临时变量，但此时由于该变量为右值，于是调用了移动构造函数将临时变量保有的资源 `“hi”` 移至 `s` 中；
-> - 而到了 C++ 17，引入了一个叫[**复制消除**](https://zh.cppreference.com/w/cpp/language/copy_elision)的规则，要求在满足一定的条件下避免对象的复制，于是这里的临时变量不会生成，直接调用 `std::string::string(const char *)` 构造对象。这可比移动构造高效多了；
+> - 在 C++11 之前，会首先调用 `std::string::string(const char *)` 的初始化构造函数，进行隐式转换生成一个临时变量，再调用拷贝构造函数生成 `s`；
+> - 引入移动语义的 C++11 之后，依然会隐式转换生成临时变量，但此时由于该变量为右值，于是调用了移动构造函数将临时变量保有的资源 `“hi”` 移至 `s` 中；
+> - 而到了 C++17，引入了一个叫[**复制消除**](https://zh.cppreference.com/w/cpp/language/copy_elision)的规则，要求在满足一定的条件下避免对象的复制，于是这里的临时变量不会生成，直接调用 `std::string::string(const char *)` 构造对象。这可比移动构造高效多了；
 >
 > 综上所述，在不同编译器标准下，答案分别为 2 2 1。
 
@@ -343,4 +343,102 @@ int main() {
 
 ## 运行时类型信息(RTTI)
 
-当应用于多态类型的表达式时，`typeid` 表达式的求值可能涉及运行时开销（虚表查找），其他情况下 `typeid` 表达式都在编译时解决。
+### typeid 算子
+
+> 定义于头文件 `<typeinfo>`
+
+`typeid` 用于获取当前对象的类型信息，返回一个 `type_info` 类，可以通过调用 `type_info` 的 `name()` 方法来获取相应的字符串型名称。
+
+```c++
+class A {};
+class B : public A {};
+
+int main() {
+  bool b;
+  char c;
+  int i;
+  double d;
+
+  A* foo = new B;
+  B bar;
+
+  std::cout << typeid(b).name() << '\n'
+            << typeid(c).name() << '\n'
+            << typeid(i).name() << '\n'
+            << typeid(d).name() << '\n'
+            << typeid(foo).name() << '\n'
+            << typeid(*foo).name() << '\n'
+            << typeid(bar).name();
+}
+// output:
+// b
+// c
+// i
+// d
+// P1A
+// 1A
+// 1B
+```
+
+不难发现，`typeid` 不仅支持内置类型，还允许获取用户自定义类型的信息。但上面只描述了静态类型的情况，在编译期就能确定类型，下面看看涉及多态的 RTTI 情况。
+
+```c++
+class Base {
+ public:
+  virtual ~Base() = default;
+};
+
+class Derive : public Base {
+ public:
+  virtual ~Derived() = default;
+};
+
+int main() {
+  Base* pb = new Derive;
+  Derive d;
+  Base& rb = d;
+  std::cout << typeid(pb).name() << '\n'
+            << typeid(*pb).name() << '\n'
+            << typeid(rb).name();
+  return 0;
+}
+// output:
+// P4Base
+// 7Derive
+// 7Derive
+```
+
+发现无论是否为多态场景，指针的类型依然为其静态类型，但其解引用后的类型却存在差异，即虽然 `pb` 的类型为 `Base*`，但其指向的对象被识别为 `Derive` 类型，这与之前 `A* foo = new B` 的表现大相径庭。
+
+这是因为这里的 `Base` 为多态对象，当应用于多态类型的表达式时，`typeid` 的求值会对表达式求值，并指代表示该表达式动态类型的对象，这涉及运行时开销（虚表查找）。这里如果表达式是通过对一个指针解引用所得，且该指针是空指针值，那么就会抛出 `std::bad_typeid` 异常。
+
+而其他情况下 `typeid` 表达式都在编译时解决，不会对表达式求值。
+
+了解了这一点，也就基本知道 `dynamic_cast` 的原理了——其实它就是利用 **RTTI** 去判断一个指针实际所指的对象类型，这依赖于虚函数表，故仅用于多态类型的转换，无法对非多态对象执行 `dynamic_cast`。
+
+### type_info
+
+上面说到 `typeid` 会返回一个 `type_info` 类，实际上它保有一个类型的实现指定信息，包括类型的名称和比较二个类型相等的方法或相对顺序。定义如下：
+
+```c++
+class type_info {
+public:
+    virtual ~type_info();
+
+    bool operator==(const type_info& rhs) const noexcept;
+    bool operator!=(const type_info& rhs) const noexcept; // C++20 移除
+
+    bool before(const type_info& rhs) const noexcept;
+    size_t hash_code() const noexcept;
+    const char* name() const noexcept;
+
+    type_info(const type_info& rhs) = delete;
+    type_info& operator=(const type_info& rhs) = delete;
+};
+```
+
+每个类型的 `type_info` 是独一无二的，故禁止了拷贝。除了之前提过的 `name()` 方法，在这里我仅关注 `operator=` 算子，另外两个不作深究。而 `operator=` 主要是检查对象是否指代相同类型，这个会经常用到，通常用于比较两个带有虚函数的类的对象是否相等。
+
+### RTTI 底层原理
+
+在一个多态对象的内存模型中，最开始就会放一个指向虚表的虚表指针 `vptr`，而在虚表的 **`-1`** 索引处保有一个 `type_info*` 条目，其指向的 `type_info` 保存着该多态对象的类型信息。`typeid` 会判断出表达式是否为一个多态对象，若是，则不断地深入内存，进行虚表指针 -> 类型信息指针 -> 类型信息层层递进，最后找到 `type_info` 并返回；而非多态对象则没有虚表这一概念，直接在编译期求得静态类型即可。

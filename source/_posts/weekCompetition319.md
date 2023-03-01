@@ -17,7 +17,7 @@ img:
 
 <!--more-->
 
-### 1. [2469. 温度转换](https://leetcode.cn/problems/convert-the-temperature/)
+## 1. [2469. 温度转换](https://leetcode.cn/problems/convert-the-temperature/)
 
 > 给你一个四舍五入到两位小数的非负浮点数 celsius 来表示温度，以 **摄氏度（Celsius）**为单位。
 >
@@ -30,11 +30,11 @@ img:
 > - 开氏度 = 摄氏度 + 273.15
 > - 华氏度 = 摄氏度 * 1.80 + 32.00
 
-#### 思路
+### 思路
 
 签到题
 
-#### code
+### code
 
 ```go
 // go
@@ -43,7 +43,7 @@ func convertTemperature(celsius float64) []float64 {
 }
 ```
 
-### 2. [2470. 最小公倍数为 K 的子数组数目](https://leetcode.cn/problems/number-of-subarrays-with-lcm-equal-to-k/)
+## 2. [2470. 最小公倍数为 K 的子数组数目](https://leetcode.cn/problems/number-of-subarrays-with-lcm-equal-to-k/)
 
 > 给你一个整数数组 nums 和一个整数 k ，请你统计并返回 nums 的 **子数组** 中满足 元素最小公倍数为 k 的子数组数目。
 >
@@ -51,11 +51,11 @@ func convertTemperature(celsius float64) []float64 {
 >
 > **数组的最小公倍数** 是可被所有数组元素整除的最小正整数。
 
-#### 思路
+### 思路
 
 数据范围挺小的，直接暴力枚举即可，但也要注意剪枝。
 
-#### code
+### code
 
 ```go
 // go
@@ -91,7 +91,7 @@ func subarrayLCM(nums []int, k int) int {
 }
 ```
 
-### 3. [2471. 逐层排序二叉树所需的最少操作数目](https://leetcode.cn/problems/minimum-number-of-operations-to-sort-a-binary-tree-by-level/)
+## 3. [2471. 逐层排序二叉树所需的最少操作数目](https://leetcode.cn/problems/minimum-number-of-operations-to-sort-a-binary-tree-by-level/)
 
 > 给你一个 **值互不相同** 的二叉树的根节点 root 。
 >
@@ -102,11 +102,11 @@ func subarrayLCM(nums []int, k int) int {
 > 节点的 **层数** 是该节点和根节点之间的路径的边数。
 >
 
-#### 思路
+### 思路
 
 用二维切片记录每一层的数据 `level[]`，对当前层而言，开一个额外数组记录每个元素 `level[i]` 在排序后的最终位置 `pos[level[i]]`，不断交换 `level[i]` 与 `level[pos[level[i]]]` 即可。
 
-#### code
+### code
 
 ```go
 // go
@@ -166,7 +166,7 @@ func minimumOperations(root *TreeNode) int {
 }
 ```
 
-### 4. [2472. 不重叠回文子字符串的最大数目](https://leetcode.cn/problems/maximum-number-of-non-overlapping-palindrome-substrings/)
+## 4. [2472. 不重叠回文子字符串的最大数目](https://leetcode.cn/problems/maximum-number-of-non-overlapping-palindrome-substrings/)
 
 > 给你一个字符串 s 和一个 **正** 整数 k 。
 >
@@ -179,14 +179,14 @@ func minimumOperations(root *TreeNode) int {
 >
 > **子字符串** 是字符串中一个连续的字符序列。
 
-#### 思路
+### 思路
 
 首先用一个二维数组 `isPalid[i][j]` 记录子字符串 `s[i] ~ s[j]` 是否为回文串。定义 `dp[i]` 表示字符串 `s[:i]` 中不重叠回文子字符串的最大数目。那么状态转移方程可以表示为：
 
 1. 若 `s[j:i] (0 <= j <= i-k)` 为回文串，则 `dp[i] = max(do[i], dp[j] + 1) `；
 2. 反之，`dp[i] = dp[i-1]`。
 
-#### code
+### code
 
 ```go
 // go

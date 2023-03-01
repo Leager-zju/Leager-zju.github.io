@@ -17,7 +17,7 @@ img:
 
 <!--more-->
 
-### Task #1 - B+Tree Pages
+## Task #1 - B+Tree Pages
 
 首先，在本 lab 中，B+ 树的所有节点都以 `BPlusTreePage` 即页的形式存在，其包含若干元数据。其中，根据所处位置不同，B+ 树的节点又分为内部节点(**Internal node**)与叶节点(**Leaf node**)。B+ 树的特点就是 internal node 仅用于索引，leaf node 存放真实数据，故这两者的键值对类型略有不同：
 
@@ -26,11 +26,11 @@ img:
 
 这便是第一个 Task 的主要任务——完善这三个数据结构。
 
-#### BPlusTreePage
+### BPlusTreePage
 
 基类，包含一些公共变量。
 
-##### 成员变量
+#### 成员变量
 
 - `page_type_`：指明该节点为内部节点还是叶节点，无需强转后判断；
 - `lsn_`：事务序列号，lab 4 中用到；
@@ -49,7 +49,7 @@ btw，尽管名字里都带个 “Page”，但 lab1 和 lab2 的 “Page” 其
 
 HEADER 内的 `page_id` 实际上和外层 Page 对象的 `page_id` 是相等的。
 
-#### BPlusInternalPage
+### BPlusInternalPage
 
 内部节点，不存放数据，仅用于索引，且 m 个 Key 对应 m+1 个 Child。基于 lab1 BPM 的实现，所有的 node 都可以通过 page_id 来进行获取，故这里的索引实际上就是 child node 对应的 page_id。
 
@@ -60,17 +60,17 @@ HEADER 内的 `page_id` 实际上和外层 Page 对象的 `page_id` 是相等的
 
 这在后续 BPlusTree 的 Insert/Remove 的实现中比较重要。当然，`BPlusLeafPage` 类中也包含以上两个方法。
 
-#### BPlusLeafPage
+### BPlusLeafPage
 
 叶节点，存放实际数据，且 m 个 Key 对应 m 个 Value。
 
 根据 B+ 树的性质，所有叶节点同时以链表形式排布，从而支持 range-search。故 leaf page 的 HEADER 还要加上 4B 的 next_page_id，以索引到下一个叶节点。如果是最右边那个叶节点，则该变量为 `INVALID_PAGE_ID`。
 
-### Task #2 - B+Tree Data Structure
+## Task #2 - B+Tree Data Structure
 
 本 Task 是本 lab 的核心部分，也是最难的部分，相比于 Task1 仅仅是实现各节点的数据结构，Task2 就要开始真正手撕 B+ 树了。
 
-#### GetValue(Key)
+### GetValue(Key)
 
 查操作较为简单，只需根据 Key 从根节点开始不断往下走即可，重点在于找 child，而不涉及多余的操作。根据 B+ 树的特性，对于 $Page\_id_i$ 对应节点为根的子树中，所有 key $K$ 均满足 $Key_i \leq K < Key_{i+1}$，且作索引的内部节点的第一个 Key 不参与比较。故查找子节点 page_id 所在索引的函数可以实现为：
 
@@ -86,7 +86,7 @@ int GetChildPageIndex(InternalPage *internal_node, const KeyType &key) {
 }
 ```
 
-#### Insert(Key, Value)
+### Insert(Key, Value)
 
 B+ 树的插入规则如下：
 
@@ -159,7 +159,7 @@ bool RecursivelyInsert(const KeyType &key, const ValueType &value, BPlusTreePage
 }
 ```
 
-#### Remove(Key)
+### Remove(Key)
 
 删除规则和插入大体类似：
 
@@ -183,11 +183,11 @@ bool RecursivelyInsert(const KeyType &key, const ValueType &value, BPlusTreePage
 
 它同样是个递归行为，我也定义了一个 `RecursivelyRemove()` 函数，流程和 insert 大体一致，不同之处在于 sibling 的挑选，需要考虑当前 child 是否为 parent 最左侧/最右侧的 child。
 
-### Task #3 - Index Iterator
+## Task #3 - Index Iterator
 
 这一 Task 相对而言简单许多，首先需要我们完善 `IndexIterator` 类，实现其四个运算符（`*`, `++`, `==`, `!=`）以及一个 `IsEnd()` 函数，还需要我们完善 `BPlusTreePage` 类中的 `Begin()` 与 `End()` 函数，其分别返回一个 `IndexIterator`。总体而言还是不难的。
 
-#### IndexIterator
+### IndexIterator
 
 由于 `IndexIterator` 是遍历 leaf node 的迭代器，故需要记录当前 kv 对的一些信息，如所在的 leaf page 以及当前 kv 对所在下标，即：
 
@@ -200,13 +200,13 @@ bool RecursivelyInsert(const KeyType &key, const ValueType &value, BPlusTreePage
 
 `==` 运算符不仅需要判断两个迭代器所处的 Page 的 page_id 及 index 是否相等，还需要在最开始加上 IsEnd() 的判断。
 
-#### Begin / End
+### Begin / End
 
 `Begin` 有两个重载函数，一个是无参 `Begin()`，只要找到 B+ 树中最左边那个叶节点即可。
 
 另一个是 `Begin(Key)`，返回的 `IndexIterator` 需满足对应的 key $K <= Key$，这与之前实现的 `GetValue` 有异曲同工之妙。
 
-### Task #4 - Concurrent Index
+## Task #4 - Concurrent Index
 
 这一 Task 要求我们在原先的基础上，令 B+ 树支持并发操作，这里需要用到的一个思路就是 **Lock Crabbing**。
 
@@ -235,7 +235,7 @@ bool RecursivelyInsert(const KeyType &key, const ValueType &value, BPlusTreePage
 1. 若 root 不会发生变化，说明到 leaf 的这条路径上必然有一个 node 是 safe 的，会直接将大锁解除；
 2. 反之，大锁会在 root page id 完成更新后解除，若采用法 2，解锁时机并没有发生变化，下一个事务依然会在同一时刻获取到最新 root node 的锁；
 
-### 总结
+## 总结
 
 课程组很贴心地为我们提供了 **b_plus_tree_printer** 这样的工具，生成 `.dot` 文件后可以直接复制到[这个网站](http://dreampuf.github.io/GraphvizOnline/)上进行图像生成。当然，也可以[直接在浏览器上运行命令行](https://15445.courses.cs.cmu.edu/fall2022/bpt-printer/)。将 B+ 树可视化，更方便我们 debug。
 

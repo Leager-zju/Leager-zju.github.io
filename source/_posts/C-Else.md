@@ -1,33 +1,33 @@
 ---
-title: C++ 11 の 其它特性(Else)
+title: C++11 の 其它特性(Else)
 author: Leager
 mathjax: true
 date: 2023-02-06 23:02:41
 summary:
 categories:
-    - C++ 11
+    - C++11
 tags:
     - C++
 img:
 ---
 
-有些 C++ 11 特性比较琐碎，单纯用一篇文章描述浪费，还有灌水嫌疑(bushi)，于是整合到同一篇来讲。
+有些 C++11 特性比较琐碎，单纯用一篇文章描述浪费，还有灌水嫌疑(bushi)，于是整合到同一篇来讲。
 
 <!--more-->
 
-### 范围 for 循环
+## 范围 for 循环
 
 允许 for 循环中使用 `for (范围变量声明 : 范围表达式)` 的形式进行遍历，无需 `for(...;...;...)` 式的写法。
 
 ```c++
 std::vector<int> v;
 
-// C++ 11 前
+// C++11 前
 for (auto iter = v.begin(); iter != v.end(); iter++) {
   DoSomeThing(*iter);
 }
 
-// C++ 11 起
+// C++11 起
 for (auto&& item : v) { // item 为 int& 型
   DoSomeThing(item);
 }
@@ -35,19 +35,19 @@ for (auto&& item : v) { // item 为 int& 型
 
 <a id="constexpr"></a>
 
-### constexpr
+## constexpr
 
 `constexpr` 和 `const` 很像，两者的共同之处在于都是**修饰词**，可以用于修饰变量与函数，不同之处在于，`const` 修饰的对象仅包含一层 **read-only** 含义，即仅保证该对象在运行时不会被改变，但其仍有可能为动态变量。
 
 而 `constexpr` 可以说是 `const` 的升华版本，用 `constexpr` 修饰的对象**在编译时便能计算出来**，整个运行过程中都不可以被改变，直接自带一层 `const` 语义。这可以说是一个非常强大的优化，有些操作能够直接在编译时完成，就不用再在运行时多次耗费时间。
 
-> 在 constexpr 出现之前，可以在编译期初始化的 const 都隐式为 constexpr，所以其实早就有了。直到 C++ 11，constexpr 才从 const 中**细分**出来成为一个关键字。作为一门效率敏感型的语言，应当尽可能地使用 **constexpr** 进行代码优化。
+> 在 constexpr 出现之前，可以在编译期初始化的 const 都隐式为 constexpr，所以其实早就有了。直到 C++11，constexpr 才从 const 中**细分**出来成为一个关键字。作为一门效率敏感型的语言，应当尽可能地使用 **constexpr** 进行代码优化。
 
-#### constexpr 变量
+### constexpr 变量
 
 用 `constexpr` 修饰的变量必须为[字面类型](https://zh.cppreference.com/w/cpp/named_req/LiteralType)，并且必须立即被初始化，初始化时所调用的表达式必须为[常量表达式](https://zh.cppreference.com/w/cpp/language/constant_expression)。
 
-#### constexpr 函数
+### constexpr 函数
 
 对于用 `constexpr` 修饰的函数，如果其传入的参数可以在编译时计算出来，那么这个函数就会产生编译时的值；反之，就和普通函数一样了。
 
@@ -77,7 +77,7 @@ constexpr int fact(int i) {
 }
 ```
 
-#### constexpr 构造函数
+### constexpr 构造函数
 
 若构造函数中所有参数均为 constexpr 变量，则该类的所有成员变量也均为 constexpr，这个对象也就为 constexpr 对象了。
 
@@ -109,9 +109,9 @@ int main() {
 
 <a id="nullptr"></a>
 
-### nullptr
+## nullptr
 
-C++ 11 以前使用宏 `NULL` 来表示空指针。本质上它是 `#define NULL 0`，也就是一个数字 0，并不算真正意义上的指针。如果遇到以下代码，则会出现二义性：
+C++11 以前使用宏 `NULL` 来表示空指针。本质上它是 `#define NULL 0`，也就是一个数字 0，并不算真正意义上的指针。如果遇到以下代码，则会出现二义性：
 
 ```c++
 void func(int) {}
@@ -120,7 +120,7 @@ void func(void*) {}
 
 > 函数 `func` 有两个重载形式，当调用 `func(NULL)` 时，两个函数都有充分的理由被调用，因为 NULL 可以视为 0 而调用 `func(int)`，二义性由此产生。
 
-C++ 11 引入的新关键词 `nullptr` 代表指针**字面量**，它是 `std::nullptr_t` 类型的纯右值，该类型可以隐式转换到任何指针类型及任何成员指针类型。注意这个转换是**单向**的！
+C++11 引入的新关键词 `nullptr` 代表指针**字面量**，它是 `std::nullptr_t` 类型的纯右值，该类型可以隐式转换到任何指针类型及任何成员指针类型。注意这个转换是**单向**的！
 
 ```c++
 template<class T>
@@ -154,7 +154,7 @@ int main() {
 
 <a id="override"></a>
 
-### override
+## override
 
 `override` 用于修饰派生类中的**虚函数**，告诉编译器（与程序员）该函数进行了重写。如果一个函数声明为 `override` 但父类却没有这个虚函数，编译报错，故可以避免程序员在重写基类函数时无意产生的错误，提高代码规范性。
 
@@ -173,7 +173,7 @@ struct B : A {
 
 <a id="final"></a>
 
-### final
+## final
 
 `final` 用于指定某个**虚函数**不能在派生类中被重写，或者某个类不能被派生。
 
@@ -196,23 +196,23 @@ struct C : B{};        // ERROR! B 为 final，无法进一步派生
 
 <a id="enum"></a>
 
-### enum class
+## enum class
 
-C++ 11 以前，**枚举**并不限定作用域，所有枚举成员均暴露在外层作用域下，并且所有枚举值都可自动转换为整型。这也就导致：
+C++11 以前，**枚举**并不限定作用域，所有枚举成员均暴露在外层作用域下，并且所有枚举值都可自动转换为整型。这也就导致：
 
 1. 不同枚举类型的枚举成员禁止重名；
 2. 不同枚举类型能够相互比较；
 
 显然，这种传统的枚举并不安全。
 
-C++ 11 引入了**限定作用域的枚举**来解决以上问题。
+C++11 引入了**限定作用域的枚举**来解决以上问题。
 
 ```c++
 enum Color { red, blue, green };
 enum class newColor { red, blue, green };  // OK! 此限定域内自成一派，与其它枚举类型无影响
 // enum class newColor: typename {...};    // 枚举类型底层默认为 int，可以如此进行修改
 
-Color c1 = 1;             // ERROR! C++ 11 起不能通过整型来初始化枚举类型
+Color c1 = 1;             // ERROR! C++11 起不能通过整型来初始化枚举类型
 Color c2 = red;           // OK! red 在该作用域中可访问，并且这里 red 的类型为 Color
 Color c3 = Color::red;    // OK! 可以通过 枚举类型::枚举成员名 访问成员
 
@@ -230,11 +230,11 @@ std::cout << (red == 0);  // output: true
 
 <a id="assert"></a>
 
-### static_assert
+## static_assert
 
 说到这个，就不得不提另一个很像的叫 `assert` 的玩意。这两者都起到**断言**的作用，区别在于：
 
-`static_assert` 作为 C++ 11 新引入的**关键字**，为**静态断言**，即编译时进行断言，若表达式为 false，则编译错误。这样一来不会生成目标代码，也不会影响程序性能。用法为：
+`static_assert` 作为 C++11 新引入的**关键字**，为**静态断言**，即编译时进行断言，若表达式为 false，则编译错误。这样一来不会生成目标代码，也不会影响程序性能。用法为：
 
 ```c++
 static_assert(expr, msg); // 如果 expr == false，则输出 msg
@@ -244,7 +244,7 @@ static_assert(expr, msg); // 如果 expr == false，则输出 msg
 
 <a id="literal"></a>
 
-### 自定义字面量
+## 自定义字面量
 
 C++ 自带如下字面量（及其对应引用）：
 
@@ -260,7 +260,7 @@ C++ 自带如下字面量（及其对应引用）：
 
 这些后缀就仿佛**单位**一般，能够告诉程序员一些关于类型的信息。
 
-C++ 11 以前，我们如果希望定义一些描述时间相关的变量，或许会这样写：
+C++11 以前，我们如果希望定义一些描述时间相关的变量，或许会这样写：
 
 ```c++
 int time = 1;
@@ -303,9 +303,9 @@ int operator""_s (unsigned long long time) {
 
 <a id="ds"></a>
 
-### 新的数据结构
+## 新的数据结构
 
-#### std::forward_list
+### std::forward_list
 
 > 定义于头文件 `<forward_list>`
 
@@ -333,7 +333,7 @@ forward_list 内部实现以下功能：
 |                 `unique()`                 | 如果有多个连续的值相等的元素，则只保留第一个，移除后续所有，可自定义比较器 |
 |                  `sort()`                  |              排序链表，默认升序，可自定义比较器              |
 
-#### std::unordered_map
+### std::unordered_map
 
 > 定义于头文件 `<unordered_map>`
 
@@ -341,13 +341,13 @@ forward_list 内部实现以下功能：
 
  `std::unordered_map` 底层采用哈希表实现，并不会进行排序，且查找时间几乎为 `O(1)`，适用于查找多的场景。用法几乎与 `std::map` 一样。
 
-#### std::unordered_set
+### std::unordered_set
 
 > 定义于头文件 `<unordered_set>`
 
 其之于 `std::set` 就好比 `std::unordered_map` 之于 `std::map`。略。
 
-#### std::array
+### std::array
 
 > 定义于头文件 `<array>`
 
@@ -362,7 +362,7 @@ forward_list 内部实现以下功能：
 
 并且类内使用 `fill()` 函数来代替之前的 `memset()` 操作。
 
-#### std::tuple
+### std::tuple
 
 > 定义于头文件 `<tuple>`
 
@@ -413,11 +413,11 @@ forward_list 内部实现以下功能：
 
 <a id="algorithm"></a>
 
-### 新的算法
+## 新的算法
 
 > 定义于头文件 `<algorithm>`
 
-#### std::all_of / std::any_of / std::none_of
+### std::all_of / std::any_of / std::none_of
 
 `std::all_of(first, last, pred)` 检查迭代器范围 `[first, last)` 内是否均满足 `pred`；
 
@@ -431,7 +431,7 @@ std::cout << std::boolalpha << std::all_of(nums.begin(), nums.end(), [](int i) {
 // output: true
 ```
 
-#### std::find / std::find_if / std::find_if_not
+### std::find / std::find_if / std::find_if_not
 
 `std::find(first, last, value)` 返回迭代器范围 `[first, last)` 内第一个 `operator== (value)` 返回 true 的元素**的迭代器**；
 
@@ -445,7 +445,7 @@ std::cout << *std::find_if(nums.begin(), nums.end(), [](int i) { return i > 3; }
 // output: 4
 ```
 
-#### std::copy / std::copy_if / std::copy_n
+### std::copy / std::copy_if / std::copy_n
 
 `std::copy(first, last, begin)` 复制迭代器范围 `[first, last)` 内所有元素到 `begin` 开始的范围；
 
@@ -460,7 +460,7 @@ std::copy_n(nums.begin(), 5, new_nums.begin());
 // new_nums = {1, 2, 3, 4, 5}
 ```
 
-#### std::is_partitioned
+### std::is_partitioned
 
 `std::is_partitioned(first, last, pred)` 检查迭代器范围 `[first, last)` 内是否所有满足 `pred` 的元素都在不满足 `pred` 的元素之前
 
@@ -470,7 +470,7 @@ std::cout << std::boolalpha << std::is_partitioned(nums.begin(), nums.end(), [](
 // output: true
 ```
 
-#### std::is_sorted
+### std::is_sorted
 
 `std::is_sorted(first, last{, comp})` 检查迭代器范围 `[first, last)` 内是否有序。可自定义比较器 `comp`，默认为非降序，即 `comp <=> operator<`。
 
@@ -480,7 +480,7 @@ std::cout << std::boolalpha << std::is_sorted(nums.begin(), nums.end());
 // output: true
 ```
 
-#### std::minmax
+### std::minmax
 
 `std::minmax(a, b{, comp})` 返回 `a`，`b` 中较小值与较大值**的引用**，并打包为 `std::pair` 返回，可自定义比较器 `comp`。
 
@@ -493,7 +493,7 @@ std::cout << minm << " " << maxm;
 // output: 1 5
 ```
 
-#### std::minmax_element
+### std::minmax_element
 
 `std::minmax_element(first, last{, comp})` 返回迭代器范围 `[first, last)` 中较小值与较大值**的迭代器**，并打包为 `std::pair` 返回，可自定义比较器 `comp`。
 
@@ -505,7 +505,7 @@ std::cout << *min_iter << " " << *max_iter;
 // output: 1 5
 ```
 
-#### std::itoa
+### std::itoa
 
 `std::itoa(first, last, value)` 以 value 为起始，并不断以 `++value` 填充迭代器范围 `[first, last)`。
 

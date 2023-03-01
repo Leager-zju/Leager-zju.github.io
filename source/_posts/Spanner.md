@@ -15,7 +15,7 @@ img:
 
 <!--more-->
 
-### 简介
+## 简介
 
 Spanner 中的数据是**多时间版本化**的，每个版本都会自动加上其提交时间的**时间戳**(timestamp)。ts 反映序列化顺序，即：如果事务 $T_1$ 在另一个事务 $T_2$ 开始之前提交，则 $T_1$ 的 commit ts 小于 $T_2$。 这一机制归功于 **TrueTime API ** 设计，通过使用多个现代时钟参考（GPS 和原子钟）来保持较小的不确定性。
 
@@ -32,13 +32,13 @@ Spanner 中的数据是**多时间版本化**的，每个版本都会自动加�
 1. 满足**外部一致性**的读取和写入；
 2. 利用 **TrueTime** 实现基于 ts 的跨数据库的全局一致读取。
 
-### 实现
+## 实现
 
 Spanner 部署称之为 **universe**，它由一系列**区域**(zones)组成，每个 zone 都是管理部署的单位。一个 zone 有一个 **zonemaster** 和若干 **spanservers**，前者负责将数据分配给后者，后者负责向客户提供数据。其结构如图所示：
 
 <img src="image-20221015173114863.png" alt="image-20221015173114863" style="zoom:80%;" />
 
-#### SpanServer 软件栈结构
+### SpanServer 软件栈结构
 
 每个 spanserver 在底层负责若干个称为 **tablet** 的数据结构实例，每个 tablet 是表中的部分数据。
 
@@ -57,7 +57,7 @@ spanserver 中会有一个 longlive 的 **Leader**，它拥有
 1. 一个**锁表**(lock table)来实现并发控制。锁表用于**两阶段锁定**(2PL)。只有需要同步的操作才会获取锁。
 2. 一个**事务管理器**(transaction manager)来支持分布式事务。只有当一个事务涉及多个 Paxos Group 时，事务管理器才参与其中，其中一个 Paxos Group 被选为**协调者**(coordinator)，该组的 **participant Leader** 将成为 **coordinate Leader**。每个事务管理器的状态存储在底层 Paxos Group 中（因此也会被复制）。
 
-#### 目录
+### 目录
 
 为了进一步提高性能，将 Paxos Group 进一步划分为**目录**(Directory)——它是一组**共享公共连续前缀**的键。Directory 是数据迁移和负载均衡的基本单位，其所有数据都具有相同的复制配置。如下图所示。
 
@@ -67,7 +67,7 @@ spanserver 中会有一个 longlive 的 **Leader**，它拥有
 
 **Movedir** 是用于在 Paxos 组之间移动目录以及向 Paxos 组添加或删除副本的后台任务。Movedir 并不作为单个事务实现，操作的时候是先将实际数据移动到指定位置，然后再用一个原子的操作更新元数据，完成整个移动过程。故 Movdir 不会阻塞当前 client 的操作。
 
-#### 数据模型
+### 数据模型
 
 Spanner 从原先 BigTable 的类关系型数据库变成了采用以下键值映射的类 KV 型数据库：
 $$
@@ -87,7 +87,7 @@ Spanner 的数据模型是**半关系**的原因在于，每个表都需要有�
 
 <img src="image-20221017112002830.png" alt="image-20221017112002830" style="zoom:67%;" />
 
-### TrueTime
+## TrueTime
 
 考虑到时间不确定性（如通信延迟），**TrueTime**并不表示某一特定时刻，而是将时间表示为一个具有有限时间不确定性的时间区间 **TTinterval: [earliest, latest]**。 TTinterval 的端点是 **TTstamp** 类型。 TrueTime API 包括以下方法：
 
@@ -97,9 +97,9 @@ Spanner 的数据模型是**半关系**的原因在于，每个表都需要有�
 
 TrueTime 利用 GPS 和原子钟两种策略进行时钟参考，因为它们会以和彼此无关的方式出现故障，故其中一个方法发生故障后，可以立刻采用另一种方法。每个 data center 都有一组 **time master**，大多数使用 GPS，剩下的配备了原子钟。通过定期综合比较两种 master 得到一个时间点。
 
-### 并发控制
+## 并发控制
 
-#### timestamp 管理
+### timestamp 管理
 
 Spanner 支持 **read-write 事务**、**read-only 事务**和 **snapshot read**，单独写入为 RW 事务；非快照单独读取为 RO 事务。如下表所示：
 
@@ -113,13 +113,13 @@ client 可以为 snapshot read 指定 ts，或指定时间边界并让 Spanner �
 
 > RW: ts = COMMIT TIME；RO: ts = START TIME
 
-#### Paxos Leader Lease
+### Paxos Leader Lease
 
 Spanner 中 Paxos 的 **lease** 默认为 10 秒。如果租约到期，Leader 会请求延长 lease 投票。同时，Spanner 允许 Paxos Leader 主动退位。
 
 每个 Paxos Group 中不同 Leader 的 lease 互不相交。为了保持这一 **lease 不相交性**，定义 $s_{max}$ 为旧 Leader 的最大 ts，新 Leader 必须等到 $TT.after ( s_{max} ) = true$ 才能开始工作。
 
-#### RW 事务
+### RW 事务
 
 RW 事务使用 2PL，故只能在获取所有锁之后与释放所有锁之前的任意时刻分配 ts。对于给定的写事务，Spanner 会选择 Paxos 为提交事务的那次 Paxos Write 分配的时间戳。
 
@@ -162,7 +162,7 @@ $t^{Paxos}_{safe}$ 是最新已应用的 Paxos 写入的 ts。因为 ts 单调�
 
 > read-write 事务中的 read 使用 **wound-wait** 来避免死锁。
 
-#### RO 事务
+### RO 事务
 
 RO 事务分两个阶段执行：
 
@@ -176,6 +176,6 @@ RO 事务分两个阶段执行：
 1. 如果事务只涉及一个 Paxos Group，则 client 直接向该 Group 的 Leader 发出 RO 事务。将 $LastTS()$ 定义为 Paxos Group 中最后 commit 的 write 的 ts。如果没有事务 prepared，则令 $s_{read} = LastTS()$ 即可满足外部一致性：事务将看到最后一次 write 的结果；
 2. 反之，需要所有参与 read 的 Paxos Group 之间进行协商来决定 ts。Spanner 目前避免了一轮沟通，而是令 client 只在 $s_{read} = TT.now().latest$ 处执行 read（可能会等待 $t_{safe}$）。事务中的所有 read 都可以发送到足够 up-to-date 的 replica。
 
-### 总结
+## 总结
 
 Spanner 优雅地利用了 TrueTime 实现了外部一致性以及其它强大特性，这是前所未有的创新设计。

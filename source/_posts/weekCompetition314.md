@@ -17,7 +17,7 @@ img:
 
 <!--more-->
 
-### 1. [处理用时最长的那个任务的员工](https://leetcode.cn/problems/the-employee-that-worked-on-the-longest-task/)
+## 1. [处理用时最长的那个任务的员工](https://leetcode.cn/problems/the-employee-that-worked-on-the-longest-task/)
 
 > 共有 n 位员工，每位员工都有一个从 0 到 n - 1 的唯一 id。
 >
@@ -29,11 +29,11 @@ img:
 >
 > 返回处理用时最长的那个任务的员工的 id。如果存在两个或多个员工同时满足，则返回几人中 **最小** 的 id。
 
-#### 思路
+### 思路
 
 找使得 `log[i][1] - log[i-1][1]` 最大的 `log[i]`，并取其中最小的那个 `log[i][0]`
 
-#### code
+### code
 
 ```go
 // go
@@ -56,7 +56,7 @@ func hardestWorker(n int, logs [][]int) int {
 
 
 
-### 2. [找出前缀异或的原始数组](https://leetcode.cn/problems/find-the-original-array-of-prefix-xor/)
+## 2. [找出前缀异或的原始数组](https://leetcode.cn/problems/find-the-original-array-of-prefix-xor/)
 
 >给你一个长度为 n 的 **整数** 数组 `pref` 。找出并返回满足下述条件且长度为 n 的数组 `arr`：
 >
@@ -64,11 +64,11 @@ func hardestWorker(n int, logs [][]int) int {
 >
 >注意 ^ 表示 按位异或运算。
 
-#### 思路
+### 思路
 
 `pref[i+1] = pref[i] ^ arr[i]`，两边同时异或 `pref[i]`，得到 `arr[i] = pref[i] ^ pref[i+1]`
 
-#### code
+### code
 
 ```go
 // go
@@ -86,7 +86,7 @@ func findArray(p []int) []int {
 
 
 
-### 3. [使用机器人打印字典序最小的字符串](https://leetcode.cn/problems/using-a-robot-to-print-the-lexicographically-smallest-string/)
+## 3. [使用机器人打印字典序最小的字符串](https://leetcode.cn/problems/using-a-robot-to-print-the-lexicographically-smallest-string/)
 
 >给你一个字符串 s 和一个机器人，机器人当前有一个空字符串 t。执行以下操作之一，直到 s 和 t 都变成空字符串：
 >
@@ -96,7 +96,7 @@ func findArray(p []int) []int {
 >
 >请你返回纸上能写出的字典序最小的字符串。
 
-#### 思路
+### 思路
 
 题目可以转为，给定一个字符串的入栈顺序，求所有出栈顺序中字典序最小的那个。所以需要把 t 等效为栈。
 
@@ -110,7 +110,7 @@ func findArray(p []int) []int {
 
 可以用一个数组 `minm[]` 来表示 s 的当前 index 到末尾这一子串中 ASSIC 码最小的字符，那么 (1) 中的比较就变成了 `t.top()` 与 `minm[i]` 之间的比较。
 
-#### code
+### code
 
 ```c++
 // c++
@@ -149,14 +149,14 @@ public:
 
 
 
-### 4. [矩阵中和能被 K 整除的路径](https://leetcode.cn/problems/paths-in-matrix-whose-sum-is-divisible-by-k/)
+## 4. [矩阵中和能被 K 整除的路径](https://leetcode.cn/problems/paths-in-matrix-whose-sum-is-divisible-by-k/)
 
 > 给你一个下标从 0 开始的 m x n 整数矩阵 grid 和一个整数 k 。你从起点 (0, 0) 出发，每一步只能往 **下** 或者往 **右** ，你想要到达终点 (m - 1, n - 1) 。
 >
 > 请你返回路径和能被 k 整除的路径数目，由于答案可能很大，返回答案对 $10^9 + 7$ 取余 的结果。
 >
 
-#### 思路
+### 思路
 
 *知道用动态规划，但没想出来，下面参考了别人的*
 
@@ -169,7 +169,7 @@ public:
 
 那么有如下状态转移方程：`dp[i][j][v] = dp[i-1][j][(v - grid[i][j]) % k] + dp[i][j-1][(v - grid[i][j]) % k]`
 
-#### code
+### code
 
 ```go
 // go

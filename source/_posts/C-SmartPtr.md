@@ -1,17 +1,17 @@
 ---
-title: C++ 11 の 智能指针(Smart Pointer)
+title: C++11 の 智能指针(Smart Pointer)
 author: Leager
 mathjax: true
 date: 2023-02-02 17:19:10
 summary:
 categories:
-    - C++ 11
+    - C++11
 tags:
     - C++
 img:
 ---
 
-C++ 不像 Java 那样有虚拟机动态的管理内存，如果使用裸指针，在程序运行过程中可能就会出现内存泄漏等问题，然而这种问题其实都可以通过 C++ 11 引入的**智能指针**来解决。
+C++ 不像 Java 那样有虚拟机动态的管理内存，如果使用裸指针，在程序运行过程中可能就会出现内存泄漏等问题，然而这种问题其实都可以通过 C++11 引入的**智能指针**来解决。
 
 <!--more-->
 
@@ -38,7 +38,7 @@ void func() {
 
 根据不同特性，智能指针分为以下三种。
 
-### std::unique_ptr
+## std::unique_ptr
 
 `unique_ptr` 是一个**独占型**的智能指针，它**不允许**其它 `unique_ptr` 共享其管理的内部指针，故不允许**拷贝构造**与**拷贝赋值**，只能通过**移动语义**来获得资源。
 
@@ -119,7 +119,7 @@ ptrs[1].Print();
  */
 ```
 
-### std::shared_ptr
+## std::shared_ptr
 
 与 `unique_ptr` 相反，`shared_ptr` 是一个**共享型**的智能指针，它**允许**其它 `shared_ptr` 共享其管理的内部指针，故实现了**拷贝构造**与**拷贝赋值**，并通过这两种方式进行资源共享。
 
@@ -203,7 +203,7 @@ std::shared_ptr<int> ptr(new int, [](int *p){ delete p; });
 
     当程序结束时，aptr, bptr 调用析构函数，引用计数值减一，但此时两块内存的引用计数值仍然大于零，永远得不到释放。糟糕透了！
 
-### std::weak_ptr
+## std::weak_ptr
 
 为了解决共享指针可能存在的**循环引用**问题，`weak_ptr` 被提出。
 

@@ -17,7 +17,7 @@ img:
 
 <!--more-->
 
-### 1. [按身高排序](https://leetcode.cn/problems/sort-the-people/)
+## 1. [按身高排序](https://leetcode.cn/problems/sort-the-people/)
 
 > 给你一个字符串数组 `names` ，和一个由 **互不相同** 的正整数组成的数组 `heights` 。两个数组的长度均为 n 。
 >
@@ -26,11 +26,11 @@ img:
 > 请按身高 **降序** 顺序返回对应的名字数组 `names` 。
 >
 
-#### 思路
+### 思路
 
 由于人名可能有重复，故不能建 map，而是将 name 与其对应的 height 作为一个整体，然后排序。
 
-#### code
+### code
 
 ```c++
 // c++
@@ -56,7 +56,7 @@ public:
 };
 ```
 
-### 2. [按位与最大的最长子数组](https://leetcode.cn/problems/longest-subarray-with-maximum-bitwise-and/)
+## 2. [按位与最大的最长子数组](https://leetcode.cn/problems/longest-subarray-with-maximum-bitwise-and/)
 
 > 给你一个长度为 n 的整数数组 `nums` 。
 >
@@ -70,11 +70,11 @@ public:
 >
 > **子数组** 是数组中的一个连续元素序列。
 
-#### 思路
+### 思路
 
 首先有一个性质：`a AND b ≤ min(a, b)`，那么 AND 运算能够得到的最大值必然是整个数组的最大值。从而问题转换为，找到一个最长的连续子数组，其中所有元素都是 `nums[]` 中的最大值。
 
-#### code
+### code
 
 ```c++
 // c++
@@ -100,7 +100,7 @@ public:
 };
 ```
 
-### 3. [找到所有好下标](https://leetcode.cn/problems/find-all-good-indices/)
+## 3. [找到所有好下标](https://leetcode.cn/problems/find-all-good-indices/)
 
 > 给你一个大小为 n 下标从 **0** 开始的整数数组 `nums` 和一个正整数 k 。
 >
@@ -111,7 +111,7 @@ public:
 >
 > 按 **升序** 返回所有好下标。
 
-#### 思路
+### 思路
 
 定义 `assend[]` 与 `dessend[]`：如果一个数比它前面那个数大，则 `assend[i] = 1`；如果一个数比它后面那个数小，则 `dessend[i] = 1`
 
@@ -119,7 +119,7 @@ public:
 
 用滑动窗口来维护前后 k-1 个下标的 assend/dessend 值中 1 的个数，每个迭代的过程只需判断个数是否均为 0 即可。
 
-#### code
+### code
 
 ```go
 // go
@@ -180,7 +180,7 @@ func goodIndices(nums []int, k int) []int {
 }
 ```
 
-### 4. [好路径的数目](https://leetcode.cn/problems/number-of-good-paths/)
+## 4. [好路径的数目](https://leetcode.cn/problems/number-of-good-paths/)
 
 > 给你一棵 n 个节点的树（连通无向无环的图），节点编号从 0 到 n - 1 且恰好有 n - 1 条边。
 >
@@ -196,7 +196,7 @@ func goodIndices(nums []int, k int) []int {
 > 注意，一条路径和它反向的路径算作 同一 路径。比方说， `0 -> 1` 与 `1 -> 0` 视为同一条路径。单个节点也视为一条合法路径。
 >
 
-#### 思路
+### 思路
 
 参考了 [这位大佬的解法](https://leetcode.cn/problems/number-of-good-paths/solution/bing-cha-ji-by-endlesscheng-tbz8/)。
 
@@ -208,7 +208,7 @@ func goodIndices(nums []int, k int) []int {
 
 由于我们按照节点值升序访问节点，故每次只需和比自己小的邻居合并，则可以保证对于节点 $v$ 的任意邻居，其所在并查集的最大值不会超过 $vals[v]$，好路径的数量也就不会遗漏。合并后 $v$ 即为代表元。
 
-#### code
+### code
 
 ```go
 // go

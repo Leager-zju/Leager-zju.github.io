@@ -17,17 +17,17 @@ img:
 
 <!--more-->
 
-### 1. [公因子的数目](https://leetcode.cn/problems/number-of-common-factors/)
+## 1. [公因子的数目](https://leetcode.cn/problems/number-of-common-factors/)
 
 > 给你两个正整数 a 和 b ，返回 a 和 b 的 **公** 因子的数目。
 >
 > 如果 x 可以同时整除 a 和 b ，则认为 x 是 a 和 b 的一个 **公因子** 。
 
-#### 思路
+## 思路
 
 从 1 到 gcd(a, b) 遍历即可。
 
-#### code
+## code
 
 ```go
 // go
@@ -52,7 +52,7 @@ func commonFactors(a int, b int) int {
 }
 ```
 
-### 2. [沙漏的最大总和](https://leetcode.cn/problems/maximum-sum-of-an-hourglass/)
+## 2. [沙漏的最大总和](https://leetcode.cn/problems/maximum-sum-of-an-hourglass/)
 
 > 给你一个大小为 **m x n** 的整数矩阵 `grid` 。
 >
@@ -65,11 +65,11 @@ func commonFactors(a int, b int) int {
 >
 > **注意**：沙漏无法旋转且必须整个包含在矩阵中。
 
-#### 思路
+## 思路
 
 由于沙漏占据了 3×3 的矩阵空间，最不用思考的做法就是遍历沙漏的左上角即可。
 
-#### code
+## code
 
 ```go
 // go
@@ -88,7 +88,7 @@ func maxSum(g [][]int) int {
 }
 ```
 
-### 3. [最小 XOR](https://leetcode.cn/problems/minimize-xor/)
+## 3. [最小 XOR](https://leetcode.cn/problems/minimize-xor/)
 
 > 给你两个正整数 num1 和 num2 ，找出满足下述条件的整数 x ：
 >
@@ -102,7 +102,7 @@ func maxSum(g [][]int) int {
 > 整数的 **置位数** 是其二进制表示中 1 的数目。
 >
 
-#### 思路
+## 思路
 
 若要使两个数按位异或所得结果最小，它们二进制中 1 的位置应尽可能一致，所以找题目中的 $x$ 实际上就是**安排其二进制中 ‘1’ 的位置**。令 $k(num1)$ 表示 $num1$ 的置位数。则对于给定的 $num1$ 与 $k(x) = k(num2)$ ，只有以下三种情况：
 
@@ -114,7 +114,7 @@ func maxSum(g [][]int) int {
 
 3. $k(num1) > k(num2)$：$x$ 的值即保留 $num1$ 右侧 $k(num2)$ 个 ‘1’ 的结果。
 
-#### code
+## code
 
 ```go
 // go
@@ -154,7 +154,7 @@ func minimizeXor(num1 int, num2 int) int {
 }
 ```
 
-### 4. [对字母串可执行的最大删除数](https://leetcode.cn/problems/maximum-deletions-on-a-string/)
+## 4. [对字母串可执行的最大删除数](https://leetcode.cn/problems/maximum-deletions-on-a-string/)
 
 > 给你一个仅由小写英文字母组成的字符串 s 。在一步操作中，你可以：
 >
@@ -166,13 +166,13 @@ func minimizeXor(num1 int, num2 int) int {
 > 返回删除 s 所需的最大操作数。
 >
 
-#### 思路
+## 思路
 
 考虑操作 2，删除前 i 个字母后还剩下长为 len(s)-i 的新字符串，我们要接着对新字符串执行同样的删除操作。这就是一个递归步骤，并且我们的递归是二叉树状的——每个 i 都需要考虑删 or 不删。
 
 那么很容易想到用动态规划。定义 `dp[i]` 为删除 `s[i-1:]` 所需最大操作数，那么对于任意 `1 ≤ i < j ≤ len(s)-1`，如果 `s[i:j] == s[j:2*j-i]`，则 `dp[i] = max(dp[i], dp[j] + 1)`
 
-#### code
+## code
 
 ```go
 // go
