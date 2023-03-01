@@ -79,7 +79,7 @@ class A {
 
 A a1, a3; // OK! 默认构造函数
 A a2(a1); // ERROR! 拷贝构造函数被弃置
-a3 = a1;  // ERROR! 拷贝赋值函数被弃置
+a3 = a1;  // ERROR! 拷贝赋值运算符被弃置
 ```
 
 > 一个很常用的例子就是 `unique_ptr`，`unique_lock` 这些类通过 `delete` 修饰来禁止对象之间的拷贝。

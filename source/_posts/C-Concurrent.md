@@ -47,7 +47,7 @@ C++11 新增了官方并发支持库，使得我们能够更好地在系统间�
 | :----------------------------------------------------------: | :----------------------------------------------------------: |
 |                     `thread() noexcept`                      |  **默认构造函数**。构造**不**关联执行线程的新 thread 对象。  |
 |             `thread( thread&& other ) noexcept`              | **移动构造函数**。将 `other` 所关联的执行线程的资源转移，此后 `other` **不**关联任何执行线程。 |
-|        `thread& operator=( thread&& other ) noexcept`        | **移动赋值函数**。若当前对象此时拥有关联的运行中线程（即 `joinable() == true` ），则调用 `std::terminate()`。 |
+|        `thread& operator=( thread&& other ) noexcept`        | **移动赋值运算符**。若当前对象此时拥有关联的运行中线程（即 `joinable() == true` ），则调用 `std::terminate()`。 |
 | `template< class Func, class... Args > explicit thread( Func&& f, Args&&... args )` | **初始化构造函数**。thread 创建并关联一个新的执行线程，开始执行可调用对象 `f`，相应参数也一并给出。 |
 
 接下来是其**成员函数**：
@@ -140,7 +140,7 @@ int main() {
 
 #### std::mutex
 
-mutex，全称 **mutual exclusion**(互斥体)，用于保护共享数据的**互斥**访问，也就是常说的**锁**。mutex 相当于一种独占性的资源，仅有 `lock` / `try_lock`（获取该资源）与 `unlock`（释放该资源）两种操作，其余各种锁都是围绕 mutex 进行封装与变形，故这些锁的**拷贝构造函数**与**拷贝赋值函数**被**弃置**。其**主要特性**如下：
+mutex，全称 **mutual exclusion**(互斥体)，用于保护共享数据的**互斥**访问，也就是常说的**锁**。mutex 相当于一种独占性的资源，仅有 `lock` / `try_lock`（获取该资源）与 `unlock`（释放该资源）两种操作，其余各种锁都是围绕 mutex 进行封装与变形，故这些锁的**拷贝构造函数**与**拷贝赋值运算符**被**弃置**。其**主要特性**如下：
 
 - **调用方**线程从它成功调用 `lock` / `try_lock` 开始，到它调用 unlock 为止占有 mutex；
 - 任一其它线程占有 mutex 时，当前线程若试图通过 `lock` / `try_lock` 要求获得 mutex 的所有权，则阻塞，直至**占有方**通过 `unlock` 释放 mutex；
@@ -229,7 +229,7 @@ std::lock_guard c(a, adopt_lock); // 告知 a 已上锁，此时用这种初始�
 
 #### std::unique_lock
 
-顾名思义，unique_lock 是独占性的，故不存在两个 unique_lock 对应同一个 mutex 对象，故**移动构造函数**与**移动赋值函数**得到了实现，方便转移资源。
+顾名思义，unique_lock 是独占性的，故不存在两个 unique_lock 对应同一个 mutex 对象，故**移动构造函数**与**移动赋值运算符**得到了实现，方便转移资源。
 
 类定义如下：
 
