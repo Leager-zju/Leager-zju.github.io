@@ -17,3 +17,7 @@ img:
 
 <!--more-->
 
+## 1 视 C++ 为一个语言联邦
+
+`C++` = `C` + `Object-oriented C` + `template C` + `STL`
+
