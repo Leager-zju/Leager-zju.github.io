@@ -309,3 +309,208 @@ BuyTransation buyTxn;
 ```
 
 创建 `buyTxn` 时，根据[**构造顺序**](../../C-Basic/C-OOP/#派生类构造顺序)，其基类的构造一定会更早被调用，然后才是派生类的专属部分。而其基类的构造函数中出现了一个纯虚函数 `logTxn()`，这是万恶之源！
+
+我们本意是希望通过该虚函数完成派生类版本的构造，但事实上，构造 `BuyTransaction` 对象时，优先构造的是对象中的基类部分，也就是 `Transaction` 部分，此时调用的 `logTxn()` 尽管为虚，但其无法表现出多态性质，相当于将其视为了 non-virtual，执行的还是 `Transaction` 版本的函数，并不会下降到派生类 `BuyTransaction`。毕竟，此时派生类专属部分尚未得到初始化，如果派生类版本的 `logTxn()` 将用到其成员变量，那将成为“**通往彻夜调试的直达车票**”——C++ 不允许你使用对象内部尚未初始化的部分。
+
+还有一个更根本的原因是，在基类部分构造期间，对象类型会被视为基类而非派生类，请看：
+
+```c++
+class B {
+ public:
+  B() { std::cout << typeid(*this).name() << "cons\n"; }
+};
+
+class D: public B {
+ public:
+  D() { std::cout << typeid(*this).name() << "cons\n"; }
+};
+
+int main() {
+  D d;
+}
+// output:
+// 1Bcons
+// 1Dcons
+```
+
+所以就算能实现多态，也不会使用派生类的版本——那不就相当于没有多态么(笑
+
+更何况，基类 `logTxn()` 还是 pure virtual，压根无法调用，故本条款也是为了防止这种情况发生。
+
+上面说的所有原因也同样适用于析构函数。
+
+如果非要实现“**根据不同类型使用不同构造函数**”，一个好的做法是，将基类的 `logTxn()` 设为 non-virtual，然后要求为该函数传入必要的信息，如:
+
+```c++
+class Transaction {
+ public:
+  void logTxn(const TransactionInfo& info) const {
+    /* ... */
+  }
+  Transaction() {
+    /* ... */
+    logTxn();
+  }
+  static TransactionInfo createInfo( /* params */ ) {
+    /* ... */
+  }
+};
+
+class BuyTransaction: public Transaction {
+ public:
+  BuyTransaction( /* params */)
+    :Transaction(createInfo( /* params */ ))
+    { /* ... */ }
+};
+```
+
+这样就由**令派生类将必要的信息向上传递**代替了**使用虚函数向下调用**。
+
+## 10. 令 operator= 返回一个 reference to *this
+
+关于赋值，可以写为如下形式：
+
+```c++
+int a, b, c;
+a = b = c = 15;
+// 由于赋值遵循右结合律，故被解析为
+a = (b = (c = 15));
+```
+
+为了实现**连锁赋值**，`operator=` 必须返回一个自身的引用。这同样适用于 `+=`、`-=`、`后++` 等运算符。
+
+## 11. 在 operator= 中处理“自我赋值”
+
+```c++
+class Object {
+  /* ... */
+ private:
+  const std::string* name;
+};
+Object ob;
+ob = ob;
+```
+
+是的这很蠢，但为了演示，没办法（摊手）。当然这种写法是被允许的，只不过自我赋值增加了无意义的开销——这还算能接受，但如果类的赋值运算符写成这样，那就要当心点了：
+
+```c++
+Object& opeartor=(Object& rhs) {
+  delete this->name;
+  this->name = new std::string(*rhs.name);
+  return *this;
+}
+```
+
+如果 `rhs == *this` 会发生什么？`this->name` 与 `rhs.name` 实际上就是同一个指针，指向同一块内存。那么此时 `name` 首先被 delete，然后再通过 `operator*` 获取 `name` 指向的字符串……接下来懂的都懂了吧~
+
+为了避免这种危害，**传统做法**是在最开始执行**证同测试**，实现**自我赋值安全性**：
+
+```c++
+Object& opeartor=(Object& rhs) {
+  if (this == &rhs) return *this; // 比较地址比比较对象本身更好
+
+  delete this->name;
+  this->name = new std::string(*rhs.name);
+  return *this;
+}
+```
+
+但该做法无法保证**异常安全性**，也就是说，如果 `new` 操作中出现异常（内存不够 or 构造函数异常），最后还是会得到一份**不安全**的反馈——`name` 可能因此被永久 delete，既无法删除，也无法读取。看 solution！
+
+```c++
+Object& opeartor=(Object& rhs) {
+  const std::string* tmp = this->name;
+  this->name = new std::string(*rhs.name);
+  delete tmp;
+  return *this;
+}
+```
+
+即便 `new` 或构造函数出现异常，`name` 也不会因此被贸然 delete——该做法保证了先分配再释放。同样的，这也解决了最开始**自我赋值安全性**的问题。
+
+上一方案的替代做法是 **copy and swap**。
+
+```c++
+class Object {
+  /* ... */
+  void swap(Object& rhs) { /* 交换 *this 和 rhs 的数据 */ }
+ private:
+  const std::string* name;
+};
+Object& opeartor=(Object& rhs) {
+  Object tmp(rhs);
+  swap(tmp);
+  return *this;
+}
+```
+
+或者直接这样写：
+
+```c++
+class Object {
+  /* ... */
+  void swap(Object& rhs) { /* 交换 *this 和 rhs 的数据 */ }
+ private:
+  const std::string* name;
+};
+Object& opeartor=(Object rhs) {
+  swap(rhs);
+  return *this;
+}
+```
+
+> 当然可以在这些方案的最开始加上证同测试，但需要在自我赋值开销与目标代码、CPU 控制流之间做出 trade-off。
+
+## 12. 复制对象时勿忘其每个成分
+
+本来编译器会为你默认生成一个完美的拷贝构造/拷贝赋值，但不一定是你想要的，所以此时你进行了一些自定义。
+
+结果后面类加入了新的成员变量，你就需要时刻警醒自己：别忘了修改自定义的拷贝构造与拷贝赋值。否则就会出现违背[**条款 4**](#4-确定对象被使用前已先被初始化) 的结果。
+
+当然这还好说，但一旦出现继承，另一个噩梦又来了……
+
+```c++
+class Customer {
+ public:
+  /* ... */
+ private:
+  std::string name;
+};
+
+class PriorityCustomer: public Customer {
+ public:
+  PriorityCustomer(const PriorityCustomer& rhs): priority(rhs.priority) {}
+
+  PriorityCustomer& operator=(const PriorityCustomer& rhs) {
+    priority = rhs.priority;
+    return *this;
+  }
+ private:
+  int priority;
+};
+```
+
+上面看起来没啥问题，但实际上，`PriorityCustomer` 类对象进行拷贝时，仅仅对派生类部分的变量进行了拷贝，而忽略了基类部分的 `std::string name`。这是致命的！此时 `name` 会用默认的方式进行构造，那么得到的新 `PriorityCustomer` 对象就变成无名氏了~
+
+> 因为如果让编译器来干，它会毫不犹豫地将基类部分也一并拷贝，怎么到你这就拉垮了？尽管如此，编译器不会给你报错，哎就是玩，毕竟这也不是啥大问题嘛，万一你真的不想拷贝呢~
+
+所以通过拷贝的方式进行构造时，一定不要忘了调用所有基类的适当的拷贝函数，拷贝赋值也是同理的。就像下面这样：
+
+```c++
+class PriorityCustomer: public Customer {
+ public:
+  PriorityCustomer(const PriorityCustomer& rhs)
+    :Customer(rhs), 
+     priority(rhs.priority) {}
+
+  PriorityCustomer& operator=(const PriorityCustomer& rhs) {
+    Customer.operator=(rhs);
+    priority = rhs.priority;
+    return *this;
+  }
+ private:
+  int priority;
+};
+```
+
+最后要注意的是，如果拷贝构造与拷贝赋值出现了重复部分，可以将这些重复的部分写入新的函数(eg.`init()`)，然后让它俩一起调用，从而消除冗余。而不是让一个拷贝调用另一个拷贝——[构造跟赋值不能混为一谈](../../C-Basic/C-OOP/#赋值运算符)！
