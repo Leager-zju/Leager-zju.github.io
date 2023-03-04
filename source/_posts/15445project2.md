@@ -91,19 +91,13 @@ int GetChildPageIndex(InternalPage *internal_node, const KeyType &key) {
 B+ 树的插入规则如下：
 
 1. 若整棵树为空，则新建 root node 并作为 leaf node，进行插入；
-
 2. 反之，根据 key 找到相应的叶节点 **src**，直接插入，注意叶节点的所有 kv 对均按照 key 递增排序；
-
 3. 若插入后 src 满足 split 条件，进行 **node split**：
 
     1. 新建一个节点 **sibling**；
-
         > 这里注意，新建 `BPlusTreePage` 对象后必须调用其 `Init()` 函数来初始化其元数据。
-
     2. 将 src 中的后一半 kv 对迁移到 sibling 中，若 src 为叶节点，则还需要修改 src 和 sibling 的 next page id；
-
     3. 若 src 同时也是 root node，则创建一个新的根节点 new root node，插入一个新条目；
-
     4. 反之，在其 parent 中插入一个新条目；
 
 4. 若 parent 因 child split 行为而导致其满足 split 条件，则继续进行 node split，直至不再满足 split 条件；

@@ -132,7 +132,6 @@ ExecutorContext 所有算子都是一样的，先来看看 Plan 为我们提供�
 既然有了 table id，那 TableHeap 就能获取了，通过 Guide 可知，我们需要通过一个叫 `TableIterator` 的对象来迭代表中 Tuple，并且适当地利用 `filter_predicate_` 进行过滤，规则为：
 
 1. 若其为 `nullptr`，则不作过滤，直接返回 Tuple；
-
 2. 反之，利用 `Evaluate()` 判断返回值。若为 `true`，则返回 Tuple，反之，跳过当前 Tuple，迭代器继续向前，重复之前的步骤；
 
     > 该函数返回值为 `Value` 类型（底层包括数据类型与值），在过滤条件的判断中，认为其返回 Value 具体类型为 `bool`，故可以通过 `GetAs<bool>()` 来获取具体值；

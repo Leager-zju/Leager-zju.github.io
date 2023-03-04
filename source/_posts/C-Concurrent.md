@@ -52,13 +52,10 @@ C++11 新增了官方**并发支持库**，使得我们能够更好地在系统�
 
 接下来是其**成员函数**：
 
-1. `get_id()`：任何关联执行线程的 thread 对象均有一个唯一标识线程的对象 `id`。若当前对象存在关联的执行线程，则返回其 `id`；反之，输出 “**thread::id of a non-executing thread**”。
-
-2. `join()`：阻塞当前线程直至 thread 对象关联的线程运行完毕。当前线程的 `id` 不能与 thread 的 `id` 相同，否则出现死锁（自己等自己）。并且，thread 自身不进行同步。同时从多个线程在同一 thread 对象上调用 `join()` 构成数据竞争，导致 **UB**。
-
-3. `joinable()`：判断当前 thread 是否可以 join，即是否关联**活跃**的执行线程。简单来说，就是**是否正在执行**。结束执行但未 join 的 thread 也视为 **joinable**。由默认构造函数生成的 thread 对象 `joinable() == false`。
-
-4. `detach()`：从 thread 对象分离执行线程，允许其独立执行。线程结束后，才释放资源。分离后，thread 也就不再关联任何执行对象了，既无法 `get_id()`，也无法 `join()`。
+1. `get_id()`：任何关联执行线程的 thread 对象均有一个唯一标识线程的对象 `id`。若当前对象存在关联的执行线程，则返回其 `id`；反之，输出 “**thread::id of a non-executing thread**”；
+2. `join()`：阻塞当前线程直至 thread 对象关联的线程运行完毕。当前线程的 `id` 不能与 thread 的 `id` 相同，否则出现死锁（自己等自己）。并且，thread 自身不进行同步。同时从多个线程在同一 thread 对象上调用 `join()` 构成数据竞争，导致 **UB**；
+3. `joinable()`：判断当前 thread 是否可以 join，即是否关联**活跃**的执行线程。简单来说，就是**是否正在执行**。结束执行但未 join 的 thread 也视为 **joinable**。由默认构造函数生成的 thread 对象 `joinable() == false`；
+4. `detach()`：从 thread 对象分离执行线程，允许其独立执行。线程结束后，才释放资源。分离后，thread 也就不再关联任何执行对象了，既无法 `get_id()`，也无法 `join()`；
 
     > 考虑这样一种情况：
     >
@@ -116,10 +113,8 @@ int main() {
 
 该命名空间下有以下常用成员函数：
 
-1. `get_id()`：获取当前线程 `id`。
-
+1. `get_id()`：获取当前线程 `id`；
 2. `yield()`：让出 CPU 资源；
-
 3. `sleep_for()`：当前线程主动睡眠指定时间后醒来。**函数原型**为
 
     ```c++
@@ -151,7 +146,7 @@ mutex，全称 **mutual exclusion**(互斥体)，用于保护共享数据的**�
 mutex 类是所有锁的基础，其**成员函数**只有三个，都是基于之前讨论的特性：
 
 1. `lock()`：尝试锁定 mutex；
-2. `try_lock()`：尝试锁定 mutex，成功获得锁时返回 `true` ，否则返回 `false` 。
+2. `try_lock()`：尝试锁定 mutex，成功获得锁时返回 `true` ，否则返回 `false`；
 3. `unlock()`：释放 mutex；
 
 #### std::timed_mutex
@@ -189,7 +184,7 @@ int try_lock( Lockable1& lock1, Lockable2& lock2, LockableN&... lockn );
 
 对于不加超时语义的 mutex 而言，需要程序员主动上锁解锁，但如果某线程在 unlock 之前就因为抛出异常而被迫终止，那么其持有的 mutex 就永远无法释放，所有等待该资源的线程也就陷入了无尽的阻塞中，这显然是不可用的。并且这样的手动释放要求我们在所有执行体的出口都要解锁，也增加了不必要的代码量。
 
-`lock_guard` 应用了 [RAII 技术](https://zh.cppreference.com/w/cpp/language/raii)，其将 mutex 进一步封装，并在构造/析构函数中进行资源的分配/释放，这样就不会出现上述问题——因为一旦线程退出，其所有资源都会被释放，那么必然会调用析构函数，进行解锁，防止线程由于编码失误导致一直持有锁。
+`lock_guard` 应用了 [RAII 技术](https://zhuanlan.zhihu.com/p/34660259)，其将 mutex 进一步封装，并在构造/析构函数中进行资源的分配/释放，这样就不会出现上述问题——因为一旦线程退出，其所有资源都会被释放，那么必然会调用析构函数，进行解锁，防止线程由于编码失误导致一直持有锁。
 
 > 这样一来，就不能用同一个 mutex 对象来初始化两个不同的 lock_guard 对象了，否则会出现**死锁**，下面几个锁也是如此。
 

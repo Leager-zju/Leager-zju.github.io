@@ -25,8 +25,8 @@ Google 从 [Lisp](Lisp 和许多其他函数式语言中存在的 map 和 reduce
 
 计算采用一组输入 K/V 对，并产生一组输出 K/V 对。MapReduce 库将计算表示为由用户编写的两个函数：
 
-1. **`map`**：根据输入生成一组中间 K/V 对。 MapReduce 库将所有具有相同 Key $k_i$ 的 K/V 对传递给 Reduce 函数。
-2. **`reduce`**。将 $k_i$ 对应的所有值合并成 Value Set，并能通过迭代器访问。
+1. **`map`**：根据输入生成一组中间 K/V 对。 MapReduce 库将所有具有相同 Key $k_i$ 的 K/V 对传递给 Reduce 函数；
+2. **`reduce`**。将 $k_i$ 对应的所有值合并成 Value Set，并能通过迭代器访问；
 
 > 以计算大量文档中每个单词出现次数为例，其伪代码如下所示：
 >
@@ -61,12 +61,12 @@ MapReduce 操作总体流程如下：
 <img src="image-20221128164832451.png" alt="image-20221128164832451" style="zoom:80%;" />
 
 1. MapReduce 库首先将输入文件 split 成 M 块，然后，它会在集群上启动该程序的多个副本；
-2. 其中一个副本是 **Master**（在 lab1 中称为 **Coordinator**），其余的是由 Master 分配工作的 **Worker**。有 M 个 map 任务和 R 个 reduce 任务要分配。 Master 为每个空闲的 Worker 分配一个任务。
+2. 其中一个副本是 **Master**（在 lab1 中称为 **Coordinator**），其余的是由 Master 分配工作的 **Worker**。有 M 个 map 任务和 R 个 reduce 任务要分配。 Master 为每个空闲的 Worker 分配一个任务；
 3. map Worker 从输入数据中解析出 K/V 对，并将每一对传递给 `map` 函数，生成的中间 K/V 对并缓存在内存中；
 4. 缓冲的 K/V 对定期被写入本地磁盘，由分区函数划分为 R 个区域。Master 获取这些缓冲对的位置并负责将这些位置转发给 reduce Worker；
 5. 当 Master 通知 reduce Worker 这些位置时，它使用 RPC 从 map Worker 的本地磁盘读取缓冲数据。当 reduce Worker 读取所有中间数据时，它会根据中间键对其进行排序，以便将所有出现的相同键组合在一起；
 6. reduce Worker 迭代排序的中间数据，对于遇到的每个唯一中间键，它将键和相应的中间值集传递给用户的 `reduce` 函数。 `reduce` 函数将输出 append 到对应分区的最终文件中；
-7. 当所有的 map 任务和 reduce 任务都完成后，Master 唤醒用户程序，从 MapReduce 调用中返回。
+7. 当所有的 map 任务和 reduce 任务都完成后，Master 唤醒用户程序，从 MapReduce 调用中返回；
 
 ### Master 数据结构
 
@@ -84,7 +84,7 @@ Worker 故障容错遵循以下原则：
 2. Failed Worker 未完成的任何任务将重置为 `idle` 状态；
 3. Failed Worker 已完成的 map 任务将重新执行，因为它们的输出存储在故障机器的本地磁盘上，无法访问；
 4. Failed Worker 已完成的 reduce 任务无需重新执行，因为它们的输出存储在全局文件系统中；
-5. 当一个 map 任务因 WorkerA 失败转而由 WorkerB 执行，所有 reduce Worker 会收到重新执行的通知，任何尚未从 Worker A 读取数据的 reduce 任务将从 Worker B 读取数据。
+5. 当一个 map 任务因 WorkerA 失败转而由 WorkerB 执行，所有 reduce Worker 会收到重新执行的通知，任何尚未从 Worker A 读取数据的 reduce 任务将从 Worker B 读取数据；
 
  当大规模 Worker 故障发生时，Master 只是简单地重新执行 Failed Worker 所做的工作，并继续向前推进，最终完成 MapReduce 操作。
 

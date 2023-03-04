@@ -142,7 +142,6 @@ std::shared_ptr<int> ptr(new int, [](int *p){ delete p; });
 `shared_ptr` 实现上较 `unique_ptr` 更为宽松，但代价为存在一些安全隐患，需要注意的是：
 
 1. 不用同一个裸指针初始化多个 `shared_ptr`，也不要对 `get()` 返回的裸指针进行 `delete`，否则会出现 **double free** 导致出问题；
-
 2. 不将 `this` 指针初始化 `shared_ptr` 并返回，否则会出现 **double free**，比如：
 
     ```c++

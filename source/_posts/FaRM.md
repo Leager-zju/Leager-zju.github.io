@@ -115,16 +115,13 @@ CM 存储 region 标识符到其 primary/backup 的映射。这些映射可被�
 
 <img src="image-20221025172808292.png" alt="image-20221025172808292" style="zoom:70%;" />
 
-1. **Lock**：coordinator 将 LOCK 记录写入每台涉及写的 primary。primary 通过尝试使用 compare-and-swap 将对象在指定版本处 lock，并回复是否成功获取所有锁。若失败，则中止事务。
-
+1. **Lock**：coordinator 将 LOCK 记录写入每台涉及写的 primary。primary 通过尝试使用 compare-and-swap 将对象在指定版本处 lock，并回复是否成功获取所有锁。若失败，则中止事务；
 2. **Validate**：coordinator 通过从 primary 中读取 被事务读取但未写入的所有对象 的版本来执行 VALIDATE。如果任何对象已更改，则中止事务。
 
     > 默认使用单侧 RDMA 读，而对于拥有 $t_r$ 以上对象的 primary，则用 RPC（阈值 $t_r$ 反映了 RPC 相对于 RDMA 读取的 CPU 成本）。
 
-3. **Commit Backup**：coordinator 将 `COMMIT-BACKUP` 记录写入所有 backup 的日志，然后等待来自 NIC 硬件的 ack，无需 CPU 干涉。
-
-4. **Commit Primary**：在确认所有 `COMMIT-BACKUP` 写入后，coordinator 将 `COMMIT-PRIMARY` 记录写入每个 primary 的日志中。接下来 primary 更新对象及其版本并 unlock。coordinator 会在收到至少一个 primary 的 ack 时向应用程序报告完成。
-
+3. **Commit Backup**：coordinator 将 `COMMIT-BACKUP` 记录写入所有 backup 的日志，然后等待来自 NIC 硬件的 ack，无需 CPU 干涉；
+4. **Commit Primary**：在确认所有 `COMMIT-BACKUP` 写入后，coordinator 将 `COMMIT-PRIMARY` 记录写入每个 primary 的日志中。接下来 primary 更新对象及其版本并 unlock。coordinator 会在收到至少一个 primary 的 ack 时向应用程序报告完成；
 5. **Truncate**：primary/backup 将记录保留在其日志中直到被截断。coordinator 在收到所有 primary 的确认后，它会在其他日志记录中捎带截断事务的标识符会从而延迟截断。backup 在截断时将更新应用于其对象副本。
 
 <img src="image-20221025172832254.png" alt="image-20221025172832254" style="zoom:70%;" />
@@ -149,8 +146,7 @@ FaRM 为 lease 维护一个专用消息队列，以及时处理请求。可靠�
 
 <img src="image-20221026112640579.png" alt="image-20221026112640579" style="zoom:80%;" />
 
-1. **Suspect**：CM 怀疑机器 lease 到期时，会启动重新配置，并开始阻止所有外部 client 请求；机器怀疑 CM lease 到期时，它首先要求 CM backup 中的一个启动重新配置。如果超时，那么它会自己尝试成为新的 CM 并重新配置。
-
+1. **Suspect**：CM 怀疑机器 lease 到期时，会启动重新配置，并开始阻止所有外部 client 请求；机器怀疑 CM lease 到期时，它首先要求 CM backup 中的一个启动重新配置。如果超时，那么它会自己尝试成为新的 CM 并重新配置；
 2. **Probe**：新 CM 向配置中的所有机器发出 RDMA 读取（任何读取失败的机器也被 SUSPECT），仅当新 CM 获得**大多数** probe 的响应时，它才会继续进行重新配置。
 
     > 这确保了如果网络被分区，CM 不会在较小的分区中。
@@ -159,12 +155,9 @@ FaRM 为 lease 维护一个专用消息队列，以及时处理请求。可靠�
 
     > 这确保了即使多台机器同时尝试从具有标识符 c 的配置更改配置，也只有一台机器可以成功地将系统移动到具有标识符 c +1 的配置（并成为 CM）。
 
-4. **Remap Regions**：新 CM 重新分配 region。若 primary 故障，它会将某个 backup 提升为新的 primary，以减少恢复时间。
-
-5. **Send New Configuration**：CM 向所有机器发送` NEW-CONFIG` 消息。如果 CM 改变，`NEW-CONFIG` 还会重置 lease 协议。
-
-6. **Apply New Configuration**：当机器接收到配置标识符大于自己的配置标识符的 `NEW-CONFIG` 时，它会应用新配置，此后拒绝任何配置外机器的请求。机器用 `NEW-CONFIG-ACK` 消息回复 CM。如果 CM 发生了变化，则会向新 CM 重新授予/请求 lease。
-
+4. **Remap Regions**：新 CM 重新分配 region。若 primary 故障，它会将某个 backup 提升为新的 primary，以减少恢复时间；
+5. **Send New Configuration**：CM 向所有机器发送` NEW-CONFIG` 消息。如果 CM 改变，`NEW-CONFIG` 还会重置 lease 协议；
+6. **Apply New Configuration**：当机器接收到配置标识符大于自己的配置标识符的 `NEW-CONFIG` 时，它会应用新配置，此后拒绝任何配置外机器的请求。机器用 `NEW-CONFIG-ACK` 消息回复 CM。如果 CM 发生了变化，则会向新 CM 重新授予/请求 lease；
 7. **Commit New Configuration**：一旦 CM 接收到所有 `NEW-CONFIG-ACK` 消息，它就会等待配置外的机器的 lease 都已过期。然后 CM 向所有配置成员发送 `NEW-CONFIG-COMMIT`（同时授予 lease）。之后所有成员都解除 **Suspect** 中对外部 client 请求的阻止，并启动事务恢复。
 
 ### 事务状态恢复
@@ -173,8 +166,7 @@ FaRM 在配置更改后使用日志来恢复事务状态。下图为事务恢复
 
 <img src="image-20221026140042960.png" alt="image-20221026140042960" style="zoom:80%;" />
 
-1. **Block Access To Recovering Regions**：当 region 的 primary 发生故障时，其中一个 backup 会在重新配置期间提升为新的 primary。在更新 region 的所有事务都反映在新的 primary 上之前不能允许访问该 region，直到第 4 步 Lock Recover 结束。
-
+1. **Block Access To Recovering Regions**：当 region 的 primary 发生故障时，其中一个 backup 会在重新配置期间提升为新的 primary。在更新 region 的所有事务都反映在新的 primary 上之前不能允许访问该 region，直到第 4 步 Lock Recover 结束；
 2. **Drain Logs**：所有机器在收到 `NEW-CONFIG-COMMIT` 消息时都会处理其日志中的所有记录。完成后，它们将最新配置标识符记录在变量 `LastDrained` 中。FaRM 事务具有在 commit 开始时分配的唯一标识符，配置标识符小于或等于 `LastDrained` 的事务的日志记录将被拒绝。
 
     > NIC 会向 COMMIT-BACKUP/PRIMARY 发送 ack，无论它们是在何种配置中发出的。由于 coordinator 在向应用程序公开更新并报告成功之前只等待这些 ack，因此 FaRM 不能仅仅拒绝来自旧配置的消息来达到**跨配置一致性**。
@@ -192,10 +184,8 @@ FaRM 在配置更改后使用日志来恢复事务状态。下图为事务恢复
 
     region 的每个 replica 都会向 primary 发送一条 `NEED-RECOVERY` 消息。
 
-4. **Lock Recover**：每个 region 的 primary 一直等待，直到本地机器 Drain Log 结束并且从每个 replica 接收到 `NEED-RECOVERY` 消息，以构建影响该 region 的完整 RT 集。然后它对 RT 分片。并行地，primary 线程从 backup 中获取尚未存储在本地的事务日志记录并给相关对象上锁。当一个 region 的 Lock Recover 完成后，该 region 可访问。
-
-5. **Replicate Log Records**：primary 线程通过向 backup 发送 `REPLICATE-TX-STATE` 消息来复制日志记录，以免丢失事务。
-
+4. **Lock Recover**：每个 region 的 primary 一直等待，直到本地机器 Drain Log 结束并且从每个 replica 接收到 `NEED-RECOVERY` 消息，以构建影响该 region 的完整 RT 集。然后它对 RT 分片。并行地，primary 线程从 backup 中获取尚未存储在本地的事务日志记录并给相关对象上锁。当一个 region 的 Lock Recover 完成后，该 region 可访问；
+5. **Replicate Log Records**：primary 线程通过向 backup 发送 `REPLICATE-TX-STATE` 消息来复制日志记录，以免丢失事务；
 6. **Vote**：coordinator 根据 region 的投票决定 commit/abort 事务。投票由 primary 发起。primary 线程将 `RECOVERY-VOTE` 消息发送到 coordinator 中的对等线程。
 
     - 若 replicas 看到 `COMMIT-PRIMARY` 或 `COMMIT-RECOVERY`，则投票 `commit-primary`；
