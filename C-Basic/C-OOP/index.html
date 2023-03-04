@@ -29,7 +29,7 @@
 <meta property="og:image" content="http://leager-zju.github.com/C-Basic/C-OOP/image-20230215194050201.png">
 <meta property="og:image" content="http://leager-zju.github.com/C-Basic/C-OOP/image-20230215194222982.png">
 <meta property="article:published_time" content="2023-02-14T03:13:46.000Z">
-<meta property="article:modified_time" content="2023-03-01T15:05:07.767Z">
+<meta property="article:modified_time" content="2023-03-03T12:57:56.402Z">
 <meta property="article:author" content="Leager">
 <meta property="article:tag" content="C++">
 <meta name="twitter:card" content="summary">
@@ -139,7 +139,7 @@
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">57</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">58</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -227,7 +227,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-03-01 23:05:07" itemprop="dateModified" datetime="2023-03-01T23:05:07+08:00">2023-03-01</time>
+                <time title="修改时间：2023-03-03 20:57:56" itemprop="dateModified" datetime="2023-03-03T20:57:56+08:00">2023-03-03</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -263,8 +263,9 @@ OOP）是种具有对象概念的程序编程典范，同时也是一种程序�
 <h2 id="封装">封装</h2>
 <h3 id="装">装</h3>
 <p><strong>装</strong>是指把数据与操作这些数据的函数绑定到一块，抽象成一个<strong>类</strong>。</p>
-<p>C++11 引入移动语义之后，对于一个空类，编译器将为其默认生成以下 6
-种特殊成员函数，且访问级别默认为
+<p>C++11
+引入移动语义之后，对于一个<strong>空类</strong>，编译器将为其默认生成以下
+6 种特殊成员函数，且访问级别默认为
 <code>public</code>（见下文）：<strong>默认构造函数</strong>、<strong>析构函数</strong>、<strong>拷贝构造函数</strong>、<strong>拷贝赋值运算符</strong>、<strong>移动构造函数</strong>、<strong>移动赋值运算符</strong>。</p>
 <h4 id="构造函数">构造函数</h4>
 <p>所谓<strong>构造函数</strong>，便是以类名为函数名的一种特殊函数，无返回值，任意一个对象在<strong>创建</strong>时都会自动调用（在成员变量初始化之后），完成类成员变量的初始化以及基类（见下文）的初始化等工作。</p>
@@ -273,7 +274,7 @@ OOP）是种具有对象概念的程序编程典范，同时也是一种程序�
 <p>用户可以自定义初始化构造函数，但会覆盖编译器原先生成的默认构造函数。如果需要使用默认构造函数，则需显式声明。</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">Foo</span>(<span class="type">int</span> i) &#123;&#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Bar</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">Bar</span>() = <span class="keyword">default</span>;</span><br><span class="line">  <span class="built_in">Bar</span>(<span class="type">int</span> i) &#123;&#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  Foo a; <span class="comment">// ERROR! 默认构造函数被覆盖</span></span><br><span class="line">  Bar b; <span class="comment">// OK!</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p><strong>拷贝构造函数</strong>/<strong>移动构造函数</strong>就是仅以<strong>同类对象左值引用</strong>/<strong>同类对象右值引用</strong>为参数的构造函数。</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">Foo</span>(<span class="type">const</span> Foo&amp;) = <span class="keyword">default</span>;  <span class="comment">// 拷贝构造</span></span><br><span class="line">  <span class="built_in">Foo</span>(<span class="type">const</span> Foo&amp;&amp;) = <span class="keyword">default</span>; <span class="comment">// 移动构造</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">Foo</span>(<span class="type">const</span> Foo&amp;) = <span class="keyword">default</span>;  <span class="comment">// 拷贝构造，拷贝每一个 non-static 变量</span></span><br><span class="line">  <span class="built_in">Foo</span>(<span class="type">const</span> Foo&amp;&amp;) = <span class="keyword">default</span>; <span class="comment">// 移动构造，转移对象所有权</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 <p>拷贝构造函数的形参也可以写为<strong>值传递</strong>，但这样会发生什么事呢？我们尝试调用值传递版本的拷贝构造函数
 <code>Foo foo(another_foo)</code>，<code>another_foo</code>
 因值传递而进行了一次形参拷贝，此时还需要调用一次拷贝构造函数，然后因值传递进行形参拷贝……直接死循环！而且值拷贝的过程也是申请内存的过程，接下来就看内存和
@@ -299,6 +300,8 @@ href="../../C-11/C-Value">此文</a>。</p>
 <p><strong>注意</strong>：析构函数没有参数，不能被重载，因此一个类只能有一个析构函数~</p>
 <p><strong>注意</strong>：<code>new</code> 出来的对象在堆上，如果不
 <code>delete</code> 是不会自动执行析构函数的~</p>
+<p><strong>注意</strong>：尽管某个类是多态类，但其默认生成的析构函数是
+non-virtual 的，需手动声明~</p>
 <blockquote>
 <p>析构函数如果设为
 <code>private</code>，则无法在栈上创建对象。一般情况下都是要声明为
@@ -401,7 +404,7 @@ href="../../C-11/C-Value">此文</a>。</p>
 <li>按成员变量列出顺序初始化成员变量，如果成员变量为某个类的对象，则调用相应构造函数；</li>
 <li>调用自身构造函数；</li>
 </ol>
-<p>而自身构造函数中对基类、成员变量的初始化不会影响相对顺序，只会影响调用哪个构造函数，比如
+<p>而初始化列表中对基类、成员变量的初始化不会影响相对顺序，只会影响调用构造函数的版本，比如
 <code>B3(2)</code> 使得基类 <code>B3</code> 调用了构造函数
 <code>B3(int)</code>。</p>
 <blockquote>
@@ -501,7 +504,24 @@ target="_blank" rel="noopener" href="https://blog.twofei.com/496/">这篇文章<
 <code>Base</code> 类的析构函数，而属于 <code>Derive</code>
 的那一部分并没有被析构。为了程序安全运行，我们应该要调用派生类的析构函数，也就是通过将基类析构函数设为虚函数来实现；</li>
 </ol>
-<h2 id="与-struct-的不同">与 struct 的不同</h2>
+<h2 id="与-struct-的异同">与 struct 的异同</h2>
+<h3 id="相同之处">相同之处</h3>
+<ol type="1">
+<li>都能在体内定义成员变量、成员函数，以及六大特殊成员函数；</li>
+<li>都能进行派生与继承，以及实现运行时多态（虚函数）；</li>
+<li>都能实现三大访问级别控制；</li>
+</ol>
+<h3 id="不同之处">不同之处</h3>
+<ol type="1">
+<li><code>struct</code> 默认 public，而 <code>class</code> 默认
+private；</li>
+<li>默认继承方式同上；</li>
+<li><code>struct</code> 无法实现泛型（即 template）；</li>
+</ol>
+<p><code>struct</code>
+是不同数据类型的集合体，更多被认为是一种自定义复合数据类型，从而更注重数据整合与使用；而
+<code>class</code>
+则是一个对象的方法与属性的集合，更注重数据安全性。</p>
 
     </div>
 
@@ -585,7 +605,7 @@ target="_blank" rel="noopener" href="https://blog.twofei.com/496/">这篇文章<
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%81%E8%A3%85"><span class="nav-text">封装</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A3%85"><span class="nav-text">装</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0"><span class="nav-text">构造函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B5%8B%E5%80%BC%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="nav-text">赋值运算符</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9E%90%E6%9E%84%E5%87%BD%E6%95%B0"><span class="nav-text">析构函数</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%81"><span class="nav-text">封</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%A7%E6%89%BF"><span class="nav-text">继承</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%99%9A%E7%BB%A7%E6%89%BF"><span class="nav-text">虚继承</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B4%BE%E7%94%9F%E7%B1%BB%E6%9E%84%E9%80%A0%E9%A1%BA%E5%BA%8F"><span class="nav-text">派生类构造顺序</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E6%80%81"><span class="nav-text">多态</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E5%A4%9A%E6%80%81"><span class="nav-text">静态多态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E5%A4%9A%E6%80%81"><span class="nav-text">动态多态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%99%9A%E5%87%BD%E6%95%B0%E8%A1%A8"><span class="nav-text">虚函数表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%AF%E8%99%9A%E5%87%BD%E6%95%B0"><span class="nav-text">纯虚函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F"><span class="nav-text">注意</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8E-struct-%E7%9A%84%E4%B8%8D%E5%90%8C"><span class="nav-text">与 struct 的不同</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%81%E8%A3%85"><span class="nav-text">封装</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A3%85"><span class="nav-text">装</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0"><span class="nav-text">构造函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B5%8B%E5%80%BC%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="nav-text">赋值运算符</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9E%90%E6%9E%84%E5%87%BD%E6%95%B0"><span class="nav-text">析构函数</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%81"><span class="nav-text">封</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%A7%E6%89%BF"><span class="nav-text">继承</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%99%9A%E7%BB%A7%E6%89%BF"><span class="nav-text">虚继承</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B4%BE%E7%94%9F%E7%B1%BB%E6%9E%84%E9%80%A0%E9%A1%BA%E5%BA%8F"><span class="nav-text">派生类构造顺序</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E6%80%81"><span class="nav-text">多态</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E5%A4%9A%E6%80%81"><span class="nav-text">静态多态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E5%A4%9A%E6%80%81"><span class="nav-text">动态多态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%99%9A%E5%87%BD%E6%95%B0%E8%A1%A8"><span class="nav-text">虚函数表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%AF%E8%99%9A%E5%87%BD%E6%95%B0"><span class="nav-text">纯虚函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F"><span class="nav-text">注意</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8E-struct-%E7%9A%84%E5%BC%82%E5%90%8C"><span class="nav-text">与 struct 的异同</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%B8%E5%90%8C%E4%B9%8B%E5%A4%84"><span class="nav-text">相同之处</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E5%90%8C%E4%B9%8B%E5%A4%84"><span class="nav-text">不同之处</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -601,7 +621,7 @@ target="_blank" rel="noopener" href="https://blog.twofei.com/496/">这篇文章<
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">57</span>
+          <span class="site-state-item-count">58</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

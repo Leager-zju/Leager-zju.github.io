@@ -461,7 +461,7 @@ GradeScope 上等了。</p>
   <entry>
     <title>15445 Project#2 B+ Tree</title>
     <url>/15445/15445project2/</url>
-    <content><![CDATA[<p>到目前为止，咱们已经完成了存储与索引部分的功能实现，接下来就进入执行层面的内容了。</p>
+    <content><![CDATA[<p>接下来开始存储与索引部分的实现。手撕 B+ 树！</p>
 <p><a
 href="https://15445.courses.cs.cmu.edu/fall2022/project2/">&gt;&gt;&gt;
 LAB 主页传送门 &lt;&lt;&lt;</a></p>
@@ -1812,7 +1812,8 @@ applyCh，被 server 接收到后执行的操作。</li>
   <entry>
     <title>C++11 の 类型推导(Auto &amp; Decltype)</title>
     <url>/C-11/C-AutoDeclType/</url>
-    <content><![CDATA[<p>C++11引入了 <code>auto</code> 和 <code>decltype</code>
+    <content><![CDATA[<p>C++11引入了 <strong><code>auto</code></strong> 和
+<strong><code>decltype</code></strong>
 这两个关键字，从而可以在编译期就推导出变量或者表达式的类型，方便开发者编码也简化了代码。</p>
 <span id="more"></span>
 <h2 id="auto">auto</h2>
@@ -2198,8 +2199,8 @@ Distributed System 也有了更进一步的理解。完结撒花~</p>
     <content><![CDATA[<p>虽然使用 <code>auto</code> 可以大大简化代码，但对于一些使用
 <code>dynamic_cast</code> 的结果不能用 <code>auto</code>
 作为占位符。将冗长的变量类型简化仍然是很头疼的一个问题，幸好 C++11
-提供了用关键字 <code>using</code>
-给类型起别名的特性，既能有效简化代码，又不影响可读性</p>
+提供了用关键字 <strong><code>using</code></strong>
+给类型起<strong>别名</strong>的特性，既能有效简化代码，又不影响可读性。</p>
 <span id="more"></span>
 <h2 id="define-与-typedef">#define 与 typedef</h2>
 <p>C 中就已经存在使用 <code>#define</code> / <code>typedef</code>
@@ -2356,7 +2357,7 @@ C++11 新增的用于提高编码效率的特性。</p>
 <figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// case 1</span></span><br><span class="line"><span class="type">int</span> bar = <span class="number">0</span>;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> foo = bar;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> *q = (<span class="type">int</span>*)&amp;foo;</span><br><span class="line"></span><br><span class="line">(*q)++;</span><br><span class="line">std::cout &lt;&lt; q &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; *q &lt;&lt; <span class="string">&quot;\n&quot;</span></span><br><span class="line">          &lt;&lt; &amp;foo &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; foo &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; *(&amp;foo);</span><br><span class="line"><span class="comment">// output:</span></span><br><span class="line"><span class="comment">// 0x78fe0c 1</span></span><br><span class="line"><span class="comment">// 0x78fe0c 1 1</span></span><br></pre></td></tr></table></figure>
 <figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// case 2</span></span><br><span class="line"><span class="keyword">constexpr</span> <span class="type">int</span> bar = <span class="number">0</span>;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> foo = bar;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> *q = (<span class="type">int</span>*)&amp;foo;</span><br><span class="line"></span><br><span class="line">(*q)++;</span><br><span class="line">std::cout &lt;&lt; q &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; *q &lt;&lt; <span class="string">&quot;\n&quot;</span></span><br><span class="line">          &lt;&lt; &amp;foo &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; foo &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; *(&amp;foo);</span><br><span class="line"><span class="comment">// output:</span></span><br><span class="line"><span class="comment">// 0x78fe0c 1</span></span><br><span class="line"><span class="comment">// 0x78fe0c 0 1</span></span><br></pre></td></tr></table></figure>
 <p>发现上面两个 case 唯一的区别在于变量 <code>bar</code> 是否为 <a
-href=""><strong>constexpr</strong></a>，换句话说，就是用于初始化
+href="../../C-11/C-Else/#constexpr"><strong>constexpr</strong></a>，换句话说，就是用于初始化
 <code>foo</code> 的变量值是否在编译时可知。</p>
 <p>根据控制变量法，不妨得出结论：如果只有到了运行时才能确定常量
 <code>foo</code> 的值，那么其并不会进符号表，而是表现地像 C
@@ -2404,7 +2405,7 @@ const 对象，只能调用 const 成员函数，因为非 const
 的同名成员函数产生不同重载版本。至于调用哪个重载版本，就看调用的对象是否为常量，如果是常量，则调用
 const 版本，否则调用非 const 版本。</p>
 <figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="comment">// 两个重载版本</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">show</span><span class="params">()</span> <span class="type">const</span> </span>&#123; std::cout &lt;&lt; <span class="string">&quot;const\n&quot;</span>; &#125;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">show</span><span class="params">()</span> </span>&#123; std::cout &lt;&lt; <span class="string">&quot;non-const\n&quot;</span>; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  Foo a;</span><br><span class="line">  <span class="type">const</span> Foo b;</span><br><span class="line">  <span class="type">const</span> Foo* c = &amp;a;</span><br><span class="line">  a.<span class="built_in">show</span>();</span><br><span class="line">  b.<span class="built_in">show</span>();</span><br><span class="line">  c-&gt;<span class="built_in">show</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// output:</span></span><br><span class="line"><span class="comment">// non-const</span></span><br><span class="line"><span class="comment">// const</span></span><br><span class="line"><span class="comment">// const</span></span><br></pre></td></tr></table></figure>
-<h2 id="与宏定义-define-的区别">与宏定义 #define 的区别</h2>
+<h2 id="与宏定义的区别">与宏定义的区别</h2>
 <table>
 <thead>
 <tr class="header">
@@ -2451,8 +2452,8 @@ const 版本，否则调用非 const 版本。</p>
     <title>C++11 の 并发支持(Concurrency)</title>
     <url>/C-11/C-Concurrent/</url>
     <content><![CDATA[<p>C++11
-新增了官方并发支持库，使得我们能够更好地在系统间移植程序，之前的 Boost
-库等也就随之成为历史了。</p>
+新增了官方<strong>并发支持库</strong>，使得我们能够更好地在系统间移植程序，之前的
+Boost 库等也就随之成为历史了。</p>
 <span id="more"></span>
 <h2 id="并发与并行">并发与并行</h2>
 <p>多线程的世界中，常常会涉及这俩重要概念。</p>
@@ -2630,8 +2631,7 @@ mutex 调用 <code>unlock()</code>，然后再次重复尝试，直至所有 mut
 unlock 之前就因为抛出异常而被迫终止，那么其持有的 mutex
 就永远无法释放，所有等待该资源的线程也就陷入了无尽的阻塞中，这显然是不可用的。并且这样的手动释放要求我们在所有执行体的出口都要解锁，也增加了不必要的代码量。</p>
 <p><code>lock_guard</code> 应用了 <a
-href="https://zh.cppreference.com/w/cpp/language/raii">RAII
-技术</a>，其将 mutex
+href="https://zhuanlan.zhihu.com/p/34660259">RAII 技术</a>，其将 mutex
 进一步封装，并在构造/析构函数中进行资源的分配/释放，这样就不会出现上述问题——因为一旦线程退出，其所有资源都会被释放，那么必然会调用析构函数，进行解锁，防止线程由于编码失误导致一直持有锁。</p>
 <blockquote>
 <p>这样一来，就不能用同一个 mutex 对象来初始化两个不同的 lock_guard
@@ -3214,9 +3214,10 @@ std::copy_n</h3>
   <entry>
     <title>C++11 の 预置与弃置(Default &amp; Delete)</title>
     <url>/C-11/C-DefaultAndDelete/</url>
-    <content><![CDATA[<p>C++11 中新增了 <code>default</code> 与 <code>delete</code>
-这俩关键字。请不要误会，这里的 <code>delete</code> 并不是与
-<code>new</code> 搭配使用释放内存的那个，而是跟 <code>default</code>
+    <content><![CDATA[<p>C++11 中新增了 <strong><code>default</code></strong> 与
+<strong><code>delete</code></strong> 这俩关键字。请不要误会，这里的
+<code>delete</code> 并不是与 <code>new</code>
+搭配使用释放内存的那个，而是跟 <code>default</code>
 相对的用于类成员函数声明的关键字。</p>
 <span id="more"></span>
 <h2 id="default">default</h2>
@@ -3240,7 +3241,7 @@ std::copy_n</h3>
 <p>在 C++11
 以前，如果想要禁止类的某个成员函数被调用，只有两种策略：要么将其声明为私有函数，要么干脆定义为空函数，什么也不做。因为有些类从功能的角度考虑必然不能对某些函数进行实现甚至定义——总不能让程序员在
 <code>human</code> 类中搞了个 <code>fly()</code> 函数吧。</p>
-<p>但问题在于，第一种做法并不能阻止类内调用，和第二种做法一样无法在调用时报错，程序员也就很难找到代码问题所在。两种做法并没有从根本上解决问题——<strong>这些函数不该被定义</strong>。</p>
+<p>但问题在于，第一种做法并不能阻止类内或友元类的调用，和第二种做法一样无法在调用时报错，程序员也就很难找到代码问题所在。两种做法并没有从根本上解决问题——<strong>这些函数不该被定义</strong>。</p>
 <p>于是，<code>delete</code> 被提出。与 <code>default</code>
 相对，后面加上 <code>= delete</code>
 的函数会被视为<strong>弃置</strong>(deleted)，在编译器眼中这个函数<strong>禁止被定义</strong>，对该函数的调用会导致编译错误，继而从根本上解决了这个问题。与
@@ -3263,8 +3264,8 @@ std::copy_n</h3>
   <entry>
     <title>C++11 の 列表初始化(List Initialize)</title>
     <url>/C-11/C-Init/</url>
-    <content><![CDATA[<p>在 C++11 中，可以直接在变量名后面用 <code>&#123;初始化列表&#125;</code>
-来进行对象的初始化。</p>
+    <content><![CDATA[<p>在 C++11 中，可以直接在变量名后面用
+<strong><code>&#123;初始化列表&#125;</code></strong> 来进行对象的初始化。</p>
 <span id="more"></span>
 <h2 id="旧世界">旧世界</h2>
 <p>C++11
@@ -3314,7 +3315,7 @@ std::copy_n</h3>
   <entry>
     <title>C++11 の 函数调用(Function Call)</title>
     <url>/C-11/C-Function/</url>
-    <content><![CDATA[<p>C++11 新增了若干使函数调用更加方便的特性。</p>
+    <content><![CDATA[<p>C++11 新增了若干使<strong>函数调用</strong>更加方便的特性。</p>
 <span id="more"></span>
 <h2 id="lambda-表达式">lambda 表达式</h2>
 <p>lambda
@@ -3475,7 +3476,7 @@ lambda 表达式了，一个 <code>std::function</code> 统统搞定。</p>
   <entry>
     <title>C++ の 内联函数(Inline)</title>
     <url>/C-Basic/C-Inline/</url>
-    <content><![CDATA[<p><code>inline</code>
+    <content><![CDATA[<p><strong><code>inline</code></strong>
 只能用于修饰函数，能够解决一些频繁调用的小函数大量消耗栈内存的问题，是一种提高程序运行效率的手段。</p>
 <span id="more"></span>
 <h2 id="inline-基本">inline 基本</h2>
@@ -3746,8 +3747,9 @@ OOP）是种具有对象概念的程序编程典范，同时也是一种程序�
 <h2 id="封装">封装</h2>
 <h3 id="装">装</h3>
 <p><strong>装</strong>是指把数据与操作这些数据的函数绑定到一块，抽象成一个<strong>类</strong>。</p>
-<p>C++11 引入移动语义之后，对于一个空类，编译器将为其默认生成以下 6
-种特殊成员函数，且访问级别默认为
+<p>C++11
+引入移动语义之后，对于一个<strong>空类</strong>，编译器将为其默认生成以下
+6 种特殊成员函数，且访问级别默认为
 <code>public</code>（见下文）：<strong>默认构造函数</strong>、<strong>析构函数</strong>、<strong>拷贝构造函数</strong>、<strong>拷贝赋值运算符</strong>、<strong>移动构造函数</strong>、<strong>移动赋值运算符</strong>。</p>
 <h4 id="构造函数">构造函数</h4>
 <p>所谓<strong>构造函数</strong>，便是以类名为函数名的一种特殊函数，无返回值，任意一个对象在<strong>创建</strong>时都会自动调用（在成员变量初始化之后），完成类成员变量的初始化以及基类（见下文）的初始化等工作。</p>
@@ -3756,7 +3758,7 @@ OOP）是种具有对象概念的程序编程典范，同时也是一种程序�
 <p>用户可以自定义初始化构造函数，但会覆盖编译器原先生成的默认构造函数。如果需要使用默认构造函数，则需显式声明。</p>
 <figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">Foo</span>(<span class="type">int</span> i) &#123;&#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Bar</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">Bar</span>() = <span class="keyword">default</span>;</span><br><span class="line">  <span class="built_in">Bar</span>(<span class="type">int</span> i) &#123;&#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  Foo a; <span class="comment">// ERROR! 默认构造函数被覆盖</span></span><br><span class="line">  Bar b; <span class="comment">// OK!</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p><strong>拷贝构造函数</strong>/<strong>移动构造函数</strong>就是仅以<strong>同类对象左值引用</strong>/<strong>同类对象右值引用</strong>为参数的构造函数。</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">Foo</span>(<span class="type">const</span> Foo&amp;) = <span class="keyword">default</span>;  <span class="comment">// 拷贝构造</span></span><br><span class="line">  <span class="built_in">Foo</span>(<span class="type">const</span> Foo&amp;&amp;) = <span class="keyword">default</span>; <span class="comment">// 移动构造</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">Foo</span>(<span class="type">const</span> Foo&amp;) = <span class="keyword">default</span>;  <span class="comment">// 拷贝构造，拷贝每一个 non-static 变量</span></span><br><span class="line">  <span class="built_in">Foo</span>(<span class="type">const</span> Foo&amp;&amp;) = <span class="keyword">default</span>; <span class="comment">// 移动构造，转移对象所有权</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 <p>拷贝构造函数的形参也可以写为<strong>值传递</strong>，但这样会发生什么事呢？我们尝试调用值传递版本的拷贝构造函数
 <code>Foo foo(another_foo)</code>，<code>another_foo</code>
 因值传递而进行了一次形参拷贝，此时还需要调用一次拷贝构造函数，然后因值传递进行形参拷贝……直接死循环！而且值拷贝的过程也是申请内存的过程，接下来就看内存和
@@ -3782,6 +3784,8 @@ href="../../C-11/C-Value">此文</a>。</p>
 <p><strong>注意</strong>：析构函数没有参数，不能被重载，因此一个类只能有一个析构函数~</p>
 <p><strong>注意</strong>：<code>new</code> 出来的对象在堆上，如果不
 <code>delete</code> 是不会自动执行析构函数的~</p>
+<p><strong>注意</strong>：尽管某个类是多态类，但其默认生成的析构函数是
+non-virtual 的，需手动声明~</p>
 <blockquote>
 <p>析构函数如果设为
 <code>private</code>，则无法在栈上创建对象。一般情况下都是要声明为
@@ -3884,7 +3888,7 @@ href="../../C-11/C-Value">此文</a>。</p>
 <li>按成员变量列出顺序初始化成员变量，如果成员变量为某个类的对象，则调用相应构造函数；</li>
 <li>调用自身构造函数；</li>
 </ol>
-<p>而自身构造函数中对基类、成员变量的初始化不会影响相对顺序，只会影响调用哪个构造函数，比如
+<p>而初始化列表中对基类、成员变量的初始化不会影响相对顺序，只会影响调用构造函数的版本，比如
 <code>B3(2)</code> 使得基类 <code>B3</code> 调用了构造函数
 <code>B3(int)</code>。</p>
 <blockquote>
@@ -3984,7 +3988,24 @@ href="https://blog.twofei.com/496/">这篇文章</a>。</p>
 <code>Base</code> 类的析构函数，而属于 <code>Derive</code>
 的那一部分并没有被析构。为了程序安全运行，我们应该要调用派生类的析构函数，也就是通过将基类析构函数设为虚函数来实现；</li>
 </ol>
-<h2 id="与-struct-的不同">与 struct 的不同</h2>
+<h2 id="与-struct-的异同">与 struct 的异同</h2>
+<h3 id="相同之处">相同之处</h3>
+<ol type="1">
+<li>都能在体内定义成员变量、成员函数，以及六大特殊成员函数；</li>
+<li>都能进行派生与继承，以及实现运行时多态（虚函数）；</li>
+<li>都能实现三大访问级别控制；</li>
+</ol>
+<h3 id="不同之处">不同之处</h3>
+<ol type="1">
+<li><code>struct</code> 默认 public，而 <code>class</code> 默认
+private；</li>
+<li>默认继承方式同上；</li>
+<li><code>struct</code> 无法实现泛型（即 template）；</li>
+</ol>
+<p><code>struct</code>
+是不同数据类型的集合体，更多被认为是一种自定义复合数据类型，从而更注重数据整合与使用；而
+<code>class</code>
+则是一个对象的方法与属性的集合，更注重数据安全性。</p>
 ]]></content>
       <categories>
         <category>C++ Basic</category>
@@ -3996,7 +4017,7 @@ href="https://blog.twofei.com/496/">这篇文章</a>。</p>
   <entry>
     <title>C++ の 静态修饰符(Static)</title>
     <url>/C-Basic/C-Static/</url>
-    <content><![CDATA[<p><code>static</code> 是 C++
+    <content><![CDATA[<p><strong><code>static</code></strong> 是 C++
 中很常用的修饰符，它被用来控制变量的存储方式和可见性。</p>
 <span id="more"></span>
 <h2 id="static-普通变量">static 普通变量</h2>
@@ -9643,7 +9664,7 @@ href="https://leetcode.cn/problems/maximum-number-of-non-overlapping-palindrome-
     <title>C++ の 内存分配(Memory Allocation)</title>
     <url>/C-Basic/C-Memory/</url>
     <content><![CDATA[<p>众所周知，C++ 是一门与内存紧密相关的语言，本文就来聊聊 C++
-眼中的内存分配。</p>
+眼中的<strong>内存分配</strong>。</p>
 <span id="more"></span>
 <h2 id="内存布局">内存布局</h2>
 <p>C++ 程序的内存分为 5
@@ -10280,9 +10301,306 @@ id="类模板的声明和实现为什么不能放在不同的文件里">类模�
 <p>当 C++ 律师！</p>
 </blockquote>
 <span id="more"></span>
+<h2 id="视-c-为一个语言联邦">1. 视 C++ 为一个语言联邦</h2>
+<p>C++ 高效编程守则视情况而变化，取决于使用 C++ 的哪一部分。</p>
+<blockquote>
+<p><code>C++</code> = <code>C</code> + <code>Object-Oriented C++</code>
++ <code>Template C++</code> + <code>STL</code>。</p>
+</blockquote>
+<h2 id="尽量以-const-enum-inline-替换-define">2. 尽量以 const, enum,
+inline 替换 #define</h2>
+<p>或可以说“尽量用编译器代替预处理器”。</p>
+<ol type="1">
+<li><p>对于常量，尽量以 <code>const</code>, <code>enum</code> 替换。</p>
+<p><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> PI 3.1415926</span></span><br><span class="line"><span class="comment">// 改为</span></span><br><span class="line"><span class="type">const</span> <span class="type">double</span> pi = <span class="number">3.1415926</span>;</span><br></pre></td></tr></table></figure></p>
+<p>如果在代码出现 <code>PI</code>
+的地方产生了编译错误，编译器只会看到被预处理器替换掉的文本
+<code>3.1415926</code>，而察觉不到 <code>PI</code>
+的存在，只会在报错信息中给出一串数字。此时很难定位到出错位置，尤其是将
+<code>#define</code> 写在其它头文件中的时候——这太糟糕了！</p>
+<p>最大的原因还是在于，编译器看不到
+<code>PI</code>，因为已经被替换掉了，故无法在<strong>符号表</strong>中找到它。同时预处理器盲目进行文本替换还会可能导致目标代码中出现多份
+<code>3.1415926</code> 这样的数字。</p>
+<p>而替换为 <code>const</code> 则不会出现这一问题，编译器会将
+<code>const</code> 变量加入符号表，避免了上述错误。<code>const</code>
+还能进行常量指针的定义，并且 <code>const</code>
+还能为一个类创建专属常量，自由控制访问级别以及静态与否。这些都是
+<code>#define</code> 做不到的，毕竟 <code>#define</code>
+不存在作用域这一说法，也不会进行类型检查。</p>
+<blockquote>
+<p>具体区别请看<a
+href="../../C-Basic/C-Const/#与宏定义的区别"><strong>此处</strong></a>。</p>
+</blockquote></li>
+<li><p>对于形似函数的宏，尽量以 <code>inline</code> 替换。</p>
+<p><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> FUNC_MAX(a, b) f((a) &gt; (b) ? (a) : (b))</span></span><br><span class="line"><span class="comment">// 改为</span></span><br><span class="line"><span class="function"><span class="keyword">template</span>&lt;<span class="keyword">class</span> T&gt;</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">func_max</span><span class="params">(<span class="type">const</span> T&amp; a, <span class="type">const</span> T&amp; b)</span> </span>&#123;</span><br><span class="line">  <span class="built_in">f</span>(a &gt; b ? a : b);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>用宏定义函数属于是最<strong>丑陋</strong>的行为了，因为你需要时刻关心是否正确添加括号。并且有些调用还不一定得到正确反馈，比如下面
+<code>a++</code> 的调用次数取决于比较的对象：</p>
+<p><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> a = <span class="number">1</span>, b = <span class="number">0</span>;</span><br><span class="line"><span class="built_in">FUNC_MAX</span>(a++, b);    <span class="comment">// a++ 调用 2 次</span></span><br><span class="line"><span class="built_in">FUNC_MAX</span>(a++, b+<span class="number">10</span>); <span class="comment">// a++ 调用 1 次</span></span><br></pre></td></tr></table></figure></p>
+<p>而<a
+href="../../C-Basic/C-Inline"><strong>内联函数</strong></a>则不会出现上述问题。<code>func_max()</code>
+成为了真正的函数，遵循作用域和访问规则，能利用泛型的同时，增加了类型检查，同时和
+<code>const</code> 一样能在类内大显身手，故更为推荐。</p></li>
+</ol>
+<p>但这并不是说预处理器就一无是处了，我们依然需要依靠
+<code>#include</code> 来引入头文件，以及依赖
+<code>#ifdef</code>，<code>#ifndef</code>
+来控制编译。就像最开始说的那样，<strong>尽量用编译器代替预处理器</strong>。</p>
+<h2 id="尽可能使用-const">3. 尽可能使用 const</h2>
+<p>关于 <code>const</code> 具体可见<a
+href="../../C-Basic/C-Const"><strong>本文</strong></a>。</p>
+<p><code>const</code>
+更像是一种约束，只要某个变量确定性地能保持不变，我们应该尽可能加上这一约束，以取得编译器的优化。反之，则容易被玩坏，比如：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Rational</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  Rational <span class="keyword">operator</span>*(<span class="type">const</span> Rational&amp; lhs, <span class="type">const</span> Rational&amp; rhs) &#123; <span class="comment">/* ... */</span> &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">Rational a, b, c;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (a * b = c) &#123;</span><br><span class="line">  <span class="comment">/* ... */</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们或许可以宽容地接受 <code>a * b = c</code>
+本来是想执行比较，但因为某些原因少打了一个 <code>=</code> 这一事实。如果
+<code>operator*</code> 返回值没有声明为
+<code>const</code>，编译器并不会因此报错，毕竟非 const
+变量允许被赋值。不考虑这一点，对函数返回值进行赋值也是个糟糕的行为——右值是不能被赋值的。即便假设编译器忽视了所有问题，程序能够成功运行下去，最终结果也可能并不如人意——该
+if 子句很难保证能进去。</p>
+<p>将返回值声明为 <code>const</code>
+则可以预防上面一系列令人头疼的问题，我们需要做的不过是多打几个字符罢了。</p>
+<h3 id="在-const-和-non-const-成员函数中避免重复">在 const 和 non-const
+成员函数中避免重复</h3>
+<p>虽然对于成员函数而言，const 与 non-const
+是两种重载形式，但如果仅有约束不同，也是一件不好的事。我们拿 <a
+href="../../C-Basic/C-Mutable/#类中的-mutable">C++のMutable</a> 里的
+<code>TextBlock</code> 的例子来说：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">TextBlock</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">TextBlock</span>(<span class="type">const</span> <span class="type">char</span>* s) &#123; <span class="comment">/* ... */</span> &#125;</span><br><span class="line"></span><br><span class="line">  <span class="type">const</span> <span class="type">char</span>&amp; <span class="keyword">operator</span>[](std::<span class="type">size_t</span> index) <span class="type">const</span> &#123;</span><br><span class="line">    <span class="comment">/* ... */</span></span><br><span class="line">    <span class="keyword">return</span> pText[index];</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="type">char</span>&amp; <span class="keyword">operator</span>[](std::<span class="type">size_t</span> index) &#123;</span><br><span class="line">    <span class="comment">/* ... */</span></span><br><span class="line">    <span class="keyword">return</span> pText[index];</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="type">char</span>* pText;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>我们实现了 const 与 non-const
+两个重载版本，供不同常量性的对象调用。但细心的人会发现，除了是否 const
+以外，其他部分几乎完全一致！这就存在一个问题：一旦往某个函数中加各种比如并发支持、完整性检查等功能，另一个函数也必须要加上同样的代码——为了保证我们希望的一致性——从而导致文件变得臃肿，反而降低可读性。尽管
+ctrl cv 降低了编码难度，但总归不太方便。</p>
+<p>一个<strong>明智</strong>的做法是利用 non-const 版本调用 const
+版本，从而避免<strong>代码重复</strong>：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">TextBlock</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">TextBlock</span>(<span class="type">const</span> <span class="type">char</span>* s) &#123; <span class="comment">/* ... */</span> &#125;</span><br><span class="line"></span><br><span class="line">  <span class="type">const</span> <span class="type">char</span>&amp; <span class="keyword">operator</span>[](std::<span class="type">size_t</span> index) <span class="type">const</span> &#123;</span><br><span class="line">    <span class="comment">/* ... */</span></span><br><span class="line">    <span class="keyword">return</span> pText[index];</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="type">char</span>&amp; <span class="keyword">operator</span>[](std::<span class="type">size_t</span> index) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">const_cast</span>&lt;<span class="type">char</span>&amp;&gt;(<span class="built_in">static_cast</span>&lt;<span class="type">const</span> TextBlock&amp;&gt;(*<span class="keyword">this</span>)[position]);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="type">char</span>* pText;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>在 non-const 版本中将 <code>*this</code> 转型为 const，便能调用 const
+函数，最后通过 <code>const_cast</code>
+移除常量性。代码瞬间精简不少！尽管，使用 cast
+是一个糟糕的想法，但在这里，很安全。</p>
+<p>而另一种做法，即通过 const 函数调用 non-const
+函数，则是一种错误行为，为了不冒 const 风险，不建议采取这种做法。</p>
+<h2 id="确定对象被使用前已先被初始化">4.
+确定对象被使用前已先被初始化</h2>
+<p>C++
+并不能保证变量在所有语境下声明时都能得到初始化，但能保证读取未初始化的值会导致
+<strong>UB</strong>。</p>
+<p>与其记忆哪些语境下会初始化，哪些语境下不会，不如选择<strong>永远在使用对象前将其初始化</strong>。</p>
+<p>对于内置类型，我们应当手动初始化；而对于非内置类型，则需要用到构造函数，并保证初始化每一个成员变量，此时只有两种方式：要么赋值，要么初始化列表。</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 赋值</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Entry</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">Entry</span>(<span class="type">const</span> std::string&amp; name, <span class="type">const</span> std::string &amp;address) &#123;</span><br><span class="line">    myName = name;</span><br><span class="line">    myAddress = address;</span><br><span class="line">  &#125;</span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  std::string myName;</span><br><span class="line">  std::string myAddress;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 初始化列表</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Entry</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">Entry</span>(std::string <span class="type">const</span>&amp; name, std::string <span class="type">const</span>&amp; address)</span><br><span class="line">  :<span class="built_in">myName</span>(name),</span><br><span class="line">   <span class="built_in">myAddress</span>(address) &#123;&#125;</span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  std::string myName;</span><br><span class="line">  std::string myAddress;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p><strong>第二个版本比第一个版本效率更高</strong>。事实上，类成员变量的初始化行为发生在构造函数之前（见<a
+href="../../C-Basic/C-OOP/#派生类构造顺序"><strong>构造顺序</strong></a>），所以对于大多数类型而言，赋值行为会先调用默认构造函数，然后再使用赋值运算符，这样就导致默认构造函数的操作被浪费，增加无意义的开销并不是一件好事。并且如果某个变量的默认构造函数被<strong>弃置</strong>，编译器还会报错。</p>
+<p>而使用初始化列表的方式，则只会影响这些成员变量调用构造函数的版本，相当于是拿着指定的实参去调用构造函数，不用担心顺序问题（但最好还是按照成员变量列出顺序来）。此时只需调用一次构造，比起赋值的方法高效许多。对于内置类型，两种方式开销一样，但为了一致性还是通过初始化列表来初始化。</p>
+<p>最后需要关心的事就是<strong>定义于不同编译单元内的 non-local static
+变量</strong>了，即定义在作用域外的其它文件的静态变量。因为 C++
+对于这类变量的初始化顺序并未明确定义，甚至根本无解。所以我们在使用一个
+<code>extern</code> 标识的变量时，它极有可能未被初始化！</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Tool.h</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Tool</span> &#123;</span><br><span class="line"> <span class="comment">/* ... */</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Human.h</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Human</span> &#123;</span><br><span class="line"> <span class="comment">/* ... */</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">extern</span> Tool theTool;</span><br><span class="line"></span><br><span class="line"><span class="function">Human <span class="title">Jack</span><span class="params">(theTool)</span></span>; <span class="comment">// 如果 theTool 未被初始化，则该语句的实现效果将是非确定性的。</span></span><br></pre></td></tr></table></figure>
+<p>一个<strong>好的设计</strong>是将 static
+变量移到成员函数中，该函数返回一个该变量的引用，用户通过调用该函数来获取变量的访问权，而非直接使用——这就是<a
+href="https://zh.wikipedia.org/zh-hans/%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F"><strong>单例模式</strong></a>的常用实现手法。</p>
+<p>为什么说它好？因为函数内部的 static
+变量会在调用函数首次遇到定义式时进行初始化，且仅初始化这一次。所以只要调用该函数，便能保证变量必然被初始化。furthermore，如果不调用函数，则变量永远不会被初始化，构造和析构的开销也降低了。</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Tool.h</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Tool</span> &#123;&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Human.h</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Human</span> &#123;</span><br><span class="line"> <span class="comment">/* ... */</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function">Tool&amp; <span class="title">getTool</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="type">static</span> Tool globalTool;</span><br><span class="line">  <span class="keyword">return</span> globalTool;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">Human <span class="title">Jack</span><span class="params">(getTool())</span></span>; <span class="comment">// 保证得到初始化</span></span><br></pre></td></tr></table></figure>
+<h2 id="了解-c-默默编写并调用哪些函数">5. 了解 C++
+默默编写并调用哪些函数</h2>
+<p><a href="../../C-Basic/C-OOP/#装"><strong>见此处</strong></a></p>
+<blockquote>
+<p>C++11
+引入移动语义之后，对于一个<strong>空类</strong>，编译器将为其默认生成以下
+6 种特殊成员函数，且访问级别默认为
+<code>public</code>（见下文）：<strong>默认构造函数</strong>、<strong>析构函数</strong>、<strong>拷贝构造函数</strong>、<strong>拷贝赋值运算符</strong>、<strong>移动构造函数</strong>、<strong>移动赋值运算符</strong>。</p>
+</blockquote>
+<h2 id="若不想使用编译器自动生成的函数就该明确拒绝">6.
+若不想使用编译器自动生成的函数，就该明确拒绝</h2>
+<p>通常来说，如果不希望使用某函数，则不声明即可。但上面那点提到，尽管你可能没声明，但一旦尝试调用，编译器就会自动帮你声明。</p>
+<p>所以希望完全阻止这种调用行为，可以加上 <a
+href="../../C-11/C-DefaultAndDelete/#delete"><code>delete</code>
+说明符</a>。</p>
+<blockquote>
+<p>与 <code>default</code> 相对，后面加上 <code>= delete</code>
+的函数会被视为<strong>弃置</strong>(deleted)，在编译器眼中这个函数<strong>禁止被定义</strong>，对该函数的调用会导致编译错误，继而从根本上解决了这个问题。</p>
+</blockquote>
+<h2 id="为多态基类声明-virtual-析构函数">7. 为多态基类声明 virtual
+析构函数</h2>
+<p>见<a href="../../C-Basic/C-OOP/#注意"><strong>此处</strong></a>第 5
+条。</p>
+<blockquote>
+<p>当可能用到基类指针/引用绑定派生类时，基类的析构函数必须为虚函数。这是因为当出现
+<code>Base* ptr = new Derive</code> 这样的代码时，虽然 <code>ptr</code>
+是 <code>Base</code> 类的指针，但我们实际上还分配了一个
+<code>Derive</code> 类的空间，如果析构函数非虚，则只会执行
+<code>Base</code> 类的析构函数，而属于 <code>Derive</code>
+的那一部分并没有被析构。为了程序安全运行，我们应该要调用派生类的析构函数，也就是通过将基类析构函数设为虚函数来实现；</p>
+</blockquote>
+<h2 id="别让异常逃离析构函数">8. 别让异常逃离析构函数</h2>
+<p>C++
+虽然并不禁止析构函数吐出异常，但<strong>不建议</strong>。考虑这种情况：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Widget</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  ~<span class="built_in">Widget</span>() &#123; <span class="comment">/* 存在抛出异常的可能 */</span> &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">std::vector&lt;Widget&gt; widgets;</span><br></pre></td></tr></table></figure>
+<p>在 <code>widgets</code> 销毁时，会调用每一个 <code>Widget</code>
+对象的析构函数，一旦某个对象析构时抛出异常，并且没有得到正确处理，整个程序可能因此发生一些
+UB。</p>
+<p>析构函数必须对此异常进行处理，以防止它逃逸到外层，造成不必要的危害。此时有两种做法：</p>
+<ol type="1">
+<li>直接终止 <figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Widget</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  ~<span class="built_in">Widget</span>() &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123; <span class="comment">/* 调用某些可能抛出异常的函数 */</span> &#125;</span><br><span class="line">    <span class="built_in">catch</span>() &#123;</span><br><span class="line">      <span class="comment">/* 记录调用失败 */</span></span><br><span class="line">      std::<span class="built_in">abort</span>();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>吞下异常 <figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Widget</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  ~<span class="built_in">Widget</span>() &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123; <span class="comment">/* 调用某些可能抛出异常的函数 */</span> &#125;</span><br><span class="line">    <span class="built_in">catch</span>() &#123;</span><br><span class="line">      <span class="comment">/* 记录调用失败 */</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+两种做法均能阻止异常的逃逸，这是好的。另外，如果客户需要对某个函数运行期间抛出的异常做出响应，那么类应该提供一个普通函数（而不是在析构函数中）执行该响应。</li>
+</ol>
+<h2 id="绝不在构造和析构过程中调用-virtual-函数">9.
+绝不在构造和析构过程中调用 virtual 函数</h2>
+<p>假设有一个 transaction
+类体系，用于模拟股市的买卖等操作，每次创建一个交易对象时，都会根据交易类型进行一次适当的记录。比如下面这个看起来挺好的做法：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Transaction</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">logTxn</span><span class="params">()</span> <span class="type">const</span> </span>= <span class="number">0</span>; <span class="comment">// 创建一份因类型不同而不同的交易日志</span></span><br><span class="line">  <span class="built_in">Transaction</span>() &#123;</span><br><span class="line">    <span class="comment">/* ... */</span></span><br><span class="line">    <span class="built_in">logTxn</span>();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">BuyTransaction</span>: <span class="keyword">public</span> Transaction &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">logTxn</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="comment">/* ... */</span> &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">SellTransaction</span>: <span class="keyword">public</span> Transaction &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">logTxn</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="comment">/* ... */</span> &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">BuyTransation buyTxn;</span><br></pre></td></tr></table></figure>
+<p>创建 <code>buyTxn</code> 时，根据<a
+href="../../C-Basic/C-OOP/#派生类构造顺序"><strong>构造顺序</strong></a>，其基类的构造一定会更早被调用，然后才是派生类的专属部分。而其基类的构造函数中出现了一个纯虚函数
+<code>logTxn()</code>，这是万恶之源！</p>
+<p>我们本意是希望通过该虚函数完成派生类版本的构造，但事实上，构造
+<code>BuyTransaction</code> 对象时，优先构造的是对象中的基类部分，也就是
+<code>Transaction</code> 部分，此时调用的 <code>logTxn()</code>
+尽管为虚，但其无法表现出多态性质，相当于将其视为了
+non-virtual，执行的还是 <code>Transaction</code>
+版本的函数，并不会下降到派生类
+<code>BuyTransaction</code>。毕竟，此时派生类专属部分尚未得到初始化，如果派生类版本的
+<code>logTxn()</code>
+将用到其成员变量，那将成为“<strong>通往彻夜调试的直达车票</strong>”——C++
+不允许你使用对象内部尚未初始化的部分。</p>
+<p>还有一个更根本的原因是，在基类部分构造期间，对象类型会被视为基类而非派生类，请看：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">B</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">B</span>() &#123; std::cout &lt;&lt; <span class="built_in">typeid</span>(*<span class="keyword">this</span>).<span class="built_in">name</span>() &lt;&lt; <span class="string">&quot;cons\n&quot;</span>; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">D</span>: <span class="keyword">public</span> B &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">D</span>() &#123; std::cout &lt;&lt; <span class="built_in">typeid</span>(*<span class="keyword">this</span>).<span class="built_in">name</span>() &lt;&lt; <span class="string">&quot;cons\n&quot;</span>; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  D d;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// output:</span></span><br><span class="line"><span class="comment">// 1Bcons</span></span><br><span class="line"><span class="comment">// 1Dcons</span></span><br></pre></td></tr></table></figure>
+<p>所以就算能实现多态，也不会使用派生类的版本——那不就相当于没有多态么(笑</p>
+<p>更何况，基类 <code>logTxn()</code> 还是 pure
+virtual，压根无法调用，故本条款也是为了防止这种情况发生。</p>
+<p>上面说的所有原因也同样适用于析构函数。</p>
+<p>如果非要实现“<strong>根据不同类型使用不同构造函数</strong>”，一个好的做法是，将基类的
+<code>logTxn()</code> 设为
+non-virtual，然后要求为该函数传入必要的信息，如:</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Transaction</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">logTxn</span><span class="params">(<span class="type">const</span> TransactionInfo&amp; info)</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">    <span class="comment">/* ... */</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="built_in">Transaction</span>() &#123;</span><br><span class="line">    <span class="comment">/* ... */</span></span><br><span class="line">    <span class="built_in">logTxn</span>();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="type">static</span> TransactionInfo <span class="title">createInfo</span><span class="params">( <span class="comment">/* params */</span> )</span> </span>&#123;</span><br><span class="line">    <span class="comment">/* ... */</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">BuyTransaction</span>: <span class="keyword">public</span> Transaction &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">BuyTransaction</span>( <span class="comment">/* params */</span>)</span><br><span class="line">    :<span class="built_in">Transaction</span>(<span class="built_in">createInfo</span>( <span class="comment">/* params */</span> ))</span><br><span class="line">    &#123; <span class="comment">/* ... */</span> &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>这样就由<strong>令派生类将必要的信息向上传递</strong>代替了<strong>使用虚函数向下调用</strong>。</p>
+<h2 id="令-operator-返回一个-reference-to-this">10. 令 operator=
+返回一个 reference to *this</h2>
+<p>关于赋值，可以写为如下形式：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> a, b, c;</span><br><span class="line">a = b = c = <span class="number">15</span>;</span><br><span class="line"><span class="comment">// 由于赋值遵循右结合律，故被解析为</span></span><br><span class="line">a = (b = (c = <span class="number">15</span>));</span><br></pre></td></tr></table></figure>
+<p>为了实现<strong>连锁赋值</strong>，<code>operator=</code>
+必须返回一个自身的引用。这同样适用于
+<code>+=</code>、<code>-=</code>、<code>后++</code> 等运算符。</p>
+<h2 id="在-operator-中处理自我赋值">11. 在 operator=
+中处理“自我赋值”</h2>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Object</span> &#123;</span><br><span class="line">  <span class="comment">/* ... */</span></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="type">const</span> std::string* name;</span><br><span class="line">&#125;;</span><br><span class="line">Object ob;</span><br><span class="line">ob = ob;</span><br></pre></td></tr></table></figure>
+<p>是的这很蠢，但为了演示，没办法（摊手）。当然这种写法是被允许的，只不过自我赋值增加了无意义的开销——这还算能接受，但如果类的赋值运算符写成这样，那就要当心点了：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">Object&amp; opeartor=(Object&amp; rhs) &#123;</span><br><span class="line">  <span class="keyword">delete</span> <span class="keyword">this</span>-&gt;name;</span><br><span class="line">  <span class="keyword">this</span>-&gt;name = <span class="keyword">new</span> std::<span class="built_in">string</span>(*rhs.name);</span><br><span class="line">  <span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果 <code>rhs == *this</code> 会发生什么？<code>this-&gt;name</code>
+与 <code>rhs.name</code> 实际上就是同一个指针，指向同一块内存。那么此时
+<code>name</code> 首先被 delete，然后再通过 <code>operator*</code> 获取
+<code>name</code> 指向的字符串……接下来懂的都懂了吧~</p>
+<p>为了避免这种危害，<strong>传统做法</strong>是在最开始执行<strong>证同测试</strong>，实现<strong>自我赋值安全性</strong>：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">Object&amp; opeartor=(Object&amp; rhs) &#123;</span><br><span class="line">  <span class="keyword">if</span> (<span class="keyword">this</span> == &amp;rhs) <span class="keyword">return</span> *<span class="keyword">this</span>; <span class="comment">// 比较地址比比较对象本身更好</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">delete</span> <span class="keyword">this</span>-&gt;name;</span><br><span class="line">  <span class="keyword">this</span>-&gt;name = <span class="keyword">new</span> std::<span class="built_in">string</span>(*rhs.name);</span><br><span class="line">  <span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>但该做法无法保证<strong>异常安全性</strong>，也就是说，如果
+<code>new</code> 操作中出现异常（内存不够 or
+构造函数异常），最后还是会得到一份<strong>不安全</strong>的反馈——<code>name</code>
+可能因此被永久 delete，既无法删除，也无法读取。看 solution！</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">Object&amp; opeartor=(Object&amp; rhs) &#123;</span><br><span class="line">  <span class="type">const</span> std::string* tmp = <span class="keyword">this</span>-&gt;name;</span><br><span class="line">  <span class="keyword">this</span>-&gt;name = <span class="keyword">new</span> std::<span class="built_in">string</span>(*rhs.name);</span><br><span class="line">  <span class="keyword">delete</span> tmp;</span><br><span class="line">  <span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>即便 <code>new</code> 或构造函数出现异常，<code>name</code>
+也不会因此被贸然
+delete——该做法保证了先分配再释放。同样的，这也解决了最开始<strong>自我赋值安全性</strong>的问题。</p>
+<p>上一方案的替代做法是 <strong>copy and swap</strong>。</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Object</span> &#123;</span><br><span class="line">  <span class="comment">/* ... */</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">swap</span><span class="params">(Object&amp; rhs)</span> </span>&#123; <span class="comment">/* 交换 *this 和 rhs 的数据 */</span> &#125;</span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="type">const</span> std::string* name;</span><br><span class="line">&#125;;</span><br><span class="line">Object&amp; opeartor=(Object&amp; rhs) &#123;</span><br><span class="line">  Object <span class="built_in">tmp</span>(rhs);</span><br><span class="line">  <span class="built_in">swap</span>(tmp);</span><br><span class="line">  <span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>或者直接这样写：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Object</span> &#123;</span><br><span class="line">  <span class="comment">/* ... */</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">swap</span><span class="params">(Object&amp; rhs)</span> </span>&#123; <span class="comment">/* 交换 *this 和 rhs 的数据 */</span> &#125;</span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="type">const</span> std::string* name;</span><br><span class="line">&#125;;</span><br><span class="line">Object&amp; opeartor=(Object rhs) &#123;</span><br><span class="line">  <span class="built_in">swap</span>(rhs);</span><br><span class="line">  <span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>当然可以在这些方案的最开始加上证同测试，但需要在自我赋值开销与目标代码、CPU
+控制流之间做出 trade-off。</p>
+</blockquote>
+<h2 id="复制对象时勿忘其每个成分">12. 复制对象时勿忘其每个成分</h2>
+<p>本来编译器会为你默认生成一个完美的拷贝构造/拷贝赋值，但不一定是你想要的，所以此时你进行了一些自定义。</p>
+<p>结果后面类加入了新的成员变量，你就需要时刻警醒自己：别忘了修改自定义的拷贝构造与拷贝赋值。否则就会出现违背<a
+href="#4-确定对象被使用前已先被初始化"><strong>条款 4</strong></a>
+的结果。</p>
+<p>当然这还好说，但一旦出现继承，另一个噩梦又来了……</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Customer</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="comment">/* ... */</span></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  std::string name;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">PriorityCustomer</span>: <span class="keyword">public</span> Customer &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">PriorityCustomer</span>(<span class="type">const</span> PriorityCustomer&amp; rhs): <span class="built_in">priority</span>(rhs.priority) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  PriorityCustomer&amp; <span class="keyword">operator</span>=(<span class="type">const</span> PriorityCustomer&amp; rhs) &#123;</span><br><span class="line">    priority = rhs.priority;</span><br><span class="line">    <span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">  &#125;</span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="type">int</span> priority;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>上面看起来没啥问题，但实际上，<code>PriorityCustomer</code>
+类对象进行拷贝时，仅仅对派生类部分的变量进行了拷贝，而忽略了基类部分的
+<code>std::string name</code>。这是致命的！此时 <code>name</code>
+会用默认的方式进行构造，那么得到的新 <code>PriorityCustomer</code>
+对象就变成无名氏了~</p>
+<blockquote>
+<p>因为如果让编译器来干，它会毫不犹豫地将基类部分也一并拷贝，怎么到你这就拉垮了？尽管如此，编译器不会给你报错，哎就是玩，毕竟这也不是啥大问题嘛，万一你真的不想拷贝呢~</p>
+</blockquote>
+<p>所以通过拷贝的方式进行构造时，一定不要忘了调用所有基类的适当的拷贝函数，拷贝赋值也是同理的。就像下面这样：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">PriorityCustomer</span>: <span class="keyword">public</span> Customer &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">PriorityCustomer</span>(<span class="type">const</span> PriorityCustomer&amp; rhs)</span><br><span class="line">    :<span class="built_in">Customer</span>(rhs), </span><br><span class="line">     <span class="built_in">priority</span>(rhs.priority) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  PriorityCustomer&amp; <span class="keyword">operator</span>=(<span class="type">const</span> PriorityCustomer&amp; rhs) &#123;</span><br><span class="line">    Customer.<span class="keyword">operator</span>=(rhs);</span><br><span class="line">    priority = rhs.priority;</span><br><span class="line">    <span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">  &#125;</span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="type">int</span> priority;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>最后要注意的是，如果拷贝构造与拷贝赋值出现了重复部分，可以将这些重复的部分写入新的函数(eg.<code>init()</code>)，然后让它俩一起调用，从而消除冗余。而不是让一个拷贝调用另一个拷贝——<a
+href="../../C-Basic/C-OOP/#赋值运算符">构造跟赋值不能混为一谈</a>！</p>
+<h2 id="以对象管理资源">13. 以对象管理资源</h2>
+<p>关于本条款，可以阅读 <a
+href="https://zhuanlan.zhihu.com/p/34660259"><strong>RAII</strong></a>
+与<a href="../../C-11/C-SmartPtr"><strong>智能指针</strong></a>
+相关内容。</p>
+<blockquote>
+<p>构造时获取资源，析构时释放资源。</p>
+</blockquote>
+<h2 id="在资源管理类中小心-coping-行为">14. 在资源管理类中小心 coping
+行为</h2>
+<p>资源管理类的核心是 RAII 技术，而智能指针则将其表现在了 heap-based
+资源上。但并非所有资源都是
+heap-based，一个很常见的例子就是<strong>互斥锁</strong>，获取资源相当于进行
+<code>lock()</code>，而释放资源则相当于
+<code>unlock()</code>。我们希望利用 RAII
+来管理这种资源，则可以很容易写出以下代码：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Lock</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">explicit</span> <span class="title">Lock</span><span class="params">(std::mutex* pm_)</span>: pm(pm_) &#123;</span></span><br><span class="line">    pm-&gt;<span class="built_in">lock</span>();</span><br><span class="line">    <span class="comment">/* ... */</span></span><br><span class="line">  &#125;</span><br><span class="line">  ~<span class="built_in">Lock</span>() &#123;</span><br><span class="line">    <span class="comment">/* ... */</span></span><br><span class="line">    pm-&gt;<span class="built_in">unlock</span>();</span><br><span class="line">  &#125;</span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  std::mutex* pm;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">std::mutex* m;</span><br><span class="line">&#123;</span><br><span class="line">  <span class="function">Lock <span class="title">lock1</span><span class="params">(&amp;m)</span></span>; <span class="comment">// 锁定互斥体</span></span><br><span class="line">  <span class="comment">/* 访问临界区 */</span></span><br><span class="line">&#125; <span class="comment">// 作用域末尾，通过析构函数释放互斥体</span></span><br></pre></td></tr></table></figure>
+<p>但如果 <code>Lock</code> 对象被拷贝，会发生什么事？</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function">Lock <span class="title">lock2</span><span class="params">(lock1)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>大部分情况下，我们有以下做法：</p>
+<ol type="1">
+<li>禁止拷贝，即设为 <code>=delete</code>，正如<a
+href="#6-若不想使用编译器自动生成的函数就该明确拒绝"><strong>条款
+6</strong></a> 所说的那样；</li>
+<li>使用<strong>引用计数法</strong>，正如 <a
+href="../../C-11/C-SmartPtr/#std::shared_ptr"><strong><code>shared_ptr</code></strong></a>
+做的那样，直到该资源的最后一个使用者被销毁后才释放；</li>
+</ol>
 ]]></content>
       <categories>
         <category>Book Reading</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>C++ の 可变说明符(Mutable)</title>
+    <url>/C-Basic/C-Mutable/</url>
+    <content><![CDATA[<p><code>mutable</code>
+意为<strong>可变的</strong>，可以在<strong>非引用非常量非静态</strong>数据成员的声明中出现，允许被常量类对象修改。</p>
+<span id="more"></span>
+<h2 id="类中的-mutable">类中的 mutable</h2>
+<p>先聊聊一个有趣的话题，关于 <a
+href="../../C-Basic/C-Const"><strong>const</strong></a>
+类成员函数有两大观点流派： 1. <strong>bitwise
+constness</strong>：主张成员函数只有在不更改对象的任何非静态成员变量时才被认为是
+const，即<strong>绝对</strong>常量； &gt; 事实上这正是 C++
+对<strong>常量性</strong>的定义。 2. <strong>logical
+constness</strong>：主张 const 成员函数可以修改所处理对象内部的某些
+bits，仅当用户看不出的情况才行，即<strong>自适应</strong>常量；</p>
+<p>对于第一种主张，有些成员函数并不具备 bitwise
+特性，却能通过编译，一个很直观的例子便是，一个 const
+类成员函数修改了类中某个指针指向的内容，却没有改变其指向：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">TextBlock</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">TextBlock</span>(<span class="type">const</span> <span class="type">char</span>* s) &#123; <span class="comment">/* ... */</span> &#125;</span><br><span class="line"></span><br><span class="line">  <span class="type">char</span>&amp; <span class="keyword">operator</span>[](std::<span class="type">size_t</span> index) <span class="type">const</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> pText[index];</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="type">char</span>* pText;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="type">const</span> TextBlock <span class="title">t</span><span class="params">(<span class="string">&quot;hello&quot;</span>)</span></span>;</span><br><span class="line">  <span class="type">char</span>* ptr = &amp;t[<span class="number">0</span>];</span><br><span class="line">  *ptr = <span class="string">&#x27;j&#x27;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>于是一个保有字符串 <code>"hello"</code>
+的常量对象，并没有拿牢，而是被改为了 <code>"jello"</code>。</p>
+<p>对于第二种主张，编译器并不支持这一做法，于是 <code>mutable</code>
+关键字派上用场。如果将一个成员变量声明为
+<code>mutable</code>（保证声明前提），则可以在 <code>const</code>
+成员函数中对其进行修改，如下：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="comment">/* ... */</span></span><br><span class="line">  <span class="function"><span class="type">int</span> <span class="title">AddAndGet</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> ++bar; &#125;</span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="keyword">mutable</span> <span class="type">int</span> bar; <span class="comment">// 释放 bitwise constness 约束</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>主要用于指定不影响类的外部可观察状态的成员，通常在并发场景下搭配互斥锁使用。</p>
+</blockquote>
+<h2 id="lambda-表达式中的-mutable">lambda 表达式中的 mutable</h2>
+<p>详情请见<a href="../../C-11/C-Function/#可选说明符">本文</a>。</p>
+<p>简单来说就是 lambda 表达式会将值捕获的变量视为
+<code>const</code>，若想要对其进行修改需加上 <code>mutable</code>
+说明符。</p>
+]]></content>
+      <categories>
+        <category>C++ Basic</category>
       </categories>
       <tags>
         <tag>C++</tag>
