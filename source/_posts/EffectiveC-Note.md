@@ -89,9 +89,7 @@ if (a * b = c) {
 
 将返回值声明为 `const` 则可以预防上面一系列令人头疼的问题，我们需要做的不过是多打几个字符罢了。
 
-### 在 const 和 non-const 成员函数中避免重复
-
-虽然对于成员函数而言，const 与 non-const 是两种重载形式，但如果仅有约束不同，也是一件不好的事。我们拿 [C++のMutable](../../C-Basic/C-Mutable/#类中的-mutable) 里的 `TextBlock` 的例子来说：
+另外，虽然对于成员函数而言，const 与 non-const 是两种重载形式，但如果仅有约束不同，也是一件不好的事。我们拿 [C++のMutable](../../C-Basic/C-Mutable/#类中的-mutable) 里的 `TextBlock` 的例子来说：
 
 ```c++
 class TextBlock {
@@ -551,7 +549,7 @@ std::mutex* m;
 } // 作用域末尾，通过析构函数释放互斥体
 ```
 
-但如果 `Lock` 对象被拷贝，会发生什么事？
+但如果 `Lock` 对象被拷贝，会发生什么事？（不言而喻了）
 
 ```c++
 Lock lock2(lock1);
@@ -559,6 +557,217 @@ Lock lock2(lock1);
 
 大部分情况下，我们有以下做法：
 
-1. 禁止拷贝，即设为 `=delete`，正如[条款 6](#6.-若不想使用编译器自动生成的函数，就该明确拒绝) 所说的那样；
-2. 使用**引用计数法**，正如 [`shared_ptr`](../../C-11/C-SmartPtr/#std::shared_ptr) 做的那样，直到该资源的最后一个使用者被销毁后才释放；
+第一，**禁止拷贝**，即设为 `=delete`，正如[**条款 6**](#6.-若不想使用编译器自动生成的函数，就该明确拒绝) 所说的那样；
 
+第二，**引用计数法**，正如 [**shared_ptr**](../../C-11/C-SmartPtr/#std::shared_ptr) 做的那样，直到该资源的最后一个使用者被销毁后才释放；
+
+第三，**拷贝底部资源**，注意这里的拷贝是指深拷贝，即不仅仅拷贝指针，同时拷贝一份指针指向的内存；
+
+第四，**转移底部资源所有权**，即实现[**移动语义**](../../C-11/C-Value/#移动语义)；
+
+## 15. 在资源管理类中提供对原始资源的访问
+
+或通过 api 来提供对原始资源的显式访问，或通过在类内自定义类型转换提供隐式访问。一般而言显示访问比较安全，而隐式访问比较方便，需要根据实际应用场景作出 trade-off。
+
+## 16. 成对使用 new 和 delete 时采取相同形式
+
+游戏规则很简单：如果你调用 new 时使用 `[]`，你必须在对应调用 delete 时也使用 `[]`。如果你调用 new 时没有使用 `[]`，那么也不该在对应调用 delete 时使用 `[]`。
+
+## 17. 以独立语句将 newed 对象置入智能指针
+
+考虑这样一个函数 `foo()`：
+
+```c++
+int bar();
+void foo(std::shared_ptr<Object> pInt, int someint) {
+  /* ... */
+}
+
+foo(new Object, bar()); // ERROR！
+```
+
+像这样调用是不行的，因为 `shared_ptr` 尽管有形参为裸指针的构造函数，但却是声明为 `explicit`，没法如此隐式转换，也就无法通过编译。或许我们可以如此做来通过编译：
+
+```c++
+foo(std::shared_ptr<Object>(new Object), bar()); // OK!
+```
+
+但不同编译器做出的反应也不一样，或许存在某个编译器给出了以下指令执行顺序：
+
+1. new Object；
+2. bar()；
+3. shared_ptr 构造函数；
+
+设想一下，如果 `bar()` 抛出一个异常，导致程序终止，会发生什么？new 出来的 `Object` 指针将无家可归，它并没有被 shared_ptr 保有，而我们依赖后者来防止资源泄漏，但很遗憾，资源泄漏发生了。解决方案很简单，就像条款说的，**以独立语句将 newed 对象置入智能指针**。
+
+```c++
+std::shared_ptr<Object> pObj(new Object);
+foo(pObj, bar()); // perfect! 绝不会引发泄漏
+```
+
+## 18. 让接口容易被正确使用，不易被误用
+
+促进正确使用很简单，只需要满足 api 的一致性，以及与内置类型的行为兼容即可。
+
+但误用却时有发生。任何一个 api 如果要求客户必须记得做某些事，就是有着“不正确使用”的倾向，因为客户可能会忘记。比如[**工厂函数**](https://refactoringguru.cn/design-patterns/factory-method)如果在内部 new 了一个指针并将其返回，则客户很容易忘记 delete，或是 delete 多次。
+
+```c++
+Object* factory();
+```
+
+或许你会想到将该指针托付给一个智能指针，比如 `std::shared_ptr<Object> pObj(factory());`，但客户也很可能会忘记使用智能指针。事实上，一个好的设计是令该 api 返回一个智能指针，即
+
+```c++
+std::shared_ptr<Object> factory();
+```
+
+这便消除了上面这些问题发生的可能性。
+
+## 19. 设计 class 犹如设计 type
+
+C++ 就像其他 OOP 语言一样，当我们定义一个新 class，也就定义了一个新 type。身为 C++ 程序员，我们并不只是 class 设计者，还是 type 设计者，重载(overloading)函数和操作符、控制内存的分配和归还、定义对象的初始化和终结……全都由我们负责。因此我们应该带着和“语言设计者当初设计语言内置类型时”一样的谨慎来研讨 class 的设计。
+
+为了搞清“**如何设计高效的类**”这一问题，我们必须想明白以下几件事：
+
+1. **新 type 的对象应该如何创建和销毁？**——好好设计构造、析构函数以及 `new`，`delete` 运算符；
+2. **对象的初始化与对象的赋值有什么区别？**——别混淆初始化与赋值，它们对应了两个不同的函数调用；
+3. **新 type 对象如果被值传递，意味着什么？**——这由拷贝构造函数决定；
+4. **什么是新 type 的“合法值”？**——对类成员变量而言，只有某些数值组成的集合是有效的，而这也决定了类的约束条件，以及需要在成员函数中做的错误检查工作；
+5. **新 type 需要配合某个继承图系吗？**——如果该类继承自其他类，那么其设计就受到其他类 virtual 与 non-virtual 函数等的影响。如果允许该类派生其他类，那么需要关注析构函数是否为虚；
+6. **新 tyoe 需要什么样的转换？**——好好设计自定义转换函数，并且思考构造函数需不需要 `explicit`；
+7. **什么样的操作符和函数对此新 type 而言是合理的？**——这决定了该类所相关的函数设计；
+8. **什么样的标准函数应当被驳回？**——好好思考哪些该 `=delete`；
+9. **谁该取用新 type 的成员？**——好好思考访问级别、友元以及是否让该类对象成为其他类的成员变量相关问题；
+10. **什么是新 type 的未声明接口？**——它对效率、异常安全性以及资源运用提供何种保证？
+11. **新 type 有多么一般化？**——实现一般化的最好做法是定义一个类模板；
+12. **真的需要新 type 吗？**——如果只是为了给基类添加新功能而定义派生类，那不如直接加点成员函数或模板；
+
+## 20. 宁以引用传递代替值传递
+
+说白了就是降低因**构造/析构**新的局部对象带来的额外开销，毕竟传引用的开销可以忽略不计，也没有生成新对象。
+
+> 至于引用是否需要加 `const`，则需要根据具体应用场景灵活变化。
+
+还有一个隐性好处是，可以通过将派生类传递给基类引用来实现多态——如果是值传递，那么就容易造成**对象切割**。
+
+最后要注意的是，C++ 里的引用常以指针的形式实现，意味着引用传递实际上传的是指针，那么对于内置类型、迭代器和函数对象而言，值传递的效率往往比引用传递的高——引用传递则还多了一步地址寻址的操作。
+
+## 21. 必须返回对象时，别妄想返回其 reference
+
+尽管我们了解了引用传递的优势，但也不能一味追求引用传递，尤其是传递一些 reference 指向实际不存在的对象，这可不是件好事。
+
+以[**条款 3**](#3-尽可能使用-const) 中 `Rational` 类为例，它内含一个函数用于计算两个有理数的乘积。
+
+```c++
+class Rational {
+ public:
+  Rational(int numerator = 0,
+           int denominator = 1) { /* ... */ }
+ private:
+  int n, d; // 分子和分母
+  friend const Rational operator*(const Rational& lhs, const Rational& rhs);
+};
+```
+
+虽然返回值是以值传递，但这点开销是值得且必要的。如果我们试图通过引用传递来逃避这一开销，那必然要有一个已经存在的 `Rational` 对象来给引用绑定，这是引用的刚需。事实上这并不合理，如果我们有以下代码：
+
+```c++
+Rational a(1, 2);
+Rational b(3, 5);
+Rational c = a * b;
+```
+
+此时希望在运算之前就存在一个表示 `3/10` 的 `Rational` 对象是不现实的。如果 `operator*` 要返回一个 reference 指向该数值，它必须自己创建该对象，在 stack 上或 heap 上。
+
+在 stack 上创建的对象会因为函数的退出而消亡，显然是无法作为引用返回值的。任何调用者甚至只是对此函数的返回值做任何一点点运用，都将立刻坠入“无定义行为”的恶地。事情的真相是，任何函数如果返回一个 reference 指向某个局部变量，都将一败涂地（指针亦是如此）。
+
+```c++
+// on-the-stack
+const Rational& operator* (const Rational& lhs,
+                           const Rational& rhs) {
+  Rational result(lhs.n * rhs.n, lhs.d * rhs.d); // 糟糕的代码！
+  return result;
+}
+```
+
+那么在 heap 上创建呢？只会更糟！还带来了一个额外的问题——如何 delete？
+
+```c++
+// on-the-heap
+const Rational& operator* (const Rational& lhs,
+                           const Rational& rhs) {
+  Rational *result = new Rational(lhs.n * rhs.n, lhs.d * rhs.d); // 更糟糕的代码！
+  return *result;
+}
+```
+
+尽管你可能非常小心谨慎，但还是无法在以下代码中幸存：
+
+```c++
+Rational w, x, y, z;
+w = x * y * z; // 等价于 operator*(operator*(x, y), z);
+```
+
+此时同一个语句调用了两次 `operator*`，也就调用了两次 new，便需要两次 delete。但遗憾的是，我们没有合理的方法进行 delete 调用，因为我们没有合理的方法取得返回值背后隐藏的那个指针，从而导致了内存泄漏。
+
+或许会想到返回 `static` 变量来避免上述情况，我只能说没有任何区别，就像下面这串代码：
+
+```c++
+// static
+const Rational& operator* (const Rational& lhs,
+                           const Rational& rhs) {
+  static Rational result;
+  result = Rational(lhs.n * rhs.n, lhs.d * rhs.d);
+  return result;
+}
+
+Rational a, b, c, d;
+if ((a * b) == (c * d)) {
+  /* ... */
+}
+```
+
+`a * b` 与 `c * d` 返回了同一个 `static` 变量的引用，表达式难道不是永远返回 `true`？
+
+至于其它一些想法，梅耶懒得一一驳斥了，他的想法很简单：对于一个“必须返回新对象”的函数，就让那个函数返回一个新对象呗！就像下面这样：
+
+```c++
+inline const Rational operator* (const Rational& lhs,
+                           const Rational& rhs) {
+  return Rational(lhs.n * rhs.n, lhs.d * rhs.d);
+}
+```
+
+我们已经探讨过，在 on-the-stack，on-the-heap，static 这些思路中，都难免存在构造/析构一个新的对象带来的开销，既然逃不过，那不如选择最稳妥的做法，更何况这只不过是一个非常小的代价罢了。
+
+## 22. 将成员变量声明为 private
+
+就**语法一致性**而言，如果 public 下全是成员函数，客户就无需思考某个成员后面是否需要加圆括号。
+
+另外，使用函数可以对成员变量的处理有着更精确的**访问控制**。如果将成员变量设为 public，那么可以很轻易地直接读写，而通过函数，则可以人为控制读写权限，就像下面这样：
+
+```c++
+class AccessLevels {
+ public:
+  int getReadOnly() const { return readOnly; }
+  void setReadWrite(int value) { readWrite = value; }
+  int getReadWrite() const { return readWrite; }
+  void setWriteOnly(int value) { writeOnly = value; }
+
+ private:
+  int noAccess;   // 无访问操作
+  int readOnly;   // 只读
+  int readWrite;  // 可读写
+  int WriteOnly;  // 只写
+}
+```
+
+最后，考虑整个类的**封装性**，将成员变量隐藏在函数接口的背后，可以为“所有可能的实现”提供弹性，并且可以确保类的约束条件总是会获得维护，因为只有成员函数可以影响它们。
+
+## 23. 宁以 non-member、non-friend 替换 member 函数
+
+面向对象守则要求数据应该尽可能被封装，然而与直观相反地，member 函数带来的封装性比 non-member 函数低。此外，提供non-member 函数可允许对类相关机能有较大的包裹弹性，而那最终导致较低的编译耦合性，同时增加类的可延伸性，因此在许多方面 non-member 做法比 member 做法好。
+
+首先，non-member non-friend 函数能够提供更大的封装性。前一条款曾说过，成员变量应该是 private，否则将有无限量的函数可以访问它们，它们也就毫无封装性。而一个 non-member non-friend 函数（它必然无法访问类内的 private 数据，也可以取用 private 函数、enums、 typedefs 等等）并不会增加“能够访问类内 private 成分”的函数数量。
+
+其次，non-member 函数也可以是其他类的 member。比较自然的做法是让它俩处于同一命名空间。不仅如此，我们还应意识到，命名空间不像 classes，前者可以跨越多个源码文件，而后者不行。将所有这些 **utilities 函数**放在多个头文件内但隶属同一个命名空间，意味客户可以轻松扩展这一组便利函数。他们需要做的就是添加更多 non-member non-friend 函数到此命名空间内，这允许客户只对他们所用的那一小部分系统形成编译耦合——毕竟如果我们想要用 `<vector>` 相关 utilities 函数，无需 `#include<memory>`。
