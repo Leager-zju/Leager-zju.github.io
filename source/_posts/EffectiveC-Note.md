@@ -766,8 +766,150 @@ class AccessLevels {
 
 ## 23. 宁以 non-member、non-friend 替换 member 函数
 
-面向对象守则要求数据应该尽可能被封装，然而与直观相反地，member 函数带来的封装性比 non-member 函数低。此外，提供non-member 函数可允许对类相关机能有较大的包裹弹性，而那最终导致较低的编译耦合性，同时增加类的可延伸性，因此在许多方面 non-member 做法比 member 做法好。
+考虑一个网页浏览器的例子，它拥有清理缓存、清理访问历史，以及清理所有 cookies 的功能
 
-首先，non-member non-friend 函数能够提供更大的封装性。前一条款曾说过，成员变量应该是 private，否则将有无限量的函数可以访问它们，它们也就毫无封装性。而一个 non-member non-friend 函数（它必然无法访问类内的 private 数据，也可以取用 private 函数、enums、 typedefs 等等）并不会增加“能够访问类内 private 成分”的函数数量。
+```c++
+class WebBrowser {
+ public:
+  /* ... */
+  void clearCache();
+  void clearHistory();
+  void clearCookies();
+  /* ... */
+};
+```
 
-其次，non-member 函数也可以是其他类的 member。比较自然的做法是让它俩处于同一命名空间。不仅如此，我们还应意识到，命名空间不像 classes，前者可以跨越多个源码文件，而后者不行。将所有这些 **utilities 函数**放在多个头文件内但隶属同一个命名空间，意味客户可以轻松扩展这一组便利函数。他们需要做的就是添加更多 non-member non-friend 函数到此命名空间内，这允许客户只对他们所用的那一小部分系统形成编译耦合——毕竟如果我们想要用 `<vector>` 相关 utilities 函数，无需 `#include<memory>`。
+可能很多人会想要添加一个这样的功能：
+
+```c++
+class WebBrowser {
+ public:
+  /* ... */
+  void clearEverything(); // 调用 clearCache, clearHistory, clearCookies
+  /* ... */
+};
+```
+
+当然，这一功能也可以通过一个 non-member 函数调用适当的成员函数实现：
+
+```c++
+void clearBrowser(WebBrowser& wb) {
+  wb.clearCache();
+  wb.clearHistory();
+  wb.clearCookies();
+}
+```
+
+好的设计中，如果能够实现相同功能，那么会优先考虑 non-member 函数。为什么？
+
+首先，non-member non-friend 函数能够提供**更大的封装性**。前一条款曾说过，成员变量应该是 private，否则将有无限的函数可以访问它们，它们也就毫无封装性。而一个 non-member non-friend 函数并不会增加“能够访问类内 private 成分”的函数数量。
+
+其次，non-member 函数也可以是其他类的成员函数。比较自然的做法是让它俩处于同一命名空间。不仅如此，我们还应意识到，命名空间不像 classes，前者可以跨越多个源码文件，而后者不行。将所有像 `clearBrowser()` 的这些 **utility 函数**放在多个头文件内但隶属同一个命名空间，意味客户可以轻松扩展这一组 utility 函数，**增加包裹弹性**，**降低编译耦合度**。他们需要做的就是添加更多 non-member non-friend 函数到此命名空间内，这允许客户只对他们所用的那一小部分系统形成编译耦合——毕竟如果我们想要用 `<vector>` 相关 utility 函数，无需 `#include<memory>`。
+
+## 24. 若所有参数皆需类型转换，请为此采用 non-member 函数
+
+[**条款 21**](#21-必须返回对象时别妄想返回其-reference) 中的 `Rational` 类对象的构造函数并没有声明为 `explicit`，也就意味着允许隐式的转换。梅耶在导读中已经提过“令 class 支持隐式转换是一种糟糕的行为”，但有例外。`Rational` 中便是梅耶刻意为之，那么为什么？
+
+注意到，类中进行乘积的函数被设为 non-member 函数。当然也可以写成成员函数，比如这样：
+
+```c++
+class Rational {
+ public:
+  /* ... */
+  const Rational operator* (const Rational& rhs) const;
+};
+```
+
+但这样写却忽略了一种混合式乘法场景：
+
+```c++
+Rational oneHalf(1, 2);
+Rational result;
+result = oneHalf * 2;  // OK! oneHalf.operator* (Rational(2));
+result = 2 * oneHalf;  // ERROR! int 并没有运算符 operator* (Rational) 的实现
+```
+
+`result = oneHalf * 2` 这一语句能编译通过的原因便是 `Rational` 类支持来自 `int` 的隐式转换。如果声明为了 `explicit`，那同样编译不过。此时我们最开始提出的那个问题已经得到了回答。
+
+而即便构造函数为 non-explicit，`result = 2 * oneHalf` 这句依然无法编译通过，本质原因在于我们实现的是 `Rational::operator* (const Rational&)`，而运算符左侧为 `int` 型，该类型并不支持 `int::operator* (const Rational&)` 这样的运算。
+
+
+定理为，**只有当参数被列于参数列表时，该参数才是隐式类型转换的合格参与者，而 this 不是**。一个好的设计应当满足所有的应用场景，为了解决这一问题，我们要做的便是像条款 21 中的那样，将 `operator*` 定义为 non-member，并令其为 `friend`——以便访问 lhs, rhs 的 private 变量。
+
+这样一来，`result = 2 * oneHalf` 便可以被编译器视为 `result = operator*(Rational(2), oneHalf)`。编译通过！
+
+## 25. 考虑写出一个不抛出异常的 swap 函数
+
+当 `std::swap` 的缺省实现版，或对其全特化无法满足需求（无法访问 private 成员）时，考虑添加一个 `swap` 成员函数，并确保其不抛出异常。为了方便，可以在同一个命名空间中提供一个 non-member non-std `swap` 来调用前者。调用成员函数 `swap` 时，应针对 `std::swap` 使用 `using` 声明，然后不带任何作用域运算符 `::` 地来为具体的成员变量调用 `swap`。就像这样：
+
+```c++
+namespace WidgetStuff {
+  template<class T>
+  class Widget {
+   public:
+    void swap(Widget<T>& rhs) {
+      using std::swap;      // 令 std::swap 在此函数内可用
+      swap(impl, rhs.impl); // 为 impl 调用最佳版本，而不是憨憨地 std::swap(impl, rhs.impl);
+    }
+   private:
+    /* 可能有许多数据 */
+    WidgetImpl<T>* impl;
+  }
+
+  template<class T>
+  void swap(Widget<T>& lhs, Widget<T>& rhs) {
+    lhs.swap(rhs);
+  }
+}; //namespace WidgetStuff
+```
+
+千万不要试图通过偏特化 `std::swap` 的方式来实现目标，因为 C++ 禁止对函数模板进行偏特化。或许可以通过添加重载版本来逃避，但尽量不要忘 `std` 里添加新东西。
+
+## 26. 尽可能延后变量定义式的出现时间
+
+这一条款的提出是源于这样一个场景：如果某个变量定义后，在其真正使用之前，同个作用域内抛出了异常，那么该变量的定义将白白浪费了一次构造与一次析构的开销。
+
+当然，基于[**条款 4**](#4-确定对象被使用前已先被初始化) 的讨论，我们也不容易写出先定义，然后使用到的时候再赋值这种行为，这比直接在构造时指定初值效率低太多了。所以，不应该只延后变量的定义，而是直到非用该变量不可的前一刻为止，甚至是尝试延后这份定义知道能给它初值实参为止，这不仅能避免构造/析构不必要的对象，还可以避免无意义的默认构造行为。更深一层说，以“具有明显意义的处置”进行初始化还可以附带说明变量的目的。
+
+那么，在循环中，我们可能容易产生疑虑：如果变量只在循环内使用，那么是定义在循环外，然后每次循环迭代时赋值，还是定义在循环内，每次循环构造一个新的 on-the-stack 变量？
+
+```c++
+// 方法 A：循环外定义
+Widget w;
+for (int i = 0; i < n; ++i) {
+  w = /* ... */;
+}
+
+// 方法 B：循环内定义
+for (int i = 0; i < n; ++i) {
+  Widget w = /* ... */;
+}
+```
+
+方法 A 的开销为：1 次构造 + 1 次析构 + n 次赋值；
+
+方法 B 的开销为：n 次构造 + n 次析构；
+
+所以，如果赋值的开销比一组构造/析构的开销小，那么自然选择方法 A；反之，选择方法 B。但方法 A 造成名称 w 的作用域比方法 B 更大，有时会对程序的可理解性和易维护性造成冲突，这也是需要考虑在内的因素。
+
+## 27. 尽量少做转型动作
+
+文章 [**C++ の Cast**](../../C-Basic/C-Cast) 中已经介绍过 C++ 中类型转换的内容。尽量避免转型，特别是在注重效率的代码中避免 `dynamic_cast`。如果非要转型，也尽可能使用 C++-style 转型。
+
+## 28. 避免返回 handles 指向对象内部成分
+
+通常我们认为，对象的“内部”就是指它的成员变量，但其实 non-public 成员函数也是对象“内部”的一部分，因此也应该留心不要返回它们的 handles，这意味你绝对不该令成员函数返回一个指针/引用指向“访问级别较低”的成员函数。如果你那么做，后者的实际访问级别就会提高如同访问级别较高者，因为客户可以取得一个指针指向那个“访问级别较低”的函数，然后通过那个指针调用它。这无形中相当于将 private 变量变成了 public，就跟之前提到的那样，这降低了封装性。
+
+此外，handles 也可能出现**悬空**的情况，即获取一个对象内部变量的指针/引用后，该对象在真正使用之前销毁，那么该指针/引用实际上指向了一个未知的变量，这极为糟糕。毕竟，handles 并不能延长变量的生命周期。这和 [**lambda 表达式**](../../C-11/C-Function/#悬垂引用)中提到的有异曲同工之妙。
+
+## 29. 为“异常安全”而努力是值得的
+
+关于异常可见[**此文**](../../C-Basic/C-Exception)。
+
+**异常安全函数**提供以下三个保证之一：
+
+1. **基本承诺**：如果异常被抛出，程序内的任何事物仍然保持在有效状态下，没有任何对象或数据结构因此被破坏，所有对象都处于内部前后一致的状态；
+2. **强烈保证**：如果异常被抛出，程序状态不变。即要么成功，要么回滚；
+3. **不抛保证**：承诺绝不抛出异常，因为它们总能完成原先承诺的功能；
+
+## 30. 透彻了解 inlining 的里里外外
