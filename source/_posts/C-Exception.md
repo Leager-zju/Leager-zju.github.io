@@ -58,19 +58,19 @@ try {
 >   virtual ~Base() = default;
 > };
 > 
-> class Derive : public Base {
+> class Derived : public Base {
 >  public:
->   virtual ~Derive() = default;
+>   virtual ~Derived() = default;
 > };
 > 
 > int main() {
 >   try {
 >     try {
->       Derive d;
+>       Derived d;
 >       Base* b = &d;
 >       std::cout << "make exception " << typeid(*b).name() << '\n';
 >       throw *b;
->     } catch (Derive& d) {
+>     } catch (Derived& d) {
 >       std::cerr << "catch " << typeid(d).name() << " success";
 >     }
 >   } catch (Base& b) {
@@ -82,7 +82,7 @@ try {
 > // catch 4Base success
 > ```
 >
-> 尽管 `*b` 在 `typeid` 算子下为 `Derive` 类型，但抛出后仍被识别为 `type Base`，无法被 `Derive&` 接收。于是栈回溯到外层，与 `catch(Base&)` 子句匹配，执行对应的代码。
+> 尽管 `*b` 在 `typeid` 算子下为 `Derived` 类型，但抛出后仍被识别为 `type Base`，无法被 `Derived&` 接收。于是栈回溯到外层，与 `catch(Base&)` 子句匹配，执行对应的代码。
 
 当然，你甚至可以在 `try-catch` 外再套一层 `try-catch`，是为**重抛**：
 

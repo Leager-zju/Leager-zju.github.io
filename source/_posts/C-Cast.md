@@ -388,14 +388,14 @@ class Base {
   virtual ~Base() = default;
 };
 
-class Derive : public Base {
+class Derived : public Base {
  public:
   virtual ~Derived() = default;
 };
 
 int main() {
-  Base* pb = new Derive;
-  Derive d;
+  Base* pb = new Derived;
+  Derived d;
   Base& rb = d;
   std::cout << typeid(pb).name() << '\n'
             << typeid(*pb).name() << '\n'
@@ -408,7 +408,7 @@ int main() {
 // 7Derive
 ```
 
-发现无论是否为多态场景，指针的类型依然为其静态类型，但其解引用后的类型却存在差异，即虽然 `pb` 的类型为 `Base*`，但其指向的对象被识别为 `Derive` 类型，这与之前 `A* foo = new B` 的表现大相径庭。
+发现无论是否为多态场景，指针的类型依然为其静态类型，但其解引用后的类型却存在差异，即虽然 `pb` 的类型为 `Base*`，但其指向的对象被识别为 `Derived` 类型，这与之前 `A* foo = new B` 的表现大相径庭。
 
 这是因为这里的 `Base` 为多态对象，当应用于多态类型的表达式时，`typeid` 的求值会对表达式求值，并指代表示该表达式动态类型的对象，这涉及运行时开销（虚表查找）。这里如果表达式是通过对一个指针解引用所得，且该指针是空指针值，那么就会抛出 `std::bad_typeid` 异常。
 

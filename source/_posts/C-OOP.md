@@ -153,7 +153,7 @@ class Base {
   void show() { std::cout << value << '\n'; }
 };
 
-class Derive: public Base {
+class Derived: public Base {
  public:
   int value{2}; // 将基类的 value 覆盖，如果要使用基类的成员变量 value，则需要加上 Base::
     
@@ -161,17 +161,17 @@ class Derive: public Base {
 };
 
 int main() {
-  Derive d;
+  Derived d;
   d.show();
 }
 // output:
 // 1 2
 ```
 
-上面展示了一个基本的继承过程。可以看到 `Derive` 可以将 `Base` 中的成员变量/函数进行覆盖，在 `Derive` 的命名空间中优先取 `Derive` 的成员。但覆盖后，基类的变量并不是消失了，而是依然可以通过 `Base::value` 进行访问，这是怎么做到的？类继承时，内存是如何分配的？不妨加入以下代码进行分析：
+上面展示了一个基本的继承过程。可以看到 `Derived` 可以将 `Base` 中的成员变量/函数进行覆盖，在 `Derived` 的命名空间中优先取 `Derived` 的成员。但覆盖后，基类的变量并不是消失了，而是依然可以通过 `Base::value` 进行访问，这是怎么做到的？类继承时，内存是如何分配的？不妨加入以下代码进行分析：
 
 ```c++
-std::cout << sizeof(Base) << " " << sizeof(Derive) << '\n';
+std::cout << sizeof(Base) << " " << sizeof(Derived) << '\n';
 int *q = reinterpret_cast<int*>(&d);
 std::cout << q << " " << q[0] << " " << q[1] << '\n';
 // output:
@@ -179,7 +179,7 @@ std::cout << q << " " << q[0] << " " << q[1] << '\n';
 // 0x78fe10 1 2
 ```
 
-可以看到，`Derive` 和 `Base` 的类大小分别为 4 和 8，恰好是 1 个 int 和 2 个 int 的大小，并且将 `Derive` 对象地址重新解读为 `int*` 时，发现有连续的一片内存分别存储了两个 int 值 1 与 2——这恰好是 `Base` 和 `Derive` 两个类对 `value` 初始化的值。这样一来就明朗许多——`Derive` 类对象的内存里最开始那一部分（4B）是专门分配给基类 `Base` 的，并且其内存布局为：
+可以看到，`Derived` 和 `Base` 的类大小分别为 4 和 8，恰好是 1 个 int 和 2 个 int 的大小，并且将 `Derived` 对象地址重新解读为 `int*` 时，发现有连续的一片内存分别存储了两个 int 值 1 与 2——这恰好是 `Base` 和 `Derived` 两个类对 `value` 初始化的值。这样一来就明朗许多——`Derived` 类对象的内存里最开始那一部分（4B）是专门分配给基类 `Base` 的，并且其内存布局为：
 
 <img src="image-20230215125309320.png" alt="image-20230215125309320" style="zoom:50%;" />
 
@@ -398,7 +398,7 @@ int main() {
 
 而不使用指针或引用直接调用，则与普通函数无异，就比如 `base.foo()` 表现的那样。
 
-值得注意的是，需要派生类进行了虚函数的**重写/覆盖**才能达到这一效果，即要求**派生类中有一个和基类完全相同的虚函数**。在这里，`Base` 和 `Derive` 的 `foo()` 函数（不管 `virtual`）正是完全相同的。如果派生类并没有进行重写，则会按照派生类的直接基类来。在多继承语境下，需避免二义性。
+值得注意的是，需要派生类进行了虚函数的**重写/覆盖**才能达到这一效果，即要求**派生类中有一个和基类完全相同的虚函数**。在这里，`Base` 和 `Derived` 的 `foo()` 函数（不管 `virtual`）正是完全相同的。如果派生类并没有进行重写，则会按照派生类的直接基类来。在多继承语境下，需避免二义性。
 
 ```c++
 class Base {
@@ -406,12 +406,12 @@ class Base {
   virtual void foo() { std::cout << "Base foo\n"; }
 };
 
-class Derive : public Base {
+class Derived : public Base {
  public:
-  virtual void foo() { std::cout << "Derive foo\n"; }
+  virtual void foo() { std::cout << "Derived foo\n"; }
 };
 
-class Final : public Derive {};
+class Final : public Derived {};
 
 int main() {
   Final f;
@@ -420,7 +420,7 @@ int main() {
   base_ptr->foo();
 }
 // output:
-// Derive foo
+// Derived foo
 ```
 
 > 有一个例外，就是**协变**，也就是基类和派生类的返回值类型的相对关系与基类和派生类的相对关系一样，并且继承方式也相同（即族谱路线都一样），此时也满足多态，不需要返回值类型相同。
@@ -438,15 +438,15 @@ int main() {
 >   }
 > };
 > 
-> class Derive : public Base {
+> class Derived : public Base {
 >  public:
 >   B *foo() {
->     std::cout << "Derive foo\n";
+>     std::cout << "Derived foo\n";
 >     return new B;
 >   }
 > };
 > 
-> class Final : public Derive {
+> class Final : public Derived {
 >  public:
 >   C *foo() {
 >     std::cout << "Final foo\n";
@@ -465,7 +465,7 @@ int main() {
 > // Final foo
 > ```
 >
-> 继承族谱分别为 A->B->C 与 Base->Derive->Final，并且均为公有继承，于是**协变**成立。
+> 继承族谱分别为 A->B->C 与 Base->Derived->Final，并且均为公有继承，于是**协变**成立。
 
 ### 虚函数表
 
@@ -478,19 +478,19 @@ class Base {
   int value;
 };
 
-class Derive : public Base {
+class Derived : public Base {
  public:
-  void foo() { std::cout << "Derive foo\n"; }
+  void foo() { std::cout << "Derived foo\n"; }
 };
 
 int main() {
-  std::cout << sizeof(Base) << " " << sizeof(Derive);
+  std::cout << sizeof(Base) << " " << sizeof(Derived);
 }
 // output:
 // 16 16
 ```
 
-类 `Base`，在仅有一个虚函数和一个 `int` 型变量的情况下，内存大小竟然是 16B。事实上，任何一个拥有虚函数的类，无论有多少虚函数，都会在内存空间的最开始分配 8B 的空间（64 位电脑的 feature），用于存放指向**虚函数表**的指针。所谓虚函数表，实际上就是存放了所有**虚函数指针**的一片内存。这么一来，`Base` 大小为 16B 也就好理解了——前面 8B 为虚函数表指针，后面 8B 是为了进行内存对齐，而 `Derive` 的内存则是完全分配到了基类。
+类 `Base`，在仅有一个虚函数和一个 `int` 型变量的情况下，内存大小竟然是 16B。事实上，任何一个拥有虚函数的类，无论有多少虚函数，都会在内存空间的最开始分配 8B 的空间（64 位电脑的 feature），用于存放指向**虚函数表**的指针。所谓虚函数表，实际上就是存放了所有**虚函数指针**的一片内存。这么一来，`Base` 大小为 16B 也就好理解了——前面 8B 为虚函数表指针，后面 8B 是为了进行内存对齐，而 `Derived` 的内存则是完全分配到了基类。
 
 在上面的代码中将 `main()` 改为以下语句，则可以比较清楚地观察内存布局：
 
@@ -498,11 +498,11 @@ int main() {
 using func = void(*)();
 int main() {
   Base base;
-  Derive derive;
+  Derived derive;
   Base* base_ptr = &derive;
   func f;
 
-  auto vfptr = reinterpret_cast<long long**>(base_ptr)[0]; // 获取 Derive 的虚函数表指针
+  auto vfptr = reinterpret_cast<long long**>(base_ptr)[0]; // 获取 Derived 的虚函数表指针
   std::cout << vfptr << " " << vfptr[0] << " ";
   f = (func)(vfptr[0]);
   f();
@@ -514,11 +514,11 @@ int main() {
   f();
 }
 // output:
-// 0x4c2f50 0x421130 Derive foo
+// 0x4c2f50 0x421130 Derived foo
 // 0x4c2f30 0x421100 Base foo
 ```
 
-不难发现，`Derive` 与 `Base` 对应两张不同的虚函数表，并且表中的存的第一个指针正是指向各自的成员函数 `foo()`。
+不难发现，`Derived` 与 `Base` 对应两张不同的虚函数表，并且表中的存的第一个指针正是指向各自的成员函数 `foo()`。
 
 > 之所以说动态多态是在运行时绑定，是因为编译时编译器并不确定指向的到底是哪个类型的对象，只有在运行时才能确定，去对应的虚函数表中找到对应虚函数并执行。
 
@@ -530,12 +530,12 @@ class Base {
   virtual void foo() { std::cout << "Base foo\n"; }
 };
 
-class Derive : public Base {};
+class Derived : public Base {};
 
 using func = void(*)();
 int main() {
   Base base;
-  Derive derive;
+  Derived derive;
   Base* base_ptr = &derive;
   func f;
 
@@ -591,7 +591,7 @@ int main() {
 2. 静态函数不能是虚函数。毕竟是全类共享，不存在继承一说；
 3. 构造函数不能是虚函数。因为在调用构造函数时，虚表指针并没有在对象的内存空间中，更别说去虚表中找对应的虚函数了，必须要构造函数调用完成后才会形成虚表指针；
 4. 内联函数不能是表现多态性时的虚函数。这点在 inline 那篇文章中提到过了；
-5. 当可能用到基类指针/引用绑定派生类时，基类的析构函数必须为虚函数。这是因为当出现 `Base* ptr = new Derive` 这样的代码时，虽然 `ptr` 是 `Base` 类的指针，但我们实际上还分配了一个 `Derive` 类的空间，如果析构函数非虚，则会执行 `Base` 类的析构函数，而属于 `Derive` 的那一部分并没有被析构。为了程序安全运行，我们应该要调用派生类的析构函数，也就是通过将基类析构函数设为虚函数来实现；
+5. 当可能用到基类指针/引用绑定派生类时，基类的析构函数必须为虚函数。这是因为当出现 `Base* ptr = new Derived` 这样的代码时，虽然 `ptr` 是 `Base` 类的指针，但我们实际上还分配了一个 `Derived` 类的空间，如果析构函数非虚，则会执行 `Base` 类的析构函数，而属于 `Derived` 的那一部分并没有被析构。为了程序安全运行，我们应该要调用派生类的析构函数，也就是通过将基类析构函数设为虚函数来实现；
 
 ## 与 struct 的异同
 

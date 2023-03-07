@@ -90,10 +90,10 @@ class Base {
   }
 };
 
-class Derive: public Base {
+class Derived: public Base {
  public:
-  Derive(char i_): Base(i_) {}
-  Derive(char i_, int j_): Base(i_, j_) {}
+  Derived(char i_): Base(i_) {}
+  Derived(char i_, int j_): Base(i_, j_) {}
 };
 ```
 
@@ -110,13 +110,13 @@ class Base {
   // private 部分略
 };
 
-class Derive: public Base {
+class Derived: public Base {
  public:
   using Base::Base;
 };
 ```
 
-和上面那种写法是等价的，比如使用 `char` 变量去初始化 `Derive` 类变量时，会调用 `Base(char)` 去初始化基类，然后调用 `display()` 打印输出。更巧妙的是，这是**隐式**声明继承的，即假设一个继承来的构造函数不被相关的代码使用，编译器不会为之产生真正的函数代码，这样比显式书写各种构造函数更加节省代码量。
+和上面那种写法是等价的，比如使用 `char` 变量去初始化 `Derived` 类变量时，会调用 `Base(char)` 去初始化基类，然后调用 `display()` 打印输出。更巧妙的是，这是**隐式**声明继承的，即假设一个继承来的构造函数不被相关的代码使用，编译器不会为之产生真正的函数代码，这样比显式书写各种构造函数更加节省代码量。
 
 ### 注意事项
 
