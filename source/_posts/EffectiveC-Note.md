@@ -1302,4 +1302,24 @@ class GameCharacter {
 
 ## 38. 通过复合塑模出 has-a 或“根据某物实现出”
 
-当某种类型的对象内含另一种类型的对象，这就是复合关系。如同 public 含有 is-a 意义一样，复合关系也有着 has-a（有一个）或“根据某物实现出”的意义。
+当某种类型的对象内含另一种类型的对象，这就是复合关系。如同 public 含有 is-a 意义一样，复合关系也有着 has-a（有一个）或“根据某物实现出”的意义。就比如想实现一个 set 数据结构，复用 `std::set` 是最方便的，但是其为了提高时间效率，提高了空间开销，每个元素额外有三个指针的空间占用。加一条限制：我们希望空间比时间重要。那么复用 `std::set` 就并不可取。于是在万千种替代方法中，随机挑选了一个用 `std::list` 实现，决定复用它。
+
+```c++
+template<class T>
+class Set: public std::list<T> { /* ... */ };
+```
+
+看起来很美好，但实际上这违背了 is-a 准则。`std::list` 允许重复元素，而我们想实现的 set 不允许，该冲突决定了这一设计是糟糕的——public 继承并不适合这种情况。正确的做法是，令 `std::list` 作为我们 `Set` 类的底层数据结构，用于存放数据，就像这样：
+
+```c++
+template<class T>
+class Set {
+ public:
+  bool member(const T& item) const;
+  void insert(const T& item) const;
+  void remove(const T& item) const;
+  std::size_t size() const;
+ private:
+  std::list<T> rep;
+};
+```
