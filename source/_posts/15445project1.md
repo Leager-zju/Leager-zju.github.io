@@ -1,11 +1,11 @@
 ---
-title: 15445 project#1 Buffer Pool
+title: CMU15445 project#1 Buffer Pool
 author: Leager
 mathjax: true
 date: 2022-12-17 21:49:30
 summary:
 categories:
-    - 15445
+    - CMU15445
 tags:
     - lab
 img:

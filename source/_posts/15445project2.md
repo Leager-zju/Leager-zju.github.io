@@ -1,11 +1,11 @@
 ---
-title: 15445 project#2 B+ Tree
+title: CMU15445 project#2 B+ Tree
 author: Leager
 mathjax: true
 date: 2023-01-10 21:42:57
 summary:
 categories:
-    - 15445
+    - CMU15445
 tags:
     - lab
 img:

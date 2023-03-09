@@ -1,11 +1,11 @@
 ---
-title: 15445 project#3 Query Execution
+title: CMU15445 project#3 Query Execution
 author: Leager
 mathjax: true
 date: 2023-01-12 11:56:11
 summary:
 categories:
-    - 15445
+    - CMU15445
 tags:
     - lab
 img:

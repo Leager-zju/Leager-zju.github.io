@@ -1,11 +1,11 @@
 ---
-title: 15445 Project#0 C++ Primer
+title: CMU15445 Project#0 C++ Primer
 author: Leager
 mathjax: true
 date: 2022-12-06 10:16:12
 summary:
 categories:
-    - 15445
+    - CMU15445
 tags:
     - lab
 img:
