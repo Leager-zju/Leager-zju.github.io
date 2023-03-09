@@ -1680,3 +1680,159 @@ class Rational {
 
 ## 47. 请使用 traits classes 表现类型信息
 
+STL 里使用 [**iterator_traits**](https://blog.csdn.net/qq_15730877/article/details/117482541) 来表达迭代器的信息，包含迭代器类型所属(iterator_category)，所指对象类型(value_type)，迭代器间距离(difference_type)，所指内容指针(pointer)，所指内容引用(reference)。根据这些信息，就能为算法提供深度优化。这些信息在编译期可用，通过 template 和特化完成实现，并有可能在编译期对类型执行 if-else 测试。
+
+## 48. 认识模板元编程
+
+[**模板元编程**](https://zhuanlan.zhihu.com/p/137853957)的优点在于，其执行于编译期，故可以在编译期侦测出一些原本运行时才能找出的错误，并且降低了运行时长、可执行文件大小与内存需求，但劣势很明显，编译时期变长了许多。
+
+## 49. 了解 new-handler 的行为
+
+当 `operator new` 抛出异常以反映一个未获满足的内存需求之前，它会先调用一个错误处理函数，即 `new-handler`，定义为一个 `void(*)()` 类型的函数指针。我们可以通过 `set_new_handler()` 函数来自定义这个处理函数。
+
+```c++
+// 已声明于 <new> 中的代码
+namespace std {
+  using new_handler = void(*)();
+  new_handler set_new_handler(new_handler p) noexcept;
+}
+
+// main.cpp
+/* ... */
+void outOfMem() {
+  std::cerr << "无法分配足够内存\n";
+  std::abort();
+}
+
+int main() {
+  std::set_new_handler(outOfMem);
+  int *pBigDataArray = new int[100000000L];
+}
+```
+
+当 `operator new` 无法分配足够内存空间时，它会反复调用 `new-handler` 函数（尽管在上面代码中调用第一次就会先输出一段信息，然后 `abort()` 终止），直到找到足够内存。因此，一个设计良好的 new-handler 函数必须做以下事情：
+
+1. **让更多内存可被使用**。一个做法是，程序一开始就分配一大块内存，当 `new-handler` 第一次被调用时，将那块内存还给程序；
+2. **安装另一个 `new-handler`**。使用其它能取得更多可用内存的 `new-handler` 通过 `set_new_handler()` 代替现有的，或者修改自身行为，比如通过修改一些 `static` / `global` 数据来影响行为；
+3. **卸载 `new-handler`**。一旦上面的策略不可行，则需要将 `nullptr` 传给 `set_new_handler()`，此时 `operator new` 会在内存分配失败时抛出异常；
+4. **抛出 `bad_alloc` 或其派生类的异常**；
+5. **不返回**。通常调用 `std::abort()` 或 `std::exit()`；
+
+有时候我们希望根据分配对象的类型不同而调用不同的 `new_handler`，只需要令每个类提供一个 `set_new_handler()` 和 `operator new` 即可。
+
+```c++
+class Widget {
+ public:
+  static std::new_handler set_new_handler(std::new_handler p) noexcept;
+  static void* operator new(std::size_t size) noexcept(false);
+ private:
+  static std::new_handler curHandler;
+};
+
+std::new_handler Widget::curHandler = nullptr;
+// 存储后返回原来的 new-handler，与  std::set_new_handler 做法无异。仅改变局部 new-handler
+std::new_handler Widget::set_new_handler(std::new_handler p) noexcept {
+  std::new_handler oldHandler = curHandler;
+  curHandler = p;
+  return oldHandler;
+}
+```
+
+其中，`Widget::operator new` 做了以下事情：
+
+1. 调用 `std::set_new_handler()`，告知 `Widget` 的错误处理函数，从而将 `Widget` 的 `new-handler` 安装为全局 `new-handler`；
+2. 调用全局 `operator new`
+   - 如果分配失败，调用 `Widget` 的 `new-handler`。如果全局 `operator new` 最终无法分配足够内存，会抛出 `std::bad_alloc` 异常。此时 `Widget` 的 `operator new` 必须恢复原本的全局 `new-handler`，再传播该异常；
+
+      ```c++
+      class NewHandlerHolder {
+       public:
+        explicit NewHandlerHolder(std::new_handler nh): handler(nh) {} // 取得原先 new-handler
+        ~NewHandlerHolder() { std::set_new_handler(handler); }         // 释放当前
+
+        NewHandlerHolder(const NewHandlerHolder&) = delete;
+        NewHandlerHolder& operator=(const NewHandlerHolder&) = delete;
+
+       private:
+        std::new_handler handler;
+      };
+      ```
+
+      这样就使得 `Widget::operator new` 的实现非常简单：
+
+      ```c++
+      void* Widget::operator new(std::size_t size) noexcept(false) {
+        NewHandlerHolder h(std::set_new_handler(currentHandler));
+        return ::operator new(size);
+      }
+      ```
+
+   - 反之，`Widger::operator new` 返回一个指向分配所得的指针。`Widget::~Widget()` 会自动将全局 `new-handler` 恢复。
+
+## 50. 了解 new 和 delete 的合理替换时机
+
+为何要替换呢？总的来说有以下理由：
+
+1. 检测运行时错误；
+2. 强化效能；
+3. 收集使用上的统计数据；
+4. 增加分配和释放的速度；
+5. 降低缺省内存管理器带来的额外空间开销；
+6. 弥补缺省分配器中的非最佳齐位；
+7. 将相关对象成簇集中；
+8. 获得非传统的行为；
+
+## 51. 编写 new 和 delete 时需固守常规
+
+`operator new` 应该内含一个无限循环，在其中尝试分配内存，若无法满足，则调用 `new-handler`。它需要有能力处理 0 bytes 的分配申请。类中的重载版本还应该处理比正确大小更大的错误申请。
+
+`operator delete` 应该不处理任何 `nullptr` 的释放申请。同样的，类中的重载版本还应该处理比正确大小更大的错误申请。
+
+## 52. 写了 placement new 也要写 placement delete
+
+如果一个 placement new 没有 placement delete，那么当 new 的内存分配动作需要取消并恢复原状时就没有任何 delete 会被调用。因此，为了消除这种内存泄漏，有必要在写了 placement new 的同时声明一个 placement delete。
+
+btw，如[**条款 33**](#33-避免遮掩继承而来的名称) 讨论的那样，我们必须小心让 `operator new` 掩盖外层作用域的其它版本。
+
+```c++
+class Base {
+ public:
+  static void* operator new(std::size_t size, std::ostream& logstram) noexcept(false); // 掩盖 global operator new
+};
+
+class Derived: public Base {
+ public:
+  static void* operator new(std::size_t size) noexcept(false); // 掩盖 Base::operator new
+};
+
+Base* pb = new Base;                   // ERROR! normal operator new 被掩盖
+Base* pb = new Base(std::cerr);        // OK!
+Derived* pd = new (std::clog) Derived; // ERROR! Base::operator new 被掩盖
+Derived* pd = new Derived;             // OK!
+```
+
+解决方案为：对于撰写内存分配函数，需要在缺省情况下，在全局作用域内提供以下所有形式的 `operator new`。
+
+```c++
+void* operator new(std::size_t) noexcept(false);                  // normal new
+void* operator new(std::size_t, void*) noexcept;                  // placement new
+void* operator new(std::size_t, const std::nothrow_t&) noexcept;  // nothrow new
+```
+
+如果在类内声明任何 `operator new`，它会遮掩上述这些标准形式。除非你就是要阻止用户使用这些形式，否则请确保它们在你所生成的任何自定义 `operator new` 可用。对于每一个可用的 `operator new`，也请确定提供对应的 `operator delete`。如果希望这些函数有着平常的行为，只要令自定义重载版本调用全局版本即可。
+
+一个简单做法是，建立一个基类，内含所有调用全局版本的 new 和 delete。凡是想以自定义形式扩充的用户，可利用继承机制与 `using` 声明取得标准形式。
+
+## 53. 不要轻忽编译器的警告
+
+一旦从某个特定编译器的警告信息中获得经验，你将学会了解，不同的信息意味什么——那往往和它们“看起来”的意义十分不同！尽管一般认为，写出一个在最高警告级别下也无任何警告信息的程序最是理想，然而一旦有了上述的经验和对警告信息的深刻理解，你倒是可以选择忽略某些警告信息。不管怎样说，在你打发某个警告信息之前，请确定你了解它意图说出的精确意义。这很重要。
+
+记住，警告信息天生和编译器相依，不同的编译器有不同的警告标准。所以，草率编程然后倚赖编译器为你指出错误，并不可取。
+
+## 54. 让自己熟悉包括 TR1 在内的标准程序库
+
+所有功能都被 [**C++11**](https://zh.cppreference.com/w/cpp/11) 囊括。
+
+## 55. 让自己熟悉 Boost
+
+大部分都被 [**C++11**](https://zh.cppreference.com/w/cpp/11) 囊括。
