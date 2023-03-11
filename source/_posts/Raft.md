@@ -114,7 +114,7 @@ Raft 日志机制能够保证不同服务器上之间日志的高度一致性。
 4. 被复制到多数服务器的 Entry 会被 Leader 标为 `Committed`，Leader 将这部分 Entry Apply 于其状态机并将该执行的结果返回给客户端。所有服务器维护一个 `CommitIndex` 变量，表示其提交的最后一个 Entry 的索引，Leader 会将该变量包含在将来的 AppendEntries RPC 中；
 5. 一旦 Follwer 收到一个更大的 `CommitIndex`，说明有新的 Entry 已提交，它会按序将其 Apply 于其本地状态机。
 
-日志复制机制使得只要大多数服务器正常运行，Raft 就可以接受、复制和应用新的日志 Entry。在正常情况下，一轮 RPC 即可将新 Entry 复制到集群的大多数，并且少数“短板”不会影响性能。
+日志复制机制使得只要大多数服务器正常运行，Raft 就可以接受、复制和应用新的日志 Entry。在正常情况下，一轮 RPC 即可将新 Entry 复制到集群的大多数，并且少数"短板"不会影响性能。
 
 ### 安全性
 
@@ -175,7 +175,7 @@ Raft 支持配置自动化更改并将其合并到 Raft 算法中。
 
 这些元数据用于对快照后的第一个 Entry 的 AppendEntries 一致性检查，因为该 Entry 需要 PrevLogIndex 与 PrevLogTerm。为了启用集群成员更改，快照还包括日志中截至 Last Included Index 的最新配置。一旦服务器完成写入快照，它可能会删除 Last Included Index 前的所有 Entry，以及任何先前的快照。
 
-每个服务器独立建立快照，且仅覆盖其日志中已提交的 Entry，但当 Leader 因建立快照而丢弃了它需要发送给 Follower 的下一个 Entry 时，则必须使用一个名为 `InstallSnapshot` 的新 RPC 将其写入的最新快照发送给“短板” Follower，如下图所示。
+每个服务器独立建立快照，且仅覆盖其日志中已提交的 Entry，但当 Leader 因建立快照而丢弃了它需要发送给 Follower 的下一个 Entry 时，则必须使用一个名为 `InstallSnapshot` 的新 RPC 将其写入的最新快照发送给"短板" Follower，如下图所示。
 
 <img src="image-20221130001356775.png" alt="image-20221130001356775" style="zoom:80%;" />
 

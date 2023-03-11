@@ -174,7 +174,7 @@ tree_ = dynamic_cast<BPlusTreeIndexForOneIntegerColumn *>(index_info_->index_.ge
 
 ### Aggregation
 
-跟其余算子的流水线式运作不同，Aggregation 操作可以说是“Pipeline breaker”——对于一些诸如 `max()`，`sum()` 等的聚合函数，它们只能通过扫描全表来进行输出，而不能每取一个 Tuple 就能作出正确的判断。故这里我们的策略转变为：不断获取下层 Tuple，然后完善一个名为 `SimpleAggregationHashTable` 的对象，直至下层不再返回，此时利用构建好的聚合表，获取我们想要的聚合结果，根据输出模式构造 Tuple 并返回。
+跟其余算子的流水线式运作不同，Aggregation 操作可以说是"Pipeline breaker"——对于一些诸如 `max()`，`sum()` 等的聚合函数，它们只能通过扫描全表来进行输出，而不能每取一个 Tuple 就能作出正确的判断。故这里我们的策略转变为：不断获取下层 Tuple，然后完善一个名为 `SimpleAggregationHashTable` 的对象，直至下层不再返回，此时利用构建好的聚合表，获取我们想要的聚合结果，根据输出模式构造 Tuple 并返回。
 
 > 相当于是最开始提到的方法 2 了。
 
@@ -208,7 +208,7 @@ for (uint32_t i = 0; i < agg_types_.size(); i++) {
 
 - **CountStarAggregate**：对应 `Count(*)`。更新时直接加一。注意 Value 对象有自带的各种运算方法（`Add`，`Min`，`Max`），且参数也为 Value 类型，直接调用即可，注意需接受返回值，并不是真正修改了原值；
 
-    > 整数“1”可以通过 `ValueFactory::GetIntegerValue(1)` 来转为 Value 类型。
+    > 整数"1"可以通过 `ValueFactory::GetIntegerValue(1)` 来转为 Value 类型。
 
 - **CountAggregate**：对应 `Count(col_name)`。仅当输入项对应的列非空时才加一。Guide Hint 中有提到：
 

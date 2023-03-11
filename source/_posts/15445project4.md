@@ -163,7 +163,7 @@ void LockManager::RunCycleDetection() {
 
 本 Task 的核心也显而易见，就是环检测算法了。
 
-这里易错点比较多，首先是 Guide 中 `txn_id` 前面的形容词 youngest 和 lowest 就傻傻分不清，实际上 youngest 指的就是 `txn_id` 大，因为 `txn_manager` 中是按照事务 id 递增来生成事务的，所以 `txn_id` 越大必然就越“年轻”嘛~
+这里易错点比较多，首先是 Guide 中 `txn_id` 前面的形容词 youngest 和 lowest 就傻傻分不清，实际上 youngest 指的就是 `txn_id` 大，因为 `txn_manager` 中是按照事务 id 递增来生成事务的，所以 `txn_id` 越大必然就越"年轻"嘛~
 
 第二，图上不一定只有一个连通分量，这是要小心的。
 

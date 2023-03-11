@@ -43,7 +43,7 @@ img:
 
 其相关的成员函数实现起来也比较简单，不再赘述。
 
-btw，尽管名字里都带个 “Page”，但 lab1 和 lab2 的 “Page” 其实是不同的，`BPlusTreePage` 实际上对应了 BPM 里面 Page 对象的 `data_` 部分，因此在访问节点时，首先通过 BPM.FetchPage 方法获取 Page 对象，再将其 `data_` 部分 `reinterpret_cast` 为 `BPlusTreePage`，最后根据对应的 `page_type_` 强转为 Internal/Leaf page。具体数据排布如下图所示：
+btw，尽管名字里都带个 "Page"，但 lab1 和 lab2 的 "Page" 其实是不同的，`BPlusTreePage` 实际上对应了 BPM 里面 Page 对象的 `data_` 部分，因此在访问节点时，首先通过 BPM.FetchPage 方法获取 Page 对象，再将其 `data_` 部分 `reinterpret_cast` 为 `BPlusTreePage`，最后根据对应的 `page_type_` 强转为 Internal/Leaf page。具体数据排布如下图所示：
 
 <img src="image-20230111164135789.png" alt="image-20230111164135789" style="zoom:60%;" />
 
@@ -107,7 +107,7 @@ B+ 树的插入规则如下：
 > 1. 对于 leaf node，在插入后 size = max_size；
 > 2. 对于 internal node，在插入后 size > max_size；
 
-实际上 Insert 是一个递归行为，每选择一个 child，就是对一棵新的 B+ 树进行 Insert 操作，故在我的实现中，定义了一个名为 `bool RecursivelyInsert(Key, Value, Root)` 的函数，其返回值表示的含义为：若为 `true`，则说明 child 满足 split 条件，由 parent 来执行 child node split，最后告知 parent 的 “grandparent” 其是否满足 split 条件；反之，此节点不进行任何操作，直接返回 `false`。
+实际上 Insert 是一个递归行为，每选择一个 child，就是对一棵新的 B+ 树进行 Insert 操作，故在我的实现中，定义了一个名为 `bool RecursivelyInsert(Key, Value, Root)` 的函数，其返回值表示的含义为：若为 `true`，则说明 child 满足 split 条件，由 parent 来执行 child node split，最后告知 parent 的 "grandparent" 其是否满足 split 条件；反之，此节点不进行任何操作，直接返回 `false`。
 
 在 `Insert()` 中调用 `RecursivelyInsert()` 实际上是对 root 进行递归插入，所以如果返回值为 true，需要进行 root 的 split，相比其它节点而言多了一个新建 new root node 的操作。
 

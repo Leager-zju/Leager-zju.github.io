@@ -276,7 +276,7 @@ COPS 使用 ChainReplication 来提供容错，并参考了 FAWN-KV。
 
 ### 冲突检测
 
-COPS 默认使用 last-writer-wins 策略避免冲突检测，“last” 取决于版本号。
+COPS 默认使用 last-writer-wins 策略避免冲突检测，"last" 取决于版本号。
 
 COPS 也可以为特定应用程序调用自定义收敛冲突处理程序，此时称为 **COPS-CD**。该系统加入了三个新策略：
 

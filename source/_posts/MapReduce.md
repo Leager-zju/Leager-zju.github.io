@@ -11,7 +11,7 @@ tags:
 img:
 ---
 
-6.824 的第一篇论文是 Google “**三驾马车**”之一的 [**MapReduce**](https://pdos.csail.mit.edu/6.824/papers/mapreduce.pdf)——一种基于[**分治**](https://zh.wikipedia.org/zh-cn/%E5%88%86%E6%B2%BB%E6%B3%95)策略，用于处理和生成大型数据集的模型，且许多现实世界的任务都可以在此模型中表达。
+6.824 的第一篇论文是 Google "**三驾马车**"之一的 [**MapReduce**](https://pdos.csail.mit.edu/6.824/papers/mapreduce.pdf)——一种基于[**分治**](https://zh.wikipedia.org/zh-cn/%E5%88%86%E6%B2%BB%E6%B3%95)策略，用于处理和生成大型数据集的模型，且许多现实世界的任务都可以在此模型中表达。
 
 <!--more-->
 
@@ -115,7 +115,7 @@ Master 定期设置检查点。如果 Master 任务死亡，则可以从最后�
 
 MapReduce 操作所用总时间受**短板效应**影响。
 
-“短板”的解决方法为：当 MapReduce 操作接近完成时，Master 会调度 Backup Worker 并将仍 `in-progress` 的任务分配给它执行，只要执行同一个任务的任何一个 Worker 完成，任务就会被标记为 `completed`。
+"短板"的解决方法为：当 MapReduce 操作接近完成时，Master 会调度 Backup Worker 并将仍 `in-progress` 的任务分配给它执行，只要执行同一个任务的任何一个 Worker 完成，任务就会被标记为 `completed`。
 
 ## 优化方案
 
