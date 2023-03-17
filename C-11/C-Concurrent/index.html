@@ -26,7 +26,7 @@
 <meta property="og:description" content="C++11 新增了官方并发支持库，使得我们能够更好地在系统间移植程序，之前的 Boost 库等也就随之成为历史了。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2023-01-29T14:44:35.000Z">
-<meta property="article:modified_time" content="2023-03-04T04:53:36.935Z">
+<meta property="article:modified_time" content="2023-03-09T14:17:34.277Z">
 <meta property="article:author" content="Leager">
 <meta property="article:tag" content="C++">
 <meta name="twitter:card" content="summary">
@@ -125,17 +125,17 @@
   </li>
         <li class="menu-item menu-item-tags">
 
-    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">6</span></a>
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">7</span></a>
 
   </li>
         <li class="menu-item menu-item-categories">
 
-    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">8</span></a>
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">10</span></a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">58</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">59</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -223,7 +223,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-03-04 12:53:36" itemprop="dateModified" datetime="2023-03-04T12:53:36+08:00">2023-03-04</time>
+                <time title="修改时间：2023-03-09 22:17:34" itemprop="dateModified" datetime="2023-03-09T22:17:34+08:00">2023-03-09</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -267,7 +267,7 @@ Boost 库等也就随之成为历史了。</p>
 <li>先扒拉几口饭，再夹点菜，再吃饭，以这一时间段为单位，两个行为看似一起进行，但任意时刻却又不同时发生，存在资源（嘴巴）的调度，这叫<strong>并发</strong>；</li>
 <li>嘴巴里既嚼饭又嚼菜的，即同时吃饭吃菜，有能力同时处理多件事，这叫<strong>并行</strong>；</li>
 </ul>
-<p>综上所述，<strong>并发</strong>与<strong>并行</strong>的最主要区别，就在于各个线程是否能够“同时”进行。</p>
+<p>综上所述，<strong>并发</strong>与<strong>并行</strong>的最主要区别，就在于各个线程是否能够"同时"进行。</p>
 <h2 id="并发支持库">并发支持库</h2>
 <p>并发支持库与 boost 很像，主要包含以下 5 个头文件。</p>
 <h3 id="thread">&lt;thread&gt;</h3>
@@ -327,21 +327,21 @@ style="text-align: center;"><code>template&lt; class Func, class... Args &gt; ex
 <li><p><code>get_id()</code>：任何关联执行线程的 thread
 对象均有一个唯一标识线程的对象
 <code>id</code>。若当前对象存在关联的执行线程，则返回其
-<code>id</code>；反之，输出 “<strong>thread::id of a non-executing
-thread</strong>”。</p></li>
+<code>id</code>；反之，输出 "<strong>thread::id of a non-executing
+thread</strong>"；</p></li>
 <li><p><code>join()</code>：阻塞当前线程直至 thread
 对象关联的线程运行完毕。当前线程的 <code>id</code> 不能与 thread 的
 <code>id</code> 相同，否则出现死锁（自己等自己）。并且，thread
 自身不进行同步。同时从多个线程在同一 thread 对象上调用
-<code>join()</code> 构成数据竞争，导致 <strong>UB</strong>。</p></li>
+<code>join()</code> 构成数据竞争，导致 <strong>UB</strong>；</p></li>
 <li><p><code>joinable()</code>：判断当前 thread 是否可以
 join，即是否关联<strong>活跃</strong>的执行线程。简单来说，就是<strong>是否正在执行</strong>。结束执行但未
 join 的 thread 也视为 <strong>joinable</strong>。由默认构造函数生成的
-thread 对象 <code>joinable() == false</code>。</p></li>
+thread 对象 <code>joinable() == false</code>；</p></li>
 <li><p><code>detach()</code>：从 thread
 对象分离执行线程，允许其独立执行。线程结束后，才释放资源。分离后，thread
 也就不再关联任何执行对象了，既无法 <code>get_id()</code>，也无法
-<code>join()</code>。</p>
+<code>join()</code>；</p>
 <blockquote>
 <p>考虑这样一种情况：</p>
 <p>若 thread 关联的线程执行周期比 thread 对象生命周期还长，则当 thread
@@ -361,7 +361,7 @@ thread 对象 <code>joinable() == false</code>。</p></li>
 <p>这实际上是 <code>std</code> 下的一个命名空间，用来表示当前线程。</p>
 <p>该命名空间下有以下常用成员函数：</p>
 <ol type="1">
-<li><p><code>get_id()</code>：获取当前线程 <code>id</code>。</p></li>
+<li><p><code>get_id()</code>：获取当前线程 <code>id</code>；</p></li>
 <li><p><code>yield()</code>：让出 CPU 资源；</p></li>
 <li><p><code>sleep_for()</code>：当前线程主动睡眠指定时间后醒来。<strong>函数原型</strong>为</p>
 <p><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">template</span>&lt; <span class="keyword">typename</span> Rep, <span class="keyword">typename</span> Period &gt;</span></span><br><span class="line"><span class="function"><span class="keyword">inline</span> <span class="type">void</span> <span class="title">sleep_for</span><span class="params">(<span class="type">const</span> std::chrono::duration&lt;Rep, Period&gt;&amp; time)</span></span></span><br></pre></td></tr></table></figure></p></li>
@@ -397,7 +397,7 @@ mutex，否则为 <strong>UB</strong>；</li>
 <ol type="1">
 <li><code>lock()</code>：尝试锁定 mutex；</li>
 <li><code>try_lock()</code>：尝试锁定 mutex，成功获得锁时返回
-<code>true</code> ，否则返回 <code>false</code> 。</li>
+<code>true</code> ，否则返回 <code>false</code>；</li>
 <li><code>unlock()</code>：释放 mutex；</li>
 </ol>
 <h4 id="stdtimed_mutex">std::timed_mutex</h4>
@@ -548,8 +548,8 @@ id="stdnotify_all_at_thread_exit">std::notify_all_at_thread_exit()</h4>
 来创建 unique_lock 对象，并且传参时需要用 <code>move()</code>
 将先前获得的锁 <code>lk</code> 的所有权转移到内部存储。</p>
 <h4 id="唤醒丢失">唤醒丢失</h4>
-<p>上面讲条件变量用法时，我提到“<strong>尝试进行 P/V
-的线程必须在持有锁时进行 P/V</strong>”，那么如果不上锁就 wait/notify
+<p>上面讲条件变量用法时，我提到"<strong>尝试进行 P/V
+的线程必须在持有锁时进行 P/V</strong>"，那么如果不上锁就 wait/notify
 会怎样呢？不加锁便进行wait 操作的行为我们已经说过是 UB，而不加锁便进行
 notify 的行为会导致<strong>唤醒丢失</strong>，且看：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// case1 唤醒丢失</span></span><br><span class="line">std::mutex m;</span><br><span class="line">std::condition_variable cond;</span><br><span class="line"><span class="type">bool</span> flag = <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line"><span class="function">std::thread <span class="title">thread1</span><span class="params">([]&#123;</span></span></span><br><span class="line"><span class="params"><span class="function">  std::unique_lock&lt;std::mutex&gt; lock(m);</span></span></span><br><span class="line"><span class="params"><span class="function">  <span class="keyword">while</span> (!flag) &#123;</span></span></span><br><span class="line"><span class="params"><span class="function">    cond.wait(lock);</span></span></span><br><span class="line"><span class="params"><span class="function">  &#125;</span></span></span><br><span class="line"><span class="params"><span class="function">  std::cout &lt;&lt; <span class="string">&quot;thread1 over\n&quot;</span>;</span></span></span><br><span class="line"><span class="params"><span class="function">&#125;)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function">std::thread <span class="title">thread2</span><span class="params">([]&#123;</span></span></span><br><span class="line"><span class="params"><span class="function">  flag = <span class="literal">true</span>;</span></span></span><br><span class="line"><span class="params"><span class="function">  cond.notify_all();</span></span></span><br><span class="line"><span class="params"><span class="function">  std::cout &lt;&lt; <span class="string">&quot;thread2 over\n&quot;</span>;</span></span></span><br><span class="line"><span class="params"><span class="function">&#125;)</span></span>;</span><br><span class="line"></span><br><span class="line">thread1.<span class="built_in">join</span>();</span><br><span class="line">thread2.<span class="built_in">join</span>();</span><br></pre></td></tr></table></figure>
@@ -693,20 +693,20 @@ wait
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">58</span>
+          <span class="site-state-item-count">59</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-count">10</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-count">7</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

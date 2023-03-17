@@ -18,18 +18,18 @@
     var CONFIG = {"hostname":"leager-zju.github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"b2t":true},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="6.824 的第二篇论文是 Google “三驾马车”之一的 GFS(Google File System)——一个用于大型分布式数据密集型应用程序的可扩展分布式文件系统。">
+  <meta name="description" content="6.824 的第二篇论文是 Google &quot;三驾马车&quot;之一的 GFS(Google File System)——一个用于大型分布式数据密集型应用程序的可扩展分布式文件系统。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="GFS 论文阅读">
 <meta property="og:url" content="http://leager-zju.github.com/6-824/GFS/index.html">
 <meta property="og:site_name" content="没什么看头的地方">
-<meta property="og:description" content="6.824 的第二篇论文是 Google “三驾马车”之一的 GFS(Google File System)——一个用于大型分布式数据密集型应用程序的可扩展分布式文件系统。">
+<meta property="og:description" content="6.824 的第二篇论文是 Google &quot;三驾马车&quot;之一的 GFS(Google File System)——一个用于大型分布式数据密集型应用程序的可扩展分布式文件系统。">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://leager-zju.github.com/6-824/GFS/image-20220925142136479.png">
 <meta property="og:image" content="http://leager-zju.github.com/6-824/GFS/image-20220925205531561.png">
 <meta property="og:image" content="http://leager-zju.github.com/6-824/GFS/image-20220926105829428.png">
 <meta property="article:published_time" content="2022-09-25T04:22:42.000Z">
-<meta property="article:modified_time" content="2023-03-01T14:24:37.426Z">
+<meta property="article:modified_time" content="2023-03-09T14:17:34.234Z">
 <meta property="article:author" content="Leager">
 <meta property="article:tag" content="paperReading">
 <meta name="twitter:card" content="summary">
@@ -129,17 +129,17 @@
   </li>
         <li class="menu-item menu-item-tags">
 
-    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">6</span></a>
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">7</span></a>
 
   </li>
         <li class="menu-item menu-item-categories">
 
-    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">8</span></a>
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">10</span></a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">58</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">59</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -227,7 +227,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-03-01 22:24:37" itemprop="dateModified" datetime="2023-03-01T22:24:37+08:00">2023-03-01</time>
+                <time title="修改时间：2023-03-09 22:17:34" itemprop="dateModified" datetime="2023-03-09T22:17:34+08:00">2023-03-09</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -257,7 +257,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>6.824 的第二篇论文是 Google “<strong>三驾马车</strong>”之一的
+        <p>6.824 的第二篇论文是 Google "<strong>三驾马车</strong>"之一的
 <strong><a
 target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/papers/gfs.pdf">GFS</a></strong>(Google
 File
@@ -352,7 +352,7 @@ MB</strong>，并且仅在需要时进行扩展。其优势如下：</p>
 </blockquote></li>
 <li><p>当增大 chunk size 时，client 更有可能将操作集中在同一 chunk
 上，从而可以通过在较长时间内保持与 chunk server 的持久 TCP
-连接来减少网络开销。</p></li>
+连接来减少网络开销；</p></li>
 <li><p>它减少了存储在 master 上的元数据的大小（chunk size 越小，同一
 file name 映射到的 chunk set
 容量也会越大），这允许我们将元数据保存在内存中。</p></li>
@@ -438,18 +438,18 @@ checkpoint。</p>
 <ol type="1">
 <li>如果所有 client
 能够始终看到相同的数据，无论他们从哪个副本中读取，则文件域是
-<strong>consistent</strong> 的。</li>
+<strong>consistent</strong> 的；</li>
 <li>如果在文件数据修改之后是 consistent 的，并且 client
 将看到该次修改完整写入的内容，则文件域是 <strong>defined</strong>
-的。</li>
+的；</li>
 <li>当修改成功且不受并发写入者的干扰时，那么受影响的文件域是
 <strong>defined</strong> 的（同时也为 consistent）。因为所有 client
-将始终看到修改写入的内容。</li>
+将始终看到修改写入的内容；</li>
 <li>并发成功的修改使文件域 <strong>undefined but
 consistent</strong>。虽然所有 client
-都看到相同的数据，但它可能无法反映任何一个修改写入的内容，通常，它由来自多个修改的混合片段组成。</li>
+都看到相同的数据，但它可能无法反映任何一个修改写入的内容，通常，它由来自多个修改的混合片段组成；</li>
 <li>失败的修改使文件域变得 <strong>inconsistent</strong>（因此也
-undefined）：不同的 client 可能在不同的时间看到不同的数据。</li>
+undefined）：不同的 client 可能在不同的时间看到不同的数据；</li>
 </ol>
 <p><img src="image-20220925205531561.png" alt="image-20220925205531561" style="zoom: 80%;" /></p>
 <p>数据修改可能是 write（将数据写入应用程序指定的文件偏移处）或 record
@@ -463,7 +463,7 @@ append（将数据在 GFS 选择的偏移处原子性地 append
 的，并包含最后一个写入的数据。 GFS 通过</p>
 <ol type="1">
 <li>在 chunk 的所有副本上以相同的顺序对其应用修改；</li>
-<li>使用 chunk 版本号</li>
+<li>使用 chunk 版本号；</li>
 </ol>
 <p>来检测任何已经过时的副本——它在它的副本中因 chunk server
 的关闭而错过了修改。过时的副本永远不会参与修改，也不会被提供给向 master
@@ -494,7 +494,7 @@ append 而不是 overwrite 、checkpoint
 <blockquote>
 <p>在另一种典型应用场景中，许多 Writers 同时将数据 append
 到文件以获取合并结果或作为生产者-消费者队列。record append 的
-“append-at-least-once” 语义保留了每个 Writer 的输出。Reader
+"append-at-least-once" 语义保留了每个 Writer 的输出。Reader
 按如下方式处理偶尔的填充和重复：Writer
 准备的每条记录都包含额外的信息（如校验和），以便验证其有效性。Reader
 可以使用校验和识别和丢弃冗余的填充和记录片段。如果 Reader
@@ -562,17 +562,17 @@ consistent but undefined 的状态。</p>
 <ol type="1">
 <li><p>将数据流与控制流分离，以有效地使用网络。虽然控制从 client 流向
 primary，然后流向所有 secondary，但数据以流水线方式沿 chunk server
-链线性推送，因此，每台机器的全部出站带宽都用于尽可能快地传输数据，而不是在多个接收者之间分配。</p></li>
-<li><p>为了尽可能避免网络瓶颈和高延迟链路（例如，交换机间链路通常两者兼有），每台机器将数据转发到网络拓扑中尚未收到数据的“最近”机器。</p>
+链线性推送，因此，每台机器的全部出站带宽都用于尽可能快地传输数据，而不是在多个接收者之间分配；</p></li>
+<li><p>为了尽可能避免网络瓶颈和高延迟链路（例如，交换机间链路通常两者兼有），每台机器将数据转发到网络拓扑中尚未收到数据的"最近"机器；</p>
 <blockquote>
 <p>假设 client 正在将数据推送到 chunk server S1 到
 S4。它将数据发送到最近的 chunk server，比如 S1。S1 通过最接近 S1 的 S4
 将其转发到最近的 chunk server S2，例如 S2。同样，S2 将其转发到 S3 或
 S4，以更接近 S2 的为准，依此类推。GFS 的网络拓扑结构非常简单，可以根据
-IP 地址准确估计“距离”。</p>
+IP 地址准确估计"距离"。</p>
 </blockquote></li>
 <li><p>通过 TCP 连接上的数据传输流水线来最小化延迟。一旦 chunk server
-接收到一些数据，它就会立即开始转发。流水线对我们特别有帮助，因为我们使用具有全双工链路的交换网络，立即发送数据不会降低接收速率。</p>
+接收到一些数据，它就会立即开始转发。流水线对我们特别有帮助，因为我们使用具有全双工链路的交换网络，立即发送数据不会降低接收速率；</p>
 <blockquote>
 <p>在没有网络拥塞的情况下，将 B 个字节传输到 R 个副本的理想经过时间是
 B/T + RL，其中 T 是网络吞吐量，L
@@ -599,7 +599,7 @@ MB）。</p>
 也这样做，并回复 client 指示应该在下一个 chunk 上重试该操作
 （记录追加被限制为最大块大小的四分之一，以将最坏情况的碎片保持在可接受的水平）；</li>
 <li>如果 append 后不超过最大大小，primary 将数据追加到它的副本，并告诉
-secondary 在相应偏移处写入数据，最后向 client 回复成功。</li>
+secondary 在相应偏移处写入数据，最后向 client 回复成功；</li>
 </ol>
 <p>如果任何副本的操作失败，client 会重试该操作。最终，同一 chunk
 的副本可能包含不同的数据，可能包括全部或部分相同记录的副本。 GFS
@@ -654,7 +654,7 @@ Unix 中的硬链接或符号链接）。 GFS
 上获取读锁，并在 /home/user 和 /save/user 上获取写锁；文件创建在 /home
 和 /home/user 上获得读锁，在 /home/user/foo
 上获得写锁。这两个操作将被正确序列化，因为它们试图在 /home/user
-上获得冲突的锁。文件创建不需要父目录上的写锁，因为没有“目录”或类似 inode
+上获得冲突的锁。文件创建不需要父目录上的写锁，因为没有"目录"或类似 inode
 的数据结构可以防止修改，其上的读锁足以保护父目录不被删除。</p>
 </blockquote>
 <p>这种锁定策略的一个很好的特性是它允许在同一目录中进行并发修改。例如，可以在同一个目录中同时执行多个文件创建：每个文件都获取路径上父目录的读锁和该文件上的写锁。目录路径上的读锁足以防止目录被
@@ -674,10 +674,10 @@ chunk 副本，这能确保在整个机架损坏或脱机的情况下，chunk
 <li>为了均衡跨 chunk server
 的磁盘利用率，希望将新副本放置在磁盘空间利用率低于平均水平的 chunk
 server 上；</li>
-<li>希望限制每个 chunk server 上“最近”创建的副本数量，因为 chunk
+<li>希望限制每个 chunk server 上"最近"创建的副本数量，因为 chunk
 是在写入需要时创建的，而在 append-once-read-many
 工作负载中，其通常在完全写入后就变为只读；</li>
-<li>希望将 chunk 副本分布在不同机架上。</li>
+<li>希望将 chunk 副本分布在不同机架上；</li>
 </ol>
 <h3 id="再复制re-replicate">再复制(re-Replicate)</h3>
 <p>当 chunk server
@@ -690,7 +690,7 @@ master 会再复制一个 chunk。每个需要再复制的 chunk
 <li>二是 chunk 的活跃程度，我们更愿意再复制活跃文件的 chunk
 而非最近被删除的文件的 chunk；</li>
 <li>三是对于任何阻塞 client 进度的
-chunk，其再复制优先级都会得到提升，以最大程度减少故障对应用程序的影响。</li>
+chunk，其再复制优先级都会得到提升，以最大程度减少故障对应用程序的影响；</li>
 </ol>
 <p>在分配完优先级后，master 选择最高优先级的 chunk 并指示那些 chunk
 server
@@ -710,11 +710,11 @@ chunk 级别的常规 gc 期间懒惰地回收。这样做的优点在于：</p>
 <li>它在组件故障很常见的大规模分布式系统中简单可靠。chunk
 的创建不一定在所有 chunk server 上成功，留下 master
 不知道其存在的副本。而 gc
-策略能够有效清理任何不知道是否有用的副本。</li>
+策略能够有效清理任何不知道是否有用的副本；</li>
 <li>它将存储回收合并到 master 的常规后台活动中，如定期扫描命名空间和与
 chunk server 的握手，因此它是分批完成的，能够摊销成本。而且这些活动仅在
-master 空闲时进行——master 能更迅速响应需要及时关注的 client 请求。</li>
-<li>存储回收的延迟提供了防止意外与不可逆删除的安全网。</li>
+master 空闲时进行——master 能更迅速响应需要及时关注的 client 请求；</li>
+<li>存储回收的延迟提供了防止意外与不可逆删除的安全网；</li>
 </ol>
 <p>而其主要缺点是该延迟有时会阻碍用户在磁盘空间紧张时的使用。重复创建和删除临时文件的应用程序可能无法立即对原先空间进行重用。</p>
 <p>如果删除的文件再次被显示删除，GFS
@@ -762,7 +762,7 @@ chunk 的版本号，client 或 chunk server
 副本上后，才会认为状态的修改已提交。简单起见，master
 通过一个主进程负责所有修改以及后台活动，当其失败时也能立即重启。若机器或磁盘发生故障，GFS
 的外部设备会在其他地方启动一个新的主进程。</p>
-<p>此外，“shadow” master 提供对文件系统的只读访问，即便在 master
+<p>此外，"shadow" master 提供对文件系统的只读访问，即便在 master
 关闭期间。它们并非 master 的完全镜像，因为这些 shadow
 的状态可能会稍微滞后于 master。事实上，client 读取的是存放在 chunk
 server 上的 chunk
@@ -826,12 +826,12 @@ RPC
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/6-824/6-824lab1/" rel="prev" title="6.824 Lab1 MapReduce">
+    <a href="/MIT6-824/6-824lab1/" rel="prev" title="6.824 Lab1 MapReduce">
       <i class="fa fa-chevron-left"></i> 6.824 Lab1 MapReduce
     </a></div>
       <div class="post-nav-item">
-    <a href="/LeetCode/weekCompetition312/" rel="next" title="weekCompetition312">
-      weekCompetition312 <i class="fa fa-chevron-right"></i>
+    <a href="/LeetCode/weekCompetition312/" rel="next" title="LeetCode 周赛 312">
+      LeetCode 周赛 312 <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
@@ -907,20 +907,20 @@ RPC
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">58</span>
+          <span class="site-state-item-count">59</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-count">10</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-count">7</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

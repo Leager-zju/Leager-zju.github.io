@@ -18,16 +18,16 @@
     var CONFIG = {"hostname":"leager-zju.github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"b2t":true},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="6.824 的第一篇论文是 Google “三驾马车”之一的 MapReduce——一种基于分治策略，用于处理和生成大型数据集的模型，且许多现实世界的任务都可以在此模型中表达。">
+  <meta name="description" content="6.824 的第一篇论文是 Google &quot;三驾马车&quot;之一的 MapReduce——一种基于分治策略，用于处理和生成大型数据集的模型，且许多现实世界的任务都可以在此模型中表达。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="MapReduce 论文阅读">
 <meta property="og:url" content="http://leager-zju.github.com/6-824/MapReduce/index.html">
 <meta property="og:site_name" content="没什么看头的地方">
-<meta property="og:description" content="6.824 的第一篇论文是 Google “三驾马车”之一的 MapReduce——一种基于分治策略，用于处理和生成大型数据集的模型，且许多现实世界的任务都可以在此模型中表达。">
+<meta property="og:description" content="6.824 的第一篇论文是 Google &quot;三驾马车&quot;之一的 MapReduce——一种基于分治策略，用于处理和生成大型数据集的模型，且许多现实世界的任务都可以在此模型中表达。">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://leager-zju.github.com/6-824/MapReduce/image-20221128164832451.png">
 <meta property="article:published_time" content="2022-09-21T16:50:26.000Z">
-<meta property="article:modified_time" content="2023-03-01T14:24:37.426Z">
+<meta property="article:modified_time" content="2023-03-09T14:17:34.233Z">
 <meta property="article:author" content="Leager">
 <meta property="article:tag" content="paperReading">
 <meta name="twitter:card" content="summary">
@@ -127,17 +127,17 @@
   </li>
         <li class="menu-item menu-item-tags">
 
-    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">6</span></a>
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">7</span></a>
 
   </li>
         <li class="menu-item menu-item-categories">
 
-    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">8</span></a>
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">10</span></a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">58</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">59</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -225,7 +225,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-03-01 22:24:37" itemprop="dateModified" datetime="2023-03-01T22:24:37+08:00">2023-03-01</time>
+                <time title="修改时间：2023-03-09 22:17:34" itemprop="dateModified" datetime="2023-03-09T22:17:34+08:00">2023-03-09</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -255,7 +255,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>6.824 的第一篇论文是 Google “<strong>三驾马车</strong>”之一的 <a
+        <p>6.824 的第一篇论文是 Google "<strong>三驾马车</strong>"之一的 <a
 target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/papers/mapreduce.pdf"><strong>MapReduce</strong></a>——一种基于<a
 target="_blank" rel="noopener" href="https://zh.wikipedia.org/zh-cn/%E5%88%86%E6%B2%BB%E6%B3%95"><strong>分治</strong></a>策略，用于处理和生成大型数据集的模型，且许多现实世界的任务都可以在此模型中表达。</p>
 <span id="more"></span>
@@ -274,10 +274,10 @@ PC 集群上实现高性能。</p>
 <ol type="1">
 <li><strong><code>map</code></strong>：根据输入生成一组中间 K/V 对。
 MapReduce 库将所有具有相同 Key <span class="math inline">\(k_i\)</span>
-的 K/V 对传递给 Reduce 函数。</li>
+的 K/V 对传递给 Reduce 函数；</li>
 <li><strong><code>reduce</code></strong>。将 <span
 class="math inline">\(k_i\)</span> 对应的所有值合并成 Value
-Set，并能通过迭代器访问。</li>
+Set，并能通过迭代器访问；</li>
 </ol>
 <blockquote>
 <p>以计算大量文档中每个单词出现次数为例，其伪代码如下所示：</p>
@@ -300,7 +300,7 @@ href="../6-824lab1">这篇文章</a>。</p>
 <li>其中一个副本是 <strong>Master</strong>（在 lab1 中称为
 <strong>Coordinator</strong>），其余的是由 Master 分配工作的
 <strong>Worker</strong>。有 M 个 map 任务和 R 个 reduce 任务要分配。
-Master 为每个空闲的 Worker 分配一个任务。</li>
+Master 为每个空闲的 Worker 分配一个任务；</li>
 <li>map Worker 从输入数据中解析出 K/V 对，并将每一对传递给
 <code>map</code> 函数，生成的中间 K/V 对并缓存在内存中；</li>
 <li>缓冲的 K/V 对定期被写入本地磁盘，由分区函数划分为 R 个区域。Master
@@ -313,7 +313,7 @@ Master 为每个空闲的 Worker 分配一个任务。</li>
 <code>reduce</code> 函数。 <code>reduce</code> 函数将输出 append
 到对应分区的最终文件中；</li>
 <li>当所有的 map 任务和 reduce 任务都完成后，Master 唤醒用户程序，从
-MapReduce 调用中返回。</li>
+MapReduce 调用中返回；</li>
 </ol>
 <h3 id="master-数据结构">Master 数据结构</h3>
 <p>Master 存储所有任务的状态（ <code>idle</code> 、
@@ -336,7 +336,7 @@ MapReduce 调用中返回。</li>
 任务无需重新执行，因为它们的输出存储在全局文件系统中；</li>
 <li>当一个 map 任务因 WorkerA 失败转而由 WorkerB 执行，所有 reduce
 Worker 会收到重新执行的通知，任何尚未从 Worker A 读取数据的 reduce
-任务将从 Worker B 读取数据。</li>
+任务将从 Worker B 读取数据；</li>
 </ol>
 <p>当大规模 Worker 故障发生时，Master 只是简单地重新执行 Failed Worker
 所做的工作，并继续向前推进，最终完成 MapReduce 操作。</p>
@@ -377,7 +377,7 @@ class="math inline">\(O(M*R)\)</span> 种状态。此外，R
 任务的输出最终都在一个单独的输出文件中。</p>
 <h3 id="备份任务">备份任务</h3>
 <p>MapReduce 操作所用总时间受<strong>短板效应</strong>影响。</p>
-<p>“短板”的解决方法为：当 MapReduce 操作接近完成时，Master 会调度 Backup
+<p>"短板"的解决方法为：当 MapReduce 操作接近完成时，Master 会调度 Backup
 Worker 并将仍 <code>in-progress</code>
 的任务分配给它执行，只要执行同一个任务的任何一个 Worker
 完成，任务就会被标记为 <code>completed</code>。</p>
@@ -443,7 +443,7 @@ Spark 和流处理框架 Flink
     <div class="post-nav">
       <div class="post-nav-item"></div>
       <div class="post-nav-item">
-    <a href="/6-824/6-824lab1/" rel="next" title="6.824 Lab1 MapReduce">
+    <a href="/MIT6-824/6-824lab1/" rel="next" title="6.824 Lab1 MapReduce">
       6.824 Lab1 MapReduce <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
@@ -520,20 +520,20 @@ Spark 和流处理框架 Flink
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">58</span>
+          <span class="site-state-item-count">59</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-count">10</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-count">7</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

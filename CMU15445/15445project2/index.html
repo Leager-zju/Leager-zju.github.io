@@ -20,20 +20,20 @@
 
   <meta name="description" content="接下来开始存储与索引部分的实现。手撕 B+ 树！ &gt;&gt;&gt; LAB 主页传送门 &lt;&lt;&lt;">
 <meta property="og:type" content="article">
-<meta property="og:title" content="15445 Project#2 B+ Tree">
-<meta property="og:url" content="http://leager-zju.github.com/15445/15445project2/index.html">
+<meta property="og:title" content="CMU15445 Project#2 B+ Tree">
+<meta property="og:url" content="http://leager-zju.github.com/CMU15445/15445project2/index.html">
 <meta property="og:site_name" content="没什么看头的地方">
 <meta property="og:description" content="接下来开始存储与索引部分的实现。手撕 B+ 树！ &gt;&gt;&gt; LAB 主页传送门 &lt;&lt;&lt;">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://leager-zju.github.com/15445/15445project2/image-20230111164135789.png">
+<meta property="og:image" content="http://leager-zju.github.com/CMU15445/15445project2/image-20230111164135789.png">
 <meta property="article:published_time" content="2023-01-10T13:42:57.000Z">
-<meta property="article:modified_time" content="2023-03-02T13:02:20.920Z">
+<meta property="article:modified_time" content="2023-03-09T14:17:34.290Z">
 <meta property="article:author" content="Leager">
 <meta property="article:tag" content="lab">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://leager-zju.github.com/15445/15445project2/image-20230111164135789.png">
+<meta name="twitter:image" content="http://leager-zju.github.com/CMU15445/15445project2/image-20230111164135789.png">
 
-<link rel="canonical" href="http://leager-zju.github.com/15445/15445project2/">
+<link rel="canonical" href="http://leager-zju.github.com/CMU15445/15445project2/">
 
 
 <script id="page-configurations">
@@ -46,7 +46,7 @@
   };
 </script>
 
-  <title>15445 Project#2 B+ Tree | 没什么看头的地方</title>
+  <title>CMU15445 Project#2 B+ Tree | 没什么看头的地方</title>
   
 
 
@@ -127,17 +127,17 @@
   </li>
         <li class="menu-item menu-item-tags">
 
-    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">6</span></a>
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">7</span></a>
 
   </li>
         <li class="menu-item menu-item-categories">
 
-    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">8</span></a>
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">10</span></a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">58</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">59</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -195,7 +195,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/15445/15445project2/">
+    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/CMU15445/15445project2/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/Avatar.jpg">
@@ -208,7 +208,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          15445 Project#2 B+ Tree
+          CMU15445 Project#2 B+ Tree
         </h1>
 
         <div class="post-meta">
@@ -225,7 +225,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-03-02 21:02:20" itemprop="dateModified" datetime="2023-03-02T21:02:20+08:00">2023-03-02</time>
+                <time title="修改时间：2023-03-09 22:17:34" itemprop="dateModified" datetime="2023-03-09T22:17:34+08:00">2023-03-09</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -233,7 +233,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/15445/" itemprop="url" rel="index"><span itemprop="name">15445</span></a>
+                  <a href="/categories/CMU15445/" itemprop="url" rel="index"><span itemprop="name">CMU15445</span></a>
                 </span>
             </span>
 
@@ -288,7 +288,7 @@ internal node 仅用于索引，leaf node
 <strong>24B</strong> 的不包含键值对的信息被称为
 <strong>HEADER</strong>。</p>
 <p>其相关的成员函数实现起来也比较简单，不再赘述。</p>
-<p>btw，尽管名字里都带个 “Page”，但 lab1 和 lab2 的 “Page”
+<p>btw，尽管名字里都带个 "Page"，但 lab1 和 lab2 的 "Page"
 其实是不同的，<code>BPlusTreePage</code> 实际上对应了 BPM 里面 Page
 对象的 <code>data_</code> 部分，因此在访问节点时，首先通过 BPM.FetchPage
 方法获取 Page 对象，再将其 <code>data_</code> 部分
@@ -342,16 +342,14 @@ node，进行插入；</p></li>
 <li><p>若插入后 src 满足 split 条件，进行 <strong>node
 split</strong>：</p>
 <ol type="1">
-<li><p>新建一个节点 <strong>sibling</strong>；</p>
-<blockquote>
-<p>这里注意，新建 <code>BPlusTreePage</code> 对象后必须调用其
-<code>Init()</code> 函数来初始化其元数据。</p>
-</blockquote></li>
-<li><p>将 src 中的后一半 kv 对迁移到 sibling 中，若 src
-为叶节点，则还需要修改 src 和 sibling 的 next page id；</p></li>
-<li><p>若 src 同时也是 root node，则创建一个新的根节点 new root
-node，插入一个新条目；</p></li>
-<li><p>反之，在其 parent 中插入一个新条目；</p></li>
+<li>新建一个节点 <strong>sibling</strong>； &gt; 这里注意，新建
+<code>BPlusTreePage</code> 对象后必须调用其 <code>Init()</code>
+函数来初始化其元数据。</li>
+<li>将 src 中的后一半 kv 对迁移到 sibling 中，若 src
+为叶节点，则还需要修改 src 和 sibling 的 next page id；</li>
+<li>若 src 同时也是 root node，则创建一个新的根节点 new root
+node，插入一个新条目；</li>
+<li>反之，在其 parent 中插入一个新条目；</li>
 </ol></li>
 <li><p>若 parent 因 child split 行为而导致其满足 split 条件，则继续进行
 node split，直至不再满足 split 条件；</p></li>
@@ -368,7 +366,7 @@ node split，直至不再满足 split 条件；</p></li>
 <code>bool RecursivelyInsert(Key, Value, Root)</code>
 的函数，其返回值表示的含义为：若为 <code>true</code>，则说明 child 满足
 split 条件，由 parent 来执行 child node split，最后告知 parent 的
-“grandparent” 其是否满足 split
+"grandparent" 其是否满足 split
 条件；反之，此节点不进行任何操作，直接返回 <code>false</code>。</p>
 <p>在 <code>Insert()</code> 中调用 <code>RecursivelyInsert()</code>
 实际上是对 root 进行递归插入，所以如果返回值为 true，需要进行 root 的
@@ -525,12 +523,12 @@ B+ 树各个操作的可视化过程，适合入门学习。</p>
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/15445/15445project1/" rel="prev" title="15445 Project#1 Buffer Pool">
-      <i class="fa fa-chevron-left"></i> 15445 Project#1 Buffer Pool
+    <a href="/CMU15445/15445project1/" rel="prev" title="CMU15445 Project#1 Buffer Pool">
+      <i class="fa fa-chevron-left"></i> CMU15445 Project#1 Buffer Pool
     </a></div>
       <div class="post-nav-item">
-    <a href="/15445/15445project3/" rel="next" title="15445 Project#3 Query Execution">
-      15445 Project#3 Query Execution <i class="fa fa-chevron-right"></i>
+    <a href="/CMU15445/15445project3/" rel="next" title="CMU15445 Project#3 Query Execution">
+      CMU15445 Project#3 Query Execution <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
@@ -607,20 +605,20 @@ Structure</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a cl
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">58</span>
+          <span class="site-state-item-count">59</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-count">10</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-count">7</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

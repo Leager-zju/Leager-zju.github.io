@@ -26,7 +26,7 @@
 <meta property="og:description" content="委托构造函数与继承构造函数并非独立的新构造函数，而是 C++11 新增的用于提高编码效率的特性。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2023-02-03T07:05:39.000Z">
-<meta property="article:modified_time" content="2023-03-01T14:24:37.363Z">
+<meta property="article:modified_time" content="2023-03-09T14:17:34.277Z">
 <meta property="article:author" content="Leager">
 <meta property="article:tag" content="C++">
 <meta name="twitter:card" content="summary">
@@ -125,17 +125,17 @@
   </li>
         <li class="menu-item menu-item-tags">
 
-    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">6</span></a>
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">7</span></a>
 
   </li>
         <li class="menu-item menu-item-categories">
 
-    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">8</span></a>
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">10</span></a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">58</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">59</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -223,7 +223,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-03-01 22:24:37" itemprop="dateModified" datetime="2023-03-01T22:24:37+08:00">2023-03-01</time>
+                <time title="修改时间：2023-03-09 22:17:34" itemprop="dateModified" datetime="2023-03-09T22:17:34+08:00">2023-03-09</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -268,14 +268,14 @@ C++11 新增的用于提高编码效率的特性。</p>
 <h2 id="继承构造函数">继承构造函数</h2>
 <p>子类为完成基类初始化，在 C++11
 之前，需要须要在构造函数中<strong>显式</strong>声明，即在初始化列表调用基类的构造函数，从而完成构造函数的传递。如果基类拥有多个构造函数，那么子类也需要实现多个与基类构造函数对应的构造函数，比如：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Base</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">Base</span>() &#123; <span class="built_in">display</span>(); &#125;</span><br><span class="line">  <span class="built_in">Base</span>(<span class="type">char</span> i_): <span class="built_in">Base</span>() &#123; i = i_; j = <span class="number">0</span>; &#125;</span><br><span class="line">  <span class="built_in">Base</span>(<span class="type">char</span> i_, <span class="type">int</span> j_): <span class="built_in">Base</span>(i_) &#123; j = j_; &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="type">char</span> i;</span><br><span class="line">  <span class="type">int</span> j;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">display</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    std::cout &lt;&lt; i &lt;&lt;  <span class="string">&quot; &quot;</span> &lt;&lt; j &lt;&lt; std::endl;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Derive</span>: <span class="keyword">public</span> Base &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">Derive</span>(<span class="type">char</span> i_): <span class="built_in">Base</span>(i_) &#123;&#125;</span><br><span class="line">  <span class="built_in">Derive</span>(<span class="type">char</span> i_, <span class="type">int</span> j_): <span class="built_in">Base</span>(i_, j_) &#123;&#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Base</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">Base</span>() &#123; <span class="built_in">display</span>(); &#125;</span><br><span class="line">  <span class="built_in">Base</span>(<span class="type">char</span> i_): <span class="built_in">Base</span>() &#123; i = i_; j = <span class="number">0</span>; &#125;</span><br><span class="line">  <span class="built_in">Base</span>(<span class="type">char</span> i_, <span class="type">int</span> j_): <span class="built_in">Base</span>(i_) &#123; j = j_; &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="type">char</span> i;</span><br><span class="line">  <span class="type">int</span> j;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">display</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    std::cout &lt;&lt; i &lt;&lt;  <span class="string">&quot; &quot;</span> &lt;&lt; j &lt;&lt; std::endl;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Derived</span>: <span class="keyword">public</span> Base &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">Derived</span>(<span class="type">char</span> i_): <span class="built_in">Base</span>(i_) &#123;&#125;</span><br><span class="line">  <span class="built_in">Derived</span>(<span class="type">char</span> i_, <span class="type">int</span> j_): <span class="built_in">Base</span>(i_, j_) &#123;&#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 <p>如果仅仅是为了完成基类的初始化，那么这样的做法显得非常冗余，代码的书写开销高达
 <span class="math inline">\(O(n)\)</span>！</p>
 <p>从 C++11 开始，我们可以直接使用 <code>using Base::Base</code>
 的方式来将基类中的构造函数全继承到派生类中，而无需重复书写，比如：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Base</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">Base</span>() &#123; <span class="built_in">display</span>(); &#125;</span><br><span class="line">  <span class="built_in">Base</span>(<span class="type">char</span> i_): <span class="built_in">Base</span>() &#123; i = i_; j = <span class="number">0</span>; &#125;</span><br><span class="line">  <span class="built_in">Base</span>(<span class="type">char</span> i_, <span class="type">int</span> j_): <span class="built_in">Base</span>(i_) &#123; j = j_; &#125;</span><br><span class="line">  <span class="comment">// private 部分略</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Derive</span>: <span class="keyword">public</span> Base &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="keyword">using</span> Base::Base;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Base</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">Base</span>() &#123; <span class="built_in">display</span>(); &#125;</span><br><span class="line">  <span class="built_in">Base</span>(<span class="type">char</span> i_): <span class="built_in">Base</span>() &#123; i = i_; j = <span class="number">0</span>; &#125;</span><br><span class="line">  <span class="built_in">Base</span>(<span class="type">char</span> i_, <span class="type">int</span> j_): <span class="built_in">Base</span>(i_) &#123; j = j_; &#125;</span><br><span class="line">  <span class="comment">// private 部分略</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Derived</span>: <span class="keyword">public</span> Base &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="keyword">using</span> Base::Base;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 <p>和上面那种写法是等价的，比如使用 <code>char</code> 变量去初始化
-<code>Derive</code> 类变量时，会调用 <code>Base(char)</code>
+<code>Derived</code> 类变量时，会调用 <code>Base(char)</code>
 去初始化基类，然后调用 <code>display()</code>
 打印输出。更巧妙的是，这是<strong>隐式</strong>声明继承的，即假设一个继承来的构造函数不被相关的代码使用，编译器不会为之产生真正的函数代码，这样比显式书写各种构造函数更加节省代码量。</p>
 <h3 id="注意事项-1">注意事项</h3>
@@ -284,7 +284,7 @@ C++11 新增的用于提高编码效率的特性。</p>
 <code>=</code> / <code>&#123;&#125;</code>
 对非静态成员就地初始化，二是额外书写构造函数，两种做法各有优劣，第一种减少了代码量，第二种更加灵活，需根据具体应用场景进行选择。</p>
 <p>2）当派生类拥有多个基类时，如果多个基类中的部分构造函数的参数列表（中的类型与顺序）完全一致，那么派生类中的继承构造函数将产生冲突，比如：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">A</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">A</span>(<span class="type">int</span> i) &#123;&#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">B</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">B</span>(<span class="type">int</span> i) &#123;&#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">C</span>: A, B &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="keyword">using</span> A::A; <span class="comment">// 等价于 C(int i): A(i) &#123;&#125;</span></span><br><span class="line">  <span class="keyword">using</span> B::B; <span class="comment">// 等价于 C(int i): B(i) &#123;&#125;</span></span><br><span class="line">  <span class="built_in">C</span>(<span class="type">int</span> i): <span class="built_in">A</span>(i), <span class="built_in">B</span>(i) &#123;&#125; <span class="comment">// 应显式声明会产生冲突的构造函数，会将上面两个“等价于”覆盖，阻止了隐式生成对应的构造函数，避免了冲突</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">A</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">A</span>(<span class="type">int</span> i) &#123;&#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">B</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">B</span>(<span class="type">int</span> i) &#123;&#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">C</span>: A, B &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="keyword">using</span> A::A; <span class="comment">// 等价于 C(int i): A(i) &#123;&#125;</span></span><br><span class="line">  <span class="keyword">using</span> B::B; <span class="comment">// 等价于 C(int i): B(i) &#123;&#125;</span></span><br><span class="line">  <span class="built_in">C</span>(<span class="type">int</span> i): <span class="built_in">A</span>(i), <span class="built_in">B</span>(i) &#123;&#125; <span class="comment">// 应显式声明会产生冲突的构造函数，会将上面两个&quot;等价于&quot;覆盖，阻止了隐式生成对应的构造函数，避免了冲突</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 <p>3）若基类构造函数声明为
 <code>private</code>，则派生类无法使用该构造函数；若为
 <code>public</code>，即便 <code>using</code> 处于 <code>private</code>
@@ -398,20 +398,20 @@ C++11 新增的用于提高编码效率的特性。</p>
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">58</span>
+          <span class="site-state-item-count">59</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-count">10</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-count">7</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
