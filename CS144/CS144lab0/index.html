@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/largeicon.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/smallicon.jpg">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"leager-zju.github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"b2t":true},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="本 lab 就是拿来配环境+练手的。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CS144 Lab0 Networking Warmup">
+<meta property="og:url" content="http://leager-zju.github.com/CS144/CS144lab0/index.html">
+<meta property="og:site_name" content="没什么看头的地方">
+<meta property="og:description" content="本 lab 就是拿来配环境+练手的。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-03-21T10:28:52.000Z">
+<meta property="article:modified_time" content="2023-03-25T13:16:27.381Z">
+<meta property="article:author" content="Leager">
+<meta property="article:tag" content="lab">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://leager-zju.github.com/CS144/CS144lab0/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>CS144 Lab0 Networking Warmup | 没什么看头的地方</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">没什么看头的地方</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里可能没有你想看的...</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于我</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">7</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">11</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">61</span></a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/CS144/CS144lab0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/Avatar.jpg">
+      <meta itemprop="name" content="Leager">
+      <meta itemprop="description" content="【数据删除】">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="没什么看头的地方">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          CS144 Lab0 Networking Warmup
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-03-21 18:28:52" itemprop="dateCreated datePublished" datetime="2023-03-21T18:28:52+08:00">2023-03-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-03-25 21:16:27" itemprop="dateModified" datetime="2023-03-25T21:16:27+08:00">2023-03-25</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/CS144/" itemprop="url" rel="index"><span itemprop="name">CS144</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本 lab 就是拿来配环境+练手的。</p>
+<span id="more"></span>
+<h2 id="环境配置">环境配置</h2>
+<p>本课程所有 lab 均需要在 Linux 环境下运行，课程组提供了 4
+种运行方式，直接照着 <a
+target="_blank" rel="noopener" href="https://stanford.edu/class/cs144/vm_howto/">Instructions</a>
+来就好了。我这里因为实验室自带 Ubuntu
+工作站，所以用了第三种方式，按照清单一个个
+<code>sudo apt-get install</code> 下来就完事了。</p>
+<h2 id="get-started">Get Started!</h2>
+<p>之前有用 http 访问某网站并获取文本、用 smtp
+发邮件的一些小操作，跟着走一遍基本没啥问题，就是熟悉一下基本的命令。现在要真正上手敲
+C++ 了。</p>
+<h3 id="准备工作">准备工作</h3>
+<p>首先是把代码拉下来，我先在自己的 github 下<a
+target="_blank" rel="noopener" href="https://github.com/new">新建</a>了一个仓库，命名为
+<strong>CS144</strong>，为了尊重课程协议，我设为了
+<code>private</code>。拉代码就直接
+<code>git clone --bare https://github.com/CS144/sponge.git</code>，后面所有的
+lab 都是在这一套文件下实现的。</p>
+<p>随后，执行</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> your_repository_name</span><br><span class="line">$ git push git@github.com:your_github_name/your_repository_name.git --all</span><br></pre></td></tr></table></figure>
+<p>此时课程代码及其所有分支已经移植到我们自己的仓库里了，接着
+<code>cd .. &amp;&amp; rm -rf sponge</code>
+将课程仓库删除，最后把我们自己的仓库拉下来即可。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># If you pull / push over HTTPS</span></span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/your_github_name/your_repository_name.git</span><br><span class="line"></span><br><span class="line"><span class="comment"># If you pull / push over SSH</span></span><br><span class="line">$ git <span class="built_in">clone</span> git@github.com:your_github_name/your_repository_name.git</span><br></pre></td></tr></table></figure>
+<p>可以输入 <code>git remote -v</code>
+查看本地与远程是否对应。ok，现在可以将所有更改 push
+到自己的代码仓库里了。</p>
+<h3 id="coding">coding</h3>
+<blockquote>
+<p>课程 lab 代码仓库一共有 8 个分支，每个 lab 前都需要
+<code>git merge lab?-startercode</code> 来合并分支。</p>
+</blockquote>
+<p>执行如下命令构建项目</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">mkdir</span> build</span><br><span class="line">$ <span class="built_in">cd</span> build</span><br><span class="line">$ cmake ..</span><br><span class="line">$ make</span><br></pre></td></tr></table></figure>
+<p>我们的代码要写在 <code>/apps/webget.cc</code> 里的
+<code>Your code here</code> 处。写之前要认真看看
+<code>socket.hh</code>，<code>address.hh</code>，<code>file_descriptor.hh</code>
+这三个头文件，尽管本 lab 要用到的类只有 <code>TCPSocket</code> 和
+<code>Address</code> 这俩。</p>
+<p><code>Address</code> 类决定了连接的目标 host 以及协议类型，这里应为
+<code>Address(host, "http")</code>。</p>
+<p><code>TCPSocket</code> 提供了 <code>write(string)</code>
+方法，等效于在 terminal 输入相应的命令；<code>read()</code>
+方法则返回获取到的字节流；<code>eof()</code>
+方法判断是否抵达字节流末尾。</p>
+<blockquote>
+<p>注意，每一行末尾都要加上 <code>'\r\n'</code>，最后的
+<code>Connection: close</code> 后要加两个这玩意。</p>
+<p>注意，请用 while(!socket.eof()) 来循环读字节流，而非 single call to
+read。</p>
+</blockquote>
+<p>写完代码后，可以执行如下命令来检查输出结果：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> build</span><br><span class="line">$ ./apps/webget cs144.keithw.org /hello <span class="comment"># 可执行文件, host, path</span></span><br></pre></td></tr></table></figure>
+<p>如果看到结果如下，则输出正确。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">HTTP/1.1 200 OK</span><br><span class="line">Date: Tue, 21 Mar 2023 10:16:57 GMT</span><br><span class="line">Server: Apache</span><br><span class="line">Last-Modified: Thu, 13 Dec 2018 15:45:29 GMT</span><br><span class="line">ETag: &quot;e-57ce93446cb64&quot;</span><br><span class="line">Accept-Ranges: bytes</span><br><span class="line">Content-Length: 14</span><br><span class="line">Connection: close</span><br><span class="line">Content-Type: text/plain</span><br><span class="line"></span><br><span class="line">Hello, CS144!</span><br></pre></td></tr></table></figure>
+<p>最后用课程组给的测试代码进行跑分:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> build</span><br><span class="line">$ make check_webget</span><br></pre></td></tr></table></figure>
+<p>看到如下输出，则通过。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[<span class="number">100</span>%] Testing webget...</span><br><span class="line">Test project .../CS144/build</span><br><span class="line">    Start <span class="number">31</span>: t_webget</span><br><span class="line"><span class="number">1</span>/<span class="number">1</span> Test #<span class="number">31</span>: t_webget .........................   Passed    <span class="number">6.05</span> sec</span><br><span class="line"></span><br><span class="line"><span class="number">100</span>% tests passed, <span class="number">0</span> tests failed out of <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="function">Total Test <span class="title">time</span> <span class="params">(real)</span> </span>=   <span class="number">6.05</span> sec</span><br><span class="line">[<span class="number">100</span>%] Built target check_webget</span><br></pre></td></tr></table></figure>
+<h2 id="an-in-memory-reliable-byte-stream">An in-memory reliable byte
+stream</h2>
+<p>lab0 的最后一个任务是实现一个处理字节流的有限容量 buffer，writer
+负责将字节流写入 buffer 中，reader 从中读取。文件位于
+<code>libsponge/byte_stream.cc</code> 以及
+<code>libsponge/byte_stream.hh</code>。</p>
+<p>writer 的工作很简单，写数据(write)、终止写入(end_input)以及获取
+buffer
+剩余容量(remaining_capacity)，需要注意的是如果写入的数据大小超过了剩余容量，则应尽可能写入，比如剩余容量
+3 的情况下要写 <code>"abcdefg"</code>，则只写入 <code>"abc"</code>。</p>
+<p>reader
+有三种输出方式，只读(peek_output)，只写(pop_output)以及读写(read_output)，注意后两种方法都意味着增加<strong>已读取的字节数</strong>。</p>
+<p>以及一些通用的接口，这些接口的实现需要我们额外添加一些 private
+成员变量，不再赘述。此外，考虑到整个 buffer
+是一个增删频繁的数据结构，并且还需要顺序遍历，于是采用了
+<code>std::vector&lt;char&gt;</code>
+作为底层数据结构来模拟<strong>循环队列</strong>。其中，<code>head</code>
+指向队首，<code>tail</code> 指向队尾的下一个位置，数组大小应为
+<code>capacity + 1</code>（留一个位置来判断队列为空还是满）。当
+<code>head == tail</code>
+时为空，<code>head == (tail + 1) % (capacity + 1)</code>
+时为满，当前缓存的字节数为
+<code>(tail - head + capacity + 1) % (capacity + 1)</code>。</p>
+<p>写完后执行以下命令进行测试：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> build</span><br><span class="line">$ make format</span><br><span class="line">$ make</span><br><span class="line">$ make check_lab0</span><br></pre></td></tr></table></figure>
+<p>测试结果如下，通过。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">[<span class="number">100</span>%] Testing Lab <span class="number">0.</span>..</span><br><span class="line">Test project .../CS144/build</span><br><span class="line">    Start <span class="number">26</span>: t_byte_stream_construction</span><br><span class="line"><span class="number">1</span>/<span class="number">9</span> Test #<span class="number">26</span>: t_byte_stream_construction .......   Passed    <span class="number">0.00</span> sec</span><br><span class="line">    Start <span class="number">27</span>: t_byte_stream_one_write</span><br><span class="line"><span class="number">2</span>/<span class="number">9</span> Test #<span class="number">27</span>: t_byte_stream_one_write ..........   Passed    <span class="number">0.00</span> sec</span><br><span class="line">    Start <span class="number">28</span>: t_byte_stream_two_writes</span><br><span class="line"><span class="number">3</span>/<span class="number">9</span> Test #<span class="number">28</span>: t_byte_stream_two_writes .........   Passed    <span class="number">0.00</span> sec</span><br><span class="line">    Start <span class="number">29</span>: t_byte_stream_capacity</span><br><span class="line"><span class="number">4</span>/<span class="number">9</span> Test #<span class="number">29</span>: t_byte_stream_capacity ...........   Passed    <span class="number">0.36</span> sec</span><br><span class="line">    Start <span class="number">30</span>: t_byte_stream_many_writes</span><br><span class="line"><span class="number">5</span>/<span class="number">9</span> Test #<span class="number">30</span>: t_byte_stream_many_writes ........   Passed    <span class="number">0.02</span> sec</span><br><span class="line">    Start <span class="number">31</span>: t_webget</span><br><span class="line"><span class="number">6</span>/<span class="number">9</span> Test #<span class="number">31</span>: t_webget .........................   Passed    <span class="number">3.45</span> sec</span><br><span class="line">    Start <span class="number">53</span>: t_address_dt</span><br><span class="line"><span class="number">7</span>/<span class="number">9</span> Test #<span class="number">53</span>: t_address_dt .....................   Passed    <span class="number">0.01</span> sec</span><br><span class="line">    Start <span class="number">54</span>: t_parser_dt</span><br><span class="line"><span class="number">8</span>/<span class="number">9</span> Test #<span class="number">54</span>: t_parser_dt ......................   Passed    <span class="number">0.00</span> sec</span><br><span class="line">    Start <span class="number">55</span>: t_socket_dt</span><br><span class="line"><span class="number">9</span>/<span class="number">9</span> Test #<span class="number">55</span>: t_socket_dt ......................   Passed    <span class="number">0.01</span> sec</span><br><span class="line"></span><br><span class="line"><span class="number">100</span>% tests passed, <span class="number">0</span> tests failed out of <span class="number">9</span></span><br><span class="line"></span><br><span class="line"><span class="function">Total Test <span class="title">time</span> <span class="params">(real)</span> </span>=   <span class="number">3.86</span> sec</span><br><span class="line">[<span class="number">100</span>%] Built target check_lab0</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/lab/" rel="tag"># lab</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/LeetCode/leetcode1653/" rel="prev" title="LeetCode 1653. 使字符串平衡的最少删除次数">
+      <i class="fa fa-chevron-left"></i> LeetCode 1653. 使字符串平衡的最少删除次数
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/CS144/CS144lab1/" rel="next" title="CS144 Lab1 Stitching Substrings Into a Byte Stream">
+      CS144 Lab1 Stitching Substrings Into a Byte Stream <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE"><span class="nav-text">环境配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#get-started"><span class="nav-text">Get Started!</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="nav-text">准备工作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#coding"><span class="nav-text">coding</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#an-in-memory-reliable-byte-stream"><span class="nav-text">An in-memory reliable byte
+stream</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Leager"
+      src="/images/Avatar.jpg">
+  <p class="site-author-name" itemprop="name">Leager</p>
+  <div class="site-description" itemprop="description">【数据删除】</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">61</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Leager-zju" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Leager-zju" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div>
+<span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("09/25/2022 00:00:00");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "本站已存活 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+    }
+setInterval("createtime()",250);
+</script>
+</div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Leager</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,0' opacity='0.5' zIndex='-1' count='160' src="//cdn.jsdelivr.net/gh/theme-next/theme-next-canvas-nest@1.0.0/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

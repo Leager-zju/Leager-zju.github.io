@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/largeicon.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/smallicon.jpg">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"leager-zju.github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"b2t":true},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="本 lab 要求在 lab0 的基础上实现一个字节流整合器。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CS144 Lab1 Stitching Substrings Into a Byte Stream">
+<meta property="og:url" content="http://leager-zju.github.com/CS144/CS144lab1/index.html">
+<meta property="og:site_name" content="没什么看头的地方">
+<meta property="og:description" content="本 lab 要求在 lab0 的基础上实现一个字节流整合器。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://leager-zju.github.com/CS144/CS144lab1/1.png">
+<meta property="og:image" content="http://leager-zju.github.com/CS144/CS144lab1/2.png">
+<meta property="article:published_time" content="2023-03-24T11:34:56.000Z">
+<meta property="article:modified_time" content="2023-03-25T13:17:02.165Z">
+<meta property="article:author" content="Leager">
+<meta property="article:tag" content="lab">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://leager-zju.github.com/CS144/CS144lab1/1.png">
+
+<link rel="canonical" href="http://leager-zju.github.com/CS144/CS144lab1/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>CS144 Lab1 Stitching Substrings Into a Byte Stream | 没什么看头的地方</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">没什么看头的地方</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里可能没有你想看的...</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于我</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">7</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">11</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">61</span></a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/CS144/CS144lab1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/Avatar.jpg">
+      <meta itemprop="name" content="Leager">
+      <meta itemprop="description" content="【数据删除】">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="没什么看头的地方">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          CS144 Lab1 Stitching Substrings Into a Byte Stream
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-03-24 19:34:56" itemprop="dateCreated datePublished" datetime="2023-03-24T19:34:56+08:00">2023-03-24</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-03-25 21:17:02" itemprop="dateModified" datetime="2023-03-25T21:17:02+08:00">2023-03-25</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/CS144/" itemprop="url" rel="index"><span itemprop="name">CS144</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本 lab 要求在 lab0 的基础上实现一个字节流整合器。</p>
+<span id="more"></span>
+<p><img src="1.png" style="zoom:67%;" /></p>
+<p>lab1 ~ lab4 均围绕此图进行。在 lab0
+中，我们实现了有序字节流，而事实上真实的网络并不会按顺序向我们发送数据包，我们需要利用一个整合器将收到的无序字节流片段以正确顺序拼接并写到
+<code>ByteStream</code> 中。数据包以 <code>&#123;data, index&#125;</code>
+的形式被接收，其中 <code>data</code> 为
+<code>std::string</code>，<code>index</code> 为 <code>data</code>
+作为子串在原始字节流中的下标，如</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">                     <span class="number">1</span>         <span class="number">2</span></span><br><span class="line">           <span class="number">01234567890123456789012345</span></span><br><span class="line">原始字符串: abcdefghijklmnopqrstuvwxyz...</span><br><span class="line"></span><br><span class="line">收到的数据包可能为 &#123;<span class="string">&quot;abc&quot;</span>, <span class="number">0</span>&#125;, &#123;<span class="string">&quot;efghij&quot;</span>, <span class="number">4</span>&#125; 等</span><br></pre></td></tr></table></figure>
+<p>一旦整合器收到了正确的数据包（需要我们维护一个
+<code>next_index</code>），它就会将其写入
+<code>ByteStream</code>；而那些顺序错乱的，整合器会将其缓存，但丢弃那些超过
+<code>capacity</code> 的部分。关于 <code>capacity</code>，guide
+里有了一个比较明确的介绍：</p>
+<p><img src="2.png" style="zoom:67%;" /></p>
+<blockquote>
+<p>即 <code>ByteStream</code> 中未读取的部分加上
+<code>Reassembler</code> 中无序的部分大小不能超过
+<code>capacity</code>。</p>
+</blockquote>
+<p>一些注意事项都写在 FAQ 里了：</p>
+<ol type="1">
+<li><strong>整个流中第一个字节的索引是什么？</strong>0。</li>
+<li><strong>实施效率应该如何？</strong>请不要构建空间或时间效率极低的数据结构，该数据结构将成为您的
+TCP 实现的基础。每个 Lab1 测试都应在不到半秒的时间内完成。</li>
+<li><strong>应该如何处理不一致的子串？</strong>可以认为它们不存在，即假设存在一个唯一的底层字节流，并且所有子字符串都是它确定的切片。</li>
+<li><strong>可以用什么？</strong>您可以使用您认为有用的标准库的任何部分，最好至少使用一种数据结构。</li>
+<li><strong>什么时候应该将字节写入
+<code>ByteStream</code>？</strong>尽快。一个字节不应该出现在
+<code>ByteStream</code> 中的唯一情况是它前面存在未被 "pushed"
+的字节。</li>
+<li><strong>提供给 <code>push_substring()</code>
+函数的子串是否会发生重叠？</strong>是的。</li>
+<li><strong>需要向 <code>StreamReassembler</code>
+添加私有成员吗？</strong>是的。子串可能以任何顺序到达，因此您的数据结构必须“记住”这些子串，直到它们准备好放入
+<code>ByteStream</code> 中，即直到它们之前的所有索引都被写入
+<code>ByteStream</code>。</li>
+<li><strong>整合器可以存储重叠的子字符串吗？</strong>不。这样做破坏了
+<code>capacity</code> 的限制。</li>
+</ol>
+<h2 id="数据结构设计">数据结构设计</h2>
+<p>我们的数据结构应当具有以下功能：</p>
+<ol type="1">
+<li>支持频繁的头部删除操作，因为要将有序部分尽快写入
+<code>ByteStream</code>；</li>
+<li>支持随机访问，因为到达的字符串可能出现在任何索引处；</li>
+<li>支持去重操作，即如果收到了 <code>&#123;"bcd", 1&#125;, &#123;"cde", 2&#125;</code>
+这样的包，我们应仅缓存四个字符 <code>"bcde"</code>；</li>
+</ol>
+<p>不难发现，lab0 中 <code>ByteStream</code>
+的实现已经为我们提供了一个良好的思路——循环队列！如果用数组实现循环队列，并且每个位置存放的是单个字符，则上面的功能都能完美实现。</p>
+<p>但此处的循环队列与 lab0 中稍有不同：</p>
+<ol type="1">
+<li><code>Reassembler</code> 的容量为
+<code>capacity - ByteStream.buffer_size()</code>，所以我舍弃了双指针，仅用一个
+<code>head</code> 来标识队列头部；</li>
+<li>正如之前所说，<code>Reassembler</code> 需要维护一个
+<code>next_index</code>，而事实上 <code>head</code>
+所指向的队列头部正是下一个要写入的字符，即 <code>head</code> 与
+<code>next_index</code> 存在对应关系（只不过 <code>head</code>
+表示的是循环队列的数组下标，而 <code>next_index</code>
+表示字符在流中的索引），则得到流索引 <code>i</code>
+在循环队列中的数组下标为
+<code>(i - next_index + head) % (capacity + 1)</code>；</li>
+</ol>
+<blockquote>
+<p>收到 <code>&#123;"bcd", 1&#125;</code> 后我们的队列大概如下所示:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">next_index = <span class="number">0</span></span><br><span class="line"></span><br><span class="line">+-+-+-+-+-+-+...+-+-+</span><br><span class="line">|/|b|c|d|/|/|...|/|/|  <span class="comment">// &#x27;/&#x27; 表示当前位置为空</span></span><br><span class="line">+-+-+-+-+-+-+...+-+-+</span><br><span class="line"> ↑</span><br><span class="line">head</span><br></pre></td></tr></table></figure>
+<p>之后再收到 <code>&#123;"cde", 2&#125;</code>，则队列变为：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">next_index = <span class="number">0</span></span><br><span class="line"></span><br><span class="line">+-+-+-+-+-+-+...+-+-+</span><br><span class="line">|/|b|c|d|e|/|...|/|/|</span><br><span class="line">+-+-+-+-+-+-+...+-+-+</span><br><span class="line"> ↑</span><br><span class="line">head</span><br></pre></td></tr></table></figure>
+<p>一旦收到 <code>&#123;"a", 0&#125;</code>，就可以将所有字符写到
+<code>ByteStream</code> 里了</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">next_index = <span class="number">6</span></span><br><span class="line"></span><br><span class="line">+-+-+-+-+-+-+...+-+-+</span><br><span class="line">|a|b|c|d|e|/|...|/|/|</span><br><span class="line">+-+-+-+-+-+-+...+-+-+</span><br><span class="line"> ↑</span><br><span class="line">head</span><br><span class="line"></span><br><span class="line">       ||</span><br><span class="line">       \/</span><br><span class="line"></span><br><span class="line">+-+-+-+-+-+-+...+-+-+</span><br><span class="line">|/|/|/|/|/|/|...|/|/|</span><br><span class="line">+-+-+-+-+-+-+...+-+-+</span><br><span class="line">           ↑</span><br><span class="line">          head</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>需要注意的是，收到的子串并非每个字符都要写入，我们要写入的部分应为</p>
+<p><code>[max(index, next_index), min(next_index + capacity - ByteStream.buffer_size(), index + data.length())]</code></p>
+<p>这样就能忽略已写入 <code>ByteStream</code> 的部分以及超出
+<code>capacity</code> 的部分。</p>
+<blockquote>
+<p>上面的索引为流索引，还需要转换为数组下标。</p>
+</blockquote>
+<p>还有一个坑点在于如何表示队列中某个位置为空。之前本来想节省内存，将
+<code>'\0'</code> 表示为空位，但发现有个测试点会将 <code>0~255</code>
+都写进来，故为了可读性，选择开了第二个数组
+<code>std::vector&lt;bool&gt; _valid(capacity + 1)</code>，<code>false</code>
+表示空位，<code>true</code> 同理。</p>
+<p>部分代码如下所示：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">StreamReassembler::push_substring</span><span class="params">(<span class="type">const</span> string &amp;data, <span class="type">const</span> <span class="type">size_t</span> index,</span></span></span><br><span class="line"><span class="params"><span class="function">                                       <span class="type">const</span> <span class="type">bool</span> eof)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (eof) &#123;</span><br><span class="line">    _eof_index = index + data.<span class="built_in">length</span>(); <span class="comment">// 记忆 eof 下标，因为它可能这次缓存在 Reassembler 中，之后才写入</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="type">size_t</span> start_index = <span class="built_in">max</span>(index, _next_index);</span><br><span class="line">  <span class="type">size_t</span> last_index = <span class="built_in">min</span>(_next_index + _capacity - _output.<span class="built_in">buffer_size</span>(),</span><br><span class="line">                          index + data.<span class="built_in">length</span>());</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> (<span class="type">size_t</span> i = start_index; i &lt; last_index; i++) &#123;  <span class="comment">// i -&gt; real index</span></span><br><span class="line">    <span class="type">size_t</span> buffer_index = (i - _next_index + _head) % (_capacity + <span class="number">1</span>);</span><br><span class="line">    <span class="keyword">if</span> (!_valid[buffer_index]) &#123;</span><br><span class="line">      _buffer[buffer_index] = data[i - index];</span><br><span class="line">      _valid[buffer_index] = <span class="literal">true</span>;</span><br><span class="line">      _size++; <span class="comment">// 仅当写入空位时才增加，_size 表示 unassembled bytes 数量</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  std::string res;</span><br><span class="line">  <span class="keyword">while</span> (_valid[_head]) &#123; <span class="comment">// 试图写入 ByteStream</span></span><br><span class="line">    res.<span class="built_in">push_back</span>(_buffer[_head]);</span><br><span class="line">    _valid[_head] = <span class="literal">false</span>;</span><br><span class="line">    _head = (_head + <span class="number">1</span>) % (_capacity + <span class="number">1</span>);</span><br><span class="line">    _next_index++;</span><br><span class="line">    _size--;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (!res.<span class="built_in">empty</span>()) &#123;</span><br><span class="line">    _output.<span class="built_in">write</span>(res);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (_next_index == _eof_index) &#123; <span class="comment">// 全写进去了</span></span><br><span class="line">    _output.<span class="built_in">end_input</span>();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>执行下列命令，进行测试：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> build</span><br><span class="line">$ make format</span><br><span class="line">$ make</span><br><span class="line">$ make check_lab1</span><br></pre></td></tr></table></figure>
+<p>测试结果如下，通过。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">[<span class="number">100</span>%] Testing the stream reassembler...</span><br><span class="line">Test project .../CS144/build</span><br><span class="line">      Start <span class="number">18</span>: t_strm_reassem_single</span><br><span class="line"> <span class="number">1</span>/<span class="number">16</span> Test #<span class="number">18</span>: t_strm_reassem_single ............   Passed    <span class="number">0.00</span> sec</span><br><span class="line">      Start <span class="number">19</span>: t_strm_reassem_seq</span><br><span class="line"> <span class="number">2</span>/<span class="number">16</span> Test #<span class="number">19</span>: t_strm_reassem_seq ...............   Passed    <span class="number">0.00</span> sec</span><br><span class="line">      Start <span class="number">20</span>: t_strm_reassem_dup</span><br><span class="line"> <span class="number">3</span>/<span class="number">16</span> Test #<span class="number">20</span>: t_strm_reassem_dup ...............   Passed    <span class="number">0.01</span> sec</span><br><span class="line">      Start <span class="number">21</span>: t_strm_reassem_holes</span><br><span class="line"> <span class="number">4</span>/<span class="number">16</span> Test #<span class="number">21</span>: t_strm_reassem_holes .............   Passed    <span class="number">0.00</span> sec</span><br><span class="line">      Start <span class="number">22</span>: t_strm_reassem_many</span><br><span class="line"> <span class="number">5</span>/<span class="number">16</span> Test #<span class="number">22</span>: t_strm_reassem_many ..............   Passed    <span class="number">0.20</span> sec</span><br><span class="line">      Start <span class="number">23</span>: t_strm_reassem_overlapping</span><br><span class="line"> <span class="number">6</span>/<span class="number">16</span> Test #<span class="number">23</span>: t_strm_reassem_overlapping .......   Passed    <span class="number">0.00</span> sec</span><br><span class="line">      Start <span class="number">24</span>: t_strm_reassem_win</span><br><span class="line"> <span class="number">7</span>/<span class="number">16</span> Test #<span class="number">24</span>: t_strm_reassem_win ...............   Passed    <span class="number">0.20</span> sec</span><br><span class="line">      Start <span class="number">25</span>: t_strm_reassem_cap</span><br><span class="line"> <span class="number">8</span>/<span class="number">16</span> Test #<span class="number">25</span>: t_strm_reassem_cap ...............   Passed    <span class="number">0.08</span> sec</span><br><span class="line">      Start <span class="number">26</span>: t_byte_stream_construction</span><br><span class="line"> <span class="number">9</span>/<span class="number">16</span> Test #<span class="number">26</span>: t_byte_stream_construction .......   Passed    <span class="number">0.00</span> sec</span><br><span class="line">      Start <span class="number">27</span>: t_byte_stream_one_write</span><br><span class="line"><span class="number">10</span>/<span class="number">16</span> Test #<span class="number">27</span>: t_byte_stream_one_write ..........   Passed    <span class="number">0.00</span> sec</span><br><span class="line">      Start <span class="number">28</span>: t_byte_stream_two_writes</span><br><span class="line"><span class="number">11</span>/<span class="number">16</span> Test #<span class="number">28</span>: t_byte_stream_two_writes .........   Passed    <span class="number">0.00</span> sec</span><br><span class="line">      Start <span class="number">29</span>: t_byte_stream_capacity</span><br><span class="line"><span class="number">12</span>/<span class="number">16</span> Test #<span class="number">29</span>: t_byte_stream_capacity ...........   Passed    <span class="number">1.22</span> sec</span><br><span class="line">      Start <span class="number">30</span>: t_byte_stream_many_writes</span><br><span class="line"><span class="number">13</span>/<span class="number">16</span> Test #<span class="number">30</span>: t_byte_stream_many_writes ........   Passed    <span class="number">0.01</span> sec</span><br><span class="line">      Start <span class="number">53</span>: t_address_dt</span><br><span class="line"><span class="number">14</span>/<span class="number">16</span> Test #<span class="number">53</span>: t_address_dt .....................   Passed    <span class="number">0.01</span> sec</span><br><span class="line">      Start <span class="number">54</span>: t_parser_dt</span><br><span class="line"><span class="number">15</span>/<span class="number">16</span> Test #<span class="number">54</span>: t_parser_dt ......................   Passed    <span class="number">0.00</span> sec</span><br><span class="line">      Start <span class="number">55</span>: t_socket_dt</span><br><span class="line"><span class="number">16</span>/<span class="number">16</span> Test #<span class="number">55</span>: t_socket_dt ......................   Passed    <span class="number">0.01</span> sec</span><br><span class="line"></span><br><span class="line"><span class="number">100</span>% tests passed, <span class="number">0</span> tests failed out of <span class="number">16</span></span><br><span class="line"></span><br><span class="line"><span class="function">Total Test <span class="title">time</span> <span class="params">(real)</span> </span>=   <span class="number">1.77</span> sec</span><br><span class="line">[<span class="number">100</span>%] Built target check_lab1</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/lab/" rel="tag"># lab</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/CS144/CS144lab0/" rel="prev" title="CS144 Lab0 Networking Warmup">
+      <i class="fa fa-chevron-left"></i> CS144 Lab0 Networking Warmup
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E8%AE%BE%E8%AE%A1"><span class="nav-text">数据结构设计</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Leager"
+      src="/images/Avatar.jpg">
+  <p class="site-author-name" itemprop="name">Leager</p>
+  <div class="site-description" itemprop="description">【数据删除】</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">61</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Leager-zju" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Leager-zju" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div>
+<span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("09/25/2022 00:00:00");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "本站已存活 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+    }
+setInterval("createtime()",250);
+</script>
+</div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Leager</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,0' opacity='0.5' zIndex='-1' count='160' src="//cdn.jsdelivr.net/gh/theme-next/theme-next-canvas-nest@1.0.0/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>
