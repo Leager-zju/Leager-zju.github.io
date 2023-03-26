@@ -18,17 +18,23 @@
     var CONFIG = {"hostname":"leager-zju.github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"b2t":true},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="【数据删除】">
-<meta property="og:type" content="website">
-<meta property="og:title" content="没什么看头的地方">
-<meta property="og:url" content="http://leager-zju.github.com/archives/page/2/index.html">
+  <meta name="description" content="本 lab 需要实现 TCP 协议的接收端。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CS144 Lab2 TCP Receiver">
+<meta property="og:url" content="http://leager-zju.github.com/CS144/CS144lab2/index.html">
 <meta property="og:site_name" content="没什么看头的地方">
-<meta property="og:description" content="【数据删除】">
+<meta property="og:description" content="本 lab 需要实现 TCP 协议的接收端。">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://leager-zju.github.com/CS144/CS144lab2/1.png">
+<meta property="og:image" content="http://leager-zju.github.com/CS144/CS144lab2/2.png">
+<meta property="article:published_time" content="2023-03-26T09:24:22.000Z">
+<meta property="article:modified_time" content="2023-03-26T13:23:29.981Z">
 <meta property="article:author" content="Leager">
+<meta property="article:tag" content="lab">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://leager-zju.github.com/CS144/CS144lab2/1.png">
 
-<link rel="canonical" href="http://leager-zju.github.com/archives/page/2/">
+<link rel="canonical" href="http://leager-zju.github.com/CS144/CS144lab2/">
 
 
 <script id="page-configurations">
@@ -36,12 +42,12 @@
   CONFIG.page = {
     sidebar: "",
     isHome : false,
-    isPost : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title>归档 | 没什么看头的地方</title>
+  <title>CS144 Lab2 TCP Receiver | 没什么看头的地方</title>
   
 
 
@@ -183,235 +189,153 @@
         <div class="content-wrap">
           
 
-          <div class="content archive">
+          <div class="content post posts-expand">
             
 
+    
   
   
-  
-  <div class="post-block">
-    <div class="posts-collapse">
-      <div class="collection-title">
-        
-        <span class="collection-header">不错! 目前共计 62 篇日志。 继续努力。</span>
-      </div>
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/CS144/CS144lab2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/Avatar.jpg">
+      <meta itemprop="name" content="Leager">
+      <meta itemprop="description" content="【数据删除】">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="没什么看头的地方">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          CS144 Lab2 TCP Receiver
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2023-03-26 17:24:22 / 修改时间：21:23:29" itemprop="dateCreated datePublished" datetime="2023-03-26T17:24:22+08:00">2023-03-26</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/CS144/" itemprop="url" rel="index"><span itemprop="name">CS144</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-    <div class="collection-year">
-      <span class="collection-header">2023</span>
-    </div>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2023-02-14T11:13:46+08:00"
-              content="2023-02-14">
-          02-14
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/C-Basic/C-OOP/" itemprop="url">
-            <span itemprop="name">C++ の 面向对象(OOP)</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2023-02-13T21:48:43+08:00"
-              content="2023-02-13">
-          02-13
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/C-Basic/C-Inline/" itemprop="url">
-            <span itemprop="name">C++ の 内联函数(Inline)</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2023-02-13T17:02:49+08:00"
-              content="2023-02-13">
-          02-13
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/C-Basic/C-Static/" itemprop="url">
-            <span itemprop="name">C++ の 静态修饰符(Static)</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2023-02-13T12:30:00+08:00"
-              content="2023-02-13">
-          02-13
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/C-Basic/C-Const/" itemprop="url">
-            <span itemprop="name">C++ の 常量(Const)</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2023-02-06T23:02:41+08:00"
-              content="2023-02-06">
-          02-06
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/C-11/C-Else/" itemprop="url">
-            <span itemprop="name">C++11 の 其它特性(Else)</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2023-02-05T12:20:37+08:00"
-              content="2023-02-05">
-          02-05
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/C-11/C-Regex/" itemprop="url">
-            <span itemprop="name">C++11 の 正则表达式(Regex)</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2023-02-04T12:15:21+08:00"
-              content="2023-02-04">
-          02-04
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/C-11/C-DefaultAndDelete/" itemprop="url">
-            <span itemprop="name">C++11 の 预置与弃置(Default & Delete)</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2023-02-03T15:05:39+08:00"
-              content="2023-02-03">
-          02-03
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/C-11/C-Constructor/" itemprop="url">
-            <span itemprop="name">C++11 の 委托与继承的构造函数(Delegating & Inherited Constructors)</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2023-02-02T17:19:10+08:00"
-              content="2023-02-02">
-          02-02
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/C-11/C-SmartPtr/" itemprop="url">
-            <span itemprop="name">C++11 の 智能指针(Smart Pointer)</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2023-01-29T22:44:35+08:00"
-              content="2023-01-29">
-          01-29
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/C-11/C-Concurrent/" itemprop="url">
-            <span itemprop="name">C++11 の 并发支持(Concurrency)</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
+        <p>本 lab 需要实现 TCP 协议的接收端。</p>
+<span id="more"></span>
+<p><img src="1.png" style="zoom:67%;" /></p>
+<blockquote>
+<p>依然是这张图</p>
+</blockquote>
+<p>此时接受端收到的就是 <code>&#123;TCP Header, IP Datagram&#125;</code>
+组成的报文段(TCP segment)了，该数据结构定义在
+<code>/libsponge/tcp_helpers/tcp_segment.hh</code> 中，其中首部(TCP
+header)字段定义在 <code>/libsponge/tcp_helpers/tcp_header.hh</code>
+中。</p>
+<p>本 lab 的难点在于如何进行序列号和流索引的转换，guide
+中其实已经说的比较详细了</p>
+<p><img src="2.png" style="zoom:67%;" /></p>
+<h2 id="task-1">Task 1</h2>
+<p>第一个任务是编写用于 <code>seqno</code> 与
+<code>absolute seqno</code> 互相转换的 <code>wrap()</code> 与
+<code>unwrap()</code> 函数。</p>
+<h3 id="wrapn-isn">wrap(n, isn)</h3>
+<p>给定 <code>isn</code> 和绝对序列号
+<code>n</code>，求相应的序列号，易得</p>
+<p><span class="math display">\[
+seqno = (isn + n\ \&amp;\ \text{uint32\_max})\ \%\ \text{uint32\_max}
+\]</span></p>
+<h3 id="unwrapn-isn-checkpoint">unwrap(n, isn, checkpoint)</h3>
+<p>给定序列号 <code>n</code> 和
+<code>isn</code>，以及用于消除多义性的检查点
+<code>checkpoint</code>，求距离 <code>checkpoint</code>
+最近的绝对序列号。显然，最后的结果应该为</p>
+<p><span class="math display">\[
+abs\_seqno = n - isn + i\times offset,\quad offset = 2^{32}, \ i \in [0,
+2^{32}-1]
+\]</span></p>
+<p>如果将 <code>checkpoint</code> 分为高 32 位与低 32 位，那么
+<code>checkpoint</code> 必然能表示为 <span
+class="math inline">\(\text{high32}\times offset +
+\text{low32}\)</span></p>
+<p>从而存在三种绝对序列号可能，分别为
+<code>i = high32-1, high32, high32+1</code></p>
+<ol type="1">
+<li>如果 <code>n-isn &lt; low32</code>，则 <code>i</code> 取
+<code>high32-1, high32</code>；</li>
+<li>如果 <code>n-isn == low32</code>，则 <code>i</code> 取
+<code>high32</code>；</li>
+<li>如果 <code>n-isn &gt; low32</code>，则 <code>i</code> 取
+<code>high32, high32+1</code>；</li>
+</ol>
+<p>不难发现，令 <code>i = high32</code>
+一定是可能的选择之一，但还有一些边界条件需要考虑：</p>
+<ol type="1">
+<li>如果 <code>high32 == 0</code>，那么 case1 下 <code>high32-1</code>
+无法取得；</li>
+<li>如果 <code>high32 == 11..11</code>，那么 case3 下
+<code>high32+1</code> 无法取得；</li>
+</ol>
+<p>故得到</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">uint64_t</span> <span class="title">unwrap</span><span class="params">(WrappingInt32 n, WrappingInt32 isn, <span class="type">uint64_t</span> checkpoint)</span> </span>&#123;</span><br><span class="line">  <span class="type">uint64_t</span> c_high32 = checkpoint &gt;&gt; <span class="number">32</span>;</span><br><span class="line">  <span class="type">uint64_t</span> offset = <span class="number">1ul</span> &lt;&lt; <span class="number">32</span>;</span><br><span class="line">  <span class="type">uint64_t</span> lower_bound = <span class="number">1ul</span> &lt;&lt; <span class="number">32</span>;</span><br><span class="line">  <span class="type">uint64_t</span> upper_bound = (lower_bound<span class="number">-1</span>) &lt;&lt; <span class="number">32</span>;</span><br><span class="line">  <span class="type">uint64_t</span> res = <span class="built_in">static_cast</span>&lt;<span class="type">uint64_t</span>&gt;(n - isn) + (c_high32 &lt;&lt; <span class="number">32</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (res &gt; checkpoint) &#123;</span><br><span class="line">    <span class="keyword">if</span> (res &gt; lower_bound &amp;&amp; res - checkpoint &gt;= offset &gt;&gt; <span class="number">1</span>) &#123;</span><br><span class="line">      res -= offset;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span> (res &lt; checkpoint)&#123;</span><br><span class="line">    <span class="keyword">if</span> (res &lt; upper_bound &amp;&amp; checkpoint - res &gt;= offset &gt;&gt; <span class="number">1</span>) &#123;</span><br><span class="line">      res += offset;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
     </div>
-  </div>
-  
-  
-  
 
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/lab/" rel="tag"># lab</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/CS144/CS144lab1/" rel="prev" title="CS144 Lab1 Stitching Substrings Into a Byte Stream">
+      <i class="fa fa-chevron-left"></i> CS144 Lab1 Stitching Substrings Into a Byte Stream
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
   
-  <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/archives/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/archives/">1</a><span class="page-number current">2</span><a class="page-number" href="/archives/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/archives/page/7/">7</a><a class="extend next" rel="next" href="/archives/page/3/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
-  </nav>
+  
+  
 
 
 
@@ -463,6 +387,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#task-1"><span class="nav-text">Task 1</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#wrapn-isn"><span class="nav-text">wrap(n, isn)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#unwrapn-isn-checkpoint"><span class="nav-text">unwrap(n, isn, checkpoint)</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -626,6 +551,59 @@ setInterval("createtime()",250);
   
 
   
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
 
   
 
