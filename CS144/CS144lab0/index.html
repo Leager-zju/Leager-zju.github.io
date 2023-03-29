@@ -26,7 +26,7 @@
 <meta property="og:description" content="本 lab 就是拿来配环境+练手的。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2023-03-21T10:28:52.000Z">
-<meta property="article:modified_time" content="2023-03-25T13:16:27.381Z">
+<meta property="article:modified_time" content="2023-03-29T07:32:47.082Z">
 <meta property="article:author" content="Leager">
 <meta property="article:tag" content="lab">
 <meta name="twitter:card" content="summary">
@@ -135,7 +135,7 @@
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">62</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">63</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -223,7 +223,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-03-25 21:16:27" itemprop="dateModified" datetime="2023-03-25T21:16:27+08:00">2023-03-25</time>
+                <time title="修改时间：2023-03-29 15:32:47" itemprop="dateModified" datetime="2023-03-29T15:32:47+08:00">2023-03-29</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -337,7 +337,8 @@ buffer
 时为空，<code>head == (tail + 1) % (capacity + 1)</code>
 时为满，当前缓存的字节数为
 <code>(tail - head + capacity + 1) % (capacity + 1)</code>。</p>
-<p>写完后执行以下命令进行测试：</p>
+<h2 id="测试结果">测试结果</h2>
+<p>执行以下命令进行测试：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> build</span><br><span class="line">$ make format</span><br><span class="line">$ make</span><br><span class="line">$ make check_lab0</span><br></pre></td></tr></table></figure>
 <p>测试结果如下，通过。</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">[<span class="number">100</span>%] Testing Lab <span class="number">0.</span>..</span><br><span class="line">Test project .../CS144/build</span><br><span class="line">    Start <span class="number">26</span>: t_byte_stream_construction</span><br><span class="line"><span class="number">1</span>/<span class="number">9</span> Test #<span class="number">26</span>: t_byte_stream_construction .......   Passed    <span class="number">0.00</span> sec</span><br><span class="line">    Start <span class="number">27</span>: t_byte_stream_one_write</span><br><span class="line"><span class="number">2</span>/<span class="number">9</span> Test #<span class="number">27</span>: t_byte_stream_one_write ..........   Passed    <span class="number">0.00</span> sec</span><br><span class="line">    Start <span class="number">28</span>: t_byte_stream_two_writes</span><br><span class="line"><span class="number">3</span>/<span class="number">9</span> Test #<span class="number">28</span>: t_byte_stream_two_writes .........   Passed    <span class="number">0.00</span> sec</span><br><span class="line">    Start <span class="number">29</span>: t_byte_stream_capacity</span><br><span class="line"><span class="number">4</span>/<span class="number">9</span> Test #<span class="number">29</span>: t_byte_stream_capacity ...........   Passed    <span class="number">0.36</span> sec</span><br><span class="line">    Start <span class="number">30</span>: t_byte_stream_many_writes</span><br><span class="line"><span class="number">5</span>/<span class="number">9</span> Test #<span class="number">30</span>: t_byte_stream_many_writes ........   Passed    <span class="number">0.02</span> sec</span><br><span class="line">    Start <span class="number">31</span>: t_webget</span><br><span class="line"><span class="number">6</span>/<span class="number">9</span> Test #<span class="number">31</span>: t_webget .........................   Passed    <span class="number">3.45</span> sec</span><br><span class="line">    Start <span class="number">53</span>: t_address_dt</span><br><span class="line"><span class="number">7</span>/<span class="number">9</span> Test #<span class="number">53</span>: t_address_dt .....................   Passed    <span class="number">0.01</span> sec</span><br><span class="line">    Start <span class="number">54</span>: t_parser_dt</span><br><span class="line"><span class="number">8</span>/<span class="number">9</span> Test #<span class="number">54</span>: t_parser_dt ......................   Passed    <span class="number">0.00</span> sec</span><br><span class="line">    Start <span class="number">55</span>: t_socket_dt</span><br><span class="line"><span class="number">9</span>/<span class="number">9</span> Test #<span class="number">55</span>: t_socket_dt ......................   Passed    <span class="number">0.01</span> sec</span><br><span class="line"></span><br><span class="line"><span class="number">100</span>% tests passed, <span class="number">0</span> tests failed out of <span class="number">9</span></span><br><span class="line"></span><br><span class="line"><span class="function">Total Test <span class="title">time</span> <span class="params">(real)</span> </span>=   <span class="number">3.86</span> sec</span><br><span class="line">[<span class="number">100</span>%] Built target check_lab0</span><br></pre></td></tr></table></figure>
@@ -425,7 +426,7 @@ buffer
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
           <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE"><span class="nav-text">环境配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#get-started"><span class="nav-text">Get Started!</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="nav-text">准备工作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#coding"><span class="nav-text">coding</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#an-in-memory-reliable-byte-stream"><span class="nav-text">An in-memory reliable byte
-stream</span></a></li></ol></div>
+stream</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9E%9C"><span class="nav-text">测试结果</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -441,7 +442,7 @@ stream</span></a></li></ol></div>
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">62</span>
+          <span class="site-state-item-count">63</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
