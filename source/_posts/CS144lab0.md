@@ -123,7 +123,9 @@ reader 有三种输出方式，只读(peek_output)，只写(pop_output)以及读
 
 以及一些通用的接口，这些接口的实现需要我们额外添加一些 private 成员变量，不再赘述。此外，考虑到整个 buffer 是一个增删频繁的数据结构，并且还需要顺序遍历，于是采用了 `std::vector<char>` 作为底层数据结构来模拟**循环队列**。其中，`head` 指向队首，`tail` 指向队尾的下一个位置，数组大小应为 `capacity + 1`（留一个位置来判断队列为空还是满）。当 `head == tail` 时为空，`head == (tail + 1) % (capacity + 1)` 时为满，当前缓存的字节数为 `(tail - head + capacity + 1) % (capacity + 1)`。
 
-写完后执行以下命令进行测试：
+## 测试结果
+
+执行以下命令进行测试：
 
 ```bash
 $ cd build

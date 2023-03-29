@@ -148,6 +148,8 @@ $$
 
 > 需要考虑的 corner case 比较多，比如仅仅 `SYN=1` / `FIN=1` 或两个标志位同时为 `1` 但无数据的情况。
 
+## 测试结果
+
 执行以下命令进行测试
 
 ```bash
@@ -157,7 +159,7 @@ $ make
 $ make check_lab2
 ```
 
-输出结果如下，通过测试
+测试结果如下，通过。
 
 ```c++
 [100%] Testing the TCP receiver...
@@ -182,38 +184,8 @@ Test project .../CS144/build
  9/26 Test  #9: t_recv_close .....................   Passed    0.00 sec
       Start 10: t_recv_special
 10/26 Test #10: t_recv_special ...................   Passed    0.00 sec
-      Start 18: t_strm_reassem_single
-11/26 Test #18: t_strm_reassem_single ............   Passed    0.00 sec
-      Start 19: t_strm_reassem_seq
-12/26 Test #19: t_strm_reassem_seq ...............   Passed    0.00 sec
-      Start 20: t_strm_reassem_dup
-13/26 Test #20: t_strm_reassem_dup ...............   Passed    0.01 sec
-      Start 21: t_strm_reassem_holes
-14/26 Test #21: t_strm_reassem_holes .............   Passed    0.00 sec
-      Start 22: t_strm_reassem_many
-15/26 Test #22: t_strm_reassem_many ..............   Passed    0.21 sec
-      Start 23: t_strm_reassem_overlapping
-16/26 Test #23: t_strm_reassem_overlapping .......   Passed    0.00 sec
-      Start 24: t_strm_reassem_win
-17/26 Test #24: t_strm_reassem_win ...............   Passed    0.22 sec
-      Start 25: t_strm_reassem_cap
-18/26 Test #25: t_strm_reassem_cap ...............   Passed    0.08 sec
-      Start 26: t_byte_stream_construction
-19/26 Test #26: t_byte_stream_construction .......   Passed    0.00 sec
-      Start 27: t_byte_stream_one_write
-20/26 Test #27: t_byte_stream_one_write ..........   Passed    0.00 sec
-      Start 28: t_byte_stream_two_writes
-21/26 Test #28: t_byte_stream_two_writes .........   Passed    0.00 sec
-      Start 29: t_byte_stream_capacity
-22/26 Test #29: t_byte_stream_capacity ...........   Passed    0.38 sec
-      Start 30: t_byte_stream_many_writes
-23/26 Test #30: t_byte_stream_many_writes ........   Passed    0.01 sec
-      Start 53: t_address_dt
-24/26 Test #53: t_address_dt .....................   Passed    0.00 sec
-      Start 54: t_parser_dt
-25/26 Test #54: t_parser_dt ......................   Passed    0.00 sec
-      Start 55: t_socket_dt
-26/26 Test #55: t_socket_dt ......................   Passed    0.01 sec
+
+...
 
 100% tests passed, 0 tests failed out of 26
 
