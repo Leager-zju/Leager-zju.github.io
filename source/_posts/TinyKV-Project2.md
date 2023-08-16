@@ -287,3 +287,7 @@ if err == ErrSnapshotTemporarilyUnavailable {
 最后才修改 Raft 层与 RaftLog 的相关数据，并令 `RaftLog.pendingSnapshot = msg.snapshot`（可以认为该数据一定不是 nil），这样下次收集 Ready 的时候会拿到待应用的快照数据，在 `SaveReadyState` 中调用 `PeerStorage.ApplySnapshot()` 将快照落实到 badger 中并修改 `ApplyState`。
 
 到此，所有需要修改的数据均已修改完毕。
+
+## 一些坑
+
+1. `newRaft` 时传入的 `peers` 切片只在 2A 的测试中用到，实际上 peers 信息是通过 `Storage.InitialState()` 返回的 `confState.Nodes` 给出；
