@@ -11,13 +11,11 @@ tags:
 img:
 ---
 
-
-
 <!--more-->
 
 ## 思路
 
-### Part A
+### Part A Raft
 
 需要实现的代码在整个 `raft` 文件夹下。
 
@@ -163,7 +161,7 @@ if len(m.Entries) > 0 {
 
 > 也很好理解，之前收集到的 `Entries` 就是 unstabled 的，现在处理完了那就有 `stabled = Entries.LastLogIndex` 了。其他也同理。
 
-### Part B
+### Part B FT KV server
 
 需要实现的代码在 `kv/raftstore` 文件夹下。
 
@@ -229,7 +227,7 @@ if len(m.Entries) > 0 {
 >
 > 发送回复时，遍历 Proposals 发现 `Index` 相同但 `Term` 不同，则发个 `ErrStaleCommand`。
 
-### Part C
+### Part C Snapshot
 
 需要对前两个 Part 所涉及的文件进行修改。
 
