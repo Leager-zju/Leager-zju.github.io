@@ -36,7 +36,7 @@ img:
 对于发起者：
 
 - 上层调用 `Tick()`；
-- Raft 层检查是否满足发起选举条件，即 `electionElapsed >= electionTimeout` 且不是 `Leader`；
+- Raft 层检查是否满足发起选举条件，即 `electionElapsed >= electionTimeout` 且不是 Leader；
 - 若超时，则视为收到收到一条本地 `MsgHup` 消息，对该消息的处理就是正式进入开始选举事件，即
   ```go
   func (r *Raft) Step(m pb.Message) error {
@@ -48,9 +48,9 @@ img:
     }
   }
   ``` 
-- 如果不是 `Leader`（防止恶趣味测试给 Leader 发一条 MsgHup），则成为候选人 `Candidate`（进入下一任期，投自己一票），并向其他 Peer （如果有）发送 `MsgRequestVote`。请求中除了自身 `CurrentTerm`，还需包含自己最后一个日志条目的 `LogTerm` 与 `LogIndex`；
-  > **存在只有自己一个 Peer 的情况，那就直接成为 `Leader` 不用发请求了**；
-- 对于收到的每一张票，首先检查发送方的 `Term`，判断是需要切换到 `Follower` 并更新任期。然后检查是同意还是拒绝，如果同意票过半则成为 `Leader`，如果反对票过半则退至 `Follower`，等待其他 `Leader` 发来消息或者下一次开始选举。
+- 如果不是 Leader（防止恶趣味测试给 Leader 发一条 MsgHup），则成为候选人 `Candidate`（进入下一任期，投自己一票），并向其他 Peer （如果有）发送 `MsgRequestVote`。请求中除了自身 `CurrentTerm`，还需包含自己最后一个日志条目的 `LogTerm` 与 `LogIndex`；
+  > **存在只有自己一个 Peer 的情况，那就直接成为 Leader 不用发请求了**；
+- 对于收到的每一张票，首先检查发送方的 `Term`，判断是需要切换到 `Follower` 并更新任期。然后检查是同意还是拒绝，如果同意票过半则成为 Leader，如果反对票过半则退至 `Follower`，等待其他 Leader 发来消息或者下一次开始选举。
 >
 
 对于接收者：
@@ -75,7 +75,7 @@ func (r *Raft) getElectionTimeout() int {
 
 **MsgAppend**：
 
-选举成功成为 `Leader` 后，需要立刻在自己的日志中增添一条空的日志条目，以巩固领导者地位。一旦有任何日志被添加（成为 Leader 或收到 `MsgPropose` 消息），都会触发 Raft 的日志复制机制——向所有 Peer 发送 `MsgAppend`。
+选举成功成为 Leader 后，需要立刻在自己的日志中增添一条空的日志条目，以巩固领导者地位。一旦有任何日志被添加（成为 Leader 或收到 `MsgPropose` 消息），都会触发 Raft 的日志复制机制——向所有 Peer 发送 `MsgAppend`。
 
 关于日志复制其实论文里讲的很清楚了。Raft 层维护所有 Peer 的两个变量：`Match` 和 `Next`。前者表示目前能够确定的其他 Peer 与自身一致的最后一个日志条目 `Index`，后者表示下一次 `MsgAppend` 要从哪个日志开始发。
 
@@ -107,17 +107,17 @@ if len(m.Entries) > 0 {
 }
 ```
 
-最后，根据消息中的 `Commit` 字段更新结构体字段，并发送同意回复，包含自身最后一条日志的 `Index`，让 `Leader` 更新 `Match/Next` 字段。
+最后，根据消息中的 `Commit` 字段更新结构体字段，并发送同意回复，包含自身最后一条日志的 `Index`，让 Leader 更新 `Match/Next` 字段。
 
-> 如果消息中的 `Entries` 长度为 0，则至少可以确定 `Leader` 含有相同的日志 `{Term: PrevLogTerm, Index: PrevLogIndex}`，那么论文中提到的 "index of last new entry" 就是 `PrevLogIndex` 了。
+> 如果消息中的 `Entries` 长度为 0，则至少可以确定 Leader 含有相同的日志 `{Term: PrevLogTerm, Index: PrevLogIndex}`，那么论文中提到的 "index of last new entry" 就是 `PrevLogIndex` 了。
 
-要注意，如果不同意该条 `MsgAppend`，则无需更新 `electionElapsed`，因为该 `Leader` 可能刚从分区的网络中放出来，马上要下台了。反之要重置一下自身选举相关的状态。
+要注意，如果不同意该条 `MsgAppend`，则无需更新 `electionElapsed`，因为该 Leader 可能刚从分区的网络中放出来，马上要下台了。反之要重置一下自身选举相关的状态。
 
 发送方收到 `MsgAppendResponse` 后，看看是不是要切到 `Follower`，然后看看是否为同意，是则更新 `Match = response.Index, Next = Match + 1`，然后根据所有 Peer 的 `Match` 更新自身的 `Commit`；反之令 `Next--`，重新发 `MsgAppend`。
 
 **Heartbeat**：
 
-与 6.824 不同，TinyKV 将日志复制和心跳分开，算两种不同的消息。前者上文已经提过，后者则是在 Tick() 驱动至心跳超时或收到 `MsgBeat` 消息后，向所有 Peer 发送 `MsgHeartbeat`。心跳的作用不仅仅是巩固 `Leader` 地位，还要向 Peers 广播自己的 `Commit`，接收方如果发现 `Commit` 比自己最后一个日志的 `LastLogIndex` 还大，则需要告诉发送方该消息，表明自己落后了，并拒绝该条消息；反之更新自身的 `Commit`。
+与 6.824 不同，TinyKV 将日志复制和心跳分开，算两种不同的消息。前者上文已经提过，后者则是在 Tick() 驱动至心跳超时或收到 `MsgBeat` 消息后，向所有 Peer 发送 `MsgHeartbeat`。心跳的作用不仅仅是巩固 Leader 地位，还要向 Peers 广播自己的 `Commit`，接收方如果发现 `Commit` 比自己最后一个日志的 `LastLogIndex` 还大，则需要告诉发送方该消息，表明自己落后了，并拒绝该条消息；反之更新自身的 `Commit`。
 
 发送方检查回复，如果 Peer 落后了，立刻发一条 `MsgAppend` 过去让它赶紧进入到最新的状态。
 
