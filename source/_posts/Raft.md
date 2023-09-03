@@ -53,7 +53,7 @@ Raft 的核心就是下面这张图了。
 
 > 上面两张图是 Raft 的重中之重。
 
-一个 Raft 集群包含多个服务器。任意时刻，每个服务器都处于三种状态之一： `Leader` 、 `Follower` 或 `Candidate`。Raft 首先选举出一个 Leader ，然后令其全权负责管理复制日志。正常情况下，每个集群只有一个 Leader，其他服务器都是 Follower。
+一个 Raft 集群包含多个服务器。任意时刻，每个服务器都处于三种状态之一： Leader 、 `Follower` 或 `Candidate`。Raft 首先选举出一个 Leader ，然后令其全权负责管理复制日志。正常情况下，每个集群只有一个 Leader，其他服务器都是 Follower。
 
 - **Leader**：处理所有客户端请求，打包为 Entry 后将其复制到其他服务器上，并告诉服务器何时可以安全地将 Entry 应用到它们的状态机。
 - **Follower**：被动响应 Leader 和 Candidate 的请求。如果超时未响应消息，则转为 Candidate；
