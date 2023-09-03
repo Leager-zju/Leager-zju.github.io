@@ -23,19 +23,14 @@ img:
 
 Raft 层首先会 `Step` 一条 `MsgTransferLeader`。由于任何节点都有可能收到该消息，故需根据身份分类讨论：
 
-**Non-Leader**：
-- 如果迁移目标 `transferee` 是自己，则直接触发 `MsgTimeoutNow`，尝试成为 Leader;
-- 如果迁移目标 `transferee` 是自己，则直接触发 `MsgTimeoutNow`，尝试成为 Leader;
+**Non-Leader**：将消息转发给 Leader;
 
-**Leader**：
-- 如果迁移目标 `transferee` 是自己，则什么也不干（已经是 Leader 无需迁移）;
-- 如果迁移目标 `transferee` 是自己，则什么也不干（已经是 Leader 无需迁移）;
-- 反之
-  1. 需检查其是否有资格上任（即日志是否和自己一样新）;
-  2. 如果 `transferee` 的日志不是最新的，则 Leader 应该向其发送 `MsgAppend`（并停止进行任何之后的 `Propose`）直到其符合条件——这需要在后续的 `HandleAppendEntriesResponse()` 中进行判断;
-  3. 一旦满足迁移条件，Leader 应该立即向其发送一条`MsgTimeoutNow`，`transferee` 在收到消息后立即开始新的选举——即 `Step(MsgHup)`——从而依靠最新的 `Term` 和 `LastLog` 当选领导人;
-  2. 如果 `transferee` 的日志不是最新的，则 Leader 应该向其发送 `MsgAppend`（并停止进行任何之后的 `Propose`）直到其符合条件——这需要在后续的 `HandleAppendEntriesResponse()` 中进行判断;
-  3. 一旦满足迁移条件，Leader 应该立即向其发送一条`MsgTimeoutNow`，`transferee` 在收到消息后立即开始新的选举——即 `Step(MsgHup)`——从而依靠最新的 `Term` 和 `LastLog` 当选领导人;
+**Leader**：如果迁移目标 `transferee` 是自己，则什么也不干（已经是 Leader 无需迁移）；反之：
+1. 检查其是否有资格上任（即日志是否和自己一样新）;
+2. 如果 `transferee` 的日志不是最新的，则 Leader 应该向其发送 `MsgAppend`（并停止进行任何之后的 `Propose`）直到其符合条件——这需要在后续的 `HandleAppendEntriesResponse()` 中进行判断;
+3. 一旦满足迁移条件，Leader 应该立即向其发送一条`MsgTimeoutNow`，`transferee` 在收到消息后立即开始新的选举——即 `Step(MsgHup)`——从而依靠最新的 `Term` 和 `LastLog` 当选领导人;
+4. 如果 `transferee` 的日志不是最新的，则 Leader 应该向其发送 `MsgAppend`（并停止进行任何之后的 `Propose`）直到其符合条件——这需要在后续的 `HandleAppendEntriesResponse()` 中进行判断;
+5. 一旦满足迁移条件，Leader 应该立即向其发送一条`MsgTimeoutNow`，`transferee` 在收到消息后立即开始新的选举——即 `Step(MsgHup)`——从而依靠最新的 `Term` 和 `LastLog` 当选领导人;
 
 #### 2 Membership Change
 
