@@ -7,11 +7,11 @@ summary:
 categories:
     - LeetCode
 tags:
-    - 每日一题
+    - 算法题
 img:
 ---
 
-传送门 [>>> 2023.3.6 每日一题 LeetCode1653(Medium) <<<](https://leetcode.cn/problems/minimum-deletions-to-make-string-balanced/)
+传送门 [>>> LeetCode1653(Medium) <<<](https://leetcode.cn/problems/minimum-deletions-to-make-string-balanced/)
 
 <!--more-->
 

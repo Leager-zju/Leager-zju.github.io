@@ -1,5 +1,5 @@
 ---
-title: TinyKV-Project3
+title: TinyKV-Project3 Multi-Raft
 author: Leager
 mathjax: true
 date: 2023-08-20 23:37:12
@@ -10,6 +10,10 @@ tags:
   - lab
 img:
 ---
+
+本 Project 需要我们实现多个存储节点之间的管理。
+
+<!--more-->
 
 ## 思路
 

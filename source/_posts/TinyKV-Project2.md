@@ -11,6 +11,8 @@ tags:
 img:
 ---
 
+本 Project 需要我们实现基础 Raft 算法。
+
 <!--more-->
 
 ## 思路

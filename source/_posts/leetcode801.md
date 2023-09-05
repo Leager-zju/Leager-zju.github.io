@@ -7,11 +7,11 @@ summary:
 categories:
     - LeetCode
 tags:
-    - 每日一题
+    - 算法题
 img:
 ---
 
-传送门 [>>> 2022.10.10 每日一题 LeetCode801(hard) <<<](https://leetcode.cn/problems/minimum-swaps-to-make-sequences-increasing/submissions/)
+传送门 [>>> LeetCode801(hard) <<<](https://leetcode.cn/problems/minimum-swaps-to-make-sequences-increasing/)
 
 <!--more-->
 

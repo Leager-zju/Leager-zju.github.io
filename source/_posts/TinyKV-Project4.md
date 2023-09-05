@@ -11,6 +11,8 @@ tags:
 img:
 ---
 
+本 Project 需要我们实现基于 MVCC 的事务模块。
+
 <!--more-->
 
 ## 思路
