@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/largeicon.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/smallicon.jpg">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"leager-zju.github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"b2t":true},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="本 Project 需要我们实现多个存储节点之间的管理。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TinyKV-Project3 Multi-Raft">
+<meta property="og:url" content="http://leager-zju.github.com/TinyKV/TinyKV-Project3/index.html">
+<meta property="og:site_name" content="没什么看头的地方">
+<meta property="og:description" content="本 Project 需要我们实现多个存储节点之间的管理。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-08-20T15:37:12.000Z">
+<meta property="article:modified_time" content="2023-09-05T05:42:23.359Z">
+<meta property="article:author" content="Leager">
+<meta property="article:tag" content="lab">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://leager-zju.github.com/TinyKV/TinyKV-Project3/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>TinyKV-Project3 Multi-Raft | 没什么看头的地方</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">没什么看头的地方</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里可能没有你想看的...</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于我</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">7</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">14</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">67</span></a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/TinyKV/TinyKV-Project3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/Avatar.jpg">
+      <meta itemprop="name" content="Leager">
+      <meta itemprop="description" content="【数据删除】">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="没什么看头的地方">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          TinyKV-Project3 Multi-Raft
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-08-20 23:37:12" itemprop="dateCreated datePublished" datetime="2023-08-20T23:37:12+08:00">2023-08-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-09-05 13:42:23" itemprop="dateModified" datetime="2023-09-05T13:42:23+08:00">2023-09-05</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/TinyKV/" itemprop="url" rel="index"><span itemprop="name">TinyKV</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本 Project 需要我们实现多个存储节点之间的管理。</p>
+<span id="more"></span>
+<h2 id="思路">思路</h2>
+<h3 id="part-a-leadershipmembership-change-in-raft">Part A
+Leadership/Membership Change in Raft</h3>
+<p>需要修改的代码位于 <code>raft/raft.go</code>。</p>
+<p>在 3A 中我们仅需修改 Raft 层的逻辑，而完整的 Change 流程将在 3B
+中实现。</p>
+<h4 id="leadership-change">1 Leadership Change</h4>
+<p>Raft 层首先会 <code>Step</code> 一条
+<code>MsgTransferLeader</code>。由于任何节点都有可能收到该消息，故需根据身份分类讨论：</p>
+<p><strong>Non-Leader</strong>：将消息转发给 Leader;</p>
+<p><strong>Leader</strong>：如果迁移目标 <code>transferee</code>
+是自己，则什么也不干（已经是 Leader 无需迁移）；反之： 1.
+检查其是否有资格上任（即日志是否和自己一样新）; 2. 如果
+<code>transferee</code> 的日志不是最新的，则 Leader 应该向其发送
+<code>MsgAppend</code>（并停止进行任何之后的
+<code>Propose</code>）直到其符合条件——这需要在后续的
+<code>HandleAppendEntriesResponse()</code> 中进行判断; 3.
+一旦满足迁移条件，Leader
+应该立即向其发送一条<code>MsgTimeoutNow</code>，<code>transferee</code>
+在收到消息后立即开始新的选举——即
+<code>Step(MsgHup)</code>——从而依靠最新的 <code>Term</code> 和
+<code>LastLog</code> 当选领导人; 4. 如果 <code>transferee</code>
+的日志不是最新的，则 Leader 应该向其发送
+<code>MsgAppend</code>（并停止进行任何之后的
+<code>Propose</code>）直到其符合条件——这需要在后续的
+<code>HandleAppendEntriesResponse()</code> 中进行判断; 5.
+一旦满足迁移条件，Leader
+应该立即向其发送一条<code>MsgTimeoutNow</code>，<code>transferee</code>
+在收到消息后立即开始新的选举——即
+<code>Step(MsgHup)</code>——从而依靠最新的 <code>Term</code> 和
+<code>LastLog</code> 当选领导人;</p>
+<h4 id="membership-change">2 Membership Change</h4>
+<p>这里我们仅需修改 <code>Raft.addNode()</code> 与
+<code>Raft.removeNode()</code>。</p>
+<p>节点的增减其实就是对 <code>Raft.Prs</code> 哈希表的修改： -
+如果待增加节点未出现在 <code>RaftGroup</code> 中，则新增一个条目; -
+如果待删除节点出现在 <code>RaftGroup</code> 中，则删除一个条目;</p>
+<p>对节点的增删会导致“大多数”发送变化：若节点增加，则新节点等待
+<code>AppendEntries</code> 即可。若节点减少，则需要重新更新
+<code>committed</code> 并发送;</p>
+<h3 id="part-b-implement-admin-commands">Part B Implement Admin
+Commands</h3>
+<p>3B 中我们就要正式实现加上<strong>域分裂</strong>(Region
+Split)在内的所有 Admin Commands 了。需要实现的代码位于
+<code>kv/Raftstore/peer_msg_handler.go</code> 与
+<code>kv/Raftstore/peer.go</code> 中。</p>
+<p>写 3B 之前我们需要粗略回顾一下整个系统的构成。</p>
+<p>在我们之前实现的 Raft 算法中，所有 <code>Peer</code>
+位于不同存储节点上，对于一个分布式系统而言，这样能保证一个节点挂掉的同时依旧能依靠剩下的节点来提供服务。而在所有节点构成的图中，并非所有节点都两两连通，那么就需要根据不同的连通分量进行划分，这个划分单位就是
+<code>Cluster</code>。</p>
+<p>一个 <code>Cluster</code> 中包含了多个存储节点
+<code>Raftstore</code>，每个 <code>Raftstore</code> 存储大量 KV
+对，如果只用一个 Raft Group 对其进行管理，则消耗的资源太大——生成一个
+Snapshot 可能就会把整个系统搞慢，于是开发者很聪明，将这些 KV
+对根据哈希算法划分为不同区间，每个区间各由一个 Raft Group 来管理，这就是
+<code>Region</code>。可以认为一个 <code>Region</code> 本质上就是一个
+Raft Group + [StartKey, EndKey)。</p>
+<p>当 <code>Client</code> 针对某个 Key
+进行增删改查操作时，会将该命令发给
+<code>Cluster</code>。<code>Cluster</code> 手上掌握着管辖范围内所有
+<code>Raftstore</code> 的信息以及所有 <code>Region</code>
+的信息，保存在一个叫 <code>Scheduler</code>
+的结构中。有了这些信息，<code>Cluster</code> 就可以根据 Key 找到是哪个
+<code>Region</code> 存着，进一步找到该 <code>Region</code> 中 Leader
+所在的存储节点，向该节点发送命令，命令除了一些关于操作的信息，命令头
+<code>Header</code> 中还存有目标 <code>Region</code>
+的相关信息作为校验码，如 <code>RegionId</code>, <code>RegionEpoch</code>
+以便进行校对。</p>
+<p>此外，<code>Cluster</code> 还承担自我修正的功能，即
+<code>Cluster</code> 会通过 <code>RegionHeartbeat()</code>
+函数不断接收所有 <code>Region</code>
+发来的<strong>心跳信息</strong>（区别于 Raft 层
+Heartbeat），这些心跳信息包含 <code>Region</code> 的当前信息，包括
+<code>RegionEpoch</code>, Leader 等，<code>Cluster</code>
+根据这些信息决定是否向对应的 <code>Region</code> 做出一些调整措施。</p>
+<blockquote>
+<p>在 MockClient 里，测试用例做出的操作会被缓存，等到下次
+<code>RegionHeartbeat()</code> 时，判断对应 <code>Region</code>
+是否有未执行完毕的操作，如果有，则在 Response 中告知。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *SchedulerTaskHandler)</span></span> Handle(t worker.Task) &#123;</span><br><span class="line">	<span class="keyword">switch</span> task := t.(<span class="keyword">type</span>) &#123;</span><br><span class="line">	...</span><br><span class="line">	<span class="keyword">case</span> *SchedulerRegionHeartbeatTask:</span><br><span class="line">		r.onHeartbeat(task) <span class="comment">// 调用 RegionHeartbeat</span></span><br><span class="line">	...</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *MockSchedulerClient)</span></span> RegionHeartbeat(req *schedulerpb.RegionHeartbeatRequest) <span class="type">error</span> &#123;</span><br><span class="line">  <span class="comment">// check if BootStrap</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// update pending peers and leader of region</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// check region epoch</span></span><br><span class="line"></span><br><span class="line">  resp := makeResp(req)</span><br><span class="line">  <span class="keyword">if</span> op := m.operators[regionID]; op != <span class="literal">nil</span> &#123;</span><br><span class="line"> 	  <span class="keyword">if</span> m.tryFinished(op, req.Region, req.Leader) &#123;</span><br><span class="line">  		<span class="built_in">delete</span>(m.operators, regionID)</span><br><span class="line">  	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">  		m.makeRegionHeartbeatResponse(op, resp)</span><br><span class="line">  	&#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// send response to store where the leader is located</span></span><br><span class="line">  <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>而在 3C 中则要实现真实的 Scheduler。</p>
+</blockquote>
+<p>以 Mock 版本为例，每个 <code>Peer</code> 都有一个
+<code>PeerMsgHandler</code>，用于接收从 <code>Cluster</code>
+发来的消息，见 <code>HandleMsg()</code>。在 Part B 中，我们主要谈以下 3
+个 Admin Commands。</p>
+<p>这 3 种 Commands 所位于的 Message Type 均为
+<code>MsgTypeRaftCmd</code>，那么首先会来到
+<code>proposeRaftCommand()</code> 函数中。</p>
+<h4 id="propose-transfer-leader">1 Propose transfer leader</h4>
+<p>因为领导迁移仅仅是一个操作，无需所有节点进行复制，所以收到该类型的
+Command 时，直接调用 <code>RawNode.TransferLeader()</code> 即可。</p>
+<h4 id="implement-conf-change-in-raftstore">2 Implement conf change in
+Raftstore</h4>
+<p>一次完整的 conf change 流程如下</p>
+<ol type="1">
+<li>调用 <code>RawNode.ProposeConfChange()</code> 给 Leader Propose 一条
+<code>EntryConfChange</code> 的<strong>特殊类型</strong>日志;</li>
+<li>apply 到这条命令时，首先检查该命令是否有效，即 <code>RegionId</code>
+与 <code>RegionEpoch</code>
+是否匹配，若不匹配，说明在收到消息之前已经进行过 Peer Change 或 Region
+Split，返回一个 <code>error</code>;</li>
+<li>令当前 <code>RegionEpoch</code> 中的 <code>confVersion</code>
+字段自增 <code>1</code>;</li>
+<li>根据 <code>ChangeType</code> 执行新 <code>Peer</code> 的添加 or 已有
+<code>Peer</code> 的删除，表现为：修改 <code>Region</code> 中的
+<code>Peers</code>，以及调用
+<code>insertPeerCache()</code>/<code>removePeerCache()</code>; &gt;
+注意，如果删除自身节点，则要执行 <code>destroyPeer()</code>，会删除包括
+<code>RegionRanges</code> 在内的诸多字段，故后续步骤无需再管，直接
+return 即可，此时完成当前 entry apply 后应直接退出，不能将数据写到
+badger 里。 &gt; &gt; 如果待添加的 <code>Peer</code> 已在 Group
+中则啥也不做，同理，如果待删除的 <code>Peer</code>
+不在了也啥也不做，而不是返回 <code>error</code>。</li>
+<li>更新
+<code>storeMeta</code>，注意这是个临界变量，在真实并发场景下对其的修改需要<strong>加锁</strong>;</li>
+<li>调用 <code>rawnode.ApplyConfChange()</code>，然后根据命令类型进行
+<code>Raft</code> 层的节点变动;</li>
+<li>如果当前节点在 <code>Raft</code> 层是 Leader 的身份，则需要返回
+Response，并且给 <code>Scheduler</code>
+发一则心跳信息，表示该操作已完成;</li>
+</ol>
+<p>接下来我们不禁心生疑惑：<strong>对于 <code>AddPeer</code>
+而言，新加入的 <code>Peer</code> 所在 <code>Raftstore</code>
+是怎么知道他需要创建一个 <code>Peer</code>？这个 <code>Peer</code>
+又是怎么知道他在哪个 <code>Region</code> 中的呢？<code>Region</code>
+中原来的那些 <code>Peer</code> 是怎么知道新的 <code>Peer</code>
+已经加入了呢？</strong></p>
+<p>首先要了解的是，测试代码里所使用的只是模拟的
+<code>Cluster</code>，不妨称它为
+<code>MockCluster</code>（当然代码里面它就叫
+<code>Cluster</code>，在文件 <code>kv/test_raftstore/cluster.go</code>
+中）。</p>
+<p>这个 <code>MockCluster</code> 持有一个 <code>NodeSimulator</code>
+来模拟大型分布式集群的节点间通信，以及 C/S
+之间的通信。所有的测试用操作，包括
+<code>MustPut()</code>/<code>MustGet()</code>/<code>MustDelete()</code>
+等都会一步步通过 <code>MockCluster.CallCommandOnLeader()</code> 到
+<code>MockCluster.CallCommand()</code> 再到
+<code>NodeSimulator.CallCommandOnStore()</code>，最后通过目标
+<code>Raftstore</code> 对应的 <code>RaftstoreRouter</code>
+的结构进行发送。</p>
+<p>之前 <code>HandleRaftReady()</code> 时调用 <code>send()</code> 函数将
+<code>Ready</code> 中的 Msgs 发出去，本质上就是通过
+<code>RaftstoreRouter.SendRaftMessage()</code> 执行发送操作。</p>
+<blockquote>
+<p>因为这里都是在本地模拟，所以不用考虑远程调用、网络流之类的问题。</p>
+</blockquote>
+<p><code>SendRaftMessage()</code> 函数做的事其实很简单——先调用
+<code>send()</code> 发 <code>MsgTypeRaftMessage</code> 类型的消息（通过
+<code>peerSender</code> 这个管道进行传递），如果出现错误，再调用
+<code>sendStore()</code> 发 <code>MsgTypeStoreRaftMessage</code>
+类型的消息（通过 <code>storeSender</code> 这个管道进行传递）。</p>
+<p>消息进了这两个管道，最后会从哪里被接受呢？</p>
+<p>首先，<code>RaftstoreRouter</code> 会在 <code>Raftstore</code>
+生成时一并创建，见函数 <code>CreateRaftstore()</code>。本质上一个
+<code>Raftstore</code> 内所有部分都共享同一个
+<code>router</code>，无论是 <code>Raftstore.router</code> 还是
+<code>ctx.router</code>，都指向同一个数据结构。下面都叫它
+<code>router</code> 了。</p>
+<p>每个 <code>Raftstore</code> 在启动时都会调用
+<code>startWorkers()</code>，然后启动 <code>raftWorker</code> 和
+<code>storeWorker</code> 这俩 GoRoutine，它们均接收从
+<code>router</code> 中传来的消息，前者用的是
+<code>router.peerSender</code> 这个管道，后者从
+<code>router.storeSender</code> 这个管道取消息。问题得到了解答。</p>
+<p>同时我们也发现，在 <code>send()</code> 函数中，如果发现当前
+<code>Raftstore</code> 并没有目标 <code>Region</code> 存在，则返回一个
+<code>error</code>，消息也会直接送到 <code>storeWorker</code>
+手上。<code>storeWorker</code> 拿到后发现是一条
+<code>MsgTypeStoreRaftMessage</code>，便调用
+<code>onRaftMessage()</code>
+进行后续处理。走到这里，我们又有新发现了，那就是任务书中也提到了的
+<code>maybeCreatePeer()</code> 函数，其注释是这么写的：<em>If target
+peer doesn't exist, create it.</em></p>
+<blockquote>
+<p>这里新建 <code>Peer</code> 的操作我们也应认真看看，包括：修改
+<code>StoreMeta</code>，调用 <code>router.register()</code>
+进行<strong>注册</strong>，以及发送一条 <code>MsgTypeStart</code>
+消息<strong>唤醒</strong>其启动 <code>ticker</code> 正式开始工作。</p>
+</blockquote>
+<p>再来看之前的疑惑，第一个问题其实得到解答了：随着上述步骤 4, 6
+的执行，新 <code>Peer</code> 的信息已经加载到 <code>PeerCache</code>
+中了，Raft 层也将新的 <code>Peer</code> 加载到 <code>Prs</code> 表中。当
+Leader 下一次群发 heartbeat 或 append 时，会给新 <code>Peer</code>
+也发一份 RaftMessage，目标 <code>Raftstore</code> 收到后发现没有目标
+<code>Region</code> 存在，也就开始了后续的创建操作。</p>
+<p>对于第二个问题，在创建 <code>Peer</code>
+之前，<code>Raftstore</code>收到的消息就含有 <code>Region</code>
+相关信息。</p>
+<p>第三个问题，Follwers/Candidates 在 apply conf change
+时仅仅是将其加到了 <code>Prs</code>
+中，如果网络一切良好，其实不用做出任何操作。而 Leader 不一样，在添加
+<code>Prs</code> 时，<code>Match</code>/<code>Next</code>
+字段其实都应该赋 <strong>0</strong>——因为该 <code>Peer</code>
+尚未初始化——这样一来，一旦发送 append 消息中遍历到新 <code>Peer</code>
+时，发现其 <code>Next=0</code>，无论如何都会小于
+<code>truncatedIndex</code>，Leader 会立刻发送 snapshot 过去。由于是通过
+<code>replicatePeer()</code> 的方式进行创建，我们会发现这种方式创建的
+<code>Peer</code>，其 Raft 层的 <code>Prs</code>
+最开始是空的，甚至不包含自身，在这种状态下可以认为其属于一个“<strong>待机</strong>”状态，只允许处理
+<code>MsgSnapshot</code>，其余消息一律作废。</p>
+<p>只有收到了 snapshot 并更细状态后，<code>Prs</code>
+也被正确赋值，其才知道了其他节点的存在，此时脱离“<strong>待机</strong>”状态。</p>
+<p>等到 Leader 收到回复后，新 <code>Peer</code> 才算正式加入 Group。</p>
+<blockquote>
+<p>当然，如果网络很差，snapshot 并没有收到，反而 Leader 早早挂了，那么新
+<code>Peer</code> 并未被初始化，也无法参与原有节点在 election timeout
+后发起的选举，可能会导致该 Group 彻底死掉——只有两个 <code>Peer</code>
+时，Candidate 无论如何也无法从另一个未初始化的 <code>Peer</code>
+处得到选票，也就无法成为 Leader。</p>
+<p>但是在 apply snapshot 之前又不能回应其余消息——谁知道 apply snapshot
+后会不会拒绝呢？</p>
+<p>3B 的最后几个测试中概率出现这种情况，我的做法是：算我过了。</p>
+</blockquote>
+<p>由于 conf change 和后面的 region split 会导致
+<code>RegionEpoch</code> 发生变化，所有 apply 之前都应当检查
+<code>Request.Header</code> 中的校验字段是否匹配，除了
+<code>RegionId</code> 是否一致、<code>RegionEpoch</code>
+是否匹配，对于根据 <code>Key</code> 进行的操作，还要检查
+<code>Key</code> 是否在 <code>Region</code> 中。很典型的例子就是目标
+<code>Key</code> 因之前进行了 region split 跑到另一个
+<code>Region</code> 里去了，此时再执行操作必然破坏一致性。</p>
+<h4 id="implement-split-region-in-raftstore">Implement split region in
+Raftstore</h4>
+<p>一次完整的 region split 流程如下：</p>
+<ol type="1">
+<li><code>ticker</code> 定期通过 <code>onSplitRegionCheckTick()</code>
+向 <code>splitChecker</code> 发送 <code>SplitCheckTask</code>
+检查是否需要进行 split，如果需要则通过 <code>router</code> 发送一条
+<code>MsgTypeSplitRegion</code> 消息;</li>
+<li>收到该消息后，<code>Peer</code> 执行
+<code>onPrepareSplitRegion()</code>，首先校验该 split
+是否合理，若是，则给 <code>Scheduler</code> 发送一则
+<code>SchedulerAskSplitTask</code>;</li>
+<li>随后 <code>Scheduler</code> 生成新的 <code>RegionId</code> 以及新的
+<code>PeerId</code>，包裹在 <code>Split</code> 的 Admin Command 中，通过
+<code>router</code> 发松;</li>
+<li>handler 收到消息，给 Leader propose 一条命令;</li>
+<li>apply 到这条命令时，首先检查该命令是否有效，即 <code>RegionId</code>
+与 <code>RegionEpoch</code>
+是否匹配，若不匹配，说明在收到消息之前已经进行过 Peer Change 或 Region
+Split，返回一个 <code>error</code>;</li>
+<li>根据命令中包含的 <code>splitKey</code> 划分为两个
+<code>Region</code>，值区间分别为 <code>[startKey, splitKey)</code> 与
+<code>[splitKey, endKey)</code>，且 <code>RegionEpoch</code> 中的
+<code>Version</code> 字段均在原基础上加 <code>1</code>; &gt;
+其中前者为原 <code>Region</code>，后者为新 <code>Region</code></li>
+<li>根据命令中的 <code>NewPeerIds</code>，为新 <code>Region</code> 的
+<code>Peers</code> 修改 <code>PeerId</code>，<code>StoreId</code>
+不变;</li>
+<li>调用 <code>createPeer()</code> 在当前 <code>Raftstore</code> 上创建
+<code>Peer</code>，并如同 <code>maybeCreatePeer()</code>
+的那样进行注册与唤醒等操作;</li>
+<li>更新 <code>storeMeta</code>，分裂出的两个 <code>Region</code>
+都要更新;</li>
+<li>如果当前节点在 <code>Raft</code> 层是 Leader 的身份，则需要返回
+Response，并且给 <code>Scheduler</code>
+发一则心跳信息，表示该操作已完成;</li>
+</ol>
+<p>region split 中并没有很难处理的疑难杂症。</p>
+<h3 id="part-c-scheduler">Part C Scheduler</h3>
+<p>需要修改的代码位于 <code>scheduler/server/cluster.go</code> 与
+<code>scheduler/server/schedulers/balance_region.go</code>，分别需要实现
+<code>processRegionHeartbeat()</code> 函数与 <code>Schedule()</code>
+函数。总体来讲比 3B
+简单许多，根据任务书一步步来即可，仅有少量小bug需要根据测试的打印结果来调整。</p>
+<h4 id="collect-region-heartbeat">1 Collect region heartbeat</h4>
+<p>根据 3B 中描述的整体系统流程，每个集群 <code>Cluster</code>
+所持有的总调度器 <code>Scheduler</code> 会根据 <code>Region</code>
+发来的心跳信息为其分配任务（PeerChange、RegionSplit
+等）。在真实网络下，心跳信息会以不可预知的速度到达
+<code>Scheduler</code>，同时也可能因为网络分区而收到来自同个
+<code>Region</code> 不同 Leader 的信息——这就需要我们记录下每个
+<code>Region</code> 的重要信息（用 <code>RegionInfo</code>
+这个数据结构来表示），以防收到 stale heartbeat。</p>
+<p>先来介绍一下整体流程，其实和 3B 中的 Mock 差不多：</p>
+<p>首先，<code>Region</code> 的 Leader 发送心跳，<code>Server</code>
+通过 <code>RegionHeartbeat()</code>
+不断收取心跳信息，并从中提取出发送方的
+<code>RegionInfo</code>，然后下放到 <code>Cluster</code>，通过
+<code>HandleRegionHeartbeat()</code> 根据当前 <code>RegionInfo</code>
+进行处理：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *Server)</span></span> RegionHeartbeat(stream schedulerpb.Scheduler_RegionHeartbeatServer) <span class="type">error</span> &#123;</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">    ...</span><br><span class="line">		request, err := server.Recv()</span><br><span class="line">    ...</span><br><span class="line">		region := core.RegionFromHeartbeat(request)</span><br><span class="line">    ...</span><br><span class="line">		err = cluster.HandleRegionHeartbeat(region)</span><br><span class="line">    ...</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在处理的过程中，<code>Cluster</code> 首先调用
+<code>processRegionHeartbeat()</code> 更新信息，若成功且该
+<code>Region</code> 拥有至少一个 <code>Peer</code>，就调用
+<code>Dispatch(Heartbeat)</code> 检查是否有对该 <code>Region</code>
+待执行的命令 <code>Operator</code>：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *RaftCluster)</span></span> HandleRegionHeartbeat(region *core.RegionInfo) <span class="type">error</span> &#123;</span><br><span class="line">	<span class="keyword">if</span> err := c.processRegionHeartbeat(region); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	c.RLock()</span><br><span class="line">	co := c.coordinator</span><br><span class="line">	c.RUnlock()</span><br><span class="line">	co.opController.Dispatch(region, schedule.DispatchFromHeartBeat)</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对于该 <code>Operator</code>：</p>
+<ol type="1">
+<li>如果尚未执行完毕（每个 <code>Operator</code> 集成了多个步骤
+<code>OpStep</code>，可能只执行到中间的某一步）且未超时，检查该
+<code>Region</code> 的 <code>ConfVersion</code> 是否完全由该
+<code>Operator</code> 修改：若是，则调用
+<code>SendScheduleCommand()</code> 执行下一步命令——发送相应
+<code>RegionHeartbeatResponse</code>，当 <code>Region</code> 收到后便会
+propose 相应命令；反之，说明该 <code>Operator</code>
+已过时，将其移除，并将状态设置为
+<code>OperatorStatus_CANCEL</code>;</li>
+<li>如果已执行完毕，将其移除，并将状态设置为
+<code>OperatorStatus_SUCCESS</code>;</li>
+<li>如果超时，将其移除，并将状态设置为
+<code>OperatorStatus_TIMEOUT</code>;</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(oc *OperatorController)</span></span> Dispatch(region *core.RegionInfo, source <span class="type">string</span>) &#123;</span><br><span class="line">	<span class="keyword">if</span> op := oc.GetOperator(region.GetID()); op != <span class="literal">nil</span> &#123;</span><br><span class="line">		timeout := op.IsTimeout()</span><br><span class="line">		<span class="keyword">if</span> step := op.Check(region); step != <span class="literal">nil</span> &amp;&amp; !timeout &#123;</span><br><span class="line">			origin := op.RegionEpoch()</span><br><span class="line">			latest := region.GetRegionEpoch()</span><br><span class="line">			changes := latest.GetConfVer() - origin.GetConfVer()</span><br><span class="line">			<span class="keyword">if</span> source == DispatchFromHeartBeat &amp;&amp;</span><br><span class="line">				changes &gt; <span class="type">uint64</span>(op.ConfVerChanged(region)) &#123;</span><br><span class="line">				<span class="keyword">if</span> oc.RemoveOperator(op) &#123;</span><br><span class="line">					oc.opRecords.Put(op, schedulerpb.OperatorStatus_CANCEL)</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">return</span></span><br><span class="line">			&#125;</span><br><span class="line">			oc.SendScheduleCommand(region, step, source)</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> op.IsFinish() &amp;&amp; oc.RemoveOperator(op) &#123;</span><br><span class="line">			oc.opRecords.Put(op, schedulerpb.OperatorStatus_SUCCESS)</span><br><span class="line">		&#125; <span class="keyword">else</span> <span class="keyword">if</span> timeout &amp;&amp; oc.RemoveOperator(op) &#123;</span><br><span class="line">			oc.opRecords.Put(op, schedulerpb.OperatorStatus_TIMEOUT)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们只需要实现函数 <code>processRegionHeartbeat()</code>。</p>
+<p>首先检查该 <code>RegionInfo</code> 的可信度：</p>
+<ol type="1">
+<li>如果在已有的表中记录过同一 <code>RegionId</code> 的 info，并且新
+info 的 <code>RegionEpoch</code> 中的两个字段 <code>ConfVersion</code>,
+<code>Version</code> 只要有一个比已有的小，就认为不可信，返回
+<code>ErrRegionIsState</code>;</li>
+<li>如果存在那些与新 info 对应的 Key 区间有重合的 info（这种情况发生于
+Region Split 操作），并且新 info 的 <code>RegionEpoch</code>
+中的两个字段 <code>ConfVersion</code>, <code>Version</code>
+只要有一个比已有的小，就认为不可信，返回
+<code>ErrRegionIsState</code>;</li>
+</ol>
+<p>检查通过后，调用 <code>putRegion()</code> 将该 info
+插入表中，并删除原有 info（如果有的话）。</p>
+<p>最后，调用 <code>updateStoreStatusLocked()</code>
+更新集群中所有存储节点状态。</p>
+<p>此处没有什么疑难杂症，很快就能完成。</p>
+<h4 id="implement-region-balance-scheduler">2 Implement region balance
+scheduler</h4>
+<p>上面提到的 <code>Operator</code> 是怎么来的呢？有一部分就是
+<code>Scheduler</code> 产生的。</p>
+<p><code>Cluster</code> 一经创建便持有一个
+<code>Coordinator</code>，其会通过 <code>runScheduler()</code> 来调用
+<code>scheduler.Schedule()</code>，定期检查是否有存储节点超载，就需要找到该节点
+<code>src</code> 的一个<strong>合适</strong>的
+<code>Region</code>，将位于 <code>src</code> 中从属于该
+<code>Region</code> 的 <code>Peer</code>
+转移到某个<strong>合适</strong>的目标节点
+<code>dst</code>，从而达成负载均衡，并通过函数返回的
+<code>MovePeerOperator</code> 加到该 <code>Region</code>
+对应的“待执行命令”中，等待下一次该 <code>Region</code>
+发来心跳信息时执行。</p>
+<blockquote>
+<p>一个 <code>MovePeerOperator</code> 包含以下步骤：</p>
+<ol type="1">
+<li>删除原节点的 <code>Peer</code>（即 <code>RemovePeer</code>
+操作）;</li>
+<li>如果必要则还要进行 <code>transferLeader</code>;</li>
+<li>将新 <code>Peer</code> 加入 <code>Region</code>（即
+<code>AddPeer</code> 操作）;</li>
+</ol>
+<p>最后等待该新 <code>Peer</code> 收到消息正式加入 Group。</p>
+</blockquote>
+<p>上文提到<strong>合适</strong>，那么究竟何谓<strong>合适</strong>？</p>
+<p>首先是<strong>合适</strong>的 <code>Region</code>，任务书指出：</p>
+<ol type="1">
+<li>First, it will try to select a <code>pending region</code> because
+pending may mean the disk is overloaded;</li>
+<li>If there isn’t a pending region, it will try to find a
+<code>follower region</code>;</li>
+<li>If it still cannot pick out one region, it will try to pick
+<code>leader regions</code>;</li>
+</ol>
+<blockquote>
+<p>可以利用框架提供的三个函数 <code>GetPendingRegionsWithLock()</code>,
+<code>GetFollowersWithLock()</code> and
+<code>GetLeadersWithLock()</code> 进行挑选。</p>
+</blockquote>
+<p><code>dst</code> 的确定原则也很简单：在所有满足 src.RegionSize -
+dst.RegionSize &gt; 2 * region.ApproximateSize 中选出那个
+<code>RegionSize</code> 最小的节点。如果 <code>RegionSize</code>
+差值不够大，那么在迁移后很可能重新迁移回去。</p>
+<blockquote>
+<p>当然，目标节点必须不包含同一
+<code>Region</code>，原因不言而喻，需要在 coding 中特别注意。</p>
+</blockquote>
+<p>确定下来后，我们就可以在 <code>dst</code> 上调用
+<code>AllocPeer()</code> 分配空间了，然后根据已有信息创建一个
+<code>MovePeerOperator</code> 并返回。</p>
+<p>值得注意的是，我们进行检查的所有节点必须为
+<strong>suitable</strong>，即：a suitable store should be
+<code>up</code> and the <code>down time</code> cannot be longer than
+<code>MaxStoreDownTime</code> of the cluster, which you can get through
+<code>cluster.GetMaxStoreDownTime()</code>.</p>
+<p>整个代码如下：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">var</span> originalRegion *core.RegionInfo</span><br><span class="line"><span class="keyword">var</span> originalStore *core.StoreInfo</span><br><span class="line"> <span class="keyword">var</span> targetStore *core.StoreInfo</span><br><span class="line">stores := GetAllSortedSuitableStores(cluster)</span><br><span class="line"></span><br><span class="line"> <span class="comment">// find original region and original store</span></span><br><span class="line">cb := <span class="function"><span class="keyword">func</span><span class="params">(container core.RegionsContainer)</span></span> &#123;</span><br><span class="line">	originalRegion = container.RandomRegion([]<span class="type">byte</span>&#123;&#125;, []<span class="type">byte</span>&#123;&#125;)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">for</span> i, store := <span class="keyword">range</span> stores &#123;</span><br><span class="line">	<span class="keyword">if</span> originalRegion = SelectSuitableRegion(cb); originalRegion != <span class="literal">nil</span> &#123;</span><br><span class="line">     originalStore = stores[i]</span><br><span class="line">     <span class="keyword">break</span></span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> originalStore == <span class="literal">nil</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"> <span class="comment">// find target store</span></span><br><span class="line"><span class="keyword">for</span> target := <span class="built_in">len</span>(stores) - <span class="number">1</span>; target &gt;= <span class="number">0</span>; target-- &#123;</span><br><span class="line">	regionInTargetStore := RegionIsInStore(originalRegion, stores[target])</span><br><span class="line">	<span class="keyword">if</span> !regionInTargetStore &amp;&amp; isDifferenceBigEnough(stores[original], stores[target], originalRegion) &#123;</span><br><span class="line">     targetStore = stores[target]</span><br><span class="line">		<span class="keyword">break</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> targetStore == <span class="literal">nil</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">newPeer := AllocPeer(cluster, stores[target].GetID())</span><br><span class="line"><span class="keyword">return</span> CreateMovePeerOperator(s.GetName(), cluster, originalRegion, operator.OpBalance, stores[original].GetID(), stores[target].GetID(), newPeer.GetId())</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>并且由于 <code>RaftGroup</code>
+随时可能变化，故对于不在组内的节点而言，任何消息都是无效的——即便收到消息，也不能做任何事。对于新加入组的节点而言，Raft
+层的 <code>Prs</code> 可能未被正确初始化，所以如果收到一条 peer
+的消息而该 peer 又不在 <code>Prs</code> 中时，将其加入。</p>
+</blockquote>
+<p>有一点不能理解的是，虽然任务书中表示 <code>RegionEpoch.ConfVer</code>
+会在 confchange 中改变，但并没有说 <code>RegionEpoch.Version</code>
+也会改，只说了在 split 中改变。然而测试用例会不通过“只修改了 confver
+而不修改 version”的代码。</p>
+<h4 id="regionsplit">3 RegionSplit</h4>
+<p>不同 RaftGroup 负责不同 Region，随着时间推进必然会有一些 Region
+会超出一个值
+<code>RegionSplitSize</code>，为了负载均衡，必须将这些过大的 Region
+一分为二。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/lab/" rel="tag"># lab</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/TinyKV/TinyKV-Project2/" rel="prev" title="TinyKV-Project2 RaftKV">
+      <i class="fa fa-chevron-left"></i> TinyKV-Project2 RaftKV
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/TinyKV/TinyKV-Project4/" rel="next" title="TinyKV-Project4 Transaction">
+      TinyKV-Project4 Transaction <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%9D%E8%B7%AF"><span class="nav-text">思路</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#part-a-leadershipmembership-change-in-raft"><span class="nav-text">Part A
+Leadership&#x2F;Membership Change in Raft</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#leadership-change"><span class="nav-text">1 Leadership Change</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#membership-change"><span class="nav-text">2 Membership Change</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#part-b-implement-admin-commands"><span class="nav-text">Part B Implement Admin
+Commands</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#propose-transfer-leader"><span class="nav-text">1 Propose transfer leader</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#implement-conf-change-in-raftstore"><span class="nav-text">2 Implement conf change in
+Raftstore</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#implement-split-region-in-raftstore"><span class="nav-text">Implement split region in
+Raftstore</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#part-c-scheduler"><span class="nav-text">Part C Scheduler</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#collect-region-heartbeat"><span class="nav-text">1 Collect region heartbeat</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#implement-region-balance-scheduler"><span class="nav-text">2 Implement region balance
+scheduler</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#regionsplit"><span class="nav-text">3 RegionSplit</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Leager"
+      src="/images/Avatar.jpg">
+  <p class="site-author-name" itemprop="name">Leager</p>
+  <div class="site-description" itemprop="description">【数据删除】</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">67</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Leager-zju" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Leager-zju" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div>
+<span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("09/25/2022 00:00:00");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "本站已存活 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+    }
+setInterval("createtime()",250);
+</script>
+</div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Leager</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,0' opacity='0.5' zIndex='-1' count='160' src="//cdn.jsdelivr.net/gh/theme-next/theme-next-canvas-nest@1.0.0/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>
