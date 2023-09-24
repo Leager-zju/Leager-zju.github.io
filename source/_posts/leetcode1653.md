@@ -11,7 +11,7 @@ tags:
 img:
 ---
 
-传送门 [>>> LeetCode1653(Medium) <<<](https://leetcode.cn/problems/minimum-deletions-to-make-string-balanced/)
+传送门 [>>> LeetCode 1653(Medium) <<<](https://leetcode.cn/problems/minimum-deletions-to-make-string-balanced/)
 
 <!--more-->
 

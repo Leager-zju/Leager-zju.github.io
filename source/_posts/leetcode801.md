@@ -11,7 +11,7 @@ tags:
 img:
 ---
 
-传送门 [>>> LeetCode801(hard) <<<](https://leetcode.cn/problems/minimum-swaps-to-make-sequences-increasing/)
+传送门 [>>> LeetCode 801(hard) <<<](https://leetcode.cn/problems/minimum-swaps-to-make-sequences-increasing/)
 
 <!--more-->
 
