@@ -302,7 +302,7 @@ Total Test time (real) =   1.77 sec
 给定 `isn` 和绝对序列号 `n`，求相应的序列号，易得
 
 $$
-seqno = (isn + n\ \&\ \text{uint32\_max})\ \%\ \text{uint32\_max}
+seqno = (isn + n\ \&\ \text{uint32_max})\ \%\ \text{uint32_max}
 $$
 
 #### unwrap(n, isn, checkpoint)
@@ -537,12 +537,12 @@ void TCPSender::tick(const size_t ms_since_last_tick) {
 怎样算正确的 ackno 呢？对于一个段而言，当且仅当下式满足时，该段被成功确认。
 
 $$
-\text{abs\_ackno} \geq \text{abs\_seqno} + \text{length\_in\_sequence\_space}
+\text{abs_ackno} \geq \text{abs_seqno} + \text{length_in_sequence_space}
 $$
 
 > 也就是说，只有部分确认的段依然被认为是"完全未确认"。
 
-与此同时，还应满足 $\text{abs\_ackno}\leq \text{abs\_next\_seqno}$，否则会被认为是无效确认号。
+与此同时，还应满足 $\text{abs_ackno}\leq \text{abs_next_seqno}$，否则会被认为是无效确认号。
 
 ```c++
 bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_size) {
@@ -584,7 +584,7 @@ bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
 已经发过的数据部分在未超时的情况下不用重复发送，那么理论上 `ackno` 会小于等于 `next_seqno`，而我们之后要发的数据部分应从 `next_seqno` 部分开始，于是乎这里就有了**发送窗口**的概念，即
 
 $$
-\text{send\_window\_size} = \text{abs\_ackno} + \text{\_rws} - \text{abs\_next\_seqno}
+\text{send_window_size} = \text{abs_ackno} + \text{_rws} - \text{abs_next_seqno}
 $$
 
 这里需要注意的点是，`send_window_size` 指的是还可以发送多少序列号，而 `TCPConfig::MAX_PAYLOAD_SIZE` 指明了数据部分的字符数量，这两者的区别影响了是否需要在发送端的 `ByteStream` 数据读完后将 `FIN` 设置为 `1`。
@@ -682,17 +682,17 @@ Total Test time (real) =   1.30 sec
 
 ```c++
 while (!_sender.segments_out().empty()) {
-        TCPSegment &seg = _sender.segments_out().front();
-        auto ackno = _receiver.ackno();
-        if (ackno.has_value()) { // 说明 receiver 至少进入了 SYN_RECV 阶段
-            seg.with_ack(true).with_ackno(ackno.value());
-        }
-        seg.with_win(_receiver.window_size());
-        if (seg.header().ack || seg.length_in_sequence_space() != 0) {
-            segments_out().push(seg);
-        }
-        _sender.segments_out().pop();
+    TCPSegment &seg = _sender.segments_out().front();
+    auto ackno = _receiver.ackno();
+    if (ackno.has_value()) { // 说明 receiver 至少进入了 SYN_RECV 阶段
+        seg.with_ack(true).with_ackno(ackno.value());
     }
+    seg.with_win(_receiver.window_size());
+    if (seg.header().ack || seg.length_in_sequence_space() != 0) {
+        segments_out().push(seg);
+    }
+    _sender.segments_out().pop();
+}
 ```
 
 ## 接收
@@ -701,13 +701,13 @@ while (!_sender.segments_out().empty()) {
 
 ```c++
 if (_receiver.in_listen() && _sender.in_closed()) {
-      if (!seg.header().syn) {
-          return;
-      }
-      _receiver.segment_received(seg);
-      connect();
-      return;
-  }
+    if (!seg.header().syn) {
+        return;
+    }
+    _receiver.segment_received(seg);
+    connect();
+    return;
+}
 ```
 
 其他时候，如果收到（或发送） `RST=1` 段后，会引发 `unclean_shutdown`。
