@@ -157,14 +157,16 @@ C++11 引入了移动语义，旨在进行一些**转移所有权**的操作，�
 
 ### std::move
 
-
-
 ```c++
+// 一个示例实现
 template< class T >
-typename std::remove_reference<T>::type&& move( T&& t ) noexcept;
+typename std::remove_reference<T>::type&& move( T&& t ) noexcept {
+  using ReturnType = remove_referece_t<T>&&;
+  return static_cast<ReturnType>(param);
+}
 ```
 
-其作用就是返回实参相应的右值引用，其中 `std::remove_reference` 相当于是做了一个去除引用保留原始数据类型的操作。调用结束后，变量 `t` 会被销毁，而函数返回值会被新变量接收，进行右值的赋值，从而实现"移动"的语义。
+它仅仅做了一件事，那就是**将实参转换为右值引用**，其中 `std::remove_reference` 相当于是做了一个去除引用保留原始数据类型的操作。
 
 ### 移动构造函数
 
@@ -172,7 +174,9 @@ typename std::remove_reference<T>::type&& move( T&& t ) noexcept;
 
 ## 完美转发
 
-**完美转发**指的是利用一个接受任意实参的函数模板将参数转发到其它函数，目标函数会收到与转发函数完全相同的实参，从而转发调用。转发函数实参是左值那目标函数实参也是左值，转发函数实参是右值那目标函数实参也是右值。并且转发参数必然要用到引用特性，否则无法准确实现功能，这里就要用到 `std::forward`。
+**完美转发**指的是利用一个接受任意实参的函数模板将参数转发到其它函数，目标函数会收到与转发函数完全相同的实参，从而转发调用。转发函数实参是左值那目标函数实参也是左值，转发函数实参是右值那目标函数实参也是右值。
+
+由于万能引用的存在，函数模板 `func(Type&&)` 内部无法知道形参对应的实参到底是个左值还是右值，如果要用到该形参作为其他函数实参，就会出现问题，这里就要用到 `std::forward`。
 
 ### std::forward
 
