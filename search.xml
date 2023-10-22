@@ -5309,17 +5309,17 @@ C++11
 引入了移动语义，旨在进行一些<strong>转移所有权</strong>的操作，顾名思义就是资源转为己有，而另一方则失去资源所有权，采用
 <code>std::move()</code> 函数实现。</p>
 <h3 id="stdmove">std::move</h3>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt; <span class="keyword">class</span> <span class="title class_">T</span> &gt;</span><br><span class="line"><span class="keyword">typename</span> std::remove_reference&lt;T&gt;::<span class="function">type&amp;&amp; <span class="title">move</span><span class="params">( T&amp;&amp; t )</span> <span class="keyword">noexcept</span></span>;</span><br></pre></td></tr></table></figure>
-<p>其作用就是返回实参相应的右值引用，其中
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 一个示例实现</span></span><br><span class="line"><span class="keyword">template</span>&lt; <span class="keyword">class</span> <span class="title class_">T</span> &gt;</span><br><span class="line"><span class="keyword">typename</span> std::remove_reference&lt;T&gt;::<span class="function">type&amp;&amp; <span class="title">move</span><span class="params">( T&amp;&amp; t )</span> <span class="keyword">noexcept</span> </span>&#123;</span><br><span class="line">  <span class="keyword">using</span> ReturnType = <span class="type">remove_referece_t</span>&lt;T&gt;&amp;&amp;;</span><br><span class="line">  <span class="keyword">return</span> <span class="built_in">static_cast</span>&lt;ReturnType&gt;(param);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>它仅仅做了一件事，那就是<strong>将实参转换为右值引用</strong>，其中
 <code>std::remove_reference</code>
-相当于是做了一个去除引用保留原始数据类型的操作。调用结束后，变量
-<code>t</code>
-会被销毁，而函数返回值会被新变量接收，进行右值的赋值，从而实现"移动"的语义。</p>
+相当于是做了一个去除引用保留原始数据类型的操作。</p>
 <h3 id="移动构造函数">移动构造函数</h3>
 <p>引入移动语义这一新特性之后，移动构造函数也随之产生，其接收同类型右值引用的实参，进行资源的迁移，将深浅拷贝两者的优势集中，既减少了开销，也无需担心出现
 double free 的情况。</p>
 <h2 id="完美转发">完美转发</h2>
-<p><strong>完美转发</strong>指的是利用一个接受任意实参的函数模板将参数转发到其它函数，目标函数会收到与转发函数完全相同的实参，从而转发调用。转发函数实参是左值那目标函数实参也是左值，转发函数实参是右值那目标函数实参也是右值。并且转发参数必然要用到引用特性，否则无法准确实现功能，这里就要用到
+<p><strong>完美转发</strong>指的是利用一个接受任意实参的函数模板将参数转发到其它函数，目标函数会收到与转发函数完全相同的实参，从而转发调用。转发函数实参是左值那目标函数实参也是左值，转发函数实参是右值那目标函数实参也是右值。</p>
+<p>由于万能引用的存在，函数模板 <code>func(Type&amp;&amp;)</code>
+内部无法知道形参对应的实参到底是个左值还是右值，如果要用到该形参作为其他函数实参，就会出现问题，这里就要用到
 <code>std::forward</code>。</p>
 <h3 id="stdforward">std::forward</h3>
 <p>函数原型如下：</p>
@@ -13280,21 +13280,24 @@ LeetCode 354 俄罗斯套娃信封问题(Hard) &lt;&lt;&lt;</a></li>
       </categories>
   </entry>
   <entry>
-    <title>点击 Url 到显示网页，这之间具体发生了什么？</title>
-    <url>/uncategorized/WhatHappenedAfterClickUrl/</url>
+    <title>点击 Url 到显示网页之间发生了什么？</title>
+    <url>/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/WhatHappenedAfterClickUrl/</url>
     <content><![CDATA[<p>经典网络问题，贯穿整个计算机网络学习始终，每个阶段拿出来回味都有不同的感受与收获。</p>
 <span id="more"></span>
 <blockquote>
 <p>参考资料：《网络是怎样运行的》 by 户根勤</p>
 </blockquote>
-<h2 id="通过-dhcp-拿-ip-地址">通过 DHCP 拿 ip 地址</h2>
-<p>假设这台主机刚刚插上网线准备接入互联网，那么此时此刻我们能够知道的仅有<strong>本机的
-MAC 地址</strong>这一信息，毕竟出厂就写在 ROM
-里的，还不知道<strong>本机的 ip 地址</strong>，所以就需要请求最近的 DHCP
-服务器（下面简称 DS）分配一个。</p>
-<p>但刚开始完全不知道任何信息，那干脆就广播一条只有 DS
+<h2 id="通过-dhcp-拿-ip-地址">通过 DHCP 拿 IP 地址</h2>
+<p>假设这台主机刚刚插上网线准备接入互联网，那么此时此刻我们能够知道的仅有<strong>本机（或称之为客户端）的
+MAC 地址</strong>这一信息，毕竟出厂就烧在 ROM
+里。如果希望其能在网络中与其他节点进行通信，就需要知道<strong>客户端的
+IP
+地址</strong>。由于刚开始完全不知道任何信息，那么最先要做的事，就是去获得最近的
+DHCP 服务器（下面简称 DS） 的 IP
+地址，只有这样才能有足够的信息去构建请求消息，让其分配一个。</p>
+<p>那么怎么获得呢？最直接的做法就是广播一条只有 DS
 收到后会回复的消息，这样我们拿到这条回复后就知道 DS
-的信息了。于是这条广播消息长这样：</p>
+的信息了。这条广播消息长这样：</p>
 <table>
 <colgroup>
 <col style="width: 25%" />
@@ -13312,7 +13315,7 @@ MAC 地址</strong>这一信息，毕竟出厂就写在 ROM
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;"><strong>From</strong>: 本机 MAC
+<td style="text-align: left;"><strong>From</strong>: 客户端 MAC
 地址<br><strong>To</strong>: FF-FF-FF-FF-FF-FF</td>
 <td style="text-align: left;"><strong>From</strong>:
 0.0.0.0<br><strong>To</strong>: 255.255.255.255</td>
@@ -13323,31 +13326,40 @@ style="text-align: left;"><strong>UDP</strong><br><strong>From</strong>:
 </tr>
 </tbody>
 </table>
-<p>这条消息或许会经过交换机，那么交换机此时会记录下 &lt;本机 MAC 地址,
+<blockquote>
+<p>这条消息或许会经过交换机，那么交换机此时会记录下 &lt;客户端 MAC 地址,
 连接该主机的端口&gt; 这一条目以构建转发表，这样从 DS
 发来的回复就快速定位到特定端口而无需广播。</p>
+</blockquote>
 <p>因为该消息的 MAC 地址为广播地址，就从所有端口出发进行广播。DS
 收到该消息后，发现是个 <strong>DISCOVER</strong>
 类型的消息，就知道有个小兔崽子在找我，我得赶紧告诉他，然后构建一条
-<strong>OFFER</strong> 消息交给网卡去发送，包含自己的 ip 地址与 MAC
+<strong>OFFER</strong> 消息交给网卡去发送，包含自己的 IP 地址与 MAC
 地址等信息。</p>
-<p>本机收到 OFFER 后，就开始正式发起请求了，就是发一条
+<p>客户端收到 OFFER 后，就开始正式发起请求了，就是发一条
 <strong>REQUEST</strong> 消息过去，只不过这次的消息中 MAC 头部与 IP
 头部的 <code>To</code> 字段都明确了。</p>
-<p>DS 收到后会发一个 <strong>ACK</strong> 回来，告知新分配的 ip
-地址。本机收到后，就配置它的 IP 地址、子网掩码和 DNS 服务器的 ip
-地址，并在其 IP
+<blockquote>
+<p>当然，可能有多个 DS 收到该广播消息，它们都会回复
+<strong>OFFER</strong>，那么就由客户端来选择向哪个 DS 请求 IP
+地址。如果跳过这一个来回，直接广播
+<strong>REQUEST</strong>，就有可能收到多个为客户端分配的 IP
+地址，而我们只有一个能设置，其他的就浪费了。</p>
+</blockquote>
+<p>DS 收到后会发一个 <strong>ACK</strong> 回来，告知客户端的 IP
+地址、子网掩码和 DNS 服务器的 IP 地址，客户端收到后进行配置，并在其 IP
 转发表中安装默认网关。此刻我们正式完成了连接互联网的准备工作。</p>
-<p>此时此刻，我们已知的信息有：<strong>本机 MAC
-地址</strong>、<strong>本机 ip 地址</strong>、<strong>默认网关 ip
-地址</strong>、<strong>DNS 服务器 ip 地址</strong>。</p>
+<p>此时此刻，我们已知的信息有：<strong>客户端 MAC
+地址</strong>、<strong>客户端 IP 地址</strong>、<strong>默认网关 IP
+地址</strong>、<strong>DNS 服务器 IP 地址</strong>。</p>
 <h2 id="通过-dns-获取-web-服务器的-ip-地址">通过 DNS 获取 Web 服务器的
-ip 地址</h2>
+IP 地址</h2>
 <p>在浏览器内输入链接敲回车，或点击链接后，浏览器应当解析该链接生成 HTTP
 GET 请求，然后调用 Socket
-库委托协议栈生成消息发出去。这之间还有一些工作要完成，最先要完成的就是向
-DNS 服务器发起查询以获取 Web 服务器的目的 ip
-地址。毕竟我们得需要知道请求发到哪吧！这条查询的信息会被组装为：</p>
+库委托协议栈生成消息发出去。这之间还有一些工作要完成，最先要完成的就是获取
+Web 服务器的目的 IP 地址，这一步是通过向 DNS
+服务器发起查询完成的，理由和请求分配 IP
+地址一样。这条查询会被组装为：</p>
 <table>
 <colgroup>
 <col style="width: 25%" />
@@ -13365,9 +13377,9 @@ DNS 服务器发起查询以获取 Web 服务器的目的 ip
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;"><strong>From</strong>: 本机 MAC
+<td style="text-align: left;"><strong>From</strong>: 客户端 MAC
 地址<br><strong>To</strong>: <em>网关路由器 MAC 地址</em></td>
-<td style="text-align: left;"><strong>From</strong>: 本机 ip
+<td style="text-align: left;"><strong>From</strong>: 客户端 IP
 地址<br><strong>To</strong>: 网关路由器</td>
 <td
 style="text-align: left;"><strong>UDP</strong><br><strong>From</strong>:<br><strong>To</strong>:</td>
@@ -13376,10 +13388,10 @@ style="text-align: left;"><strong>UDP</strong><br><strong>From</strong>:<br><str
 </tr>
 </tbody>
 </table>
-<p>然而<em>网关路由器 MAC 地址</em>这一信息我们是不知道的，只知道其 ip
-地址。网络中有一项协议为我们提供了<strong>根据 ip 地址查询 MAC
-地址</strong>的功能，那就是 ARP。本机生成下面这样一个 ARP
-查询报文后，通过交换机广播出去</p>
+<p>然而<em>网关路由器 MAC 地址</em>这一信息我们是不知道的，只知道其 IP
+地址。网络中有一项协议为我们提供了<strong>根据 IP 地址查询 MAC
+地址</strong>的功能，那就是 <strong>ARP</strong>。客户端生成下面这样一个
+ARP 查询消息后，通过交换机广播出去：</p>
 <table>
 <colgroup>
 <col style="width: 25%" />
@@ -13397,55 +13409,61 @@ style="text-align: left;"><strong>UDP</strong><br><strong>From</strong>:<br><str
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;"><strong>From</strong>: 本机 MAC
+<td style="text-align: left;"><strong>From</strong>: 客户端 MAC
 地址<br><strong>To</strong>: FF-FF-FF-FF-FF-FF</td>
-<td style="text-align: left;"><strong>From</strong>: 本机 ip
-地址<br><strong>To</strong>: 网关路由器 ip 地址</td>
+<td style="text-align: left;"><strong>From</strong>: 客户端 IP
+地址<br><strong>To</strong>: 网关路由器 IP 地址</td>
 <td
 style="text-align: left;"><strong>UDP</strong><br><strong>From</strong>:<br><strong>To</strong>:</td>
 <td style="text-align: left;"><strong>ARP</strong></td>
 </tr>
 </tbody>
 </table>
-<p>网关路由器收到后，就会回复其 MAC 地址，这样本机就知道了。</p>
+<p>网关路由器收到后，就会回复其 MAC 地址，这样客户端就知道了。</p>
 <blockquote>
 <p>当然如果每次都这样广播一次的话倒也不是很有必要，一般情况下都会有一个
 ARP Cache，每次想知道 MAC 地址的时候先去 Cache
 里查一查，如果有就不用广播了。</p>
 </blockquote>
-<p>fine，这下可以正式发送 DNS
-服务器查询请求了。事实上本机记录的是最近的那个 DNS
-服务器，真要认真查还得从根 dns、一级 dns
-逐级往下，这里细节暂且不表，只需要知道最近的那个 DNS 服务器会有一个
-Cache 就好了。最后查到 ip
-地址后返回给本机，这下所有手续齐全了，可以正式开始数据交互了。</p>
-<p>此时此刻，我们新增的已知信息有：<strong>Web 服务器 ip
+<p>fine，这下可以正式发送 DNS 服务器查询请求了。</p>
+<ol type="1">
+<li>首先搜索<strong>浏览器的 DNS 缓存</strong>，缓存中维护一张域名与 IP
+地址的对应表;</li>
+<li>如果没有命中，则继续搜索<strong>操作系统的 DNS 缓存</strong>;</li>
+<li>如果依然没有命中，则操作系统将域名发送至<strong>本地 DNS
+服务器</strong>，它查询自己的 DNS 缓存，查找成功则返回结果；</li>
+<li>如果没有命中‍，则向上级域名服务器进行迭代查询，最终得到该域名对应的
+IP 地址，返回给操作系统，操作系统又将 IP
+地址返回给浏览器（这三者还会将得到的 IP 地址进行缓存）；</li>
+</ol>
+<p>这下所有手续齐全了，可以正式开始数据交互了。</p>
+<p>此时此刻，我们新增的已知信息有：<strong>Web 服务器 IP
 地址</strong>、<strong>默认网关 MAC 地址</strong>、<strong>DNS 服务器
 MAC 地址</strong>。</p>
 <h2 id="tcp-三次握手建立连接">TCP 三次握手建立连接</h2>
 <p>由于 HTTP 请求常常交给 TCP 协议，而 TCP
-又需要保证在数据的传输之前，双方建立起了稳定的连接。首先本机会创建一个
-socket，用于唯一标识连接——毕竟可能存在多个网页同时点击该链接——同时会为本机分配一个端口
+又需要保证在数据的传输之前，双方建立起了稳定的连接。首先客户端会创建一个
+socket，用于唯一标识连接——毕竟可能存在多个网页同时点击该链接——同时会为客户端分配一个端口
 <code>p</code>，该 socket 应当长成这样：</p>
 <table>
 <thead>
 <tr class="header">
-<th style="text-align: center;">源 ip 地址与端口</th>
-<th style="text-align: center;">目的 ip 地址与端口</th>
+<th style="text-align: center;">源 IP 地址与端口</th>
+<th style="text-align: center;">目的 IP 地址与端口</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: center;">&lt;本机 ip 地址, p&gt;</td>
-<td style="text-align: center;">&lt;Web 服务器 ip 地址, 80&gt;</td>
+<td style="text-align: center;">&lt;客户端 IP 地址, p&gt;</td>
+<td style="text-align: center;">&lt;Web 服务器 IP 地址, 80&gt;</td>
 </tr>
 </tbody>
 </table>
 <blockquote>
 <p>Web 服务器固定以 80 作为端口。</p>
 </blockquote>
-<p>上面这些信息都是已知的，所以可以毫无阻碍的进行创建。然后协议栈生成一个连接请求报文发送给
-Web 服务器。</p>
+<p>上面这些信息都是已知的，所以可以毫无阻碍的进行创建。然后协议栈生成一个连接请求发送给
+Web 服务器：</p>
 <table>
 <colgroup>
 <col style="width: 25%" />
@@ -13463,10 +13481,10 @@ Web 服务器。</p>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;"><strong>From</strong>: 本机 MAC
+<td style="text-align: left;"><strong>From</strong>: 客户端 MAC
 地址<br><strong>To</strong>: 默认网关 MAC 地址</td>
-<td style="text-align: left;"><strong>From</strong>: 本机 ip
-地址<br><strong>To</strong>: Web 服务器 ip 地址</td>
+<td style="text-align: left;"><strong>From</strong>: 客户端 IP
+地址<br><strong>To</strong>: Web 服务器 IP 地址</td>
 <td
 style="text-align: left;"><strong>TCP</strong><br><strong>From</strong>:
 p<br><strong>To</strong>: 80</td>
@@ -13474,8 +13492,9 @@ p<br><strong>To</strong>: 80</td>
 </tr>
 </tbody>
 </table>
+<blockquote>
 <p>网关路由器收到该消息后，根据 ARP 获取到 Web
-服务器将链路层头部改为</p>
+服务器将链路层头部改为：</p>
 <table>
 <thead>
 <tr class="header">
@@ -13489,7 +13508,6 @@ p<br><strong>To</strong>: 80</td>
 </tr>
 </tbody>
 </table>
-<blockquote>
 <p>这里的 <code>下一个</code> 由路由器的转发表决定。如果距离 Web
 服务器之间还有若干路由器，那就根据寻路算法填下一个路由器的 MAC
 地址，让其进行下一步的转发；如果直达，那就是 Web 服务器的 MAC
@@ -13497,9 +13515,9 @@ p<br><strong>To</strong>: 80</td>
 </blockquote>
 <p>Web
 服务器收到该连接请求后，会取出传输层头部检查自己是否有这个端口（我们这个情况下是有的，而且会有一个目的
-ip 和目的端口均为空的 {&lt;null, null&gt;, &lt;ip, 80&gt;} 这样一个
+IP 和目的端口均为空的 {&lt;null, null&gt;, &lt;IP, 80&gt;} 这样一个
 socket 处于监听状态），一看哦有啊，就创建一个该 socket
-的副本，然后填入本机的 ip 地址和端口，并发送一个 SYN=1, ACK=1
+的副本，然后填入客户端的 IP 地址和端口，并发送一个 SYN=1, ACK=1
 的回复。</p>
 <blockquote>
 <p>这个副本并不会影响原来的 socket，因为一个 socket
@@ -13507,19 +13525,559 @@ socket 处于监听状态），一看哦有啊，就创建一个该 socket
 就会被本次连接占用，那就没有 socket 进行监听，后续的所有来自其他
 host/server 的连接都得排队或 abort 了。</p>
 </blockquote>
-<p>本机收到这条回复后，再发一个 ACK
+<p>客户端收到这条回复后，再发一个 ACK
 回去表明收到了服务器发来的回复，如果一段时间内没有收到重复消息，说明这条
 ACK 也被服务器收到了，连接正式确立。</p>
 <h2 id="进行数据传输">进行数据传输</h2>
-<p>此时此刻，本机与 Web 服务器各有一个 socket
+<p>此时此刻，客户端与 Web 服务器各有一个 socket
 被用于该连接，两边的数据传输也是基于各自的 socket
-进行。所有工作做完后，对于本机而言，就是生成 HTTP GET
-请求然后不断加上协议栈各层的头部通过网卡发送出去，其中链路层头部就是本机
+进行。所有工作做完后，对于客户端而言，就是生成 HTTP GET
+请求然后不断加上协议栈各层的头部通过网卡发送出去，其中链路层头部就是客户端
 MAC 地址与网关 MAC 地址，网络层与传输层的源地址与目标地址直接根据 socket
 确立。经过交换机、路由器的层层转发，消息终于来到了 Web 服务器的 80
 端口，然后 Web 服务器验证有效性后将消息进行拆解，发现是一条 GET
 请求，遂将本地的 html 文件以二进制的形式进行答复。</p>
-<p>本机收到该答复后，将二进制数据交给浏览器进行渲染，显示出网页。如果还有其他图片、视频等要素，依然也是通过上面的手段进行获取。</p>
+<p>客户端收到该答复后，将二进制数据交给浏览器进行渲染，显示出网页。如果还有其他图片、视频等要素，依然也是通过上面的手段进行获取。</p>
 ]]></content>
+      <categories>
+        <category>计算机网络</category>
+      </categories>
+      <tags>
+        <tag>What Happened</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>进程间通信(IPC)</title>
+    <url>/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/IPC/</url>
+    <content><![CDATA[<p>为了保护操作系统中进程互不干扰，需要使用进程隔离技术，以防不同进程能够修改其他进程数据。但进程之间又不能完全隔离，需要一定的通信手段，于是开发出了<strong>进程间通信(IPC,
+InterProcess Communication)</strong>技术。</p>
+<span id="more"></span>
+<h2 id="管道pipe">管道(Pipe)</h2>
+<p>管道是最基本的通信机制，实质是一个半双工的通信方式，即数据只能单向流通，每次从头读取，向尾写入，并且遵循
+<strong>FIFO(First In First Out)</strong>
+原则，以<strong>字节流</strong>的方式进行传输，就仿佛一个单向队列。并且管道双方必须均处于“在线”状态，一旦一方退出，另一方也自动断开。</p>
+<blockquote>
+<p>如果双方相互通信时，则需要建立两个管道。</p>
+</blockquote>
+<p>根据<strong>是否存在于文件系统</strong>中，又可将管道分为<strong>匿名管道</strong>和<strong>命名管道</strong>两种。</p>
+<blockquote>
+<p>“<strong>名</strong>”指的就是路径名啦。</p>
+</blockquote>
+<h3 id="匿名管道">匿名管道</h3>
+<p>Linux 中可以通过函数 <code>int pipe(int fd[2])</code>
+建立匿名管道，其中 <code>fd[0]</code> 为读取端，<code>fd[1]</code>
+为写入端，两个都是<strong>文件描述符</strong>，从而可以用
+<code>read()/write()</code> 系统调用进行数据传输。比如下面这段代码：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">  <span class="type">int</span> fd[<span class="number">2</span>];</span><br><span class="line">  <span class="type">int</span> ret = pipe(fd); <span class="comment">// ret&gt;=0 for success, ret&lt;0 for fail</span></span><br><span class="line">  <span class="keyword">if</span> (ret &lt; <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Pipe Create Failed!\n&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="type">pid_t</span> id = fork();</span><br><span class="line">  <span class="keyword">if</span> (id &lt; <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Fork Failed\n&quot;</span>);</span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span>(id == <span class="number">0</span>) &#123;</span><br><span class="line">    close(fd[<span class="number">0</span>]); <span class="comment">// 关闭读取才能写入</span></span><br><span class="line">    <span class="type">int</span> i = <span class="number">0</span>;</span><br><span class="line">    <span class="type">char</span>* msg = <span class="string">&quot;I&#x27;m child&quot;</span>;</span><br><span class="line">    <span class="keyword">while</span>(i++ &lt; <span class="number">100</span>) &#123;</span><br><span class="line">      write(fd[<span class="number">1</span>], msg, <span class="built_in">strlen</span>(msg));</span><br><span class="line">      sleep(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    close(fd[<span class="number">1</span>]); <span class="comment">// 关闭写入才能读取</span></span><br><span class="line">    <span class="type">int</span> i = <span class="number">0</span>;</span><br><span class="line">    <span class="type">char</span> msg[<span class="number">100</span>];</span><br><span class="line">    <span class="keyword">while</span>(i++ &lt; <span class="number">100</span>) &#123;</span><br><span class="line">      <span class="built_in">memset</span>(msg, <span class="string">&#x27;\0&#x27;</span>, <span class="keyword">sizeof</span>(msg));</span><br><span class="line">      read(fd[<span class="number">0</span>], msg, <span class="keyword">sizeof</span>(msg));</span><br><span class="line">      <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>, msg);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>事实上，匿名管道并<strong>不</strong>位于文件系统中，它本质上是一个位于<strong>内核空间</strong>中的缓冲区，只不过将两端以“文件”的形式提供了数据读写的渠道。如果缓冲区已满，则阻塞写入；如果缓冲区为空，则阻塞读取。</p>
+<p><img src="1.png"/></p>
+<p>同时，读写端的文件描述符仅仅位于通信双方公共祖先进程的地址空间内部，也是因为如此，匿名管道仅适用于<strong>父子进程</strong>这种有“亲缘关系”（或称相关）的进程之间的通信，而无法跨进程通信。</p>
+<blockquote>
+<p>毕竟调用 <code>fork()</code> 会进行一次完整的拷贝操作，也就会复制该
+<code>fd[]</code>。</p>
+</blockquote>
+<p>同样，一旦进程销毁，该管道也随之被销毁。也就是说，匿名管道的<strong>生命周期完全由进程决定</strong>。</p>
+<h3 id="命名管道">命名管道</h3>
+<p>那么为了实现跨进程通信，不如就把上文中的缓冲区改为实际的文件，令其位于文件系统中，这样一来只要知道该<strong>管道文件</strong>的路径，就可以在任何进程之间进行通信了。</p>
+<p>Linux 中可以通过函数
+<code>int mkfifo(const char *path, mode_t mode)</code>
+建立命名管道，其中 <code>path</code> 指明文件路径，<code>mode</code>
+指明管道文件的存取权限。比如下面这段代码：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* server.c */</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _PATH_NAME_ <span class="string">&quot;/tmp/file.tmp&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _SIZE_  100</span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">  <span class="type">int</span> ret = mkfifo(_PATH_NAME_, S_IFIFO | <span class="number">0666</span>);</span><br><span class="line">  <span class="keyword">if</span> (ret == <span class="number">-1</span>) &#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Make File Error\n&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="type">char</span> buf[_SIZE_] = &#123;<span class="number">0</span>&#125;;</span><br><span class="line">  <span class="type">int</span> fd = open(_PATH_NAME_, O_WRONLY);</span><br><span class="line">  <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">    fget(buf, <span class="keyword">sizeof</span>(buf)<span class="number">-1</span>, <span class="built_in">stdin</span>);</span><br><span class="line">    <span class="type">int</span> ret = write(fd, buf, <span class="built_in">strlen</span>(buf)+<span class="number">1</span>);</span><br><span class="line">    <span class="keyword">if</span> (ret &lt; <span class="number">0</span>) &#123;</span><br><span class="line">      <span class="built_in">printf</span>(<span class="string">&quot;Write Error\n&quot;</span>);</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  close(fd);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* client.c */</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _PATH_NAME_ <span class="string">&quot;/tmp/file.tmp&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _SIZE_  100</span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">  <span class="type">int</span> fd = open(_PATH_NAME_, O_RDONLY);</span><br><span class="line">  <span class="keyword">if</span> (fd &lt; <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Open File Error\n&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="type">char</span> buf[_SIZE_] = &#123;<span class="number">0</span>&#125;;</span><br><span class="line">  <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">    <span class="type">int</span> ret = read(fd, buf, <span class="keyword">sizeof</span>(buf));</span><br><span class="line">    <span class="keyword">if</span> (ret &lt; <span class="number">0</span>) &#123;</span><br><span class="line">      <span class="built_in">printf</span>(<span class="string">&quot;Read Error\n&quot;</span>);</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>, buf);</span><br><span class="line">  &#125;</span><br><span class="line">  close(fd);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>服务端利用系统函数 <code>mkfifo()</code> 创建一个名为
+<code>file.tmp</code>
+的文件作为管道并写入。客户端同样也能打开该文件进行读取。而它们却是无关进程。</p>
+<h2 id="信号signal">信号(Signal)</h2>
+<p>信号是一种软中断，采用异步通信方式，内核可以利用信号来通知用户进程发生了哪些系统事件，一般源于<strong>硬件方式</strong>（用户按下
+<code>Ctrl+C</code>
+键）或<strong>软件方式</strong>（系统调用产生信号）</p>
+<p>Linux 中共定义了 64 种信号，分为以下两种：</p>
+<ol type="1">
+<li><strong>不可靠信号</strong>：不支持排队，信号可能会丢失，发送多次相同的信号，进程只能收到一次.
+信号值取值区间为 1~31；</li>
+<li><strong>可靠信号</strong>：支持排队，信号不会丢失，发多少次，就可以收到多少次，信号值取值区间为
+32~64；</li>
+</ol>
+<h3 id="常见信号">常见信号</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: center;">信号</th>
+<th style="text-align: center;">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><strong>SIGHUP</strong></td>
+<td
+style="text-align: center;">用户从终端注销，所有已启动进程都将收到该进程。系统缺省状态下对该信号的处理是终止进程</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>SIGINT</strong></td>
+<td style="text-align: center;">程序终止信号。程序运行过程中，按
+<code>Ctrl+C</code> 键将产生该信号</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>SIGQUIT</strong></td>
+<td style="text-align: center;">程序退出信号。程序运行过程中，按
+<code>Ctrl+\</code> 键将产生该信号</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>SIGBUS / SIGSEGV</strong></td>
+<td style="text-align: center;">进程访问非法地址</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>SIGFPE</strong></td>
+<td
+style="text-align: center;">运算中出现致命错误，如除零操作、数据溢出等</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>SIGKILL</strong></td>
+<td style="text-align: center;">用户终止进程执行信号。执行
+<code>kill -9</code> 发送该信号</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>SIGTERM</strong></td>
+<td style="text-align: center;">结束进程信号。执行 <code>kill pid</code>
+发送该信号</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>SIGALRM</strong></td>
+<td style="text-align: center;">定时器信号</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>SIGCHLD</strong></td>
+<td
+style="text-align: center;">子进程退出信号。如果其父进程没有忽略该信号也没有处理该信号，则子进程退出后将形成僵尸进程</td>
+</tr>
+</tbody>
+</table>
+<h3 id="linux-信号相关数据结构">Linux 信号相关数据结构</h3>
+<p>Linux 在进程管理结构 <code>task_struct</code>
+中定义了信号相关的变量。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">task_struct</span> &#123;</span></span><br><span class="line">  ...</span><br><span class="line">  <span class="type">int</span> sigpending; <span class="comment">// 是否有待处理信号</span></span><br><span class="line">  ...</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">signal_struct</span> *<span class="title">sig</span>;</span> <span class="comment">// 定义了信号值对应的处理方法</span></span><br><span class="line">  <span class="type">sigset_t</span> blocked; <span class="comment">// 被屏蔽的信息，以 bit 表示</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">sigpending</span> <span class="title">pending</span>;</span> <span class="comment">// 待处理信号队列</span></span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span>  _NSIG  64</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">signal_struct</span> &#123;</span></span><br><span class="line">  <span class="type">atomic_t</span> count;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">k_sigaction</span> <span class="title">action</span>[_<span class="title">NSIG</span>];</span> <span class="comment">// 信号处理函数表</span></span><br><span class="line">  <span class="type">spinlock_t</span> siglock;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="title function_">void</span> <span class="params">(*<span class="type">__sighandler_t</span>)</span><span class="params">(<span class="type">int</span>)</span>;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sigaction</span> &#123;</span></span><br><span class="line">  <span class="type">__sighandler_t</span> sa_handler; <span class="comment">// 处理函数</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">long</span> sa_flags;</span><br><span class="line">  <span class="type">void</span> (*sa_restorer)(<span class="type">void</span>);</span><br><span class="line">  <span class="type">sigset_t</span> sa_mask;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">k_sigaction</span> &#123;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">sigaction</span> <span class="title">sa</span>;</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sigqueue</span> &#123;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">sigqueue</span> *<span class="title">next</span>;</span></span><br><span class="line">  <span class="type">siginfo_t</span> info;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sigpending</span> &#123;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">sigqueue</span> *<span class="title">head</span>, **<span class="title">tail</span>;</span></span><br><span class="line">  <span class="type">sigset_t</span> signal;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="信号发送流程">信号发送流程</h3>
+<p>以 <code>kill()</code> 为例，其函数原型为
+<code>int kill(pid_t pid, int sig)</code>。</p>
+<p>当源进程(src)调用 <code>kill()</code>
+打算将目的进程(dst)给杀掉时，该系统调用会进一步调用内核函数
+<code>sys_kill()</code>：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">asmlinkage <span class="type">long</span> </span><br><span class="line"><span class="title function_">sys_kill</span><span class="params">(<span class="type">int</span> pid, <span class="type">int</span> sig)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">siginfo</span> <span class="title">info</span>;</span></span><br><span class="line"></span><br><span class="line">  info.si_signo = sig;</span><br><span class="line">  info.si_errno = <span class="number">0</span>;</span><br><span class="line">  info.si_code = SI_USER;</span><br><span class="line">  info.si_pid = current-&gt;pid;</span><br><span class="line">  info.si_uid = current-&gt;uid;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> kill_something_info(sig, &amp;info, pid);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">kill_something_info</span><span class="params">(<span class="type">int</span> sig, <span class="keyword">struct</span> siginfo *info, <span class="type">int</span> pid)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">if</span> (!pid) &#123;</span><br><span class="line">    <span class="keyword">return</span> kill_pg_info(sig, info, current-&gt;pgrp);</span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span> (pid == <span class="number">-1</span>) &#123;</span><br><span class="line">    <span class="type">int</span> retval = <span class="number">0</span>, count = <span class="number">0</span>;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">task_struct</span> * <span class="title">p</span>;</span></span><br><span class="line">    read_lock(&amp;tasklist_lock);</span><br><span class="line">    for_each_task(p) &#123;</span><br><span class="line">      <span class="keyword">if</span> (p-&gt;pid &gt; <span class="number">1</span> &amp;&amp; p != current) &#123;</span><br><span class="line">        <span class="type">int</span> err = send_sig_info(sig, info, p);</span><br><span class="line">        ++count;</span><br><span class="line">        <span class="keyword">if</span> (err != -EPERM)</span><br><span class="line">          retval = err;</span><br><span class="line">      &#125; </span><br><span class="line">    &#125; </span><br><span class="line">    read_unlock(&amp;tasklist_lock);</span><br><span class="line">    <span class="keyword">return</span> count ? retval : -ESRCH;</span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span> (pid &lt; <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> kill_pg_info(sig, info, -pid);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> kill_proc_info(sig, info, pid);</span><br><span class="line">  &#125; </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+<p>从函数 <code>kill_something_info()</code>
+可以得知，信号发送后具体的处理流程与 dst 的 <code>pid</code>
+有很大关系，具体为：</p>
+<ol type="1">
+<li><code>pid&gt;0</code> 时：直接发送给 <code>pid</code>
+对应的进程；</li>
+<li><code>pid=0</code> 时：发送给所有与 src 属同一个使用组的进程；</li>
+<li><code>pid=-1</code> 时：发送给 src
+有权给其发送信号的所有进程，除了进程 1(init);</li>
+<li><code>pid&lt;-1</code> 时：发送给 -pid 为组标识的进程；</li>
+</ol>
+<p>这里只讨论第一种情况。当 pid&gt;0 时，调用
+<code>kill_proc_info()</code> 函数，通过 <code>send_sig_info()</code>
+发送信号。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="type">int</span></span><br><span class="line"><span class="title function_">kill_proc_info</span><span class="params">(<span class="type">int</span> sig, <span class="keyword">struct</span> siginfo *info, <span class="type">pid_t</span> pid)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">int</span> error;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">task_struct</span> *<span class="title">p</span>;</span></span><br><span class="line"></span><br><span class="line">  read_lock(&amp;tasklist_lock);</span><br><span class="line">  p = find_task_by_pid(pid); <span class="comment">// 获得 pid 对应的 task_struct</span></span><br><span class="line">  error = -ESRCH;</span><br><span class="line">  <span class="keyword">if</span> (p) &#123;</span><br><span class="line">    error = send_sig_info(sig, info, p);</span><br><span class="line">  &#125;</span><br><span class="line">  read_unlock(&amp;tasklist_lock);</span><br><span class="line">  <span class="keyword">return</span> error;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">send_sig_info</span><span class="params">(<span class="type">int</span> sig, <span class="keyword">struct</span> siginfo *info, <span class="keyword">struct</span> task_struct *t)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">unsigned</span> <span class="type">long</span> flags;</span><br><span class="line">  <span class="type">int</span> ret;</span><br><span class="line"></span><br><span class="line">  ret = -EINVAL;</span><br><span class="line">  <span class="keyword">if</span> (sig &lt; <span class="number">0</span> || sig &gt; _NSIG)</span><br><span class="line">    <span class="keyword">goto</span> out_nolock;</span><br><span class="line"></span><br><span class="line">  ret = -EPERM;</span><br><span class="line">  <span class="keyword">if</span> (bad_signal(sig, info, t)) <span class="comment">// 检查是否有权限发送，没有就直接返回</span></span><br><span class="line">    <span class="keyword">goto</span> out_nolock;</span><br><span class="line"></span><br><span class="line">  ret = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">if</span> (!sig || !t-&gt;sig)</span><br><span class="line">    <span class="keyword">goto</span> out_nolock;</span><br><span class="line"></span><br><span class="line">  spin_lock_irqsave(&amp;t-&gt;sigmask_lock, flags);</span><br><span class="line">  handle_stop_signal(sig, t)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (ignored_signal(sig, t)) <span class="comment">// 是否忽略该信号，是就不发送</span></span><br><span class="line">    <span class="keyword">goto</span> out;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (sig &lt; SIGRTMIN &amp;&amp; sigismember(&amp;t-&gt;pending.signal, sig)) <span class="comment">// 不可靠信号如果已经在等待队列中，就不会再次入队</span></span><br><span class="line">    <span class="keyword">goto</span> out;</span><br><span class="line"></span><br><span class="line">  ret = deliver_signal(sig, info, t); <span class="comment">// 发送信号，并将 task_struct.pending 置为 1</span></span><br><span class="line">out:</span><br><span class="line">  spin_unlock_irqrestore(&amp;t-&gt;sigmask_lock, flags);</span><br><span class="line">  <span class="keyword">if</span> ((t-&gt;state &amp; TASK_INTERRUPTIBLE)&amp;&amp; signal_pending(t)) <span class="comment">// 如果处于睡眠可中断状态且有信号待处理，将其唤醒</span></span><br><span class="line">    wake_up_process(t);</span><br><span class="line"></span><br><span class="line">out_nolock:</span><br><span class="line">  <span class="keyword">return</span> ret;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>至此，发送信号的流程已完成。</p>
+<h3 id="信号处理流程">信号处理流程</h3>
+<p>此时此刻信号已经发送给目标进程，为了尽快让信号得到处理，Linux
+把信号处理过程放置在进程<strong>从内核态返回到用户态前</strong>，然后检查
+<code>sigpending</code> 是否为 1，若是，就调用 <code>do_signal()</code>
+函数进行处理。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">do_signal</span><span class="params">(<span class="keyword">struct</span> pt_regs *regs, <span class="type">sigset_t</span> *oldset)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">siginfo_t</span> info;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">k_sigaction</span> *<span class="title">ka</span>;</span></span><br><span class="line"> </span><br><span class="line">  <span class="keyword">if</span> ((regs-&gt;xcs &amp; <span class="number">3</span>)!= <span class="number">3</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (!oldset)</span><br><span class="line">    oldset = &amp;current-&gt;blocked;</span><br><span class="line"> </span><br><span class="line">  <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">long</span> signr;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 不断对信号队列进行 dequeue 取出头部，如果没有可取的就直接退出</span></span><br><span class="line">    spin_lock_irq(&amp;current-&gt;sigmask_lock);</span><br><span class="line">    signr = dequeue_signal(&amp;current-&gt;blocked, &amp;info);</span><br><span class="line">    spin_unlock_irq(&amp;current-&gt;sigmask_lock);</span><br><span class="line">    <span class="keyword">if</span> (!signr)</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    ka = &amp;current-&gt;sig-&gt;action[signr<span class="number">-1</span>];</span><br><span class="line">    <span class="keyword">if</span> (ka-&gt;sa.sa_handler == SIG_IGN) &#123; <span class="comment">// ignore. 即如果忽视就直接跳过</span></span><br><span class="line">      <span class="keyword">if</span> (signr != SIGCHLD)</span><br><span class="line">        <span class="keyword">continue</span>;</span><br><span class="line"></span><br><span class="line">      <span class="comment">/* Check for SIGCHLD: it&#x27;s special.  */</span></span><br><span class="line">      <span class="keyword">while</span> (sys_wait4(<span class="number">-1</span>, <span class="literal">NULL</span>, WNOHANG, <span class="literal">NULL</span>)&gt; <span class="number">0</span>)</span><br><span class="line">        <span class="comment">/* nothing */</span>;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">continue</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (ka-&gt;sa.sa_handler == SIG_DFL) &#123; <span class="comment">// default. 即指定为默认就用系统的默认处理方法</span></span><br><span class="line">      <span class="type">int</span> exit_code = signr;</span><br><span class="line"></span><br><span class="line">      <span class="comment">/* Init gets no signals it doesn&#x27;t want.  */</span> </span><br><span class="line">      <span class="keyword">if</span> (current-&gt;pid == <span class="number">1</span>)</span><br><span class="line">        <span class="keyword">continue</span>;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">switch</span> (signr) &#123;</span><br><span class="line">      <span class="keyword">case</span> SIGCONT: <span class="keyword">case</span> SIGCHLD: <span class="keyword">case</span> SIGWINCH:</span><br><span class="line">        <span class="keyword">continue</span>;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">case</span> SIGTSTP: <span class="keyword">case</span> SIGTTIN: <span class="keyword">case</span> SIGTTOU:</span><br><span class="line">        <span class="keyword">if</span> (is_orphaned_pgrp(current-&gt;pgrp))</span><br><span class="line">          <span class="keyword">continue</span>;</span><br><span class="line">        <span class="comment">/* FALLTHRU */</span></span><br><span class="line"></span><br><span class="line">      <span class="keyword">case</span> SIGSTOP:</span><br><span class="line">        current-&gt;state = TASK_STOPPED;</span><br><span class="line">        current-&gt;exit_code = signr;</span><br><span class="line">        <span class="keyword">if</span> (!(current-&gt;p_pptr-&gt;sig-&gt;action[SIGCHLD<span class="number">-1</span>].sa.sa_flags &amp; SA_NOCLDSTOP))</span><br><span class="line">          notify_parent(current, SIGCHLD);</span><br><span class="line">        schedule();</span><br><span class="line">        <span class="keyword">continue</span>;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">case</span> SIGQUIT: <span class="keyword">case</span> SIGILL: <span class="keyword">case</span> SIGTRAP:</span><br><span class="line">      <span class="keyword">case</span> SIGABRT: <span class="keyword">case</span> SIGFPE: <span class="keyword">case</span> SIGSEGV:</span><br><span class="line">      <span class="keyword">case</span> SIGBUS: <span class="keyword">case</span> SIGSYS: <span class="keyword">case</span> SIGXCPU: <span class="keyword">case</span> SIGXFSZ:</span><br><span class="line">        <span class="keyword">if</span> (do_coredump(signr, regs))</span><br><span class="line">          exit_code |= <span class="number">0x80</span>;</span><br><span class="line">        <span class="comment">/* FALLTHRU */</span> </span><br><span class="line"></span><br><span class="line">      <span class="keyword">default</span>:</span><br><span class="line">        sigaddset(&amp;current-&gt;pending.signal, signr);</span><br><span class="line">        recalc_sigpending(current);</span><br><span class="line">        current-&gt;flags |= PF_SIGNALED;</span><br><span class="line">        do_exit(exit_code);</span><br><span class="line">        <span class="comment">/* NOTREACHED */</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    ... </span><br><span class="line">    handle_signal(signr, ka, &amp;info, oldset, regs); <span class="comment">// 如果通过 signal() 注册了自定义处理方法，就用 handle_signal() 去处理</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>值得注意的是，用户定义的处理方法代码位于用户态，而在运行这段系统函数期间
+CPU
+还处于内核态，只能先返回用户态执行用户态代码，再回到内核态做后续工作。</p>
+</blockquote>
+<h2 id="消息队列msg-queue">消息队列(Msg Queue)</h2>
+<p>管道的一个劣势在于，数据都是以字节流进行传输，没有格式一说，这就要求管道的读取方和写入方必须事先约定好数据的格式与长度，比如多少字节算作一个消息/命令/记录等等。</p>
+<p>为了打破这一限制，诞生了消息队列。其本质上是内核中的链表，每个节点是一个具有<strong>特定格式</strong>的消息，和
+C++ 中的 <code>std::list&lt;Message&gt;</code>
+很像。不同的队列以不同的<strong>队列标识符(qid)</strong>来区分，只有内核重启或显式删除后相关队列才会被移除。</p>
+<p>和管道相同之处在于，如果管道/队列存放的数据/消息满了，写会被阻塞，读同理。</p>
+<p>不同之处在于，虽然写都是写到末尾，但是消息队列可以根据消息字段<strong>随机读取</strong>，而不一定要从队首。并且，消息队列允许多个进程对其读写。</p>
+<h3 id="消息队列使用">消息队列使用</h3>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* writer.c */</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/ipc.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/msg.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">msgbuf</span> &#123;</span> <span class="comment">// 待写入消息节点数据结构，必须以 long 类型变量开始</span></span><br><span class="line">	<span class="type">long</span> mtype;</span><br><span class="line">	<span class="type">char</span> mtext[<span class="number">255</span>];</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">	<span class="type">int</span> mq_id = msgget(<span class="number">123</span>, IPC_CREAT | <span class="number">0666</span>); <span class="comment">// 创建一个消息队列</span></span><br><span class="line">	<span class="keyword">if</span> (mq_id != <span class="number">-1</span>) &#123;</span><br><span class="line">		<span class="comment">// 初始化要发生的消息</span></span><br><span class="line">		<span class="class"><span class="keyword">struct</span> <span class="title">msgbuf</span> <span class="title">mybuf</span>;</span></span><br><span class="line">		mybuf.mtype = <span class="number">1</span>;</span><br><span class="line">		<span class="built_in">strcpy</span>(mybuf.mtext, <span class="string">&quot;I&#x27;m send process.\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 发送消息</span></span><br><span class="line">		<span class="keyword">if</span> (msgsnd(mq_id, &amp;mybuf, <span class="keyword">sizeof</span>(mybuf.mtext), <span class="number">0</span>)) &#123;</span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">&quot;success\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">		<span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="built_in">printf</span>(<span class="string">&quot;msgsnd Fail\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;msgget Fail\n&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* reader.c */</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/ipc.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/msg.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">msgbuf</span> &#123;</span> <span class="comment">// 待读取消息节点数据结构，必须与消息队列节点格式一致</span></span><br><span class="line">	<span class="type">long</span> mtype;</span><br><span class="line">	<span class="type">char</span> mtext[<span class="number">255</span>];</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">	<span class="type">int</span> mq_id = msgget(<span class="number">123</span>, IPC_CREAT | <span class="number">0666</span>); <span class="comment">// 获取消息队列</span></span><br><span class="line">	<span class="keyword">if</span> (mq_id != <span class="number">-1</span>) &#123;</span><br><span class="line">		<span class="class"><span class="keyword">struct</span> <span class="title">msgbuf</span> <span class="title">mybuf</span>;</span></span><br><span class="line">		<span class="comment">// 接收第一条消息，存到 mybuf 中</span></span><br><span class="line">		<span class="keyword">if</span> (msgrcv(mq_id, &amp;mybuf, <span class="keyword">sizeof</span>(mybuf.mtext), <span class="number">0</span>, IPC_NOWAIT) != <span class="number">-1</span>) &#123;</span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">&quot;read success: %s\n&quot;</span>, mybuf.mtext);</span><br><span class="line">			<span class="comment">// 删除这个消息队列</span></span><br><span class="line">			<span class="keyword">if</span> (msgctl(mq_id, IPC_RMID, <span class="number">0</span>) != <span class="number">-1</span>)&#123;</span><br><span class="line">				<span class="built_in">printf</span>(<span class="string">&quot;delete msg success\n&quot;</span>);</span><br><span class="line">      &#125;</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">&quot;msgsnd Fail\n&quot;</span>);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;msgget Fail\n&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="共享内存shared-memory">共享内存(Shared Memory)</h2>
+<p>共享内存是指将同一片内存映射到多个进程的虚拟地址空间，进程就可以直接读写这一块内存而不需要进行数据的拷贝，从而大大提高效率。</p>
+<p>当然，建立共享内存的过程无需进行数据复制，直接在内存中操作，是最快的可用通信机制。然而还需要一些信号量提供同步/互斥手段，否则会出现一致性的问题。</p>
+<blockquote>
+<p>管道、消息队列都需要将进程内部数据复制到内核空间/磁盘</p>
+</blockquote>
+<p>目前 Linux 系统有以下三种共享内存方案：</p>
+<ol type="1">
+<li>mmap 内存共享映射；</li>
+<li>XSI 共享内存；</li>
+<li>POSIX 共享内存；</li>
+</ol>
+<h3 id="mmap-共享内存">mmap 共享内存</h3>
+<p>mmap
+本来的是存储映射功能。它可以将一个文件映射到内存中，在程序里就可以直接使用内存地址对文件内容进行访问，这可以让程序对文件访问更方便。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/mman.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 通过设置 fd，就可以映射到文件，返回值是相应的内存地址。</span></span><br><span class="line"><span class="type">void</span> *<span class="title function_">mmap</span><span class="params">(<span class="type">void</span> *addr, <span class="type">size_t</span> length, <span class="type">int</span> prot, <span class="type">int</span> flags, <span class="type">int</span> fd, <span class="type">off_t</span> offset)</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 移除地址 addr 上的共享内存</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">munmap</span><span class="params">(<span class="type">void</span> *addr, <span class="type">size_t</span> length)</span>;</span><br></pre></td></tr></table></figure>
+<p>由于这个系统调用的特性可以用在很多场合，所以 Linux
+系统用它实现了很多功能，并不仅局限于存储映射，还可以进行共享内存，只需令
+<code>mmap()</code> 中
+<code>flags = MAP_SHARED|MAP_ANONYMOUS, fd = -1</code>。这样一来，配合
+<code>fork()</code>，父子进程都可以获取相同的 <code>mmap()</code>
+返回的共享内存地址，从而实现通信。样例代码如下：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;errno.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/file.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;wait.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/mman.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> COUNT 100</span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">do_child</span><span class="params">(<span class="type">int</span> *count)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">int</span> interval;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* critical section */</span></span><br><span class="line">	interval = *count;</span><br><span class="line">	interval++;</span><br><span class="line">	usleep(<span class="number">1</span>);</span><br><span class="line">	*count = interval;</span><br><span class="line">	<span class="comment">/* critical section */</span></span><br><span class="line"></span><br><span class="line">	<span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">pid_t</span> pid;</span><br><span class="line">	<span class="type">int</span> count;</span><br><span class="line">	<span class="type">int</span> *shm_p;</span><br><span class="line"></span><br><span class="line">	shm_p = (<span class="type">int</span> *)mmap(<span class="literal">NULL</span>, <span class="keyword">sizeof</span>(<span class="type">int</span>), PROT_WRITE|PROT_READ, MAP_SHARED|MAP_ANONYMOUS, <span class="number">-1</span>, <span class="number">0</span>);</span><br><span class="line">	<span class="keyword">if</span> (MAP_FAILED == shm_p) &#123;</span><br><span class="line">		perror(<span class="string">&quot;mmap()&quot;</span>);</span><br><span class="line">		<span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	*shm_p = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> (count = <span class="number">0</span>; count &lt; COUNT; count++) &#123;</span><br><span class="line">		pid = fork();</span><br><span class="line">		<span class="keyword">if</span> (pid &lt; <span class="number">0</span>) &#123;</span><br><span class="line">			perror(<span class="string">&quot;fork()&quot;</span>);</span><br><span class="line">			<span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> (pid == <span class="number">0</span>) &#123;</span><br><span class="line">			do_child(shm_p);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> (count=<span class="number">0</span>;count&lt;COUNT;count++) &#123;</span><br><span class="line">		wait(<span class="literal">NULL</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;shm_p: %d\n&quot;</span>, *shm_p);</span><br><span class="line">	munmap(shm_p, <span class="keyword">sizeof</span>(<span class="type">int</span>));</span><br><span class="line">	<span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="xsi-共享内存">XSI 共享内存</h3>
+<p>mmap 实现共享内存的方式需要 <code>fork()</code>
+配合，只能支持相关进程。XSI 采取更为通用的手段，能够支持无关进程。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/ipc.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/shm.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/ipc.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 根据指定文件的 inode 编号和文件所在设备的设备编号来生成 key</span></span><br><span class="line"><span class="type">key_t</span> <span class="title function_">ftok</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *pathname, <span class="type">int</span> proj_id)</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 根据 key 生成/获取共享内存标识符 shmid</span></span><br><span class="line"><span class="comment">// Linux 限制了系统最大能创建的共享内存为 128 个</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">shmget</span><span class="params">(<span class="type">key_t</span> key, <span class="type">size_t</span> size, <span class="type">int</span> shmflg)</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 将 &#123;虚拟地址: 物理地址&#125; 的映射绑定到进程内，并令该共享内存的 `shm_nattach` 计数器加一</span></span><br><span class="line"><span class="type">void</span> *<span class="title function_">shmat</span><span class="params">(<span class="type">int</span> shmid, <span class="type">const</span> <span class="type">void</span> *shmaddr, <span class="type">int</span> shmflg)</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 移除映射，并令该共享内存的 `shm_nattach` 计数器减一</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">shmdt</span><span class="params">(<span class="type">const</span> <span class="type">void</span> *shmaddr)</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 执行控制命令，如进行删除</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">shmctl</span><span class="params">(<span class="type">int</span> shmid, <span class="type">int</span> cmd, <span class="keyword">struct</span> shmid_ds *buf)</span>;</span><br></pre></td></tr></table></figure>
+<p>但根据管道的经验，无关进程之间的通信能且仅能通过文件来实现，每次根据
+<code>path</code> 打开一个文件，进程内部都有一个文件描述符
+<code>fd</code> 来指向该文件，从而进行操作。XSI
+就是根据这个思路来设计的，<code>key</code> 对应了
+<code>path</code>，<code>shmid</code> 对应了
+<code>fd</code>。之所以说<strong>对应</strong>，是因为并不是真正的文件描述符，无法使用
+<code>open()/write()</code>
+这样的系统调用对其执行操作。事实上，内核里有一张名为
+<code>shm_segs[]</code> 的表来存放共享内存相关信息，并根据
+<code>shmid</code> 来索引。只要 <code>ftok</code>
+的参数是一样的，那么生成的 <code>key</code> 也必然是一样且唯一的，根据
+<code>shmget()</code> 得到的 <code>shmid</code>
+也是唯一的，这就实现了任意进程能够对共享内存进行访问。样例代码如下：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;errno.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/file.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;wait.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/mman.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/ipc.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/shm.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> COUNT 100</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PATHNAME <span class="string">&quot;/etc/passwd&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">do_child</span><span class="params">(<span class="type">int</span> proj_id)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">int</span> interval;</span><br><span class="line">	<span class="type">int</span> *shm_p, shm_id;</span><br><span class="line">	<span class="type">key_t</span> shm_key;</span><br><span class="line">	<span class="comment">// 使用 ftok() 产生shmkey</span></span><br><span class="line">	<span class="keyword">if</span> ((shm_key = ftok(PATHNAME, proj_id)) == <span class="number">-1</span>) &#123;</span><br><span class="line">		perror(<span class="string">&quot;ftok()&quot;</span>);</span><br><span class="line">		<span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 在子进程中获取到已经在父进程中创建好的 shmid</span></span><br><span class="line">	shm_id = shmget(shm_key, <span class="keyword">sizeof</span>(<span class="type">int</span>), <span class="number">0</span>);</span><br><span class="line">	<span class="keyword">if</span> (shm_id &lt; <span class="number">0</span>) &#123;</span><br><span class="line">		perror(<span class="string">&quot;shmget()&quot;</span>);</span><br><span class="line">		<span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 将相关共享内存段映射到本进程的内存地址</span></span><br><span class="line">	shm_p = (<span class="type">int</span> *)shmat(shm_id, <span class="literal">NULL</span>, <span class="number">0</span>);</span><br><span class="line">	<span class="keyword">if</span> ((<span class="type">void</span> *)shm_p == (<span class="type">void</span> *)<span class="number">-1</span>) &#123;</span><br><span class="line">		perror(<span class="string">&quot;shmat()&quot;</span>);</span><br><span class="line">		<span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* critical section */</span></span><br><span class="line">	interval = *shm_p;</span><br><span class="line">	interval++;</span><br><span class="line">	usleep(<span class="number">1</span>);</span><br><span class="line">	*shm_p = interval;</span><br><span class="line">	<span class="comment">/* critical section */</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// 解除本进程内对共享内存的地址映射</span></span><br><span class="line">	<span class="keyword">if</span> (shmdt(shm_p) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">		perror(<span class="string">&quot;shmdt()&quot;</span>);</span><br><span class="line">		<span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">pid_t</span> pid;</span><br><span class="line">	<span class="type">int</span> count;</span><br><span class="line">	<span class="type">int</span> *shm_p;</span><br><span class="line">	<span class="type">int</span> shm_id, proj_id;</span><br><span class="line">	<span class="type">key_t</span> shm_key;</span><br><span class="line"></span><br><span class="line">	proj_id = <span class="number">1234</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 使用约定好的文件路径和 proj_id 产生 shm_key</span></span><br><span class="line">	<span class="keyword">if</span> ((shm_key = ftok(PATHNAME, proj_id)) == <span class="number">-1</span>) &#123;</span><br><span class="line">		perror(<span class="string">&quot;ftok()&quot;</span>);</span><br><span class="line">		<span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 创建一个共享内存，如果系统中已经存在此共享内存则报错退出，创建出来的共享内存权限为 0600(-rw-------)</span></span><br><span class="line">	shm_id = shmget(shm_key, <span class="keyword">sizeof</span>(<span class="type">int</span>), IPC_CREAT|IPC_EXCL|<span class="number">0600</span>);</span><br><span class="line">	<span class="keyword">if</span> (shm_id &lt; <span class="number">0</span>) &#123;</span><br><span class="line">		perror(<span class="string">&quot;shmget()&quot;</span>);</span><br><span class="line">		<span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 绑定映射</span></span><br><span class="line">	shm_p = (<span class="type">int</span> *)shmat(shm_id, <span class="literal">NULL</span>, <span class="number">0</span>);</span><br><span class="line">	<span class="keyword">if</span> ((<span class="type">void</span> *)shm_p == (<span class="type">void</span> *)<span class="number">-1</span>) &#123;</span><br><span class="line">		perror(<span class="string">&quot;shmat()&quot;</span>);</span><br><span class="line">		<span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	*shm_p = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 并发读写</span></span><br><span class="line">	<span class="keyword">for</span> (count = <span class="number">0</span>; count &lt; COUNT; count++) &#123;</span><br><span class="line">		pid = fork();</span><br><span class="line">		<span class="keyword">if</span> (pid &lt; <span class="number">0</span>) &#123;</span><br><span class="line">			perror(<span class="string">&quot;fork()&quot;</span>);</span><br><span class="line">			<span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> (pid == <span class="number">0</span>) &#123;</span><br><span class="line">			do_child(proj_id);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 等待所有子进程执行完毕</span></span><br><span class="line">	<span class="keyword">for</span> (count = <span class="number">0</span>; count &lt; COUNT; count++) &#123;</span><br><span class="line">		wait(<span class="literal">NULL</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 解除映射</span></span><br><span class="line">	<span class="keyword">if</span> (shmdt(shm_p) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">		perror(<span class="string">&quot;shmdt()&quot;</span>);</span><br><span class="line">		<span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 删除共享内存</span></span><br><span class="line">	<span class="keyword">if</span> (shmctl(shm_id, IPC_RMID, <span class="literal">NULL</span>) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">		perror(<span class="string">&quot;shmctl()&quot;</span>);</span><br><span class="line">		<span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="posix-共享内存">POSIX 共享内存</h3>
+<p>POSIX 共享内存本质上就是在 <code>/dev/shm</code>
+上创建一个文件，并将其 mmap 之后映射其内存地址。</p>
+<h2 id="套接字socket">套接字(Socket)</h2>
+]]></content>
+      <categories>
+        <category>操作系统</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>切换进程/线程前后发生了什么？</title>
+    <url>/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/WhatHappenedAfterSwitchProcess/</url>
+    <content><![CDATA[<p>该问题是<strong>进程与线程的区别</strong>中的一个核心问题。</p>
+<span id="more"></span>
+<h2 id="进程有什么">进程有什么</h2>
+<p>一个进程需要存放若干数据，以及若干指令，那么首先其会有一片内存，在分页机制下，所有进程都必须有其独立的<strong>页表(PT,
+Page
+Table)</strong>，从而完成虚拟地址到物理地址（<em>用户地址空间</em>）的转换。</p>
+<p>有页表，就肯定需要一个访问机制。目前操作系统一般都采用二级页表，也就是访页时最先进入<strong>页目录(PD,
+Page
+Directory)</strong>，再根据里面的页目录项获取页表物理地址。需要一个寄存器来存储该目录的物理地址，即<strong>页目录表寄存器(PDBR,
+Page Directory Base Register)</strong>（x86_64 下使用
+<strong>CR3</strong>）通过向该寄存器赋予页目录基地址（物理），便可随时访问页目录。</p>
+<p>以及<strong>页表缓存(TLB, Translation Lookaside
+Buffer)</strong>，用于加快虚拟地址-&gt;物理地址的转换。</p>
+<p>此外，进程在执行程序时，必须要有一个<strong>指令指针寄存器(IP,
+Instruction Pointer)</strong>，来告诉 CPU
+即将执行的指令在代码段中的偏移量，和一个<strong>代码段寄存器(CS, Code
+Segment)</strong>，用来存放内存代码段区域的入口地址。这两个寄存器合在一起为我们指示了
+CPU
+当前要读取指令的地址（虚拟），最后根据页表对应到实际的物理地址进行取指令操作。</p>
+<blockquote>
+<p>物理地址 = CS &lt;&lt; 4 + IP</p>
+</blockquote>
+<p>程序的运行必然是由若干函数组合起来运行的。当一个函数在运行时，需要为它在栈中创建一个栈帧用来记录运行时产生的相关信息，因此每个函数在执行前都会创建一个栈帧，在它返回时会销毁该栈帧。栈由高地址向低地址拓展，为了访问栈，就必须要有<strong>栈基址(BP,
+Base Pointer)</strong>，以及<strong>栈顶指针(SP, Stack
+Pointer)</strong>。</p>
+<h2 id="线程有什么">线程有什么</h2>
+<p>线程与进程的关系，就好比函数与程序的关系。同一进程下的所有线程都共享同一地址空间，包括全局变量与代码段。但每个线程有各自的<strong>栈</strong>空间与
+<strong>CS:IP</strong>，就好比不同函数对应的参数与返回地址都不同，所执行的指令所处位置也不一定相同。</p>
+<blockquote>
+<p>Linux 中进程与线程都被抽象为 <code>task_struct</code>，各自拥有
+<code>pid</code>，但其内存所指 <code>mm_struct</code> 是相同的。</p>
+</blockquote>
+<h2 id="进程与线程切换开销">进程与线程切换开销</h2>
+<p>进程的切换，必然伴随着上文提到的种种寄存器的保存与加载。除了这些，最大的开销来源于：从一个进程切换到另一个进程时，对应的地址空间也将切换，那么
+TLB 是需要被清空的，这样就导致 TLB miss 以及访页速率降低，当然，Cache
+miss 率也会提高。</p>
+<p>然而，<strong>同一进程内</strong>的线程切换并不涉及地址空间的切换，仅仅保存其
+BP, SP 以及若干寄存器即可。</p>
+<blockquote>
+<p>如果是不同进程之间的线程切换，那依然会涉及进程切换。</p>
+</blockquote>
+<p>这也就是为什么，进程切换的开销比线程切换大得多。</p>
+]]></content>
+      <categories>
+        <category>操作系统</category>
+      </categories>
+      <tags>
+        <tag>What Happened</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>面经</title>
+    <url>/Interview/%E9%9D%A2%E7%BB%8F/</url>
+    <content><![CDATA[<p>个人的 面试经验整理。</p>
+<span id="more"></span>
+<h2 id="编程语言">编程语言</h2>
+<h3 id="c">C++</h3>
+<h4 id="左值和右值">左值和右值</h4>
+<p>具体可见 <a href="../../C-11/C-Value">C++11 の 左值与右值</a></p>
+<ol type="1">
+<li>左值和右值的区别？</li>
+</ol>
+<blockquote>
+<p>可以取地址并具有变量名的是左值。</p>
+<p>剩下的都是右值，只存在于寄存器中，无法在内存中寻址，不具有持久性。</p>
+</blockquote>
+<ol start="2" type="1">
+<li>右值引用(Type&amp;&amp;)是什么？为什么要用右值引用？</li>
+</ol>
+<blockquote>
+<p>简单来说，右值引用绑定的对象为右值，其具有变量名，所以是左值。</p>
+<p><code>func(Type&amp;)</code> 可以修改形参但无法用右值传值，
+<code>func(const Type&amp;)</code>
+可以用右值传值但无法在函数内部对形参进行修改。可以选择在栈上开一个左值的内存然后赋予右值，再用前者，也就是
+<code>func(Type&amp;)</code>
+传值，但存在开销，故提出右值引用。<code>func(Type&amp;&amp;)</code>
+既可以传入右值，又可以修改形参。</p>
+</blockquote>
+<ol start="3" type="1">
+<li>拷贝构造和移动构造的区别？</li>
+</ol>
+<blockquote>
+<p>前者是深拷贝，相当于在内存中创建一个副本。</p>
+<p>后者实际是做了个浅拷贝，并在内存中改变数据所有权（把我有的给你，然后将我有的设为
+nil），基于 <code>std::move</code> 和右值引用。</p>
+</blockquote>
+<ol start="4" type="1">
+<li><code>std::move</code> 和 <code>std::forward</code> 的区别？</li>
+</ol>
+<p>可见 <a
+href="https://cntransgroup.github.io/EffectiveModernCppChinese/5.RRefMovSemPerfForw/item23.html#%E6%9D%A1%E6%AC%BE%E4%BA%8C%E5%8D%81%E4%B8%89%E7%90%86%E8%A7%A3stdmove%E5%92%8Cstdforward">Effective
+Modern C++ Item23</a></p>
+<blockquote>
+<p><code>std::move</code> 仅仅做了个 become 右值引用的类型转换。</p>
+<p><code>std::forward</code>
+仅仅是将实参转为对应的引用版本，适用于万能引用下类型不明确的情况。</p>
+</blockquote>
+<h4 id="智能指针">智能指针</h4>
+<p>具体可见 <a href="../../C-11/C-SmartPtr">C++11 の 智能指针</a></p>
+<ol type="1">
+<li><code>std::shared_ptr</code> 和 <code>std::unique_ptr</code>
+的异同？</li>
+</ol>
+<blockquote>
+<p>这两个都是智能指针，均满足 RAII
+准则，在析构时自动释放堆上分配的内存。</p>
+<p>shared ptr 为<strong>共享</strong>指针，允许拷贝构造，可以由多个
+shared ptr
+变量同时指向同一块内存，每块内存都会维护一个引用计数器，每引用一个对象计数器加
+1；每释放一个对象计数器减 1。当计数器为 0 时该内存才会被释放。</p>
+<p>unique ptr
+为<strong>独占</strong>指针，不允许拷贝构造，同时只能有一个 unique ptr
+指向某块内存，只能通过移动语义来进行更改所有权。</p>
+</blockquote>
+<h4 id="内存">内存</h4>
+<ol type="1">
+<li><code>int*</code> 和 <code>void*</code> 的区别？</li>
+</ol>
+<blockquote>
+<p><code>int*</code>
+类型的变量会有一个运行时信息，告诉编译器“我指向的这块内存是个
+<code>int</code> 变量，如果你要读取就只能一次性读 4 字节”。当然，其他的
+<code>double*</code>、<code>long long*</code> 同理。</p>
+<p><code>void*</code> 意为无类型指针，可以指向任意类型的数据，但赋值给
+<code>int*</code> 这种的就要配合类型转换了。直接读取是读 1
+字节，毕竟也是指向了一个内存地址。</p>
+</blockquote>
+<h2 id="操作系统">操作系统</h2>
+<ol type="1">
+<li>进程和线程的区别？</li>
+</ol>
+<blockquote>
+<p>进程:
+资源分配的单位，拥有独立地址空间，切换时需修改页表基地址寄存器，清空 TLB
+以及 CS、IP 等寄存器，从而开销大。</p>
+<p>线程:
+调度的单位，同一进程下所有线程共享地址空间，但线程之间拥有独立的程序计数器与栈空间，切换时仅需修改相关寄存器，故开销小。另外，不同进程之间的线程切换也会涉及到进程切换，开销变大。</p>
+<p>就好比程序和函数的区别一样。所有函数（线程）都能访问整个程序（进程）的全局变量、其他函数，但切换到另一个函数时，需要记住原本执行到哪一步了（程序计数器），还要记住原本的参数以及函数返回地址是什么（栈空间）。</p>
+<p>程序之间就不能互相访问对方的变量、函数这些了（地址空间独立），切换的话要清空
+TLB，那新来的程序在地址转换访问内存时必然要经历多次的 TLB miss，甚至是
+cache miss，开销肯定就大了。</p>
+</blockquote>
+<ol start="2" type="1">
+<li>切换地址空间是怎样实现的？</li>
+</ol>
+<blockquote>
+<p>修改页表基地址寄存器，以访问正确的页表；以及清空
+TLB，防止进行错误的地址转换。当然如果 TLB 支持 ASID 就不用清空了。</p>
+</blockquote>
+<ol start="3" type="1">
+<li>进程访页过程？</li>
+</ol>
+<blockquote>
+<p>以<strong>在支持二级页表的 32 位机器中取指令</strong>为例。</p>
+<p>首先进程根据当前 CS:IP 寄存器，进行指令地址的计算（CS&lt;&lt;4 +
+IP），从而获得相应代码段中的指令地址。注意这是一个虚拟地址，需要根据硬件转换为物理地址。</p>
+<p><strong>注意</strong>: 假设该虚拟地址的前 10 位 <code>PD_Index</code>
+是页目录条目的索引，中间 10 位 <code>PT_Index</code>
+是页表条目的索引，后 12 位是页内偏移 <code>Offset</code>。</p>
+<p>先访问 TLB，TLB 实际存储的是虚拟页号 <code>VPN</code> 到物理页帧号
+<code>PFN</code> 的转换。如果 TLB 命中，就直接根据
+<code>PFN&lt;&lt;10 | Offset</code>
+得到物理地址了。如果没有命中，就要获取正确的 <code>PFN</code> 并更新 TLB
+条目以便未来的访问同一物理页时降低开销。</p>
+<p>那么首先去页目录基地址寄存器中获取页目录的地址
+<code>PD_Addr</code>，这是个物理地址，可以直接访问，然后根据
+<code>PD_Addr + 4*PD_Index</code> （一个条目为 4
+字节）获得相应页目录项条目。这一条目中存放的是相应页表的地址
+<code>PT_Addr</code>，还有一些状态位（如果该页表中没有任何一个页面分配，那么有效位就是
+0，反之为 1）。</p>
+<p>这里假设页目录项有效，那么我们得到了页表，用同样的方法，我们访问地址
+<code>PT_Addr + 4*PT_Index</code> 可以得到
+<code>PFN</code>，假设页表项仍然有效，那就赶紧更新 TLB
+然后重新访问一遍。</p>
+<p>由于上次的插入，这次必定能获得物理地址，那么就可以愉快地访存了。</p>
+<p>如果页目录项/页表项无效，说明我们要访问的物理页帧并没有存放我们想要的数据（页表也占据了一整个物理页帧），那么此时此刻就要去磁盘上获取数据，然后根据一定的置换规则（如
+LRU）进行换页。</p>
+</blockquote>
+<ol start="4" type="1">
+<li>为什么要用多级页表？</li>
+</ol>
+<blockquote>
+<p>32 位机器下，如果一个页面为 4KB 并且采用单级页表，那就要整整 4MB
+的连续空间，而且不一定这 2^20
+个页面都得到分配，会有很大一部分页表项是浪费的。</p>
+<p>二级页表就不会有这种情况。假设前 10 位为页目录索引，中间 10
+位为页表索引，如果某个页表所指向的 2^10
+个页面都没得到分配，那么就不会为这个页表分配物理页帧，页目录中会将该页表的有效位设为
+0。这样就大大节省了空间，还防止了无法分配过大连续内存的问题。</p>
+</blockquote>
+<ol start="5" type="1">
+<li>用户态和内核态的区别？怎么切换？为什么要区分这两个级别？</li>
+</ol>
+<blockquote>
+<p>用户态和内核态是操作系统的两种运行级别，两者最大的区别就是特权级不同。用户态拥有最低的特权级，内核态拥有最高的特权级。运行在用户态的程序不能直接访问内核，例如不能使用系统调用。Due
+to the complexity of developing and maintaining the kernel, only the
+most essential and performance-critical code are placed in the kernel.
+Other things, such as GUI, management and control code, typically are
+programmed as user-space applications. This practice of splitting the
+implementation of certain features between kernel and user space is
+quite common in Linux.（引用自 <a
+href="https://www.linuxjournal.com/article/7356">Linux Journal</a>）</p>
+<p>处于用户态的进程可以通过 1.请求系统调用 2.硬件中断 3.软件异常
+等方式陷入内核态，然后再利用 ret 指令返回用户态。</p>
+<p>如果只有用户态，那就完全没法利用操作系统的内核功能；如果只有内核态，那所有进程都可以访问内核数据，甚至修改内核，不安全。</p>
+</blockquote>
+<ol start="6" type="1">
+<li>进程有几个栈？</li>
+</ol>
+<blockquote>
+<p>两个。用户态一个，内核态一个。两个栈的数据不互通，也是为了安全性考虑。</p>
+</blockquote>
+<ol start="7" type="1">
+<li>执行系统调用的过程？</li>
+</ol>
+<blockquote>
+<ol type="1">
+<li>将系统调用号放到寄存器 EAX 中，执行 <code>int 0x80</code>
+指令发出中断；</li>
+<li>CPU 收到中断后，根据中断号 <code>0x80</code>
+到中断向量表中查找对应中断描述符，其中包含中断服务程序
+<code>system_call</code> 的代码段选择子；</li>
+<li>根据该段选择子去全局描述符表 GDT 里取得段描述符，段描述符
+<code>SD</code> 里保存了中断服务程序的段基址和属性信息，此时 CPU
+就得到了中断服务程序的起始地址。这里，CPU 会检查 CS.CPL 和
+SD.DPL，以确保中断服务程序的特权级是高于当前用户程序的，或者说当前程序有权限使用中断服务程序，这可以避免用户应用程序访问特殊的中断门；</li>
+<li>在执行 <code>system_call</code> 前，CPU 会先从当前进程的 TSS
+字段里取得内核栈地址，然后保存用户进程现场（CS、IP、SS、ESP
+等信息），并将新的内核栈信息赋给 SS 和 ESP；</li>
+<li>开始执行 <code>system_call</code>，根据 EAX
+寄存器存储的系统调用号，从系统调用表上找到相应的系统调用并调用；</li>
+<li>执行 <code>itret</code>
+指令返回用户态，取出内核栈中保存的用户进程信息，重新赋值给相关寄存器，至此系统调用完成；</li>
+</ol>
+</blockquote>
+<h2 id="计算机网络">计算机网络</h2>
+<ol type="1">
+<li>说一下五层网络模型，并且指出 TCP 处于哪一层？</li>
+</ol>
+<blockquote>
+<p>应用层，传输层，网络层，数据链路层，物理层。TCP 位于传输层。</p>
+</blockquote>
+<ol start="2" type="1">
+<li>TCP 和 UDP 的区别？</li>
+</ol>
+<blockquote>
+<p>TCP: 数据传输前要用三次握手建立连接，数据传输过程中提供流量控制（TCP
+拥塞控制）和有序性（序列号和确认号），因而效率不高，但非常可靠；</p>
+<p>UDP:
+无需连接，不计后果地发送，即便丢包也无所谓，虽然不可靠，但效率很高，一般用于视频、DNS
+查询等；</p>
+</blockquote>
+<ol start="3" type="1">
+<li>为什么视频可以用 UDP？</li>
+</ol>
+<blockquote>
+<p>因为即使丢包也可以用插值算法补帧，允许这种不可靠，同时更要追求视频的实时性。</p>
+</blockquote>
+<ol start="4" type="1">
+<li>点击 url 到显示网页之间发生了什么？</li>
+</ol>
+<blockquote>
+<p>见另一篇文章 <a
+href="../../计算机网络/WhatHappenedAfterClickUrl">点击 Url
+到显示网页之间发生了什么？</a></p>
+</blockquote>
+<ol start="5" type="1">
+<li>TCP 和 UDP 都是怎么处理数据量较大的包的（如 5KB）？</li>
+</ol>
+<blockquote>
+<p>因为以太网 MTU=1500MB 的缘故，IP
+层会将过大的包进行分片，处理方式为在头部设置<strong>标识位</strong>与<strong>片偏移</strong>。TCP
+和 UDP 都不负责分片工作，而是将其交付给下一层去做。</p>
+<p>特别的，IP 首部的长度字段为 16 位，意味着同一个分片组最大可以容纳
+64KB 的 TCP/UDP 数据，那对 TCP/UDP 而言 5KB
+简直是小意思，不会分片。而如果超过 64 KB，那就要分成多个 TCP/UDP
+包发送了。</p>
+</blockquote>
+<ol start="6" type="1">
+<li>网络层如何转发数据包？路由器是如何进行自学习的？</li>
+</ol>
+<blockquote>
+<p>交换机根据源 MAC 地址建立转发表，根据目的 MAC 地址转发，如果目的 MAC
+地址不在，就发一个 ARP 广播请求来获取。</p>
+<p>路由器根据目的 IP
+地址进行将数据包由特定端口发出。对于静态路由而言，转发表需管理员手动配置；而动态路由则会根据路由协议（如
+RIP）定时与其他路由器交换路由信息，从而建立转发表。</p>
+</blockquote>
+<h2 id="数据库系统">数据库系统</h2>
+<ol type="1">
+<li>说下 ACID 分别代表什么意思？</li>
+</ol>
+<blockquote>
+<p>A: Atomic 原子性</p>
+<p>C: Consistency 一致性</p>
+<p>I: Isolation 隔离性</p>
+<p>D: Durability 持久性</p>
+</blockquote>
+<ol start="2" type="1">
+<li>事务隔离级别分别有哪些？</li>
+</ol>
+<blockquote>
+<p>读未提交: 这种隔离级别不加任何锁，有可能读事务 reader 读取到了写事务
+writer 写入数据库但未提交的数据。这就是<strong>脏读</strong>。</p>
+<p>读提交: 这种隔离级别上了写锁，但同一事务 reader
+对同一个键的前后两次读取之间可能会因为穿插了另一事务 writer
+的写入，从而读取到了不一样的数据。这就是<strong>不可重复读</strong>。</p>
+<p>可重复读：这种隔离级别下，对某个键的读取开始后不再允许任何写入，因而不会出现上述情况，前后两次读结果必定相同。但在某些场景比如
+<code>select * from table; insert values &#123;k1, v1&#125; into table;</code>
+中，两个语句之间由于另一事务也插入了 <code>&#123;k1, v1&#125;</code>
+这一键值对，导致 <code>insert</code> 失败，原因是键冲突，但
+<code>select</code>
+时并没有看到这一条数据。这就是<strong>幻读</strong>。</p>
+<p>可序列化:
+这种隔离级别下，事务串行化顺序执行，可以避免脏读、不可重复读与幻读。但是这种事务隔离级别效率低下，比较耗数据库性能，一般不使用。</p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>Interview</category>
+      </categories>
   </entry>
 </search>
