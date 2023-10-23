@@ -14324,6 +14324,70 @@ mask 打印信息，格式为：</p>
 <p>最后进行测试：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ./grade-lab-syscall trace</span><br><span class="line">...</span><br><span class="line">== Test trace 32 grep == trace 32 grep: OK (1.1s) </span><br><span class="line">== Test trace all grep == trace all grep: OK (1.0s) </span><br><span class="line">== Test trace nothing == trace nothing: OK (1.0s) </span><br><span class="line">== Test trace children == trace children: OK (13.2s)</span><br></pre></td></tr></table></figure>
 <h2 id="task2-sysinfo">Task2: Sysinfo</h2>
+<p>该任务要求我们实现 <code>sysinfo(sysinfo*)</code>
+函数，并为传入的结构体填充字段，分别为：</p>
+<ol type="1">
+<li><code>freemem</code>: 空闲内存字节数；</li>
+<li><code>nproc</code>: 当前进程数；</li>
+</ol>
+<p>由于这也是一个新建的系统调用函数，所以我们需要像上一个任务一样修改以下文件
+<code>user/user.h</code>，<code>user/usys.pl</code>，<code>Makefile</code>，<code>kernal/syscall.h</code>，<code>kernal/syscall.c</code>，并且在
+<code>kernal/sysproc.c</code> 中添加并实现 <code>sys_sysinfo()</code>
+函数。</p>
+<blockquote>
+<p><code>user/user.h</code>: int sysinfo(struct sysinfo *);
+<code>user/usys.pl</code>: entry("sysinfo"); <code>Makefile</code>:
+$U/_sysinfo<br />
+<code>kernal/syscall.h</code>: #define SYS_sysinfo 23
+<code>kernal/syscall.c</code>: [SYS_sysinfo] sys_sysinfo</p>
+</blockquote>
+<p>然而，lab 并没有为我们提供现成的“获取空闲字节数”与“获取当前进程数”的
+API，需要我们自己实现。这两个 API 可以分别在
+<code>kernal/kalloc.c</code> 与 <code>kernal/proc.c</code>
+中实现（需要在 <code>kernal/defs.h</code> 中添加声明）。</p>
+<h3 id="获取空闲内存字节数">获取空闲内存字节数</h3>
+<p><code>kernal/kalloc.c</code> 中有一个名为 <code>kmem</code>
+的数据结构，它维护了一个空闲链表。</p>
+<p>事实上，所有内存中未分配的页面都有一个 header，大小为 64
+位（一个指针那么大），指向（逻辑上的）下一个未分配的页面，这个指针在软件层面用数据结构
+<code>struct run</code> 表示。一旦有一个空闲页面 <code>page</code>
+被分配，那么（逻辑上的）上一个页面 <code>prev</code> 的 <code>run</code>
+就会指向 <code>page</code> 的（逻辑上的）下一个空闲页面
+<code>next</code>；而有个物理页被 free
+了，就让它成为空闲链表的表头。</p>
+<blockquote>
+<p>这可以在 <code>kernal/kalloc.c</code> 中的 <code>kalloc()</code> 与
+<code>kfree()</code> 中得知。</p>
+</blockquote>
+<p>那空闲内存的字节数就很好计算了，就是**空闲页面数*页面大小**嘛。写成代码就是</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* kernal/kalloc.c */</span></span><br><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">kfreemem</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">int</span> npage = <span class="number">0</span>;</span><br><span class="line">  acquire(&amp;kmem.lock);</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">run</span> *<span class="title">r</span> =</span> kmem.freelist;</span><br><span class="line">  <span class="keyword">while</span> (r) &#123;</span><br><span class="line">    r = r-&gt;next;</span><br><span class="line">    npage++;</span><br><span class="line">  &#125;</span><br><span class="line">  release(&amp;kmem.lock);</span><br><span class="line">  <span class="keyword">return</span> npage * PGSIZE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="获取当前进程数">获取当前进程数</h3>
+<p><code>kernal/proc.c</code> 中为我们定义了一个名为 <code>proc</code>
+的进程表（对的，和结构体 <code>struct proc</code>
+同名），我们只需要遍历该表，检查进程状态即可。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* kernal/proc.c */</span></span><br><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">nproc</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">int</span> cnt = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; NPROC; i++) &#123;</span><br><span class="line">    <span class="keyword">if</span> (proc[i].state != UNUSED) &#123;</span><br><span class="line">      cnt++;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> cnt;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="实现-sys_sysinfo">实现 sys_sysinfo()</h3>
+<p>接下来就是实现系统函数了。由于我们在用户层调用 <code>sysinfo()</code>
+时传入的是一个指针，所以在读取该参数时不能用 <code>argint()</code>，而是
+<code>argaddr()</code>。</p>
+<p>值得注意的是，读取到的参数是一个用户态的虚拟地址，如果我们创建一个
+<code>struct sysinfo*</code>
+变量用于接收指针，然后再赋值，像下面这样：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">uint64 va;</span><br><span class="line">argaddr(<span class="number">0</span>, &amp;va);</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sysinfo</span>* <span class="title">info</span> =</span> (<span class="keyword">struct</span> sysinfo*)va;</span><br><span class="line">info-&gt;freemem = kfreemem();</span><br><span class="line">info-&gt;nproc = nproc();</span><br></pre></td></tr></table></figure>
+<p>那肯定是不行的。对于内核而言，如果直接访问地址，那访问的就是物理地址，可我们得到的却是一个用户态下的虚拟地址，这两者是完全不能等同的。要想访问到正确的物理地址，就需要通过页表进行地址转换。然而
+lab 已经为我们提供了另一个实现方法，<code>kernal/vm.c</code> 中的
+<code>copyout()</code>
+函数，用于拷贝一段内存到虚拟地址。这正好是我们需要的，要用它，我们只需要在内核栈中新建一个
+<code>struct sysinfo info</code> 变量，赋值后调用 <code>copyout()</code>
+拷贝即可。完整的 <code>sys_sysinfo()</code> 如下：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">uint64</span><br><span class="line"><span class="title function_">sys_sysinfo</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  uint64 va;</span><br><span class="line">  <span class="keyword">if</span> (argaddr(<span class="number">0</span>, &amp;va) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// info is in kernal address space</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">sysinfo</span> <span class="title">info</span>;</span></span><br><span class="line">  info.freemem = kfreemem();</span><br><span class="line">  info.nproc = nproc();</span><br><span class="line"></span><br><span class="line">  <span class="comment">// copy info to *va</span></span><br><span class="line">  <span class="keyword">return</span> copyout(myproc()-&gt;pagetable, va, (<span class="type">char</span>*)&amp;info, <span class="keyword">sizeof</span>(info));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="最后的工作">最后的工作</h2>
+<ol type="1">
+<li><code>git commit -am ""</code> 将所有修改提交到本地;</li>
+<li>执行 <code>make handin</code>。由于 lab0 保存了
+APIKey，故直接成功提交；</li>
+</ol>
+<p>可选的挑战再说吧，没有什么想做的欲望。</p>
 ]]></content>
       <categories>
         <category>MIT6.s081</category>
