@@ -271,7 +271,7 @@ kbd {
   border: 1px solid #ccc;
   border-radius: 0.2em;
   box-shadow: 0.1em 0.1em 0.2em rgba(0,0,0,0.1);
-  color: #555;
+  color: #d75;
   font-family: inherit;
   padding: 0.1em 0.3em;
   white-space: nowrap;
@@ -441,7 +441,7 @@ code {
 code {
   background: #eee;
   border-radius: 3px;
-  color: #555;
+  color: #d75;
   padding: 2px 4px;
   overflow-wrap: break-word;
   word-wrap: break-word;
@@ -1220,7 +1220,7 @@ pre .javascript .function {
 }
 .links-of-author a::before,
 .links-of-author span.exturl::before {
-  background: #9e0eff;
+  background: #447a65;
   border-radius: 50%;
   content: ' ';
   display: inline-block;
@@ -1870,7 +1870,7 @@ pre .javascript .function {
 .posts-expand .post-meta {
   color: #999;
   font-family: 'Lato', "PingFang SC", "Microsoft YaHei", sans-serif;
-  font-size: 12px;
+  font-size: 13px;
   margin: 3px 0 60px 0;
   text-align: center;
 }
