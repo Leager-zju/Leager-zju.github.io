@@ -14783,6 +14783,9 @@ COW
 <code>(pa - KERNBASE) &gt;&gt; 12</code>
 即可。虽然前面可能有部分页会被浪费，但胜在简单可靠。</p>
 <p>思路捋清了，那代码就很好写了。</p>
+<h2 id="preparation">Preparation</h2>
+<p>切换到对应分支</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ git fetch</span><br><span class="line">$ git checkout cow</span><br><span class="line">$ make clean</span><br></pre></td></tr></table></figure>
 <h2 id="task-implement-copy-on-write">Task: Implement copy-on write</h2>
 <h3 id="引用计数">引用计数</h3>
 <p>首先实现引用计数。</p>
@@ -14817,6 +14820,9 @@ APIKey，故直接成功提交；</li>
     <url>/MIT6-s081/6-s081lab3/</url>
     <content><![CDATA[<p>现在是，陷入内核时间。</p>
 <span id="more"></span>
+<h2 id="preparation">Preparation</h2>
+<p>切换到对应分支</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ git fetch</span><br><span class="line">$ git checkout traps</span><br><span class="line">$ make clean</span><br></pre></td></tr></table></figure>
 <h2 id="task1-risc-v-assembly">Task1: RISC-V assembly</h2>
 <p>第一个任务就是了解一下 RISC-V 汇编语言，直接跳过。</p>
 <blockquote>
@@ -14898,6 +14904,386 @@ trapframe 进行拷贝，然后修改 trapframe 的 epc 字段，等待
 <figure class="highlight c"><figcaption><span>kernel/sysproc.c</span></figcaption><table><tr><td class="code"><pre><span class="line">uint64</span><br><span class="line"><span class="title function_">sys_sigreturn</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">proc</span>* <span class="title">p</span> =</span> myproc();</span><br><span class="line">  p-&gt;tick = <span class="number">0</span>;</span><br><span class="line">  p-&gt;in_handler = <span class="number">0</span>; <span class="comment">// finish calling handler, set it as 0</span></span><br><span class="line">  memmove(p-&gt;trapframe, &amp;p-&gt;trapframe_copy, <span class="keyword">sizeof</span>(<span class="keyword">struct</span> trapframe));</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h2 id="测试结果">测试结果</h2>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ make grade</span><br><span class="line">...</span><br><span class="line">== Test answers-traps.txt == answers-traps.txt: OK </span><br><span class="line">== Test backtrace <span class="built_in">test</span> == </span><br><span class="line">$ make qemu-gdb</span><br><span class="line">backtrace <span class="built_in">test</span>: OK (3.6s) </span><br><span class="line">== Test running alarmtest == </span><br><span class="line">$ make qemu-gdb</span><br><span class="line">(3.9s) </span><br><span class="line">== Test   alarmtest: test0 == </span><br><span class="line">  alarmtest: test0: OK </span><br><span class="line">== Test   alarmtest: test1 == </span><br><span class="line">  alarmtest: test1: OK </span><br><span class="line">== Test   alarmtest: test2 == </span><br><span class="line">  alarmtest: test2: OK </span><br><span class="line">== Test usertests == </span><br><span class="line">$ make qemu-gdb</span><br><span class="line">usertests: OK (123.9s) </span><br><span class="line">== Test time == </span><br><span class="line">time: OK </span><br><span class="line">Score: 85/85</span><br></pre></td></tr></table></figure>
+<h2 id="最后的工作">最后的工作</h2>
+<ol type="1">
+<li><code>git commit -am ""</code> 将所有修改提交到本地;</li>
+<li>执行 <code>make handin</code>。由于 lab0 保存了
+APIKey，故直接成功提交；</li>
+</ol>
+<p>可选的挑战再说吧，没有什么想做的欲望。</p>
+]]></content>
+      <categories>
+        <category>MIT6.s081</category>
+      </categories>
+      <tags>
+        <tag>lab</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>6.s081 Lab6 Networking</title>
+    <url>/MIT6-s081/6-s081lab6/</url>
+    <content><![CDATA[<p>这里要我们在软件层面实现数据包的收发操作。</p>
+<span id="more"></span>
+<h2 id="preparation">Preparation</h2>
+<p>切换到对应分支</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ git fetch</span><br><span class="line">$ git checkout net</span><br><span class="line">$ make clean</span><br></pre></td></tr></table></figure>
+<h2 id="模拟网络">模拟网络</h2>
+<p>我们将使用名为 <strong>E1000</strong>
+的网络设备来处理网络通信，实际上是 qemu 模拟了一个网卡和 PCI
+总线，以及若干寄存器。不妨从 <code>connect()</code> 开始，逐步分析。</p>
+<h3 id="从-connect-开始">从 connect 开始</h3>
+<p><code>connect()</code> 实际上会触发系统调用
+<code>sys_connect()</code>，它主要调用 <code>sockalloc()</code>
+根据传入的参数（目的 ip
+地址，源端口和目的端口）新建一个套接字，然后将其注册到一个 SOCK
+类型的文件中，然后为该文件分配一个 fd 并返回。</p>
+<p>通过对该 fd 进行读写，就是进行数据的收发操作。</p>
+<h3 id="writefd">write(fd)</h3>
+<p>先看发数据。在用户态执行 <code>write(fd)</code> 会跳转到系统调用
+<code>sys_write(fd)</code>，进一步执行
+<code>filewrite(fd)</code>，发现传入的 fd 指向一个 SOCK
+文件，下一步就会执行 <code>sockwrite()</code>。该函数就是将数据拷贝到
+<code>struct mbuf</code> 类型的变量中，然后利用协议栈，不断封装 TCP/UDP
+首部、IP 首部、以太网首部，最后得到一个完整的数据包，就可以发送了。</p>
+<figure class="highlight c"><figcaption><span>kernel/sysnet.c</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">sockwrite</span><span class="params">(<span class="keyword">struct</span> sock *si, uint64 addr, <span class="type">int</span> n)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">proc</span> *<span class="title">pr</span> =</span> myproc();</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">mbuf</span> *<span class="title">m</span>;</span></span><br><span class="line"></span><br><span class="line">  m = mbufalloc(MBUF_DEFAULT_HEADROOM); <span class="comment">// 分配一个 mbuf，并留出首部空间。</span></span><br><span class="line">  <span class="keyword">if</span> (!m)</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (copyin(pr-&gt;pagetable, mbufput(m, n), addr, n) == <span class="number">-1</span>) &#123; <span class="comment">// 载入数据</span></span><br><span class="line">    mbuffree(m);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  net_tx_udp(m, si-&gt;raddr, si-&gt;lport, si-&gt;rport);</span><br><span class="line">  <span class="keyword">return</span> n;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><figcaption><span>kernel/net.c</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">net_tx_udp</span><span class="params">(<span class="keyword">struct</span> mbuf *m, uint32 dip,</span></span><br><span class="line"><span class="params">           uint16 sport, uint16 dport)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">udp</span> *<span class="title">udphdr</span>;</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// put the UDP header...</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// now on to the IP layer</span></span><br><span class="line">  net_tx_ip(m, IPPROTO_UDP, dip);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span></span><br><span class="line"><span class="title function_">net_tx_ip</span><span class="params">(<span class="keyword">struct</span> mbuf *m, uint8 proto, uint32 dip)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">ip</span> *<span class="title">iphdr</span>;</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// push the IP header...</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// now on to the ethernet layer</span></span><br><span class="line">  net_tx_eth(m, ETHTYPE_IP);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span></span><br><span class="line"><span class="title function_">net_tx_eth</span><span class="params">(<span class="keyword">struct</span> mbuf *m, uint16 ethtype)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">eth</span> *<span class="title">ethhdr</span>;</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// push the ethernet header...</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (e1000_transmit(m)) &#123; <span class="comment">// 发送，该函数需要我们实现</span></span><br><span class="line">    mbuffree(m);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="readfd">read(fd)</h3>
+<p>收数据的流程基本与上面类似。在用户态执行 <code>read(fd)</code>
+会跳转到系统调用 <code>sys_read(fd)</code>，进一步执行
+<code>fileread(fd)</code>，发现传入的 fd 指向一个 SOCK
+文件，下一步就会执行
+<code>sockread()</code>。到这里就开始不一样了。<code>sockread()</code>
+如果发现接收队列 <code>mbufq</code> 为空，就 sleep 直到被唤醒。</p>
+<p>而唤醒操作实际上由硬件决定。每当 E1000
+收到一个数据包，就会触发一次中断 <code>e1000_intr()</code>，里面会调用
+<code>e1000_recv()</code>。这是我们需要实现的，事实上，根据任务手册我们也能大概推断出，该函数需要调用若干次
+<code>net_rx</code>，不断拆解头部最后得到数据，发给
+<code>sockrecvudp()</code>，它会将数据（实际上是 <code>mbuf</code>）push
+进接收队列，并唤醒沉睡中的
+<code>sockread()</code>。醒了以后发现数据已经有了，那就美滋滋地读取，最后返回给用户态。</p>
+<figure class="highlight c"><figcaption><span>kernel/sysnet.c</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">sockread</span><span class="params">(<span class="keyword">struct</span> sock *si, uint64 addr, <span class="type">int</span> n)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  acquire(&amp;si-&gt;lock);</span><br><span class="line">  <span class="keyword">while</span> (mbufq_empty(&amp;si-&gt;rxq) &amp;&amp; !pr-&gt;killed) &#123; <span class="comment">// 等待 sockrecvudp 的唤醒</span></span><br><span class="line">    sleep(&amp;si-&gt;rxq, &amp;si-&gt;lock);</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">  m = mbufq_pophead(&amp;si-&gt;rxq); <span class="comment">// 取出 socket 的接收队列队首数据</span></span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">if</span> (copyout(pr-&gt;pagetable, addr, m-&gt;head, len) == <span class="number">-1</span>) &#123; </span><br><span class="line">    mbuffree(m);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><figcaption><span>kernel/net.c</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="comment">// called by e1000_recv</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">net_rx</span><span class="params">(<span class="keyword">struct</span> mbuf *m)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">if</span> (type == ETHTYPE_IP) <span class="comment">// type 为以太网首部的类型字段</span></span><br><span class="line">    net_rx_ip(m);</span><br><span class="line">  <span class="keyword">else</span> <span class="keyword">if</span> (type == ETHTYPE_ARP)</span><br><span class="line">    net_rx_arp(m);</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">    mbuffree(m);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span></span><br><span class="line"><span class="title function_">net_rx_ip</span><span class="params">(<span class="keyword">struct</span> mbuf *m)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">ip</span> *<span class="title">iphdr</span>;</span></span><br><span class="line">  iphdr = mbufpullhdr(m, *iphdr);</span><br><span class="line">  net_rx_udp(m, len, iphdr);</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span></span><br><span class="line"><span class="title function_">net_rx_udp</span><span class="params">(<span class="keyword">struct</span> mbuf *m, uint16 len, <span class="keyword">struct</span> ip *iphdr)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">udp</span> *<span class="title">udphdr</span>;</span></span><br><span class="line">  udphdr = mbufpullhdr(m, *udphdr);</span><br><span class="line">  ...</span><br><span class="line">  sockrecvudp(m, sip, dport, sport); <span class="comment">// 分别从首部中提取出，并经过 ntohs 的大小端转换</span></span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span></span><br><span class="line"><span class="title function_">net_rx_arp</span><span class="params">(<span class="keyword">struct</span> mbuf *m)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  net_tx_arp(ARP_OP_REPLY, smac, sip); <span class="comment">// 这个要特别注意，收到一个 ARP 包后要马上发回去</span></span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><figcaption><span>kernel/sysnet.c</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">sockrecvudp</span><span class="params">(<span class="keyword">struct</span> mbuf *m, uint32 raddr, uint16 lport, uint16 rport)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">found:</span><br><span class="line">  ...</span><br><span class="line">  mbufq_pushtail(&amp;si-&gt;rxq, m);  <span class="comment">// 将数据插到 socket 的接收队列末尾</span></span><br><span class="line">  wakeup(&amp;si-&gt;rxq);             <span class="comment">// 并唤醒</span></span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="task1-e1000-transmit">Task1: E1000 Transmit</h2>
+<p>OK，接下来我们首先进行一个发送函数的实现。关于
+<code>tx_ring[]</code>、<code>tx_mbufs[]</code>
+以及其他寄存器就不提了，我们只要知道是一个环形结构即可，且 E1000_TDT
+寄存器表明了我们应该从哪个索引进行写入。lab 手册的 hint
+其实给的很详细了，这里只说一些我认为比较坑的点：</p>
+<ol type="1">
+<li><code>Otherwise, use mbuffree() to free the last mbuf that was transmitted from that descriptor (if there was one).</code>
+这里需要遍历整个 mbuf 链表释放，防止内存泄漏；</li>
+<li><code>tx_desc</code> 的 <code>cmd</code>
+字段设置的是比特位，因为以太网最大数据包大小为 1518，而
+<code>mbuf</code> 的 buffer 大小为 2048，所以一个 <code>mbuf</code>
+必定能容纳一个以太网包，需要为其置位
+<code>E1000_TXD_CMD_EOP</code>，表示一个包结束了；</li>
+<li><code>tx_desc</code> 的
+<code>cso</code>、<code>css</code>、<code>special</code>
+字段都可以不用设置；</li>
+<li>别忘了用<strong>锁</strong>来对并发 transmit 进行互斥处理；</li>
+</ol>
+<figure class="highlight c"><figcaption><span>kernel/e1000.c</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">e1000_transmit</span><span class="params">(<span class="keyword">struct</span> mbuf *m)</span></span><br><span class="line">&#123;</span><br><span class="line">  acquire(&amp;e1000_lock);</span><br><span class="line">  uint32 tail = regs[E1000_TDT];</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">tx_desc</span>* <span class="title">txd</span> =</span> &amp;tx_ring[tail];</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">mbuf</span>* <span class="title">last_mbuf</span> =</span> tx_mbufs[tail];</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> ((txd-&gt;status &amp; E1000_TXD_STAT_DD) == <span class="number">0</span>) &#123;</span><br><span class="line">    release(&amp;e1000_lock);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (last_mbuf) &#123;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">mbuf</span>* <span class="title">t</span>;</span></span><br><span class="line">    <span class="keyword">while</span> (last_mbuf) &#123;</span><br><span class="line">      t = last_mbuf-&gt;next;</span><br><span class="line">      mbuffree(last_mbuf);</span><br><span class="line">      last_mbuf = t;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  tx_mbufs[tail] = m;</span><br><span class="line">  txd-&gt;addr = (uint64)(m-&gt;head);</span><br><span class="line">  txd-&gt;length = (uint16)(m-&gt;len);</span><br><span class="line">  txd-&gt;cmd = E1000_TXD_CMD_RS | E1000_TXD_CMD_EOP;</span><br><span class="line">  txd-&gt;status = <span class="number">0</span>;  <span class="comment">// not done</span></span><br><span class="line">  regs[E1000_TDT] = (tail+<span class="number">1</span>) % TX_RING_SIZE;</span><br><span class="line"></span><br><span class="line">  release(&amp;e1000_lock);</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="task2-e1000-recv">Task2: E1000 Recv</h2>
+<p>接收函数也是按照 hint 来即可。也说下坑点：</p>
+<ol type="1">
+<li>不用加锁！不用加锁！如果加了锁，调用 <code>net_rx</code> 发现是个
+ARP 包会马上调用
+<code>e1000_transmit()</code>，里面也有加锁，那就会导致连上两次锁又得不到释放，结果不言而喻；</li>
+<li>因为一开始会先令 E1000_RDT 增加，所以如果检查 E1000_RDT 发现对应
+<code>rx_desc</code> 的 E1000_RXD_STAT_DD 位为 0，需要将 E1000_RDT
+回退一格，这样下一次调用时就会跳到正确的位置；</li>
+<li>每次读取要把所有满足 E1000_RXD_STAT_DD=1
+的读完，而不能一次调用只读一个
+<code>mbuf</code>，所以需要一个大的循环；</li>
+</ol>
+<figure class="highlight c"><figcaption><span>kernel/e1000.c</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span></span><br><span class="line"><span class="title function_">e1000_recv</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  uint32 tail;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">rx_desc</span>* <span class="title">rxd</span>;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">mbuf</span>* <span class="title">m</span>;</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">    regs[E1000_RDT] = (regs[E1000_RDT]+<span class="number">1</span>) % RX_RING_SIZE;</span><br><span class="line">    tail = regs[E1000_RDT];</span><br><span class="line">    rxd = &amp;rx_ring[tail];</span><br><span class="line">    m = rx_mbufs[tail];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((rxd-&gt;status &amp; E1000_RXD_STAT_DD) == <span class="number">0</span>) &#123;</span><br><span class="line">      regs[E1000_RDT] = (regs[E1000_RDT]<span class="number">-1</span>) % RX_RING_SIZE;</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    m-&gt;len = rxd-&gt;length;</span><br><span class="line">    net_rx(m);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((rx_mbufs[tail] = mbufalloc(<span class="number">0</span>)) == <span class="number">0</span>)</span><br><span class="line">      panic(<span class="string">&quot;e1000_recv&quot;</span>);</span><br><span class="line">    rxd-&gt;status = <span class="number">0</span>;</span><br><span class="line">    rxd-&gt;addr = (uint64)rx_mbufs[tail]-&gt;head;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="测试结果">测试结果</h2>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ make grade</span><br><span class="line">...</span><br><span class="line">== Test running nettests == </span><br><span class="line">$ make qemu-gdb</span><br><span class="line">(3.1s) </span><br><span class="line">== Test   nettest: ping == </span><br><span class="line">  nettest: ping: OK </span><br><span class="line">== Test   nettest: single process == </span><br><span class="line">  nettest: single process: OK </span><br><span class="line">== Test   nettest: multi-process == </span><br><span class="line">  nettest: multi-process: OK </span><br><span class="line">== Test   nettest: DNS == </span><br><span class="line">  nettest: DNS: OK </span><br><span class="line">== Test time == </span><br><span class="line">time: OK </span><br><span class="line">Score: 100/100</span><br></pre></td></tr></table></figure>
+<h2 id="最后的工作">最后的工作</h2>
+<ol type="1">
+<li><code>git commit -am ""</code> 将所有修改提交到本地;</li>
+<li>执行 <code>make handin</code>。由于 lab0 保存了
+APIKey，故直接成功提交；</li>
+</ol>
+<p>可选的挑战再说吧，没有什么想做的欲望。</p>
+]]></content>
+      <categories>
+        <category>MIT6.s081</category>
+      </categories>
+      <tags>
+        <tag>lab</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>6.s081 Lab5 Multithreading</title>
+    <url>/MIT6-s081/6-s081lab5/</url>
+    <content><![CDATA[<p>现在进入操作系统的另一大特性：并发。</p>
+<span id="more"></span>
+<h2 id="线程切换-in-xv6">线程切换 in xv6</h2>
+<p>在 xv6
+中，每个进程都可以视为有一个主线程，逐行运行指令，享有所有寄存器的使用权。然而，时间片到期，也就是进程收到时钟中断后，会调用
+<code>yield()</code> 函数<strong>自愿</strong>让出 CPU。</p>
+<p>该函数会将当前进程运行状态设置为
+<code>RUNNABLE</code>，也就是所谓的<strong>就绪态</strong>，然后调用
+<code>sched()</code>。</p>
+<p><code>sched()</code> 进行一些合理性检查后，会调用
+<code>switch()</code> 进行上下文的切换：保存当前进程上下文到
+<code>proc-&gt;context</code> 中，并将寄存器设置为 CPU
+调度器线程的上下文（<code>struct context</code>
+指明了保存的上下文都有哪些寄存器，基本都是 <strong>Callee Saved
+Register</strong>，这里主要关注 ra）。也就是说，调用
+<code>swtch()</code> 后，本来 ra 应该为 <code>sched()</code> 中调用
+<code>swtch()</code> 处的地址，但 <code>switch()</code> 的一通操作，ra
+成为了调度器线程 <code>scheduler()</code> 函数的地址，那么
+<code>swtch()</code> 最后的 ret 指令会进入到 <code>scheduler()</code>
+开始执行。</p>
+<p><code>scheduler()</code> 本质上是个 for
+循环，遍历进程表找到下一个处于就绪态的进程 A，将 A 设置为
+<code>RUNNING</code>，即<strong>运行态</strong>，然后调用
+<code>swtch()</code> 保存当前寄存器到调度进程中，然后读 A
+的上下文到寄存器中，这样就完成了切换的工作。</p>
+<p>如果是首次调度 A，那么由于 A 的 <code>context.ra</code> 会被初始化为
+<code>forkret()</code>，直接跳转过去；</p>
+<p>反之，A 的 <code>context.ra</code> 因为上次时间片到期而被初始化为
+<strong><code>sched()</code> 中调用 <code>swtch()</code>
+处的地址</strong>，恢复上下文后相当于跟什么都没发生一样，继续执行，退出
+<code>sched()</code>，退出 <code>yield()</code>，后面就是到
+<code>usertrapret()</code> 返回用户态了。</p>
+<p>所以，进程的切换相当于主线程的切换，而在硬件层面，就是几个寄存器的切换，同一个进程切换出去，会在同一位置切换回来继续执行，保证了并发的正确性。</p>
+<blockquote>
+<p>ret 指令会自动设置 PC，也就不用保存。</p>
+</blockquote>
+<p>而页表寄存器的切换与 TLB 的清除工作，是当进程切换后，必然会进入
+<code>usertrapret()</code>（<code>forkret()</code>
+最后也会进入），这里会进行内核态到用户态页表的切换，而用户态页表地址在
+<code>struct proc</code> 中的 <code>pagetable</code>
+里，调度到哪个进程自然就会将 SATP 设为对应进程的
+<code>proc-&gt;pagetable</code>。</p>
+<h2 id="preparation">Preparation</h2>
+<p>切换到对应分支</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ git fetch</span><br><span class="line">$ git checkout thread</span><br><span class="line">$ make clean</span><br></pre></td></tr></table></figure>
+<h2 id="task1-uthread-switching-between-threads">Task1: Uthread:
+switching between threads</h2>
+<p>该任务就是实现线程间的切换，其实现完全可以参考进程切换，毕竟本质上也是主线程的切换。</p>
+<figure class="highlight c"><figcaption><span>user/uthread.c</span></figcaption><table><tr><td class="code"><pre><span class="line">...</span><br><span class="line"><span class="comment">// 定义上下文结构体，其实就是直接抄了 proc.h 里的。</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">context</span> &#123;</span></span><br><span class="line">  uint64 ra;</span><br><span class="line">  uint64 sp;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// callee-saved</span></span><br><span class="line">  uint64 s0;</span><br><span class="line">  uint64 s1;</span><br><span class="line">  uint64 s2;</span><br><span class="line">  uint64 s3;</span><br><span class="line">  uint64 s4;</span><br><span class="line">  uint64 s5;</span><br><span class="line">  uint64 s6;</span><br><span class="line">  uint64 s7;</span><br><span class="line">  uint64 s8;</span><br><span class="line">  uint64 s9;</span><br><span class="line">  uint64 s10;</span><br><span class="line">  uint64 s11;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">thread</span> &#123;</span></span><br><span class="line">  <span class="type">char</span>           <span class="built_in">stack</span>[STACK_SIZE]; <span class="comment">/* the thread&#x27;s stack */</span></span><br><span class="line">  <span class="type">int</span>            state;             <span class="comment">/* FREE, RUNNING, RUNNABLE */</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">context</span> <span class="title">ctx</span>;</span>               <span class="comment">// (!new)</span></span><br><span class="line">&#125;;</span><br><span class="line">...</span><br><span class="line"><span class="type">void</span> </span><br><span class="line"><span class="title function_">thread_schedule</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">thread</span> *<span class="title">t</span>, *<span class="title">next_thread</span>;</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">/* Find another runnable thread. */</span></span><br><span class="line">  ...</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (current_thread != next_thread) &#123;         <span class="comment">/* switch threads?  */</span></span><br><span class="line">    next_thread-&gt;state = RUNNING;</span><br><span class="line">    t = current_thread;</span><br><span class="line">    current_thread = next_thread;</span><br><span class="line">    thread_switch((uint64)&amp;t-&gt;ctx, (uint64)&amp;next_thread-&gt;ctx); <span class="comment">// (!new)</span></span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    next_thread = <span class="number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> </span><br><span class="line"><span class="title function_">thread_create</span><span class="params">(<span class="type">void</span> (*func)())</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">thread</span> *<span class="title">t</span>;</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> (t = all_thread; t &lt; all_thread + MAX_THREAD; t++) &#123;</span><br><span class="line">    <span class="keyword">if</span> (t-&gt;state == FREE) <span class="keyword">break</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  t-&gt;state = RUNNABLE;</span><br><span class="line"></span><br><span class="line">  <span class="built_in">memset</span>(&amp;t-&gt;ctx, <span class="number">0</span>, <span class="keyword">sizeof</span>(<span class="keyword">struct</span> context)); <span class="comment">// (!new)</span></span><br><span class="line">  t-&gt;ctx.ra = (uint64)func;                   <span class="comment">// (!new)</span></span><br><span class="line">  t-&gt;ctx.sp = (uint64)&amp;t-&gt;<span class="built_in">stack</span> + STACK_SIZE; <span class="comment">// (!new)</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><figcaption><span>user/uthread_switch.S</span></figcaption><table><tr><td class="code"><pre><span class="line">.globl thread_switch</span><br><span class="line">thread_switch:</span><br><span class="line">	sd ra, 0(a0)</span><br><span class="line">  ...</span><br><span class="line">  sd s11, 104(a0)</span><br><span class="line"></span><br><span class="line">  ld ra, 0(a1)</span><br><span class="line">  ...</span><br><span class="line">  ld s11, 104(a1)</span><br><span class="line"></span><br><span class="line">	ret    /* return to ra */</span><br></pre></td></tr></table></figure>
+<p>基本都是参考已有的实现，但关键是弄明白具体发生了什么。</p>
+<h2 id="task2-using-threads">Task2: Using threads</h2>
+<p>该任务（和下一个任务）是熟悉 <code>pthread.h</code>
+库并发编程，场景是对一个哈希表进行并发读写，由于是批量写完再读，所以不用给读操作加锁（读写交错的话就要加锁了）。</p>
+<p>这里的哈希表采用最简单的拉链法处理冲突和直接哈希进行映射，一共有
+<code>NBUCKETS</code> 个桶，每个桶用链表实现，用
+<code>key % NBUCKETS</code> 进行映射，然后插到桶链表的末尾。</p>
+<p>最开始我们可以为整个表设置一个大锁，一旦要进行写操作，就上锁，写完放锁。但这样效率很低，毕竟一共有互不干涉的
+<code>NBUCKETS</code> 个桶，如果两个 key
+分别映射到不同的桶，那就没有必要用大锁来互斥。于是可以考虑开一个锁数组，每个桶对应一个表，根据
+key 的映射结果决定给哪个桶上锁放锁，这样效率会比之前快很多。</p>
+<blockquote>
+<p>大锁的设计粒度太粗，无法通过 <code>ph_fast</code>
+测试，改为“一桶一锁”方能通过。</p>
+</blockquote>
+<figure class="highlight c"><figcaption><span>notxv6/ph.c</span></figcaption><table><tr><td class="code"><pre><span class="line">...</span><br><span class="line"><span class="type">pthread_mutex_t</span> locks[NBUCKET];</span><br><span class="line">...</span><br><span class="line"><span class="type">static</span> </span><br><span class="line"><span class="type">void</span> <span class="title function_">put</span><span class="params">(<span class="type">int</span> key, <span class="type">int</span> value)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">int</span> i = key % NBUCKET;</span><br><span class="line">  pthread_mutex_lock(&amp;locks[i]);</span><br><span class="line">  <span class="comment">// insert</span></span><br><span class="line">  pthread_mutex_unlock(&amp;locks[i]);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="comment">// before put</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; NBUCKET; i++) &#123;</span><br><span class="line">    pthread_mutex_init(&amp;locks[i], <span class="number">0</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="task3-barrier">Task3: Barrier</h2>
+<p>这个任务就是用到条件变量相关的库函数了。场景是每个线程都有一个 for
+循环，每次循环都要调用 <code>barrier()</code>
+进行短暂阻塞，保证每个线程的循环轮次保持一致。</p>
+<figure class="highlight c"><figcaption><span>notxv6/barrier.c</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span> *</span><br><span class="line"><span class="title function_">thread</span><span class="params">(<span class="type">void</span> *xa)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; <span class="number">20000</span>; i++) &#123;</span><br><span class="line">    <span class="type">int</span> t = bstate.round;</span><br><span class="line">    assert (i == t);</span><br><span class="line">    barrier();</span><br><span class="line">    usleep(random() % <span class="number">100</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>有一个全局结构体
+<code>struct barrier bstate</code>，里面设置了一些变量，比如
+<code>bstate.nthread</code> 就是当前位于 barrier
+的线程数，<code>bstate.round</code> 是当前 barrier
+所处的轮次。全局静态变量 <code>nthread</code> 和 <code>round</code>
+分别表示总线程数与……这个 <code>round</code>
+变量需要我们自己品，暂且不表。</p>
+<p>令第 i 次循环调用的阻塞为 barrier_i，不妨考虑
+barrier_0。一开始所有线程都会进入
+barrier_0，如果不是最后一个进入的，就阻塞，反之，唤醒其他线程。此外，还要有一个线程负责修改
+<code>bstate.round</code>，那么由谁来修改呢？是最后一个进入的，还是最后一个离开的？</p>
+<p>如果是最后一个出去的进行修改，那就会出问题。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span> </span><br><span class="line"><span class="title function_">barrier</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  pthread_mutex_lock(&amp;bstate.barrier_mutex);</span><br><span class="line">  bstate.nthread++;</span><br><span class="line">  <span class="keyword">if</span> (bstate.nthread &lt; nthread) &#123; <span class="comment">// 不是最后一个进来的</span></span><br><span class="line">    pthread_cond_wait(&amp;bstate.barrier_cond, &amp;bstate.barrier_mutex);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123; <span class="comment">// 是最后一个进来的</span></span><br><span class="line">    pthread_cond_broadcast(&amp;bstate.barrier_cond);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (--bstate.nthread == <span class="number">0</span>) &#123; <span class="comment">// 是最后一个离开的</span></span><br><span class="line">    bstate.round++;</span><br><span class="line">  &#125;</span><br><span class="line">  pthread_mutex_unlock(&amp;bstate.barrier_mutex);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里，每个进程在进入后与离开前都会修改
+<code>bstate.nthread</code>，如果由最后一个离开的修改
+<code>bstate.round</code>，就会导致其他先离开的线程经历短暂的
+<code>usleep()</code> 后，进入到下一个循环，此时
+<code>bstate.round</code> 为 0，但 <code>i</code> 为
+1，断言失败，程序报错。问题的本质在于，<code>bstate.round</code>
+没有得到及时修改。那么是不是改完这个问题就没事了呢？当然不是。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span> </span><br><span class="line"><span class="title function_">barrier</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  pthread_mutex_lock(&amp;bstate.barrier_mutex);</span><br><span class="line">  bstate.nthread++;</span><br><span class="line">  <span class="keyword">if</span> (bstate.nthread &lt; nthread) &#123; <span class="comment">// 不是最后一个进来的</span></span><br><span class="line">    pthread_cond_wait(&amp;bstate.barrier_cond, &amp;bstate.barrier_mutex);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123; <span class="comment">// 是最后一个进来的，也是第一个离开的，毕竟从进来到退出之间一直持有锁</span></span><br><span class="line">    bstate.round++;</span><br><span class="line">    pthread_cond_broadcast(&amp;bstate.barrier_cond);</span><br><span class="line">  &#125;</span><br><span class="line">  pthread_mutex_unlock(&amp;bstate.barrier_mutex);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>尽管上面的修改确实解决了断言的问题，但断言之后，线程会进入
+barrier_1，获取锁，然后修改 <code>bstate.nthread</code>。然而，还有其他
+<code>nthread-1</code> 个线程还逗留在 <code>barrier_0()</code>
+中，甚至可能没有走到 <code>if (bstate.nthread-- == nthread)</code>
+这一步。</p>
+<p>第一个离开的线程会先将 barrier_0 的 <code>bstate.nthread</code>
+减少，然后进入 barrier_1 将 <code>bstate.nthread</code>
+增加——<code>bstate.nthread</code> 相当于没有变化，这就导致其他线程到了
+<code>if (bstate.nthread-- == nthread)</code>
+后，会误以为自己是第一个离开的，从而修改
+<code>bstate.round</code>。这是个毁灭性的错误！</p>
+<p>这个错误的根源在于，后面的 barrier 不应该在
+<strong>有线程未退出前面的 barrier 的时候</strong> 对
+<code>bstate.nthread</code>
+进行修改。那么如何判断是否所有线程都退出前一个 barrier 了呢？全局变量
+<code>round</code>
+派上用场了。如果将这个变量解释为，<strong>最晚的线程所处的 barrier
+轮次</strong>，那么只要有线程没有退出 barrier_{i-1}，<code>round</code>
+就会停留在 <code>i-1</code>，直到所有线程都阻塞在
+<code>barrier_i</code>（或退出 <code>barrier_&#123;i-1&#125;</code>），此时
+<code>round</code> 才会被设置为 <code>i</code>。</p>
+<p>所以，在修改 <code>bstate.nthread</code> 之前，所有线程都要阻塞，直到
+<code>round</code> 被修改为与 <code>bstate.round</code> 一致，然后被修改
+<code>round</code> 的那个线程唤醒。</p>
+<blockquote>
+<p>修改 <code>round</code> 的线程其实就是最后一个离开
+<code>barrier_&#123;i-1&#125;</code> 的线程。</p>
+</blockquote>
+<figure class="highlight c"><figcaption><span>notxv6/barrier.c</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span> </span><br><span class="line"><span class="title function_">barrier</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  pthread_mutex_lock(&amp;bstate.barrier_mutex);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">while</span> (round != bstate.round) &#123; <span class="comment">// 等待所有线程退出前一个 barrier</span></span><br><span class="line">    pthread_cond_wait(&amp;bstate.barrier_cond, &amp;bstate.barrier_mutex);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  bstate.nthread++;</span><br><span class="line">  <span class="keyword">if</span> (bstate.nthread &lt; nthread) &#123; <span class="comment">// 等待所有线程进入当前 barrier</span></span><br><span class="line">    pthread_cond_wait(&amp;bstate.barrier_cond, &amp;bstate.barrier_mutex);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123; <span class="comment">// 最后一个进入的，负责修改 bstate.round，并唤醒其他线程</span></span><br><span class="line">    bstate.round++;</span><br><span class="line">    pthread_cond_broadcast(&amp;bstate.barrier_cond);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (--bstate.nthread == <span class="number">0</span>) &#123; <span class="comment">// 最后一个离开的，负责修改 round，并唤醒下一个 barrier 等待的所有线程</span></span><br><span class="line">    round = bstate.round;</span><br><span class="line">    pthread_cond_broadcast(&amp;bstate.barrier_cond);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  pthread_mutex_unlock(&amp;bstate.barrier_mutex);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="测试结果">测试结果</h2>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ make grade</span><br><span class="line">...</span><br><span class="line">== Test uthread == </span><br><span class="line">$ make qemu-gdb</span><br><span class="line">uthread: OK (3.1s) </span><br><span class="line">== Test answers-thread.txt == answers-thread.txt: OK </span><br><span class="line">== Test ph_safe == make[1]:</span><br><span class="line">ph_safe: OK (14.1s) </span><br><span class="line">== Test ph_fast == make[1]:</span><br><span class="line">ph_fast: OK (32.3s) </span><br><span class="line">== Test barrier == make[1]:</span><br><span class="line">barrier: OK (2.7s) </span><br><span class="line">== Test time == </span><br><span class="line">time: OK </span><br><span class="line">Score: 60/60</span><br></pre></td></tr></table></figure>
+<h2 id="最后的工作">最后的工作</h2>
+<ol type="1">
+<li><code>git commit -am ""</code> 将所有修改提交到本地;</li>
+<li>执行 <code>make handin</code>。由于 lab0 保存了
+APIKey，故直接成功提交；</li>
+</ol>
+<p>可选的挑战再说吧，没有什么想做的欲望。</p>
+]]></content>
+      <categories>
+        <category>MIT6.s081</category>
+      </categories>
+      <tags>
+        <tag>lab</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>6.s081 Lab8 File System</title>
+    <url>/MIT6-s081/6-s081lab8/</url>
+    <content><![CDATA[<p>现在开始进入文件系统的阶段。</p>
+<span id="more"></span>
+<h2 id="task1-large-files">Task1: Large files</h2>
+<p>该任务要求我们为 inode 实现<strong>二级间接索引</strong>。</p>
+<p>原本的 inode 含有 11 个直接索引和 1 个一级间接索引，已知一个 disk
+block 大小为 <code>1024</code>，一个块地址大小为 4B，那一个 block
+内部可以容纳 256 条地址，即当前文件系统仅支持最大
+<code>(11+256)*BSIZE = 267KB</code> 大小的文件。</p>
+<p>这里，我们需要将 1 个直接索引拿来升级为二级间接索引（指向一个包含 256
+个一级间接索引的 block）。那么首先要修改 inode 结构体。xv6
+中，除了表示磁盘上的 inode <code>struct dinode</code>
+外，内存中还包含磁盘 inode 的拷贝
+<code>struct inode</code>，这两者分别位于 <code>kernel/fs.h</code> 与
+<code>kernel/file.h</code>。同时，还要修改一些宏字段如
+<code>MAXFILE</code>，以适配我们“升级”后的文件系统。</p>
+<figure class="highlight c"><figcaption><span>kernel/fs.h</span></figcaption><table><tr><td class="code"><pre><span class="line">...</span><br><span class="line"><span class="meta">#<span class="keyword">define</span> NDIRECT 11                                                      <span class="comment">// (!new)</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> NINDIRECT (BSIZE / sizeof(uint))</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> NDOUBLYINDIRECT ((BSIZE / sizeof(uint))*(BSIZE / sizeof(uint))) <span class="comment">// (!new)</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MAXFILE (NDIRECT + NINDIRECT + NDOUBLYINDIRECT)                 <span class="comment">// (!new)</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// On-disk inode structure</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">dinode</span> &#123;</span></span><br><span class="line">  ...</span><br><span class="line">  uint addrs[NDIRECT+<span class="number">1</span>+<span class="number">1</span>];  <span class="comment">// (!new)</span></span><br><span class="line">&#125;;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><figcaption><span>kernel/file.h</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="comment">// in-memory copy of an inode</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">inode</span> &#123;</span></span><br><span class="line">  ...</span><br><span class="line">  uint addrs[NDIRECT+<span class="number">1</span>+<span class="number">1</span>];  <span class="comment">// (!new)</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>修改完后，便可以通过 <code>make fs.img</code> 重构 qemu
+的文件系统了。</p>
+<p>现在，我们就能尝试创建更大的文件了。当然，最开始创建一个文件时，文件系统仅仅是为其分配了一个
+inode，还没有分配任何 disk
+block，只有当对文件进行写入时，才根据写入文件的 offset
+检查是否需要为其分配 block。我们查看写文件的 <code>sys_write()</code>
+操作，会发现其调用了 <code>filewrite()</code>，然后进一步调用
+<code>writei()</code>。<code>writei()</code> 里有个 for
+循环，每次取文件中一个 block 的大小进行写入，那么第 i
+次写入数据对应的文件偏移量为 <code>i * BSIZE</code>，相当于写入了 inode
+对应的逻辑块号为 <code>i</code> 的 disk block。</p>
+<p><code>bread()</code> 函数就是根据 block number 找到 block cache
+中对应的 block 的，那么 block number 怎么求？我们发现
+<code>bread()</code> 的第二个参数是根据函数 <code>bmap()</code>
+得来的，而这个 <code>bmap()</code> 就是根据 <code>inode</code>
+中的逻辑块号获取物理块号的。进去看了一眼发现，当前 <code>bmap()</code>
+仅支持一级间接索引，所以我们要做的就是修改该函数，令其支持二级间接索引。</p>
+<p><code>bmap()</code>
+的基本思路很简单，首先查直接索引，然后查一级间接索引。如果某一逻辑块号没有对应的索引块，那就为其分配一个索引块。从这也能看出，索引块是按需分配的，即便支持了二级间接索引，也不会因此导致大量的磁盘块分配。</p>
+<p>参考一级索引的查找方式，很容易能写出二级的：</p>
+<figure class="highlight c"><figcaption><span>kernel/fs.c</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="type">static</span> uint</span><br><span class="line"><span class="title function_">bmap</span><span class="params">(<span class="keyword">struct</span> inode *ip, uint bn)</span></span><br><span class="line">&#123;</span><br><span class="line">  uint addr, *a;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">buf</span> *<span class="title">bp</span>;</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>(bn &lt; NDIRECT)&#123;</span><br><span class="line">    ...</span><br><span class="line">  &#125;</span><br><span class="line">  bn -= NDIRECT;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>(bn &lt; NINDIRECT)&#123;</span><br><span class="line">    <span class="comment">// Load indirect block, allocating if necessary.</span></span><br><span class="line">    ...</span><br><span class="line">  &#125;</span><br><span class="line">  bn -= NINDIRECT;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 在二级索引块中，包含了 256 个一级间接索引块号，相当于其 `addr[]` 中的每个下标都覆盖了 256 个物理块</span></span><br><span class="line">  <span class="comment">// 由于这里逻辑块号 bn 已经被映射到 0~256*256-1 的范围，所以</span></span><br><span class="line">  <span class="comment">// bn/NINDIRECT 为二级索引块的下标</span></span><br><span class="line">  <span class="comment">// bn%NINDIRECT 为二级索引块指向的一级索引块的下标</span></span><br><span class="line">  <span class="keyword">if</span> (bn &lt; NDOUBLYINDIRECT) &#123;</span><br><span class="line">    <span class="comment">// Load doubly-indirect block, allocating if necessary.</span></span><br><span class="line">    <span class="keyword">if</span>((addr = ip-&gt;addrs[NDIRECT+<span class="number">1</span>]) == <span class="number">0</span>)</span><br><span class="line">      ip-&gt;addrs[NDIRECT+<span class="number">1</span>] = addr = balloc(ip-&gt;dev);</span><br><span class="line">    bp = bread(ip-&gt;dev, addr);</span><br><span class="line">    a = (uint*)bp-&gt;data;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((addr = a[bn/NINDIRECT]) == <span class="number">0</span>) &#123;</span><br><span class="line">      a[bn/NINDIRECT] = addr = balloc(ip-&gt;dev);</span><br><span class="line">      log_write(bp);</span><br><span class="line">    &#125;</span><br><span class="line">    brelse(bp); <span class="comment">// 在指向新的 block 前，释放原来的，下同</span></span><br><span class="line"></span><br><span class="line">    bp = bread(ip-&gt;dev, addr);</span><br><span class="line">    a = (uint*)bp-&gt;data;</span><br><span class="line">    bn %= NINDIRECT;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>((addr = a[bn]) == <span class="number">0</span>)&#123;</span><br><span class="line">      a[bn] = addr = balloc(ip-&gt;dev);</span><br><span class="line">      log_write(bp);</span><br><span class="line">    &#125;</span><br><span class="line">    brelse(bp);</span><br><span class="line">    <span class="keyword">return</span> addr;</span><br><span class="line">  &#125;</span><br><span class="line">  panic(<span class="string">&quot;bmap: out of range&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当然，有写操作，自然有相应的清空操作。什么时候要清空呢？我们这里写的都是位于内存的
+block cache 中的数据，<code>struct inode</code>
+也是位于内存的相对于磁盘的缓存。有 cache 那必然有 victim，当一个
+cache-inode 要被 victim 时，会将其所有块的数据写入
+disk，然后释放，从而实现内存复用。</p>
+<p>inode 里有一个 <code>ref</code> 字段，表明该文件的引用计数。我们对
+inode 的操作总是伴随着 <code>ilock()</code> 与
+<code>iunlock()</code>，事实上还有一个函数叫
+<code>iunlockput()</code>，它将 <code>iunlock()</code> 与
+<code>iput()</code> 结合到一起。那么 <code>iput()</code>
+是干嘛的？通过阅读函数原型，我们发现它就是将
+<code>inode.ref--</code>，如果减到 0，并且 <code>inode.nlink</code> 也为
+0，说明内存中不要这个文件了，磁盘里也不再需要该文件，此时就可以通过
+<code>itruc()</code> 将 inode 所使用的所有块写入磁盘并释放。</p>
+<p>同样的，我们现在支持了二级索引，那必然要对<strong>用到 inode
+索引</strong>的所有函数进行修改。<code>itrunc()</code> 即是如此。</p>
+<figure class="highlight c"><figcaption><span>kernel/fs.c</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">itrunc</span><span class="params">(<span class="keyword">struct</span> inode *ip)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">for</span>(i = <span class="number">0</span>; i &lt; NDIRECT; i++)&#123;</span><br><span class="line">    ...</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>(ip-&gt;addrs[NDIRECT])&#123;</span><br><span class="line">    ...</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (ip-&gt;addrs[NDIRECT+<span class="number">1</span>]) &#123;</span><br><span class="line">    bp = bread(ip-&gt;dev, ip-&gt;addrs[NDIRECT+<span class="number">1</span>]);</span><br><span class="line">    a = (uint*)bp-&gt;data;</span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; NINDIRECT; i++) &#123; <span class="comment">// 释放二级索引下的所有一级索引</span></span><br><span class="line">      <span class="keyword">if</span> (a[i]) &#123;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> <span class="title">buf</span> *<span class="title">tmp</span> =</span> bread(ip-&gt;dev, a[i]);</span><br><span class="line">        uint *tmp_addr = (uint*)tmp-&gt;data;</span><br><span class="line">        <span class="keyword">for</span> (j = <span class="number">0</span>; j &lt; NINDIRECT; j++) &#123;</span><br><span class="line">          <span class="keyword">if</span> (tmp_addr[j]) &#123;</span><br><span class="line">            bfree(ip-&gt;dev, tmp_addr[j]);</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        brelse(tmp);</span><br><span class="line">        bfree(ip-&gt;dev, a[i]);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    brelse(bp);</span><br><span class="line">    bfree(ip-&gt;dev, ip-&gt;addrs[NDIRECT+<span class="number">1</span>]);</span><br><span class="line">    ip-&gt;addrs[NDIRECT+<span class="number">1</span>] = <span class="number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  ip-&gt;size = <span class="number">0</span>;</span><br><span class="line">  iupdate(ip);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="task2-symbolic-links">Task2: Symbolic links</h2>
+<p>该任务要求我们实现创建符号链接的系统调用，也就是创建一个 SYMLINK
+类型的
+inode，其指向的磁盘块数据内容为某个文件/目录的路径。这里我们不用实现指向目录的符号链接，只需要实现对文件的符号链接即可。</p>
+<p>新增系统调用需要修改的文件就不说了。首先要新增两个宏，一个是用于
+inode 类型的 <code>T_SYMLINK</code>，在 <code>kernel/stat.h</code>
+中修改，另一个是用于 open 操作的选项 <code>O_NOFOLLOW</code>，在
+<code>kernel/fcntl.h</code>
+中修改，表明如果传入的路径解析出来是一个符号链接，且设置了该
+option，就不用进一步打开链接对象，而是直接打开文件。否则，要逐渐深入，直到某路径对应的文件不是符号链接。</p>
+<p>接下来，我们已经创建了系统调用
+<code>sys_symlink()</code>，那么该函数要做什么呢？只需要新建一个
+inode，然后调用 <code>writei()</code>
+将目标文件路径写入即可。对就这么简单。</p>
+<figure class="highlight c"><figcaption><span>kernel/sysfile.c</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="comment">// Create the path with content target in block data.</span></span><br><span class="line">uint64</span><br><span class="line"><span class="title function_">sys_symlink</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">char</span> target[MAXPATH], path[MAXPATH];</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">inode</span>* <span class="title">ip</span>;</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (argstr(<span class="number">0</span>, target, MAXPATH) &lt; <span class="number">0</span> || argstr(<span class="number">1</span>, path, MAXPATH) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  begin_op();</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">if</span> ((ip = create(path, T_FILE, <span class="number">0</span>, <span class="number">0</span>)) == <span class="number">0</span>) &#123;</span><br><span class="line">      end_op();</span><br><span class="line">      <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    ip-&gt;type = T_SYMLINK;</span><br><span class="line">    writei(ip, <span class="number">0</span>, (uint64)target, <span class="number">0</span>, MAXPATH);</span><br><span class="line">    iunlockput(ip); <span class="comment">// 调用</span></span><br><span class="line">  &#125;</span><br><span class="line">  end_op();</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>还要改的是 <code>sys_open()</code>
+函数，我们需要新增一条特性，以便打开 SYMLINK inode
+时能打开其链接的目标文件。</p>
+<figure class="highlight c"><figcaption><span>kernel/sysfile.c</span></figcaption><table><tr><td class="code"><pre><span class="line">uint64</span><br><span class="line"><span class="title function_">sys_open</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">if</span>(ip-&gt;type == T_DEVICE)&#123;</span><br><span class="line">    ...</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (ip-&gt;type == T_SYMLINK &amp;&amp; (omode &amp; O_NOFOLLOW) == <span class="number">0</span>) &#123; <span class="comment">// 意味着要 follow 下去</span></span><br><span class="line">      <span class="type">char</span> target[MAXPATH];</span><br><span class="line">      uint threshold = <span class="number">10</span>; <span class="comment">// 以防出现 b-&gt;a-&gt;b-&gt;... 的循环链接</span></span><br><span class="line">      <span class="keyword">while</span> (threshold) &#123;</span><br><span class="line">        <span class="keyword">if</span> (readi(ip, <span class="number">0</span>, (uint64)target, <span class="number">0</span>, MAXPATH) != MAXPATH) &#123; <span class="comment">// 读取 inode 存储的 target 文件路径</span></span><br><span class="line">          panic(<span class="string">&quot;link error&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        iunlockput(ip); <span class="comment">// ip 即将赋值为下一个 inode，记得释放</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> ((ip = namei(target)) == <span class="number">0</span>) &#123; <span class="comment">// 根据路径获取相应的 inode</span></span><br><span class="line">          end_op();</span><br><span class="line">          <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        ilock(ip);</span><br><span class="line">        <span class="keyword">if</span> (ip-&gt;type != T_SYMLINK) &#123;</span><br><span class="line">          <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        threshold--;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> (threshold &lt;= <span class="number">0</span>) &#123; <span class="comment">// 突破阈值，说明可能存在循环，直接报错</span></span><br><span class="line">        iunlockput(ip);</span><br><span class="line">        end_op();</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    f-&gt;type = FD_INODE;</span><br><span class="line">    f-&gt;off = <span class="number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="测试结果">测试结果</h2>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ make grade</span><br><span class="line">...</span><br><span class="line">== Test running bigfile == </span><br><span class="line">$ make qemu-gdb</span><br><span class="line">running bigfile: OK (106.6s) </span><br><span class="line">== Test running symlinktest == </span><br><span class="line">$ make qemu-gdb</span><br><span class="line">(0.8s) </span><br><span class="line">== Test   symlinktest: symlinks == </span><br><span class="line">  symlinktest: symlinks: OK </span><br><span class="line">== Test   symlinktest: concurrent symlinks == </span><br><span class="line">  symlinktest: concurrent symlinks: OK </span><br><span class="line">== Test usertests == </span><br><span class="line">$ make qemu-gdb</span><br><span class="line">usertests: OK (197.8s) </span><br><span class="line">== Test time == </span><br><span class="line">time: OK </span><br><span class="line">Score: 100/100</span><br></pre></td></tr></table></figure>
+<h2 id="最后的工作">最后的工作</h2>
+<ol type="1">
+<li><code>git commit -am ""</code> 将所有修改提交到本地;</li>
+<li>执行 <code>make handin</code>。由于 lab0 保存了
+APIKey，故直接成功提交；</li>
+</ol>
+<p>可选的挑战再说吧，没有什么想做的欲望。</p>
+]]></content>
+      <categories>
+        <category>MIT6.s081</category>
+      </categories>
+      <tags>
+        <tag>lab</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>6.s081 Lab7 Lock</title>
+    <url>/MIT6-s081/6-s081lab7/</url>
+    <content><![CDATA[<p>这个 lab 就是对原先的并发控制进行优化。</p>
+<span id="more"></span>
+<h2 id="task1-memory-allocator">Task1: Memory allocator</h2>
+<p>原来的内存分配模块持有一把大锁，每当要分配内存时都会将大锁锁定，直至分配完成。这样对多核的机器并不是很友好，因为每个
+CPU core 都需要在大锁上竞争，造成资源浪费。</p>
+<p>一种优化策略是，将空闲的内存划分为 CPU core 数量的区域，每个 core
+对应整个空闲链表的一部分，且各自维护相应的锁，不同 core
+只需要在自己负责那部分即可。当然有的 core
+上运行的进程可能需要多个页，一旦自己那部分空闲内存不够了，就需要从其他
+core 的空闲内存中“窃取”一页出来。</p>
+<blockquote>
+<p>毕竟闲着也是闲着，不如最大化利用。</p>
+</blockquote>
+<figure class="highlight c"><figcaption><span>kernel/kalloc.c</span></figcaption><table><tr><td class="code"><pre><span class="line">...</span><br><span class="line"><span class="comment">// NCPU 个 freelist 与 lock</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">spinlock</span> <span class="title">lock</span>;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">run</span> *<span class="title">freelist</span>;</span></span><br><span class="line">&#125; kmems[NCPU];</span><br><span class="line">...</span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">kinit</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; NCPU; i++) &#123;</span><br><span class="line">    initlock(&amp;kmems[i].lock, <span class="string">&quot;kmem&quot;</span>); <span class="comment">// 初始化所有 kmem</span></span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">kfree</span><span class="params">(<span class="type">void</span> *pa)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="comment">// 将原本的 kmem 改为 kmems[cpu_id] 即可</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> *</span><br><span class="line"><span class="title function_">kalloc</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="comment">// 从当前 core 开始遍历所有 core 负责的 kmem</span></span><br><span class="line">  <span class="comment">// 直到找到一个有空闲页的 kmem，直接拿来用</span></span><br><span class="line">  <span class="comment">// 最后 kfree 会将该页加到当前 core 的 kmem 里</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; NCPU; i++) &#123; </span><br><span class="line">    acquire(&amp;kmems[cpu_id].lock);</span><br><span class="line">    r = kmems[cpu_id].freelist;</span><br><span class="line">    <span class="keyword">if</span> (r) &#123;</span><br><span class="line">      kmems[cpu_id].freelist = r-&gt;next;</span><br><span class="line">    &#125;</span><br><span class="line">    release(&amp;kmems[cpu_id].lock);</span><br><span class="line">    <span class="keyword">if</span> (r) &#123;</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    cpu_id = (cpu_id+<span class="number">1</span>)%NCPU;</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="task2-buffer-cache">Task2: Buffer cache</h2>
+<p>这个 task 也是对并发控制进行优化，只不过针对的是磁盘块在内存中的
+cache。<code>kernel/bio.c</code> 里有相关实现，结构体
+<code>bcache</code> 内部维护了一个双向链表，用于支持 LRU
+策略。同样的，每次操作都要对大锁进行竞争。</p>
+<p>由于每个 disk block 都有各自的块号
+<code>blockno</code>，那么可以划分为不同的 "bucket"，根据 blockno
+映射到不同的 bucket，每个 bucket 有一把锁，这样就减少了竞争。</p>
+<p>同时，根据 <code>kernel/trap.c</code> 里的 <code>ticks</code>
+变量，我们也可以为每个 block 增加一个 <code>timestamp</code>
+字段，用于标识最后访问该块的时间戳，这样就不需要双向链表来做 LRU
+了，每次 victim 的时候找到 <code>timestamp</code> 最小的 block
+即可。</p>
+<figure class="highlight c"><figcaption><span>kernel/buf.h</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="comment">// 移除了 prev 和 next 字段，新增 timestamp 字段</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">buf</span> &#123;</span></span><br><span class="line">  <span class="type">int</span> valid;   <span class="comment">// has data been read from disk?</span></span><br><span class="line">  <span class="type">int</span> disk;    <span class="comment">// does disk &quot;own&quot; buf?</span></span><br><span class="line">  uint dev;</span><br><span class="line">  uint blockno;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">sleeplock</span> <span class="title">lock</span>;</span></span><br><span class="line">  uint refcnt;</span><br><span class="line">  uint timestamp; <span class="comment">// (!new)</span></span><br><span class="line">  uchar data[BSIZE];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><figcaption><span>kernel/bio.c</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> NBUCKETS 5</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">spinlock</span> <span class="title">lock</span>;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">buf</span> <span class="title">buf</span>[<span class="title">NBUF</span>];</span> <span class="comment">// 这里相当于做了个 tricky，单纯增加 Cache 容量来降低 miss 概率</span></span><br><span class="line">&#125; bcache[NBUCKETS];</span><br><span class="line"></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">binit</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">buf</span> *<span class="title">b</span>;</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; NBUCKETS; i++) &#123;</span><br><span class="line">    initlock(&amp;bcache[i].lock, <span class="string">&quot;bcache&quot;</span>);</span><br><span class="line">    <span class="keyword">for</span>(b = bcache[i].buf; b &lt; bcache[i].buf+NBUF; b++)&#123;</span><br><span class="line">      initsleeplock(&amp;b-&gt;lock, <span class="string">&quot;buffer&quot;</span>);</span><br><span class="line">      b-&gt;timestamp = <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="keyword">struct</span> buf*</span><br><span class="line"><span class="title function_">bget</span><span class="params">(uint dev, uint blockno)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">buf</span> *<span class="title">b</span>;</span></span><br><span class="line">  uint bucketno = blockno % NBUCKETS;</span><br><span class="line">  uint earliest = __INT_MAX__;</span><br><span class="line">  uint idx = <span class="number">-1</span>;</span><br><span class="line"></span><br><span class="line">  acquire(&amp;bcache[bucketno].lock);</span><br><span class="line">  <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">0</span>; i &lt; NBUF; i++)&#123;</span><br><span class="line">    b = &amp;bcache[bucketno].buf[i];</span><br><span class="line">    <span class="keyword">if</span> (b-&gt;dev == dev &amp;&amp; b-&gt;blockno == blockno) &#123;</span><br><span class="line">      <span class="comment">// 意味着缓存命中</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 同时也进行 LRU 策略，如果 miss 就可以直接用，不用再次 for 遍历</span></span><br><span class="line">    <span class="keyword">if</span> (b-&gt;refcnt == <span class="number">0</span> &amp;&amp; b-&gt;timestamp &lt; earliest) &#123;</span><br><span class="line">      earliest = b-&gt;timestamp;</span><br><span class="line">      idx = i;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (idx != <span class="number">-1</span>) &#123; <span class="comment">// 意味着有 block 被 victim，且就在 buf[idx] 处</span></span><br><span class="line">    ...</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  panic(<span class="string">&quot;bget: no buffers&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">brelse</span><span class="params">(<span class="keyword">struct</span> buf *b)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">if</span> (--b-&gt;refcnt == <span class="number">0</span>) &#123;</span><br><span class="line">    b-&gt;timestamp = <span class="number">0</span>; <span class="comment">// 将其置 0，以便 victim</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">bpin</span><span class="params">(<span class="keyword">struct</span> buf *b)</span> &#123;</span><br><span class="line">  <span class="comment">// 根据 b-&gt;blockno 映射到 bucket</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">bunpin</span><span class="params">(<span class="keyword">struct</span> buf *b)</span> &#123;</span><br><span class="line">  <span class="comment">// 根据 b-&gt;blockno 映射到 bucket</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="测试结果">测试结果</h2>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ make grade</span><br><span class="line">...</span><br><span class="line">== Test running kalloctest == </span><br><span class="line">$ make qemu-gdb</span><br><span class="line">(70.1s) </span><br><span class="line">== Test   kalloctest: test1 == </span><br><span class="line">  kalloctest: test1: OK </span><br><span class="line">== Test   kalloctest: test2 == </span><br><span class="line">  kalloctest: test2: OK </span><br><span class="line">== Test kalloctest: sbrkmuch == </span><br><span class="line">$ make qemu-gdb</span><br><span class="line">kalloctest: sbrkmuch: OK (10.5s) </span><br><span class="line">== Test running bcachetest == </span><br><span class="line">$ make qemu-gdb</span><br><span class="line">(8.7s) </span><br><span class="line">== Test   bcachetest: test0 == </span><br><span class="line">  bcachetest: test0: OK </span><br><span class="line">== Test   bcachetest: test1 == </span><br><span class="line">  bcachetest: test1: OK </span><br><span class="line">== Test usertests == </span><br><span class="line">$ make qemu-gdb</span><br><span class="line">usertests: OK (134.2s) </span><br><span class="line">== Test time == </span><br><span class="line">time: OK </span><br><span class="line">Score: 70/70</span><br></pre></td></tr></table></figure>
 <h2 id="最后的工作">最后的工作</h2>
 <ol type="1">
 <li><code>git commit -am ""</code> 将所有修改提交到本地;</li>
