@@ -15649,6 +15649,10 @@ key 直接获取之前创建过的产品。</p>
 <p>这俩底层是基于<strong>哈希表</strong>实现的，是无序的。理论上增删查改的时间复杂度是
 <code>O(1)</code>（最差时间复杂度
 <code>O(n)</code>），实际上数据的分布是否均匀会极大影响容器的性能。</p>
+<h4 id="冲突处理">冲突处理</h4>
+<p>以 <code>unordered_map</code>
+为例，其底层哈希表采用<strong>链地址法</strong>解决冲突，如下图：</p>
+<p><img src="1.png" style="zoom:50%"/></p>
 <h3 id="stackqueue">stack/queue</h3>
 <p>它们都是由 <code>deque</code> 作为底层容器实现的，通过修改
 <code>deque</code> 的接口，实现独特的性质（此二者也可以用
