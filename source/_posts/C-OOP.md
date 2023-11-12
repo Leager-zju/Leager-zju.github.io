@@ -86,7 +86,7 @@ class Foo {
 
 > 需要将返回值写为**本类引用**，以实现连锁赋值。
 
-那么下面这串代码，执行的是哪个函数呢？【<font color=white>拷贝构造函数</font>】
+那么下面这段代码，执行的是哪个函数呢？【<font color=white>拷贝构造函数</font>】
 
 ```c++
 Foo foo1 = foo2;
@@ -109,7 +109,7 @@ class Foo {
 
 **注意**：尽管某个类是多态类，但其默认生成的析构函数是 non-virtual 的，需手动声明~
 
-> 析构函数如果设为 `private`，则无法在栈上创建对象。一般情况下都是要声明为 `public` 的。
+> 析构函数如果声明为 `private`，则**无法在栈上创建对象**。一般情况下都是要声明为 `public` 的。
 
 ### 封
 
@@ -156,8 +156,7 @@ class Base {
 class Derived: public Base {
  public:
   int value{2}; // 将基类的 value 覆盖，如果要使用基类的成员变量 value，则需要加上 Base::
-    
-  void show() { std::cout << Base::value << " " << value << '\n'; }      // 分别打印基类的 value 与自身的 value
+  void show() { std::cout << Base::value << ' ' << value << '\n'; }      // 分别打印基类的 value 与自身的 value
 };
 
 int main() {
@@ -171,9 +170,9 @@ int main() {
 上面展示了一个基本的继承过程。可以看到 `Derived` 可以将 `Base` 中的成员变量/函数进行覆盖，在 `Derived` 的命名空间中优先取 `Derived` 的成员。但覆盖后，基类的变量并不是消失了，而是依然可以通过 `Base::value` 进行访问，这是怎么做到的？类继承时，内存是如何分配的？不妨加入以下代码进行分析：
 
 ```c++
-std::cout << sizeof(Base) << " " << sizeof(Derived) << '\n';
+std::cout << sizeof(Base) << ' ' << sizeof(Derived) << '\n';
 int *q = reinterpret_cast<int*>(&d);
-std::cout << q << " " << q[0] << " " << q[1] << '\n';
+std::cout << q << ' ' << q[0] << ' ' << q[1] << '\n';
 // output:
 // 4 8
 // 0x78fe10 1 2
@@ -213,17 +212,17 @@ class Final: public Derive2, public Derive1 {
 
 int main() {
   Final *f = new Final;
-  std::cout << sizeof(Base) << " " << sizeof(Derive1) << " " << sizeof(Derive2) << " " << sizeof(Final) << '\n';
+  std::cout << sizeof(Base) << ' ' << sizeof(Derive1) << ' ' << sizeof(Derive2) << ' ' << sizeof(Final) << '\n';
     
   int *q = reinterpret_cast<int*>(f);
   for (int i = 0; i < sizeof(Final) / sizeof(int); i++) {
-    std::cout << q[i] << " ";
+    std::cout << q[i] << ' ';
   }
   std::cout << '\n';
     
   f->modify1();
   for (int i = 0; i < sizeof(Final) / sizeof(int); i++) {
-    std::cout << q[i] << " ";
+    std::cout << q[i] << ' ';
   }
 }
 
@@ -335,7 +334,9 @@ int main() {
 
 ### 静态多态
 
-**静态多态**依靠函数**重载**实现，在编译时完成绑定，编译器根据函数实参的类型，推断出要调用的函数，如果有对应的函数就调用该函数，否则出现编译错误。
+**静态多态**依靠函数**重载**实现。编译器编译的过程中，首先遇到函数的声明，此时会将函数的参数类型也加到函数符号中，而不仅仅是函数名，比如编译 `int foo(int a, char b)` 最后得到的符号可能是 `foo_int_char`。编译器后续遇到函数调用时，根据传入实参类型，去符号表里找调用的是哪个函数。
+
+> 所以仅有返回值不一样的两个同名同参数列表函数并不构成重载。
 
 ```c++
 class Foo {
@@ -353,6 +354,10 @@ int main() {
 // int 1
 // char 2
 ```
+
+而 C 语言并不支持函数重载，因此编译 .c 的函数时不会带上函数的参数类型，一般只包括函数名。根据这一结论，如果想在 C++ 中调用 C 版本的函数，就需要用 `extern "C"` 进行修饰，来告诉编译器不要修改该函数名。
+
+否则，它会按照重整后的名字去目标文件（.obj）中去寻找对应的函数，而目标文件中存放的却是不带参数类型的 C 版本的函数，名字对不上，就找不到。
 
 ### 动态多态
 
@@ -467,110 +472,6 @@ int main() {
 >
 > 继承族谱分别为 A->B->C 与 Base->Derived->Final，并且均为公有继承，于是**协变**成立。
 
-### 虚函数表
-
-那么问题来了，C++ 是如何实现多态的？先看下面这串代码：
-
-```c++
-class Base {
- public:
-  virtual void foo() { std::cout << "Base foo\n"; }
-  int value;
-};
-
-class Derived : public Base {
- public:
-  void foo() { std::cout << "Derived foo\n"; }
-};
-
-int main() {
-  std::cout << sizeof(Base) << " " << sizeof(Derived);
-}
-// output:
-// 16 16
-```
-
-类 `Base`，在仅有一个虚函数和一个 `int` 型变量的情况下，内存大小竟然是 16B。事实上，任何一个拥有虚函数的类，无论有多少虚函数，都会在内存空间的最开始分配 8B 的空间（64 位电脑的 feature），用于存放指向**虚函数表**的指针。所谓虚函数表，实际上就是存放了所有**虚函数指针**的一片内存。这么一来，`Base` 大小为 16B 也就好理解了——前面 8B 为虚函数表指针，后面 8B 是为了进行内存对齐，而 `Derived` 的内存则是完全分配到了基类。
-
-在上面的代码中将 `main()` 改为以下语句，则可以比较清楚地观察内存布局：
-
-```c++
-using func = void(*)();
-int main() {
-  Base base;
-  Derived derive;
-  Base* base_ptr = &derive;
-  func f;
-
-  auto vfptr = reinterpret_cast<long long**>(base_ptr)[0]; // 获取 Derived 的虚函数表指针
-  std::cout << vfptr << " " << vfptr[0] << " ";
-  f = (func)(vfptr[0]);
-  f();
-
-  base_ptr = &base;
-  vfptr = reinterpret_cast<long long**>(base_ptr)[0];      // 获取 Base 的虚函数表指针
-  std::cout << vfptr << " " << vfptr[0] << " ";
-  f = (func)(vfptr[0]);
-  f();
-}
-// output:
-// 0x4c2f50 0x421130 Derived foo
-// 0x4c2f30 0x421100 Base foo
-```
-
-不难发现，`Derived` 与 `Base` 对应两张不同的虚函数表，并且表中的存的第一个指针正是指向各自的成员函数 `foo()`。
-
-> 之所以说动态多态是在运行时绑定，是因为编译时编译器并不确定指向的到底是哪个类型的对象，只有在运行时才能确定，去对应的虚函数表中找到对应虚函数并执行。
-
-再来看看派生类**未进行重写**的情况：
-
-```c++
-class Base {
- public:
-  virtual void foo() { std::cout << "Base foo\n"; }
-};
-
-class Derived : public Base {};
-
-using func = void(*)();
-int main() {
-  Base base;
-  Derived derive;
-  Base* base_ptr = &derive;
-  func f;
-
-  auto vfptr = reinterpret_cast<long long**>(base_ptr)[0];
-  std::cout << vfptr << " " << vfptr[0] << " ";
-  f = (func)(vfptr[0]);
-  f();
-
-  base_ptr = &base;
-  vfptr = reinterpret_cast<long long**>(base_ptr)[0];
-  std::cout << vfptr << " " << vfptr[0] << " ";
-  f = (func)(vfptr[0]);
-  f();
-}
-// output:
-// 0x4c2f50 0x421100 Base foo
-// 0x4c2f30 0x421100 Base foo
-```
-
-说明在未出现重写的情况下，派生类依然在基类的对应位置新建了一张属于自己的虚函数表，但里面存放的指针仍然指向了 `Base::foo()`。而上面重写了基类虚函数的派生类，则会将自己的虚函数表对应那一项进行覆盖。
-
-之前说过，当一个派生类继承基类时，派生会继承基类的函数的调用权。所以如果一个基类包含了虚函数，那么派生类也可调用这些虚函数，换句话说，一个类继承了包含虚函数的基类，那么这个类也拥有自己的虚表。
-
-于是，一份关于内存分配的构想已经隐隐约约浮现出来了。
-
-<img src="image-20230215194050201.png" alt="image-20230215194050201" style="zoom:70%;" />
-
-<center><font size=3>派生类未重写时</font></center>
-
-<img src="image-20230215194222982.png" alt="image-20230215194222982" style="zoom:70%;" />
-
-<center><font size=3>派生类重写时</font></center>
-
-> 更详细的关于虚函数内存的机制可以看[这篇文章](https://blog.twofei.com/496/)。
-
 ### 纯虚函数
 
 说了那么多，虚函数到底有啥用？
@@ -593,6 +494,25 @@ int main() {
 4. 内联函数不能是表现多态性时的虚函数。这点在 inline 那篇文章中提到过了；
 5. 当可能用到基类指针/引用绑定派生类时，基类的析构函数必须为虚函数。这是因为当出现 `Base* ptr = new Derived` 这样的代码时，虽然 `ptr` 是 `Base` 类的指针，但我们实际上还分配了一个 `Derived` 类的空间，如果析构函数非虚，则会执行 `Base` 类的析构函数，而属于 `Derived` 的那一部分并没有被析构。为了程序安全运行，我们应该要调用派生类的析构函数，也就是通过将基类析构函数设为虚函数来实现；
 
+### 误区
+
+之所以说动态多态是在运行时绑定，是因为编译器**可能**无法在编译时期确定指针指向的到底是哪个类型的对象，只有在运行时才能去对应的虚函数表中找到对应虚函数并执行，比如将指针或引用作为函数入参的情况。
+
+但“虚函数一定是运行期间绑定”这一说法是错误的，如果基类 `B` 的指针 `B* foo` 指向的某个对象类型，其派生序列中某个祖先 `D`（同样为 `B` 的派生类）对虚函数 `func()` 增加了 **`final`** 关键字，那么调用 `Foo->func()` 时，编译器会在**编译时期**直接生成 `D` 类型的 `func()` 版本，而不是在运行时去查虚函数表。毕竟后面没法重写了，那只能看作调用 `D::func()` 了。直接用 `final` 关键字修饰类型 `D` 也是一样的。
+
+同样的，如果**指定了调用版本**，如 `Foo->B::func()`，也会在**编译时期**生成 `B` 类型的 `func()` 版本。
+
+归根结底，程序具体行为还是得看编译器是怎么生成汇编代码的。对于某些一眼就能看出来基类指针指向哪个派生类对象的情况，比如：
+
+```C++
+Derived d;
+Base *b = &d;
+```
+
+此时还要傻乎乎地等到运行时才去查表，而不做任何优化，这样的编译器我认为是没有市场可言的。
+
+具体见[此文](https://www.zhihu.com/question/491602524/answer/2165605549)。
+
 ## 与 struct 的异同
 
 ### 相同之处
@@ -608,3 +528,264 @@ int main() {
 3. `struct` 无法实现泛型（即 template）；
 
 `struct` 是不同数据类型的集合体，更多被认为是一种自定义复合数据类型，从而更注重数据整合与使用；而 `class` 则是一个对象的方法与属性的集合，更注重数据安全性。
+
+## 虚继承、虚函数的内存模型
+
+### 虚函数表
+
+现在有个很大的问题：C++ 是如何实现多态的？
+
+先看下面这段代码。
+
+```c++ main.cpp
+#include <iostream>
+
+class Base {
+ public:
+  virtual void foo() {
+    std::cout << "Base foo\n";
+  }
+  int x = 1;
+};
+
+class Derived : public Base {
+ public:
+  virtual void foo() {
+    std::cout << "Derived foo\n";
+  }
+  int y = 2;
+};
+
+int main() {
+  Base b;
+  Derived d1, d2;
+  return 0;
+}
+```
+
+通过 gdb 查看内存分布
+
+```bash
+$ g++ main.cpp -g -o m
+$ gdb m
+...
+(gdb) print b
+$1 = {_vptr.Base = 0x555555557d68 <vtable for Base+16>, x = 1}
+
+(gdb) p/a &b
+$2 = 0x7fffffffe060
+
+(gdb) p/a *(long*)0x7fffffffe060
+$3 = 0x555555557d68 <_ZTV4Base+16>  # b 内存中前 8B 存放了一个 vptr
+
+(gdb) p/a &b.foo
+$4 = 0x55555555527a <_ZN4Base3fooEv>
+
+(gdb) p/a *(void**)0x555555557d68@1
+$5 = {0x55555555527a <_ZN4Base3fooEv>}  # b.vptr 指向的内存的第一个元素就是 Base::foo() 的函数指针
+
+(gdb) print d1
+$6 = {<Base> = {_vptr.Base = 0x555555557d50 <vtable for Derived+16>, x = 1}, y = 2}
+
+(gdb) p/a &d1
+$7 = 0x7fffffffe070
+
+(gdb) p/a *(long*)0x7fffffffe070
+$8 = 0x555555557d50 <_ZTV7Derived+16>  # d1 内存中前 8B 也存放了一个 vptr，但和 b 的不同
+
+(gdb) p/a &d1.foo
+$9 = 0x5555555552a6 <_ZN7Derived3fooEv>
+
+(gdb) p/a *(void**)0x555555557d50@1
+$10 = {0x5555555552a6 <_ZN7Derived3fooEv>}  # d1.vptr 指向的内存的第一个元素则是 Derived::foo() 的函数指针
+
+(gdb) p/a d2
+$11 = {<Base> = {_vptr.Base = 0x555555557d50 <vtable for Derived+16>, x = 1}, y = 2}
+```
+
+根据上面的输出，我们不难发现，无论是 `b` 还是 `d1`/`d2`，在内存的前 8B 都有一个叫 `_vptr` 的指针，这个指针实际上是**虚函数表指针**，指向了一个叫**虚函数表**的东西，每一个表项都存放了类对应版本的虚函数，比如 `b` 的虚函数表里就存了 `B::foo()` 的函数指针，对应符号为 `_ZN4Base3fooEv`。
+
+在虚函数表指针后，就是各自的成员变量了，按照派生顺序存放，先 `Base::x` 后 `Derived::y`，各 4B。
+
+同时，我们还发现一个有趣的事是，`d2` 的虚函数表指针与 `d1` 一致，说明同一类的虚函数表是**全局共享**的，并且存放在**全局存储区**。
+
+以上是派生类**进行虚函数重写**的情况，下面再来看看派生类**未进行重写**的情况：
+
+```c++ main.cpp
+#include <iostream>
+
+class Base {
+ public:
+  virtual void foo() {
+    std::cout << "Base foo\n";
+  }
+  int x = 1;
+};
+
+class Derived : public Base {
+ public:
+  // 仅含一个成员变量 y，而未对 foo() 进行重写
+  int y = 2;
+};
+
+int main() {
+  Base b;
+  Derived d;
+  return 0;
+}
+```
+
+```bash
+$ g++ main.cpp -g -o m
+$ gdb m
+...
+(gdb) print b
+$1 = {_vptr.Base = 0x555555557d68 <vtable for Base+16>, x = 1}
+
+(gdb) print *(void**)0x555555557d68@1
+$2 = {0x55555555527a <Base::foo()>}
+
+(gdb) print d
+$3 = {<Base> = {_vptr.Base = 0x555555557d50 <vtable for Derived+16>, x = 1}, y = 2}
+
+(gdb) print *(void**)0x555555557d50@1
+$4 = {0x55555555527a <Base::foo()>}
+```
+
+发现此时虽然 `d` 指向了和 `b` 不同的虚函数表，但内容是完全一致的，都是 `Base::foo()` 的函数指针。
+
+从而推断：
+
+1. 在继承自一个有虚函数的基类时，派生类会将基类的虚函数表进行一次深拷贝；
+2. 当派生类未进行重写时，保留基类版本；
+3. 当派生类对虚函数进行重写时，派生类指向的虚函数表中，重写的那几个虚函数对应的项会被改为派生类的版本，并且派生类和基类中的符号名也有所修改；
+
+
+> 更详细的关于虚函数内存模型的机制可以看[这篇文章](https://blog.twofei.com/496/)。
+
+### 运行时决议
+
+我们现在知道，每个（派生关系中有虚函数的）类对象在实例化时都会有若干张虚函数表，当使用基类指针指向派生类对象并调用虚函数时，通过虚函数表可以查到对应的函数指针。那么问题来了，虚函数表的表项是通过何种方式进行索引的？或者说，调用 `base_ptr->foo()` 是怎么索引到虚函数表中正确的那一项呢？
+
+那么需要引入一个概念，叫**运行时决议**，即运行时确定调用函数的地址。在多态场景下，就是编译完后通过指令，去对象中的虚表里找到相应虚函数并运行。这一决议是在汇编级别实现的，暂时只学到这。
+
+### 虚继承
+
+虚继承是用于解决菱形继承问题的，通过共享虚基类来消除歧义。那么**共享**这一功能是如何实现的？且看代码。
+
+```C
+#include <iostream>
+
+class Base {
+ public:
+  int x = 1;
+};
+
+class Child1: public virtual Base {
+ public:
+  int c1 = 2;
+};
+
+class Child2: public virtual Base {
+ public:
+  int c2 = 3;
+};
+
+class Derived : public Child1, public Child2 {
+ public:
+  int d = 4;
+};
+
+int main() {
+  Derived d;
+  return 0;
+}
+```
+
+依然通过 gdb 查看变量
+
+```bash
+$ g++ main.cpp -g -o main
+$ gdb main
+
+(gdb) b 25
+Breakpoint 1 at 0x11b0: file main.cpp, line 25.
+(gdb) r
+
+(gdb) p d
+$1 = {<Child1> = {<Base> = {x = 1}, _vptr.Child1 = 0x555555557ca0 <vtable for Derived+24>, c1 = 2}, <Child2> = {_vptr.Child2 = 0x555555557cb8 <VTT for Derived>, c2 = 3}, d = 4}
+
+(gdb) p/a &d                           Child1 -->  +------------------+  <---- 0x7fffffffe050
+$2 = 0x7fffffffe050                                | _vptr.Child1(8B) |
+                                                   +------------------+        0x7fffffffe058
+(gdb) p/a sizeof(d)                                |      c1(4B)      |
+$3 = 0x28                                          +------------------+        0x7fffffffe05c
+                                                   |   _padding(4B)   |
+(gdb) p/a *(long*)0x7fffffffe050       Child2 -->  +------------------+        0x7fffffffe060
+$4 = 0x555555557ca0 <_ZTV7Derived+24>              | _vptr.Child2(8B) |
+                                                   +------------------+        0x7fffffffe068
+(gdb) p/a *((int*)0x7fffffffe050+2)                |      c2(4B)      |
+$5 = 0x2                                           +------------------+        0x7fffffffe06c
+                                                   |       d(4B)      |
+(gdb) p/a *((int*)0x7fffffffe050+3)                +------------------+        0x7fffffffe070
+$6 = 0x0                                           |       x(4B)      |
+                                                   +------------------+        0x7fffffffe074
+(gdb) p/a *((long*)0x7fffffffe050+2                |   _padding(4B)   |
+$7 = 0x555555557cb8 <_ZTT7Derived>                 +------------------+
+
+(gdb) p/a *((int*)0x7fffffffe050+6)
+$8 = 0x3
+
+(gdb) p/a *((int*)0x7fffffffe050+7)
+$7 = 0x4
+
+(gdb) p/a *((int*)0x7fffffffe050+8)
+$9 = 0x1
+
+(gdb) p/a *((int*)0x7fffffffe050+9)
+$10 = 0x0
+```
+
+为什么没有虚函数，这里也出现了虚函数表？事实上，为了增加一些运行时信息，比如 `type_info`、`offset`（用来确定基类在派生类中的偏移量），将这些信息放在虚函数表的负值索引处，可以通过 `vptr[-?]` 的形式访问。let's check it out!
+
+```bash
+(gdb) p/a *((long*)0x555555557ca0-1)
+$11 = 0x555555557d08 <_ZTI7Derived>   # 运行时信息，实际指向的对象类型
+
+(gdb) p *((long*)0x555555557ca0-2)
+$12 = 0                               # 对象实际地址相对于该基类的偏移量，Child1 在最开始，所以 offset=0
+
+(gdb) p *((long*)0x555555557ca0-3)
+$13 = 32                              # 虚基类相对于该基类的偏移量，Base 位于 0x7fffffffe070，而 Child1 位于 0x7fffffffe050，相减即得
+
+(gdb) p/a *((long*)0x555555557cb8-1)
+$14 = 0x555555557d08 <_ZTI7Derived>   # 运行时信息，实际指向的对象类型
+
+(gdb) p *((long*)0x555555557cb8-2)
+$15 = -16                             # Child2 在 0x7fffffffe060，减 16 得到实际指向对象首地址
+
+(gdb) p/a *((long*)0x555555557cb8-3)
+$16 = 16                              # 相减即得
+```
+
+又发现这两个虚表的地址差值为 24，刚好是 3 个 8B，说明它们俩是挨在一起的。那么可以得到虚表的内存模型如下：
+
+```
+                 +------------------+  <---- 0x555555557c88
+                 |  offset to vbase |
+                 +------------------+        0x555555557c90
+                 |  offset to top   |
+                 +------------------+        0x555555557c98
+                 | runtime_typeinfo |
+vptr_Child1 -->  +------------------+        0x555555557ca0
+                 |  offset to vbase |
+                 +------------------+        0x555555557ca8
+                 |  offset to top   |
+                 +------------------+        0x555555557cb0
+                 | runtime_typeinfo |
+vptr_Child2 -->  +------------------+        0x555555557cb8
+```
+
+以 `Child2* pc2 = pd` 为例，实际的代码可能是 `Child2* pc2 = pd == nullptr ? (Child2*)(pd + sizeof(Child1)) : 0`，它对应内存的首个元素就是 8B 的虚表指针，通过这一指针就可以访问到运行时信息。
+
+在有虚函数&&虚继承的情况下，虚表向下填充函数指针即可。

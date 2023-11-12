@@ -101,7 +101,7 @@ void Foo(B* pb, D* pd) {
 dynamic_cast<new_type>(expr); // 其中 new_type/expr 必须为指针或引用。若 new_type 为指针，则 expr 必须为指针；如为引用，则 expr 为左值
 ```
 
-与 `static_cast` 相对，`dynamic_cast` 在运行时执行类型检查，故用于**多态对象**的转换，且更加安全。具体表现为：
+与 `static_cast` 相对，`dynamic_cast` 在运行时执行类型检查，故用于**多态对象**的**向上**转换，且更加安全。具体表现为：
 
 - 如果转型成功，那么 `dynamic_cast` 就会正确返回转换后的值；
 - 如果转型失败且 `new_type` 是指针类型，那么它会返回 `nullptr`；

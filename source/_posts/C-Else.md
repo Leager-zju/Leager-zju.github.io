@@ -33,8 +33,6 @@ for (auto&& item : v) { // item 为 int& 型
 }
 ```
 
-<a id="constexpr"></a>
-
 ## constexpr
 
 `constexpr` 和 `const` 很像，两者的共同之处在于都是**修饰词**，可以用于修饰变量与函数，不同之处在于，`const` 修饰的对象仅包含一层 **read-only** 含义，即仅保证该对象在运行时不会被改变，但其仍有可能为动态变量。
@@ -107,8 +105,6 @@ int main() {
 }
 ```
 
-<a id="nullptr"></a>
-
 ## nullptr
 
 C++11 以前使用宏 `NULL` 来表示空指针。本质上它是 `#define NULL 0`，也就是一个数字 0，并不算真正意义上的指针。如果遇到以下代码，则会出现二义性：
@@ -152,8 +148,6 @@ int main() {
 // 函数 func(int*) 已调用
 ```
 
-<a id="override"></a>
-
 ## override
 
 `override` 用于修饰派生类中的**虚函数**，告诉编译器（与程序员）该函数进行了重写。如果一个函数声明为 `override` 但父类却没有这个虚函数，编译报错，故可以避免程序员在重写基类函数时无意产生的错误，提高代码规范性。
@@ -170,8 +164,6 @@ struct B : A {
   void bar() override;       // ERROR! A::bar 非虚
 };
 ```
-
-<a id="final"></a>
 
 ## final
 
@@ -194,7 +186,7 @@ struct B final : A {   // OK! B 为 final
 struct C : B{};        // ERROR! B 为 final，无法进一步派生
 ```
 
-<a id="enum"></a>
+> 对于多态类，如果确定一个虚函数不会再被覆盖，或者该类不会再被继承，则推荐标上 `final`。这可以为编译器提供非常有价值的编译优化信息，总而将原本需要推迟到运行期才能确定的虚函数调用提前在编译期就已确定。如被调用的函数能与上层调用方一起进一步地做函数内联、常量折叠、无用代码消除等优化，则可以压榨出非常可观的性能提升。
 
 ## enum class
 
@@ -228,8 +220,6 @@ std::cout << (red == 0);  // output: true
 
 虽然限制很多，但也更安全。应当尽可能使用带限定域的枚举。
 
-<a id="assert"></a>
-
 ## static_assert
 
 说到这个，就不得不提另一个很像的叫 `assert` 的玩意。这两者都起到**断言**的作用，区别在于：
@@ -241,8 +231,6 @@ static_assert(expr, msg); // 如果 expr == false，则输出 msg
 ```
 
 `assert` 为**动态断言**，在运行时执行，不影响编译（其实就是一个**宏**）。通过 `static_cast<bool>` 把表达式转换成 `bool` 类型，从而实现断言。缺点在于影响程序性能，常用于 debug 模式，在 release 模式中一般会关掉。
-
-<a id="literal"></a>
 
 ## 自定义字面量
 
@@ -300,8 +288,6 @@ int operator""_s (unsigned long long time) {
 > - `const char32_t*, std::size_t`
 
 如果希望在编译时就调用字面量后缀函数，则需要把函数定义为 `constexpr`。
-
-<a id="ds"></a>
 
 ## 新的数据结构
 
@@ -410,8 +396,6 @@ forward_list 内部实现以下功能：
 - `tuple_cat(tuples...)` 连接任意数量的 tuple；
 
 并可以通过全局函数 `std::get<index>(tuple)` 访问 tuple 对象的第 index 个元素。
-
-<a id="algorithm"></a>
 
 ## 新的算法
 

@@ -27,7 +27,7 @@ img:
 
 基于上述讨论，可以开始进行 lab tasks 的构思了。
 
-## Task #1-Extendable Hash Table
+## Task #1 - Extendable Hash Table
 
 具体概念请参考[可扩展哈希实现](https://zhuanlan.zhihu.com/p/537292608)。
 

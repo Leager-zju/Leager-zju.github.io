@@ -5,7 +5,7 @@ mathjax: true
 date: 2022-11-15 17:05:59
 summary:
 categories:
-    - 6.824
+    - MIT6.824
 tags:
     - paperReading
 img:
