@@ -26,7 +26,7 @@
 <meta property="og:description" content="标准模板库(Standard Template Library, STL)是一个 C++ 软件库，大量影响了 C++ 标准程序库但并非是其的一部分。其中包含 4 个组件，分别为容器、算法、函数、迭代器。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2023-11-08T16:23:58.000Z">
-<meta property="article:modified_time" content="2023-11-09T06:19:41.253Z">
+<meta property="article:modified_time" content="2023-11-12T15:27:00.517Z">
 <meta property="article:author" content="Leager">
 <meta property="article:tag" content="C++">
 <meta name="twitter:card" content="summary">
@@ -215,10 +215,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2023-11-09 00:23:58 / 修改时间：14:19:41" itemprop="dateCreated datePublished" datetime="2023-11-09T00:23:58+08:00">2023-11-09</time>
+              <time title="创建时间：2023-11-09 00:23:58" itemprop="dateCreated datePublished" datetime="2023-11-09T00:23:58+08:00">2023-11-09</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-11-12 23:27:00" itemprop="dateModified" datetime="2023-11-12T23:27:00+08:00">2023-11-12</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -289,13 +295,13 @@
 <code>std::forward</code>
 转发的形式调用<strong>初始化构造函数</strong>。</p>
 <p>后者则需要调用<strong>拷贝/移动构造函数</strong>，效率较前者更低。</p>
-<h2 id="list">list</h2>
+<h3 id="list">list</h3>
 <p>底层是<strong>双向链表</strong>。</p>
 <p>不支持随机访问，只能通过<strong>遍历</strong>的方式查找，复杂度为
 <code>O(n)</code>。</p>
 <p><strong>插入和删除</strong>的速度快，当已定位到待插入/删除的位置时，只需要调整指针的指向，复杂度为
 <code>O(1)</code>。</p>
-<h2 id="deque">deque</h2>
+<h3 id="deque">deque</h3>
 <p>双向队列，由分段连续空间构成，每段连续空间是一个缓冲区，由一个中控器来控制。它必须维护一个中控器指针，还要维护
 <code>start</code> 和 <code>finish</code>
 两个迭代器，分别指向第一个缓冲区和最后一个缓冲区。</p>
@@ -303,7 +309,7 @@
 <p>支持<strong>随机访问</strong>，但性能比vector要低</p>
 <p>支持<strong>双端扩容</strong>，因此在头部和尾部插入和删除元素很快，为
 <code>O(1)</code>，但是在中间插入和删除元素很慢。</p>
-<h2 id="setmap">set/map</h2>
+<h3 id="setmap">set/map</h3>
 <p>这俩容器底层都是由<strong>红黑树</strong>实现的，其内部元素依照其值自动排序。<strong>增删查改</strong>的时间复杂度近似
 <code>O(log n)</code>。</p>
 <blockquote>
@@ -318,11 +324,11 @@
 <p>为什么不用平衡二叉树(AVL)呢？尽管 AVL
 是高度平衡的，但频繁的插入和删除，会引起频繁的旋转操作，导致效率下降。而红黑树是一种弱平衡二叉树，相对于严格要求平衡的平衡二叉树来说，它的旋转次数少（红黑树的插入最多两次旋转，删除最多三次旋转），所以对于插入、删除操作较多的情况下，通常使用红黑树。</p>
 </blockquote>
-<h2 id="unordered_setunordered_map">unordered_set/unordered_map</h2>
+<h3 id="unordered_setunordered_map">unordered_set/unordered_map</h3>
 <p>这俩底层是基于<strong>哈希表</strong>实现的，是无序的。理论上增删查改的时间复杂度是
 <code>O(1)</code>（最差时间复杂度
 <code>O(n)</code>），实际上数据的分布是否均匀会极大影响容器的性能。</p>
-<h2 id="stackqueue">stack/queue</h2>
+<h3 id="stackqueue">stack/queue</h3>
 <p>它们都是由 <code>deque</code> 作为底层容器实现的，通过修改
 <code>deque</code> 的接口，实现独特的性质（此二者也可以用
 <code>list</code> 作为底层实现）</p>
@@ -330,7 +336,7 @@
 封住了头端的开口，<strong>先进后出</strong>。</p>
 <p><code>queue</code> 是 <code>deque</code>
 封住了尾端的开口，<strong>先进先出</strong>。</p>
-<h2 id="priority_queue">priority_queue</h2>
+<h3 id="priority_queue">priority_queue</h3>
 <p>以 <code>vector</code>
 作为底层容器，以<strong>堆</strong>作为处理规则。</p>
 <blockquote>
@@ -418,7 +424,7 @@
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
           <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%B9%E5%99%A8"><span class="nav-text">容器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#vector"><span class="nav-text">vector</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E9%87%8A%E6%94%BE%E5%86%85%E5%AD%98"><span class="nav-text">如何释放内存？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#emplace_back-%E5%92%8C-push_back-%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-text">emplace_back() 和 push_back()
-的区别</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#list"><span class="nav-text">list</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#deque"><span class="nav-text">deque</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#setmap"><span class="nav-text">set&#x2F;map</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#unordered_setunordered_map"><span class="nav-text">unordered_set&#x2F;unordered_map</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#stackqueue"><span class="nav-text">stack&#x2F;queue</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#priority_queue"><span class="nav-text">priority_queue</span></a></li></ol></div>
+的区别</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#list"><span class="nav-text">list</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#deque"><span class="nav-text">deque</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#setmap"><span class="nav-text">set&#x2F;map</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#unordered_setunordered_map"><span class="nav-text">unordered_set&#x2F;unordered_map</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#stackqueue"><span class="nav-text">stack&#x2F;queue</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#priority_queue"><span class="nav-text">priority_queue</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
