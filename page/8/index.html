@@ -138,7 +138,7 @@
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">84</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">85</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -191,6 +191,90 @@
 
           <div class="content index posts-expand">
             
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/MIT6-824/Aurora/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/Avatar.jpg">
+      <meta itemprop="name" content="Leager">
+      <meta itemprop="description" content="【数据删除】">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="没什么看头的地方">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/MIT6-824/Aurora/" class="post-title-link" itemprop="url">Aurora 论文阅读</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-10-09 19:46:40" itemprop="dateCreated datePublished" datetime="2022-10-09T19:46:40+08:00">2022-10-09</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-11-10 23:43:40" itemprop="dateModified" datetime="2023-11-10T23:43:40+08:00">2023-11-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/MIT6-824/" itemprop="url" rel="index"><span itemprop="name">MIT6.824</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>6.824 的第七篇论文是 <a
+target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/papers/aurora.pdf"><strong>Aurora</strong></a>——一个高性能，高可靠的关系数据库服务。在处理事务的速度上，Aurora
+宣称比其他数据库快 35
+倍。同时，其完全抛弃了通用存储，转而构建了自己<strong>应用定制的存储</strong>。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/MIT6-824/Aurora/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
       
   
   
@@ -485,7 +569,7 @@ Ramakrishnan
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-11-10 23:43:40" itemprop="dateModified" datetime="2023-11-10T23:43:40+08:00">2023-11-10</time>
+                <time title="修改时间：2023-11-14 13:05:08" itemprop="dateModified" datetime="2023-11-14T13:05:08+08:00">2023-11-14</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -508,20 +592,21 @@ Ramakrishnan
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>本实验要求在每一个 raft 节点上实现一个 K/V
+          <p>本实验要求在每一个 Raft 节点上实现一个 K/V
 服务器(server)，向上接受客户端(client)的请求并返回请求结果，向下生成日志应用到
-raft 节点中。</p>
+Raft 节点中。</p>
 <p>整个模式大概长<a
 target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/notes/raft_diagram.pdf">这样</a>。</p>
 <p>主要流程是这样的：</p>
 <ol type="1">
-<li>client 寻找对应 raft 节点是 leader 的
+<li>client 寻找对应 Raft 节点是 Leader 的
 server，并发起一个请求(Put/Append/Get)；</li>
-<li>server 收到请求后，调用 raft 的 Start() 函数；</li>
-<li>raft 节点间互相 AppendEntries 之后，将消息 apply 到 applyChannel
+<li>server 收到请求后，调用 Raft 的 <code>Start()</code>
+函数生成新日志；</li>
+<li>Raft 层间互相进行日志复制之后，将 committed 日志传到到 applyChannel
 里；</li>
 <li>server 从 applyChannel
-中取出消息，之后正式将命令应用到数据库中。</li>
+中拿到日志，提取出命令后，正式将命令应用到存储中；</li>
 </ol>
           <!--noindex-->
             <div class="post-button">
@@ -580,7 +665,7 @@ server，并发起一个请求(Put/Append/Get)；</li>
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-11-10 23:43:40" itemprop="dateModified" datetime="2023-11-10T23:43:40+08:00">2023-11-10</time>
+                <time title="修改时间：2023-11-14 12:38:21" itemprop="dateModified" datetime="2023-11-14T12:38:21+08:00">2023-11-14</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -662,7 +747,7 @@ server，并发起一个请求(Put/Append/Get)；</li>
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-11-10 23:43:40" itemprop="dateModified" datetime="2023-11-10T23:43:40+08:00">2023-11-10</time>
+                <time title="修改时间：2023-11-14 12:37:26" itemprop="dateModified" datetime="2023-11-14T12:37:26+08:00">2023-11-14</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -960,88 +1045,6 @@ target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/papers/vm-
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/math/linear-algebra(1)/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/Avatar.jpg">
-      <meta itemprop="name" content="Leager">
-      <meta itemprop="description" content="【数据删除】">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="没什么看头的地方">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/math/linear-algebra(1)/" class="post-title-link" itemprop="url">Linear-Algebra(1)</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2022-09-29 14:21:50" itemprop="dateCreated datePublished" datetime="2022-09-29T14:21:50+08:00">2022-09-29</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-03-04 13:59:44" itemprop="dateModified" datetime="2023-03-04T13:59:44+08:00">2023-03-04</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/math/" itemprop="url" rel="index"><span itemprop="name">math</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>如果本科线代能有这样的教育方式和路线，我何苦现在还要来听这门公开课(</p>
-<p>记录一下听的过程中觉得有用的信息好了。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/math/linear-algebra(1)/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1113,7 +1116,7 @@ target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/papers/vm-
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">84</span>
+          <span class="site-state-item-count">85</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
