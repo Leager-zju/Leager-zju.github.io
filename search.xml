@@ -3860,16 +3860,16 @@ RTTI 情况。</p>
 并不会给你飘红线，但编译时就会报一堆错误。</p>
 </blockquote>
 <p>而对于
-<code>typedef</code>，其在编译时期执行，故可以进行类型检查，但它不能直接进行模板替换，只能采用外面套一个结构体的方式。也就是说，如果定义了这样一个类模板：</p>
+<code>typedef</code>，其在编译时期执行，故可以进行类型检查，但它不能直接进行模板替换，只能采用<strong>外面套一个结构体</strong>的方式。也就是说，如果定义了这样一个类模板：</p>
 <figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">A</span> &#123;&#125;;</span><br></pre></td></tr></table></figure>
 <p>如果试图用 <code>typedef</code>
 取<strong>模板别名</strong>，则必须用上面那种写法，下面那种写法会报错：</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// OK</span></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Alias</span> &#123;</span><br><span class="line">    <span class="keyword">typedef</span> A&lt;T&gt; <span class="type">a_t</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ERROR</span></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">typedef</span> A&lt;T&gt; <span class="type">a_t</span>;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// OK</span></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Alias</span> &#123;</span><br><span class="line">  <span class="keyword">typedef</span> A&lt;T&gt; <span class="type">a_t</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ERROR</span></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">typedef</span> A&lt;T&gt; <span class="type">a_t</span>;</span><br></pre></td></tr></table></figure>
 <p>这样起别名的方式又增加了冗余的结构体名，降低了可读性与 code
 效率。</p>
 <p>不仅如此，<code>typedef</code>
 在定义<strong>函数指针</strong>时也存在降低可读性的情况：</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">typedef</span> <span class="title">void</span> <span class="params">(*func)</span> <span class="params">(<span class="type">int</span>, <span class="type">int</span>)</span></span>; <span class="comment">// func 为函数指针 void*(int, int) 的别名</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">typedef</span> <span class="title">void</span> <span class="params">(*func)</span> <span class="params">(<span class="type">int</span>, <span class="type">int</span>)</span></span>; <span class="comment">// func 为函数指针 void(*)(int, int) 的别名</span></span><br></pre></td></tr></table></figure>
 <blockquote>
 <p>在网上找到很多说 <code>typedef</code> / <code>#define</code>
 无法起模板别名的文章，但实际操作了一遍，发现或许是编译器更新了，一些以前认为无法实现的代码如今都能编译通过。所以还是绝知此事要躬行。</p>
@@ -3887,7 +3887,7 @@ RTTI 情况。</p>
 <figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">using</span> new_alias = old_typename;</span><br><span class="line"></span><br><span class="line"><span class="comment">// or</span></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">using</span> new_alias = old_typename&lt;T&gt;;</span><br></pre></td></tr></table></figure>
 <p>如果需要使用 <code>using</code>
 为函数指针取别名，则可以直接用类似赋值的方式，即</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">using</span> func = <span class="type">void</span>* (<span class="type">int</span>, <span class="type">int</span>);</span><br></pre></td></tr></table></figure>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">using</span> func = <span class="built_in">void</span>(*)(<span class="type">int</span>, <span class="type">int</span>);</span><br></pre></td></tr></table></figure>
 <p>一目了然，符合直觉。</p>
 ]]></content>
       <categories>
