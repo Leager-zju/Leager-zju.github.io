@@ -24,15 +24,15 @@
     var CONFIG = {"hostname":"leager-zju.github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"b2t":true},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="C++11引入了 auto 和 decltype 这两个关键字，从而可以在编译期就推导出变量或者表达式的类型，方便开发者编码也简化了代码。">
+  <meta name="description" content="C++11引入了 auto 和 decltype 这两个关键字，从而可以在编译期就推导出变量或者表达式的类型，方便开发者编码也简化了代码。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="C++11 の 类型推导(Auto &amp; Decltype)">
 <meta property="og:url" content="http://leager-zju.github.com/C-11/C-AutoDeclType/index.html">
 <meta property="og:site_name" content="没什么看头的地方">
-<meta property="og:description" content="C++11引入了 auto 和 decltype 这两个关键字，从而可以在编译期就推导出变量或者表达式的类型，方便开发者编码也简化了代码。">
+<meta property="og:description" content="C++11引入了 auto 和 decltype 这两个关键字，从而可以在编译期就推导出变量或者表达式的类型，方便开发者编码也简化了代码。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2023-01-16T04:37:37.000Z">
-<meta property="article:modified_time" content="2023-11-17T07:03:43.219Z">
+<meta property="article:modified_time" content="2023-11-17T07:10:32.801Z">
 <meta property="article:author" content="Leager">
 <meta property="article:tag" content="C++">
 <meta name="twitter:card" content="summary">
@@ -229,7 +229,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-11-17 15:03:43" itemprop="dateModified" datetime="2023-11-17T15:03:43+08:00">2023-11-17</time>
+                <time title="修改时间：2023-11-17 15:10:32" itemprop="dateModified" datetime="2023-11-17T15:10:32+08:00">2023-11-17</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -259,7 +259,8 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>C++11引入了 <code>auto</code> 和 <code>decltype</code>
+        <p>C++11引入了 <strong><code>auto</code></strong> 和
+<strong><code>decltype</code></strong>
 这两个关键字，从而可以在编译期就推导出变量或者表达式的类型，方便开发者编码也简化了代码。</p>
 <span id="more"></span>
 <h2 id="auto">auto</h2>
@@ -311,14 +312,14 @@
 <p>除了上面讲的外，关于 <code>decltype</code> 还有以下几条规则：</p>
 <ol type="1">
 <li><p>若推导对象为不被括号包裹的变量表达式或函数调用，则推导结果为该表达式声明时的类型或函数的返回值类型。例如：</p>
-<p><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> i = <span class="number">0</span>;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> &amp;j = i;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">func</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123; <span class="keyword">public</span>: <span class="type">double</span> bar; &#125;</span><br><span class="line"><span class="type">const</span> Foo *foo;</span><br><span class="line"></span><br><span class="line"><span class="keyword">decltype</span>(i) di = i;         <span class="comment">// 推导结果为 int</span></span><br><span class="line"><span class="keyword">decltype</span>(j) dj = j;         <span class="comment">// 推导结果为 const int&amp;</span></span><br><span class="line"><span class="keyword">decltype</span>(i+j) k;            <span class="comment">// 推导结果为 int</span></span><br><span class="line"><span class="keyword">decltype</span>(<span class="built_in">func</span>()) f;         <span class="comment">// 推导结果为 int</span></span><br><span class="line"><span class="keyword">decltype</span>(foo-&gt;bar) foo_bar; <span class="comment">// 推导结果为 double</span></span><br></pre></td></tr></table></figure></p>
+<p><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> i = <span class="number">0</span>;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> &amp;j = i;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">func</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123;</span><br><span class="line">  <span class="keyword">public</span>:</span><br><span class="line">    <span class="type">double</span> bar;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">const</span> Foo *foo;</span><br><span class="line"></span><br><span class="line"><span class="keyword">decltype</span>(i) di = i;         <span class="comment">// 推导结果为 int</span></span><br><span class="line"><span class="keyword">decltype</span>(j) dj = j;         <span class="comment">// 推导结果为 const int&amp;</span></span><br><span class="line"><span class="keyword">decltype</span>(i+j) k;            <span class="comment">// 推导结果为 int</span></span><br><span class="line"><span class="keyword">decltype</span>(<span class="built_in">func</span>()) f;         <span class="comment">// 推导结果为 int</span></span><br><span class="line"><span class="keyword">decltype</span>(foo-&gt;bar) foo_bar; <span class="comment">// 推导结果为 double</span></span><br></pre></td></tr></table></figure></p>
 <blockquote>
 <p>不难发现，<code>decltype</code>会保留表达式的引用和 cv 限定符。</p>
 </blockquote>
 <p>反之，如果表达式类别为左值，则返回
 <code>T&amp;</code>；如果为右值，则返回 <code>T</code>，其中
 <code>T</code> 为表达式类型。例如将上面的代码改为下面这样：</p>
-<p><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">decltype</span>((i)) di = i;                    <span class="comment">// 左值，推导结果为 int&amp;</span></span><br><span class="line"><span class="keyword">decltype</span>((j)) dj = j;                    <span class="comment">// 左值。推导结果为 const int&amp;</span></span><br><span class="line"><span class="keyword">decltype</span>((i+j)) k;                       <span class="comment">// 右值，推导结果为 int</span></span><br><span class="line"><span class="keyword">decltype</span>((lambda)) l;                    <span class="comment">// 左值，推导结果为 lambda [](int, int) -&gt; int&amp;</span></span><br><span class="line"><span class="keyword">decltype</span>((<span class="built_in">func</span>())) f;                    <span class="comment">// 右值，推导结果为 int</span></span><br><span class="line"><span class="keyword">decltype</span>((foo-&gt;bar)) foo_bar = foo-&gt;bar; <span class="comment">// 左值，推导结果为 const double&amp;</span></span><br></pre></td></tr></table></figure></p></li>
+<p><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">decltype</span>((i)) di = i;                    <span class="comment">// 左值，推导结果为 int&amp;</span></span><br><span class="line"><span class="keyword">decltype</span>((j)) dj = j;                    <span class="comment">// 左值。推导结果为 const int&amp;</span></span><br><span class="line"><span class="keyword">decltype</span>((i+j)) k;                       <span class="comment">// 右值，推导结果为 int</span></span><br><span class="line"><span class="keyword">decltype</span>((<span class="built_in">func</span>())) f;                    <span class="comment">// 右值，推导结果为 int</span></span><br><span class="line"><span class="keyword">decltype</span>((foo-&gt;bar)) foo_bar = foo-&gt;bar; <span class="comment">// 左值，推导结果为 const double&amp;</span></span><br></pre></td></tr></table></figure></p></li>
 <li><p>若推导对象为函数名，则不允许出现有多个重载的函数，否则会产生二义性，例如：</p>
 <p><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">func</span><span class="params">(<span class="type">int</span> a)</span></span>;</span><br><span class="line"><span class="keyword">decltype</span>(func) f1; <span class="comment">// OK! func 仅有一个重载</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">double</span> <span class="title">func</span><span class="params">(<span class="type">double</span> b)</span></span>;</span><br><span class="line"><span class="keyword">decltype</span>(func) f2; <span class="comment">// ERROR! func 有两个重载</span></span><br></pre></td></tr></table></figure></p></li>
 </ol>
