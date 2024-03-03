@@ -55,19 +55,19 @@ class A {
 A a;
 
 auto f = [=]() {          // ERROR! 不能修改 const 对象 a 且调用非 const 成员函数 foo()
-    ++a.i;
-    a.foo();
-    a.bar();
+  ++a.i;
+  a.foo();
+  a.bar();
 };
 auto g = [=]() mutable {  // OK! 加入 mutable 后禁制解除
-    ++a.i;
-    a.foo();
-    a.bar();
+  ++a.i;
+  a.foo();
+  a.bar();
 };
 auto h = [&]() {          // OK! 引用捕获不受影响
-    ++a.i;
-    a.foo();
-    a.bar();
+  ++a.i;
+  a.foo();
+  a.bar();
 };
 ```
 
@@ -82,7 +82,7 @@ a++;
 f(); // 输出 0
 ```
 
-从这个例子中不难发现，在捕获阶段 lambda 表达式的相关变量值就已经确定，尽管之后发生了修改，表达式内的变量也不会随之改变，这就是值捕获的**延迟特性**。如果希望值随着外部变化一起修改，则需要采用引用捕获。
+从这个例子中不难发现，在捕获阶段 lambda 表达式的相关变量值就已经确定，尽管之后发生了修改，表达式内的变量也不会随之改变，这就是值捕获的**延迟特性**。如果希望值随着外部变化一起修改，则需要采用**引用捕获**。
 
 ### 悬垂引用
 
@@ -148,30 +148,29 @@ R operator()( Args... args ) const;
 
 ### 使用方法
 
-- 存储**函数**：
+- 存储**函数**
 
     ```c++
     void foo(int i) { std::cout << i; }
-    std::function<void(int)> f;
-    
-    f = foo; // 存储 void(int) 类型的函数
+    std::function<void(int)> f(foo); // 存储 void(int) 类型的函数
+
     f(1); // output: 1
     // or
     f = &foo;
     f(1); // output: 1
     ```
 
-- 存储**模板函数**：（后面类模板也是一样的）
+- 存储**模板函数**
 
     ```c++
     template<typename T>
     void foo(T i) { std::cout << i; }
     
-    std::function<void(int)> f = foo<int>;
+    std::function<void(int)> f(foo<int>);
     f(2); // output: 2
     ```
 
-- 存储 **lambda 表达式**：
+- 存储 **lambda 表达式**
 
     ```c++
     std::function<void(int)> f = [](int i) { std::cout << i; };
@@ -179,31 +178,36 @@ R operator()( Args... args ) const;
     
     // 同时，可以利用其在 lambda 表达式中模拟递归
     auto factorial = [](int n) {
-        std::function<int(int)> fac = [&](int n){ return (n < 2) ? 1 : n*fac(n-1); }; // 而 lambda 表达式 auto fac = [&](int n){...}; 无法用于递归
+        std::function<int(int)> fac = [&](int n){
+          return (n < 2) ? 1 : n*fac(n-1);
+        }; // 而 lambda 表达式 auto fac = [&](int n){...}; 无法用于递归
         return fac(n);
     };
     
     std::cout << factorial(4);   // output: 24
     ```
 
-- 存储**函数对象**：
+- 存储**函数对象**
 
     ```c++
     struct foo {
       void operator()(int i) const { std::cout << i; }
     };
     
-    std::function<void(int)> f = foo; // 必须是重载类型为 void operator() (int) 类型的函数对象
+    std::function<void(int)> f(foo); // 必须是重载类型为 void operator() (int) 类型的函数对象
     f(4); // output: 4
     ```
 
-- 存储**类成员函数**：
+- 存储**类成员函数**
 
     ```c++
     class Foo {
      public:
       Foo(int num) : num_(num) {}
-      void foobar(int i) const { std::cout << num_ + i; }
+      void foobar(int i) const {
+        std::cout << num_ + i;
+      }
+     private:
       int num_;
     };
     Foo foo(2);
@@ -215,43 +219,26 @@ R operator()( Args... args ) const;
      故 const Foo& 必须为第一个形参类型，视为 this
      */
     std::function<void(const Foo&, int)> f = &Foo::foobar;
-    f(foo, 3); // output: 5
-    f(3, 3);   // output: 6  (隐式调用构造函数)
+    f(foo, 3); // 相当于调用 foo.foobar(3)
+    f(123, 3); // 隐式调用构造函数 Foo(123)
     ```
 
-- 存储**类成员变量访问器**：
+- 🎈存储**类成员变量访问器**
 
     ```c++
-    class Foo {
-     public:
-      Foo(int num) : num_(num) {}
-      int num_;
-    };
-    Foo foo(7);
-    
-    std::function<int(Foo const&)> h = &Foo::num_; // 理由同上
-    std::cout << h(foo); // output: 7
+    std::function<int(Foo const&)> g = &Foo::num_; // 理由同上
+    std::cout << g(foo); // 相当于调用 foo.num_
     ```
 
-- 存储 **std::bind 表达式**：（关于 `std::bind` 详情见下文）
+- 存储 **std::bind 表达式**
 
     ```c++
-    class Foo {
-     public:
-      Foo(int num) : num_(num) {}
-      void foobar(int i) const { std::cout << num_ + i; }
-      int num_;
-    };
-    Foo foo(4);
-    
-    std::function<void(const Foo&, int)> f;
     using std::placeholders::_1;
+    std::function<void(int)> h;
     
-    f = std::bind( &Foo::foobar, foo, _1 );
-    f(4);                        // output: 8
-    // or
-    f = std::bind( &Foo::foobar, &foo, _1 );
-    f(5);                        // output: 9
+    h = std::bind( &Foo::foobar, foo, _1 ); // 由于绑定了对象 foo，所以生成的可调用对象被 std::function<void(int)> 接收
+    // 或者 h = std::bind( &Foo::foobar, &foo, _1 );
+    h(4); // 相当于调用 foo.foobar(4)
     ```
 
 ### 思考
@@ -260,21 +247,27 @@ R operator()( Args... args ) const;
 
 ## std::bind
 
-`std::bind` 将参数 `args` 绑定到可调用对象 `f` 以生成**转发**包装器，调用此包装器等价于调用 `f(args)`，之所以称其为转发器，是因为参数是被转发给目标函数再调用（其实就是当一个中介/路由器）。
+`std::bind` 将部分**固定参数** `args` 和可调用对象 `f` 绑定到一起生成一个新的可调用对象（或称**转发器**） `binder`，剩下的未绑定参数被 `std::placeholders` 的占位符 `_1, _2, _3...` 所替换。调用 `binder` 时，参数会被转发给 `f`，事实上调用的还是 `f`。
 
-乍一眼看上去这与 `std::function` 相性非常相似，事实上 `std::bind` 生成的返回值可以由 `std::function` 接纳存储，以便随时调用，就和上面示例的那样。
-
-除此之外，`std::bind` 还可以将 m 参数的可调用对象转为 n 参数的可调用对象，绑定 m-n 个参数，剩下的未绑定参数被 `std::placeholders` 的占位符 `_1, _2, _3...` 所替换。
+乍一眼看上去这与 `std::function` 相性非常相似，事实上 `std::bind` 生成的转发器可以由 `std::function` 接纳存储，以便随时调用，就和上面示例的那样。
 
 ### 使用方法
 
 先上例子：
 
 ```c++
-void foo(int i, int j, int k) { std::cout << i + j + k; }
-int bar(int i) { return i * 2; }
+void foo(int i, int j, int k) {
+  std::cout << i + j + k;
+}
 
-std::function<void(int, int, int)> f = std::bind(foo, std::placeholders::_1, 2, std::bind(bar, std::placeholders:: _3));
+int bar(int i) {
+  return i * 2;
+}
+
+using std::placeholders::_1;
+using std::placeholders::_3;
+
+std::function<void(int, int, int)> f = std::bind(foo, _1, 2, std::bind(bar, _3));
 
 f(1, 5, 9); // output: 21  实际上调用了 foo(1, 2, bar(9)) 即 foo(1, 2, 18);
 ```

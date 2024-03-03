@@ -84,9 +84,9 @@ decltype(foo) bar; // 由于 foo 为 int，则 decltype(foo) 被推导为 int
 上面的 `foo` 可以为任意有类型的表达式，但不能是 `void` 类型。
 
 ```c++
-void func();
+void func(void);
 
-decltype(func) p;   // OK! p 为 void* 的函数指针
+decltype(func) p;   // OK! p 为 void(void) 的函数类型，注意和函数指针类型 void(*p)(void) 不同
 decltype(func()) q; // ERROR!
 ```
 
@@ -99,16 +99,17 @@ decltype(func()) q; // ERROR!
     ```c++
     int i = 0;
     const int &j = i;
-    auto lambda = [](int a, int b) -> int { return a + b; };
     int func();
     
-    class Foo { public: double bar; }
+    class Foo {
+      public:
+        double bar;
+    }
     const Foo *foo;
     
     decltype(i) di = i;         // 推导结果为 int
     decltype(j) dj = j;         // 推导结果为 const int&
     decltype(i+j) k;            // 推导结果为 int
-    decltype(lambda) l;         // 推导结果为 lambda [](int, int) -> int
     decltype(func()) f;         // 推导结果为 int
     decltype(foo->bar) foo_bar; // 推导结果为 double
     ```
@@ -121,7 +122,6 @@ decltype(func()) q; // ERROR!
     decltype((i)) di = i;                    // 左值，推导结果为 int&
     decltype((j)) dj = j;                    // 左值。推导结果为 const int&
     decltype((i+j)) k;                       // 右值，推导结果为 int
-    decltype((lambda)) l;                    // 左值，推导结果为 lambda [](int, int) -> int&
     decltype((func())) f;                    // 右值，推导结果为 int
     decltype((foo->bar)) foo_bar = foo->bar; // 左值，推导结果为 const double&
     ```

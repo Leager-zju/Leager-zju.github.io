@@ -51,9 +51,10 @@ img:
   }
   ``` 
 - 如果不是 Leader（防止恶趣味测试给 Leader 发一条 MsgHup），则成为候选人 `Candidate`（进入下一任期，投自己一票），并向其他 Peer （如果有）发送 `MsgRequestVote`。请求中除了自身 `CurrentTerm`，还需包含自己最后一个日志条目的 `LogTerm` 与 `LogIndex`；
+
   > **存在只有自己一个 Peer 的情况，那就直接成为 Leader 不用发请求了**；
+
 - 对于收到的每一张票，首先检查发送方的 `Term`，判断是需要切换到 `Follower` 并更新任期。然后检查是同意还是拒绝，如果同意票过半则成为 Leader，如果反对票过半则退至 `Follower`，等待其他 Leader 发来消息或者下一次开始选举。
->
 
 对于接收者：
 
@@ -67,7 +68,7 @@ img:
 
 ```go
 func (r *Raft) getElectionTimeout() int {
-	return rand.Intn(2*r.electionTimeout) + r.electionTimeout
+  return rand.Intn(2*r.electionTimeout) + r.electionTimeout
 }
 ```
 
@@ -77,7 +78,7 @@ func (r *Raft) getElectionTimeout() int {
 
 **MsgAppend**：
 
-选举成功成为 Leader 后，需要立刻在自己的日志中增添一条空的日志条目，以巩固领导者地位。一旦有任何日志被添加（成为 Leader 或收到 `MsgPropose` 消息），都会触发 Raft 的日志复制机制——向所有 Peer 发送 `MsgAppend`。
+选举成功成为 Leader 后，需要立刻在自己的日志中增添一条空的日志条目，以快速提交旧日志（根据 raft paper 中的 figure 8，只能 commit 当前 Term 的日志）。一旦有任何日志被添加（成为 Leader 或收到 `MsgPropose` 消息），都会触发 Raft 的日志复制机制——向所有 Peer 发送 `MsgAppend`。
 
 关于日志复制其实论文里讲的很清楚了。Raft 层维护所有 Peer 的两个变量：`Match` 和 `Next`。前者表示目前能够确定的其他 Peer 与自身一致的最后一个日志条目 `Index`，后者表示下一次 `MsgAppend` 要从哪个日志开始发。
 
@@ -85,7 +86,7 @@ func (r *Raft) getElectionTimeout() int {
 
 > `MsgAppend` 需要包含 `PrevLogTerm` 与 `PrevLogIndex` 以便接收方进行日志匹配。
 
-同时，消息还要附带一个 `Commit` 字段，让其他 Peer 知道哪些日志是已经被大多数复制的，并更新自己的 `Committed`，以便 Apply 到上层。
+同时，消息还要附带一个 `Commit` 字段，让其他 Peer 知道哪些日志是已经拷贝到多数 Peer，并更新自己的 `Committed`，以便 Apply 到上层。
 
 接收方收到 `MsgAppend` 并检查完发送方 `Term` 后，便开始进行匹配，如果`PrevLogTerm` 与 `PrevLogIndex` 不匹配，则拒绝该条消息。
 
@@ -119,7 +120,7 @@ if len(m.Entries) > 0 {
 
 **Heartbeat**：
 
-与 6.824 不同，TinyKV 将日志复制和心跳分开，算两种不同的消息。前者上文已经提过，后者则是在 Tick() 驱动至心跳超时或收到 `MsgBeat` 消息后，向所有 Peer 发送 `MsgHeartbeat`。心跳的作用不仅仅是巩固 Leader 地位，还要向 Peers 广播自己的 `Commit`，接收方如果发现 `Commit` 比自己最后一个日志的 `LastLogIndex` 还大，则需要告诉发送方该消息，表明自己落后了，并拒绝该条消息；反之更新自身的 `Commit`。
+与 6.824 不同，TinyKV 将日志复制和心跳分开，算两种不同的消息。前者上文已经提过，后者则是在 Tick() 驱动至心跳超时或收到 `MsgBeat` 消息后，向所有 Peer 发送 `MsgHeartbeat`。心跳的作用不仅仅是巩固 Leader 地位，还要向 Peers 广播自己的 `Commit`，接收方如果发现 Leader 的 `Commit` 比自己最后一个日志的 `LastLogIndex` 还大，则需要告诉发送方这一信息，表明自己落后了，**并拒绝该条消息**；反之更新自身的 `Commit`。
 
 发送方检查回复，如果 Peer 落后了，立刻发一条 `MsgAppend` 过去让它赶紧进入到最新的状态。
 
@@ -249,7 +250,7 @@ if len(m.Entries) > 0 {
 
 ```go
 func (d *peerMsgHandler) applyAdminRequest(adminReq *AdminRequest, entry *Entry, wb *WriteBatch) {
-	switch adminReq.CmdType {
+  switch adminReq.CmdType {
     ...
     case raft_cmdpb.AdminCmdType_CompactLog:
       // 1. do the actual log deletion work

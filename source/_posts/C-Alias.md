@@ -23,7 +23,7 @@ C 中就已经存在使用 `#define` / `typedef` 来给类型取别名的用法�
 
 > 也就是说，如果 `#define` 为一个不存在的类型取了别名，写代码的时候 IDE 并不会给你飘红线，但编译时就会报一堆错误。
 
-而对于 `typedef`，其在编译时期执行，故可以进行类型检查，但它不能直接进行模板替换，只能采用外面套一个结构体的方式。也就是说，如果定义了这样一个类模板：
+而对于 `typedef`，其在编译时期执行，故可以进行类型检查，但它不能直接进行模板替换，只能采用**外面套一个结构体**的方式。也就是说，如果定义了这样一个类模板：
 
 ```c++
 template<typename T>
@@ -36,7 +36,7 @@ class A {};
 // OK
 template<typename T>
 struct Alias {
-    typedef A<T> a_t;
+  typedef A<T> a_t;
 };
 
 // ERROR
@@ -49,7 +49,7 @@ typedef A<T> a_t;
 不仅如此，`typedef` 在定义**函数指针**时也存在降低可读性的情况：
 
 ```c++
-typedef void (*func) (int, int); // func 为函数指针 void*(int, int) 的别名
+typedef void (*func) (int, int); // func 为函数指针 void(*)(int, int) 的别名
 ```
 
 > 在网上找到很多说 `typedef` / `#define` 无法起模板别名的文章，但实际操作了一遍，发现或许是编译器更新了，一些以前认为无法实现的代码如今都能编译通过。所以还是绝知此事要躬行。
@@ -73,7 +73,7 @@ using new_alias = old_typename<T>;
 如果需要使用 `using` 为函数指针取别名，则可以直接用类似赋值的方式，即
 
 ```c++
-using func = void* (int, int);
+using func = void(*)(int, int);
 ```
 
 一目了然，符合直觉。
