@@ -4,8 +4,7 @@ author: Leager
 mathjax: true
 date: 2023-11-08 15:37:11
 summary:
-categories:
-  - 编程思想
+categories: 编程思想
 tags:
 img:
 ---

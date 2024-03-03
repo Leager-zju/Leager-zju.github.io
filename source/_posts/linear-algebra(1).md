@@ -4,9 +4,8 @@ author: Leager
 mathjax: true
 date: 2022-09-29 14:21:50
 summary:
-categories: math
-tags:
-    - MIT18.06
+categories: MIT 18.06
+tags: math
 img:
 ---
 

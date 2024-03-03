@@ -4,10 +4,8 @@ author: Leager
 mathjax: true
 date: 2023-03-01 16:55:34
 summary:
-categories:
-    - Book Reading
-tags:
-    - C++
+categories: note
+tags: C++
 img:
 ---
 

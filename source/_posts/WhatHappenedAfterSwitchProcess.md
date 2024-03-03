@@ -4,10 +4,8 @@ author: Leager
 mathjax: true
 date: 2023-10-09 20:04:44
 summary:
-categories:
-  - 操作系统
-tags:
-  - What Happened
+categories: What Happened
+tags: operating system
 img:
 ---
 

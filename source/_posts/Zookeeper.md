@@ -4,10 +4,8 @@ author: Leager
 mathjax: true
 date: 2022-10-08 14:52:10
 summary:
-categories:
-    - MIT6.824
-tags:
-    - paperReading
+categories: paperReading
+tags: MIT 6.824
 img:
 ---
 

@@ -4,10 +4,8 @@ author: Leager
 mathjax: true
 date: 2023-08-14 11:49:53
 summary:
-categories:
-  - TinyKV
-tags:
-  - lab
+categories: TinyKV
+tags: lab
 img:
 ---
 

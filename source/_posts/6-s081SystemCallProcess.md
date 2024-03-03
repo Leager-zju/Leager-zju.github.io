@@ -4,10 +4,8 @@ author: Leager
 mathjax: true
 date: 2023-10-25 20:37:37
 summary:
-categories:
-  - MIT6.s081
-tags:
-  - lab
+categories: lab
+tags: MIT 6.s081
 img:
 ---
 

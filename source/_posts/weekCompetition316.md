@@ -4,10 +4,8 @@ author: Leager
 mathjax: true
 date: 2022-10-23 13:39:34
 summary:
-categories:
-    - LeetCode
-tags:
-    - 周赛
+categories: LeetCode
+tags: weekly
 img:
 ---
 

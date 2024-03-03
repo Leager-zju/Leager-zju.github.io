@@ -4,8 +4,7 @@ author: Leager
 mathjax: true
 date: 2022-11-27 13:28:34
 summary:
-categories:
-    - ZJU CLASS
+categories: ZJU CLASS
 tags:
 img:
 ---

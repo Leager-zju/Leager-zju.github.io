@@ -4,10 +4,8 @@ author: Leager
 mathjax: true
 date: 2023-10-07 11:23:53
 summary:
-categories:
-  - 计算机网络
-tags:
-  - What Happened
+categories: What Happened
+tags: net
 img:
 ---
 

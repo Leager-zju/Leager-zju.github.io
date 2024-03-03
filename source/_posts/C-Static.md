@@ -4,10 +4,8 @@ author: Leager
 mathjax: true
 date: 2023-02-13 17:02:49
 summary:
-categories:
-    - C++ Basic
-tags:
-    - C++
+categories: C++
+tags: C++ basic
 img:
 ---
 

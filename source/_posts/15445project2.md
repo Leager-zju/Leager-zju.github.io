@@ -4,10 +4,8 @@ author: Leager
 mathjax: true
 date: 2023-01-10 21:42:57
 summary:
-categories:
-    - CMU15445
-tags:
-    - lab
+categories: lab
+tags: CMU 15445
 img:
 ---
 

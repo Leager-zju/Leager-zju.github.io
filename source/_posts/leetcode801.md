@@ -4,10 +4,8 @@ author: Leager
 mathjax: true
 date: 2022-10-10 11:30:00
 summary:
-categories:
-    - LeetCode
-tags:
-    - 算法题
+categories: LeetCode
+tags: daily
 img:
 ---
 
