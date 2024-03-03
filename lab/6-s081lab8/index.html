@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/largeicon.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/smallicon.jpg">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link href="https://fonts.googleapis.com/css?family=Noto+Serif+SC:400,500,700&display=swap&subset=chinese-simplified" rel="stylesheet">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Amstelvar:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"leager-zju.github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"b2t":true},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="现在开始进入文件系统的阶段。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="6.s081 Lab8 File System">
+<meta property="og:url" content="http://leager-zju.github.com/lab/6-s081lab8/index.html">
+<meta property="og:site_name" content="没什么看头的地方">
+<meta property="og:description" content="现在开始进入文件系统的阶段。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-11-02T13:08:43.000Z">
+<meta property="article:modified_time" content="2024-03-03T04:11:26.346Z">
+<meta property="article:author" content="Leager">
+<meta property="article:tag" content="MIT 6.s081">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://leager-zju.github.com/lab/6-s081lab8/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>6.s081 Lab8 File System | 没什么看头的地方</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">没什么看头的地方</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里可能没有你想看的...</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于我</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">18</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">17</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">86</span></a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/lab/6-s081lab8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/Avatar.jpg">
+      <meta itemprop="name" content="Leager">
+      <meta itemprop="description" content="【数据删除】">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="没什么看头的地方">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          6.s081 Lab8 File System
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-11-02 21:08:43" itemprop="dateCreated datePublished" datetime="2023-11-02T21:08:43+08:00">2023-11-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-03-03 12:11:26" itemprop="dateModified" datetime="2024-03-03T12:11:26+08:00">2024-03-03</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/lab/" itemprop="url" rel="index"><span itemprop="name">lab</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>现在开始进入文件系统的阶段。</p>
+<span id="more"></span>
+<h2 id="preparation">Preparation</h2>
+<p>切换到对应分支</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ git fetch</span><br><span class="line">$ git checkout fs</span><br><span class="line">$ make clean</span><br></pre></td></tr></table></figure>
+<h2 id="task1-large-files">Task1: Large files</h2>
+<p>该任务要求我们为 inode 实现<strong>二级间接索引</strong>。</p>
+<p>原本的 inode 含有 11 个直接索引和 1 个一级间接索引，已知一个 disk
+block 大小为 <code>1024</code>，一个块地址大小为 4B，那一个 block
+内部可以容纳 256 条地址，即当前文件系统仅支持最大
+<code>(11+256)*BSIZE = 267KB</code> 大小的文件。</p>
+<p>这里，我们需要将 1 个直接索引拿来升级为二级间接索引（指向一个包含 256
+个一级间接索引的 block）。那么首先要修改 inode 结构体。xv6
+中，除了表示磁盘上的 inode <code>struct dinode</code>
+外，内存中还包含磁盘 inode 的拷贝
+<code>struct inode</code>，这两者分别位于 <code>kernel/fs.h</code> 与
+<code>kernel/file.h</code>。同时，还要修改一些宏字段如
+<code>MAXFILE</code>，以适配我们“升级”后的文件系统。</p>
+<figure class="highlight c"><figcaption><span>kernel/fs.h</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line"><span class="meta">#<span class="keyword">define</span> NDIRECT 11                                                      <span class="comment">// (!new)</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> NINDIRECT (BSIZE / sizeof(uint))</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> NDOUBLYINDIRECT ((BSIZE / sizeof(uint))*(BSIZE / sizeof(uint))) <span class="comment">// (!new)</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MAXFILE (NDIRECT + NINDIRECT + NDOUBLYINDIRECT)                 <span class="comment">// (!new)</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// On-disk inode structure</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">dinode</span> &#123;</span></span><br><span class="line">  ...</span><br><span class="line">  uint addrs[NDIRECT+<span class="number">1</span>+<span class="number">1</span>];  <span class="comment">// (!new)</span></span><br><span class="line">&#125;;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><figcaption><span>kernel/file.h</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// in-memory copy of an inode</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">inode</span> &#123;</span></span><br><span class="line">  ...</span><br><span class="line">  uint addrs[NDIRECT+<span class="number">1</span>+<span class="number">1</span>];  <span class="comment">// (!new)</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>修改完后，便可以通过 <code>make fs.img</code> 重构 qemu
+的文件系统了。</p>
+<p>现在，我们就能尝试创建更大的文件了。当然，最开始创建一个文件时，文件系统仅仅是为其分配了一个
+inode，还没有分配任何 disk
+block，只有当对文件进行写入时，才根据写入文件的 offset
+检查是否需要为其分配 block。我们查看写文件的 <code>sys_write()</code>
+操作，会发现其调用了 <code>filewrite()</code>，然后进一步调用
+<code>writei()</code>。<code>writei()</code> 里有个 for
+循环，每次取文件中一个 block 的大小进行写入，那么第 i
+次写入数据对应的文件偏移量为 <code>i * BSIZE</code>，相当于写入了 inode
+对应的逻辑块号为 <code>i</code> 的 disk block。</p>
+<p><code>bread()</code> 函数就是根据 block number 找到 block cache
+中对应的 block 的，那么 block number 怎么求？我们发现
+<code>bread()</code> 的第二个参数是根据函数 <code>bmap()</code>
+得来的，而这个 <code>bmap()</code> 就是根据 <code>inode</code>
+中的逻辑块号获取物理块号的。进去看了一眼发现，当前 <code>bmap()</code>
+仅支持一级间接索引，所以我们要做的就是修改该函数，令其支持二级间接索引。</p>
+<p><code>bmap()</code>
+的基本思路很简单，首先查直接索引，然后查一级间接索引。如果某一逻辑块号没有对应的索引块，那就为其分配一个索引块。从这也能看出，索引块是按需分配的，即便支持了二级间接索引，也不会因此导致大量的磁盘块分配。</p>
+<p>参考一级索引的查找方式，很容易能写出二级的：</p>
+<figure class="highlight c"><figcaption><span>kernel/fs.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> uint</span><br><span class="line"><span class="title function_">bmap</span><span class="params">(<span class="keyword">struct</span> inode *ip, uint bn)</span></span><br><span class="line">&#123;</span><br><span class="line">  uint addr, *a;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">buf</span> *<span class="title">bp</span>;</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>(bn &lt; NDIRECT)&#123;</span><br><span class="line">    ...</span><br><span class="line">  &#125;</span><br><span class="line">  bn -= NDIRECT;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>(bn &lt; NINDIRECT)&#123;</span><br><span class="line">    <span class="comment">// Load indirect block, allocating if necessary.</span></span><br><span class="line">    ...</span><br><span class="line">  &#125;</span><br><span class="line">  bn -= NINDIRECT;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 在二级索引块中，包含了 256 个一级间接索引块号，相当于其 `addr[]` 中的每个下标都覆盖了 256 个物理块</span></span><br><span class="line">  <span class="comment">// 由于这里逻辑块号 bn 已经被映射到 0~256*256-1 的范围，所以</span></span><br><span class="line">  <span class="comment">// bn/NINDIRECT 为二级索引块的下标</span></span><br><span class="line">  <span class="comment">// bn%NINDIRECT 为二级索引块指向的一级索引块的下标</span></span><br><span class="line">  <span class="keyword">if</span> (bn &lt; NDOUBLYINDIRECT) &#123;</span><br><span class="line">    <span class="comment">// Load doubly-indirect block, allocating if necessary.</span></span><br><span class="line">    <span class="keyword">if</span>((addr = ip-&gt;addrs[NDIRECT+<span class="number">1</span>]) == <span class="number">0</span>)</span><br><span class="line">      ip-&gt;addrs[NDIRECT+<span class="number">1</span>] = addr = balloc(ip-&gt;dev);</span><br><span class="line">    bp = bread(ip-&gt;dev, addr);</span><br><span class="line">    a = (uint*)bp-&gt;data;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((addr = a[bn/NINDIRECT]) == <span class="number">0</span>) &#123;</span><br><span class="line">      a[bn/NINDIRECT] = addr = balloc(ip-&gt;dev);</span><br><span class="line">      log_write(bp);</span><br><span class="line">    &#125;</span><br><span class="line">    brelse(bp); <span class="comment">// 在指向新的 block 前，释放原来的，下同</span></span><br><span class="line"></span><br><span class="line">    bp = bread(ip-&gt;dev, addr);</span><br><span class="line">    a = (uint*)bp-&gt;data;</span><br><span class="line">    bn %= NINDIRECT;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>((addr = a[bn]) == <span class="number">0</span>)&#123;</span><br><span class="line">      a[bn] = addr = balloc(ip-&gt;dev);</span><br><span class="line">      log_write(bp);</span><br><span class="line">    &#125;</span><br><span class="line">    brelse(bp);</span><br><span class="line">    <span class="keyword">return</span> addr;</span><br><span class="line">  &#125;</span><br><span class="line">  panic(<span class="string">&quot;bmap: out of range&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当然，有写操作，自然有相应的清空操作。什么时候要清空呢？我们这里写的都是位于内存的
+block cache 中的数据，<code>struct inode</code>
+也是位于内存的相对于磁盘的缓存。有 cache 那必然有 victim，当一个
+cache-inode 要被 victim 时，会将其所有块的数据写入
+disk，然后释放，从而实现内存复用。</p>
+<p>inode 里有一个 <code>ref</code> 字段，表明该文件的引用计数。我们对
+inode 的操作总是伴随着 <code>ilock()</code> 与
+<code>iunlock()</code>，事实上还有一个函数叫
+<code>iunlockput()</code>，它将 <code>iunlock()</code> 与
+<code>iput()</code> 结合到一起。那么 <code>iput()</code>
+是干嘛的？通过阅读函数原型，我们发现它就是将
+<code>inode.ref--</code>，如果减到 0，并且 <code>inode.nlink</code> 也为
+0，说明内存中不要这个文件了，磁盘里也不再需要该文件，此时就可以通过
+<code>itruc()</code> 将 inode 所使用的所有块写入磁盘并释放。</p>
+<p>同样的，我们现在支持了二级索引，那必然要对<strong>用到 inode
+索引</strong>的所有函数进行修改。<code>itrunc()</code> 即是如此。</p>
+<figure class="highlight c"><figcaption><span>kernel/fs.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">itrunc</span><span class="params">(<span class="keyword">struct</span> inode *ip)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">for</span>(i = <span class="number">0</span>; i &lt; NDIRECT; i++)&#123;</span><br><span class="line">    ...</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>(ip-&gt;addrs[NDIRECT])&#123;</span><br><span class="line">    ...</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (ip-&gt;addrs[NDIRECT+<span class="number">1</span>]) &#123;</span><br><span class="line">    bp = bread(ip-&gt;dev, ip-&gt;addrs[NDIRECT+<span class="number">1</span>]);</span><br><span class="line">    a = (uint*)bp-&gt;data;</span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; NINDIRECT; i++) &#123; <span class="comment">// 释放二级索引下的所有一级索引</span></span><br><span class="line">      <span class="keyword">if</span> (a[i]) &#123;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> <span class="title">buf</span> *<span class="title">tmp</span> =</span> bread(ip-&gt;dev, a[i]);</span><br><span class="line">        uint *tmp_addr = (uint*)tmp-&gt;data;</span><br><span class="line">        <span class="keyword">for</span> (j = <span class="number">0</span>; j &lt; NINDIRECT; j++) &#123;</span><br><span class="line">          <span class="keyword">if</span> (tmp_addr[j]) &#123;</span><br><span class="line">            bfree(ip-&gt;dev, tmp_addr[j]);</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        brelse(tmp);</span><br><span class="line">        bfree(ip-&gt;dev, a[i]);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    brelse(bp);</span><br><span class="line">    bfree(ip-&gt;dev, ip-&gt;addrs[NDIRECT+<span class="number">1</span>]);</span><br><span class="line">    ip-&gt;addrs[NDIRECT+<span class="number">1</span>] = <span class="number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  ip-&gt;size = <span class="number">0</span>;</span><br><span class="line">  iupdate(ip);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="task2-symbolic-links">Task2: Symbolic links</h2>
+<p>该任务要求我们实现创建符号链接的系统调用，也就是创建一个 SYMLINK
+类型的
+inode，其指向的磁盘块数据内容为某个文件/目录的路径。这里我们不用实现指向目录的符号链接，只需要实现对文件的符号链接即可。</p>
+<p>新增系统调用需要修改的文件就不说了。首先要新增两个宏，一个是用于
+inode 类型的 <code>T_SYMLINK</code>，在 <code>kernel/stat.h</code>
+中修改，另一个是用于 open 操作的选项 <code>O_NOFOLLOW</code>，在
+<code>kernel/fcntl.h</code>
+中修改，表明如果传入的路径解析出来是一个符号链接，且设置了该
+option，就不用进一步打开链接对象，而是直接打开文件。否则，要逐渐深入，直到某路径对应的文件不是符号链接。</p>
+<p>接下来，我们已经创建了系统调用
+<code>sys_symlink()</code>，那么该函数要做什么呢？只需要新建一个
+inode，然后调用 <code>writei()</code>
+将目标文件路径写入即可。对就这么简单。</p>
+<figure class="highlight c"><figcaption><span>kernel/sysfile.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Create the path with content target in block data.</span></span><br><span class="line">uint64</span><br><span class="line"><span class="title function_">sys_symlink</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">char</span> target[MAXPATH], path[MAXPATH];</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">inode</span>* <span class="title">ip</span>;</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (argstr(<span class="number">0</span>, target, MAXPATH) &lt; <span class="number">0</span> || argstr(<span class="number">1</span>, path, MAXPATH) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  begin_op();</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">if</span> ((ip = create(path, T_FILE, <span class="number">0</span>, <span class="number">0</span>)) == <span class="number">0</span>) &#123;</span><br><span class="line">      end_op();</span><br><span class="line">      <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    ip-&gt;type = T_SYMLINK;</span><br><span class="line">    writei(ip, <span class="number">0</span>, (uint64)target, <span class="number">0</span>, MAXPATH);</span><br><span class="line">    iunlockput(ip); <span class="comment">// 调用</span></span><br><span class="line">  &#125;</span><br><span class="line">  end_op();</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>还要改的是 <code>sys_open()</code>
+函数，我们需要新增一条特性，以便打开 SYMLINK inode
+时能打开其链接的目标文件。</p>
+<figure class="highlight c"><figcaption><span>kernel/sysfile.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">uint64</span><br><span class="line"><span class="title function_">sys_open</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">if</span>(ip-&gt;type == T_DEVICE)&#123;</span><br><span class="line">    ...</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (ip-&gt;type == T_SYMLINK &amp;&amp; (omode &amp; O_NOFOLLOW) == <span class="number">0</span>) &#123; <span class="comment">// 意味着要 follow 下去</span></span><br><span class="line">      <span class="type">char</span> target[MAXPATH];</span><br><span class="line">      uint threshold = <span class="number">10</span>; <span class="comment">// 以防出现 b-&gt;a-&gt;b-&gt;... 的循环链接</span></span><br><span class="line">      <span class="keyword">while</span> (threshold) &#123;</span><br><span class="line">        <span class="keyword">if</span> (readi(ip, <span class="number">0</span>, (uint64)target, <span class="number">0</span>, MAXPATH) != MAXPATH) &#123; <span class="comment">// 读取 inode 存储的 target 文件路径</span></span><br><span class="line">          panic(<span class="string">&quot;link error&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        iunlockput(ip); <span class="comment">// ip 即将赋值为下一个 inode，记得释放</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> ((ip = namei(target)) == <span class="number">0</span>) &#123; <span class="comment">// 根据路径获取相应的 inode</span></span><br><span class="line">          end_op();</span><br><span class="line">          <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        ilock(ip);</span><br><span class="line">        <span class="keyword">if</span> (ip-&gt;type != T_SYMLINK) &#123;</span><br><span class="line">          <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        threshold--;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> (threshold &lt;= <span class="number">0</span>) &#123; <span class="comment">// 突破阈值，说明可能存在循环，直接报错</span></span><br><span class="line">        iunlockput(ip);</span><br><span class="line">        end_op();</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    f-&gt;type = FD_INODE;</span><br><span class="line">    f-&gt;off = <span class="number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="测试结果">测试结果</h2>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">$ make grade</span><br><span class="line">...</span><br><span class="line">== Test running bigfile == </span><br><span class="line">$ make qemu-gdb</span><br><span class="line">running bigfile: OK (106.6s) </span><br><span class="line">== Test running symlinktest == </span><br><span class="line">$ make qemu-gdb</span><br><span class="line">(0.8s) </span><br><span class="line">== Test   symlinktest: symlinks == </span><br><span class="line">  symlinktest: symlinks: OK </span><br><span class="line">== Test   symlinktest: concurrent symlinks == </span><br><span class="line">  symlinktest: concurrent symlinks: OK </span><br><span class="line">== Test usertests == </span><br><span class="line">$ make qemu-gdb</span><br><span class="line">usertests: OK (197.8s) </span><br><span class="line">== Test time == </span><br><span class="line">time: OK </span><br><span class="line">Score: 100/100</span><br></pre></td></tr></table></figure>
+<h2 id="最后的工作">最后的工作</h2>
+<ol type="1">
+<li><code>git commit -am ""</code> 将所有修改提交到本地;</li>
+<li>执行 <code>make handin</code>。由于 lab0 保存了
+APIKey，故直接成功提交；</li>
+</ol>
+<p>可选的挑战再说吧，没有什么想做的欲望。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/MIT-6-s081/" rel="tag"># MIT 6.s081</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/lab/6-s081lab7/" rel="prev" title="6.s081 Lab7 Lock">
+      <i class="fa fa-chevron-left"></i> 6.s081 Lab7 Lock
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/lab/6-s081lab9/" rel="next" title="6.s081 Lab9 Mmap">
+      6.s081 Lab9 Mmap <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#preparation"><span class="nav-text">Preparation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#task1-large-files"><span class="nav-text">Task1: Large files</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#task2-symbolic-links"><span class="nav-text">Task2: Symbolic links</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9E%9C"><span class="nav-text">测试结果</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E5%90%8E%E7%9A%84%E5%B7%A5%E4%BD%9C"><span class="nav-text">最后的工作</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Leager"
+      src="/images/Avatar.jpg">
+  <p class="site-author-name" itemprop="name">Leager</p>
+  <div class="site-description" itemprop="description">【数据删除】</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">86</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Leager-zju" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Leager-zju" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div>
+<span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("09/25/2022 00:00:00");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "本站已存活 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+    }
+setInterval("createtime()",250);
+</script>
+</div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Leager</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,0' opacity='0.5' zIndex='-1' count='160' src="//cdn.jsdelivr.net/gh/theme-next/theme-next-canvas-nest@1.0.0/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>
