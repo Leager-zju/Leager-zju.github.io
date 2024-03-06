@@ -16285,19 +16285,19 @@ Multi-Core Processor</h2>
 <p>一个时钟周期内执行多条 independent 的指令（其实就是 ILP）。所谓
 independent，就是指指令之间不 load/store
 同一内存地址/寄存器里的数据。像下面这两条指令就是不 independent 的。</p>
-<p>&lt;img src="1.png", zoom="67%"&gt;</p>
+<p>&lt;img src="1.png", zoom="67%"/&gt;</p>
 <blockquote>
 <p>ILP 的实现需要在一个 CPU core 内包含多个 Data Fetch/Instruction
 Decode 模块。</p>
 </blockquote>
 <h4 id="多核multi-core">多核(Multi-core)</h4>
 <p>多核确实能提高执行效率，如果不与其他策略配合使用，只会是堆砌成本的下下策，依然没有改变单核效率低下的问题。</p>
-<p>&lt;img src="2.png", zoom="67%"&gt;</p>
+<p>&lt;img src="2.png", zoom="67%"/&gt;</p>
 <h4
 id="单个指令处理多个数据simd-single-instruction-multiple-data">单个指令处理多个数据(SIMD,
 Single Instruction Multiple Data)</h4>
 <p>通过向量的方式进行数据处理。</p>
-<p>&lt;img src="3.png", zoom="67%"&gt;</p>
+<p>&lt;img src="3.png", zoom="67%"/&gt;</p>
 <blockquote>
 <p>SIMD 的实现需要在一个 CPU core 内包含多个 ALU
 模块。配合多核能够实现一条指令处理 #core * #ALU 个数据</p>
