@@ -226,7 +226,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-03-06 20:09:17" itemprop="dateModified" datetime="2024-03-06T20:09:17+08:00">2024-03-06</time>
+                <time title="修改时间：2024-03-06 20:43:23" itemprop="dateModified" datetime="2024-03-06T20:43:23+08:00">2024-03-06</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -249,71 +249,17 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <span id="more"></span>
-<h2 id="lecture-1-why-parallelism">Lecture 1: Why Parallelism</h2>
-<p>很早以前实现并行的性价比并不高，因为人们只需要等最新的 CPU
-出来就行。厂商通过以下两种方式提升 CPU 性能：</p>
-<ol type="1">
-<li>提升时钟频率；</li>
-<li>实现指令级别的并行(ILP, Instruction Level Parallelism)；</li>
-</ol>
-<p>然而时钟频率因为 energy wall 达到瓶颈，ILP
-也受限于指令流的设计，我们迫切地需要其他手段来提升程序执行效率，所以需要我们编写代码提高性能。</p>
-<p>所谓并行(Parallelism)，其实可以理解为，在原来<strong>单个时钟周期</strong>内执行单条指令处理单个数据的基础上，实现多个处理器/线程进行合作，从而更快地解决问题。在
-CPU 性能一定的情况下，并行能最大化利用 CPU，提升程序执行效率。</p>
-<h2 id="lecture-2-a-modern-multi-core-processor">Lecture 2: A Modern
-Multi-Core Processor</h2>
-<h3 id="并行执行">并行执行</h3>
-<p>目前有以下几种并行执行的方式：</p>
-<h4 id="超标量superscalar">超标量(Superscalar)</h4>
-<p>一个时钟周期内执行多条 independent 的指令（其实就是 ILP）。所谓
-independent，就是指指令之间不 load/store
-同一内存地址/寄存器里的数据。像下面这两条指令就是不 independent 的。</p>
-<p>&lt;img src="1.png", zoom="67%"&gt;</p>
-<blockquote>
-<p>ILP 的实现需要在一个 CPU core 内包含多个 Data Fetch/Instruction
-Decode 模块。</p>
-</blockquote>
-<h4 id="多核multi-core">多核(Multi-core)</h4>
-<p>多核确实能提高执行效率，如果不与其他策略配合使用，只会是堆砌成本的下下策，依然没有改变单核效率低下的问题。</p>
-<p>&lt;img src="2.png", zoom="67%"&gt;</p>
-<h4
-id="单个指令处理多个数据simd-single-instruction-multiple-data">单个指令处理多个数据(SIMD,
-Single Instruction Multiple Data)</h4>
-<p>通过向量的方式进行数据处理。</p>
-<p>&lt;img src="3.png", zoom="67%"&gt;</p>
-<blockquote>
-<p>SIMD 的实现需要在一个 CPU core 内包含多个 ALU
-模块。配合多核能够实现一条指令处理 #core * #ALU 个数据</p>
-</blockquote>
-<p>然而，遇到条件指令(if)时，因为所有 ALU 共享 Decode
-模块，所以会出现某些 ALU 不满足条件而无法利用的情况，导致并不能达到 peak
-performance。最好能进行数据层面的优化，使得同一组 ALU
-处理的数据能够满足同一条件。</p>
-<h3 id="其他瓶颈">其他瓶颈</h3>
-<h4 id="时延latency">时延(latency)</h4>
-<p>当遇到 load/store 等访问内存的指令时，因为数据传输需要时间，称为
-<strong>Stall</strong>，只有当数据到达 CPU 后才指令才能继续运行。</p>
-<p><strong>解决方案</strong>：</p>
-<ol type="1">
-<li>通过多级 Cache 来加快数据获取；</li>
-<li>通过 Interleaving Multi-thread，当某一线程 Stall
-时，由操作系统进行线程切换（调度），将 CPU 资源分给另一线程，从而提高
-CPU 利用率； &gt;
-整体的效率提升了，但单个任务的效率会因为等待调度减慢。同时需要一些存储空间来存储每个线程的上下文。</li>
-</ol>
-<h4 id="带宽bandwidth">带宽(bandwidth)</h4>
-<p>CPU
-依靠总线(bus)单位时间内最多可以从内存中获取的数据量。一旦某次计算所需数据量过大，带宽也将成为限制。</p>
-<p><strong>解决方案</strong>：</p>
-<p>减少数据从内存读取的次数，比如用 Cache。</p>
-<h2 id="lecture-3-parallel-programming-abstractions">Lecture 3: Parallel
-Programming Abstractions</h2>
-<h3 id="abstractions-vs-implementation">Abstractions vs
-implementation</h3>
-<h3 id="three-models-of-communication">Three models of
-communication</h3>
-
+          <p>并行计算。<a
+target="_blank" rel="noopener" href="https://gfxcourses.stanford.edu/cs149/fall23">&gt;&gt;&gt; 传送门
+&lt;&lt;&lt;</a></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/note/CS149/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
