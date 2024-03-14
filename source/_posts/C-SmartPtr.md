@@ -317,6 +317,10 @@ class SharedPointer {
       return counter_->ptr_;
     }
 
+    bool isNull() {
+      return get() == nullptr;
+    }
+
   private:
     Counter* counter_;
 };
