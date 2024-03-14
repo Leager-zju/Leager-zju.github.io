@@ -21,33 +21,33 @@
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"leager-zju.github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"b2t":true},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+    var CONFIG = {"hostname":"leager-zju.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"b2t":true},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
   <meta name="description" content="6.824 的第十三篇论文是 COPS——一种可提供具有收敛冲突处理的因果一致性(Causal Plus, Causal+)的 ALPS 键值存储系统，并且具有高可扩展性。在 COPS-GT 中引入的 GET 事务还能够在不锁定或阻塞的情况下获得多个 Key 的一致视图。COPS-GT 也能为常见工作负载提供与 COPS 类似的延迟、吞吐量和扩展性。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="COPS 论文阅读">
-<meta property="og:url" content="http://leager-zju.github.com/paperReading/COPS/index.html">
+<meta property="og:url" content="http://leager-zju.github.io/paperReading/COPS/index.html">
 <meta property="og:site_name" content="没什么看头的地方">
 <meta property="og:description" content="6.824 的第十三篇论文是 COPS——一种可提供具有收敛冲突处理的因果一致性(Causal Plus, Causal+)的 ALPS 键值存储系统，并且具有高可扩展性。在 COPS-GT 中引入的 GET 事务还能够在不锁定或阻塞的情况下获得多个 Key 的一致视图。COPS-GT 也能为常见工作负载提供与 COPS 类似的延迟、吞吐量和扩展性。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://leager-zju.github.com/paperReading/COPS/image-20221123152400801.png">
-<meta property="og:image" content="http://leager-zju.github.com/paperReading/COPS/image-20221123154038807.png">
-<meta property="og:image" content="http://leager-zju.github.com/paperReading/COPS/image-20221123233736790.png">
-<meta property="og:image" content="http://leager-zju.github.com/paperReading/COPS/image-20221124160439714.png">
-<meta property="og:image" content="http://leager-zju.github.com/paperReading/COPS/image-20221124183914409.png">
-<meta property="og:image" content="http://leager-zju.github.com/paperReading/COPS/image-20221124190342458.png">
-<meta property="og:image" content="http://leager-zju.github.com/paperReading/COPS/image-20221124202053597.png">
-<meta property="og:image" content="http://leager-zju.github.com/paperReading/COPS/image-20221125004741571.png">
-<meta property="og:image" content="http://leager-zju.github.com/paperReading/COPS/image-20221125005327803.png">
+<meta property="og:image" content="http://leager-zju.github.io/paperReading/COPS/image-20221123152400801.png">
+<meta property="og:image" content="http://leager-zju.github.io/paperReading/COPS/image-20221123154038807.png">
+<meta property="og:image" content="http://leager-zju.github.io/paperReading/COPS/image-20221123233736790.png">
+<meta property="og:image" content="http://leager-zju.github.io/paperReading/COPS/image-20221124160439714.png">
+<meta property="og:image" content="http://leager-zju.github.io/paperReading/COPS/image-20221124183914409.png">
+<meta property="og:image" content="http://leager-zju.github.io/paperReading/COPS/image-20221124190342458.png">
+<meta property="og:image" content="http://leager-zju.github.io/paperReading/COPS/image-20221124202053597.png">
+<meta property="og:image" content="http://leager-zju.github.io/paperReading/COPS/image-20221125004741571.png">
+<meta property="og:image" content="http://leager-zju.github.io/paperReading/COPS/image-20221125005327803.png">
 <meta property="article:published_time" content="2022-11-23T05:45:49.000Z">
 <meta property="article:modified_time" content="2024-03-03T04:16:01.560Z">
 <meta property="article:author" content="Leager">
 <meta property="article:tag" content="MIT 6.824">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://leager-zju.github.com/paperReading/COPS/image-20221123152400801.png">
+<meta name="twitter:image" content="http://leager-zju.github.io/paperReading/COPS/image-20221123152400801.png">
 
-<link rel="canonical" href="http://leager-zju.github.com/paperReading/COPS/">
+<link rel="canonical" href="http://leager-zju.github.io/paperReading/COPS/">
 
 
 <script id="page-configurations">
@@ -151,7 +151,7 @@
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">87</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">86</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -209,7 +209,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/paperReading/COPS/">
+    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.io/paperReading/COPS/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/Avatar.jpg">
@@ -736,7 +736,7 @@ Key 的上一个版本 <code>prev</code>，该 Key 的当前可见版本为
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">87</span>
+          <span class="site-state-item-count">86</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

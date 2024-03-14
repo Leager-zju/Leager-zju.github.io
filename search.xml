@@ -12196,12 +12196,6 @@ checkpoint，因为一致性不是问题，RDD
       </tags>
   </entry>
   <entry>
-    <title>TCPthings</title>
-    <url>/uncategorized/TCPthings/</url>
-    <content><![CDATA[
-]]></content>
-  </entry>
-  <entry>
     <title>Spanner 论文阅读</title>
     <url>/paperReading/Spanner/</url>
     <content><![CDATA[<p>6.824 的第九篇论文是 <strong><a
