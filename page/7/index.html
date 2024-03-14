@@ -138,7 +138,7 @@
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">86</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">87</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -191,6 +191,93 @@
 
           <div class="content index posts-expand">
             
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/lab/6-824lab4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/Avatar.jpg">
+      <meta itemprop="name" content="Leager">
+      <meta itemprop="description" content="【数据删除】">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="没什么看头的地方">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/lab/6-824lab4/" class="post-title-link" itemprop="url">6.824 Lab4 Sharded Key/Value Service</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-11-22 20:20:28" itemprop="dateCreated datePublished" datetime="2022-11-22T20:20:28+08:00">2022-11-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-03-03 12:11:10" itemprop="dateModified" datetime="2024-03-03T12:11:10+08:00">2024-03-03</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/lab/" itemprop="url" rel="index"><span itemprop="name">lab</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>对于单个副本组而言，所有机器存储共享同一存储空间，机器数量的增加并不会扩大存储能力。而当
+kv 对数量不断增长时，副本组的存储能力成为瓶颈。</p>
+<p>参考 <a target="_blank" rel="noopener" href="https://leager-zju.github.io/6-824/aurora/">Aurora</a>
+的做法，不妨将数据划分为多个片段，每个副本组负责<strong>分片</strong>(Shard)的一个子集。组内机器使用
+Raft
+来复制分片。此外还有一个<strong>分片控制器</strong>(Shardctrler)，决定哪个副本组应该为每个分片服务，此信息称为<strong>配置</strong>(Config)。本实验就是实现这样一个
+multi-raft 的 kv 存储系统。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/lab/6-824lab4/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
       
   
   
@@ -942,89 +1029,6 @@ target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/papers/spa
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.com/paperReading/Frangipani/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/Avatar.jpg">
-      <meta itemprop="name" content="Leager">
-      <meta itemprop="description" content="【数据删除】">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="没什么看头的地方">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/paperReading/Frangipani/" class="post-title-link" itemprop="url">Frangipani 论文阅读</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2022-10-10 13:25:38" itemprop="dateCreated datePublished" datetime="2022-10-10T13:25:38+08:00">2022-10-10</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-03-03 12:18:23" itemprop="dateModified" datetime="2024-03-03T12:18:23+08:00">2024-03-03</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/paperReading/" itemprop="url" rel="index"><span itemprop="name">paperReading</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>6.824 的第八篇论文是 <strong><a
-target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/papers/thekkath-frangipani.pdf">Frangipani</a></strong>——一种建立在
-<strong>Petal</strong>（一种可扩展、高可用性、自动管理的分布式存储服务）上的可扩展的分布式文件系统，并使用分布式锁来确保一致性。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/paperReading/Frangipani/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1096,7 +1100,7 @@ target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/papers/the
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">86</span>
+          <span class="site-state-item-count">87</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

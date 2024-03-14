@@ -33,7 +33,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://leager-zju.github.com/C/C-OOP/image-20230215125309320.png">
 <meta property="article:published_time" content="2023-02-14T03:13:46.000Z">
-<meta property="article:modified_time" content="2024-03-03T04:15:06.666Z">
+<meta property="article:modified_time" content="2024-03-14T11:50:45.068Z">
 <meta property="article:author" content="Leager">
 <meta property="article:tag" content="C++ basic">
 <meta name="twitter:card" content="summary">
@@ -143,7 +143,7 @@
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">86</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">87</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -231,7 +231,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-03-03 12:15:06" itemprop="dateModified" datetime="2024-03-03T12:15:06+08:00">2024-03-03</time>
+                <time title="修改时间：2024-03-14 19:50:45" itemprop="dateModified" datetime="2024-03-14T19:50:45+08:00">2024-03-14</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -418,9 +418,11 @@ non-virtual 的，需手动声明~</p>
 <h2 id="多态">多态</h2>
 <p><strong>多态</strong>，即多种形态，能够使得不同的对象去完成同一件事时，产生不同的动作和结果。最常见的多态有<strong>静态多态</strong>与<strong>动态多态</strong>两种，</p>
 <h3 id="静态多态">静态多态</h3>
-<p><strong>静态多态</strong>依靠函数<strong>重载</strong>实现。编译器编译的过程中，首先遇到函数的声明，此时会将函数的参数类型也加到函数符号中，而不仅仅是函数名，比如编译
-<code>int foo(int a, char b)</code> 最后得到的符号可能是
-<code>foo_int_char</code>。编译器后续遇到函数调用时，根据传入实参类型，去符号表里找调用的是哪个函数。</p>
+<h4 id="重载">重载</h4>
+<p><strong>重载</strong>可以实现<strong>静态多态</strong>。编译器编译的过程中，首先遇到函数的声明，此时会将函数的参数类型也加到函数符号中，而不仅仅是函数名，比如编译
+<code>int foo(int a, char b)</code> 最后得到的符号可能类似于
+<code>foo_int_char</code>
+这样。编译器后续遇到函数调用时，根据传入实参类型，去符号表里找调用的是哪个函数。</p>
 <blockquote>
 <p>所以仅有返回值不一样的两个同名同参数列表函数并不构成重载。</p>
 </blockquote>
@@ -431,6 +433,38 @@ C++ 中调用 C 版本的函数，就需要用 <code>extern "C"</code>
 进行修饰，来告诉编译器不要修改该函数名。</p>
 <p>否则，它会按照重整后的名字去目标文件（.obj）中去寻找对应的函数，而目标文件中存放的却是不带参数类型的
 C 版本的函数，名字对不上，就找不到。</p>
+<h4
+id="奇异返回模板模式curiously-recurring-template-pattern-crtp">奇异返回模板模式(curiously
+recurring template pattern, CRTP)</h4>
+<p>CRTP 是一种 C++
+的设计模式，精巧地结合了继承和模板编程的技术，也可以用于实现静态多态。其原理可以由以下代码简述：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">class</span> <span class="title class_">T</span>&gt;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Base</span> &#123;</span><br><span class="line">  <span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">show</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      <span class="comment">// cout &lt;&lt; &quot;Base::show()\n&quot;;</span></span><br><span class="line">      (<span class="built_in">static_cast</span>&lt;T*&gt;(<span class="keyword">this</span>))-&gt;<span class="built_in">show</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Derived</span> : <span class="keyword">public</span> Base&lt;Derived&gt; &#123;</span><br><span class="line">  <span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">show</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      cout &lt;&lt; <span class="string">&quot;Derived::show()\n&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  Base&lt;Derived&gt;* p = <span class="keyword">new</span> <span class="built_in">Derived</span>();</span><br><span class="line">  p-&gt;<span class="built_in">show</span>();</span><br><span class="line">  <span class="keyword">delete</span> p;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>这里 <code>Derived</code>
+类继承自一个模板类，并且该模板类的模板参数恰好为
+<code>Derived</code>。在 18 行，当我们用一个
+<code>Base&lt;Derived&gt;</code> 指针指向一个 <code>Derived</code>
+类对象内存，并在 19 行调用函数 <code>show()</code> 时，因为
+<code>show()</code>
+不是虚函数，所以会根据指针类型而非对象类型进行函数调用，易得此时调用的版本是
+<code>Base::show()</code>。</p>
+<p>而又因为 <code>Base::show()</code> 内部仅仅调用了
+<code>Derived::show()</code>（此时已经将
+<code>Base&lt;Derived&gt;</code>
+进行实例化），所以尽管以基类指针指向派生类并调用了一个非虚函数，最终行为依然与调用了派生类的版本一致，给人一种动态多态的感觉，尽管实际上并没有。</p>
+<p>🔔 CRTP
+和虚函数相比，在编译器即可确定执行行为，省去了查虚函数表的操作，减少了一次访问内存的开销，进而性能更加优秀。像
+clickhouse、boost 库都进行了大量 CRTP 的应用。</p>
+<blockquote>
+<p>一个很经典的例子就是：一个类可以从
+<code>std::enable_shared_from_this&lt;&gt;</code> 中派生，继而获得了调用
+<code>shared_from_this()</code> 的能力。即若一个类对象已经被若干 shared
+pointer 指向，那么调用该函数可以返回一个与这些 shared pointer
+共享计数器的新 sp，而不是用 <code>std::make_shared(this)</code>
+返回一个计数器为 1 的 sp，防止 double free。</p>
+</blockquote>
+<p>🔔
+但不足之处在于，因为没有虚函数，就不会进行运行时动态绑定，也就无法生成虚函数表与获取
+RTTI。</p>
 <h3 id="动态多态">动态多态</h3>
 <p><strong>动态多态</strong>依靠类的<strong>虚函数</strong>实现，在运行时完成绑定，编译器根据对象类型执行相应函数。</p>
 <p>先来说说什么是虚函数。前面提到了虚继承，用到 <code>virtual</code>
@@ -657,7 +691,8 @@ target="_blank" rel="noopener" href="https://blog.twofei.com/496/">这篇文章<
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%81%E8%A3%85"><span class="nav-text">封装</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A3%85"><span class="nav-text">装</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0"><span class="nav-text">构造函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B5%8B%E5%80%BC%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="nav-text">赋值运算符</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9E%90%E6%9E%84%E5%87%BD%E6%95%B0"><span class="nav-text">析构函数</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%81"><span class="nav-text">封</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%A7%E6%89%BF"><span class="nav-text">继承</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%99%9A%E7%BB%A7%E6%89%BF"><span class="nav-text">虚继承</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B4%BE%E7%94%9F%E7%B1%BB%E6%9E%84%E9%80%A0%E9%A1%BA%E5%BA%8F"><span class="nav-text">派生类构造顺序</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E6%80%81"><span class="nav-text">多态</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E5%A4%9A%E6%80%81"><span class="nav-text">静态多态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E5%A4%9A%E6%80%81"><span class="nav-text">动态多态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%AF%E8%99%9A%E5%87%BD%E6%95%B0"><span class="nav-text">纯虚函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F"><span class="nav-text">注意</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%AF%E5%8C%BA"><span class="nav-text">误区</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8E-struct-%E7%9A%84%E5%BC%82%E5%90%8C"><span class="nav-text">与 struct 的异同</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%B8%E5%90%8C%E4%B9%8B%E5%A4%84"><span class="nav-text">相同之处</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E5%90%8C%E4%B9%8B%E5%A4%84"><span class="nav-text">不同之处</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%99%9A%E7%BB%A7%E6%89%BF%E8%99%9A%E5%87%BD%E6%95%B0%E7%9A%84%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B"><span class="nav-text">虚继承、虚函数的内存模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%99%9A%E5%87%BD%E6%95%B0%E8%A1%A8"><span class="nav-text">虚函数表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E6%97%B6%E5%86%B3%E8%AE%AE"><span class="nav-text">运行时决议</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%99%9A%E7%BB%A7%E6%89%BF-1"><span class="nav-text">虚继承</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%81%E8%A3%85"><span class="nav-text">封装</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A3%85"><span class="nav-text">装</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0"><span class="nav-text">构造函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B5%8B%E5%80%BC%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="nav-text">赋值运算符</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9E%90%E6%9E%84%E5%87%BD%E6%95%B0"><span class="nav-text">析构函数</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%81"><span class="nav-text">封</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%A7%E6%89%BF"><span class="nav-text">继承</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%99%9A%E7%BB%A7%E6%89%BF"><span class="nav-text">虚继承</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B4%BE%E7%94%9F%E7%B1%BB%E6%9E%84%E9%80%A0%E9%A1%BA%E5%BA%8F"><span class="nav-text">派生类构造顺序</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E6%80%81"><span class="nav-text">多态</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E5%A4%9A%E6%80%81"><span class="nav-text">静态多态</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%87%8D%E8%BD%BD"><span class="nav-text">重载</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A5%87%E5%BC%82%E8%BF%94%E5%9B%9E%E6%A8%A1%E6%9D%BF%E6%A8%A1%E5%BC%8Fcuriously-recurring-template-pattern-crtp"><span class="nav-text">奇异返回模板模式(curiously
+recurring template pattern, CRTP)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E5%A4%9A%E6%80%81"><span class="nav-text">动态多态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%AF%E8%99%9A%E5%87%BD%E6%95%B0"><span class="nav-text">纯虚函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F"><span class="nav-text">注意</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%AF%E5%8C%BA"><span class="nav-text">误区</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8E-struct-%E7%9A%84%E5%BC%82%E5%90%8C"><span class="nav-text">与 struct 的异同</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%B8%E5%90%8C%E4%B9%8B%E5%A4%84"><span class="nav-text">相同之处</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E5%90%8C%E4%B9%8B%E5%A4%84"><span class="nav-text">不同之处</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%99%9A%E7%BB%A7%E6%89%BF%E8%99%9A%E5%87%BD%E6%95%B0%E7%9A%84%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B"><span class="nav-text">虚继承、虚函数的内存模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%99%9A%E5%87%BD%E6%95%B0%E8%A1%A8"><span class="nav-text">虚函数表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E6%97%B6%E5%86%B3%E8%AE%AE"><span class="nav-text">运行时决议</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%99%9A%E7%BB%A7%E6%89%BF-1"><span class="nav-text">虚继承</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -673,7 +708,7 @@ target="_blank" rel="noopener" href="https://blog.twofei.com/496/">这篇文章<
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">86</span>
+          <span class="site-state-item-count">87</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

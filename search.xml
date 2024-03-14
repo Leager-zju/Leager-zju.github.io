@@ -3557,6 +3557,55 @@ inode，然后调用 <code>writei()</code>
 APIKey，故直接成功提交；</li>
 </ol>
 <p>可选的挑战再说吧，没有什么想做的欲望。</p>
+<h2 id="附录软链接与硬链接的区别">附录：软链接与硬链接的区别</h2>
+<h3 id="unix-文件系统简述">unix 文件系统简述</h3>
+<p>文件数据存放在若干磁盘块中，unix fs
+用索引节点(inode)来定位文件所对应的磁盘块号。C 语言实现中，inode
+是一个结构体，存放若干文件属性，例如 xv6 完整的 inode
+结构体如下所示：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// On-disk inode structure</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">dinode</span> &#123;</span></span><br><span class="line">  <span class="type">short</span> type;               <span class="comment">// File type</span></span><br><span class="line">  <span class="type">short</span> major;              <span class="comment">// Major device number (T_DEVICE only)</span></span><br><span class="line">  <span class="type">short</span> minor;              <span class="comment">// Minor device number (T_DEVICE only)</span></span><br><span class="line">  <span class="type">short</span> nlink;              <span class="comment">// Number of links to inode in file system</span></span><br><span class="line">  uint size;                <span class="comment">// Size of file (bytes)</span></span><br><span class="line">  uint addrs[NDIRECT+<span class="number">1</span>+<span class="number">1</span>];  <span class="comment">// Data block addresses</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>对于 unix fs 而言，根目录对应的 inode（unix
+的<strong>万物皆文件</strong>理念）位置是全局可知的。一个目录文件对应的磁盘块数据中，有目录下所有子文件的
+{文件名 =&gt; inode} 索引，根据此即可通过文件名到 inode cache
+中拿到相应的数据。</p>
+<blockquote>
+<p>所以对于路径 "/foo/bar/hello.c" 上的文件而言，需要经过多次定位 inode
+与读盘操作将 hello.c 的数据读入内存。</p>
+</blockquote>
+<h2 id="软链接">软链接</h2>
+<blockquote>
+<p>ln -s target symlink</p>
+</blockquote>
+<p>创建软链接相当于创建一个内容为<strong>目标文件路径</strong>的文件
+<code>symlink</code>，为其分配一个全新的 inode 结构体与磁盘空间，通过
+<code>symlink</code>
+索引文件时只需获取盘块中的路径字符串，再对该路径进行递归访问。</p>
+<p>删除 <code>target</code> 后不会影响
+<code>symlink</code>，如果在原来的目录下继续新建一个名为
+<code>target</code> 的<strong>新</strong>文件，访问 <code>symlink</code>
+依然成功。继续强调一遍，软链接即<strong>文件路径</strong>，只不过存放在磁盘中，不需要我们手打。在
+Linux 中，利用 PATH 创建用户自定义目录下的软链接十分好用，不必进行 cp/mv
+等操作。同时，允许用户<strong>跨文件系统</strong>进行访问。根据“万物即文件”，软链接也可以对<strong>目录</strong>创建。</p>
+<p>缺点是相比直接访问 <code>target</code>
+多了一次（如果路径上的文件还是软链接类型文件则需要多次）读盘操作，同时存在一些创建文件的系统调用开销。</p>
+<h2 id="硬链接">硬链接</h2>
+<blockquote>
+<p>ln target hardlink</p>
+</blockquote>
+<p>创建硬链接相当于在目录文件中写入一个与 <code>target</code> 相同 inode
+号的字段，访问 <code>hardlink</code> 时会定位到 <code>target</code> 同一
+inode，不会额外分配空间。</p>
+<p>此时需要在 inode 中维护一个 <code>linkRef</code> 的字段，当多个文件
+<code>f1</code>,<code>f2</code>,... 在同一 inode
+上创建硬链接时，只要有至少一个文件 <code>fi</code> 存在（即
+<code>linkRef&gt;0</code>），对应的 inode
+就不会被释放；当且仅当链接到那个 inode 的所有文件被删除后（即
+<code>linkRef=0</code>），才释放 inode 与磁盘。</p>
+<p>根据上述特性，硬链接比较适合对于处于深层次目录下的
+<code>target</code>
+进行创建，这样可以省去很多目录的读盘开销。但与软链接不同，<code>hardlink</code>
+与 <code>target</code>
+只能在同一文件系统下，且不允许对目录创建硬链接。</p>
 ]]></content>
       <categories>
         <category>lab</category>
@@ -6066,9 +6115,11 @@ non-virtual 的，需手动声明~</p>
 <h2 id="多态">多态</h2>
 <p><strong>多态</strong>，即多种形态，能够使得不同的对象去完成同一件事时，产生不同的动作和结果。最常见的多态有<strong>静态多态</strong>与<strong>动态多态</strong>两种，</p>
 <h3 id="静态多态">静态多态</h3>
-<p><strong>静态多态</strong>依靠函数<strong>重载</strong>实现。编译器编译的过程中，首先遇到函数的声明，此时会将函数的参数类型也加到函数符号中，而不仅仅是函数名，比如编译
-<code>int foo(int a, char b)</code> 最后得到的符号可能是
-<code>foo_int_char</code>。编译器后续遇到函数调用时，根据传入实参类型，去符号表里找调用的是哪个函数。</p>
+<h4 id="重载">重载</h4>
+<p><strong>重载</strong>可以实现<strong>静态多态</strong>。编译器编译的过程中，首先遇到函数的声明，此时会将函数的参数类型也加到函数符号中，而不仅仅是函数名，比如编译
+<code>int foo(int a, char b)</code> 最后得到的符号可能类似于
+<code>foo_int_char</code>
+这样。编译器后续遇到函数调用时，根据传入实参类型，去符号表里找调用的是哪个函数。</p>
 <blockquote>
 <p>所以仅有返回值不一样的两个同名同参数列表函数并不构成重载。</p>
 </blockquote>
@@ -6079,6 +6130,38 @@ C++ 中调用 C 版本的函数，就需要用 <code>extern "C"</code>
 进行修饰，来告诉编译器不要修改该函数名。</p>
 <p>否则，它会按照重整后的名字去目标文件（.obj）中去寻找对应的函数，而目标文件中存放的却是不带参数类型的
 C 版本的函数，名字对不上，就找不到。</p>
+<h4
+id="奇异返回模板模式curiously-recurring-template-pattern-crtp">奇异返回模板模式(curiously
+recurring template pattern, CRTP)</h4>
+<p>CRTP 是一种 C++
+的设计模式，精巧地结合了继承和模板编程的技术，也可以用于实现静态多态。其原理可以由以下代码简述：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">class</span> <span class="title class_">T</span>&gt;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Base</span> &#123;</span><br><span class="line">  <span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">show</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      <span class="comment">// cout &lt;&lt; &quot;Base::show()\n&quot;;</span></span><br><span class="line">      (<span class="built_in">static_cast</span>&lt;T*&gt;(<span class="keyword">this</span>))-&gt;<span class="built_in">show</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Derived</span> : <span class="keyword">public</span> Base&lt;Derived&gt; &#123;</span><br><span class="line">  <span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">show</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      cout &lt;&lt; <span class="string">&quot;Derived::show()\n&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  Base&lt;Derived&gt;* p = <span class="keyword">new</span> <span class="built_in">Derived</span>();</span><br><span class="line">  p-&gt;<span class="built_in">show</span>();</span><br><span class="line">  <span class="keyword">delete</span> p;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>这里 <code>Derived</code>
+类继承自一个模板类，并且该模板类的模板参数恰好为
+<code>Derived</code>。在 18 行，当我们用一个
+<code>Base&lt;Derived&gt;</code> 指针指向一个 <code>Derived</code>
+类对象内存，并在 19 行调用函数 <code>show()</code> 时，因为
+<code>show()</code>
+不是虚函数，所以会根据指针类型而非对象类型进行函数调用，易得此时调用的版本是
+<code>Base::show()</code>。</p>
+<p>而又因为 <code>Base::show()</code> 内部仅仅调用了
+<code>Derived::show()</code>（此时已经将
+<code>Base&lt;Derived&gt;</code>
+进行实例化），所以尽管以基类指针指向派生类并调用了一个非虚函数，最终行为依然与调用了派生类的版本一致，给人一种动态多态的感觉，尽管实际上并没有。</p>
+<p>🔔 CRTP
+和虚函数相比，在编译器即可确定执行行为，省去了查虚函数表的操作，减少了一次访问内存的开销，进而性能更加优秀。像
+clickhouse、boost 库都进行了大量 CRTP 的应用。</p>
+<blockquote>
+<p>一个很经典的例子就是：一个类可以从
+<code>std::enable_shared_from_this&lt;&gt;</code> 中派生，继而获得了调用
+<code>shared_from_this()</code> 的能力。即若一个类对象已经被若干 shared
+pointer 指向，那么调用该函数可以返回一个与这些 shared pointer
+共享计数器的新 sp，而不是用 <code>std::make_shared(this)</code>
+返回一个计数器为 1 的 sp，防止 double free。</p>
+</blockquote>
+<p>🔔
+但不足之处在于，因为没有虚函数，就不会进行运行时动态绑定，也就无法生成虚函数表与获取
+RTTI。</p>
 <h3 id="动态多态">动态多态</h3>
 <p><strong>动态多态</strong>依靠类的<strong>虚函数</strong>实现，在运行时完成绑定，编译器根据对象类型执行相应函数。</p>
 <p>先来说说什么是虚函数。前面提到了虚继承，用到 <code>virtual</code>
@@ -6397,6 +6480,16 @@ bptr，其 other
 <code>shared_ptr</code> 中所存在的循环引用现象——令循环中的其中一个指针为
 <code>weak_ptr</code> 即可。</p>
 <figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">A</span>;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">B</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">A</span> &#123;</span><br><span class="line">  std::shared_ptr&lt;B&gt; other;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">B</span> &#123;</span><br><span class="line">  std::weak_ptr&lt;A&gt; other;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">auto</span> aptr = std::<span class="built_in">make_shared</span>&lt;A&gt;(); <span class="comment">// aptr.count = 1</span></span><br><span class="line">  <span class="keyword">auto</span> bptr = std::<span class="built_in">make_shared</span>&lt;B&gt;(); <span class="comment">// bptr.count = 1</span></span><br><span class="line">  aptr-&gt;other = bptr;</span><br><span class="line">  bptr-&gt;other = aptr;</span><br><span class="line">  <span class="comment">// 不存在 shared_ptr 之间的拷贝，故引用计数值不会发生变化。</span></span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="如何手撕一个-shared-ptr">如何手撕一个 shared ptr</h2>
+<p>首先思考的是：shared ptr 需要支持哪些特性？</p>
+<ol type="1">
+<li>类模板，支持所有类型及其构造函数参数；</li>
+<li>线程安全的计数器；</li>
+<li>拷贝/赋值/移动构造函数；</li>
+<li>支持用派生类构造；</li>
+<li>正确释放指针；</li>
+</ol>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">class</span> <span class="title class_">T</span>&gt;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">SharedPointer</span> &#123;</span><br><span class="line">  <span class="keyword">public</span>:</span><br><span class="line">   <span class="keyword">class</span> <span class="title class_">Counter</span> &#123;</span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">      <span class="built_in">Counter</span>(T* ptr): <span class="built_in">ptr_</span>(ptr), <span class="built_in">cnt_</span>(<span class="number">0</span>) &#123;&#125;</span><br><span class="line">      ~<span class="built_in">Counter</span>() &#123; <span class="keyword">delete</span> ptr_; &#125;</span><br><span class="line">      <span class="function"><span class="type">void</span> <span class="title">addRef</span><span class="params">()</span> </span>&#123; cnt_.<span class="built_in">fetch_add</span>(<span class="number">1</span>); &#125;</span><br><span class="line">      <span class="function"><span class="type">void</span> <span class="title">release</span><span class="params">()</span> </span>&#123; cnt_.<span class="built_in">fetch_sub</span>(<span class="number">1</span>); &#125;</span><br><span class="line">      <span class="function"><span class="type">int</span> <span class="title">getCount</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> cnt_.<span class="built_in">load</span>(); &#125;</span><br><span class="line">      T* ptr_;</span><br><span class="line">    <span class="keyword">private</span>:</span><br><span class="line">      std::atomic&lt;<span class="type">int</span>&gt; cnt_;</span><br><span class="line">   &#125;;</span><br><span class="line">  <span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">SharedPointer</span>(T* ptr) &#123;</span><br><span class="line">      counter_ = <span class="keyword">new</span> <span class="built_in">Counter</span>(ptr);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// copy constructor</span></span><br><span class="line">    <span class="built_in">SharedPointer</span>(<span class="type">const</span> SharedPointer&lt;T&gt; &amp;sp) &#123;</span><br><span class="line">      counter_ = sp.counter_;</span><br><span class="line">      counter_-&gt;<span class="built_in">addRef</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    SharedPointer&amp; <span class="keyword">operator</span>=(<span class="type">const</span> SharedPointer&lt;T&gt; &amp;sp) &#123;</span><br><span class="line">      counter_ = sp.counter_;</span><br><span class="line">      counter_-&gt;<span class="built_in">addRef</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// move constructor</span></span><br><span class="line">    <span class="built_in">SharedPointer</span>(SharedPointer&lt;T&gt;&amp;&amp; sp) &#123;</span><br><span class="line">      counter_ = sp.counter_;</span><br><span class="line">      sp.counter_ = <span class="literal">nullptr</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    SharedPointer&amp; <span class="keyword">operator</span>=(SharedPointer&lt;T&gt; &amp;&amp;sp) &#123;</span><br><span class="line">      counter_ = sp.counter_;</span><br><span class="line">      sp.counter_ = <span class="literal">nullptr</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// derived constructor</span></span><br><span class="line">    <span class="function"><span class="keyword">template</span>&lt;<span class="keyword">class</span> U&gt;</span></span><br><span class="line"><span class="function">    <span class="title">SharedPointer</span><span class="params">(U* derive)</span> </span>&#123;</span><br><span class="line">      <span class="built_in">assert</span>(std::is_base_of&lt;T, U&gt;::value);</span><br><span class="line">      counter_ = <span class="keyword">new</span> <span class="built_in">Counter</span>(derive);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ~<span class="built_in">SharedPointer</span>() &#123; </span><br><span class="line">      counter_-&gt;<span class="built_in">release</span>();</span><br><span class="line">      <span class="keyword">if</span> (counter_-&gt;<span class="built_in">getCount</span>() == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">delete</span> counter_;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function">T* <span class="title">get</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> counter_-&gt;ptr_;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">isNull</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="built_in">get</span>() == <span class="literal">nullptr</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">private</span>:</span><br><span class="line">    Counter* counter_;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>C++</category>
@@ -10522,16 +10615,16 @@ RPC
 <h2 id="显示目录内容列表---ls">显示目录内容列表 - ls</h2>
 <p>全称为 <code>list</code></p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">ls</span> [-al] [path]</span><br><span class="line"><span class="comment"># -a: 列出所有文件，包括以 &#x27;.&#x27; 开头的隐藏文件</span></span><br><span class="line"><span class="comment"># -l: 列出详细信息，包括文件属性、修改日期等</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># path: 若为目录，啧列出指定目录下内容；反之，打印 path</span></span><br></pre></td></tr></table></figure>
-<h1 id="拷贝文件或目录---cp">拷贝文件或目录 - cp</h1>
+<h2 id="拷贝文件或目录---cp">拷贝文件或目录 - cp</h2>
 <p>全称为 <code>copy</code></p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cp</span> [-filprs] src dst</span><br><span class="line"><span class="comment"># -f: 强制执行</span></span><br><span class="line"><span class="comment"># -i: 询问是否拷贝</span></span><br><span class="line"><span class="comment"># -l: 改为建立 hard link</span></span><br><span class="line"><span class="comment"># -p: 保留原权限，而非使用默认权限</span></span><br><span class="line"><span class="comment"># -r: 递归拷贝</span></span><br><span class="line"><span class="comment"># -s: 改为建立 soft link</span></span><br></pre></td></tr></table></figure>
 <blockquote>
 <p>拷贝得到的新文件/目录，其 user:group 为命令执行者</p>
 </blockquote>
-<h1 id="移动文件或目录---mv">移动文件或目录 - mv</h1>
+<h2 id="移动文件或目录---mv">移动文件或目录 - mv</h2>
 <p>全称为 <code>move</code></p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">mv</span> [-<span class="keyword">fi</span>] src dst</span><br><span class="line"><span class="comment"># -f: 强制执行</span></span><br><span class="line"><span class="comment"># -i: 询问是否移动</span></span><br></pre></td></tr></table></figure>
-<h1 id="删除文件或目录---rm">删除文件或目录 - rm</h1>
+<h2 id="删除文件或目录---rm">删除文件或目录 - rm</h2>
 <p>全称为 <code>remove</code></p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">rm</span> [-fir] 文件或目录</span><br><span class="line"><span class="comment"># -f: 强制删除</span></span><br><span class="line"><span class="comment"># -i: 询问是否删除</span></span><br><span class="line"><span class="comment"># -r: 递归删除</span></span><br></pre></td></tr></table></figure>
 <h2 id="修改文件拥有者---chown">修改文件拥有者 - chown</h2>
@@ -15603,6 +15696,31 @@ shared ptr
 为<strong>独占</strong>指针，不允许拷贝构造，同时只能有一个 unique ptr
 指向某块内存，只能通过移动语义来进行更改所有权。</p>
 </blockquote>
+<ol start="2" type="1">
+<li><code>std::shared_ptr</code> 有什么缺陷？如何解决？</li>
+</ol>
+<blockquote>
+<p>shared ptr 存在循环引用的问题，可以用 <code>std::weak_ptr</code>
+解决。比如下面这段代码，分别有两个 shared ptr 指向 a 和 b
+所在的内存空间，outPa/inPa 与 outPb/inPb 的计数器均为
+<strong>2</strong>。</p>
+<p>当 <code>func()</code> 退出时，栈变量 outPa 和 outPb
+结束生命周期，调用析构函数，分别使得 outPa/inPa 和 outPb/inPb 的计数值
+<strong>-1</strong>。然而，类成员变量 inPa/inPb （的所有数据）还位于 a/b
+所在的堆空间中，它们的计数器并没有归零，而是
+<strong>1</strong>。那么永远得不到释放，这就造成了<strong>内存泄漏</strong>。</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">B</span>;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">A</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    std::shared_ptr&lt;B&gt; inPb;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">B</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    std::shared_ptr&lt;A&gt; inPa;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">func</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> outPa = std::<span class="built_in">make_shared</span>&lt;A&gt;(); <span class="comment">// 视为指向堆空间 a</span></span><br><span class="line">    <span class="keyword">auto</span> outPb = std::<span class="built_in">make_shared</span>&lt;B&gt;(); <span class="comment">// 视为指向堆空间 b</span></span><br><span class="line">    outPa-&gt;inPb = outPb;</span><br><span class="line">    outPa-&gt;inPa = outPa;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果使用 <code>std::weak_ptr&lt;B&gt; inPb</code> 来代替
+<code>std::shared_ptr&lt;B&gt; inPb</code>，则可以解决该问题。这是因为
+weak ptr 并不影响 <strong>指向该内存的 shared ptr</strong>
+的计数器，它只作为一个<strong>观测者</strong>，用于监测对应的空间是否被释放（通过
+<code>expired()</code> 函数），同时提供了一个 <code>lock()</code>
+函数来访问地址。根据这一特性，尽管 outPa/inPa 的计数器为 2，但是 outPb
+的计数器为 1，那么其在函数退出后可以对 b 的内存进行释放，从而使 inPa
+的计数器 counterA-=1，而 outPa 又因为函数退出而再次使计数器
+counterA-=1，进而释放 a 的内存。</p>
+<p>此时，a/b 的内存均被释放。</p>
+</blockquote>
 <h4 id="内存">内存</h4>
 <ol type="1">
 <li><code>int*</code> 和 <code>void*</code> 的区别？</li>
@@ -15624,13 +15742,11 @@ shared ptr
 <blockquote>
 <p>进程:
 资源分配的单位，拥有独立地址空间，切换时需修改页表基地址寄存器，清空 TLB
-以及 CS、IP 等寄存器，从而开销大。</p>
+以及 CS、IP 等寄存器。新进程一开始访页时大概率会 cache
+miss，从而开销大。</p>
 <p>线程:
-调度的单位，同一进程下所有线程共享地址空间，但线程之间拥有独立的程序计数器与栈空间，切换时仅需修改相关寄存器，故开销小。另外，不同进程之间的线程切换也会涉及到进程切换，开销变大。</p>
-<p>就好比程序和函数的区别一样。所有函数（线程）都能访问整个程序（进程）的全局变量、其他函数，但切换到另一个函数时，需要记住原本执行到哪一步了（程序计数器），还要记住原本的参数以及函数返回地址是什么（栈空间）。</p>
-<p>程序之间就不能互相访问对方的变量、函数这些了（地址空间独立），切换的话要清空
-TLB，那新来的程序在地址转换访问内存时必然要经历多次的 TLB miss，甚至是
-cache miss，开销肯定就大了。</p>
+调度的单位，同一进程下所有线程共享地址空间，但线程之间拥有独立的程序计数器与栈空间，切换时仅需修改相关寄存器，无需修改页表，故开销小。另外，不同进程之间的线程切换也会涉及到进程切换，开销变大。</p>
+<p>本质区别在于<strong>是否和其它单位共享页表</strong>。</p>
 </blockquote>
 <ol start="2" type="1">
 <li>切换地址空间是怎样实现的？</li>
@@ -16336,5 +16452,11 @@ communication</h3>
       <tags>
         <tag>CS149</tag>
       </tags>
+  </entry>
+  <entry>
+    <title>TCPthings</title>
+    <url>/uncategorized/TCPthings/</url>
+    <content><![CDATA[
+]]></content>
   </entry>
 </search>
