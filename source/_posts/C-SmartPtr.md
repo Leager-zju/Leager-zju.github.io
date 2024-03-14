@@ -258,6 +258,7 @@ int main() {
 2. 线程安全的计数器；
 3. 拷贝/赋值/移动构造函数；
 4. 支持用派生类构造；
+5. 正确释放指针；
 
 ```C++
 template<class T>
@@ -266,24 +267,51 @@ class SharedPointer {
    class Counter {
     public:
       Counter(T* ptr): ptr_(ptr), cnt_(0) {}
-      void addRef() { cnt_.fetch_add(1, std::memory_order_relaxed); }
-      void release() { cnt_. }
+      ~Counter() { delete ptr_; }
+      void addRef() { cnt_.fetch_add(1); }
+      void release() { cnt_.fetch_sub(1); }
+      int getCount() { return cnt_.load(); }
       T* ptr_;
     private:
       std::atomic<int> cnt_;
    };
   public:
-    SharedPointer(T* ptr) : counter(ptr) {}
-    SharedPointer(const SharedPointer<T> &sp) : counter_(sp.counter_) {
-      counter_->cnt_++;
+    SharedPointer(T* ptr) {
+      counter_ = new Counter(ptr);
     }
+    // copy constructor
+    SharedPointer(const SharedPointer<T> &sp) {
+      counter_ = sp.counter_;
+      counter_->addRef();
+    }
+    SharedPointer& operator=(const SharedPointer<T> &sp) {
+      counter_ = sp.counter_;
+      counter_->addRef();
+    }
+
+    // move constructor
     SharedPointer(SharedPointer<T>&& sp) {
       counter_ = sp.counter_;
       sp.counter_ = nullptr;
     }
-    SharedPointer(Args args...)
+    SharedPointer& operator=(SharedPointer<T> &&sp) {
+      counter_ = sp.counter_;
+      sp.counter_ = nullptr;
+    }
 
-    ~SharedPointer() {  }
+    // derived constructor
+    template<class U>
+    SharedPointer(U* derive) {
+      assert(std::is_base_of<T, U>::value);
+      counter_ = new Counter(derive);
+    }
+
+    ~SharedPointer() { 
+      counter_->release();
+      if (counter_->getCount() == 0) {
+        delete counter_;
+      }
+    }
 
     T* get() {
       return counter_->ptr_;
