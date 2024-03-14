@@ -248,4 +248,48 @@ int main() {
   // 不存在 shared_ptr 之间的拷贝，故引用计数值不会发生变化。
   return 0;
 }
-``
+```
+
+## 如何手撕一个 shared ptr 
+
+首先思考的是：shared ptr 需要支持哪些特性？
+
+1. 类模板，支持所有类型及其构造函数参数；
+2. 线程安全的计数器；
+3. 拷贝/赋值/移动构造函数；
+4. 支持用派生类构造；
+
+```C++
+template<class T>
+class SharedPointer {
+  public:
+   class Counter {
+    public:
+      Counter(T* ptr): ptr_(ptr), cnt_(0) {}
+      void addRef() { cnt_.fetch_add(1, std::memory_order_relaxed); }
+      void release() { cnt_. }
+      T* ptr_;
+    private:
+      std::atomic<int> cnt_;
+   };
+  public:
+    SharedPointer(T* ptr) : counter(ptr) {}
+    SharedPointer(const SharedPointer<T> &sp) : counter_(sp.counter_) {
+      counter_->cnt_++;
+    }
+    SharedPointer(SharedPointer<T>&& sp) {
+      counter_ = sp.counter_;
+      sp.counter_ = nullptr;
+    }
+    SharedPointer(Args args...)
+
+    ~SharedPointer() {  }
+
+    T* get() {
+      return counter_->ptr_;
+    }
+
+  private:
+    Counter* counter_;
+};
+```
