@@ -47,6 +47,11 @@ void* malloc( std::size_t size );
 
 > 使用时需强转为所需类型的指针。
 
+🔔 调用 `malloc` 分配内存时，会有两种方式向操作系统申请
+
+1. 小于某个阈值（如 128KB）时，使用 `brk()` 系统调用在堆上分配内存；
+2. 大于某个阈值时，使用 `mmap()` 系统调用在文件映射区上分配内存；
+
 ### calloc()
 
 ```c++
@@ -290,3 +295,44 @@ template<
 
 智能指针是针对裸指针进行封装的类，它能够更安全、更方便地使用动态内存。具体见 [C++11 の 智能指针](../../C-11/C-SmartPtr)。
 
+## 内存泄漏及其常用工具
+
+如果使用了 `malloc()/new` 分配内存却未调用 `free()/delete` 释放，那么指向该内存区域的指针（通常分配在栈上）将会因为生命周期结束而被释放，从而永远无法访问那片内存。在操作系统视角下，程序员没释放，那就是有可能使用，这块内存将被一直保留。一旦这种情况越来越多，那么后续再进行内存分配时，将会没有内存可用，这就是**内存泄漏**。
+
+### Valgrind
+
+Valgrind 可以用来检测程序是否有非法使用内存的问题，例如访问未初始化的内存、访问数组时越界、忘记释放动态内存等问题。
+
+构建项目时加上编译选项 `-g`，之后调用 `valgrind --tool=memcheck --leak-check=full  {可执行文件}` 即可进行内存问题检测。
+   
+### Address Sanitizer
+
+AddressSanitizer 是 Google 开发的一款用于检测内存访问错误的工具。它内置在 GCC 版本 >= 4.8 中，适用于 C 和 C++ 代码。它能够检测：
+
+- **Heap buffer overflow**：堆越界访问；
+- **Stack buffer overflow**：栈越界访问；
+- **Global buffer overflow**：全局缓冲区越界访问；
+- **Use after free**：访问指向*已释放内存*的野指针；
+- **Use after return**：访问指向*生命周期结束的局部变量*的野指针；
+- **Use after scope**：同上；
+- **Initialization order bugs**；
+- **Memory leaks**：内存泄漏，即分配但不释放；
+
+AddressSanitizer 可在使用运行时检测跟踪内存分配，这意味着必须使用 AddressSanitizer 构建代码才能利用它的功能。
+
+构建项目时，用 `-fsanitize=address` 选项编译和链接（同时记得加上编译选项 `-g`）。此时可执行文件就进入 ASan 模式。在程序运行时首次检测到问题时，会打印错误信息并退出。
+
+```C++ main.c
+int main() {
+  int *ptr = new int(1);
+  return 0;
+}
+```
+
+```bash
+$ gcc -fsanitize=address -g main.c -o main
+$ ./main
+# 输出错误信息
+```
+
+和 Valgrind 相比，AddressSanitizer **性能更高**。

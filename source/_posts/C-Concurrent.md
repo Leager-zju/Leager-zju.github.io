@@ -31,7 +31,7 @@ C++11 新增了官方**并发支持库**，使得我们能够更好地在系统�
 
 并发支持库与 boost 很像，主要包含以下 5 个头文件。
 
-### <thread\>
+### <thread>
 
 > 此头文件中定义了 `std::thread` 以及访问当前执行线程的函数 `std::this_thread`
 
@@ -127,7 +127,7 @@ int main() {
     inline void sleep_until(const std::chrono::time_point<Clock, Duration>& time)
     ```
 
-### <mutex\>
+### <mutex>
 
 > 此头文件中定义了各种互斥锁如 `std::mutex`，`std::lock_guard`，`std::unique_lock` 等
 
@@ -328,7 +328,7 @@ int main() {
 // output: 0 call
 ```
 
-### <atomic\>
+### <atomic>
 
 > 此头文件中定义了原子变量 `std::atomic<T>`，以及其各种特化 `std::atomic_int`，`std::atomic_bool` 等
 
@@ -366,7 +366,7 @@ void sub() { x--; }
 
 事实上，原子变量能帮助我们自动控制线程之间的同步，保证加/减等操作的原子性——若一个线程写入原子对象，同时另一线程从它读取，则行为良好定义。
 
-### <condition_variable\>
+### <condition_variable>
 
 #### std::condition_variable
 
@@ -596,6 +596,122 @@ void producer() {
 
 解决办法就是**将 wait 放到条件判断循环中**，即类似于上一节中第二段代码。
 
-### <future\>
+### <future>
 
-以后用到再学吧
+#### std::future
+
+`std::future` 类型变量可以用于保存某个异步任务的结果（**共享变量**），并且内含一个状态(state)来表示该任务是否完成(ready)。因此可以把它当成一种简单的线程间同步的手段。通常由某个 "Provider" 创建，并在未来的某个线程中设置共享变量的值（future 因此得名），另外一个线程中与该共享变量相关联的 `std::future` 对象调用 `get()` 获取该值。
+
+如果共享变量中 `state != ready`，则对 `std::future::get()` 的调用会阻塞，直到 Provider 设置了共享变量的值（然后 `state == ready`），这才返回异步任务的值或异常（如果发生了异常）。
+
+#### std::promise
+
+`std::promise<T>` 属于 Provider。它关联了一个 `std::future<T>` 对象，并可以通过 `get_future()` 返回该对象。同样的，它也可以通过 `set_value(T)` 进行共享变量的赋值，从而唤醒另一个调用了 `std::future::get()` 的线程（如果有）。
+
+```C++
+#include <functional>
+#include <future>
+#include <iostream>
+#include <thread>
+
+void print_int(std::future<int>& fut) {
+  int x = fut.get();                    // 1. 阻塞
+  std::cout << "value: " << x << '\n';  // 3. 打印 value: 10.
+}
+
+int main() {
+  std::promise<int> prom;
+  std::future<int> fut = prom.get_future();
+  std::thread t(print_int, std::ref(fut));
+
+  prom.set_value(10); // 2. 线程 t 结束对 fut.get() 的阻塞
+  t.join();
+  return 0;
+}
+// output:
+// value: 10
+```
+
+#### std::packaged_task
+
+`std::packaged_task<T(Args...)>` 也是 Provider。它除了关联一个 `std::future<T>` 对象，还包装了一个类型为 `T(Args...)` 的**可调用对象**。packaged_task 实现了 `operator()`（因而可以作为 `std::thread` 的初始化参数），调用一个 packaged_task 相当于调用内含的可调用对象，并将返回值或异常存在关联的 future 里。
+
+当线程 a 用一个 `std::packaged_task` 初始化新线程 b 时，a 可以调用 `std::packaged_task::get_future()` 返回一个 future 对象，并调用 `get()` 阻塞直至 b 执行完返回。
+
+```C++
+#include <chrono>
+#include <future>
+#include <iostream>
+#include <thread>
+
+int count(int from, int to) {
+  for (int i = from; i != to; --i) {
+    std::cout << i << '\n';
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+  }
+  std::cout << "Finished!\n";
+  return from - to;
+}
+
+int main() {
+  std::packaged_task<int(int, int)> task(count); // contruct a packaged_task
+  std::future<int> ret = task.get_future();      // get its future
+
+  std::thread th(std::move(task), 10, 0);
+  int value = ret.get(); // wait until count() is done
+
+  std::cout << "The countdown lasted for " << value << " seconds.\n";
+
+  th.join();
+  return 0;
+}
+// output:
+// 10
+// 9
+// 8
+// 7
+// 6
+// 5
+// 4
+// 3
+// 2
+// 1
+// Finished!
+// The countdown lasted for 10 seconds.
+```
+
+## 并发应用
+
+### 无锁队列(Lockless Queue)
+
+### 线程池(Thread Pool)
+
+利用 `std::future` 和 `std::packaged_task`，我们可以实现一个支持异步返回结果的**线程池**。
+
+和普通的仅支持**执行但不返回结果**的线程池相比，其核心在于一个 `ThreadPool::execute()` 执行函数。该函数为模板函数，允许传入一个可调用对象及其参数列表，内部通过 `std::packaged_task` 包装后交付给空闲线程执行，并将返回结果保存在其关联的 `std::future` 对象中。执行函数可以返回这个 future，并让用户通过 `std::future::get()` 等待执行结果。
+
+```C++
+template<class F, class ...Args>
+auto ThreadPool::execute(F&& callable, Args&& ...args) -> decltype(callable(args...)) {
+  using returnType = decltype(callable(args...));
+  std::packaged_task<returnType(Args...)> task(callable);
+  std::future result = task.get_future();
+
+  taskQueue.emplace(std::move(task)); // 加入就绪队列，唤醒线程取出任务并执行
+
+  return result.get();
+}
+
+...
+
+int max(int a, int b) {
+  return a > b ? a : b;
+}
+
+int main() {
+  ThreadPool& tp = ThreadPool::getInstance(); // 单例模式
+  int res = tp.execute(max, 1, 2);
+  cout << res;
+  return 0;
+}
+```
