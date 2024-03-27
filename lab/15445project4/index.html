@@ -32,7 +32,7 @@
 <meta property="og:description" content="接下来，需要完善对事务并发的支持。 &gt;&gt;&gt; LAB 主页传送门 &lt;&lt;&lt;">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2023-01-12T03:56:16.000Z">
-<meta property="article:modified_time" content="2024-03-03T04:12:22.196Z">
+<meta property="article:modified_time" content="2024-03-27T04:20:19.685Z">
 <meta property="article:author" content="Leager">
 <meta property="article:tag" content="CMU 15445">
 <meta name="twitter:card" content="summary">
@@ -131,12 +131,12 @@
   </li>
         <li class="menu-item menu-item-tags">
 
-    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">17</span></a>
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">16</span></a>
 
   </li>
         <li class="menu-item menu-item-categories">
 
-    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">19</span></a>
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">18</span></a>
 
   </li>
         <li class="menu-item menu-item-archives">
@@ -229,7 +229,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-03-03 12:12:22" itemprop="dateModified" datetime="2024-03-03T12:12:22+08:00">2024-03-03</time>
+                <time title="修改时间：2024-03-27 12:20:19" itemprop="dateModified" datetime="2024-03-27T12:20:19+08:00">2024-03-27</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -298,18 +298,25 @@ Lock Note。</em></strong></font></p>
 <p>表锁和行锁的上锁过程基本类似，行锁在上锁前多了一个所在表是否正确上锁的判断，其余一致。这里就先讲<strong>表锁</strong>的上锁流程。</p>
 <p>首先，判断以下三个变量是否兼容：</p>
 <ol type="1">
-<li><code>txn.TransactionState</code> &gt; GROWING, SHRINKING, ABORTED,
-COMMITTED</li>
-<li><code>txn.IsolationLevel</code> &gt; Bustub 只规定了 3 个隔离级别：
-&gt; &gt; - <code>READ_UNCOMMITTED</code>：该隔离级别下，不加 S
-锁。会出现<strong>脏读</strong>问题，即会读到其它事务修改但未提交的数据；
-&gt; - <code>READ_COMMITTED</code>：该隔离级别下，读操作会加 S
+<li><p><code>txn.TransactionState</code></p>
+<blockquote>
+<p>GROWING, SHRINKING, ABORTED, COMMITTED</p>
+</blockquote></li>
+<li><p><code>txn.IsolationLevel</code></p>
+<blockquote>
+<p>Bustub 只规定了 3 个隔离级别：</p>
+<ul>
+<li><code>READ_UNCOMMITTED</code>：该隔离级别下，不加 S
+锁。会出现<strong>脏读</strong>问题，即会读到其它事务修改但未提交的数据；</li>
+<li><code>READ_COMMITTED</code>：该隔离级别下，读操作会加 S
 锁，但单次读结束会直接释放 S 锁，并且即便在 SHRINKING 阶段也可以再次加 S
-锁。解决脏读，但会出现<strong>不可重复读</strong>问题，即由于中途释放了锁，同一事务的两次读中间可能会出现其它事务的写操作，从而前后读到不同的数据；
-&gt; - <code>REPEATED_READ</code>：该隔离级别下，所有操作均遵循
+锁。解决脏读，但会出现<strong>不可重复读</strong>问题，即由于中途释放了锁，同一事务的两次读中间可能会出现其它事务的写操作，从而前后读到不同的数据；</li>
+<li><code>REPEATED_READ</code>：该隔离级别下，所有操作均遵循
 2PL，支持所有上锁，但等到事务 ABORTED/COMMITTED
 后才释放所有锁，解决不可重复读，但会出现<strong>幻读</strong>问题，例如第一个事务对一个表中的数据进行了修改，且涉及到表中的全部数据行，同时，第二个事务向该表中插入一行新数据，那么，第一个事务的用户之后就会发现表中还存在没有修改的数据行，仿佛出现幻觉。</li>
-<li><code>lock_mode</code></li>
+</ul>
+</blockquote></li>
+<li><p><code>lock_mode</code></p></li>
 </ol>
 <p>具体规则如下：</p>
 <ol type="1">
@@ -511,13 +518,13 @@ Execution</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" hr
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-count">18</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-count">16</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

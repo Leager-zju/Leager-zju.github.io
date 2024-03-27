@@ -32,7 +32,7 @@
 <meta property="og:description" content="久仰本书大名，花了若干时间入门 C++ 后，终于可以拜读一下这部经典作品。  当 C++ 律师！">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2023-03-01T08:55:34.000Z">
-<meta property="article:modified_time" content="2024-03-03T04:18:17.055Z">
+<meta property="article:modified_time" content="2024-03-27T01:51:06.494Z">
 <meta property="article:author" content="Leager">
 <meta property="article:tag" content="C++">
 <meta name="twitter:card" content="summary">
@@ -131,12 +131,12 @@
   </li>
         <li class="menu-item menu-item-tags">
 
-    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">17</span></a>
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">16</span></a>
 
   </li>
         <li class="menu-item menu-item-categories">
 
-    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">19</span></a>
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">18</span></a>
 
   </li>
         <li class="menu-item menu-item-archives">
@@ -229,7 +229,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-03-03 12:18:17" itemprop="dateModified" datetime="2024-03-03T12:18:17+08:00">2024-03-03</time>
+                <time title="修改时间：2024-03-27 09:51:06" itemprop="dateModified" datetime="2024-03-27T09:51:06+08:00">2024-03-27</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -293,7 +293,7 @@ inline 替换 #define</h2>
 不存在作用域这一说法，也不会进行类型检查。</p>
 <blockquote>
 <p>具体区别请看<a
-href="../../C-Basic/C-Const/#与宏定义的区别"><strong>此处</strong></a>。</p>
+href="../../C/C-Const/#与宏定义的区别"><strong>此处</strong></a>。</p>
 </blockquote></li>
 <li><p>对于形似函数的宏，尽量以 <code>inline</code> 替换。</p>
 <p><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> FUNC_MAX(a, b) f((a) &gt; (b) ? (a) : (b))</span></span><br><span class="line"><span class="comment">// 改为</span></span><br><span class="line"><span class="function"><span class="keyword">template</span>&lt;<span class="keyword">class</span> T&gt;</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">func_max</span><span class="params">(<span class="type">const</span> T&amp; a, <span class="type">const</span> T&amp; b)</span> </span>&#123;</span><br><span class="line">  <span class="built_in">f</span>(a &gt; b ? a : b);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
@@ -301,7 +301,7 @@ href="../../C-Basic/C-Const/#与宏定义的区别"><strong>此处</strong></a>�
 <code>a++</code> 的调用次数取决于比较的对象：</p>
 <p><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> a = <span class="number">1</span>, b = <span class="number">0</span>;</span><br><span class="line"><span class="built_in">FUNC_MAX</span>(a++, b);    <span class="comment">// a++ 调用 2 次</span></span><br><span class="line"><span class="built_in">FUNC_MAX</span>(a++, b+<span class="number">10</span>); <span class="comment">// a++ 调用 1 次</span></span><br></pre></td></tr></table></figure></p>
 <p>而<a
-href="../../C-Basic/C-Inline"><strong>内联函数</strong></a>则不会出现上述问题。<code>func_max()</code>
+href="../../C/C-Inline"><strong>内联函数</strong></a>则不会出现上述问题。<code>func_max()</code>
 成为了真正的函数，遵循作用域和访问规则，能利用泛型的同时，增加了类型检查，同时和
 <code>const</code> 一样能在类内大显身手，故更为推荐。</p></li>
 </ol>
@@ -311,7 +311,7 @@ href="../../C-Basic/C-Inline"><strong>内联函数</strong></a>则不会出现�
 来控制编译。就像最开始说的那样，<strong>尽量用编译器代替预处理器</strong>。</p>
 <h2 id="尽可能使用-const">3. 尽可能使用 const</h2>
 <p>关于 <code>const</code> 具体可见<a
-href="../../C-Basic/C-Const"><strong>本文</strong></a>。</p>
+href="../../C/C-Const"><strong>本文</strong></a>。</p>
 <p><code>const</code>
 更像是一种约束，只要某个变量确定性地能保持不变，我们应该尽可能加上这一约束，以取得编译器的优化。反之，则容易被玩坏，比如：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Rational</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  Rational <span class="keyword">operator</span>*(<span class="type">const</span> Rational&amp; lhs, <span class="type">const</span> Rational&amp; rhs) &#123; <span class="comment">/* ... */</span> &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">Rational a, b, c;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (a * b = c) &#123;</span><br><span class="line">  <span class="comment">/* ... */</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -325,7 +325,7 @@ if 子句很难保证能进去。</p>
 则可以预防上面一系列令人头疼的问题，我们需要做的不过是多打几个字符罢了。</p>
 <p>另外，虽然对于成员函数而言，const 与 non-const
 是两种重载形式，但如果仅有约束不同，也是一件不好的事。我们拿 <a
-href="../../C-Basic/C-Mutable/#类中的-mutable">C++のMutable</a> 里的
+href="../../C/C-Mutable/#类中的-mutable">C++のMutable</a> 里的
 <code>TextBlock</code> 的例子来说：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">TextBlock</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">TextBlock</span>(<span class="type">const</span> <span class="type">char</span>* s) &#123; <span class="comment">/* ... */</span> &#125;</span><br><span class="line"></span><br><span class="line">  <span class="type">const</span> <span class="type">char</span>&amp; <span class="keyword">operator</span>[](std::<span class="type">size_t</span> index) <span class="type">const</span> &#123;</span><br><span class="line">    <span class="comment">/* ... */</span></span><br><span class="line">    <span class="keyword">return</span> pText[index];</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="type">char</span>&amp; <span class="keyword">operator</span>[](std::<span class="type">size_t</span> index) &#123;</span><br><span class="line">    <span class="comment">/* ... */</span></span><br><span class="line">    <span class="keyword">return</span> pText[index];</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="type">char</span>* pText;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 <p>我们实现了 const 与 non-const
@@ -351,7 +351,7 @@ ctrl cv 降低了编码难度，但总归不太方便。</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 赋值</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Entry</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">Entry</span>(<span class="type">const</span> std::string&amp; name, <span class="type">const</span> std::string &amp;address) &#123;</span><br><span class="line">    myName = name;</span><br><span class="line">    myAddress = address;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  std::string myName;</span><br><span class="line">  std::string myAddress;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 初始化列表</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Entry</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">Entry</span>(std::string <span class="type">const</span>&amp; name, std::string <span class="type">const</span>&amp; address)</span><br><span class="line">  :<span class="built_in">myName</span>(name),</span><br><span class="line">   <span class="built_in">myAddress</span>(address) &#123;&#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  std::string myName;</span><br><span class="line">  std::string myAddress;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 <p><strong>第二个版本比第一个版本效率更高</strong>。事实上，类成员变量的初始化行为发生在构造函数之前（见<a
-href="../../C-Basic/C-OOP/#派生类构造顺序"><strong>构造顺序</strong></a>），所以对于大多数类型而言，赋值行为会先调用默认构造函数，然后再使用赋值运算符，这样就导致默认构造函数的操作被浪费，增加无意义的开销并不是一件好事。并且如果某个变量的默认构造函数被<strong>弃置</strong>，编译器还会报错。</p>
+href="../../C/C-OOP/#派生类构造顺序"><strong>构造顺序</strong></a>），所以对于大多数类型而言，赋值行为会先调用默认构造函数，然后再使用赋值运算符，这样就导致默认构造函数的操作被浪费，增加无意义的开销并不是一件好事。并且如果某个变量的默认构造函数被<strong>弃置</strong>，编译器还会报错。</p>
 <p>而使用初始化列表的方式，则只会影响这些成员变量调用构造函数的版本，相当于是拿着指定的实参去调用构造函数，不用担心顺序问题（但最好还是按照成员变量列出顺序来）。此时只需调用一次构造，比起赋值的方法高效许多。对于内置类型，两种方式开销一样，但为了一致性还是通过初始化列表来初始化。</p>
 <p>最后需要关心的事就是<strong>定义于不同编译单元内的 non-local static
 变量</strong>了，即定义在作用域外的其它文件的静态变量。因为 C++
@@ -366,7 +366,7 @@ target="_blank" rel="noopener" href="https://zh.wikipedia.org/zh-hans/%E5%8D%95%
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Tool.h</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Tool</span> &#123;&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Human.h</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Human</span> &#123;</span><br><span class="line"> <span class="comment">/* ... */</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function">Tool&amp; <span class="title">getTool</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="type">static</span> Tool globalTool;</span><br><span class="line">  <span class="keyword">return</span> globalTool;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">Human <span class="title">Jack</span><span class="params">(getTool())</span></span>; <span class="comment">// 保证得到初始化</span></span><br></pre></td></tr></table></figure>
 <h2 id="了解-c-默默编写并调用哪些函数">5. 了解 C++
 默默编写并调用哪些函数</h2>
-<p><a href="../../C-Basic/C-OOP/#装"><strong>见此处</strong></a></p>
+<p><a href="../../C/C-OOP/#装"><strong>见此处</strong></a></p>
 <blockquote>
 <p>C++11
 引入移动语义之后，对于一个<strong>空类</strong>，编译器将为其默认生成以下
@@ -377,7 +377,7 @@ target="_blank" rel="noopener" href="https://zh.wikipedia.org/zh-hans/%E5%8D%95%
 若不想使用编译器自动生成的函数，就该明确拒绝</h2>
 <p>通常来说，如果不希望使用某函数，则不声明即可。但上面那点提到，尽管你可能没声明，但一旦尝试调用，编译器就会自动帮你声明。</p>
 <p>所以希望完全阻止这种调用行为，可以加上 <a
-href="../../C-11/C-DefaultAndDelete/#delete"><code>delete</code>
+href="../../C/C-DefaultAndDelete/#delete"><code>delete</code>
 说明符</a>。</p>
 <blockquote>
 <p>与 <code>default</code> 相对，后面加上 <code>= delete</code>
@@ -385,7 +385,7 @@ href="../../C-11/C-DefaultAndDelete/#delete"><code>delete</code>
 </blockquote>
 <h2 id="为多态基类声明-virtual-析构函数">7. 为多态基类声明 virtual
 析构函数</h2>
-<p>见<a href="../../C-Basic/C-OOP/#注意"><strong>此处</strong></a>第 5
+<p>见<a href="../../C/C-OOP/#注意"><strong>此处</strong></a>第 5
 条。</p>
 <blockquote>
 <p>当可能用到基类指针/引用绑定派生类时，基类的析构函数必须为虚函数。这是因为当出现
@@ -416,7 +416,7 @@ UB。</p>
 类体系，用于模拟股市的买卖等操作，每次创建一个交易对象时，都会根据交易类型进行一次适当的记录。比如下面这个看起来挺好的做法：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Transaction</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">logTxn</span><span class="params">()</span> <span class="type">const</span> </span>= <span class="number">0</span>; <span class="comment">// 创建一份因类型不同而不同的交易日志</span></span><br><span class="line">  <span class="built_in">Transaction</span>() &#123;</span><br><span class="line">    <span class="comment">/* ... */</span></span><br><span class="line">    <span class="built_in">logTxn</span>();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">BuyTransaction</span>: <span class="keyword">public</span> Transaction &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">logTxn</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="comment">/* ... */</span> &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">SellTransaction</span>: <span class="keyword">public</span> Transaction &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">logTxn</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="comment">/* ... */</span> &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">BuyTransation buyTxn;</span><br></pre></td></tr></table></figure>
 <p>创建 <code>buyTxn</code> 时，根据<a
-href="../../C-Basic/C-OOP/#派生类构造顺序"><strong>构造顺序</strong></a>，其基类的构造一定会更早被调用，然后才是派生类的专属部分。而其基类的构造函数中出现了一个纯虚函数
+href="../../C/C-OOP/#派生类构造顺序"><strong>构造顺序</strong></a>，其基类的构造一定会更早被调用，然后才是派生类的专属部分。而其基类的构造函数中出现了一个纯虚函数
 <code>logTxn()</code>，这是万恶之源！</p>
 <p>我们本意是希望通过该虚函数完成派生类版本的构造，但事实上，构造
 <code>BuyTransaction</code> 对象时，优先构造的是对象中的基类部分，也就是
@@ -491,11 +491,11 @@ href="#4.-确定对象被使用前已先被初始化"><strong>条款 4</strong><
 <p>所以通过拷贝的方式进行构造时，一定不要忘了调用所有基类的适当的拷贝函数，拷贝赋值也是同理的。就像下面这样：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">PriorityCustomer</span>: <span class="keyword">public</span> Customer &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">PriorityCustomer</span>(<span class="type">const</span> PriorityCustomer&amp; rhs)</span><br><span class="line">    :<span class="built_in">Customer</span>(rhs), </span><br><span class="line">     <span class="built_in">priority</span>(rhs.priority) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  PriorityCustomer&amp; <span class="keyword">operator</span>=(<span class="type">const</span> PriorityCustomer&amp; rhs) &#123;</span><br><span class="line">    Customer.<span class="keyword">operator</span>=(rhs);</span><br><span class="line">    priority = rhs.priority;</span><br><span class="line">    <span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="type">int</span> priority;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 <p>最后要注意的是，如果拷贝构造与拷贝赋值出现了重复部分，可以将这些重复的部分写入新的函数(eg.<code>init()</code>)，然后让它俩一起调用，从而消除冗余。而不是让一个拷贝调用另一个拷贝——<a
-href="../../C-Basic/C-OOP/#赋值运算符">构造跟赋值不能混为一谈</a>！</p>
+href="../../C/C-OOP/#赋值运算符">构造跟赋值不能混为一谈</a>！</p>
 <h2 id="以对象管理资源">13. 以对象管理资源</h2>
 <p>关于本条款，可以阅读 <a
 target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/34660259"><strong>RAII</strong></a>
-与<a href="../../C-11/C-SmartPtr"><strong>智能指针</strong></a>
+与<a href="../../C/C-SmartPtr"><strong>智能指针</strong></a>
 相关内容。</p>
 <blockquote>
 <p>构造时获取资源，析构时释放资源。</p>
@@ -516,11 +516,11 @@ heap-based，一个很常见的例子就是<strong>互斥锁</strong>，获取�
 href="#6.-若不想使用编译器自动生成的函数，就该明确拒绝"><strong>条款
 6</strong></a> 所说的那样；</p>
 <p>第二，<strong>引用计数法</strong>，正如 <a
-href="../../C-11/C-SmartPtr/#std::shared_ptr"><strong>shared_ptr</strong></a>
+href="../../C/C-SmartPtr/#std::shared_ptr"><strong>shared_ptr</strong></a>
 做的那样，直到该资源的最后一个使用者被销毁后才释放；</p>
 <p>第三，<strong>拷贝底部资源</strong>，注意这里的拷贝是指深拷贝，即不仅仅拷贝指针，同时拷贝一份指针指向的内存；</p>
 <p>第四，<strong>转移底部资源所有权</strong>，即实现<a
-href="../../C-11/C-Value/#移动语义"><strong>移动语义</strong></a>；</p>
+href="../../C/C-Value/#移动语义"><strong>移动语义</strong></a>；</p>
 <h2 id="在资源管理类中提供对原始资源的访问">15.
 在资源管理类中提供对原始资源的访问</h2>
 <p>或通过 api
@@ -744,7 +744,7 @@ on-the-stack 变量？</p>
 A；反之，选择方法 B。但方法 A 造成名称 w 的作用域比方法 B
 更大，有时会对程序的可理解性和易维护性造成冲突，这也是需要考虑在内的因素。</p>
 <h2 id="尽量少做转型动作">27. 尽量少做转型动作</h2>
-<p>文章 <a href="../../C-Basic/C-Cast"><strong>C++ の Cast</strong></a>
+<p>文章 <a href="../../C/C-Cast"><strong>C++ の Cast</strong></a>
 中已经介绍过 C++
 中类型转换的内容。尽量避免转型，特别是在注重效率的代码中避免
 <code>dynamic_cast</code>。如果非要转型，也尽可能使用 C++-style
@@ -758,11 +758,11 @@ private 变量变成了 public，就跟之前提到的那样，这降低了封�
 <p>此外，handles
 也可能出现<strong>悬空</strong>的情况，即获取一个对象内部变量的指针/引用后，该对象在真正使用之前销毁，那么该指针/引用实际上指向了一个未知的变量，这极为糟糕。毕竟，handles
 并不能延长变量的生命周期。这和 <a
-href="../../C-11/C-Function/#悬垂引用"><strong>lambda
+href="../../C/C-Function/#悬垂引用"><strong>lambda
 表达式</strong></a>中提到的有异曲同工之妙。</p>
 <h2 id="为异常安全而努力是值得的">29. 为"异常安全"而努力是值得的</h2>
 <p>关于异常可见<a
-href="../../C-Basic/C-Exception"><strong>此文</strong></a>。</p>
+href="../../C/C-Exception"><strong>此文</strong></a>。</p>
 <p><strong>异常安全函数</strong>提供以下三个保证之一：</p>
 <ol type="1">
 <li><strong>基本承诺</strong>：如果异常被抛出，程序内的任何事物仍然保持在有效状态下，没有任何对象或数据结构因此被破坏，所有对象都处于内部前后一致的状态；</li>
@@ -772,7 +772,7 @@ href="../../C-Basic/C-Exception"><strong>此文</strong></a>。</p>
 <h2 id="透彻了解-inlining-的里里外外">30. 透彻了解 inlining
 的里里外外</h2>
 <p>关于 inline，请看<a
-href="../../C-Basic/C-Inline"><strong>此文</strong></a>。</p>
+href="../../C/C-Inline"><strong>此文</strong></a>。</p>
 <blockquote>
 <p>inline
 函数背后的整体观念是，将"对此函数的每一个调用"都以函数本体替换之。优点是能够免除函数调用成本，比宏多了类型检查，以及其他编译器优化。缺点是增加了目标码大小，导致程序体积太大，可能导致额外的换页行为，降低
@@ -932,7 +932,7 @@ friend。其优点是否足以弥补缺点，这是需要进行仔细考虑的�
 设计模式</strong>。上面的函数指针本质上是一个<strong>可调用对象</strong>。C++11
 已经将所有的可调用对象进行了统一，推出了新特性
 <code>std::function</code>（见<a
-href="../../C-11/C-Function">此文</a>），那用此新特性进行替换，提高了更多的实现弹性，不是吗？只要函数签名与需求端兼容，那么就是可行的。</p>
+href="../../C/C-Function">此文</a>），那用此新特性进行替换，提高了更多的实现弹性，不是吗？只要函数签名与需求端兼容，那么就是可行的。</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">GameCharacter</span>;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">defaultHealthCalc</span><span class="params">(<span class="type">const</span> GameCharacter&amp; gc)</span></span>;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">GameCharacter</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="keyword">using</span> HealthCalcFunc = std::function&lt;<span class="built_in">int</span>(<span class="type">const</span> GameCharacter &amp;)&gt;;</span><br><span class="line">  <span class="function"><span class="keyword">explicit</span> <span class="title">GameCharacter</span><span class="params">(HealthCalFunc hcf = defaultHealthCalc)</span></span></span><br><span class="line"><span class="function">   : healthFunc(hcf) &#123;</span>&#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">int</span> <span class="title">healthValue</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> <span class="built_in">healthFunc</span>(*<span class="keyword">this</span>); &#125;</span><br><span class="line"> </span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  HealthCalFunc healthFunc;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 <p>那么，接下来表演个戏法：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 函数</span></span><br><span class="line"><span class="function"><span class="type">short</span> <span class="title">calcHealth</span><span class="params">(<span class="type">const</span> GameCharacter&amp;)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 仿函数</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">HealthCalculator</span> &#123;</span><br><span class="line">  <span class="function"><span class="type">int</span> <span class="title">operator</span><span class="params">()</span> <span class="params">(<span class="type">const</span> GameCharacter&amp;)</span> <span class="type">const</span> </span>&#123; <span class="comment">/* ... */</span> &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 成员函数</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">GameLevel</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="type">float</span> <span class="title">calcHealth</span><span class="params">(<span class="type">const</span> GameCharacter&amp;)</span></span>;</span><br><span class="line">  <span class="comment">/* ... */</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 两个人物类型</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">EvilBadGuy</span>: <span class="keyword">public</span> GameCharacter &#123;</span><br><span class="line">  <span class="comment">/* ... */</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">EyeCandyCharacter</span>: <span class="keyword">public</span> GameCharacter &#123;</span><br><span class="line">  <span class="comment">/* ... */</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">GameLevel currentLevel;</span><br><span class="line"></span><br><span class="line"><span class="function">EvilBadGuy <span class="title">ebg1</span><span class="params">(calcHealth)</span></span>;                       <span class="comment">// 1. 使用函数计算</span></span><br><span class="line"></span><br><span class="line"><span class="function">EyeCandyCharacter <span class="title">ecc1</span><span class="params">(HealthCalculator())</span></span>;        <span class="comment">// 2. 使用仿函数计算</span></span><br><span class="line"></span><br><span class="line"><span class="function">EvilBadguy <span class="title">ebg2</span><span class="params">(std::bind(&amp;GameLevel::health,      <span class="comment">// 3. 使用某个类的成员函数计算</span></span></span></span><br><span class="line"><span class="params"><span class="function">                          currentLevel,</span></span></span><br><span class="line"><span class="params"><span class="function">                          std::placeholder::_1))</span></span>;</span><br></pre></td></tr></table></figure></li>
@@ -985,7 +985,7 @@ private 继承。何为必要？即需要访问基类 protected 成员，或需�
 virtual 函数时。</p>
 <h2 id="明智而审慎地使用多重继承">40. 明智而审慎地使用多重继承</h2>
 <p>关于多继承的事，请看<a
-href="../../C-Basic/C-OOP/#继承"><strong>此文</strong></a>。</p>
+href="../../C/C-OOP/#继承"><strong>此文</strong></a>。</p>
 <p>多重继承容易引发歧义，且带来了虚继承的需求。虚继承还会带来一系列成本，除非虚基类不带任何数据。</p>
 <p>但多重继承也不是一无是处，在 public 继承某个接口类，并且 private
 继承某个协助类时才发挥出正当用途。</p>
@@ -1358,13 +1358,13 @@ new 也要写 placement delete</span></a></li><li class="nav-item nav-level-2"><
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-count">18</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-count">16</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

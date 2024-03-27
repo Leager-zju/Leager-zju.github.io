@@ -32,7 +32,7 @@
 <meta property="og:description" content="C++11 新增了官方并发支持库，使得我们能够更好地在系统间移植程序，之前的 Boost 库等也就随之成为历史了。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2023-01-29T14:44:35.000Z">
-<meta property="article:modified_time" content="2024-03-18T14:50:24.237Z">
+<meta property="article:modified_time" content="2024-03-27T04:30:37.393Z">
 <meta property="article:author" content="Leager">
 <meta property="article:tag" content="C++11">
 <meta name="twitter:card" content="summary">
@@ -131,12 +131,12 @@
   </li>
         <li class="menu-item menu-item-tags">
 
-    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">17</span></a>
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">16</span></a>
 
   </li>
         <li class="menu-item menu-item-categories">
 
-    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">19</span></a>
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">18</span></a>
 
   </li>
         <li class="menu-item menu-item-archives">
@@ -229,7 +229,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-03-18 22:50:24" itemprop="dateModified" datetime="2024-03-18T22:50:24+08:00">2024-03-18</time>
+                <time title="修改时间：2024-03-27 12:30:37" itemprop="dateModified" datetime="2024-03-27T12:30:37+08:00">2024-03-27</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -276,7 +276,7 @@ Boost 库等也就随之成为历史了。</p>
 <p>综上所述，<strong>并发</strong>与<strong>并行</strong>的最主要区别，就在于各个线程是否能够"同时"进行。</p>
 <h2 id="并发支持库">并发支持库</h2>
 <p>并发支持库与 boost 很像，主要包含以下 5 个头文件。</p>
-<h3 id="section"><thread></h3>
+<h3 id="thread">&lt; thread &gt;</h3>
 <blockquote>
 <p>此头文件中定义了 <code>std::thread</code> 以及访问当前执行线程的函数
 <code>std::this_thread</code></p>
@@ -288,8 +288,8 @@ api。</p>
 <p>首先讲下<strong>初始化方式</strong>。由于每个线程都是一个独立的执行单位，故不存在两个同样的执行线程，那么<strong>拷贝构造</strong>与<strong>拷贝赋值</strong>因此被<strong>弃置</strong>(<code>delete</code>)。除此之外，其初始化方式共有四种重载形式：</p>
 <table>
 <colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
+<col style="width: 42%" />
+<col style="width: 57%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -374,7 +374,7 @@ thread 对象 <code>joinable() == false</code>；</p></li>
 <li><p><code>sleep_until()</code>：当前线程主动睡眠，直至指定时刻。<strong>函数原型</strong>为</p>
 <p><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">template</span>&lt; <span class="keyword">typename</span> Clock, <span class="keyword">typename</span> Duration &gt;</span></span><br><span class="line"><span class="function"><span class="keyword">inline</span> <span class="type">void</span> <span class="title">sleep_until</span><span class="params">(<span class="type">const</span> std::chrono::time_point&lt;Clock, Duration&gt;&amp; time)</span></span></span><br></pre></td></tr></table></figure></p></li>
 </ol>
-<h3 id="section-1"><mutex></h3>
+<h3 id="mutex">&lt; mutex &gt;</h3>
 <blockquote>
 <p>此头文件中定义了各种互斥锁如
 <code>std::mutex</code>，<code>std::lock_guard</code>，<code>std::unique_lock</code>
@@ -487,7 +487,7 @@ mutex
 <code>flag</code> 由 <code>false</code> 改为
 <code>true</code>。具体代码如下：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;bits/stdc++.h&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line">once_flag flag;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">func</span><span class="params">(<span class="type">int</span> i)</span> </span>&#123;</span><br><span class="line">  <span class="built_in">call_once</span>(flag, [i]() &#123;</span><br><span class="line">    cout &lt;&lt; i &lt;&lt; <span class="string">&quot; call\n&quot;</span>;</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  thread threads[<span class="number">5</span>];</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; ++i) &#123;</span><br><span class="line">    threads[i] = <span class="built_in">thread</span>(func, i);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">auto</span>&amp; t : threads) &#123;</span><br><span class="line">    t.<span class="built_in">join</span>();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// output: 0 call</span></span><br></pre></td></tr></table></figure>
-<h3 id="section-2"><atomic></h3>
+<h3 id="atomic">&lt; atomic &gt;</h3>
 <blockquote>
 <p>此头文件中定义了原子变量
 <code>std::atomic&lt;T&gt;</code>，以及其各种特化
@@ -510,7 +510,7 @@ mutex，代码可以写为：</p>
 <p>而如果使用<strong>原子变量</strong>，则代码可以简化为：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">std::atomic&lt;<span class="type">int</span>&gt; <span class="title">x</span><span class="params">(<span class="number">0</span>)</span></span>;  <span class="comment">// or std::atomic_int x(0)</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">add</span><span class="params">()</span> </span>&#123; x++; &#125;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">sub</span><span class="params">()</span> </span>&#123; x--; &#125;</span><br></pre></td></tr></table></figure>
 <p>事实上，原子变量能帮助我们自动控制线程之间的同步，保证加/减等操作的原子性——若一个线程写入原子对象，同时另一线程从它读取，则行为良好定义。</p>
-<h3 id="section-3"><condition_variable></h3>
+<h3 id="condition_variable">&lt; condition_variable &gt;</h3>
 <h4 id="stdcondition_variable">std::condition_variable</h4>
 <p><code>condition_variable</code>
 是利用线程间共享的<strong>全局变量</strong>进行<strong>同步</strong>的一种机制，能用于阻塞一个或多个线程（或称使其等待(<strong>wait</strong>)），直至另一线程通知(<strong>notify</strong>)条件变量将等待的线程唤醒。相当于操作系统里的
@@ -598,7 +598,7 @@ wait
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// case3 虚假唤醒</span></span><br><span class="line">std::mutex m;</span><br><span class="line">std::condition_variable cond;</span><br><span class="line"><span class="type">int</span> cnt = <span class="number">0</span>; <span class="comment">// 产品</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">consumer</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="function">std::unique_lock&lt;std::mutex&gt; <span class="title">lock</span><span class="params">(m)</span></span>;</span><br><span class="line">  <span class="keyword">if</span> (cnt == <span class="number">0</span>) &#123;</span><br><span class="line">    cond.<span class="built_in">wait</span>(lock);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">producer</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="function">std::unique_lock&lt;std::mutex&gt; <span class="title">lock</span><span class="params">(m)</span></span>;</span><br><span class="line">  cnt++;</span><br><span class="line">  cond.<span class="built_in">notify_all</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>解决办法就是<strong>将 wait
 放到条件判断循环中</strong>，即类似于上一节中第二段代码。</p>
-<h3 id="section-4"><future></h3>
+<h3 id="future">&lt; future &gt;</h3>
 <h4 id="stdfuture">std::future</h4>
 <p><code>std::future</code>
 类型变量可以用于保存某个异步任务的结果（<strong>共享变量</strong>），并且内含一个状态(state)来表示该任务是否完成(ready)。因此可以把它当成一种简单的线程间同步的手段。通常由某个
@@ -724,7 +724,7 @@ future，并让用户通过 <code>std::future::get()</code> 等待执行结果�
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E4%B8%8E%E5%B9%B6%E8%A1%8C"><span class="nav-text">并发与并行</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E6%94%AF%E6%8C%81%E5%BA%93"><span class="nav-text">并发支持库</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#section"><span class="nav-text"></span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#stdthread"><span class="nav-text">std::thread</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#stdthis_thread"><span class="nav-text">std::this_thread</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#section-1"><span class="nav-text"></span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#stdmutex"><span class="nav-text">std::mutex</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#stdtimed_mutex"><span class="nav-text">std::timed_mutex</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#stdrecursively_mutex"><span class="nav-text">std::recursively_mutex</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#stdrecursively_timed_mutex"><span class="nav-text">std::recursively_timed_mutex</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#stdlock-stdtry_lock"><span class="nav-text">std::lock() &amp; std::try_lock()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#stdlock_guard"><span class="nav-text">std::lock_guard</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#stdunique_lock"><span class="nav-text">std::unique_lock</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#stdcall_once"><span class="nav-text">std::call_once()</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#section-2"><span class="nav-text"></span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#stdatomic"><span class="nav-text">std::atomic</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#section-3"><span class="nav-text"></span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#stdcondition_variable"><span class="nav-text">std::condition_variable</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#stdcondition_variable_any"><span class="nav-text">std::condition_variable_any</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#stdnotify_all_at_thread_exit"><span class="nav-text">std::notify_all_at_thread_exit()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%94%A4%E9%86%92%E4%B8%A2%E5%A4%B1"><span class="nav-text">唤醒丢失</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%99%9A%E5%81%87%E5%94%A4%E9%86%92"><span class="nav-text">虚假唤醒</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#section-4"><span class="nav-text"></span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#stdfuture"><span class="nav-text">std::future</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#stdpromise"><span class="nav-text">std::promise</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#stdpackaged_task"><span class="nav-text">std::packaged_task</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E5%BA%94%E7%94%A8"><span class="nav-text">并发应用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%A0%E9%94%81%E9%98%9F%E5%88%97lockless-queue"><span class="nav-text">无锁队列(Lockless Queue)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E6%B1%A0thread-pool"><span class="nav-text">线程池(Thread Pool)</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E4%B8%8E%E5%B9%B6%E8%A1%8C"><span class="nav-text">并发与并行</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E6%94%AF%E6%8C%81%E5%BA%93"><span class="nav-text">并发支持库</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#thread"><span class="nav-text">&lt; thread &gt;</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#stdthread"><span class="nav-text">std::thread</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#stdthis_thread"><span class="nav-text">std::this_thread</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mutex"><span class="nav-text">&lt; mutex &gt;</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#stdmutex"><span class="nav-text">std::mutex</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#stdtimed_mutex"><span class="nav-text">std::timed_mutex</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#stdrecursively_mutex"><span class="nav-text">std::recursively_mutex</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#stdrecursively_timed_mutex"><span class="nav-text">std::recursively_timed_mutex</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#stdlock-stdtry_lock"><span class="nav-text">std::lock() &amp; std::try_lock()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#stdlock_guard"><span class="nav-text">std::lock_guard</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#stdunique_lock"><span class="nav-text">std::unique_lock</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#stdcall_once"><span class="nav-text">std::call_once()</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#atomic"><span class="nav-text">&lt; atomic &gt;</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#stdatomic"><span class="nav-text">std::atomic</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#condition_variable"><span class="nav-text">&lt; condition_variable &gt;</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#stdcondition_variable"><span class="nav-text">std::condition_variable</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#stdcondition_variable_any"><span class="nav-text">std::condition_variable_any</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#stdnotify_all_at_thread_exit"><span class="nav-text">std::notify_all_at_thread_exit()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%94%A4%E9%86%92%E4%B8%A2%E5%A4%B1"><span class="nav-text">唤醒丢失</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%99%9A%E5%81%87%E5%94%A4%E9%86%92"><span class="nav-text">虚假唤醒</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#future"><span class="nav-text">&lt; future &gt;</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#stdfuture"><span class="nav-text">std::future</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#stdpromise"><span class="nav-text">std::promise</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#stdpackaged_task"><span class="nav-text">std::packaged_task</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E5%BA%94%E7%94%A8"><span class="nav-text">并发应用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%A0%E9%94%81%E9%98%9F%E5%88%97lockless-queue"><span class="nav-text">无锁队列(Lockless Queue)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E6%B1%A0thread-pool"><span class="nav-text">线程池(Thread Pool)</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -747,13 +747,13 @@ future，并让用户通过 <code>std::future::get()</code> 等待执行结果�
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-count">18</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-count">16</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

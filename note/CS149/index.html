@@ -31,11 +31,15 @@
 <meta property="og:site_name" content="没什么看头的地方">
 <meta property="og:description" content="并行计算。&gt;&gt;&gt; 传送门 &lt;&lt;&lt;">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://leager-zju.github.io/note/CS149/1.png">
+<meta property="og:image" content="http://leager-zju.github.io/note/CS149/2.png">
+<meta property="og:image" content="http://leager-zju.github.io/note/CS149/3.png">
 <meta property="article:published_time" content="2024-03-03T04:08:59.000Z">
-<meta property="article:modified_time" content="2024-03-06T12:46:08.187Z">
+<meta property="article:modified_time" content="2024-03-27T01:55:19.409Z">
 <meta property="article:author" content="Leager">
 <meta property="article:tag" content="CS149">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://leager-zju.github.io/note/CS149/1.png">
 
 <link rel="canonical" href="http://leager-zju.github.io/note/CS149/">
 
@@ -131,12 +135,12 @@
   </li>
         <li class="menu-item menu-item-tags">
 
-    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">17</span></a>
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">16</span></a>
 
   </li>
         <li class="menu-item menu-item-categories">
 
-    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">19</span></a>
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">18</span></a>
 
   </li>
         <li class="menu-item menu-item-archives">
@@ -229,7 +233,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-03-06 20:46:08" itemprop="dateModified" datetime="2024-03-06T20:46:08+08:00">2024-03-06</time>
+                <time title="修改时间：2024-03-27 09:55:19" itemprop="dateModified" datetime="2024-03-27T09:55:19+08:00">2024-03-27</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -282,19 +286,19 @@ Multi-Core Processor</h2>
 <p>一个时钟周期内执行多条 independent 的指令（其实就是 ILP）。所谓
 independent，就是指指令之间不 load/store
 同一内存地址/寄存器里的数据。像下面这两条指令就是不 independent 的。</p>
-<p>&lt;img src="1.png", zoom="67%"/&gt;</p>
+<p><img src="1.png" style="zoom:40%"/></p>
 <blockquote>
 <p>ILP 的实现需要在一个 CPU core 内包含多个 Data Fetch/Instruction
 Decode 模块。</p>
 </blockquote>
 <h4 id="多核multi-core">多核(Multi-core)</h4>
 <p>多核确实能提高执行效率，如果不与其他策略配合使用，只会是堆砌成本的下下策，依然没有改变单核效率低下的问题。</p>
-<p>&lt;img src="2.png", zoom="67%"/&gt;</p>
+<p><img src="2.png" style="zoom:40%"/></p>
 <h4
 id="单个指令处理多个数据simd-single-instruction-multiple-data">单个指令处理多个数据(SIMD,
 Single Instruction Multiple Data)</h4>
 <p>通过向量的方式进行数据处理。</p>
-<p>&lt;img src="3.png", zoom="67%"/&gt;</p>
+<p><img src="3.png" style="zoom:40%"/></p>
 <blockquote>
 <p>SIMD 的实现需要在一个 CPU core 内包含多个 ALU
 模块。配合多核能够实现一条指令处理 #core * #ALU 个数据</p>
@@ -437,13 +441,13 @@ communication</span></a></li></ol></li></ol></div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-count">18</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-count">16</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
