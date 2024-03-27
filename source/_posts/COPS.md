@@ -24,7 +24,7 @@ COPS(Clusters of Order-Preserving Servers, 保序服务器集群)的 Causal+ 提
 
 COPS 有多个数据中心，每个数据中心都由前端服务器和后端 KV 数据存储组成。本地数据中心执行读写操作，在后台以 Causal+ 的顺序跨数据中心复制数据。
 
-<img src="image-20221123152400801.png" alt="image-20221123152400801" style="zoom:67%;" />
+<img src="1.png" />
 
 ## ALPS 系统与 Trade-off
 
@@ -42,7 +42,7 @@ COPS 有多个数据中心，每个数据中心都由前端服务器和后端 KV
 
 下图为一个示例：
 
-<img src="image-20221123154038807.png" alt="image-20221123154038807" style="zoom:67%;" />
+<img src="causal.png" style="zoom:50%;" />
 
 - 根据**单线程内有序规则**得到 `get (y) = 2` $\leadsto$  `put (x, 4)`；
 - 根据 **Gets From 规则**得到 `put (y, 2)` $\leadsto$ `get (y) = 2`；
@@ -62,7 +62,7 @@ COPS 有多个数据中心，每个数据中心都由前端服务器和后端 KV
 
 下图展示了几种主流的一致性模型及其一致性强弱关系。
 
-<img src="image-20221123233736790.png" alt="image-20221123233736790" style="zoom:80%;" />
+<img src="consistency.png" style="zoom:120%;" />
 
 1. **线性化**：它保持全局、实时排序；
 2. **可串行化**：至少确保全局排序；
@@ -93,7 +93,7 @@ COPS 通过采用以下方法实现了可扩展性：
 
 COPS 旨在跨数据中心运行，如下图所示。
 
-<img src="image-20221124160439714.png" style="zoom:80%;"/>
+<img src="overview.png" style="zoom:80%;"/>
 
 客户端仅与本地 COPS 集群通信。系统将 Key 空间划分为若干分区，集群包含数据的完整副本，而集群内部节点存放单个分区。
 
@@ -131,7 +131,7 @@ COPS 中是 `< key: {version, value} >`；而 COPS-GT 中是 `< key: {version, v
 
 客户端 API 由四个操作组成：
 
-<img src="image-20221124183914409.png" alt="image-20221124183914409" style="zoom:67%;" />
+<img src="client.png" />
 
 所有函数都有一个**上下文**参数，客户端库使用它跟踪每个操作之间的因果依赖关系。不同版本的 COPS 略有不同。
 
@@ -144,7 +144,7 @@ COPS 中是 `< key: {version, value} >`；而 COPS-GT 中是 `< key: {version, v
 
 上下文包括最近的依赖项与所有的依赖项，如下图所示。
 
-<img src="image-20221124190342458.png" alt="image-20221124190342458" style="zoom:80%;" />
+<img src="context.png" />
 
 为了减少跟踪依赖关系所需的**空间开销**，COPS-GT 提供 GC 功能，一旦数据被所有 COPS 副本提交，其依赖关系就会被删除。
 
@@ -171,7 +171,7 @@ COPS 中的写操作有两个步骤：
 
 KV 存储公开以下 API 调用以提供这两种操作：
 
-<img src="image-20221124202053597.png" alt="image-20221124202053597" />
+<img src="write1.png" />
 
 #### 写入本地
 
@@ -203,7 +203,7 @@ KV 存储公开以下 API 调用以提供这两种操作：
 
 客户端库向本地集群中负责 Key 的节点依次发起 `get_by_version`：
 
-<img src="image-20221125004741571.png" alt="image-20221125004741571" style="zoom:80%;" />
+<img src="rad.png" style="zoom:80%;" />
 
 此读取可以读取 Key 的任一版本，在 COPS 中总是读取最新版本。收到响应后，客户端库将 `< key, version, [deps] >` 添加到上下文，并返回结果值。
 
@@ -211,7 +211,7 @@ KV 存储公开以下 API 调用以提供这两种操作：
 
 COPS-GT 提供 `get_trans` 接口，仅需两轮 `get_by_version`。算法实现如下。
 
-<img src="image-20221125005327803.png" alt="image-20221125005327803" style="zoom:80%;" />
+<img src="txn.png" style="zoom:80%;" />
 
 如果它检索到的版本 >= 依赖列表中的版本，则该结果的因果依赖关系得到满足。
 

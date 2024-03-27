@@ -31,7 +31,7 @@ C++11 新增了官方**并发支持库**，使得我们能够更好地在系统�
 
 并发支持库与 boost 很像，主要包含以下 5 个头文件。
 
-### <thread>
+### < thread >
 
 > 此头文件中定义了 `std::thread` 以及访问当前执行线程的函数 `std::this_thread`
 
@@ -41,12 +41,12 @@ C++11 新增了官方**并发支持库**，使得我们能够更好地在系统�
 
 首先讲下**初始化方式**。由于每个线程都是一个独立的执行单位，故不存在两个同样的执行线程，那么**拷贝构造**与**拷贝赋值**因此被**弃置**(`delete`)。除此之外，其初始化方式共有四种重载形式：
 
-|                           重载形式                           |                             说明                             |
-| :----------------------------------------------------------: | :----------------------------------------------------------: |
-|                     `thread() noexcept`                      |  **默认构造函数**。构造**不**关联执行线程的新 thread 对象。  |
-|             `thread( thread&& other ) noexcept`              | **移动构造函数**。将 `other` 所关联的执行线程的资源转移，此后 `other` **不**关联任何执行线程。 |
-|        `thread& operator=( thread&& other ) noexcept`        | **移动赋值运算符**。若当前对象此时拥有关联的运行中线程（即 `joinable() == true` ），则调用 `std::terminate()`。 |
-| `template< class Func, class... Args > explicit thread( Func&& f, Args&&... args )` | **初始化构造函数**。thread 创建并关联一个新的执行线程，开始执行可调用对象 `f`，相应参数也一并给出。 |
+|                                      重载形式                                       |                                                      说明                                                       |
+| :---------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------: |
+|                                 `thread() noexcept`                                 |                           **默认构造函数**。构造**不**关联执行线程的新 thread 对象。                            |
+|                         `thread( thread&& other ) noexcept`                         |         **移动构造函数**。将 `other` 所关联的执行线程的资源转移，此后 `other` **不**关联任何执行线程。          |
+|                   `thread& operator=( thread&& other ) noexcept`                    | **移动赋值运算符**。若当前对象此时拥有关联的运行中线程（即 `joinable() == true` ），则调用 `std::terminate()`。 |
+| `template< class Func, class... Args > explicit thread( Func&& f, Args&&... args )` |       **初始化构造函数**。thread 创建并关联一个新的执行线程，开始执行可调用对象 `f`，相应参数也一并给出。       |
 
 接下来是其**成员函数**：
 
@@ -127,7 +127,7 @@ int main() {
     inline void sleep_until(const std::chrono::time_point<Clock, Duration>& time)
     ```
 
-### <mutex>
+### < mutex >
 
 > 此头文件中定义了各种互斥锁如 `std::mutex`，`std::lock_guard`，`std::unique_lock` 等
 
@@ -328,7 +328,7 @@ int main() {
 // output: 0 call
 ```
 
-### <atomic>
+### < atomic >
 
 > 此头文件中定义了原子变量 `std::atomic<T>`，以及其各种特化 `std::atomic_int`，`std::atomic_bool` 等
 
@@ -366,7 +366,7 @@ void sub() { x--; }
 
 事实上，原子变量能帮助我们自动控制线程之间的同步，保证加/减等操作的原子性——若一个线程写入原子对象，同时另一线程从它读取，则行为良好定义。
 
-### <condition_variable>
+### < condition_variable >
 
 #### std::condition_variable
 
@@ -596,7 +596,7 @@ void producer() {
 
 解决办法就是**将 wait 放到条件判断循环中**，即类似于上一节中第二段代码。
 
-### <future>
+### < future >
 
 #### std::future
 

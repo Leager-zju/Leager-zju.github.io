@@ -27,11 +27,11 @@ img:
 
 TinyKV 存储使用 3 个 CF 来存放不同类型数据，分别为：
 
-|CF|Key|Value|
-|:-:|:-:|:-:|
-|default|UserKey_StartTs|Value|
-|lock|UserKey|Lock Data Structure To Byte|
-|Write|UserKey_CommitTs|Write Data Structure To Byte|
+|   CF    |       Key        |            Value             |
+| :-----: | :--------------: | :--------------------------: |
+| default | UserKey_StartTs  |            Value             |
+|  lock   |     UserKey      | Lock Data Structure To Byte  |
+|  Write  | UserKey_CommitTs | Write Data Structure To Byte |
 
 > 存储按 key 字母序递增排序。同个 key 按存储时间戳降序排序，即越新的在越前面。
 

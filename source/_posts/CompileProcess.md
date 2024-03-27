@@ -188,11 +188,11 @@ typedef struct {
 
 以文章最开始的程序为例，执行 `gcc main.c -o main.o` 后，`main.o` 符号表中会出现以下三个条目：
 
-|Idx|type|binding|value|size|Ndx|Section|符号名|
-|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-|8|FUNC|GLOBAL|0|24|1|.text|main|
-|9|DATA|GLOBAL|0|8|3|.data|array|
-|10|NOTYPE|GLOBAL|0|0|Undefined|Undefined|sum|
+|  Idx  |  type  | binding | value | size  |    Ndx    |  Section  | 符号名 |
+| :---: | :----: | :-----: | :---: | :---: | :-------: | :-------: | :----: |
+|   8   |  FUNC  | GLOBAL  |   0   |  24   |     1     |   .text   |  main  |
+|   9   |  DATA  | GLOBAL  |   0   |   8   |     3     |   .data   | array  |
+|  10   | NOTYPE | GLOBAL  |   0   |   0   | Undefined | Undefined |  sum   |
 
 易得，`main` 为 `.text` 节中偏移 0 的 24 字节 GLOBAL 函数。同理，`array` 为 `.data` 节中偏移 0 的 8 字节 GLOBAL 变量。`sum` 由于只有声明没有定义，故被视为一个外部符号，交给链接器处理。
 
@@ -305,10 +305,10 @@ Disassembly of section .text:
 
 `main()` 中引用了两个全局符号：`array` 和 `sum`。汇编器为每个引用产生一个重定位条目，分别为：
 
-|offset|type|symbol|addend|
-|:-:|:-:|:-:|:-:|
-|0x14|R_X86_64_PC32|array|-0x4|
-|0x1c|R_X86_64_PLT32|sum|-0x4|
+| offset |      type      | symbol | addend |
+| :----: | :------------: | :----: | :----: |
+|  0x14  | R_X86_64_PC32  | array  |  -0x4  |
+|  0x1c  | R_X86_64_PLT32 |  sum   |  -0x4  |
 
 这就告诉链接器，需要对节偏移 `0x14` 处的引用 `array` 和节偏移 `0x1c` 处的引用 `sum` 进行重定位，这样在运行时就能正确执行语句。
 

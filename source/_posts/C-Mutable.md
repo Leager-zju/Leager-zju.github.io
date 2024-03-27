@@ -5,7 +5,7 @@ mathjax: true
 date: 2023-03-02 14:29:34
 summary:
 categories: C++
-tags: C++ basic
+tags: C++ Basic
 img:
 ---
 
@@ -15,7 +15,7 @@ img:
 
 ## 类中的 mutable
 
-先聊聊一个有趣的话题，关于 [**const**](../../C-Basic/C-Const) 类成员函数有两大观点流派：
+先聊聊一个有趣的话题，关于 [**const**](../../C/C-Const) 类成员函数有两大观点流派：
 
 1. **bitwise constness**：主张成员函数只有在不更改对象的任何非静态成员变量时才被认为是 const，即**绝对**常量；
       
@@ -63,6 +63,6 @@ class Foo {
 
 ## lambda 表达式中的 mutable
 
-详情请见[本文](../../C-11/C-Function/#可选说明符)。
+详情请见[本文](../../C/C-Function/#可选说明符)。
 
 简单来说就是 lambda 表达式会将值捕获的变量视为 `const`，若想要对其进行修改需加上 `mutable` 说明符。

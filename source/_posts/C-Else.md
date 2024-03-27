@@ -297,25 +297,25 @@ int operator""_s (unsigned long long time) {
 
 forward_list 内部实现以下功能：
 
-|                    方法                    |                             描述                             |
-| :----------------------------------------: | :----------------------------------------------------------: |
-| `begin()` /  `cbegin` / `end()` / `cend()` |                  返回指向起始/末尾的迭代器                   |
-|    `before_begin()` / `cbefore_begin()`    |           返回指向第一个元素之前的迭代器（头节点）           |
-|                 `empty()`                  |                       检查容器是否为空                       |
-|                `max_size()`                |                     返回可容纳最大元素数                     |
-|                 `clear()`                  |                           清空容器                           |
-|      `insert_after(iter_pos, value)`       |                      在某处之后插入元素                      |
-|      `emplace_after(iter_pos, value)`      |                      在某处之后构造元素                      |
-|          `erase_after(iter_pos)`           |                      移除某处之后的元素                      |
-|            `push_front(value)`             |                      在链表头部插入元素                      |
-|           `emplace_front(value)`           |                      在链表头部构造元素                      |
-|               `pop_front()`                |                         移除头部元素                         |
-|           `merge(forward_list)`            |         合并两个已排序链表，默认升序，可自定义比较器         |
-|   `splice_after(iter_pos, forward_list)`   |           移动另一链表的元素到某处后，执行移动语义           |
-|    `remove(value)` / `remove_if(pred)`     |                    移除满足特定标准的元素                    |
-|                `reverse()`                 |                           倒转链表                           |
+|                    方法                    |                                    描述                                    |
+| :----------------------------------------: | :------------------------------------------------------------------------: |
+| `begin()` /  `cbegin` / `end()` / `cend()` |                         返回指向起始/末尾的迭代器                          |
+|    `before_begin()` / `cbefore_begin()`    |                  返回指向第一个元素之前的迭代器（头节点）                  |
+|                 `empty()`                  |                              检查容器是否为空                              |
+|                `max_size()`                |                            返回可容纳最大元素数                            |
+|                 `clear()`                  |                                  清空容器                                  |
+|      `insert_after(iter_pos, value)`       |                             在某处之后插入元素                             |
+|      `emplace_after(iter_pos, value)`      |                             在某处之后构造元素                             |
+|          `erase_after(iter_pos)`           |                             移除某处之后的元素                             |
+|            `push_front(value)`             |                             在链表头部插入元素                             |
+|           `emplace_front(value)`           |                             在链表头部构造元素                             |
+|               `pop_front()`                |                                移除头部元素                                |
+|           `merge(forward_list)`            |                合并两个已排序链表，默认升序，可自定义比较器                |
+|   `splice_after(iter_pos, forward_list)`   |                  移动另一链表的元素到某处后，执行移动语义                  |
+|    `remove(value)` / `remove_if(pred)`     |                           移除满足特定标准的元素                           |
+|                `reverse()`                 |                                  倒转链表                                  |
 |                 `unique()`                 | 如果有多个连续的值相等的元素，则只保留第一个，移除后续所有，可自定义比较器 |
-|                  `sort()`                  |              排序链表，默认升序，可自定义比较器              |
+|                  `sort()`                  |                     排序链表，默认升序，可自定义比较器                     |
 
 ### std::unordered_map
 

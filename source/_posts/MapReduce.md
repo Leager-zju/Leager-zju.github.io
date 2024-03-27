@@ -23,8 +23,8 @@ Google 从 [Lisp](Lisp 和许多其他函数式语言中存在的 map 和 reduce
 
 计算采用一组输入 K/V 对，并产生一组输出 K/V 对。MapReduce 库将计算表示为由用户编写的两个函数：
 
-1. **`map`**：根据输入生成一组中间 K/V 对。 MapReduce 库将所有具有相同 Key $k_i$ 的 K/V 对传递给 Reduce 函数；
-2. **`reduce`**。将 $k_i$ 对应的所有值合并成 Value Set，并能通过迭代器访问；
+1. `map()`：根据输入生成一组中间 K/V 对。 MapReduce 库将所有具有相同 Key $k_i$ 的 K/V 对传递给 Reduce 函数；
+2. `reduce()`：将 $k_i$ 对应的所有值合并成 Value Set，并能通过迭代器访问；
 
 > 以计算大量文档中每个单词出现次数为例，其伪代码如下所示：
 >
@@ -50,7 +50,7 @@ Google 从 [Lisp](Lisp 和许多其他函数式语言中存在的 map 和 reduce
 
 ## 实现
 
-关于 lab1 MapReduce 的具体实现可参考[这篇文章](../6-824lab1)。
+关于 lab1 MapReduce 的具体实现可参考[这篇文章](../../lab/6-824lab1)。
 
 ### 操作流程
 
