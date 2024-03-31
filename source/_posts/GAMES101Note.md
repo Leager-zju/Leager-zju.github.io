@@ -71,7 +71,7 @@ $$
 
 <img src="rotate.png"/>
 
-我们可以采用特值法，$(1, 0)\rarr(\cos{\theta}, \sin{\theta})\quad(0, 1)\rarr(-\sin{\theta}, \cos{\theta})$，代入 $\vec{a'}=\bold{M}\vec{a}$ 求解，从而得到：
+我们可以采用特值法，$(1, 0)\rightarrow(\cos{\theta}, \sin{\theta})\quad(0, 1)\rarr(-\sin{\theta}, \cos{\theta})$，代入 $\vec{a'}=\mathbf{M}\vec{a}$ 求解，从而得到：
 
 $$
 \left(\begin{matrix}
@@ -111,11 +111,11 @@ $$
 
 #### 齐次坐标与平移(Translation)
 
-上面这些都属于线性变换，都可以通过 $\vec{a} = \bold{M}\vec{a}$ 的方式来表示，但这并不适用于“平移”操作，比如下面这张图：
+上面这些都属于线性变换，都可以通过 $\vec{a} = \mathbf{M}\vec{a}$ 的方式来表示，但这并不适用于“平移”操作，比如下面这张图：
 
 <img src="translation.png"/>
 
-我们之前讨论的变换，不难发现图像在变换前后，$(0, 0)$ 处的点是不动的，但平移不然。我们似乎不能通过 $\vec{a} = \bold{M}\vec{a}$ 使得 $(x', y') = (x+t_x, y+t_y)$。换句话说，平移并非线性变换，其需要的“变换”应当为
+我们之前讨论的变换，不难发现图像在变换前后，$(0, 0)$ 处的点是不动的，但平移不然。我们似乎不能通过 $\vec{a} = \mathbf{M}\vec{a}$ 使得 $(x', y') = (x+t_x, y+t_y)$。换句话说，平移并非线性变换，其需要的“变换”应当为
 
 
 $$
@@ -195,11 +195,11 @@ $$
 
 即线性变换+平移。这样就用一个形式统一了所有的变换。
 
-- **缩放**: $\bold{S}(s_x, s_y) = \left(\begin{matrix}s_x & 0 & 0\\ 0 & s_y & 0\\0 & 0 & 1\end{matrix}\right)$
+- **缩放**: $\mathbf{S}(s_x, s_y) = \left(\begin{matrix}s_x & 0 & 0\\ 0 & s_y & 0\\0 & 0 & 1\end{matrix}\right)$
 
-- **旋转**: $\bold{R}(\theta) = \left(\begin{matrix}\cos{\theta} & -\sin{\theta} & 0\\ \sin{\theta} & \cos{\theta} & 0\\0 & 0 & 1\end{matrix}\right)$
+- **旋转**: $\mathbf{R}(\theta) = \left(\begin{matrix}\cos{\theta} & -\sin{\theta} & 0\\ \sin{\theta} & \cos{\theta} & 0\\0 & 0 & 1\end{matrix}\right)$
 
-- **平移**: $\bold{T}(t_x, t_y) = \left(\begin{matrix}s_x & 0 & 0\\ 0 & s_y & 0\\0 & 0 & 1\end{matrix}\right)$
+- **平移**: $\mathbf{T}(t_x, t_y) = \left(\begin{matrix}s_x & 0 & 0\\ 0 & s_y & 0\\0 & 0 & 1\end{matrix}\right)$
 
 #### 逆变换(Inverse)
 
@@ -218,7 +218,7 @@ $$
 1. 先平移后旋转；
 2. 先旋转后平移；
 
-两者得到的结果并不一样。这是**矩阵不满足交换律**导致的，即 $\bold{R}(\theta)·\bold{T}(t_x, t_y) \neq \bold{T}(t_x, t_y)·\bold{R}(\theta)$
+两者得到的结果并不一样。这是**矩阵不满足交换律**导致的，即 $\mathbf{R}(\theta)·\mathbf{T}(t_x, t_y) \neq \mathbf{T}(t_x, t_y)·\mathbf{R}(\theta)$
 
 如果希望图像围绕一个特定的点 $(x_0, y_0)$ 进行旋转，那么可以先平移至与原点对齐，旋转后再回到原来的位置，即
 
