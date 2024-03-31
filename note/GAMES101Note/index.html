@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/largeicon.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/smallicon.jpg">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link href="https://fonts.googleapis.com/css?family=Noto+Serif+SC:400,500,700&display=swap&subset=chinese-simplified" rel="stylesheet">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Amstelvar:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"leager-zju.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"b2t":true},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="&gt;&gt;&gt;课程主页传送门&lt;&lt;&lt;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="GAMES101（现代图形学入门）の 笔记">
+<meta property="og:url" content="http://leager-zju.github.io/note/GAMES101Note/index.html">
+<meta property="og:site_name" content="没什么看头的地方">
+<meta property="og:description" content="&gt;&gt;&gt;课程主页传送门&lt;&lt;&lt;">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://leager-zju.github.io/note/GAMES101Note/reflection.png">
+<meta property="og:image" content="http://leager-zju.github.io/note/GAMES101Note/rotate.png">
+<meta property="og:image" content="http://leager-zju.github.io/note/GAMES101Note/shear.png">
+<meta property="og:image" content="http://leager-zju.github.io/note/GAMES101Note/translation.png">
+<meta property="og:image" content="http://leager-zju.github.io/note/GAMES101Note/inverse.png">
+<meta property="og:image" content="http://leager-zju.github.io/note/GAMES101Note/compose.png">
+<meta property="og:image" content="http://leager-zju.github.io/note/GAMES101Note/trt.png">
+<meta property="article:published_time" content="2024-03-31T13:10:06.000Z">
+<meta property="article:modified_time" content="2024-03-31T16:36:45.214Z">
+<meta property="article:author" content="Leager">
+<meta property="article:tag" content="GAMES">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://leager-zju.github.io/note/GAMES101Note/reflection.png">
+
+<link rel="canonical" href="http://leager-zju.github.io/note/GAMES101Note/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>GAMES101（现代图形学入门）の 笔记 | 没什么看头的地方</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">没什么看头的地方</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里可能没有你想看的...</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于我</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">17</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">18</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">88</span></a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.io/note/GAMES101Note/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/Avatar.jpg">
+      <meta itemprop="name" content="Leager">
+      <meta itemprop="description" content="【数据删除】">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="没什么看头的地方">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          GAMES101（现代图形学入门）の 笔记
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-03-31 21:10:06" itemprop="dateCreated datePublished" datetime="2024-03-31T21:10:06+08:00">2024-03-31</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-04-01 00:36:45" itemprop="dateModified" datetime="2024-04-01T00:36:45+08:00">2024-04-01</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/note/" itemprop="url" rel="index"><span itemprop="name">note</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><a
+target="_blank" rel="noopener" href="https://sites.cs.ucsb.edu/~lingqi/teaching/games101.html">&gt;&gt;&gt;课程主页传送门&lt;&lt;&lt;</a></p>
+<span id="more"></span>
+<h2 id="变换transformation">变换(Transformation)</h2>
+<p>变换分为两种：Modeling（平移、旋转、缩放等）和 Viewing（3D 投影到
+2D）</p>
+<h3 id="模型变换modeling">模型变换(Modeling)</h3>
+<p>先讨论二维的情况。</p>
+<blockquote>
+<p>在二维平面图上，所有的 modeling 都是基于原点 <span
+class="math inline">\((0, 0)\)</span> 的。</p>
+</blockquote>
+<h4 id="缩放scale">缩放(Scale)</h4>
+<p>对于原图像上任意一个点 <span class="math inline">\((x,
+y)\)</span>，其缩放后的坐标为 <span class="math inline">\((x&#39;,
+y&#39;) = (s_x·x, s_y·y)\)</span>。其中 <span class="math inline">\(s_x,
+s_y\)</span> 分别表示 <span class="math inline">\(\vec{x},
+\vec{y}\)</span> 方向上的缩放倍率。</p>
+<p>用线性代数的方式表示就是：</p>
+<p><span class="math display">\[
+\left(\begin{matrix}
+x&#39;\\ y&#39;
+\end{matrix}\right)
+=
+\left(\begin{matrix}
+s_x &amp; 0\\
+0 &amp; s_y
+\end{matrix}\right)
+\left(\begin{matrix}
+x\\ y
+\end{matrix}\right)
+\]</span></p>
+<h4 id="镜像reflection">镜像(Reflection)</h4>
+<p>考虑下面这张图</p>
+<p><img src="reflection.png"/></p>
+<p>我们也可以得到下面这样一个线性表达式：</p>
+<p><span class="math display">\[
+\left(\begin{matrix}
+x&#39;\\ y&#39;
+\end{matrix}\right)
+=
+\left(\begin{matrix}
+-1 &amp; 0\\
+0 &amp; 1
+\end{matrix}\right)
+\left(\begin{matrix}
+x\\ y
+\end{matrix}\right)
+\]</span></p>
+<h4 id="旋转rotate">旋转(Rotate)</h4>
+<p>考虑下面这张图：</p>
+<p><img src="rotate.png"/></p>
+<p>我们可以采用特值法，<span class="math inline">\((1,
+0)\rarr(\cos{\theta}, \sin{\theta})\quad(0, 1)\rarr(-\sin{\theta},
+\cos{\theta})\)</span>，代入 <span
+class="math inline">\(\vec{a&#39;}=\bold{M}\vec{a}\)</span>
+求解，从而得到：</p>
+<p><span class="math display">\[
+\left(\begin{matrix}
+x&#39;\\ y&#39;
+\end{matrix}\right)
+=
+\left(\begin{matrix}
+\cos{\theta} &amp; -\sin{\theta}\\
+\sin{\theta} &amp; \cos{\theta}
+\end{matrix}\right)
+\left(\begin{matrix}
+x\\ y
+\end{matrix}\right)
+\]</span></p>
+<h4 id="切变shear">切变(Shear)</h4>
+<p>考虑下面这张图：</p>
+<p><img src="shear.png"/></p>
+<p>坐标在 <span class="math inline">\(\vec{x}\)</span>
+方向上的偏移量与其纵坐标的大小有关，并且呈线性关系，同时纵坐标又不会发生偏移，那么很容易能够得到下面这个关系：</p>
+<p><span class="math display">\[
+\left(\begin{matrix}
+x&#39;\\ y&#39;
+\end{matrix}\right)
+=
+\left(\begin{matrix}
+1 &amp; a\\
+0 &amp; 1
+\end{matrix}\right)
+\left(\begin{matrix}
+x\\ y
+\end{matrix}\right)
+\]</span></p>
+<h4 id="齐次坐标与平移translation">齐次坐标与平移(Translation)</h4>
+<p>上面这些都属于线性变换，都可以通过 <span
+class="math inline">\(\vec{a} = \bold{M}\vec{a}\)</span>
+的方式来表示，但这并不适用于“平移”操作，比如下面这张图：</p>
+<p><img src="translation.png"/></p>
+<p>我们之前讨论的变换，不难发现图像在变换前后，<span
+class="math inline">\((0, 0)\)</span>
+处的点是不动的，但平移不然。我们似乎不能通过 <span
+class="math inline">\(\vec{a} = \bold{M}\vec{a}\)</span> 使得 <span
+class="math inline">\((x&#39;, y&#39;) = (x+t_x,
+y+t_y)\)</span>。换句话说，平移并非线性变换，其需要的“变换”应当为</p>
+<p><span class="math display">\[
+\left(\begin{matrix}
+x&#39;\\ y&#39;
+\end{matrix}\right)
+=
+\left(\begin{matrix}
+a &amp; b\\
+c &amp; d
+\end{matrix}\right)
+\left(\begin{matrix}
+x\\ y
+\end{matrix}\right)
++
+\left(\begin{matrix}
+t_x\\ t_y
+\end{matrix}\right)
+\tag{1}
+\]</span></p>
+<p>于是科学家引入了“齐次坐标”，对于二维的点/向量，为其增加第三个坐标
+<span class="math inline">\(w\)</span>。当 <span
+class="math inline">\(w=1\)</span> 时，表示点；<span
+class="math inline">\(w=0\)</span> 时，表示向量。</p>
+<p>那么对于图像上任意一个点，对其进行平移操作，相当于做了下面这样的变换：</p>
+<p><span class="math display">\[
+\left(\begin{matrix}
+x&#39;\\ y&#39;\\ w&#39;
+\end{matrix}\right)
+=
+\left(\begin{matrix}
+1 &amp; 0 &amp; t_x\\
+0 &amp; 1 &amp; t_y\\
+0 &amp; 0 &amp; 1
+\end{matrix}\right)
+\left(\begin{matrix}
+x\\ y\\ 1
+\end{matrix}\right)
+=
+\left(\begin{matrix}
+x+t_x\\ y+t_y\\ 1
+\end{matrix}\right)
+\]</span></p>
+<p>得到的结果依然是一个“点”的形式。而对于向量而言，因为 <span
+class="math inline">\(w=0\)</span>，那么有</p>
+<ul>
+<li>vector ± vector = vector</li>
+<li>point - point = vector</li>
+<li>point + vector = point</li>
+</ul>
+<p>从而能够满足向量的平移不变性。</p>
+<blockquote>
+<p>那么 point + point 呢？我们定义当 <span
+class="math inline">\(w\neq0\)</span> 时，<span
+class="math inline">\(\left(\begin{matrix}x\\ y\\
+w\end{matrix}\right)\)</span> 等同于点 <span
+class="math inline">\(\left(\begin{matrix}x/w\\ y/w\\
+1\end{matrix}\right)\)</span>。易得<strong>两点相加得到该两点所成线段的中点</strong>。</p>
+</blockquote>
+<h4 id="仿射变换affine">仿射变换(Affine)</h4>
+<p>根据齐次坐标，我们能够把式(1)改写为：</p>
+<p><span class="math display">\[
+\left(\begin{matrix}
+x&#39;\\ y&#39;\\ 1
+\end{matrix}\right)
+=
+\left(\begin{matrix}
+a &amp; b &amp; t_x\\
+c &amp; d &amp; t_y\\
+0 &amp; 0 &amp; 1
+\end{matrix}\right)
+\left(\begin{matrix}
+x\\ y\\ 1
+\end{matrix}\right)
+=
+\left(\begin{matrix}
+ax+by+t_x\\ cx+dy+t_y\\ 1
+\end{matrix}\right)
+\]</span></p>
+<p>即线性变换+平移。这样就用一个形式统一了所有的变换。</p>
+<ul>
+<li><p><strong>缩放</strong>: <span class="math inline">\(\bold{S}(s_x,
+s_y) = \left(\begin{matrix}s_x &amp; 0 &amp; 0\\ 0 &amp; s_y &amp; 0\\0
+&amp; 0 &amp; 1\end{matrix}\right)\)</span></p></li>
+<li><p><strong>旋转</strong>: <span
+class="math inline">\(\bold{R}(\theta) =
+\left(\begin{matrix}\cos{\theta} &amp; -\sin{\theta} &amp; 0\\
+\sin{\theta} &amp; \cos{\theta} &amp; 0\\0 &amp; 0 &amp;
+1\end{matrix}\right)\)</span></p></li>
+<li><p><strong>平移</strong>: <span class="math inline">\(\bold{T}(t_x,
+t_y) = \left(\begin{matrix}s_x &amp; 0 &amp; 0\\ 0 &amp; s_y &amp; 0\\0
+&amp; 0 &amp; 1\end{matrix}\right)\)</span></p></li>
+</ul>
+<h4 id="逆变换inverse">逆变换(Inverse)</h4>
+<p>相当于左乘一个逆矩阵。</p>
+<p><img src="inverse.png"/></p>
+<h4 id="对变换进行压缩composing-transforms">对变换进行压缩(Composing
+Transforms)</h4>
+<p>根据上面的结论，<strong>左乘</strong>一个仿射矩阵相当于进行相应的变换。我们知道矩阵是有结合律的，一系列变换相当于不断左乘对应的矩阵，那么左侧所有矩阵的乘积就是这一系列变换的总和。</p>
+<p><img src="compose.png"/></p>
+<p>再考虑下面两种情况：</p>
+<ol type="1">
+<li>先平移后旋转；</li>
+<li>先旋转后平移；</li>
+</ol>
+<p>两者得到的结果并不一样。这是<strong>矩阵不满足交换律</strong>导致的，即
+<span class="math inline">\(\bold{R}(\theta)·\bold{T}(t_x, t_y) \neq
+\bold{T}(t_x, t_y)·\bold{R}(\theta)\)</span></p>
+<p>如果希望图像围绕一个特定的点 <span class="math inline">\((x_0,
+y_0)\)</span>
+进行旋转，那么可以先平移至与原点对齐，旋转后再回到原来的位置，即</p>
+<p><img src="trt.png"/></p>
+<h4 id="高维仿射">高维仿射</h4>
+<p>也是一样的，都需要进行一个坐标的拓展。对于三维坐标系而言，其仿射变换长下面这样：</p>
+<p><span class="math display">\[
+\left(\begin{matrix}
+x&#39;\\ y&#39;\\ w&#39;\\ 1
+\end{matrix}\right)
+=
+\left(\begin{matrix}
+a &amp; b &amp; c &amp; t_x\\
+d &amp; e &amp; f &amp; t_y\\
+g &amp; h &amp; i &amp; t_z\\
+0 &amp; 0 &amp; 0 &amp; 1
+\end{matrix}\right)
+\left(\begin{matrix}
+x\\ y\\ z\\ 1
+\end{matrix}\right)
+\]</span></p>
+<p>四维五维同理。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/GAMES/" rel="tag"># GAMES</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/Computer-Network/TCPThings/" rel="prev" title="TCP Things">
+      <i class="fa fa-chevron-left"></i> TCP Things
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%98%E6%8D%A2transformation"><span class="nav-text">变换(Transformation)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%9E%8B%E5%8F%98%E6%8D%A2modeling"><span class="nav-text">模型变换(Modeling)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%A9%E6%94%BEscale"><span class="nav-text">缩放(Scale)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%95%9C%E5%83%8Freflection"><span class="nav-text">镜像(Reflection)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%8B%E8%BD%ACrotate"><span class="nav-text">旋转(Rotate)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%87%E5%8F%98shear"><span class="nav-text">切变(Shear)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%BD%90%E6%AC%A1%E5%9D%90%E6%A0%87%E4%B8%8E%E5%B9%B3%E7%A7%BBtranslation"><span class="nav-text">齐次坐标与平移(Translation)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%BF%E5%B0%84%E5%8F%98%E6%8D%A2affine"><span class="nav-text">仿射变换(Affine)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%86%E5%8F%98%E6%8D%A2inverse"><span class="nav-text">逆变换(Inverse)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%B9%E5%8F%98%E6%8D%A2%E8%BF%9B%E8%A1%8C%E5%8E%8B%E7%BC%A9composing-transforms"><span class="nav-text">对变换进行压缩(Composing
+Transforms)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%AB%98%E7%BB%B4%E4%BB%BF%E5%B0%84"><span class="nav-text">高维仿射</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Leager"
+      src="/images/Avatar.jpg">
+  <p class="site-author-name" itemprop="name">Leager</p>
+  <div class="site-description" itemprop="description">【数据删除】</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">88</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Leager-zju" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Leager-zju" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div>
+<span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("09/25/2022 00:00:00");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "本站已存活 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+    }
+setInterval("createtime()",250);
+</script>
+</div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Leager</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,0' opacity='0.5' zIndex='-1' count='160' src="//cdn.jsdelivr.net/gh/theme-next/theme-next-canvas-nest@1.0.0/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>
