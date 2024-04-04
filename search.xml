@@ -10656,8 +10656,8 @@ class="math inline">\((0, 0)\)</span> 的。</p>
 <p>对于原图像上任意一个点 <span class="math inline">\((x,
 y)\)</span>，其缩放后的坐标为 <span class="math inline">\((x&#39;,
 y&#39;) = (s_x·x, s_y·y)\)</span>。其中 <span class="math inline">\(s_x,
-s_y\)</span> 分别表示 <span class="math inline">\(\vec{x},
-\vec{y}\)</span> 方向上的缩放倍率。</p>
+s_y\)</span> 分别表示 <span class="math inline">\(\mathbf{x},
+\mathbf{y}\)</span> 方向上的缩放倍率。</p>
 <p>用线性代数的方式表示就是：</p>
 <p><span class="math display">\[
 \left(\begin{matrix}
@@ -10693,8 +10693,8 @@ x\\ y
 <p>考虑下面这张图：</p>
 <p><img src="rotate.png"/></p>
 <p>我们可以采用特值法，<span class="math inline">\((1,
-0)\rightarrow(\cos{\theta}, \sin{\theta})\quad(0, 1)\rarr(-\sin{\theta},
-\cos{\theta})\)</span>，代入 <span
+0)\rightarrow(\cos{\alpha}, \sin{\alpha})\quad(0,
+1)\rightarrow(-\sin{\alpha}, \cos{\alpha})\)</span>，代入 <span
 class="math inline">\(\vec{a&#39;}=\mathbf{M}\vec{a}\)</span>
 求解，从而得到：</p>
 <p><span class="math display">\[
@@ -10703,17 +10703,33 @@ x&#39;\\ y&#39;
 \end{matrix}\right)
 =
 \left(\begin{matrix}
-\cos{\theta} &amp; -\sin{\theta}\\
-\sin{\theta} &amp; \cos{\theta}
+\cos{\alpha} &amp; -\sin{\alpha}\\
+\sin{\alpha} &amp; \cos{\alpha}
 \end{matrix}\right)
 \left(\begin{matrix}
 x\\ y
 \end{matrix}\right)
 \]</span></p>
+<blockquote>
+<p>这里如果改变旋转方向，从逆时针改为顺时针，那么矩阵 <span
+class="math inline">\(\mathbf{M}\)</span> 应该代入 <span
+class="math inline">\(-\alpha\)</span>，得到</p>
+<p><span class="math display">\[
+\mathbf{M(-\alpha)} =
+\left(\begin{matrix}
+\cos{\alpha} &amp; \sin{\alpha}\\
+-\sin{\alpha} &amp; \cos{\alpha}
+\end{matrix}\right) = \mathbf{M}(\alpha)^T
+\]</span></p>
+<p>事实上改变方向，角度不变的两个旋转应该互为逆操作，所以也有 <span
+class="math inline">\(\mathbf{M(-\alpha)} =
+\mathbf{M(\alpha)}^{-1}\)</span></p>
+<p>易得，<strong>旋转矩阵是一个正交矩阵</strong>。</p>
+</blockquote>
 <h4 id="切变shear">切变(Shear)</h4>
 <p>考虑下面这张图：</p>
 <p><img src="shear.png"/></p>
-<p>坐标在 <span class="math inline">\(\vec{x}\)</span>
+<p>坐标在 <span class="math inline">\(\mathbf{x}\)</span>
 方向上的偏移量与其纵坐标的大小有关，并且呈线性关系，同时纵坐标又不会发生偏移，那么很容易能够得到下面这个关系：</p>
 <p><span class="math display">\[
 \left(\begin{matrix}
@@ -10823,9 +10839,9 @@ class="math inline">\(\mathbf{S}(s_x, s_y) = \left(\begin{matrix}s_x
 &amp; 0 &amp; 0\\ 0 &amp; s_y &amp; 0\\0 &amp; 0 &amp;
 1\end{matrix}\right)\)</span></p></li>
 <li><p><strong>旋转</strong>: <span
-class="math inline">\(\mathbf{R}(\theta) =
-\left(\begin{matrix}\cos{\theta} &amp; -\sin{\theta} &amp; 0\\
-\sin{\theta} &amp; \cos{\theta} &amp; 0\\0 &amp; 0 &amp;
+class="math inline">\(\mathbf{R}(\alpha) =
+\left(\begin{matrix}\cos{\alpha} &amp; -\sin{\alpha} &amp; 0\\
+\sin{\alpha} &amp; \cos{\alpha} &amp; 0\\0 &amp; 0 &amp;
 1\end{matrix}\right)\)</span></p></li>
 <li><p><strong>平移</strong>: <span
 class="math inline">\(\mathbf{T}(t_x, t_y) = \left(\begin{matrix}s_x
@@ -10845,13 +10861,13 @@ Transforms)</h4>
 <li>先旋转后平移；</li>
 </ol>
 <p>两者得到的结果并不一样。这是<strong>矩阵不满足交换律</strong>导致的，即
-<span class="math inline">\(\mathbf{R}(\theta)·\mathbf{T}(t_x, t_y) \neq
-\mathbf{T}(t_x, t_y)·\mathbf{R}(\theta)\)</span></p>
+<span class="math inline">\(\mathbf{R}(\alpha)·\mathbf{T}(t_x, t_y) \neq
+\mathbf{T}(t_x, t_y)·\mathbf{R}(\alpha)\)</span></p>
 <p>如果希望图像围绕一个特定的点 <span class="math inline">\((x_0,
 y_0)\)</span>
 进行旋转，那么可以先平移至与原点对齐，旋转后再回到原来的位置，即</p>
 <p><img src="trt.png"/></p>
-<h4 id="高维仿射">高维仿射</h4>
+<h4 id="推广到三维空间">推广到三维空间</h4>
 <p>也是一样的，都需要进行一个坐标的拓展。对于三维坐标系而言，其仿射变换长下面这样：</p>
 <p><span class="math display">\[
 \left(\begin{matrix}
@@ -10868,7 +10884,397 @@ g &amp; h &amp; i &amp; t_z\\
 x\\ y\\ z\\ 1
 \end{matrix}\right)
 \]</span></p>
-<p>四维五维同理。</p>
+<ul>
+<li><p><strong>缩放</strong>: <span
+class="math inline">\(\mathbf{S}(s_x, s_y, s_z) =
+\left(\begin{matrix}s_x &amp; 0 &amp; 0 &amp; 0\\ 0 &amp; s_y &amp; 0
+&amp; 0\\ 0 &amp; 0 &amp; s_z &amp; 0\\ 0 &amp; 0 &amp; 0 &amp;
+1\end{matrix}\right)\)</span></p></li>
+<li><p><strong>旋转</strong>（往轴负方向看逆时针）:</p>
+<ul>
+<li>绕 <span class="math inline">\(x\)</span> 轴：<span
+class="math inline">\(\mathbf{R_x}(\alpha) = \left(\begin{matrix}1 &amp;
+0 &amp; 0 &amp; 0\\ 0 &amp; \cos{\alpha} &amp; -\sin{\alpha} &amp; 0\\ 0
+&amp; \sin{\alpha} &amp; \cos{\alpha} &amp; 0\\ 0 &amp; 0 &amp; 0 &amp;
+1\end{matrix}\right)\)</span></li>
+<li>绕 <span class="math inline">\(y\)</span> 轴：<span
+class="math inline">\(\mathbf{R_y}(\alpha) =
+\left(\begin{matrix}\cos{\alpha} &amp; 0 &amp; \sin{\alpha} &amp; 0\\ 0
+&amp; 1 &amp; 0 &amp; 0\\ -\sin{\alpha} &amp; 0 &amp; \cos{\alpha} &amp;
+0\\ 0 &amp; 0 &amp; 0 &amp; 1\end{matrix}\right)\)</span></li>
+<li>绕 <span class="math inline">\(z\)</span> 轴：<span
+class="math inline">\(\mathbf{R_z}(\alpha) =
+\left(\begin{matrix}\cos{\alpha} &amp; -\sin{\alpha} &amp; 0 &amp; 0\\
+\sin{\alpha} &amp; \cos{\alpha} &amp; 0 &amp; 0\\ 0 &amp; 0 &amp; 1
+&amp; 0\\ 0 &amp; 0 &amp; 0 &amp; 1\end{matrix}\right)\)</span></li>
+</ul></li>
+<li><p><strong>平移</strong>: <span
+class="math inline">\(\mathbf{T}(t_x, t_y, t_z) = \left(\begin{matrix}1
+&amp; 0 &amp; 0 &amp; t_x\\ 0 &amp; 1 &amp; 0 &amp; t_y\\ 0 &amp; 0
+&amp; 1 &amp; t_z\\ 0 &amp; 0 &amp; 0 &amp;
+1\end{matrix}\right)\)</span></p></li>
+</ul>
+<p>三维空间的旋转比较特殊，因为需要考虑绕某个轴旋转（二维旋转可以视为有一条虚拟的
+<span class="math inline">\(z\)</span>
+轴，方向垂直纸面向外，所有的旋转都是绕该轴进行的）。</p>
+<blockquote>
+<p>有的科学家用飞机来模拟三维空间的旋转，并为其进行命名：<strong>roll</strong>，<strong>pitch</strong>，<strong>yaw</strong>。</p>
+<p><img src="eularangles.png"></p>
+</blockquote>
+<h4
+id="罗德里格斯旋转公式rodrigues-rotation-formula">罗德里格斯旋转公式(Rodrigues'
+Rotation Formula)</h4>
+<p>设向量 <span class="math inline">\(\mathbf{v}\)</span>
+绕<strong>单位向量</strong> <span
+class="math inline">\(\mathbf{k}\)</span> 旋转角度 <span
+class="math inline">\(\theta\)</span> 得到新向量 <span
+class="math inline">\(\mathbf{v}_{rot}\)</span></p>
+<p><img src="rodrigues.png"/></p>
+<p>如果将向量 <span class="math inline">\(\mathbf{v}\)</span>
+分解为平行和垂直轴 <span class="math inline">\(\mathbf{k}\)</span>
+的两个分量 <span class="math inline">\(\mathbf{v_{\parallel}}\)</span>
+和 <span
+class="math inline">\(\mathbf{v_{\bot}}\)</span>，不难发现只是对 <span
+class="math inline">\(\mathbf{v_{\bot}}\)</span> 作绕轴旋转，而 <span
+class="math inline">\(\mathbf{v_{\parallel}}\)</span>
+不变，所以问题转换为求 <span
+class="math inline">\(\mathbf{v}_{rot}\)</span> 的垂直分量，记为 <span
+class="math inline">\(\mathbf{v}_{rot\bot}\)</span>。可以很容易得到</p>
+<p><span class="math display">\[
+\mathbf{v}_{rot\bot} = \sin{\theta}(\mathbf{k}\times\mathbf{v}) +
+\cos{\theta}\mathbf{v}_{\bot}
+\]</span></p>
+<p>与此同时</p>
+<p><span class="math display">\[
+\mathbf{k}\times\mathbf{v} =
+\mathbf{k}\times(\mathbf{v}_{\parallel}+\mathbf{v}_{\bot}) =
+\mathbf{k}\times\mathbf{v}_{\parallel}+\mathbf{k}\times\mathbf{v}_{\bot}
+= \mathbf{0} + \mathbf{k}\times\mathbf{v}_{\bot} =
+\mathbf{k}\times\mathbf{v}_{\bot}
+\]</span></p>
+<p>继而问题又转换为求 <span
+class="math inline">\(\mathbf{v_{\bot}}\)</span>。这里有一个比较 tricky
+的性质：对于单位向量 <span class="math inline">\(\mathbf{k}\)</span>
+而言，<span
+class="math inline">\(\mathbf{k}\times\mathbf{v_{\bot}}\)</span>
+仅仅是将 <span class="math inline">\(\mathbf{v_{\bot}}\)</span> 绕轴旋转
+90°。易得 <span
+class="math inline">\(\mathbf{k}\times(\mathbf{k}\times\mathbf{v_{\bot}})\)</span>
+是绕轴旋转了 180°，所以有</p>
+<p><span class="math display">\[
+\mathbf{v}_{\bot} = -\mathbf{k}\times(\mathbf{k}\times\mathbf{v}_\bot) =
+-\mathbf{k}\times(\mathbf{k}\times\mathbf{v})
+\]</span></p>
+<p>那么我们就可以得到结论了</p>
+<p><span class="math display">\[
+\begin{align}
+\mathbf{v}_{rot}
+&amp;= \mathbf{v}_{\parallel} + \mathbf{v}_{rot\bot}\\
+&amp;= \mathbf{v}-\mathbf{v}_{\bot} +
+\sin{\theta}(\mathbf{k}\times\mathbf{v}) +
+\cos{\theta}\mathbf{v}_{\bot}\\
+&amp;= \mathbf{v} + \sin{\theta}(\mathbf{k}\times\mathbf{v}) -
+(\cos{\theta}-1)\mathbf{k}\times(\mathbf{k}\times\mathbf{v})\\
+&amp;= \mathbf{v} + \sin{\theta}(\mathbf{k}\times\mathbf{v}) +
+(1-\cos{\theta})\mathbf{k}\times(\mathbf{k}\times\mathbf{v})\\
+&amp;= \mathbf{v} + \sin{\theta}\mathbf{K}·\mathbf{v} +
+(1-\cos{\theta})\mathbf{K}^2\mathbf{v}\\
+&amp;= [\mathbf{I} + \sin{\theta}\mathbf{K} +
+(1-\cos{\theta})\mathbf{K}^2]·\mathbf{v}
+\end{align}
+\]</span></p>
+<p>从而绕单位向量 <span class="math inline">\(\mathbf{k}\)</span>
+旋转角度 <span class="math inline">\(\theta\)</span>
+对应的变换矩阵为</p>
+<p><span class="math display">\[
+\mathbf{R}(\mathbf{k}, \theta) = \mathbf{I} + \sin{\theta}\mathbf{K} +
+(1-\cos{\theta})\mathbf{K}^2
+\]</span></p>
+<p>其中 <span class="math inline">\(\mathbf{K}\)</span> 为由单位向量
+<span class="math inline">\(\mathbf{k}\)</span>
+生成的反对称矩阵，三维坐标下表示为</p>
+<p><span class="math display">\[
+\left(
+    \begin{matrix}
+    0 &amp; -k_z &amp; k_y \\
+    k_z &amp; 0 &amp; -k_x \\
+    -k_y &amp; k_x &amp; 0
+    \end{matrix}
+\right)
+\]</span></p>
+<h3 id="观测变换view">观测变换(View)</h3>
+<h4 id="相机的放置">相机的放置</h4>
+<p>要做观测变换，首先要解决“<strong>如何放置相机</strong>”这一问题。一般由以下三个属性在空间中唯一确定一个相机：</p>
+<ol type="1">
+<li><strong>位置</strong>(position)：<span
+class="math inline">\(\vec{e}\)</span>；</li>
+<li><strong>朝向</strong>(gaze direction)：<span
+class="math inline">\(\hat{g}\)</span>；</li>
+<li><strong>上方</strong>(up direction)：<span
+class="math inline">\(\hat{t}\)</span>；</li>
+</ol>
+<p>另外还有一个关键属性：<strong>相对不变</strong>。即如果相机和所有的物体保持同样的移动，那么得到的观测（照片）永远一致。常用的做法是将相机变换到下面这样的初始状态，其它物体也做同样的变换。</p>
+<p><span class="math display">\[
+\begin{aligned}
+\vec{e} &amp;= (0, 0, 0)\\
+\hat{g} &amp;= -\mathbf{z}\\
+\hat{t} &amp;= \mathbf{y}
+\end{aligned}
+\]</span></p>
+<blockquote>
+<p>把人头当作相机，观测结果就是我们日常画的<strong>二维坐标系</strong>。上面这个是约定俗成的，能够使观测变容易。</p>
+</blockquote>
+<h4 id="相机变换">相机变换</h4>
+<p>为了让任意位置的相机都能达到初始状态，需要进行一定的变换（称之为
+<span class="math inline">\(\mathbf{M}_{view}\)</span>）</p>
+<ol type="1">
+<li>将 <span class="math inline">\(\vec{e}\)</span> 移至原点；</li>
+<li>将 <span class="math inline">\(\hat{g}\)</span> 旋转至 <span
+class="math inline">\(-\mathbf{z}\)</span>；</li>
+<li>将 <span class="math inline">\(\hat{t}\)</span> 旋转至 <span
+class="math inline">\(\mathbf{y}\)</span>；</li>
+<li>将 <span class="math inline">\(\hat{g}\times\hat{t}\)</span> 旋转至
+<span class="math inline">\(\mathbf{x}\)</span>；</li>
+</ol>
+<p>不难得到 <span class="math inline">\(\mathbf{M}_{view} =
+\mathbf{R}_{view}\mathbf{T}_{view}\)</span>（先平移后旋转）。</p>
+<p>其中</p>
+<p><span class="math display">\[
+\mathbf{T}_{view} =
+\left(\begin{matrix}
+1 &amp; 0 &amp; 0 &amp; -x_e\\
+0 &amp; 1 &amp; 0 &amp; -y_e\\
+0 &amp; 0 &amp; 1 &amp; -z_e\\
+0 &amp; 0 &amp; 0 &amp; 1
+\end{matrix}\right)
+\]</span></p>
+<p>那么旋转矩阵要如何表示呢？发现正着来不太好写，那不如倒着来，先考虑逆操作，即
+<span
+class="math inline">\(\mathbf{x}\rightarrow\hat{g}\times\hat{t},\quad
+\mathbf{y}\rightarrow\hat{t},\quad
+\mathbf{z}\rightarrow-\hat{g}\)</span>，分别代入特殊值可以得到</p>
+<p><span class="math display">\[
+\mathbf{R}_{view}^{-1} =
+\left(\begin{matrix}
+x_{\hat{g}\times\hat{t}} &amp; x_{\hat{t}} &amp; x_{-\hat{g}} &amp; 0\\
+y_{\hat{g}\times\hat{t}} &amp; y_{\hat{t}} &amp; y_{-\hat{g}} &amp; 0\\
+z_{\hat{g}\times\hat{t}} &amp; z_{\hat{t}} &amp; z_{-\hat{g}} &amp; 0\\
+0 &amp; 0 &amp; 0 &amp; 1
+\end{matrix}\right)
+\]</span></p>
+<p>之前我们讨论过，二维旋转矩阵是<strong>正交矩阵</strong>，其实这一性质对三维同样成立，所以有</p>
+<p><span class="math display">\[
+\mathbf{R}_{view} =
+(\mathbf{R}_{view}^{-1})^T =
+\left(\begin{matrix}
+x_{\hat{g}\times\hat{t}} &amp; y_{\hat{g}\times\hat{t}} &amp;
+z_{\hat{g}\times\hat{t}} &amp; 0\\
+x_{\hat{t}} &amp; y_{\hat{t}} &amp; z_{\hat{t}} &amp; 0\\
+x_{-\hat{g}} &amp; y_{-\hat{g}} &amp; z_{-\hat{g}} &amp; 0\\
+0 &amp; 0 &amp; 0 &amp; 1
+\end{matrix}\right)
+\]</span></p>
+<h3 id="投影变换projection">投影变换(Projection)</h3>
+<p><img src="projections.png"/></p>
+<blockquote>
+<p>透视投影会形成视角锥，正交投影假设相机置于无穷远处。</p>
+</blockquote>
+<h4 id="正交投影orthographic-projection">正交投影(Orthographic
+projection)</h4>
+<p>在计算机图形学中，为了节省计算资源，会定义一个<strong>可视空间</strong>，只有可视空间内的物体才需要进行绘制。正交投影定义的可视空间是一个<strong>盒状可视空间</strong>，本质上是三维物体的外切立方体，其长宽高分别由区间
+<span class="math inline">\([f, n], [l, r], [b, t]\)</span> 确定。</p>
+<p>所谓正交投影，其实就是已知该可视空间内的任意点，将其垂直投影到 <span
+class="math inline">\(xOy\)</span>
+平面并求解对应点的坐标。一种朴素的思路是直接舍弃 <span
+class="math inline">\(z\)</span>
+坐标，但这样做在有前后遮挡的情况下会出现错误的绘制结果。</p>
+<p><img src="orth.png"/></p>
+<p>现代化做法是像上图这样。首先将可视空间平移至以原点为空间中心，再对长宽高进行归一化。</p>
+<p>不难得到两步操作之和的变换矩阵为</p>
+<p><span class="math display">\[
+\mathbf{M}_{ortho} =
+\left(\begin{matrix}
+\frac{2}{r-l} &amp; 0 &amp; 0 &amp; 0\\
+0 &amp; \frac{2}{t-b} &amp; 0 &amp; 0\\
+0 &amp; 0 &amp; \frac{2}{n-f} &amp; 0\\
+0 &amp; 0 &amp; 0 &amp; 1
+\end{matrix}\right)
+\left(\begin{matrix}
+1 &amp; 0 &amp; 0 &amp; -\frac{r+l}{2}\\
+0 &amp; 1 &amp; 0 &amp; -\frac{t+b}{2}\\
+0 &amp; 0 &amp; 1 &amp; -\frac{n+f}{2}\\
+0 &amp; 0 &amp; 0 &amp; 1
+\end{matrix}\right)
+=
+\left(\begin{matrix}
+\frac{2}{r-l} &amp; 0 &amp; 0 &amp; -\frac{r+l}{r-l}\\
+0 &amp; \frac{2}{t-b} &amp; 0 &amp; -\frac{t+b}{t-b}\\
+0 &amp; 0 &amp; \frac{2}{n-f} &amp; -\frac{n+f}{n-f}\\
+0 &amp; 0 &amp; 0 &amp; 1
+\end{matrix}\right)
+\]</span></p>
+<blockquote>
+<p>归一化是因为，现实情况几乎所有的图形系统都把坐标系的空间范围限定在
+<span class="math inline">\((-1,1)\)</span>
+范围内，这么做是为了方便移植，使坐标系独立于各种尺寸的图形设备。</p>
+</blockquote>
+<blockquote>
+<p>我们这里是<strong>右手系</strong>，所以有反直觉的 <span
+class="math inline">\(n&gt;f\)</span>，有的引擎采用左手系（相机看向
+<span class="math inline">\(\mathbf{z}\)</span> 正向），从而 <span
+class="math inline">\(f&gt;n\)</span>，更加符合直觉。</p>
+</blockquote>
+<h4 id="透视投影perspective-projection">透视投影(Perspective
+projection)</h4>
+<p>透视投影符合我们日常视角，即<strong>近大远小</strong>，且平行线不再平行，视觉效果看会收束到一个点。</p>
+<p>闫神提供的解法是，将相机视锥形成的四棱台<strong>压缩(squish)</strong>成盒状，再应用正交投影即可。</p>
+<p><img src="squish.png" style="zoom:80%"/></p>
+<p>对于视锥范围内的任意一点 <span class="math inline">\(A(x, y,
+z)\)</span>，从原点作一条直线经过该点的直线（即视线），与近裁切面相交于点
+<span class="math inline">\(A&#39;(x&#39;, y&#39;,
+z&#39;=n)\)</span>。基于正交投影的性质，我们希望点 <span
+class="math inline">\(A\)</span> 在经过 squish 后的点 <span
+class="math inline">\(B\)</span> 满足 <span
+class="math inline">\(x_B=x&#39;, y_B=y&#39;\)</span>。</p>
+<p><img src="similarTriangle.png" style="zoom:60%"/></p>
+<p>根据相似三角形，不难得到</p>
+<p><span class="math display">\[
+\begin{aligned}
+x&#39;&amp;=\frac{n}{z}x\\[2em]
+y&#39;&amp;=\frac{n}{z}y
+\end{aligned}
+\]</span></p>
+<p>在齐次坐标下，我们得到这样一个变换关系：</p>
+<p><span class="math display">\[
+\mathbf{M}_{squish}
+\left(
+\begin{matrix}
+x \\ y \\ z \\ 1
+\end{matrix}
+\right)
+=
+\left(
+\begin{matrix}
+nx/z \\ ny/z \\ ? \\ 1
+\end{matrix}
+\right)
+\overset{\times z}{\Longleftrightarrow}
+\left(
+\begin{matrix}
+nx \\ ny \\ ? \\ z
+\end{matrix}
+\right)
+\]</span></p>
+<p>从而有</p>
+<p><span class="math display">\[
+\mathbf{M}_{squish}
+=
+\left(
+\begin{matrix}
+n &amp; 0 &amp; 0 &amp; 0\\
+0 &amp; n &amp; 0 &amp; 0\\
+? &amp; ? &amp; ? &amp; ?\\
+0 &amp; 0 &amp; 1 &amp; 0
+\end{matrix}
+\right)
+\overset{不妨设为}{==}
+\left(
+\begin{matrix}
+n &amp; 0 &amp; 0 &amp; 0\\
+0 &amp; n &amp; 0 &amp; 0\\
+A &amp; B &amp; C &amp; D\\
+0 &amp; 0 &amp; 1 &amp; 0
+\end{matrix}
+\right)
+\]</span></p>
+<p>接下来就是求 squish 矩阵的第三行元素。由于在 squish
+前后，近裁切面和远裁切面上的所有点保持不变，所以我们可以代入两个特殊点进行求解，一个是近裁切面上的点
+<span class="math inline">\((x, y, n)\)</span>，一个是远裁切面上的点
+<span class="math inline">\((x, y, f)\)</span>，从而得到</p>
+<p><span class="math display">\[
+\left(
+\begin{matrix}
+n &amp; 0 &amp; 0 &amp; 0\\
+0 &amp; n &amp; 0 &amp; 0\\
+A &amp; B &amp; C &amp; D\\
+0 &amp; 0 &amp; 1 &amp; 0
+\end{matrix}
+\right)
+\left(
+\begin{matrix}
+x \\ y \\ n \\ 1
+\end{matrix}
+\right)
+=
+\left(
+\begin{matrix}
+nx \\ ny \\ Ax+By+Cn+D \\ n
+\end{matrix}
+\right)
+=
+\left(
+\begin{matrix}
+nx \\ ny \\ n^2 \\ n
+\end{matrix}
+\right)
+\Leftrightarrow
+\left(
+\begin{matrix}
+x \\ y \\ n \\ 1
+\end{matrix}
+\right)
+\]</span></p>
+<p>得到 <span class="math inline">\(Cn+D = n^2\)</span>，同理 <span
+class="math inline">\(Cf+D = f^2\)</span>，最终解得</p>
+<p><span class="math display">\[
+A=B=0,\ C=n+f,\ D=-nf
+\]</span></p>
+<p>即</p>
+<p><span class="math display">\[
+\mathbf{M}_{squish}
+=
+\left(
+\begin{matrix}
+n &amp; 0 &amp; 0 &amp; 0\\
+0 &amp; n &amp; 0 &amp; 0\\
+0 &amp; 0 &amp; n+f &amp; -nf\\
+0 &amp; 0 &amp; 1 &amp; 0
+\end{matrix}
+\right)
+\]</span></p>
+<p>最终得到透视投影变换矩阵为</p>
+<p><span class="math display">\[
+\mathbf{M}_{persp} = \mathbf{M}_{ortho}\mathbf{M}_{squish}
+\left(\begin{matrix}
+\frac{2}{r-l} &amp; 0 &amp; 0 &amp; -\frac{r+l}{r-l}\\
+0 &amp; \frac{2}{t-b} &amp; 0 &amp; -\frac{t+b}{t-b}\\
+0 &amp; 0 &amp; \frac{2}{n-f} &amp; -\frac{n+f}{n-f}\\
+0 &amp; 0 &amp; 0 &amp; 1
+\end{matrix}\right)
+\left(
+\begin{matrix}
+n &amp; 0 &amp; 0 &amp; 0\\
+0 &amp; n &amp; 0 &amp; 0\\
+0 &amp; 0 &amp; n+f &amp; -nf\\
+0 &amp; 0 &amp; 1 &amp; 0
+\end{matrix}
+\right) \\
+\]</span></p>
+<blockquote>
+<p>❗提问：视锥内任意一点 <span class="math inline">\(x, y, z\)</span>
+在 squish 后是靠近 <span class="math inline">\(xOy\)</span>
+平面还是远离？</p>
+<p>不妨代入式子求解，计算得到新的点为 <span class="math inline">\((nx/z,
+ny/z, n+f-nf/z)\)</span>，我们只需要判断 <span
+class="math inline">\(n+f-nf/z\)</span> 和 <span
+class="math inline">\(z\)</span> 的大小关系即可。</p>
+<p>令 <span class="math inline">\(f(z) = n+f-nf/z-z = -[z^2-(n+f)z+nf]/z
+= -[(z-n)(z-f)]/z\)</span></p>
+<p>当 <span class="math inline">\(f \leq z \leq n &lt; 0\)</span>
+时，<span class="math inline">\(f(z) &lt;= 0\)</span> 恒成立，即 <span
+class="math inline">\(n+f-nf/z \leq
+z\)</span>，表示<strong>远离</strong>。结论呼之欲出。</p>
+</blockquote>
 ]]></content>
       <categories>
         <category>note</category>
