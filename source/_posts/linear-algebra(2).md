@@ -40,15 +40,19 @@ img:
 <img src="image-20220929215857174.png" alt="image-20220929215857174" style="zoom:100%;" />
 
 若令 $\vec{p} = \hat{x}\vec{a}$，因 $\vec{e}$ 与 $\vec{a}$ 正交，则有 $\vec{a}^T(\vec{b}-\hat{x}\vec{a}) = 0$，解得
+
 $$
 \hat{x} = \frac{\vec{a}^T\vec{b}}{\vec{a}^T\vec{a}}
 \\[2ex]
 \vec{p} = \vec{a}\frac{\vec{a}^T\vec{b}}{\vec{a}^T\vec{a}}
 $$
+
 相当于把 $\vec{b}$ 以某种操作投影到了 $\vec{p}$ 上。若用**投影矩阵** $P$ 来描述这一操作，则有 $\vec{p} = P\vec{b}$，得
+
 $$
 P = \frac{\vec{a}\vec{a}^T}{\vec{a}^T\vec{a}}
 $$
+
 这是一个**对称矩阵**（$P^T=P$），而且是**幂等矩阵**（$P^2 = P$）
 
 ### 如果考虑该问题在高维空间的版本
@@ -135,6 +139,7 @@ $$
 1. 第一个向量不作变动，即 $\displaystyle \vec{e}_1 = \frac{\vec{a}_1}{||\vec{a}_1||}$
 
 2. 对于之后的所有向量 $\vec{a}_i$，由于我们已经求得一组标准正交向量 $\vec{e}_1, \dots, \vec{e}_{i-1}$，设求其施密特正交化后的向量为 $\vec{e}_i$，易得 $\vec{e}_i$ 垂直于 $\vec{e}_1, \dots, \vec{e}_{i-1}$，从而有$\vec{e}_i$ 垂直于 $\vec{e}_1, \dots, \vec{e}_{i-1}$ 张成的向量空间。此时可以把问题转换为**投影问题**，只不过我们这里需要求投影问题中的**误差**，也就是原向量 $\vec{a}_i$ 减去它在投影到所有基 $\vec{e}_k$ 上的分量 $\vec{p}_k$：
+
     $$
     \vec{e}_i = \vec{a}_i - \sum\limits_{k=1}^{i-1}\vec{p}_k
     \\[2ex]
@@ -281,6 +286,7 @@ $$
 已知二阶矩阵 $A = \begin{bmatrix}a & b \\ c & d\end{bmatrix}$ 的行列式公式，则其逆矩阵为 $\displaystyle A^{-1} = \frac{1}{ad-bc} \begin{bmatrix}d & -b \\ -c & a\end{bmatrix}$
 
 事实上，**任意矩阵的逆**都可以写为这样一个形式：
+
 $$
 A^{-1} = \frac{1}{det(A)}C^T
 \\[2ex]
@@ -294,6 +300,7 @@ C_{21} & C_{22} & \cdots & C_{2n}
 C_{n1} & C_{n2} & \cdots & C_{nn}
 \end{bmatrix}
 $$
+
 其中 $C_{ij}$ 为 $A$ 中元素 $a_{ij}$ 的**代数余子式**。代数余子式矩阵 $C$ 的转置 $C^T$ 也称为 $A$ 的**伴随矩阵**。
 
 对上式进行左乘 $A$，则有
