@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/largeicon.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/smallicon.jpg">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link href="https://fonts.googleapis.com/css?family=Noto+Serif+SC:400,500,700&display=swap&subset=chinese-simplified" rel="stylesheet">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Amstelvar:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"leager-zju.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"b2t":true},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="第 392 场周赛复盘。 排名 367 &#x2F; 3193">
+<meta property="og:type" content="article">
+<meta property="og:title" content="weekCompetition392">
+<meta property="og:url" content="http://leager-zju.github.io/LeetCode/weekCompetition392/index.html">
+<meta property="og:site_name" content="没什么看头的地方">
+<meta property="og:description" content="第 392 场周赛复盘。 排名 367 &#x2F; 3193">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-04-07T03:28:36.000Z">
+<meta property="article:modified_time" content="2024-04-07T13:00:54.243Z">
+<meta property="article:author" content="Leager">
+<meta property="article:tag" content="weekly">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://leager-zju.github.io/LeetCode/weekCompetition392/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>weekCompetition392 | 没什么看头的地方</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">没什么看头的地方</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里可能没有你想看的...</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于我</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">17</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">18</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">89</span></a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.io/LeetCode/weekCompetition392/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/Avatar.jpg">
+      <meta itemprop="name" content="Leager">
+      <meta itemprop="description" content="【数据删除】">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="没什么看头的地方">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          weekCompetition392
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-04-07 11:28:36 / 修改时间：21:00:54" itemprop="dateCreated datePublished" datetime="2024-04-07T11:28:36+08:00">2024-04-07</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/LeetCode/" itemprop="url" rel="index"><span itemprop="name">LeetCode</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><a target="_blank" rel="noopener" href="https://leetcode.cn/contest/weekly-contest-392/">第 392
+场周赛</a>复盘。</p>
+<p><strong>排名</strong> 367 / 3193</p>
+<span id="more"></span>
+<h2 id="最长的严格递增或递减子数组">1. <a
+target="_blank" rel="noopener" href="https://leetcode.cn/problems/longest-strictly-increasing-or-strictly-decreasing-subarray/description/">最长的严格递增或递减子数组</a></h2>
+<blockquote>
+<p>给你一个整数数组 <code>nums</code> 。</p>
+<p>返回数组 <code>nums</code> 中 <strong>严格递增</strong> 或
+<strong>严格递减</strong> 的最长非空子数组的长度。</p>
+</blockquote>
+<h3 id="思路">思路</h3>
+<p>维护两个数组，分别是以当前元素为末尾的最长严格递增/递减子数组的长度。<strong>动态规划</strong>后取两个数组中的最大值即可。</p>
+<h3 id="code">code</h3>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// C++</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">longestMonotonicSubarray</span><span class="params">(vector&lt;<span class="type">int</span>&gt;&amp; nums)</span> </span>&#123;</span><br><span class="line">        <span class="type">int</span> n = nums.<span class="built_in">size</span>();</span><br><span class="line">        <span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">inc</span><span class="params">(n, <span class="number">1</span>)</span></span>; <span class="comment">// 最长严格递增子数组的长度</span></span><br><span class="line">        <span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">dec</span><span class="params">(n, <span class="number">1</span>)</span></span>; <span class="comment">// 最长严格递减子数组的长度</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt; n; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (nums[i] &gt; nums[i - <span class="number">1</span>]) &#123;</span><br><span class="line">                inc[i] = inc[i - <span class="number">1</span>] + <span class="number">1</span>;</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (nums[i] &lt; nums[i - <span class="number">1</span>]) &#123;</span><br><span class="line">                dec[i] = dec[i - <span class="number">1</span>] + <span class="number">1</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">max</span>(*<span class="built_in">max_element</span>(inc.<span class="built_in">begin</span>(), inc.<span class="built_in">end</span>()),</span><br><span class="line">                   *<span class="built_in">max_element</span>(dec.<span class="built_in">begin</span>(), dec.<span class="built_in">end</span>()));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h2 id="满足距离约束且字典序最小的字符串">2. <a
+target="_blank" rel="noopener" href="https://leetcode.cn/problems/lexicographically-smallest-string-after-operations-with-constraint/description/">满足距离约束且字典序最小的字符串</a></h2>
+<blockquote>
+<p>给你一个字符串 <code>s</code> 和一个整数 <code>k</code> 。</p>
+<p>定义函数 <code>distance(s1, s2)</code> ，用于衡量两个长度为
+<code>n</code> 的字符串 <code>s1</code> 和 <code>s2</code>
+之间的距离，即：</p>
+<ul>
+<li>字符 <code>'a'</code> 到 <code>'z'</code> 按 <strong>循环</strong>
+顺序排列，对于区间 <code>[0, n - 1]</code> 中的 <code>i</code>
+，计算所有「 <code>s1[i]</code> 和 <code>s2[i]</code> 之间
+<strong>最小距离</strong>」的 和 。</li>
+</ul>
+<p>例如，<code>distance("ab", "cd") == 4</code> ，且
+<code>distance("a", "z") == 1</code> 。</p>
+<p>你可以对字符串 <code>s</code> 执行 <strong>任意次</strong>
+操作。在每次操作中，可以将 <code>s</code> 中的一个字母
+<strong>改变</strong> 为 <strong>任意</strong> 其他小写英文字母。</p>
+<p>返回一个字符串，表示在执行一些操作后你可以得到的
+<strong>字典序最小</strong> 的字符串 <code>t</code> ，且满足
+<code>distance(s, t) &lt;= k</code> 。</p>
+</blockquote>
+<h3 id="思路-1">思路</h3>
+<p>使用<strong>贪心</strong>的策略，从字符串第一个字母开始，对于靠前的每个字母，我们希望执行操作后其变得尽可能“小”，这样操作后得到的字符串的字典序必然是最小的。</p>
+<p>我们可以求出每个字母变成 <code>'a'</code>
+的距离，如果当前操作次数允许，那么就将其变为
+<code>'a'</code>；反之尽可能变成更小的字母。</p>
+<h3 id="code-1">code</h3>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// C++</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">disToA</span><span class="params">(<span class="type">char</span> ch)</span> </span>&#123; <span class="keyword">return</span> <span class="built_in">min</span>(ch - <span class="string">&#x27;a&#x27;</span>, <span class="string">&#x27;a&#x27;</span> + <span class="number">26</span> - ch); &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function">string <span class="title">getSmallestString</span><span class="params">(string s, <span class="type">int</span> k)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; s.<span class="built_in">length</span>() &amp;&amp; k &gt; <span class="number">0</span>; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (s[i] != <span class="string">&#x27;a&#x27;</span>) &#123; <span class="comment">// 如果已经是 &#x27;a&#x27; 了就不操作</span></span><br><span class="line">                <span class="type">int</span> d = <span class="built_in">disToA</span>(s[i]);</span><br><span class="line">                <span class="keyword">if</span> (k &gt;= d) &#123;</span><br><span class="line">                    s[i] = <span class="string">&#x27;a&#x27;</span>;</span><br><span class="line">                    k -= d;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    s[i] -= k;</span><br><span class="line">                    k = <span class="number">0</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> s;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h2 id="使数组中位数等于-k-的最少操作数">3. <a
+target="_blank" rel="noopener" href="https://leetcode.cn/problems/minimum-operations-to-make-median-of-array-equal-to-k/description/">使数组中位数等于
+K 的最少操作数</a></h2>
+<blockquote>
+<p>给你一个整数数组 <code>nums</code> 和一个 <strong>非负</strong> 整数
+<code>k</code> 。</p>
+<p>一次操作中，你可以选择任一下标 <code>i</code> ，然后将
+<code>nums[i]</code> 加 <code>1</code> 或者减 <code>1</code> 。</p>
+<p>请你返回将 <code>nums</code> <strong>中位数</strong> 变为
+<code>k</code> 所需要的 <strong>最少</strong> 操作次数。</p>
+<p>一个数组的 <strong>中位数</strong> 指的是数组按
+<strong>非递减</strong>
+顺序排序后最中间的元素。如果数组长度为偶数，我们选择中间两个数的较大值为中位数。</p>
+</blockquote>
+<h3 id="思路-2">思路</h3>
+<p>因为是修改任意元素，故修改前后结果与初始顺序无关，那么可以先将数组排序，将问题转换为：使得
+<code>nums[nums.size()/2] == k</code>。</p>
+<p>此时我们可以找 <code>k</code> 的左右边界。</p>
+<ul>
+<li><strong>左边界</strong>：第一个<strong>小于等于</strong> k
+的数；</li>
+<li><strong>右边界</strong>：第一个<strong>大于</strong> k 的数；</li>
+</ul>
+<p>如果右边界小于等于
+<code>nums.size()/2</code>，说明中间这部分数太大了，应当将其减至
+<code>k</code>，使得最终右边界为 <code>nums.size()/2 + 1</code>。</p>
+<p>如果左边界大于
+<code>nums.size()/2</code>，说明中间这部分数太小了，应当将其增至
+<code>k</code>，使得最终左边界为 <code>nums.size()/2</code>。</p>
+<p>其他情况都是使得整个数组的中位数为 <code>k</code>
+的，此时无需任何操作。</p>
+<blockquote>
+<p>WA 了一次，发现返回值是 <code>long long</code>，而我返回了一个
+<code>int</code>🤣。</p>
+</blockquote>
+<h3 id="code-2">code</h3>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// C++</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">long</span> <span class="type">long</span> <span class="title">minOperationsToMakeMedianK</span><span class="params">(vector&lt;<span class="type">int</span>&gt;&amp; nums, <span class="type">int</span> k)</span> </span>&#123;</span><br><span class="line">        <span class="built_in">sort</span>(nums.<span class="built_in">begin</span>(), nums.<span class="built_in">end</span>());</span><br><span class="line">        <span class="type">int</span> lb = nums.<span class="built_in">size</span>(), rb = nums.<span class="built_in">size</span>();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; nums.<span class="built_in">size</span>(); i++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (nums[i] &gt;= k) &#123;</span><br><span class="line">                lb = i;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = lb; i &lt; nums.<span class="built_in">size</span>(); i++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (nums[i] &gt; k) &#123;</span><br><span class="line">                rb = i;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="type">long</span> <span class="type">long</span> res = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">while</span> (rb &lt; nums.<span class="built_in">size</span>() / <span class="number">2</span> + <span class="number">1</span>) &#123;</span><br><span class="line">            res += nums[rb++] - k;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">while</span> (lb &gt; nums.<span class="built_in">size</span>() / <span class="number">2</span>) &#123;</span><br><span class="line">            res += k - nums[--lb];</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h2 id="带权图里旅途的最小代价">4. <a
+target="_blank" rel="noopener" href="https://leetcode.cn/problems/minimum-cost-walk-in-weighted-graph/">带权图里旅途的最小代价</a></h2>
+<blockquote>
+<p>给你一个 <code>n</code> 个节点的带权无向图，节点编号为 <code>0</code>
+到 <code>n - 1</code> 。</p>
+<p>给你一个整数 <code>n</code> 和一个数组 <code>edges</code> ，其中
+<code>edges[i] = [u_i, v_i, w_i]</code> 表示节点 <code>u_i</code> 和
+<code>v_i</code> 之间有一条权值为 <code>w_i</code> 的无向边。</p>
+<p>在图中，一趟旅途包含一系列节点和边。旅途开始和结束点都是图中的节点，且图中存在连接旅途中相邻节点的边。注意，一趟旅途可能访问同一条边或者同一个节点多次。</p>
+<p>如果旅途开始于节点 <code>u</code> ，结束于节点 <code>v</code>
+，我们定义这一趟旅途的 <strong>代价</strong> 是经过的边权按位与
+<code>AND</code> 的结果。换句话说，如果经过的边对应的边权为
+<code>w0, w1, w2, ..., wk</code> ，那么代价为
+<code>w0 &amp; w1 &amp; w2 &amp; ... &amp; wk</code> ，其中
+<code>&amp;</code> 表示按位与 <code>AND</code> 操作。</p>
+<p>给你一个二维数组 <code>query</code> ，其中
+<code>query[i] = [s_i, t_i]</code>
+。对于每一个查询，你需要找出从节点开始 <code>s_i</code> ，在节点
+<code>t_i</code> 处结束的旅途的最小代价。如果不存在这样的旅途，答案为
+<code>-1</code> 。</p>
+<p>返回数组 <code>answer</code> ，其中 <code>answer[i]</code>
+表示对于查询 <code>i</code> 的 <strong>最小</strong> 旅途代价。</p>
+</blockquote>
+<h3 id="思路-3">思路</h3>
+<p>对于按位与而言，<code>a AND b</code> 的结果必然小于等于
+<code>a, b</code>
+两者，并且图中点和边可以访问任意次数，那么我们需要尽可能多地访问边，这样就能使得结果最小。</p>
+<p>对于一个连通分量来说，将所有边都访问一遍就已经能达到最小值了，因为相同的数做
+<code>AND</code>
+计算结果不变，所以访问再多次也没有意义。那思路就很简单了，用<strong>并查集</strong>，将所有互达的点纳入同一个集合。如果查询中的两个点在同一个连通分量里，我们可以遍历这个连通分量所有的边，不断做
+<code>AND</code> 计算即可；反之说明两点不可达，直接返回
+<code>-1</code>。</p>
+<p>经过上面的讨论我们发现，同一个连通分量里任意两对不同的点，其路径代价都是一样的，都是这个连通分量里所有的边的
+<code>AND</code>
+操作和，这可以看作是<strong>整个连通分量的代价</strong>。那么我们可以在查询前预先将所有连通分量的代价计算好，等到查询时直接进入哈希表中查询即可，无需作重复计算。</p>
+<p>有一点需要注意的是，因为是无向图，并且两点之间可能会有多条边，那么也需要将这些边做一个代价统计，最后留下的结果就直接是
+<code>AND</code> 的结果。</p>
+<blockquote>
+<p>😭 corner case：当 <code>query[0] == query[1]</code> 时，代价为
+<code>0</code>。好多人都 WA 了，估计是因为这个 case 没考虑到。</p>
+</blockquote>
+<h3 id="code-3">code</h3>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// C++</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">minimumCost</span><span class="params">(<span class="type">int</span> n, vector&lt;vector&lt;<span class="type">int</span>&gt;&gt;&amp; edges,</span></span></span><br><span class="line"><span class="params"><span class="function">                            vector&lt;vector&lt;<span class="type">int</span>&gt;&gt;&amp; query)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 初始化并查集</span></span><br><span class="line">        <span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">father</span><span class="params">(n)</span></span>;</span><br><span class="line">        <span class="keyword">auto</span> findfather = [&amp;](<span class="type">int</span> x) &#123;</span><br><span class="line">            <span class="type">int</span> a = x, b = x;</span><br><span class="line">            <span class="keyword">while</span> (x != father[x]) &#123;</span><br><span class="line">                x = father[x];</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">while</span> (a != x) &#123;</span><br><span class="line">                a = father[a];</span><br><span class="line">                father[b] = x;</span><br><span class="line">                b = a;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> x;</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="keyword">auto</span> merge = [&amp;](<span class="type">int</span> x, <span class="type">int</span> y) &#123;</span><br><span class="line">            <span class="type">int</span> fx = <span class="built_in">findfather</span>(x);</span><br><span class="line">            <span class="type">int</span> fy = <span class="built_in">findfather</span>(y);</span><br><span class="line">            <span class="keyword">if</span> (fx != fy) &#123;</span><br><span class="line">                father[fx] = fy;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">            father[i] = i;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 初始化图</span></span><br><span class="line">        vector&lt;unordered_map&lt;<span class="type">int</span>, <span class="type">int</span>&gt;&gt; <span class="built_in">g</span>(n);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">auto</span>&amp;&amp; e : edges) &#123;</span><br><span class="line">            <span class="type">int</span> u = e[<span class="number">0</span>];</span><br><span class="line">            <span class="type">int</span> v = e[<span class="number">1</span>];</span><br><span class="line">            <span class="type">int</span> w = e[<span class="number">2</span>];</span><br><span class="line">            <span class="keyword">if</span> (g[u].<span class="built_in">count</span>(v) == <span class="number">0</span>) &#123;</span><br><span class="line">                g[u][v] = w;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                g[u][v] &amp;= w;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (g[v].<span class="built_in">count</span>(u) == <span class="number">0</span>) &#123;</span><br><span class="line">                g[v][u] = w;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                g[v][u] &amp;= w;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="built_in">merge</span>(u, v);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 预先计算连通分量的代价</span></span><br><span class="line">        unordered_map&lt;<span class="type">int</span>, <span class="type">int</span>&gt; cache;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">            <span class="type">int</span> f = <span class="built_in">findfather</span>(i);</span><br><span class="line"></span><br><span class="line">            <span class="type">int</span> tmp = <span class="number">-1</span>;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">auto</span>&amp;&amp; next : g[i]) &#123;</span><br><span class="line">                <span class="comment">// 这里就算重复计算 (u, v) 和 (v, u) 也没关系，AND 结果是不变的</span></span><br><span class="line">                <span class="keyword">if</span> (tmp == <span class="number">-1</span>) &#123;</span><br><span class="line">                    tmp = next.second;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    tmp &amp;= next.second;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (cache.<span class="built_in">count</span>(f)) &#123;</span><br><span class="line">                cache[f] &amp;= tmp;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                cache[f] = tmp;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 结果查询</span></span><br><span class="line">        vector&lt;<span class="type">int</span>&gt; res;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">auto</span>&amp;&amp; q : query) &#123;</span><br><span class="line">            <span class="keyword">if</span> (q[<span class="number">0</span>] == q[<span class="number">1</span>]) &#123;</span><br><span class="line">                res.<span class="built_in">push_back</span>(<span class="number">0</span>); <span class="comment">// !!! corner case</span></span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">findfather</span>(q[<span class="number">0</span>]) != <span class="built_in">findfather</span>(q[<span class="number">1</span>])) &#123;</span><br><span class="line">                res.<span class="built_in">push_back</span>(<span class="number">-1</span>);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                res.<span class="built_in">push_back</span>(cache[<span class="built_in">findfather</span>(q[<span class="number">0</span>])]);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/weekly/" rel="tag"># weekly</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/note/GAMES101Note/" rel="prev" title="GAMES101（现代图形学入门）の 笔记">
+      <i class="fa fa-chevron-left"></i> GAMES101（现代图形学入门）の 笔记
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E9%95%BF%E7%9A%84%E4%B8%A5%E6%A0%BC%E9%80%92%E5%A2%9E%E6%88%96%E9%80%92%E5%87%8F%E5%AD%90%E6%95%B0%E7%BB%84"><span class="nav-text">1. 最长的严格递增或递减子数组</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%9D%E8%B7%AF"><span class="nav-text">思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#code"><span class="nav-text">code</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BB%A1%E8%B6%B3%E8%B7%9D%E7%A6%BB%E7%BA%A6%E6%9D%9F%E4%B8%94%E5%AD%97%E5%85%B8%E5%BA%8F%E6%9C%80%E5%B0%8F%E7%9A%84%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="nav-text">2. 满足距离约束且字典序最小的字符串</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%9D%E8%B7%AF-1"><span class="nav-text">思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#code-1"><span class="nav-text">code</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E6%95%B0%E7%BB%84%E4%B8%AD%E4%BD%8D%E6%95%B0%E7%AD%89%E4%BA%8E-k-%E7%9A%84%E6%9C%80%E5%B0%91%E6%93%8D%E4%BD%9C%E6%95%B0"><span class="nav-text">3. 使数组中位数等于
+K 的最少操作数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%9D%E8%B7%AF-2"><span class="nav-text">思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#code-2"><span class="nav-text">code</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%A6%E6%9D%83%E5%9B%BE%E9%87%8C%E6%97%85%E9%80%94%E7%9A%84%E6%9C%80%E5%B0%8F%E4%BB%A3%E4%BB%B7"><span class="nav-text">4. 带权图里旅途的最小代价</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%9D%E8%B7%AF-3"><span class="nav-text">思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#code-3"><span class="nav-text">code</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Leager"
+      src="/images/Avatar.jpg">
+  <p class="site-author-name" itemprop="name">Leager</p>
+  <div class="site-description" itemprop="description">【数据删除】</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">89</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Leager-zju" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Leager-zju" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div>
+<span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("09/25/2022 00:00:00");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "本站已存活 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+    }
+setInterval("createtime()",250);
+</script>
+</div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Leager</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,0' opacity='0.5' zIndex='-1' count='160' src="//cdn.jsdelivr.net/gh/theme-next/theme-next-canvas-nest@1.0.0/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>
