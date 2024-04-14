@@ -319,7 +319,6 @@ $$
 
 $$
 \mathbf{R}(\mathbf{k}, \theta) = \mathbf{I} + \sin{\theta}\mathbf{K} + (1-\cos{\theta})\mathbf{K}^2
-
 $$
 
 其中 $\mathbf{K}$ 为由单位向量 $\mathbf{k}$ 生成的反对称矩阵，三维坐标下表示为
@@ -332,7 +331,6 @@ $$
     -k_y & k_x & 0
     \end{matrix}
 \right)
-
 $$
 
 ### 观测变换(View)
@@ -353,7 +351,6 @@ $$
 \hat{g} &= -\mathbf{z}\\
 \hat{t} &= \mathbf{y}
 \end{aligned}
-
 $$
 
 > 把人头当作相机，观测结果就是我们日常画的**二维坐标系**。上面这个是约定俗成的，能够使观测变容易。
@@ -1420,3 +1417,201 @@ BVH 这种加速结构目前得到了非常广泛的应用，其本质思想在�
 BVH 的求解伪代码如下：
 
 <img src="bvhcode.png" style="zoom:60%">
+
+### 辐射度量学(Radiometry)
+
+辐射度量学是一种方法，能定义一系列的属性和单位去描述光照。之前在 Blinn-Phong 模型中，我们有定义“光强”这么一个概念，但并没有明确给出其物理意义，这就是辐射度量学要说明的。接下来聊聊光照相关的两个基本属性。
+
+- **辐射能量(Radiant Energy)**：符号 $Q$。单位**焦耳**($\text{J}$)；
+- **辐射通量(Radiant Flux)**：定义为单位时间产生的能量 $\displaystyle\Phi=\frac{dQ}{dt}$，常称**功率**。单位**瓦特**($\text{W}$)/**流明**($\text{lm}$)。也可定义为单位时间内通过某一平面的光子数量/光源的亮度；
+
+有了以上两个基本属性以后，就能对其进行拓展了。
+
+#### 辐射强度(Intensity)
+
+定义为**点光源在单位立体角的辐射通量(Power Per Unit Solid Angle)**。
+
+即 $\displaystyle I(\omega)=\frac{\text{d}\Phi}{\text{d}\omega}$，单位 $\displaystyle \frac{\text{W}}{\text{sr}}=\frac{\text{lm}}{\text{sr}}=\text{cd}/\text{candela}$。
+
+那么什么是立体角呢？数学中的**角(Angle)**通常用弧度表示，对应一段圆的弧长，此时弧度为 $\displaystyle\theta=\frac{l}{r}$。
+
+<img src="angle.png" style="zoom:60%">
+
+而立体角则是会形成一个锥体，对应球体的表面，此时立体角度为 $\displaystyle\Omega=\frac{A}{r^2}$。
+
+<img src="solidangle.png" style="zoom:60%">
+
+> 整个球的立体角为 $4\pi r^2/r^2 = 4\pi$
+
+有了这一概念，那么单位立体角的计算，就可以通过计算球表面单位面积来求解。如果我们引入了球体的 $\theta,\phi$ 表示，那么这就很简单了，如下图。
+
+<img src="da.png" style="zoom:60%">
+
+> 可以认为单位面积是一块矩形区域，其长为 $d\theta$ 对应的弧长，宽为 $d\phi$ 在半径为 $r\sin\theta$ 的圆中对应的弧长。
+> 
+> 此时整个球的立体角也可以用下式进行计算
+> 
+> $$
+> \Omega=\displaystyle\int_{S^2}d\omega=\int_0^{2\pi}\int_0^\pi\sin\theta d\theta d\phi = 4\pi
+> $$
+
+我们只需要确定某个光照方向 $\omega$ ，就可以用 $\theta,\phi$ 定义其位置，进而计算出对应的单位立体角。所以 intensity 也可以理解为**光源在任意方向上的亮度**。
+
+假设光线从点光源处均匀辐射，那么任一方向上的 intensity 都是相同的，如果我们又预先知道了这个点光源的 flux（对应整个球面），就可以用以下式子计算出 intensity：
+
+$$
+\Phi = \int_{S^2}Id\omega = 4\pi I \longrightarrow I = \frac{\Phi}{4\pi}
+$$
+
+#### 辐射照度(Irradiance)
+
+定义为**单位面积上的辐射通量(Power Per Unit Area)**。
+
+即 $\displaystyle E(\mathbf{x})=\frac{\text{d}\Phi(\mathbf{x})}{\text{d}A}$，单位 $\displaystyle\frac{\text{W}}{\text{m}^2}=\frac{\text{lm}}{\text{m}^2}=\text{lux}$。
+
+> 注意计算时必须用 Power 垂直于 Unit Area 的分量，就是前面“漫反射”提到的，需要与平面法线作夹角并乘上 $\cos{\theta}$。也可以用太阳直射角与季节的关系来理解——夏季太阳几乎垂直入射到北半球，所以接收到能量就多，就会更热。
+
+之前我们聊 Blinn-Phong 模型的漫反射项时，提到“能量损耗”这么一个概念。基于上面提到的两个光照属性，我们发现对于一个点光源而言，随着半径的增大，intensity 其实是不会发生变化的，因为立体角是不变的。但是对于任意半径的球面而言，它们的 power 也是不变的，其实是 irradiance 发生了衰减。
+
+<img src="irradiancefalloff.png" style="zoom:60%">
+
+#### 辐射亮度(Radiance)
+
+定义为**投射到单位面积上的单位立体角上的辐射通量(Power Per Unit Solid Angle, Per Projected Unit Area)**。
+
+即 $\displaystyle\text{L}(\mathbf{p}, \omega)=\frac{\text{d}^2\Phi(\mathbf{p}, \omega)}{\text{d}\omega\text{d}A\cos\theta}$，单位 $\displaystyle\frac{\text{W}}{\text{sr}\ \text{m}^2}=\frac{\text{lm}}{\text{sr}\ \text{m}^2}=\frac{\text{cd}}{\text{m}^2}=\text{nit}$。
+
+这个概念可以和 intensity 和 irradiance 联系起来，既可以认为是投射到单位面积上的 intensity，也可以认为是某个点从单位立体角上接收到的 irradiance。
+
+通常我们采用后者，也就是像下图这样，既然 irradiance 考虑的是点 $\mathbf{p}$ 从四面八方接收到的 power，那 radiance 就是只考虑其中的某个方向。
+
+<img src="radiance.png" style="zoom:60%">
+
+#### 双向反射分布函数(BRDF, Bidirectional Reflectance Distribution Function)
+
+当光线打到某个点上时，会根据该点的属性，可能会吸收一部分能量，再形成特定的反射结果：如果这个点具有漫反射特性，那么会向四面八方均匀反射；如果这个点是镜面，那就会往法线的对称方向集中反射……如果能确定入射方向，那就需要某种数学方法来准确描述反射结果，这就是 BRDF 干的事情。
+
+BRDF 定义了 irradiance 从某个单位立体角方向入射到单位面积上后，以怎样的结果向反射的立体角方向进行反射。
+
+<img src="brdf.png" style="zoom:60%">
+
+也就是说 BRDF 将一个入射方向与一个反射方向建立了映射。如果我们对所有的入射方向都应用一遍反射方向 $\omega_r$ 的 BRDF，那是不是就能得出一个正确的反射结果了呢？是的没错，正是下式：
+
+$$
+L_r(\mathbf{p}, \omega_r) = \int_{\Omega^+}f_r(\mathbf{p}, \omega_i\rightarrow\omega_r)L_i(\mathbf{p},\omega_i)\cos\theta_i \text{d}\omega_i
+$$
+
+上面这个方程称为**反射方程(Reflection Equation)**。
+
+> 从概念上来讲，反射方程考虑了任意入射方向的光照对反射方向的贡献，并将其累加。
+
+如果在此基础上考虑到物体本身会发光的情况，那就得到了**渲染方程(Rendering Equation)**，如下式：
+
+$$
+L_r(\mathbf{p}, \omega_r) = L_e(\mathbf{p}, \omega_r)
++
+\int_{\Omega^+}f_r(\mathbf{p}, \omega_i\rightarrow\omega_r)L_i(\mathbf{p},\omega_i)\cos\theta_i \text{d}\omega_i
+$$
+
+> 当然还要考虑“入射光不仅仅来自光源，也会来自其它物体表面的反射光”这么一种情况，那就是一个**递归**的解法了，即在点 $\mathbf{p}$ 处放置一个虚拟相机，观察其它物体表面的 $L_r$。这是光线弹射一次的做法，那么弹射两次、三次、……做法也是类似的。
+
+### 路径追踪(Path Tracing)
+
+#### 蒙特卡洛积分(Monte Carlo Integration)
+
+回顾一下微积分中的**黎曼积分**，它的基本思路是将函数图像分解为若干个矩形，求解该函数的定积分实际上就是求这些矩形的面积之和。
+
+蒙特卡洛积分也参考了这一思路，但它的核心思路是**随机采样**。也就是说，对于积分域 $[a,b]$，我们认为变量 $x$ 在区间内满足一定概率分布 $X_i\sim p(x)$，我们只要不断地进行随机采样，求得采样值对应的函数值（可以认为是一个矩形面积值），那么定积分的结果可以认为是这些函数值的**平均**。用式子 $\displaystyle F_N=\frac{1}{N}\sum\limits_{i=1}^N\frac{f(X_i)}{p(X_i)}$ 表示。其中 $N$ 为采样次数。
+
+<img src="mtkl.png" style="zoom:60%">
+
+> 对于一个在积分域服从均匀分布的变量来说，$\displaystyle p(X_i)=\frac{1}{b-a}$，那么定积分的结果就是 $\displaystyle\frac{b-a}{N}\sum\limits_{i=1}^Nf(X_i)$
+
+#### 用蒙特卡洛积分求解路径追踪
+
+利用所学知识，我们就可以对渲染方程作特殊处理了。取点 $\mathbf{p}$ 所有单位入射方向（半球）构成向量集合，表示采样域。对该集合进行 $N$ 次随机采样，得到一个概率分布，代入蒙特卡洛积分求解即可。
+
+此时可以认为光线在所有方向上都是等概率的，即入射方向/立体角满足均匀分布，则有 $p(\omega_i) = 1/2\pi$（半球的立体角为 $2\pi$）。如果我们额外考虑某一束入射光是来自光源还是其它物体表面 $\mathbf{q}$ 的反射光，就可以得到下面这个式子
+
+$$
+L_r(\mathbf{p},\omega_r)\approx
+\begin{cases}
+  \displaystyle\frac{1}{N}\sum\limits_{i=1}^N \frac{f_r(\mathbf{p},\omega_i\rightarrow\omega_r)L_i(\mathbf{p}, \omega_i)\cos\theta_i}{p(\omega_i)} \qquad 点光源直射
+  \\[2em]
+  \displaystyle\frac{1}{N}\sum\limits_{i=1}^N \frac{f_r(\mathbf{p},\omega_i\rightarrow\omega_r)L_r(\mathbf{q}, -\omega_i)\cos\theta_i}{p(\omega_i)} \quad\ 来自其它物体的反射
+\end{cases}
+$$
+
+进而可以用以下伪代码来描述
+
+<img src="globalillumination.png" style="zoom:60%">
+
+#### 优化1：解决指数爆炸
+
+这种做法存在一个问题，那就是当 $N$ 比较大的时候，如果只考虑光源直射，那就只需要作 N 次采样即可，为线性时间复杂度；但是如果考虑其它物体的反射，进行递归计算时，对应的时间复杂度就高达 $O(N^{光线总反射次数})$。这显然是不可取的。
+
+<img src="ptp1.png" style="zoom:60%">
+
+如果设置 $N=1$，就叫**路径追踪**，可以解决上面的问题，只不过噪声大了点。但事实上我们要得到的是一整个像素的 radiance，而这个像素会对应多条 path，只要对这些 path 求平均就可以了。
+
+<img src="paths.png" style="zoom:60%">
+
+我们可以在像素内均匀地取 $N$ 个不同的点，对于每个点，发射一条光线到场景中（区别于上面那个 $N$），如果与物体产生交点，那就计算相应的着色。
+
+<img src="rg.png" style="zoom:60%">
+
+这样就把路径追踪和着色联系在了一起。
+
+> 如果 $N>1$，就是**分布式光线追踪**，会出现指数爆炸。
+
+#### 优化2：确定递归终点
+
+完了吗？没有，还有一个问题，那就是如何确定递归终点。
+
+这里可以使用**俄罗斯轮盘赌(Russian Roulette)**的方式，即我们可以设置某个概率 $P$，在采样反射光时，以概率 $P$ 进行采样，概率 $1-P$ 什么也不干，此时我们收集到的 `shade()` 结果需要除以 $P$，使得期望不变。这样一来，上面 `shade()` 函数的伪代码就需要修正为下面这样。
+
+<img src="shaderr.png" style="zoom:60%">
+
+#### 优化3：在光源上采样
+
+遗憾的是，上面的解法仍然存在问题，因为我们是在半球上随机取一个入射方向进行采样，运气成分就很大，可能没法取到一个恰好从光源入射的方向。此时就需要转换思路，可以在光源上采样。
+
+但毕竟我们是把着色点为球心的单位球面作为积分域，如果要在光源上采样，那就需要把 $\text{d}\omega$ 转换成光源上的 $\text{d}A$，再进行积分。
+
+这很简单，因为采样光的方向相同，那么对应的单位立体角也是相同的，所以 $\mathbf{x}'$ 处的 intensity 和单位半球面上的 intensity 是相等的。考虑 $\text{d}A$ 的法线方向 $\mathbf{n}'$，我们可以得到
+
+$$
+\text{d}\omega·{||\mathbf{x}'-\mathbf{x}||^2}=\text{d}A\cos\theta' \Longrightarrow \text{d}\omega=\frac{\text{d}A\cos\theta'}{||\mathbf{x}'-\mathbf{x}||^2}
+$$
+
+<img src="samplethelight.png" style="zoom:60%">
+
+这就把之前的所有知识都给串起来了。有了这一结论，渲染方程又可以进一步改为
+
+$$
+L_r(\mathbf{p}, \omega_r) = L_e(\mathbf{p}, \omega_r)
++
+\int_{A}f_r(\mathbf{p}, \omega_i\rightarrow\omega_r)L_i(\mathbf{p},\omega_i)\frac{\cos\theta\cos\theta'}{||\mathbf{x}'-\mathbf{x}||^2} \text{d}A
+$$
+
+此时点光源直射的情况就不需要用 RR 来处理递归终点了，因为我们只需要一次采样就够了。考虑到着色点与点光源直接可能存在其它物体遮挡，伪代码可以进一步优化为下面这样：
+
+```python
+shade(p, wo)
+  # Contribution from the light source.
+  Uniformly sample the light at x’ (pdf_light = 1 / A)
+  Shoot a ray from p to x’
+  If the ray is not blocked in the middle
+    L_dir = L_i * f_r * cos θ * cos θ’ / |x’ - p|^2 / pdf_light
+
+  # Contribution from other reflectors.
+  L_indir = 0.0
+  Test Russian Roulette with probability P_RR
+  Uniformly sample the hemisphere toward wi (pdf_hemi = 1 / 2pi)
+  Trace a ray r(p, wi)
+  If ray r hit a non-emitting object at q
+    L_indir = shade(q, -wi) * f_r * cos θ / pdf_hemi / P_RR
+  Return L_dir + L_indir
+```
+
+> GAMES101 的难度在此已经到达峰值了，接下去就简单很多。
