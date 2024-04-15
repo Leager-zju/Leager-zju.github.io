@@ -11243,6 +11243,7 @@ n &amp; 0 &amp; 0 &amp; 0\\
 <p>最终得到透视投影变换矩阵为</p>
 <p><span class="math display">\[
 \mathbf{M}_{persp} = \mathbf{M}_{ortho}\mathbf{M}_{squish}
+=
 \left(\begin{matrix}
 \frac{2}{r-l} &amp; 0 &amp; 0 &amp; -\frac{r+l}{r-l}\\
 0 &amp; \frac{2}{t-b} &amp; 0 &amp; -\frac{t+b}{t-b}\\
