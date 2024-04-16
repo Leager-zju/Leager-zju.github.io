@@ -581,6 +581,7 @@ $$
 
 $$
 \mathbf{M}_{persp} = \mathbf{M}_{ortho}\mathbf{M}_{squish}
+=
 \left(\begin{matrix}
 \frac{2}{r-l} & 0 & 0 & -\frac{r+l}{r-l}\\
 0 & \frac{2}{t-b} & 0 & -\frac{t+b}{t-b}\\
