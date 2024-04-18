@@ -11349,12 +11349,12 @@ class="math inline">\(\vec{OP_0}\times\vec{P_0P_1},
 <h4 id="反走样antialiasing">反走样(Antialiasing)</h4>
 <p>由于一个像素实际上会被填充为一个正方形，大部分情况下，采样的结果并不能完美地还原一个图形，反而容易产生<strong>锯齿(Jaggies)</strong>，比如下图。</p>
 <p><img src="jaggies.png" style="zoom:70%"></p>
-<p>锯齿是<strong>走样(Aliasing)问题</strong>的其中一种表现形式，此外还有摩尔纹（空间采样）、车轮错觉（时间采样）等。本质原因都是：<code>&lt;u&gt;</code>信号（函数）变化太快，以至于采样速度跟不上<code>&lt;/u&gt;</code>。</p>
+<p>锯齿是<strong>走样(Aliasing)问题</strong>的其中一种表现形式，此外还有摩尔纹（空间采样）、车轮错觉（时间采样）等。本质原因都是：<u>信号（函数）变化太快，以至于采样速度跟不上</u>。</p>
 <p><strong>反走样(Antialiasing)</strong>就是为了解决这一问题所提出的。以三角形锯齿问题为例，我们可以先将其<strong>模糊处理(Blurring)</strong>，或者说<strong>滤波(Pre-Filtering)</strong>，再对模糊结果进行采样，这样就会有一些边界被采样成粉红色，而不是说只要像素中心不落在三角形内部就被采样成白色。</p>
 <p><img src="blur.png" style="zoom:70%"></p>
 <p>❗
 注意<strong>顺序不能颠倒</strong>，这涉及到一些<strong>频域(frequency
-domain)</strong>相关的知识。可以明确的一点是：<code>&lt;u&gt;</code>采用同样的间隔进行采样，频率越高采样越不准确，所以更高频率的函数需要更密集的采样点<code>&lt;/u&gt;</code>。比如下面，用相同的手段分别对黑色和蓝色的曲线进行采样，得到的结果是一样的，也就无法对其进行区分，从而导致走样。</p>
+domain)</strong>相关的知识。可以明确的一点是：<u>采用同样的间隔进行采样，频率越高采样越不准确，所以更高频率的函数需要更密集的采样点</u>。比如下面，用相同的手段分别对黑色和蓝色的曲线进行采样，得到的结果是一样的，也就无法对其进行区分，从而导致走样。</p>
 <p><img src="diff.png" style="zoom:50%"></p>
 <p>而模糊处理其实就是<strong>低通滤波</strong>，将高频信息滤掉，只通过低频分量，这样再做采样操作，就不容易在频域上发生混叠。</p>
 <p><img src="filter.png" style="zoom:50%"></p>
@@ -11442,7 +11442,7 @@ Local</strong>，这句话的意思是，着色只会考虑这个着色点，以
 <p>对于<strong>漫反射(Diffuse
 Reflection)</strong>而言，光在着色点<strong>均匀</strong>地向四面八方反射，故此时观测结果与观测方向无关。</p>
 <p>另外我们发现，当着色点平面法线方向和光线的夹角变化时，得到的观测结果明暗程度也会发生变化。根据光的波粒二象性，<u>光是具有能量的</u>，所以当
-<span class="math inline">\(\theta{\mathbf{n}, \mathbf{l}}\)</span>
+<span class="math inline">\(\theta(\mathbf{n}, \mathbf{l})\)</span>
 变化时，着色点在单位面积收到的<strong>能量值</strong>（光强度）也会有所变化。具体而言，光强度与
 <span class="math inline">\(\cos{\theta}=\mathbf{n}·\mathbf{l}\)</span>
 呈正相关。<u>我们判断物体的明暗程度，本质上就是判断该物体表面能接收到多少能量</u>。</p>
