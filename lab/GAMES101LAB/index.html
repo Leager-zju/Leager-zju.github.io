@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/largeicon.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/smallicon.jpg">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link href="https://fonts.googleapis.com/css?family=Noto+Serif+SC:400,500,700&display=swap&subset=chinese-simplified" rel="stylesheet">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Amstelvar:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"leager-zju.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"b2t":true},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="&gt;&gt;&gt; Github 传送门&lt;&lt;&lt;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="GAMES101（现代图形学入门）の 作业记录">
+<meta property="og:url" content="http://leager-zju.github.io/lab/GAMES101LAB/index.html">
+<meta property="og:site_name" content="没什么看头的地方">
+<meta property="og:description" content="&gt;&gt;&gt; Github 传送门&lt;&lt;&lt;">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://leager-zju.github.io/lab/GAMES101LAB/MSAA.png">
+<meta property="og:image" content="http://leager-zju.github.io/lab/GAMES101LAB/normal.png">
+<meta property="og:image" content="http://leager-zju.github.io/lab/GAMES101LAB/phong.png">
+<meta property="og:image" content="http://leager-zju.github.io/lab/GAMES101LAB/texture.png">
+<meta property="og:image" content="http://leager-zju.github.io/lab/GAMES101LAB/bump.png">
+<meta property="og:image" content="http://leager-zju.github.io/lab/GAMES101LAB/displacement.png">
+<meta property="og:image" content="http://leager-zju.github.io/lab/GAMES101LAB/bilinear.png">
+<meta property="og:image" content="http://leager-zju.github.io/lab/GAMES101LAB/bi.png">
+<meta property="og:image" content="http://leager-zju.github.io/lab/GAMES101LAB/my_bezier_curve.png">
+<meta property="og:image" content="http://leager-zju.github.io/lab/GAMES101LAB/my_bezier_curve_anti_aliasing.png">
+<meta property="article:published_time" content="2024-04-19T09:16:19.000Z">
+<meta property="article:modified_time" content="2024-04-21T06:59:16.613Z">
+<meta property="article:author" content="Leager">
+<meta property="article:tag" content="GAMES">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://leager-zju.github.io/lab/GAMES101LAB/MSAA.png">
+
+<link rel="canonical" href="http://leager-zju.github.io/lab/GAMES101LAB/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>GAMES101（现代图形学入门）の 作业记录 | 没什么看头的地方</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">没什么看头的地方</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里可能没有你想看的...</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于我</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">17</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类<span class="badge">18</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴<span class="badge">90</span></a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://leager-zju.github.io/lab/GAMES101LAB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/Avatar.jpg">
+      <meta itemprop="name" content="Leager">
+      <meta itemprop="description" content="【数据删除】">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="没什么看头的地方">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          GAMES101（现代图形学入门）の 作业记录
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-04-19 17:16:19" itemprop="dateCreated datePublished" datetime="2024-04-19T17:16:19+08:00">2024-04-19</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-04-21 14:59:16" itemprop="dateModified" datetime="2024-04-21T14:59:16+08:00">2024-04-21</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/lab/" itemprop="url" rel="index"><span itemprop="name">lab</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><a target="_blank" rel="noopener" href="https://github.com/Leager-zju/GAMES101">&gt;&gt;&gt; Github
+传送门&lt;&lt;&lt;</a></p>
+<span id="more"></span>
+<h2 id="环境搭建">环境搭建</h2>
+<p>使用平台：<strong>Windows</strong> + Vscode + MSYS2 + MinGW</p>
+<h3 id="eigen-库安装-编译">Eigen 库安装 &amp; 编译</h3>
+<p>进入<a
+target="_blank" rel="noopener" href="https://gitlab.com/libeigen/eigen/-/releases/">下载地址</a>进行下载并解压。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /your/path/to/Eigen</span><br><span class="line"><span class="built_in">mkdir</span> build &amp;&amp; <span class="built_in">cd</span> build</span><br><span class="line">cmake -G <span class="string">&quot;Unix Makefiles&quot;</span> .. <span class="comment"># windows 下默认生成 ninja，需要改为生成 makefile</span></span><br><span class="line">make install -j8</span><br></pre></td></tr></table></figure>
+<p>然后会自动在 <code>C:/Program Files(x86)</code> 下生成一个名为
+<code>eigen3</code> 的文件夹。也可以移到自己喜欢的地方，记为
+<code>/your/path/to/eigen3</code>。</p>
+<h3 id="opencv-库安装-编译">opencv 库安装 &amp; 编译</h3>
+<p>进入<a
+target="_blank" rel="noopener" href="https://sourceforge.net/projects/opencvlibrary/files/opencv-win/">下载地址</a>进行下载并双击
+.exe 文件解压。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /your/path/to/opencv</span><br><span class="line"><span class="built_in">cd</span> sources</span><br><span class="line"><span class="built_in">mkdir</span> build &amp;&amp; <span class="built_in">cd</span> build</span><br><span class="line">cmake -G <span class="string">&quot;Unix Makefiles&quot;</span> -D WITH_OPENGL=ON -D ENABLE_CXX11=ON -D WITH_IPP=OFF -D ENABLE_PRECOMPILED_HEADERS=OFF ..</span><br></pre></td></tr></table></figure>
+<p>接下来用管理员权限运行
+<code>make -j8 &amp;&amp; make install -j8</code>。</p>
+<p>会在 <code>sources/build/</code> 目录下生成一个名为
+<code>install</code>
+的目录，这就是我们所需要的目录，其他都可以忽略，记为
+<code>your/path/to/opencv</code></p>
+<h3 id="编译">编译</h3>
+<p>CMakelists 参见相应分支。</p>
+<p>❗ 注意：需要将 <code>your/path/to/opencv/x64/mingw/bin</code>
+加入系统变量 PATH，否则链接阶段会找不到对应的动态库。</p>
+<h2 id="assignment1-透视投影">Assignment1 透视投影</h2>
+<p>第一个作业要求实现透视投影的 MVP 三个矩阵。</p>
+<h3 id="旋转矩阵model">旋转矩阵(Model)</h3>
+<p>这里要求实现按 <span class="math inline">\(\mathbf{z}\)</span>
+轴旋转的矩阵。注意 <code>get_model_matrix(float rotation_angle)</code>
+的参数是角度制，而使用 C++ 函数 <code>sin()</code>/<code>cos()</code>
+时要转为弧度制。</p>
+<p>实现如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 角度转弧度</span></span><br><span class="line"><span class="function"><span class="type">float</span> <span class="title">angleToRadians</span><span class="params">(<span class="type">float</span> angle)</span> </span>&#123; <span class="keyword">return</span> MY_PI*angle/<span class="number">180</span>; &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Create the model matrix for rotating the triangle around the Z axis.</span></span><br><span class="line"><span class="comment">// Then return it.</span></span><br><span class="line"><span class="function">Eigen::Matrix4f <span class="title">get_model_matrix</span><span class="params">(<span class="type">float</span> rotation_angle)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// transform angle to radians</span></span><br><span class="line">    <span class="type">float</span> cosValue = <span class="built_in">cos</span>(<span class="built_in">angleToRadians</span>(rotation_angle));</span><br><span class="line">    <span class="type">float</span> sinValue = <span class="built_in">sin</span>(<span class="built_in">angleToRadians</span>(rotation_angle));</span><br><span class="line">    Eigen::Matrix4f rotate;</span><br><span class="line">    rotate &lt;&lt; cosValue, -sinValue, <span class="number">0</span>, <span class="number">0</span>,</span><br><span class="line">              sinValue, cosValue,  <span class="number">0</span>, <span class="number">0</span>,</span><br><span class="line">              <span class="number">0</span>,        <span class="number">0</span>,         <span class="number">1</span>, <span class="number">0</span>,</span><br><span class="line">              <span class="number">0</span>,        <span class="number">0</span>,         <span class="number">0</span>, <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">return</span> rotate;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="平移矩阵view">平移矩阵(View)</h3>
+<p>这里其实就是将世界中所有物体同时平移，使得相机位于世界坐标的原点。<code>get_view_matrix(Eigen::Vector3f eye_pos)</code>
+的参数是相机的初始位置。</p>
+<p>实现如下</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Eigen::Matrix4f <span class="title">get_view_matrix</span><span class="params">(Eigen::Vector3f eye_pos)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    Eigen::Matrix4f translate;</span><br><span class="line">    translate &lt;&lt; <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, -eye_pos[<span class="number">0</span>],</span><br><span class="line">                 <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, -eye_pos[<span class="number">1</span>],</span><br><span class="line">                 <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, -eye_pos[<span class="number">2</span>],</span><br><span class="line">                 <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">return</span> translate;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="投影矩阵projection">投影矩阵(Projection)</h3>
+<p>这里需要我们实现透视投影矩阵，也是本次任务的难点所在。虽然课程中已经用数学方法推导出了矩阵，但这里还有一些不一样的地方：课程中的推导采用右手系，即相机在原点往
+<span class="math inline">\(\mathbf{z}\)</span> 轴负方向看，此时矩阵中的
+<span class="math inline">\(n\)</span> 和 <span
+class="math inline">\(f\)</span> 都应为负值。</p>
+<p>而通过观察 <code>main()</code> 我们发现，这里
+<code>get_projection_matrix(float eye_fov, float aspect_ratio, float zNear, float zFar)</code>
+的两个参数 <code>zNear</code>/<code>zFar</code>
+传入的都是正数。如果直接用这两个作为 <span
+class="math inline">\(n\)</span> 和 <span
+class="math inline">\(f\)</span>，会发现结果出现三角形上下颠倒的问题（准确来说是与预期值在
+<span class="math inline">\(\mathbf{z}\)</span> 轴上偏移了 180°）。</p>
+<p>导致这一结果的原因在于，我们在推导过程中认为可视空间内某一点 <span
+class="math inline">\((x, y, z)\)</span> 与近平面上的点 <span
+class="math inline">\((x&#39;, y&#39;, n)\)</span>
+应当存在这样一个关系</p>
+<p><span class="math display">\[
+x&#39; = \frac{n}{z}x
+\]</span></p>
+<p>一旦 <span class="math inline">\(n\)</span> 和 <span
+class="math inline">\(z\)</span> 符号相反，就会出现 <span
+class="math inline">\(x&#39;\)</span> 的值也相反，同理 <span
+class="math inline">\(y&#39;\)</span>
+的值也反了，那不就使得观测结果不符合预期了么。</p>
+<p>我的做法是：依然采用<strong>右手系</strong>，不同的是需要将这两个参数理解为近/远平面离原点的距离，<span
+class="math inline">\(n\)</span> 和 <span
+class="math inline">\(f\)</span>
+各取相应的负值，这样就能解决这一问题了。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Eigen::Matrix4f <span class="title">get_projection_matrix</span><span class="params">(<span class="type">float</span> eye_fov, <span class="type">float</span> aspect_ratio,</span></span></span><br><span class="line"><span class="params"><span class="function">                                      <span class="type">float</span> zNear, <span class="type">float</span> zFar)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// eye_fov: viewing angle in the range of [-eye_fov, eye_fov]</span></span><br><span class="line">    <span class="comment">// aspect_ratio: the height:width of viewing plane</span></span><br><span class="line">    Eigen::Matrix4f squish;</span><br><span class="line">    Eigen::Matrix4f translation;</span><br><span class="line">    Eigen::Matrix4f scale;</span><br><span class="line"></span><br><span class="line">    <span class="type">float</span> n = -zNear;</span><br><span class="line">    <span class="type">float</span> f = -zFar;</span><br><span class="line"></span><br><span class="line">    squish &lt;&lt; n, <span class="number">0</span>, <span class="number">0</span>,   <span class="number">0</span>,</span><br><span class="line">              <span class="number">0</span>, n, <span class="number">0</span>,   <span class="number">0</span>,</span><br><span class="line">              <span class="number">0</span>, <span class="number">0</span>, n+f, -n*f,</span><br><span class="line">              <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>,   <span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="type">float</span> top = <span class="built_in">abs</span>(n)*<span class="built_in">tan</span>(<span class="built_in">angleToRadians</span>(eye_fov/<span class="number">2</span>));</span><br><span class="line">    <span class="type">float</span> bottom = -top;</span><br><span class="line"></span><br><span class="line">    <span class="type">float</span> right = top*aspect_ratio;</span><br><span class="line">    <span class="type">float</span> left = -right;</span><br><span class="line"></span><br><span class="line">    translation &lt;&lt; <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, -(left+right)/<span class="number">2</span>,</span><br><span class="line">                   <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, -(top+bottom)/<span class="number">2</span>,</span><br><span class="line">                   <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, -(n+f)/<span class="number">2</span>,</span><br><span class="line">                   <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    scale &lt;&lt; <span class="number">2</span>/(right-left), <span class="number">0</span>,              <span class="number">0</span>,       <span class="number">0</span>,</span><br><span class="line">             <span class="number">0</span>,              <span class="number">2</span>/(top-bottom), <span class="number">0</span>,       <span class="number">0</span>,</span><br><span class="line">             <span class="number">0</span>,              <span class="number">0</span>,              <span class="number">2</span>/(n-f), <span class="number">0</span>,</span><br><span class="line">             <span class="number">0</span>,              <span class="number">0</span>,              <span class="number">0</span>,       <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> scale*translation*squish;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="bonus-按任意轴-axis-旋转">BONUS: 按任意轴 axis 旋转</h3>
+<p>按照课程推导结果代入即可</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Eigen::Matrix4f <span class="title">get_rotation</span><span class="params">(Vector3f axis, <span class="type">float</span> angle)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    Eigen::Matrix4f K = Eigen::Matrix4f::<span class="built_in">Identity</span>();</span><br><span class="line">    <span class="type">float</span> sinValue = <span class="built_in">sin</span>(<span class="built_in">angleToRadians</span>(angle));</span><br><span class="line">    <span class="type">float</span> cosValue = <span class="built_in">cos</span>(<span class="built_in">angleToRadians</span>(angle));</span><br><span class="line">    <span class="type">float</span> kx = axis[<span class="number">0</span>];</span><br><span class="line">    <span class="type">float</span> ky = axis[<span class="number">1</span>];</span><br><span class="line">    <span class="type">float</span> kz = axis[<span class="number">2</span>];</span><br><span class="line">    K &lt;&lt; <span class="number">0</span>,   -kz, ky,</span><br><span class="line">         kz,  <span class="number">0</span>,   -kx,</span><br><span class="line">         -ky, kx, <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">return</span> Eigen::Matrix4f::<span class="built_in">Identity</span>() + sinValue*K + (<span class="number">1</span>-cosValue)*K*K;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="总结">总结</h3>
+<p>第一个作业难度甚至可以说低。唯一的难点在于对 <code>zNear</code> 和
+<code>zFar</code>
+的理解是否有误，这一点当时卡了我一定时间，解决该问题的同时对整个透视投影的理解也加深了许多。</p>
+<h2 id="assignment2-光栅化">Assignment2 光栅化</h2>
+<p>第二个作业要求利用 Z-Buffer 算法实现光栅化。</p>
+<h3 id="判断是否在三角形内">判断是否在三角形内</h3>
+<p>经过透视投影后，我们知道了三角形三个顶点在屏幕空间中的坐标。那么对于屏幕空间内的
+pixel，可以利用重心坐标来判断是否在三角形内，如果重心坐标的三个值均在
+<span class="math inline">\([0, 1]\)</span> 之间，那么就认为这个 pixel
+在三角形内。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">static</span> <span class="type">bool</span> <span class="title">insideTriangle</span><span class="params">(<span class="type">float</span> x, <span class="type">float</span> y, <span class="type">const</span> Vector3f* _v)</span></span></span><br><span class="line"><span class="function"></span>&#123;   </span><br><span class="line">    <span class="keyword">auto</span> [alpha, beta, gamma] = <span class="built_in">computeBarycentric2D</span>(x, y, _v);</span><br><span class="line">    <span class="keyword">return</span> alpha &gt;= <span class="number">0</span> &amp;&amp; beta &gt;= <span class="number">0</span> &amp;&amp; gamma &gt;= <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>computeBarycentric2D()</code>
+是课程框架为我们实现好的求重心坐标的函数，直接用即可。</p>
+<h3 id="对三角形进行光栅化">对三角形进行光栅化</h3>
+<p>要实现的函数为
+<code>rasterize_triangle()</code>。为了减少开销，我们只需要在三角形的
+bounding box 内遍历 pixel 即可。</p>
+<blockquote>
+<p>可能存在的 corner case 是三角形顶点坐标不在可视空间内，所以需要对
+bounding box 的边界进行特殊处理。</p>
+</blockquote>
+<p>如果一个 pixel
+在三角形内，那么我们需要利用重心坐标求出对应的深度值，并判断是否需要用当前
+RGB 覆盖原有的。因为这里是右手系，所以求出的点的 <span
+class="math inline">\(\mathbf{z}\)</span>
+值都是负数，这个值越大，说明离原点（相机）越近，就是要覆盖的。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> rst::rasterizer::<span class="built_in">rasterize_triangle</span>(<span class="type">const</span> Triangle&amp; t)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 求解 bounding box（略）</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 遍历 pixel</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> x = min_x; x &lt;= max_x; x++) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> y = min_y; y &lt;= max_y; y++) &#123;</span><br><span class="line">            <span class="type">int</span> pixel_index = <span class="built_in">get_index</span>(x, y);</span><br><span class="line">            <span class="comment">// pixel center 坐标值</span></span><br><span class="line">            <span class="type">float</span> sampleX = x + <span class="number">0.5</span>;</span><br><span class="line">            <span class="type">float</span> sampleY = y + <span class="number">0.5</span>;</span><br><span class="line">            <span class="keyword">if</span> (!<span class="built_in">insideTriangle</span>(sampleX, sampleY, t.v)) <span class="keyword">continue</span>;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">auto</span>[alpha, beta, gamma] = <span class="built_in">computeBarycentric2D</span>(sampleY, sampleY, t.v);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 下面这段代码是什么意思呢？</span></span><br><span class="line">            <span class="type">float</span> w_reciprocal = <span class="number">1.0</span>/(alpha / v[<span class="number">0</span>].<span class="built_in">w</span>() + beta / v[<span class="number">1</span>].<span class="built_in">w</span>() + gamma / v[<span class="number">2</span>].<span class="built_in">w</span>());</span><br><span class="line">            <span class="type">float</span> z_interpolated = alpha * v[<span class="number">0</span>].<span class="built_in">z</span>() / v[<span class="number">0</span>].<span class="built_in">w</span>() + beta * v[<span class="number">1</span>].<span class="built_in">z</span>() / v[<span class="number">1</span>].<span class="built_in">w</span>() + gamma * v[<span class="number">2</span>].<span class="built_in">z</span>() / v[<span class="number">2</span>].<span class="built_in">w</span>();</span><br><span class="line">            z_interpolated *= w_reciprocal;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (<span class="built_in">isinf</span>(depth_buf[pixel_index])  || z_interpolated &gt; depth_buf[pixel_index]) &#123;</span><br><span class="line">                depth_buf[pixel_index] = z_interpolated;</span><br><span class="line">                <span class="built_in">set_pixel</span>(&#123;x, y, <span class="number">0</span>&#125;, t.<span class="built_in">getColor</span>());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注意到框架让我们用注释的方法求深度值，但提供的代码有些莫名其妙。查阅资料发现，可视空间中的三角形经过透视投影变换到了屏幕空间后，同一点
+<span class="math inline">\(P\)</span>
+的重心坐标会发生变化，所以不能直接用屏幕空间中的重心坐标来插值三角形的在可视空间中的真实属性，而需要用一定手段进行<strong>校正</strong>。</p>
+<p>🙋‍♂️
+看到这里需要特别说明一下，下面所有在<strong>屏幕空间</strong>中（求出）的值都会加上
+<span
+class="math inline">\(\prime\)</span>，如果没有，则表明这个值是属于<strong>可视空间/真实空间</strong>的。</p>
+<p>网上关于这个的资料已经非常详细了，我直接贴结论：</p>
+<p><span class="math display">\[
+\frac{1}{z_P} =
+\frac{\alpha&#39;}{z_A}+\frac{\beta&#39;}{z_B}+\frac{\gamma&#39;}{z_C}
+\]</span></p>
+<blockquote>
+<p>解释一下，其中 <span class="math inline">\(\alpha&#39;, \beta&#39;,
+\gamma&#39;\)</span> 是点 <span class="math inline">\(P\)</span> 在
+<span class="math inline">\(\triangle{ABC}\)</span>
+中<strong>屏幕空间</strong>下的重心坐标，而 <span
+class="math inline">\(z_P, z_A, z_B, z_C\)</span>
+都是这些点在<strong>可视空间</strong>中的 <span
+class="math inline">\(\mathbf{z}\)</span> 值。</p>
+</blockquote>
+<p>如果想通过插值求点 <span class="math inline">\(P\)</span> 的属性
+<span class="math inline">\(I\)</span>，那就用以下公式：</p>
+<p><span class="math display">\[
+I_P = z_P[\frac{\alpha&#39;}{z_A}I_A + \frac{\beta&#39;}{z_B}I_B +
+\frac{\gamma&#39;}{z_C}I_C] = \frac{\frac{\alpha&#39;}{z_A}I_A +
+\frac{\beta&#39;}{z_B}I_B +
+\frac{\gamma&#39;}{z_C}I_C}{\frac{\alpha&#39;}{z_A}+\frac{\beta&#39;}{z_B}+\frac{\gamma&#39;}{z_C}}
+\]</span></p>
+<p>而透视投影矩阵的第四行为 <span
+class="math inline">\([0,0,1,0]\)</span>，也就是说最后得到的 <span
+class="math inline">\(\mathbf{w}\)</span>
+值自然就存储了顶点的真实深度。这就是为什么框架给的代码用的是齐次坐标
+<span class="math inline">\(\mathbf{w}\)</span> 值而不是 <span
+class="math inline">\(\mathbf{z}\)</span> 值了——屏幕空间中的 <span
+class="math inline">\(\mathbf{z}\)</span>
+值是经过投影变换后的，不是真实深度。</p>
+<blockquote>
+<p>至于之前的旋转平移变换，都只是改变绝对位置，相对位置还是不变的，所以不会影响深度，只要看透视投影就行。</p>
+</blockquote>
+<p>那么框架的代码就很容易理解了，<code>z_interpolated</code>
+并不是真实深度，而是可视空间深度。只不过框架这里存在问题，前面
+<code>v = t.toVector4()</code> 的时候，函数 <code>toVector4()</code>
+里对 <span class="math inline">\(\mathbf{w}\)</span> 的赋值竟然直接赋了
+<code>1</code>，这就导致所谓的校正仍然 fall back
+到线性插值。虽然结果看起来没啥问题，但这也是一个值得注意的点。</p>
+<h3 id="bonus-msaa">BONUS: MSAA</h3>
+<p>为了实现 MSAA，就不能对于一个 pixel 设置一个 Z Buffer
+值了。假设我们用 <span class="math inline">\(n\times n\)</span>
+个采样点对同一个 pixel 进行采样，那么就需要对同一个 pixel 设置 <span
+class="math inline">\(n\times n\)</span> 个 Z Buffer，与等量的 RGB
+Buffer，这样之后就可以求一个 pixel 内所有采样点的 RGB 平均值来上色。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> rst::rasterizer::<span class="built_in">rasterize_triangle</span>(<span class="type">const</span> Triangle&amp; t)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 求解 bounding box（略）</span></span><br><span class="line"></span><br><span class="line">    <span class="type">const</span> <span class="type">int</span> sample_count = msaa*msaa;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> x = min_x; x &lt;= max_x; x++) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> y = min_y; y &lt;= max_y; y++) &#123;</span><br><span class="line">            <span class="type">int</span> pixel_index = <span class="built_in">get_index</span>(x, y);</span><br><span class="line">            <span class="type">int</span> count = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; sample_count; i++) &#123;</span><br><span class="line">                <span class="type">float</span> samplePointWidth = <span class="number">1.0</span>/msaa;</span><br><span class="line">                <span class="type">int</span> col = i%msaa;</span><br><span class="line">                <span class="type">int</span> row = i/msaa;</span><br><span class="line">                <span class="comment">// 计算采样点中心坐标</span></span><br><span class="line">                <span class="type">float</span> sampleX = x + col*samplePointWidth + samplePointWidth/<span class="number">2</span>;</span><br><span class="line">                <span class="type">float</span> sampleY = y + row*samplePointWidth + samplePointWidth/<span class="number">2</span>;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (!<span class="built_in">insideTriangle</span>(sampleX, sampleY, t.v)) <span class="keyword">continue</span>;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">auto</span>[alpha, beta, gamma] = <span class="built_in">computeBarycentric2D</span>(sampleX, sampleY, t.v);</span><br><span class="line">                <span class="type">float</span> w_reciprocal = <span class="number">1.0</span>/(alpha / v[<span class="number">0</span>].<span class="built_in">w</span>() + beta / v[<span class="number">1</span>].<span class="built_in">w</span>() + gamma / v[<span class="number">2</span>].<span class="built_in">w</span>());</span><br><span class="line">                <span class="type">float</span> z_interpolated = alpha * v[<span class="number">0</span>].<span class="built_in">z</span>() / v[<span class="number">0</span>].<span class="built_in">w</span>() + beta * v[<span class="number">1</span>].<span class="built_in">z</span>() / v[<span class="number">1</span>].<span class="built_in">w</span>() + gamma * v[<span class="number">2</span>].<span class="built_in">z</span>() / v[<span class="number">2</span>].<span class="built_in">w</span>();</span><br><span class="line">                z_interpolated *= w_reciprocal;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (<span class="built_in">isinf</span>(sample_depth_buf[pixel_index][i])  || z_interpolated &gt; sample_depth_buf[pixel_index][i]) &#123;</span><br><span class="line">                    sample_depth_buf[pixel_index][i] = z_interpolated;</span><br><span class="line">                    sample_color_buf[pixel_index][i] = t.<span class="built_in">getColor</span>();</span><br><span class="line">                    count++;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (count) &#123;</span><br><span class="line">                <span class="comment">// 即上色结果有更新</span></span><br><span class="line">                Vector3f res = &#123;<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>&#125;;</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">auto</span>&amp;&amp; color : sample_color_buf[pixel_index]) &#123;</span><br><span class="line">                    res += color;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="built_in">set_pixel</span>(&#123;x, y, <span class="number">0</span>&#125;, res/(sample_count));</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="总结-1">总结</h3>
+<p>校正插值是本次作业的难点，需要好好理解推导过程。</p>
+<p>输出结果如下：</p>
+<p><img src="./MSAA.png" style="zoom:70%"></p>
+<p>左侧是不用 MSAA 的结果，右侧是使用 4×MSAA
+的结果，可以看到锯齿得到了明显改善。</p>
+<h2 id="assignment3-纹理与插值">Assignment3 纹理与插值</h2>
+<p>第三个作业要求我们实现更多属性的插值，并且将纹理应用到模型上。</p>
+<h3 id="更多的插值与法线着色">更多的插值与法线着色</h3>
+<p>有了作业 2 的前置知识，其实求真实属性已经不是什么难点了，只不过这次
+<code>rasterize_triangle()</code> 函数中多了一个名为
+<code>view_pos</code> 的参数，通过阅读 <code>draw()</code>
+函数我们发现，这正是三角形顶点在可视空间中的坐标，这样一来真实深度就有了，只要在屏幕空间求一遍重心坐标即可。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> rst::rasterizer::<span class="built_in">rasterize_triangle</span>(<span class="type">const</span> Triangle&amp; t, <span class="type">const</span> std::array&lt;Eigen::Vector3f, <span class="number">3</span>&gt;&amp; view_pos) </span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 求解 bounding box（略）</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> x = min_x; x &lt;= max_x; x++) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> y = min_y; y &lt;= max_y; y++) &#123;</span><br><span class="line">            <span class="type">int</span> pixel_index = <span class="built_in">get_index</span>(x, y);</span><br><span class="line">            <span class="type">float</span> sampleX = x + <span class="number">0.5</span>;</span><br><span class="line">            <span class="type">float</span> sampleY = y + <span class="number">0.5</span>;</span><br><span class="line">            <span class="keyword">if</span> (!<span class="built_in">insideTriangle</span>(sampleX, sampleY, v)) <span class="keyword">continue</span>;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">auto</span>[alpha, beta, gamma] = <span class="built_in">computeBarycentric2D</span>(sampleX, sampleY, v); <span class="comment">// Barycentric Coordinates</span></span><br><span class="line"></span><br><span class="line">            <span class="type">float</span> Z = <span class="number">1.0</span> / (alpha / v[<span class="number">0</span>].<span class="built_in">w</span>() + beta / v[<span class="number">1</span>].<span class="built_in">w</span>() +</span><br><span class="line">                             gamma / v[<span class="number">2</span>].<span class="built_in">w</span>());  <span class="comment">// depth in view space</span></span><br><span class="line">            <span class="type">float</span> zp =</span><br><span class="line">                alpha * v[<span class="number">0</span>].<span class="built_in">z</span>() / v[<span class="number">0</span>].<span class="built_in">w</span>() + beta * v[<span class="number">1</span>].<span class="built_in">z</span>() / v[<span class="number">1</span>].<span class="built_in">w</span>() +</span><br><span class="line">                gamma * v[<span class="number">2</span>].<span class="built_in">z</span>() / v[<span class="number">2</span>].<span class="built_in">w</span>();  <span class="comment">// depth in projection space</span></span><br><span class="line">            zp *= Z;</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">if</span> (<span class="built_in">isinf</span>(depth_buf[pixel_index]) || zp &gt; depth_buf[pixel_index]) &#123;</span><br><span class="line">                depth_buf[pixel_index] = zp;</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 各个属性的插值结果</span></span><br><span class="line">                Vector3f interpolated_color = <span class="built_in">interpolate</span>(</span><br><span class="line">                    alpha / v[<span class="number">0</span>].<span class="built_in">w</span>(), beta / v[<span class="number">1</span>].<span class="built_in">w</span>(), gamma / v[<span class="number">2</span>].<span class="built_in">w</span>(),</span><br><span class="line">                    t.color[<span class="number">0</span>], t.color[<span class="number">1</span>], t.color[<span class="number">2</span>], <span class="number">1</span> / Z);</span><br><span class="line"></span><br><span class="line">                Vector3f interpolated_normal = <span class="built_in">interpolate</span>(</span><br><span class="line">                    alpha / v[<span class="number">0</span>].<span class="built_in">w</span>(), beta / v[<span class="number">1</span>].<span class="built_in">w</span>(), gamma / v[<span class="number">2</span>].<span class="built_in">w</span>(),</span><br><span class="line">                    t.normal[<span class="number">0</span>], t.normal[<span class="number">1</span>], t.normal[<span class="number">2</span>], <span class="number">1</span> / Z);</span><br><span class="line"></span><br><span class="line">                Vector2f interpolated_texcoords = <span class="built_in">interpolate</span>(</span><br><span class="line">                    alpha / v[<span class="number">0</span>].<span class="built_in">w</span>(), beta / v[<span class="number">1</span>].<span class="built_in">w</span>(), gamma / v[<span class="number">2</span>].<span class="built_in">w</span>(),</span><br><span class="line">                    t.tex_coords[<span class="number">0</span>], t.tex_coords[<span class="number">1</span>], t.tex_coords[<span class="number">2</span>], <span class="number">1</span> / Z);</span><br><span class="line"></span><br><span class="line">                Vector3f interpolated_shadingcoords = <span class="built_in">interpolate</span>(</span><br><span class="line">                    alpha / v[<span class="number">0</span>].<span class="built_in">w</span>(), beta / v[<span class="number">1</span>].<span class="built_in">w</span>(), gamma / v[<span class="number">2</span>].<span class="built_in">w</span>(),</span><br><span class="line">                    view_pos[<span class="number">0</span>], view_pos[<span class="number">1</span>], view_pos[<span class="number">2</span>], <span class="number">1</span> / Z);</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 一个数据结构，传递给 fragment_shader 以求出上色结果</span></span><br><span class="line">                <span class="function">fragment_shader_payload <span class="title">payload</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">                    interpolated_color, interpolated_normal.normalized(),</span></span></span><br><span class="line"><span class="params"><span class="function">                    interpolated_texcoords, texture ? &amp;*texture : <span class="literal">nullptr</span>)</span></span>;</span><br><span class="line">                payload.view_pos = interpolated_shadingcoords;</span><br><span class="line"></span><br><span class="line">                Vector3f pixel_color = <span class="built_in">fragment_shader</span>(payload);</span><br><span class="line">                <span class="built_in">set_pixel</span>(&#123;x, y&#125;, pixel_color);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出结果如下：</p>
+<p><img src="./normal.png" style="zoom:40%"></p>
+<h3 id="blinn-phong-着色">Blinn Phong 着色</h3>
+<p>Blinn Phong
+模型里面有三个项：漫反射项、高光项、环境光项。这些项的所需参数大部分都在框架中给出，需要我们求的有</p>
+<ul>
+<li>光线方向 <span class="math inline">\(\mathbf{l}\)</span>；</li>
+<li>观测方向 <span class="math inline">\(\mathbf{v}\)</span>；</li>
+<li>半程向量 <span class="math inline">\(\mathbf{h}\)</span>；</li>
+</ul>
+<p>注意，结构体 <code>fragment_shader_payload</code>
+中包含了非常多有用信息，比如</p>
+<ul>
+<li>着色点真实坐标 <code>view_pos</code>；</li>
+<li>着色点 RGB <code>color</code>；</li>
+<li>着色点法线方向 <code>normal</code>；</li>
+<li>着色点纹理坐标 <code>tex_coords</code>；</li>
+<li>着色点所在模型对应的纹理 <code>texture</code>；</li>
+</ul>
+<p>那么 <span
+class="math inline">\(\mathbf{l},\mathbf{v},\mathbf{h}\)</span>
+就很好求了，要注意的是公式里的这些变量都是单位向量，要调用
+<code>normalized()</code> 进行单位化。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Eigen::Vector3f <span class="title">phong_fragment_shader</span><span class="params">(<span class="type">const</span> fragment_shader_payload&amp; payload)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    Eigen::Vector3f ka = Eigen::<span class="built_in">Vector3f</span>(<span class="number">0.005</span>, <span class="number">0.005</span>, <span class="number">0.005</span>);</span><br><span class="line">    Eigen::Vector3f kd = payload.color;</span><br><span class="line">    Eigen::Vector3f ks = Eigen::<span class="built_in">Vector3f</span>(<span class="number">0.7937</span>, <span class="number">0.7937</span>, <span class="number">0.7937</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">auto</span> l1 = light&#123;&#123;<span class="number">20</span>, <span class="number">20</span>, <span class="number">20</span>&#125;, &#123;<span class="number">500</span>, <span class="number">500</span>, <span class="number">500</span>&#125;&#125;;</span><br><span class="line">    <span class="keyword">auto</span> l2 = light&#123;&#123;<span class="number">-20</span>, <span class="number">20</span>, <span class="number">0</span>&#125;, &#123;<span class="number">500</span>, <span class="number">500</span>, <span class="number">500</span>&#125;&#125;;</span><br><span class="line"></span><br><span class="line">    std::vector&lt;light&gt; lights = &#123;l1, l2&#125;;</span><br><span class="line">    Eigen::Vector3f amb_light_intensity&#123;<span class="number">10</span>, <span class="number">10</span>, <span class="number">10</span>&#125;;</span><br><span class="line">    Eigen::Vector3f eye_pos&#123;<span class="number">0</span>, <span class="number">0</span>, <span class="number">10</span>&#125;;</span><br><span class="line"></span><br><span class="line">    <span class="type">float</span> p = <span class="number">150</span>;</span><br><span class="line"></span><br><span class="line">    Eigen::Vector3f color = payload.color;</span><br><span class="line">    Eigen::Vector3f point = payload.view_pos;</span><br><span class="line">    Eigen::Vector3f normal = payload.normal;</span><br><span class="line"></span><br><span class="line">    Eigen::Vector3f result_color = &#123;<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>&#125;;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">auto</span>&amp; light : lights)</span><br><span class="line">    &#123;</span><br><span class="line">        Vector3f l = (light.position - point).<span class="built_in">normalized</span>();  <span class="comment">// 光线方向</span></span><br><span class="line">        Vector3f v = (eye_pos - point).<span class="built_in">normalized</span>();         <span class="comment">// 观测方向</span></span><br><span class="line">        Vector3f h = (l + v).<span class="built_in">normalized</span>();                   <span class="comment">// 半程向量</span></span><br><span class="line">        <span class="type">float</span> r_square = (light.position - point).<span class="built_in">dot</span>(light.position - point);</span><br><span class="line">        Vector3f light_intensity = light.intensity / r_square;</span><br><span class="line"></span><br><span class="line">        Vector3f ambient_item = <span class="built_in">product</span>(ka, amb_light_intensity); <span class="comment">// 环境光项</span></span><br><span class="line">        Vector3f diffuse_item =</span><br><span class="line">            <span class="built_in">product</span>(kd, light_intensity) * std::<span class="built_in">max</span>&lt;<span class="type">float</span>&gt;(<span class="number">0.0</span>, normal.<span class="built_in">dot</span>(l)); <span class="comment">// 漫反射项</span></span><br><span class="line">        Vector3f specular_item =</span><br><span class="line">            <span class="built_in">product</span>(ks, light_intensity) *</span><br><span class="line">            std::<span class="built_in">pow</span>(std::<span class="built_in">max</span>&lt;<span class="type">float</span>&gt;(<span class="number">0.0</span>, normal.<span class="built_in">dot</span>(h)), p); <span class="comment">// 高光项</span></span><br><span class="line">        result_color += ambient_item + diffuse_item + specular_item;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> result_color * <span class="number">255.f</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>这里
+<code>ka</code>/<code>kd</code>/<code>ks</code>/<code>light_intensity</code>
+都是三元向量，分别在 RGB
+三个通道上进行乘算，最后的结果也是一个三元向量，那就需要定义一个新的向量乘法，使得
+<span class="math inline">\(\text{product}([a_1, a_2, \dots, a_n], [b_1,
+b_2, \dots, b_n]) = [a1*b_1, a2*b_2,\dots,a_n*b_n]\)</span>。</p>
+</blockquote>
+<p>输出结果如下：</p>
+<p><img src="./phong.png" style="zoom:40%"></p>
+<h3 id="纹理着色">纹理着色</h3>
+<p>这一步是在 Blinn Phong 的基础上用纹理中的 RGB 值代替模型本身 RGB
+值，在前面加上以下代码即可。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (payload.texture)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">float</span> u = payload.tex_coords.<span class="built_in">x</span>();</span><br><span class="line">    <span class="type">float</span> v = payload.tex_coords.<span class="built_in">y</span>();</span><br><span class="line">    return_color = payload.texture-&gt;<span class="built_in">getColorBilinear</span>(u, v);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出结果如下：</p>
+<p><img src="./texture.png" style="zoom:40%"></p>
+<h3 id="凹凸贴图">凹凸贴图</h3>
+<p>按照注释实现即可，其中 TBN 矩阵会在后续进行推导。输出结果如下：</p>
+<p><img src="./bump.png" style="zoom:40%"></p>
+<h3 id="位移贴图">位移贴图</h3>
+<p>依然是按照注释实现。输出结果如下：</p>
+<p><img src="./displacement.png" style="zoom:40%"></p>
+<h3 id="bonus-双线性插值">BONUS: 双线性插值</h3>
+<p>我们需要在 <code>Texture.hpp</code> 里实现函数
+<code>getColorBilinear()</code>。结合下面这张图，我们可以得出一些思路。</p>
+<p><img src="./bilinear.png" style="zoom:40%"></p>
+<p>第一步要做的是找出离纹理坐标系上的一点 <span
+class="math inline">\((u, v)\)</span> 最近的 4 个
+texel，那么就需要根据这个点在当前 texel
+的位置进行判断。我们可以计算当前点到左侧 texel
+中心在横坐标上的距离（对应公式中的 <span
+class="math inline">\(s\)</span>），如果值大于
+1，说明在横向上最近的是右侧 texel，反之是左侧的 texel。我们只需要将当前
+<span class="math inline">\((u, v)\)</span> 定位到 4 个 texel
+中左下的那个，就可以很方便地进行计算了。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Eigen::Vector3f <span class="title">getColorBilinear</span><span class="params">(<span class="type">float</span> u, <span class="type">float</span> v)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 纹理图是一个矩阵，要用行/列的形式访问</span></span><br><span class="line">    <span class="keyword">auto</span> u_img = u * width;        <span class="comment">// 矩阵列</span></span><br><span class="line">    <span class="keyword">auto</span> v_img = (<span class="number">1</span> - v) * height; <span class="comment">// 矩阵行</span></span><br><span class="line"></span><br><span class="line">    <span class="type">float</span> s = u_img-(<span class="type">int</span>)u_img + <span class="number">0.5</span>;</span><br><span class="line">    <span class="type">float</span> t = v_img-(<span class="type">int</span>)v_img + <span class="number">0.5</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (s &gt; <span class="number">1</span>) &#123;</span><br><span class="line">        s = s<span class="number">-1</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        u_img = u_img<span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (t &gt; <span class="number">1</span>) &#123;</span><br><span class="line">        t = t<span class="number">-1</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        v_img = v_img<span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">auto</span> u00 = image_data.<span class="built_in">at</span>&lt;cv::Vec3b&gt;(v_img, u_img);</span><br><span class="line">    <span class="keyword">auto</span> u10 = image_data.<span class="built_in">at</span>&lt;cv::Vec3b&gt;(v_img, u_img + <span class="number">1</span>);</span><br><span class="line">    <span class="keyword">auto</span> u01 = image_data.<span class="built_in">at</span>&lt;cv::Vec3b&gt;(v_img + <span class="number">1</span>, u_img);</span><br><span class="line">    <span class="keyword">auto</span> u11 = image_data.<span class="built_in">at</span>&lt;cv::Vec3b&gt;(v_img + <span class="number">1</span>, u_img + <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">auto</span> u0 = u00 + s * (u10 - u00);</span><br><span class="line">    <span class="keyword">auto</span> u1 = u01 + t * (u11 - u01);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">auto</span> color = u0 + t * (u1 - u0);</span><br><span class="line">    <span class="keyword">return</span> Eigen::<span class="built_in">Vector3f</span>(color[<span class="number">0</span>], color[<span class="number">1</span>], color[<span class="number">2</span>]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出结果对比（奶牛鼻子处），右侧是采用双线性插值的结果，可以看到过渡更加平滑。</p>
+<p><img src="./bi.png" style="zoom:70%"></p>
+<h3 id="总结-2">总结</h3>
+<p>框架帮我们实现了 <code>insideTriangle()</code>
+函数，但可能会出现纹理坐标 <span class="math inline">\(&gt;1\)</span>
+的情况，修改为用重心坐标判断就 ok 了。</p>
+<h2 id="assignment4-贝塞尔曲线">Assignment4 贝塞尔曲线</h2>
+<p>第四个作业要求我们绘制贝塞尔曲线。</p>
+<h3 id="贝塞尔曲线">贝塞尔曲线</h3>
+<p>课程给的框架中为我们实现了一个静态的贝塞尔曲线绘制函数
+<code>naive_bezier()</code>，根据 4
+个控制点进行绘制。我们需要实现另一个递归的版本。</p>
+<p>递归版本的思路是：对于给定控制点集 <span
+class="math inline">\(C=\{c_1, c_2, \dots,
+c_n\}\)</span>，取所有的相邻的两个控制点 <span
+class="math inline">\(c_i, c_{i+1}\)</span>，找到所有的 <span
+class="math inline">\(n-1\)</span> 个 <span
+class="math inline">\(t\)</span> 分点 <span class="math inline">\(c_{i,
+t} = t*c_i + (1-t)*c_{i+1}\)</span> 加入新的控制点集合 <span
+class="math inline">\(C&#39; = \{c_{1,t}, c_{2,t}, \dots, c_{n-1,
+t}\}\)</span> ，并作为递归函数的参数传入。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">cv::Point2f <span class="title">recursive_bezier</span><span class="params">(<span class="type">const</span> std::vector&lt;cv::Point2f&gt; &amp;control_points, <span class="type">float</span> t)</span> </span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (control_points.<span class="built_in">size</span>() == <span class="number">1</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> control_points[<span class="number">0</span>];</span><br><span class="line">    &#125;</span><br><span class="line">    std::vector&lt;cv::Point2f&gt; new_control_points;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; control_points.<span class="built_in">size</span>()<span class="number">-1</span>; i++) &#123;</span><br><span class="line">        new_control_points.<span class="built_in">emplace_back</span>(t * control_points[i] + (<span class="number">1</span>-t) * control_points[i+<span class="number">1</span>]);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">recursive_bezier</span>(new_control_points, t);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">bezier</span><span class="params">(<span class="type">const</span> std::vector&lt;cv::Point2f&gt; &amp;control_points, cv::Mat &amp;window)</span> </span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">double</span> t = <span class="number">0.0</span>; t &lt;= <span class="number">1.0</span>; t += <span class="number">0.001</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        cv::Point2f point = <span class="built_in">recursive_bezier</span>(control_points, t); <span class="comment">// 找到 bezier(t) 的点</span></span><br><span class="line">        <span class="comment">// 通道 [1] 是 G 值，[2] 是 R 值</span></span><br><span class="line">        window.<span class="built_in">at</span>&lt;cv::Vec3b&gt;(point.y, point.x)[<span class="number">1</span>] = <span class="number">255</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>虽然课程框架只说实现 4
+个控制点的版本，但是递归的实现应该能够支持任意数量的控制点。</p>
+</blockquote>
+<p>输出结果如下：</p>
+<p><img src="./my_bezier_curve.png" style="zoom:70%"></p>
+<h3 id="反走样">反走样</h3>
+<p>曲线反走样的基本思路就是<strong>加粗</strong>。虽然这里不能用双线性插值，因为最近的
+4 个像素点不一定都有颜色，但是也值得参考。我们可以找最近的四个
+pixel，根据 <code>bezier(t)</code> 与这些 pixels
+中心点的距离来为其赋予相应的 G 值。</p>
+<p>对于一个点来说，其与最近 4 个 pixel-center 的距离应该在区间 <span
+class="math inline">\([0, \sqrt{2}]\)</span> 内，并且离一个 pixel
+越近，这个 pixel 的 G 值就应该越高，可以简单的用公式 <span
+class="math inline">\(\displaystyle G =
+255*(1-\frac{d}{\sqrt{2}})\)</span> 来线性计算，从而得到下面的代码</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">bezier_antialiasing</span><span class="params">(<span class="type">const</span> std::vector&lt;cv::Point2f&gt; &amp;control_points, cv::Mat &amp;window)</span> </span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">double</span> t = <span class="number">0.0</span>; t &lt;= <span class="number">1.0</span>; t += <span class="number">0.001</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        cv::Point2f point = <span class="built_in">recursive_bezier</span>(control_points, t);</span><br><span class="line"></span><br><span class="line">        <span class="type">float</span> x = point.x;</span><br><span class="line">        <span class="type">float</span> y = point.y;</span><br><span class="line">        <span class="type">float</span> u = x - (<span class="type">int</span>)x + <span class="number">0.5</span>;</span><br><span class="line">        <span class="type">float</span> v = y - (<span class="type">int</span>)y + <span class="number">0.5</span>;</span><br><span class="line">        <span class="keyword">if</span> (u &gt; <span class="number">1</span>) &#123;</span><br><span class="line">            u = u<span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (v &gt; <span class="number">1</span>) &#123;</span><br><span class="line">            v = v<span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="type">float</span> d00 = <span class="built_in">pow</span>(u, <span class="number">2</span>) + <span class="built_in">pow</span>(v, <span class="number">2</span>);</span><br><span class="line">        <span class="type">float</span> d01 = <span class="built_in">pow</span>(<span class="number">1</span>-u, <span class="number">2</span>) + <span class="built_in">pow</span>(v, <span class="number">2</span>);</span><br><span class="line">        <span class="type">float</span> d10 = <span class="built_in">pow</span>(u, <span class="number">2</span>) + <span class="built_in">pow</span>(<span class="number">1</span>-v, <span class="number">2</span>);</span><br><span class="line">        <span class="type">float</span> d11 = <span class="built_in">pow</span>(<span class="number">1</span>-u, <span class="number">2</span>) + <span class="built_in">pow</span>(<span class="number">1</span>-v, <span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">        window.<span class="built_in">at</span>&lt;cv::Vec3b&gt;(y, x)[<span class="number">1</span>] =</span><br><span class="line">            <span class="built_in">fmin</span>(<span class="number">255</span>, window.<span class="built_in">at</span>&lt;cv::Vec3b&gt;(y, x)[<span class="number">1</span>] + <span class="number">255</span> * (<span class="number">1</span> - <span class="built_in">sqrt</span>(d00 / <span class="number">2</span>)));</span><br><span class="line">        window.<span class="built_in">at</span>&lt;cv::Vec3b&gt;(y, x + <span class="number">1</span>)[<span class="number">1</span>] =</span><br><span class="line">            <span class="built_in">fmin</span>(<span class="number">255</span>, window.<span class="built_in">at</span>&lt;cv::Vec3b&gt;(y, x + <span class="number">1</span>)[<span class="number">1</span>] + <span class="number">255.0</span> * (<span class="number">1</span> - <span class="built_in">sqrt</span>(d01 / <span class="number">2</span>)));</span><br><span class="line">        window.<span class="built_in">at</span>&lt;cv::Vec3b&gt;(y + <span class="number">1</span>, x)[<span class="number">1</span>] =</span><br><span class="line">            <span class="built_in">fmin</span>(<span class="number">255</span>, window.<span class="built_in">at</span>&lt;cv::Vec3b&gt;(y + <span class="number">1</span>, x)[<span class="number">1</span>] + <span class="number">255.0</span> * (<span class="number">1</span> - <span class="built_in">sqrt</span>(d10 / <span class="number">2</span>)));</span><br><span class="line">        window.<span class="built_in">at</span>&lt;cv::Vec3b&gt;(y + <span class="number">1</span>, x + <span class="number">1</span>)[<span class="number">1</span>] =</span><br><span class="line">            <span class="built_in">fmin</span>(<span class="number">255</span>, window.<span class="built_in">at</span>&lt;cv::Vec3b&gt;(y + <span class="number">1</span>, x + <span class="number">1</span>)[<span class="number">1</span>] + <span class="number">255.0</span> * <span class="number">1</span> - <span class="built_in">sqrt</span>(d11 / <span class="number">2</span>));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出结果如下：</p>
+<p><img src="./my_bezier_curve_anti_aliasing.png" style="zoom:70%"></p>
+<p>可以看到锯齿现象得到了明显改善。</p>
+<h3 id="总结-3">总结</h3>
+<p>没有难度。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/GAMES/" rel="tag"># GAMES</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/LeetCode/weekCompetition392/" rel="prev" title="weekCompetition392">
+      <i class="fa fa-chevron-left"></i> weekCompetition392
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA"><span class="nav-text">环境搭建</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#eigen-%E5%BA%93%E5%AE%89%E8%A3%85-%E7%BC%96%E8%AF%91"><span class="nav-text">Eigen 库安装 &amp; 编译</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#opencv-%E5%BA%93%E5%AE%89%E8%A3%85-%E7%BC%96%E8%AF%91"><span class="nav-text">opencv 库安装 &amp; 编译</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E8%AF%91"><span class="nav-text">编译</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#assignment1-%E9%80%8F%E8%A7%86%E6%8A%95%E5%BD%B1"><span class="nav-text">Assignment1 透视投影</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%8B%E8%BD%AC%E7%9F%A9%E9%98%B5model"><span class="nav-text">旋转矩阵(Model)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%B3%E7%A7%BB%E7%9F%A9%E9%98%B5view"><span class="nav-text">平移矩阵(View)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%95%E5%BD%B1%E7%9F%A9%E9%98%B5projection"><span class="nav-text">投影矩阵(Projection)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#bonus-%E6%8C%89%E4%BB%BB%E6%84%8F%E8%BD%B4-axis-%E6%97%8B%E8%BD%AC"><span class="nav-text">BONUS: 按任意轴 axis 旋转</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#assignment2-%E5%85%89%E6%A0%85%E5%8C%96"><span class="nav-text">Assignment2 光栅化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A4%E6%96%AD%E6%98%AF%E5%90%A6%E5%9C%A8%E4%B8%89%E8%A7%92%E5%BD%A2%E5%86%85"><span class="nav-text">判断是否在三角形内</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E4%B8%89%E8%A7%92%E5%BD%A2%E8%BF%9B%E8%A1%8C%E5%85%89%E6%A0%85%E5%8C%96"><span class="nav-text">对三角形进行光栅化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#bonus-msaa"><span class="nav-text">BONUS: MSAA</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93-1"><span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#assignment3-%E7%BA%B9%E7%90%86%E4%B8%8E%E6%8F%92%E5%80%BC"><span class="nav-text">Assignment3 纹理与插值</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9B%B4%E5%A4%9A%E7%9A%84%E6%8F%92%E5%80%BC%E4%B8%8E%E6%B3%95%E7%BA%BF%E7%9D%80%E8%89%B2"><span class="nav-text">更多的插值与法线着色</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#blinn-phong-%E7%9D%80%E8%89%B2"><span class="nav-text">Blinn Phong 着色</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%B9%E7%90%86%E7%9D%80%E8%89%B2"><span class="nav-text">纹理着色</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%B9%E5%87%B8%E8%B4%B4%E5%9B%BE"><span class="nav-text">凹凸贴图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%8D%E7%A7%BB%E8%B4%B4%E5%9B%BE"><span class="nav-text">位移贴图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#bonus-%E5%8F%8C%E7%BA%BF%E6%80%A7%E6%8F%92%E5%80%BC"><span class="nav-text">BONUS: 双线性插值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93-2"><span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#assignment4-%E8%B4%9D%E5%A1%9E%E5%B0%94%E6%9B%B2%E7%BA%BF"><span class="nav-text">Assignment4 贝塞尔曲线</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B4%9D%E5%A1%9E%E5%B0%94%E6%9B%B2%E7%BA%BF"><span class="nav-text">贝塞尔曲线</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8D%E8%B5%B0%E6%A0%B7"><span class="nav-text">反走样</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93-3"><span class="nav-text">总结</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Leager"
+      src="/images/Avatar.jpg">
+  <p class="site-author-name" itemprop="name">Leager</p>
+  <div class="site-description" itemprop="description">【数据删除】</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">90</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Leager-zju" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Leager-zju" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div>
+<span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("09/25/2022 00:00:00");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "本站已存活 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+    }
+setInterval("createtime()",250);
+</script>
+</div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Leager</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,0' opacity='0.5' zIndex='-1' count='160' src="//cdn.jsdelivr.net/gh/theme-next/theme-next-canvas-nest@1.0.0/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>
