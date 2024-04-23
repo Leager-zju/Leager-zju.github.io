@@ -618,3 +618,97 @@ void bezier_antialiasing(const std::vector<cv::Point2f> &control_points, cv::Mat
 ### 总结
 
 没有难度。
+
+## Assignment5 光线追踪
+
+说是光追，实际上要实现的部分并不多，整体以阅读框架为主。
+
+按照作业要求所述，在 `main()` 中首先定义了场景 `scene`，并且调用 `add()` 方法加入各个物体，之后用 `Render.render()` 进行渲染。
+
+这里的渲染方式很简单，对于屏幕空间中的每个像素，以相机为起点向可视空间中打出一条光线，找到光线的与第一个物体表面的交点，根据材质判断是否要进行反射/折射，并令光线进一步传播。如果光线最终能不遮挡地到达光源，那么这条光路就会被**有效渲染**，即将后续所有弹射点的着色值加到第一个交点上。
+
+我们要实现两个函数，分别是确定打出光线的方向，以及判断光线和三角形的交点。
+
+### 确定光线方向
+
+因为有 MVP 变换，所以相机视为在 $xOy$ 平面上永远处于屏幕空间的中心，也就是 $(scene.width/2, scene.height/2)$。我们只要确定相机到屏幕的距离 $z$，就可以用像素中心坐标减去像素坐标，构造一个方向向量，`normalized()` 之后就是要求的光线方向了。
+
+`scene` 中有一个参数 `fov`，表示相机在 $\mathbf{y}$ 方向的视角，有 $\displaystyle \tan(\text{fov}/2) = \frac{scene.height}{2z}$，这样就能算出 $z$ 了。
+
+关于像素中心的坐标，这里有一个坑点在于，代码中的 $i, j$ 实际上是从左上角的像素开始，往右下角进行遍历的，而不是我们平常认知中的平面直角坐标系的遍历方式。在 $\mathbf{x}$ 方向上的分量很好求，就是 $i-scene.width/2+0.5$，但是 $\mathbf{y}$ 方向上的分量就不是 $j-scene.height/2+0.5$ 了，而是其相反数。
+
+所以得到以下代码（稍作修改，更加可读）
+
+```C++
+void Renderer::Render(const Scene& scene)
+{
+    static const int w = scene.width;
+    static const int h = scene.height;
+
+    std::vector<Vector3f> framebuffer(w * h);
+
+    float z = h * 0.5 / std::tan(deg2rad(scene.fov * 0.5f));
+
+    // Use this variable as the eye position to start your rays.
+    Vector3f eye_pos(0);
+    int m = 0;
+    for (int j = 0; j < h; ++j)
+    {
+        float y = h * 0.5 - j - 0.5;
+        for (int i = 0; i < w; ++i)
+        {
+            // generate primary ray direction
+            float x = i - w * 0.5 + 0.5;
+            Vector3f dir = normalize(Vector3f(x, y, -z));
+            framebuffer[m++] = castRay(eye_pos, dir, scene, 0);
+        }
+        UpdateProgress(j / (float)h);
+    }
+    ...  
+}
+```
+
+> 注意 $z$ 要取负值，因为是往 $-\mathbf{z}$ 侧发出的光线。
+
+### 与三角形的交点
+
+用上课讲的 Möller–Trumbore 算法即可。
+
+```C++
+bool rayTriangleIntersect(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, const Vector3f& orig,
+                          const Vector3f& dir, float& tnear, float& u, float& v)
+{
+    // o + t * d = (1-alpha-beta) * v0 + alpha * v1 + beta * v2
+    // t * (-d) + alpha * (v1 - v0) + beta * (v2 - v0) = o - v0
+    // [-d, v1-v0, v2-v0] * [t, alpha, beta]^T = o-v0
+    Vector3f X = -dir;
+    Vector3f Y = v1-v0;
+    Vector3f Z = v2-v0;
+    Vector3f W = orig-v0;
+
+    // Cramer's rule
+    float detA = Determinant(X, Y, Z);
+    float t = Determinant(W, Y, Z)/detA;
+    float alpha = Determinant(X, W, Z)/detA;
+    float beta = Determinant(X, Y, W)/detA;
+    if (t <= 0.f || alpha < 0.f || beta < 0.f || 1-alpha-beta < 0.f) {
+        return false;
+    }
+
+    tnear = t;
+    // 这里参数意义不明，tnear 并不是全局最近，而仅仅是与三角形的交点的 t 值，用于在 trace() 里更新全局最近 t
+    u = alpha;
+    v = beta;
+    return true;
+}
+```
+
+> 注意判断交点是否在三角形内时不能用 $\leq0$，因为顶点也算在三角形内。
+
+### 总结
+
+CMakeLists 里的编译选项中有一个 `-fsanitize=undefined`，这会导致出现 `runtime error: xxx is outside the range of representable values of type 'char'` 的报错，将这个选项去掉就能 work 了。
+
+输出结果如下：
+
+<img src="./raytrace.png" style="zoom:70%">

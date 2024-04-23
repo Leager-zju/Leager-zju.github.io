@@ -1367,7 +1367,35 @@ $$
 
 对于单个三角形而言，交点只有 0 个或 1 个。对于一个三角形而言，我们可以快速求出其**法线** $\mathbf{N}$，假设交点为 $\mathbf{p}=\mathbf{o}+t\mathbf{d}$，可以找到三角形所在平面上另一个确定的点 $\mathbf{p'}$，必然满足 $(\mathbf{p}-\mathbf{p'})\mathbf{N}=0$。解得 $\mathbf{p}$ 后，可以用**重心坐标**判断是否在三角形内部。
    
-> 即解线性方程组 $b_1\mathbf{A}+b_2\mathbf{B}+(1-b_1-b_2)\mathbf{C}=\mathbf{p}$，如果三个系数都非负，就在内部。
+> 我们发现，光线与平面的交点 $\mathbf{p}$ 必然满足 $\mathbf{p} = b_1\mathbf{A}+b_2\mathbf{B}+(1-b_1-b_2)\mathbf{C}$，那么求解下面这个方程，就能把 $t$ 和重心坐标一起求出来，这就是 **Möller–Trumbore 算法**。
+> 
+> $$
+> \mathbf{o}+t\mathbf{d} = b_1\mathbf{A}+b_2\mathbf{B}+(1-b_1-b_2)\mathbf{C}
+> $$
+>
+> 我们将上式进行一定改动，得到
+>
+> $$
+> -t\mathbf{d} + b_1(\mathbf{A}-\mathbf{C}) + b_2(\mathbf{B}-\mathbf{C}) = \mathbf{o} - \mathbf{C}
+> $$
+>
+> 不难发现这是一个关于 $t, b_1, b_2$ 的三元一次方程组，如果令 
+> 
+> $$
+> \begin{aligned}
+> \mathbf{X} &= -\mathbf{d}\\ \mathbf{Y} &= \mathbf{A}-\mathbf{C}\\ \mathbf{Z} &= \mathbf{B}-\mathbf{C}\\ \mathbf{W} &= \mathbf{o}-\mathbf{C}
+> \end{aligned}
+> $$
+> 
+> 那么上式可以写作 $[\mathbf{X}, \mathbf{Y}, \mathbf{Z}]·[t, b_1, b_2]^T = \mathbf{W}$。
+>
+> 根据克莱姆法则，我们能够得到
+> 
+> $$
+> t = \det([\mathbf{W}, \mathbf{Y}, \mathbf{Z}])/\det([\mathbf{X}, \mathbf{Y}, \mathbf{Z}])
+> $$
+>
+> 又因为 $\det(\mathbf{a}, \mathbf{b}, \mathbf{c}) = \mathbf{a}·(\mathbf{b}\times\mathbf{c})$，则 $t$ 易求，同理 $b_1, b_2$ 易求。
 
 对于若干个三角形构成的物体而言，如果一个个三角形去遍历判断，那就太慢了。现代化做法是用**轴对齐包围盒(AABB)**包裹该物体，如果一道光线连 AABB 都不会产生交点，那必然不会和物体产生交点。
 
