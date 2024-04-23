@@ -12082,8 +12082,41 @@ class="math inline">\((\mathbf{p}-\mathbf{p&#39;})\mathbf{N}=0\)</span>。解得
 <span class="math inline">\(\mathbf{p}\)</span>
 后，可以用<strong>重心坐标</strong>判断是否在三角形内部。</p>
 <blockquote>
-<p>即解线性方程组 <span
-class="math inline">\(b_1\mathbf{A}+b_2\mathbf{B}+(1-b_1-b_2)\mathbf{C}=\mathbf{p}\)</span>，如果三个系数都非负，就在内部。</p>
+<p>我们发现，光线与平面的交点 <span
+class="math inline">\(\mathbf{p}\)</span> 必然满足 <span
+class="math inline">\(\mathbf{p} =
+b_1\mathbf{A}+b_2\mathbf{B}+(1-b_1-b_2)\mathbf{C}\)</span>，那么求解下面这个方程，就能把
+<span class="math inline">\(t\)</span> 和重心坐标一起求出来，这就是
+<strong>Möller–Trumbore 算法</strong>。</p>
+<p><span class="math display">\[
+\mathbf{o}+t\mathbf{d} =
+b_1\mathbf{A}+b_2\mathbf{B}+(1-b_1-b_2)\mathbf{C}
+\]</span></p>
+<p>我们将上式进行一定改动，得到</p>
+<p><span class="math display">\[
+-t\mathbf{d} + b_1(\mathbf{A}-\mathbf{C}) + b_2(\mathbf{B}-\mathbf{C}) =
+\mathbf{o} - \mathbf{C}
+\]</span></p>
+<p>不难发现这是一个关于 <span class="math inline">\(t, b_1, b_2\)</span>
+的三元一次方程组，如果令</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf{X} &amp;= -\mathbf{d}\\ \mathbf{Y} &amp;=
+\mathbf{A}-\mathbf{C}\\ \mathbf{Z} &amp;= \mathbf{B}-\mathbf{C}\\
+\mathbf{W} &amp;= \mathbf{o}-\mathbf{C}
+\end{aligned}
+\]</span></p>
+<p>那么上式可以写作 <span class="math inline">\([\mathbf{X}, \mathbf{Y},
+\mathbf{Z}]·[t, b_1, b_2]^T = \mathbf{W}\)</span>。</p>
+<p>根据克莱姆法则，我们能够得到</p>
+<p><span class="math display">\[
+t = \det([\mathbf{W}, \mathbf{Y}, \mathbf{Z}])/\det([\mathbf{X},
+\mathbf{Y}, \mathbf{Z}])
+\]</span></p>
+<p>又因为 <span class="math inline">\(\det(\mathbf{a}, \mathbf{b},
+\mathbf{c}) = \mathbf{a}·(\mathbf{b}\times\mathbf{c})\)</span>，则 <span
+class="math inline">\(t\)</span> 易求，同理 <span
+class="math inline">\(b_1, b_2\)</span> 易求。</p>
 </blockquote>
 <p>对于若干个三角形构成的物体而言，如果一个个三角形去遍历判断，那就太慢了。现代化做法是用<strong>轴对齐包围盒(AABB)</strong>包裹该物体，如果一道光线连
 AABB 都不会产生交点，那必然不会和物体产生交点。</p>
@@ -19175,6 +19208,53 @@ class="math inline">\(\displaystyle G =
 <p>可以看到锯齿现象得到了明显改善。</p>
 <h3 id="总结-3">总结</h3>
 <p>没有难度。</p>
+<h2 id="assignment5-光线追踪">Assignment5 光线追踪</h2>
+<p>说是光追，实际上要实现的部分并不多，整体以阅读框架为主。</p>
+<p>按照作业要求所述，在 <code>main()</code> 中首先定义了场景
+<code>scene</code>，并且调用 <code>add()</code> 方法加入各个物体，之后用
+<code>Render.render()</code> 进行渲染。</p>
+<p>这里的渲染方式很简单，对于屏幕空间中的每个像素，以相机为起点向可视空间中打出一条光线，找到光线的与第一个物体表面的交点，根据材质判断是否要进行反射/折射，并令光线进一步传播。如果光线最终能不遮挡地到达光源，那么这条光路就会被<strong>有效渲染</strong>，即将后续所有弹射点的着色值加到第一个交点上。</p>
+<p>我们要实现两个函数，分别是确定打出光线的方向，以及判断光线和三角形的交点。</p>
+<h3 id="确定光线方向">确定光线方向</h3>
+<p>因为有 MVP 变换，所以相机视为在 <span
+class="math inline">\(xOy\)</span> 平面上永远处于屏幕空间的中心，也就是
+<span class="math inline">\((scene.width/2,
+scene.height/2)\)</span>。我们只要确定相机到屏幕的距离 <span
+class="math inline">\(z\)</span>，就可以用像素中心坐标减去像素坐标，构造一个方向向量，<code>normalized()</code>
+之后就是要求的光线方向了。</p>
+<p><code>scene</code> 中有一个参数 <code>fov</code>，表示相机在 <span
+class="math inline">\(\mathbf{y}\)</span> 方向的视角，有 <span
+class="math inline">\(\displaystyle \tan(\text{fov}/2) =
+\frac{scene.height}{2z}\)</span>，这样就能算出 <span
+class="math inline">\(z\)</span> 了。</p>
+<p>关于像素中心的坐标，这里有一个坑点在于，代码中的 <span
+class="math inline">\(i, j\)</span>
+实际上是从左上角的像素开始，往右下角进行遍历的，而不是我们平常认知中的平面直角坐标系的遍历方式。在
+<span class="math inline">\(\mathbf{x}\)</span> 方向上的分量很好求，就是
+<span class="math inline">\(i-scene.width/2+0.5\)</span>，但是 <span
+class="math inline">\(\mathbf{y}\)</span> 方向上的分量就不是 <span
+class="math inline">\(j-scene.height/2+0.5\)</span>
+了，而是其相反数。</p>
+<p>所以得到以下代码（稍作修改，更加可读）</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">Renderer::Render</span><span class="params">(<span class="type">const</span> Scene&amp; scene)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">static</span> <span class="type">const</span> <span class="type">int</span> w = scene.width;</span><br><span class="line">    <span class="type">static</span> <span class="type">const</span> <span class="type">int</span> h = scene.height;</span><br><span class="line"></span><br><span class="line">    <span class="function">std::vector&lt;Vector3f&gt; <span class="title">framebuffer</span><span class="params">(w * h)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="type">float</span> z = h * <span class="number">0.5</span> / std::<span class="built_in">tan</span>(<span class="built_in">deg2rad</span>(scene.fov * <span class="number">0.5f</span>));</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Use this variable as the eye position to start your rays.</span></span><br><span class="line">    <span class="function">Vector3f <span class="title">eye_pos</span><span class="params">(<span class="number">0</span>)</span></span>;</span><br><span class="line">    <span class="type">int</span> m = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt; h; ++j)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="type">float</span> y = h * <span class="number">0.5</span> - j - <span class="number">0.5</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; w; ++i)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="comment">// generate primary ray direction</span></span><br><span class="line">            <span class="type">float</span> x = i - w * <span class="number">0.5</span> + <span class="number">0.5</span>;</span><br><span class="line">            Vector3f dir = <span class="built_in">normalize</span>(<span class="built_in">Vector3f</span>(x, y, -z));</span><br><span class="line">            framebuffer[m++] = <span class="built_in">castRay</span>(eye_pos, dir, scene, <span class="number">0</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">UpdateProgress</span>(j / (<span class="type">float</span>)h);</span><br><span class="line">    &#125;</span><br><span class="line">    ...  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注意 <span class="math inline">\(z\)</span> 要取负值，因为是往 <span
+class="math inline">\(-\mathbf{z}\)</span> 侧发出的光线。</p>
+</blockquote>
+<h3 id="与三角形的交点">与三角形的交点</h3>
+<p>用上课讲的 Möller–Trumbore 算法即可。</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">bool</span> <span class="title">rayTriangleIntersect</span><span class="params">(<span class="type">const</span> Vector3f&amp; v0, <span class="type">const</span> Vector3f&amp; v1, <span class="type">const</span> Vector3f&amp; v2, <span class="type">const</span> Vector3f&amp; orig,</span></span></span><br><span class="line"><span class="params"><span class="function">                          <span class="type">const</span> Vector3f&amp; dir, <span class="type">float</span>&amp; tnear, <span class="type">float</span>&amp; u, <span class="type">float</span>&amp; v)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// o + t * d = (1-alpha-beta) * v0 + alpha * v1 + beta * v2</span></span><br><span class="line">    <span class="comment">// t * (-d) + alpha * (v1 - v0) + beta * (v2 - v0) = o - v0</span></span><br><span class="line">    <span class="comment">// [-d, v1-v0, v2-v0] * [t, alpha, beta]^T = o-v0</span></span><br><span class="line">    Vector3f X = -dir;</span><br><span class="line">    Vector3f Y = v1-v0;</span><br><span class="line">    Vector3f Z = v2-v0;</span><br><span class="line">    Vector3f W = orig-v0;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Cramer&#x27;s rule</span></span><br><span class="line">    <span class="type">float</span> detA = <span class="built_in">Determinant</span>(X, Y, Z);</span><br><span class="line">    <span class="type">float</span> t = <span class="built_in">Determinant</span>(W, Y, Z)/detA;</span><br><span class="line">    <span class="type">float</span> alpha = <span class="built_in">Determinant</span>(X, W, Z)/detA;</span><br><span class="line">    <span class="type">float</span> beta = <span class="built_in">Determinant</span>(X, Y, W)/detA;</span><br><span class="line">    <span class="keyword">if</span> (t &lt;= <span class="number">0.f</span> || alpha &lt; <span class="number">0.f</span> || beta &lt; <span class="number">0.f</span> || <span class="number">1</span>-alpha-beta &lt; <span class="number">0.f</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    tnear = t;</span><br><span class="line">    <span class="comment">// 这里参数意义不明，tnear 并不是全局最近，而仅仅是与三角形的交点的 t 值，用于在 trace() 里更新全局最近 t</span></span><br><span class="line">    u = alpha;</span><br><span class="line">    v = beta;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注意判断交点是否在三角形内时不能用 <span
+class="math inline">\(\leq0\)</span>，因为顶点也算在三角形内。</p>
+</blockquote>
+<h3 id="总结-4">总结</h3>
+<p>CMakeLists 里的编译选项中有一个
+<code>-fsanitize=undefined</code>，这会导致出现
+<code>runtime error: xxx is outside the range of representable values of type 'char'</code>
+的报错，将这个选项去掉就能 work 了。</p>
+<p>输出结果如下：</p>
+<p><img src="./raytrace.png" style="zoom:70%"></p>
 ]]></content>
       <categories>
         <category>lab</category>
