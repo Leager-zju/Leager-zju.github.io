@@ -712,3 +712,325 @@ CMakeLists 里的编译选项中有一个 `-fsanitize=undefined`，这会导致�
 输出结果如下：
 
 <img src="./raytrace.png" style="zoom:70%">
+
+## Assignment6 BVH 加速结构
+
+本次作业要求用 BVH 对光追进行加速。具体原理见课程笔记，简单来说其核心思想就是对物体进行划分，构建一棵 BVH-Tree，以二分的方式找到光线在场景中与物体的第一个交点，而不用遍历所有的物体，从而达到加速的效果。
+
+### 判断 AABB 是否与光线相交
+
+求出光线与三对平面的 $tmin, tmax$，然后判断这三个区间是否在 $\geq0$ 处有交集即可。
+
+```C++
+inline bool Bounds3::IntersectP(const Ray& ray, const Vector3f& invDir,
+                                const std::array<int, 3>& dirIsNeg) const
+{
+    Vector3f tmin = (pMin - ray.origin) * invDir;
+    Vector3f tmax = (pMax - ray.origin) * invDir;
+    if (dirIsNeg[0]) std::swap(tmin.x, tmax.x);
+    if (dirIsNeg[1]) std::swap(tmin.y, tmax.y);
+    if (dirIsNeg[2]) std::swap(tmin.z, tmax.z);
+
+    float a = fmax(tmin.x, fmax(tmin.y, tmin.z));
+    float b = fmin(tmax.x, fmin(tmax.y, tmax.z));
+
+    return b >= a && b >= 0;
+}
+```
+
+### 利用 BVH 加速求交
+
+对于一个给定的 BVH 节点，我们首先判断光线是否与当前的 AABB 相交。如果不相交，那么这道光和所有的子节点必然不相交；反之，这个节点要么是叶子节点，要么光线和左右子节点都相交或者只和其中一个相交，需要分情况讨论：
+
+- 如果是叶子节点，直接返回与物体的交点；
+- 如果和左右子节点都相交，那么需要求出两个交点中最近的那个；
+- 如果只和一个节点相交，那直接返回交点即可；
+
+```C++
+Intersection BVHAccel::getIntersection(BVHBuildNode* node, const Ray& ray) const
+{
+    std::array<int, 3> dirIsNeg{ray.direction.x < 0, ray.direction.y < 0, ray.direction.z < 0};
+    if (node->bounds.IntersectP(ray, ray.direction_inv, dirIsNeg)) {
+        // 是叶子节点，直接判断是否与物体相交
+        if (!node->left && !node->right) {
+            return node->object->getIntersection(ray);
+        }
+
+        Intersection left  = getIntersection(node->left, ray);
+        Intersection right  = getIntersection(node->right, ray);
+        if (left.happened && right.happened) { // 都相交
+            return left.distance < right.distance ? left : right;
+        }
+        if (left.happened) {
+            return left;
+        }
+        if (right.happened) {
+            return right;
+        }
+    }
+    return {};
+}
+```
+
+### 如何构建 BVH
+
+首先将所有物体根据分布关系进行排序——在哪个轴上分布的最多就按哪个轴排。
+
+```C++
+Bounds3 centroidBounds;
+for (size_t i = 0; i < objects.size(); ++i)
+    centroidBounds =
+        Union(centroidBounds, objects[i]->getBounds().Centroid());
+int dim = centroidBounds.maxExtent();
+switch (dim) {
+case 0:
+    std::sort(objects.begin(), objects.end(), [](auto f1, auto f2) {
+        return f1->getBounds().Centroid().x <
+                f2->getBounds().Centroid().x;
+    });
+    break;
+case 1:
+    std::sort(objects.begin(), objects.end(), [](auto f1, auto f2) {
+        return f1->getBounds().Centroid().y <
+                f2->getBounds().Centroid().y;
+    });
+    break;
+case 2:
+    std::sort(objects.begin(), objects.end(), [](auto f1, auto f2) {
+        return f1->getBounds().Centroid().z <
+                f2->getBounds().Centroid().z;
+    });
+    break;
+}
+```
+
+然后找到所有 `object` 中最中间的那个，划分成两个部分
+
+```C++
+auto beginning = objects.begin();
+auto middling = objects.begin() + objects.size()/2;
+auto ending = objects.end();
+
+auto leftshapes = std::vector<Object*>(beginning, middling);
+auto rightshapes = std::vector<Object*>(middling, ending);
+```
+
+对这两部分分别进行构建
+
+```C++
+node->left = recursiveBuild(leftshapes);
+node->right = recursiveBuild(rightshapes);
+
+node->bounds = Union(node->left->bounds, node->right->bounds);
+```
+
+对于特殊情况（只有一个或两个 `object`），则无需排序。
+
+```C++
+if (objects.size() == 1) {
+    // Create leaf _BVHBuildNode_
+    node->bounds = objects[0]->getBounds();
+    node->object = objects[0];
+    node->left = nullptr;
+    node->right = nullptr;
+    return node;
+}
+else if (objects.size() == 2) {
+    node->left = recursiveBuild(std::vector{objects[0]});
+    node->right = recursiveBuild(std::vector{objects[1]});
+
+    node->bounds = Union(node->left->bounds, node->right->bounds);
+    return node;
+}
+```
+
+### 总结
+
+SAH 的优化效果并没有特别明显，就不掰扯了。
+
+输出结果如下：
+
+<img src="./bvh.png" style="zoom:70%">
+
+## Assignment7 Path Tracing
+
+最难的一次，要求实现路径追踪。这次作业坑非常多，我将一一记录。
+
+### 多线程
+
+为了提高运行效率，我先做了多线程。
+
+原本的代码是，按行优先顺序遍历像素点，调用 `castRay()` 等待返回的着色结果。
+
+如果要做多线程版本，比如说设置 `n_thread` 个线程，那第 `i` 个线程负责 `rowId % n_thread = i` 的行即可。
+
+```C++
+void Renderer::Render(const Scene& scene)
+{
+    ...
+    const int n_worker = 16;
+    std::vector<std::thread> worker;
+    auto task = [&](int threadIndex) {
+        for (int j = threadIndex; j < scene.height; j += n_worker) {
+            for (int i = 0; i < scene.width; ++i) {
+                // cast ray
+            }
+        }
+    };
+    for (int i = 0; i < n_worker; i++) {
+        worker.emplace_back(std::bind(task, i));
+    }
+    for (auto&& w : worker) {
+        w.join();
+    }
+    // save framebuffer to file  
+}
+```
+
+以及 `get_random_float()` 中的前三个变量都可以设为 `static`，经测试在 spp=256 的 case 下性能提高了 3 倍。
+
+### 拷贝之前的代码
+
+这里我们需要拷贝 `Bounds3::IntersectP()`、`BVHAccel::getIntersection()`、`Triangle::getIntersection`。
+
+值得注意的是，在 `Bounds3::IntersectP()` 也就是判断光线和 AABB 是否相交的地方，需要用 `texit >= tenter`，而不是 `>`。这是因为作业 7 中几个物体的 AABB 可能就是一个二维平面而不是一个立方体，从而某一对平面的 `tenter = texit`。
+
+如果用 `>`，最后结果就是一大片漆黑。
+
+### 实现 castRay
+
+当一束光线从相机出发打到可视空间中时，有三种情况：
+
+1. 光线没有打到任何物体，此时观测结果为纯黑；
+2. 光线打到自发光物体，此时直接返回其 color（在这里是 `material.emit`）；
+3. 光线打到不发光物体，此时需要进行直接光照与间接光照的采样；
+
+第一种情况很好实现，直接 `return` 即可，关键是第二种情况。
+
+#### 直接光照
+
+设光线打到物体的 $p$ 点。
+
+对于直接光照的采样，框架为我们实现了 `sampleLight()` 方法，其原理是随机选择一个 `hasEmit() = true` 的物体（自发光物体，或者称其为光源），并在其表面上随机选择一点，返回该点的 `Intersection` 信息与 `pdf`。
+
+有了这一信息后，还需要判断该光源与物体之间是否存在物体遮挡，判断方式就是以 $p$ 为起点，向光源打出一道光，判断击中的物体距离和物体与光源的距离是否相等。如果相等，则认为没有物体遮挡。
+
+> 这里距离是浮点数类型，而判断浮点类型是否相等是无法做到的，课程里是通过两数之差的绝对值小于 `EPLSILON` 来判断相等。
+>
+> 这里 `EPSILON` 比数据精度小，导致即便没有物体遮挡也会在计算中判断错误，使得结果中出现黑色条纹。这里只需要将 `EPSILON` 从 `0.0001` 改为 `0.001` 即可。
+>
+> 当然，判断光线与 AABB 是否相交也可以用 `texit + EPSILON > tenter`
+
+如果光源能直接照射到物体，那么我们就可以用公式计算直接光照项 `L_dir` 了。
+
+这里如果改用光源向物体打出的光线进行遮挡判断会出现 `Intersection.distance = 0` 的错误，认为应该是光线与光源的 AABB 产生了交点，需要将起点进行偏移处理。为了方便还是采用从 $p$ 点出发的方法。
+
+```C++
+Intersection light;
+float pdf;
+sampleLight(light, pdf);
+float dis = (hitPoint - light.coords).norm();
+
+Vector3f wi = (hitPoint - light.coords).normalized(); // 自发光物体打来的直接光照
+Intersection block = intersect(Ray(hitPoint, -wi));   // 判断该光照是否被其它物体遮挡
+if (block.happened && dis - block.distance < EPSILON) {
+    float dis2 = dis*dis;
+    Vector3f emit = light.emit;
+    Vector3f eval = m->eval(wi, wo, N);
+    float cosTheta = fmax(0.f, -dotProduct(wi, N));
+    float cosThetaPrime = fmax(0.f, dotProduct(wi, light.normal));
+    
+    L_dir = emit * eval * cosTheta * cosThetaPrime / dis2 / pdf;
+}
+```
+
+#### 间接光照
+
+对于间接光照的计算，首先要用俄罗斯轮盘赌策略来判断是否需要继续递归。框架提供的随机数函数是 `get_random_float()`。如果进行了之前提到的优化，这一步的时间开销将会大大降低。
+
+如果需要继续递归，那么就根据黎曼积分，在物体表面半球区域随机采样一个方向，框架提供的方法是 `Material::sample()`，根据入射方向与法线随机生成出射方向，然后根据公式计算间接光照项 `L_indir`。
+
+```C++
+if (get_random_float() < RussianRoulette) {
+    Vector3f sampleDir = m->sample(ray.direction, N).normalized();
+    Vector3f wi = -sampleDir; // 其它物体打来的间接光照
+    Vector3f eval = m->eval(wi, wo, N);
+    Vector3f Li = castRay(Ray(hitPoint, sampleDir), depth + 1);
+    float cosTheta = fmax(0.f, dotProduct(sampleDir, N));
+    float pdf = m->pdf(wi, wo, N);
+
+    L_indir = Li * eval * cosTheta / pdf / RussianRoulette;
+}
+```
+
+
+这里要注意，间接光照不能由直接光源提供，否则能量就会不守恒——同一个光源提供了两次贡献。这里可以利用 `castRay()` 的 `depth` 参数，为 0 时表示由相机发出，可以接收光源的贡献；反之表示由场景中的物体进行间接光照采样时调用的。在 `Render::Render()` 中的调用设为 1，其它时候设为 0。
+
+完整的函数如下：
+
+```C++
+Vector3f Scene::castRay(const Ray &ray, int depth) const
+{
+    Intersection intersection = intersect(ray);
+    if (!intersection.happened) {
+        return {0.0, 0.0, 0.0};
+    }
+
+    Material *m = intersection.m;
+    Vector3f hitPoint = intersection.coords;
+    Vector3f N = intersection.normal;
+    
+    // 打到自发光物体
+    // 如果是首次打到，说明是相机调用的 castRay()，直接返回其颜色；
+    // 反之，说明是为了计算间接光照项，此时不能对自发光物体采样，返回空值；
+    if (m->hasEmission()) {
+        return depth == 0 ? m->getEmission() : Vector3f{0.0, 0.0, 0.0};
+    }
+
+    Vector3f L_dir;
+    Vector3f L_indir;
+    Vector3f wo = -ray.direction;
+
+    {   // 直接光照
+        Intersection light;
+        float pdf;
+        sampleLight(light, pdf);
+        float dis = (hitPoint - light.coords).norm();
+        
+        Vector3f wi = (hitPoint - light.coords).normalized(); // 自发光物体打来的直接光照
+        Intersection block = intersect(Ray(hitPoint, -wi));   // 判断该光照是否被其它物体遮挡
+        if (block.happened && dis - block.distance < EPSILON) {
+            float dis2 = dis*dis;
+            Vector3f emit = light.emit;
+            Vector3f eval = m->eval(wi, wo, N);
+            float cosTheta = fmax(0.f, -dotProduct(wi, N));
+            float cosThetaPrime = fmax(0.f, dotProduct(wi, light.normal));
+            
+            L_dir = emit * eval * cosTheta * cosThetaPrime / dis2 / pdf;
+        }
+    }
+    {   // 间接光照
+        if (get_random_float() < RussianRoulette) {
+            Vector3f sampleDir = m->sample(ray.direction, N).normalized();
+            Vector3f wi = -sampleDir;
+            Vector3f eval = m->eval(wi, wo, N);
+            Vector3f Li = castRay(Ray(hitPoint, sampleDir), depth + 1);
+            float cosTheta = fmax(0.f, dotProduct(sampleDir, N));
+            float pdf = m->pdf(wi, wo, N);
+
+            L_indir = Li * eval * cosTheta / pdf / RussianRoulette;
+        }
+    }
+    return L_dir + L_indir;
+}
+```
+
+### 总结
+
+微表面(Microfacet)部分我没做，因为看了半天公式依然不能理解，以后学有所成再来补上。
+
+输出结果如下：
+
+分辨率 960*1280，spp=256
+
+<img src="./pathtracing.png" style="zoom:70%">
