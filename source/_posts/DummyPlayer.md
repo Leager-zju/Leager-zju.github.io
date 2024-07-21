@@ -219,7 +219,9 @@ set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/build/bin)
 
 #### 安装 protoc 编译器
 
-在[这个页面](https://github.com/protocolbuffers/protobuf/releases/latest)查看最新版本，此时此刻为 `https://github.com/protocolbuffers/protobuf/releases/download/v26.1/protoc-26.1-linux-x86_64.zip`。
+在[这个页面](https://github.com/protocolbuffers/protobuf/releases/latest)查看最新版本
+
+> 此时此刻为 `https://github.com/protocolbuffers/protobuf/releases/download/v26.1/protoc-26.1-linux-x86_64.zip`。
 
 ```bash
 $ wget https://github.com/protocolbuffers/protobuf/releases/download/v26.1/protoc-26.1-linux-x86_64.zip
