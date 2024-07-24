@@ -54,13 +54,13 @@ vector 内部维护了三个迭代器，分别是:
 
 `vector::clear()` 方法仅仅移除元素，实际上底层分配的内存并不会随之减少，调用 `vector::capacity()` 时依然能够得到一个正值。
 
-那么如何释放内存呢？比如一个 `vector<int> nums`， 比较 hack 的一种方式是 `nums = {}`，这样既可以清空元素还会释放内存。正规的做法是调用 `vector::swap()` 与一个空 vector（右值）进行底层数组的交换，交换后 `nums` 指向一个空数组，而另一个右值会在当前作用域结束后被回收。
+那么如何释放内存呢？比如一个 `vector<int> nums`， 比较 hack 的一种方式是 `nums = {}`，这样既可以清空元素还会释放内存。正规的做法是令一个空 vector（右值）调用 `vector::swap()` 进行底层数组的交换，交换后 `nums` 指向一个空数组，而另一个右值会在当前作用域结束后被回收。
 
 ```C++
 vector<int>().swap(nums); // nums 为待释放的 vector
-nums.swap(vector<int>());
+nums.swap(vector<int>()); // Error: Non-const lvalue reference to type 'vector<...>' cannot bind to a temporary of type 'vector<...>' 因为 swap 的形参类型是 T&，不能传递右值
 
-// 或者
+// 第二种写法的解决方案如下
 {
   vector<int> tmp{};
   nums.swap(tmp);

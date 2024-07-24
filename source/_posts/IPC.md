@@ -177,7 +177,7 @@ struct task_struct {
   int sigpending; // 是否有待处理信号
   ...
   struct signal_struct *sig; // 定义了信号值对应的处理方法
-  sigset_t blocked; // 被屏蔽的信息，以 bit 表示
+  sigset_t blocked;          // 被屏蔽的信息，以 bit 表示
   struct sigpending pending; // 待处理信号队列
   ...
 }
@@ -220,7 +220,7 @@ struct sigpending {
 
 以 `kill()` 为例，其函数原型为 `int kill(pid_t pid, int sig)`。
 
-当源进程(src)调用 `kill()` 打算将目的进程(dst)给杀掉时，该系统调用会进一步调用内核函数 `sys_kill()`：
+当源进程(src)调用 `kill()` 打算将目标进程(dst)给杀掉时，该系统调用会进一步调用内核函数 `sys_kill()`：
 
 ```C
 asmlinkage long 
@@ -265,10 +265,10 @@ static int kill_something_info(int sig, struct siginfo *info, int pid)
 
 从函数 `kill_something_info()` 可以得知，信号发送后具体的处理流程与 dst 的 `pid` 有很大关系，具体为：
 
-1. `pid>0` 时：直接发送给 `pid` 对应的进程；
-2. `pid=0` 时：发送给所有与 src 属同一个使用组的进程；
-3. `pid=-1` 时：发送给 src 有权给其发送信号的所有进程，除了进程 1(init);
-4. `pid<-1` 时：发送给 -pid 为组标识的进程；
+1. `pid > 0` 时：直接发送给 `pid` 对应的进程；
+2. `pid = 0` 时：发送给所有与 src 属同一个使用组的进程；
+3. `pid = -1` 时：发送给 src 有权给其发送信号的所有进程，除了进程 1(init);
+4. `pid < -1` 时：发送给 -pid 为组标识的进程；
 
 这里只讨论第一种情况。当 pid>0 时，调用 `kill_proc_info()` 函数，通过 `send_sig_info()` 发送信号。
 
@@ -331,7 +331,7 @@ out_nolock:
 
 ### 信号处理流程
 
-此时此刻信号已经发送给目标进程，为了尽快让信号得到处理，Linux 把信号处理过程放置在进程**从内核态返回到用户态前**，然后检查 `sigpending` 是否为 1，若是，就调用 `do_signal()` 函数进行处理。
+此时此刻信号已经发送给目标进程，为了尽快让信号得到处理，Linux 把信号处理过程放置在进程**从内核态返回到用户态前**，也就是操作系统决定调度目标进程的时候，然后检查 `sigpending` 是否为 1，若是，就调用 `do_signal()` 函数进行处理。
 
 ```C
 int do_signal(struct pt_regs *regs, sigset_t *oldset)
@@ -415,7 +415,11 @@ int do_signal(struct pt_regs *regs, sigset_t *oldset)
 }
 ```
 
-> 值得注意的是，用户定义的处理方法代码位于用户态，而在运行这段系统函数期间 CPU 还处于内核态，只能先返回用户态执行用户态代码，再回到内核态做后续工作。
+> 值得注意的是，用户定义的处理方法代码位于用户态，而在运行这段系统函数期间 CPU 还处于内核态，只能先返回用户态执行用户态代码，再回到内核态做后续工作。所以信号处理的开销还是蛮大的。
+
+### 总结
+
+发送进程通过 `sys_*()` 系统调用，将信号信息打包放到目标进程的 `task_struct` 中，下次操作系统调度进程时，检查这个进程是否有待处理的信号，如果有则先进行信号处理，之后在回到用户态继续执行之前的指令。
 
 ## 消息队列(Msg Queue)
 

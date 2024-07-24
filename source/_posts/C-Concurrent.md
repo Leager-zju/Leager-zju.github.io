@@ -680,9 +680,228 @@ int main() {
 // The countdown lasted for 10 seconds.
 ```
 
+## pthread(POSIX thread)
+
+pthread 是一个在类 UNIX 系统下广泛使用的并发包，Linux 系统下在 glibc 库里实现。
+
+### pthread_mutex_t
+
+这是 pthread 中对于锁的数据结构定义，如下所示：
+
+```c++
+typedef union
+{
+  struct __pthread_mutex_s
+  {
+    int __lock;             // 锁状态。0: 未占用；1: 占用
+    unsigned int __count;   // 为可重入锁所使用，表示持有锁的次数
+    int __owner;            // 持有锁的 thread id
+    unsigned int __nusers;
+    /* KIND must stay at this position in the structure to maintain binary compatibility. */
+    int __kind;             // 锁类型。
+                            // PTHREAD_MUTEX_TIMED_NP:      普通锁(默认值)
+                            // PTHREAD_MUTEX_RECURSIVE_NP:  可重入锁
+                            // PTHREAD_MUTEX_ADAPTIVE_NP:   自适应锁
+                            // PTHREAD_MUTEX_ERRORCHECK_NP: 检错锁
+    int __spins;            // 当前已自旋次数，用于计算自适应锁单次最大自旋次数
+    __pthread_list_t __list;
+  } __data;
+  ......
+} pthread_mutex_t;
+```
+
+### pthread_mutex_lock(mutex)
+
+这是提供给用户的加锁函数，内部会判断锁的类型，并执行不同的上锁策略。
+
+#### 普通锁
+
+对于**普通锁**，直接进行加锁。
+
+```C++
+if (__glibc_likely (type == PTHREAD_MUTEX_TIMED_NP)) {
+  /* 普通锁 */
+  simple:
+    LLL_MUTEX_LOCK (mutex);
+    assert (mutex->__data.__owner == 0);
+}
+```
+
+#### 可重入锁
+
+对于**可重入锁**，如果同一线程加锁，则直接增加计数器；否则，像普通锁一样加锁。
+
+```C++
+else if (__builtin_expect (PTHREAD_MUTEX_TYPE (mutex) == PTHREAD_MUTEX_RECURSIVE_NP, 1)) {
+  /* 可重入锁 */
+  pid_t id = THREAD_GETMEM (THREAD_SELF, tid);
+
+  if (mutex->__data.__owner == id) {
+    if (__glibc_unlikely (mutex->__data.__count + 1 == 0))
+      /* 意思是当前计数器达到了 unsigned int 的上界 */
+      return EAGAIN;
+    
+    ++mutex->__data.__count;
+    return 0
+  }
+
+  LLL_MUTEX_LOCK (mutex);
+  assert (mutex->__data.__owner == 0);
+  mutex->__data.__count = 1;
+}
+```
+
+#### 自适应锁
+
+对于**自适应锁**，则是首先进行一定次数的「自旋」，如果达到次数上限后依然没有获得锁，则像普通锁一样加锁。
+
+```C++
+else if (__builtin_expect (PTHREAD_MUTEX_TYPE (mutex) == PTHREAD_MUTEX_ADAPTIVE_NP, 1)) {
+  /* 自适应锁 */
+  if (! __is_smp)
+    /* 如果不是 SMP 系统，则跳过自旋，直接像普通锁一样加锁 */
+    goto simple;
+
+  if (LLL_MUTEX_TRYLOCK (mutex) != 0) {
+    int cnt = 0;
+    int max_cnt = MIN (MAX_ADAPTIVE_COUNT, mutex->__data.__spins * 2 + 10);
+    do
+    {
+      if (cnt++ >= max_cnt) {
+        LLL_MUTEX_LOCK (mutex);
+        break;
+      }
+      atomic_spin_nop ();
+    }
+    while (LLL_MUTEX_TRYLOCK (mutex) != 0);
+    /* 如果这次自旋次数少，说明竞争不激烈，之后可以减少最大自旋次数；反之需要更多次的竞争 */
+    mutex->__data.__spins += (cnt - mutex->__data.__spins) / 8;
+  }
+  assert (mutex->__data.__owner == 0);
+}
+```
+
+#### 检错锁
+
+对于**检错锁**，则首先检查是否为同一线程重复上锁，是一种简单的避免死锁的逻辑。
+
+```C++
+else {
+  /* 检错锁 */
+  pid_t id = THREAD_GETMEM (THREAD_SELF, tid);
+  assert (PTHREAD_MUTEX_TYPE (mutex) == PTHREAD_MUTEX_ERRORCHECK_NP);
+  if (__glibc_unlikely (mutex->__data.__owner == id))
+    return EDEADLK;
+
+  goto simple;
+}
+```
+
+### LLL_MUTEX_LOCK(mutex)
+
+这其实是一个宏，将其展开后我们可以得到 `__lll_lock(&((mutex)->__data.__lock), PTHREAD_MUTEX_PSHARED (mutex))`。所以其实是走了 `__lll_lock()` 宏，第二个参数用于获取当前锁是否为共享锁（读锁）。
+
+来看看上锁的策略吧！简单来说就是先尝试用 CAS 获取锁，如果获取失败（被占用）就执行 `__lll_lock_wait*()` 挂起等待。
+
+```C++
+#define __lll_lock(futex, private)                                      \
+  ((void)                                                               \
+   ({                                                                   \
+     int *__futex = (futex);                                            \
+     if (__glibc_unlikely                                               \
+         (atomic_compare_and_exchange_bool_acq (__futex, 1, 0)))        \
+       {                                                                \
+         if (__builtin_constant_p (private) && (private) == LLL_PRIVATE)\
+           __lll_lock_wait_private (__futex);                           \
+         else                                                           \
+           __lll_lock_wait (__futex, private);                          \
+       }                                                                \
+   }))
+```
+
+发现这里有个 `futex`，对此，源码里面的注释是这样的：
+
+「If FUTEX is 0 (not acquired), set to 1 (acquired with no waiters) and return.
+
+Otherwise, ensure that it is >1 (acquired, possibly with waiters) and then block until we acquire the lock, at which point FUTEX will still be > 1.
+
+The lock is always acquired on return.」
+
+> 这里是直接把 `pthread_mutex_t` 里的 `__lock` 拿来当 futex 使了。
+
+#### __lll_lock_wait()
+
+`*futex` 为 2 表示 "acquired, possibly with waiters"，所以如果已经为 2 了，就直接等待；之后检查锁状态是否为 0，然后将其置 2，如果最开始状态非 0 则等待。
+
+```C++
+void __lll_lock_wait (int *futex, int private) {
+  if (*futex == 2)
+    lll_futex_wait (futex, 2, private); /* Wait if *futex == 2. */
+
+  while (atomic_exchange_acq (futex, 2) != 0)
+    lll_futex_wait (futex, 2, private); /* Wait if *futex == 2. */
+}
+```
+
+#### lll_futex_wait()/lll_futex_timed_wait()
+
+`lll_futex_wait` 这个宏走的是 `lll_futex_timed_wait()`。如果 lll_futex_wake 后 *futexp 值还是 val，则以 **FUTEX_WAIT** 执行系统调用 `futex()` 进行等待。
+
+```C++
+#define lll_futex_timed_wait(futexp, val, timeout, private)     \
+  lll_futex_syscall (4, futexp,                                 \
+		     __lll_private_flag (FUTEX_WAIT, private),              \
+		     val, timeout)
+             
+#define lll_futex_syscall(nargs, futexp, op, ...)                       \
+  ({                                                                    \
+    INTERNAL_SYSCALL_DECL (__err);                                      \
+    long int __ret = INTERNAL_SYSCALL (futex, __err, nargs, futexp, op, \
+				       __VA_ARGS__);                                            \
+    (__glibc_unlikely (INTERNAL_SYSCALL_ERROR_P (__ret, __err))         \
+     ? -INTERNAL_SYSCALL_ERRNO (__ret, __err) : 0);                     \
+  })
+```
+
+### lll_unlock()
+
+释放锁的核心函数。无条件将锁的状态置 0，如果旧状态值为 2，则还需要执行 `lll_futex_wake` 去唤醒等待的线程，此时第一个竞争成功的线程通过 `atomic_exchange_acq (futex, 2)` 将状态置 2 后成功获取到锁，如此往复。
+
+```C++
+#define __lll_unlock(futex, private)                   \
+  ((void)                                              \
+   ({                                                  \
+     int *__futex = (futex);                           \
+     int __oldval = atomic_exchange_rel (__futex, 0);  \
+     if (__glibc_unlikely (__oldval > 1))              \
+       lll_futex_wake (__futex, 1, private);           \
+   }))
+ 
+#define lll_unlock(futex, private)    \
+  __lll_unlock (&(futex), private)
+```
+
+#### lll_futex_wake()
+
+以 **FUTEX_WAKE** 去执行系统调用 `futex()`。
+
+```C++
+
+#define lll_futex_wake(futexp, nr, private)            \
+  ({                                                   \
+        INTERNAL_SYSCALL_DECL (__err);                 \
+        long int __ret;                                \
+        __ret = INTERNAL_SYSCALL (futex, __err, 4,     \
+                       (futexp), FUTEX_WAKE, (nr), 0); \
+        __ret;                                         \
+  })
+```
+
 ## 并发应用
 
 ### 无锁队列(Lockless Queue)
+
+可参考[这篇文章](https://coolshell.cn/articles/8239.html)。
 
 ### 线程池(Thread Pool)
 
