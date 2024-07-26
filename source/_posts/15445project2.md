@@ -171,7 +171,7 @@ bool RecursivelyInsert(const KeyType &key, const ValueType &value, BPlusTreePage
 >     1. 若为 leaf node，删除后 size < min_size；
 >     2. 若为 internal node，删除后 size <= min_size；
 >
-> > min_size = max_size / 2 
+> > min_size = max_size / 2
 
 它同样是个递归行为，我也定义了一个 `RecursivelyRemove()` 函数，流程和 insert 大体一致，不同之处在于 sibling 的挑选，需要考虑当前 child 是否为 parent 最左侧/最右侧的 child。
 

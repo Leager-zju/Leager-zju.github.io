@@ -40,15 +40,15 @@ public:
         for (int i = 0; i < names.size(); i++) {
             temp.emplace_back(make_pair(names[i], heights[i]));
         }
-        
+
         sort(temp.begin(), temp.end(), [&](const pair<string, int> &a, const pair<string, int> &b) {
             return a.second > b.second;
         });
-        
+
         for (auto &it : temp) {
             res.emplace_back(it.first);
         }
-            
+
         return res;
     }
 };
@@ -123,16 +123,16 @@ public:
 // go
 func goodIndices(nums []int, k int) []int {
     n := len(nums)
-    
+
     res := make([]int, 0)
-    
+
     if n - k <= k {
         return res
     }
-    
+
     assend := make([]int, n)
     dessend := make([]int, n)
-    
+
     for i := range nums {
         if i > 0 && nums[i] > nums[i-1] {
             assend[i] = 1
@@ -148,32 +148,32 @@ func goodIndices(nums []int, k int) []int {
 
     left1, right1, left2, right2 := 1, k-1, k+1, 2*k-1
     cnt1, cnt2 := 0, 0
-    
+
     for i := left1; i <= right1; i++ {
         cnt1 += assend[i]
     }
     for i := left2; i <= right2; i++ {
         cnt2 += dessend[i]
     }
-    
+
     if cnt1 == 0 && cnt2 == 0 {
         res = append(res, k)
     }
-    
+
     for i := k+1; i < n-k; i++ {
         right1++
         cnt1 = cnt1 + assend[right1] - assend[left1]
         left1++
-        
+
         right2++
         cnt2 = cnt2 + dessend[right2] - dessend[left2]
         left2++
-        
+
         if cnt1 == 0 && cnt2 == 0 {
             res = append(res, i)
         }
     }
-    
+
     return res
 }
 ```
@@ -253,7 +253,7 @@ func numberOfGoodPaths(vals []int, edges [][]int) int {
             if fx == fy || vals[fy] > vals[id] { // fx == fy 则无需合并, 只考虑比自己小的邻居
                 continue
             }
-            
+
             if vals[fx] == vals[fy] {
                 res += size[fx] * size[fy]
                 size[fx] += size[fy]

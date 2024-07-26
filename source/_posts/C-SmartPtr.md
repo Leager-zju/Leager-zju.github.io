@@ -69,7 +69,7 @@ void func() {
 > struct deleter {
 >   void operator(T* p) { delete p; }
 > };
-> 
+>
 > deleter<int> d;
 > std::unique_ptr<int, deleter<int>> ptr(new int, d);
 > ```
@@ -178,15 +178,15 @@ std::shared_ptr<int> ptr(new int, [](int *p){ delete p; });
     ```c++
     struct A;
     struct B;
-    
+
     struct A {
       std::shared_ptr<B> other;
     };
-    
+
     struct B {
       std::shared_ptr<A> other;
     };
-    
+
     int main() {
       auto aptr = std::make_shared<A>(); // aptr.count = 1
       auto bptr = std::make_shared<B>(); // bptr.count = 1
@@ -250,7 +250,7 @@ int main() {
 }
 ```
 
-## 如何手撕一个 shared ptr 
+## 如何手撕一个 shared ptr
 
 首先思考的是：shared ptr 需要支持哪些特性？
 
@@ -306,7 +306,7 @@ class SharedPointer {
       counter_ = new Counter(derive);
     }
 
-    ~SharedPointer() { 
+    ~SharedPointer() {
       counter_->release();
       if (counter_->getCount() == 0) {
         delete counter_;

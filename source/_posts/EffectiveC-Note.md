@@ -504,7 +504,7 @@ class PriorityCustomer: public Customer {
 class PriorityCustomer: public Customer {
  public:
   PriorityCustomer(const PriorityCustomer& rhs)
-    :Customer(rhs), 
+    :Customer(rhs),
      priority(rhs.priority) {}
 
   PriorityCustomer& operator=(const PriorityCustomer& rhs) {
@@ -856,7 +856,7 @@ namespace WidgetStuff {
       using std::swap;      // 令 std::swap 在此函数内可用
       swap(impl, rhs.impl); // 为 impl 调用最佳版本，而不是憨憨地 std::swap(impl, rhs.impl);
     }
-  
+
    private:
     /* 可能有许多数据 */
     WidgetImpl<T>* impl;
@@ -1209,7 +1209,7 @@ class GameCharacter {
 下面想讨论一些其它代替方案。
 
 1. 通过 **NVI**(Non-Virtual Interface) 手法实现 **Template Method 设计模式**。该模式主张令 virtual 函数称为 private，然后通过一个称为 **wrapper** 的 public non-virtual 函数来调用它。
-   
+
    ```c++
    class GameCharacter {
     public:
@@ -1228,7 +1228,7 @@ class GameCharacter {
    NVI 手法的一个优点在于，它确保在一个 virtual 函数调用前后完成一些工作。虽然它涉及在派生类中对 virtual 函数进行 override，但这仅仅影响"如何"被完成，而基类中的 wrapper 则决定了"何时"被完成。
 
 2. 通过函数指针实现 **Strategy 设计模式**。该方案主张"人物血量计算与人物类型无关"，而是在构造函数中接受一个函数指针指向一个"血量计算"函数，通过调用该函数实现效果：
-   
+
    ```c++
    class GameCharacter;
    int defaultHealthCalc(const GameCharacter& gc);
@@ -1248,7 +1248,7 @@ class GameCharacter {
    这使得同一人物类型下不同实体也可以拥有不同"血量计算"函数，并且某人物的计算函数可以在运行时期变化，比如可以通过提供一个 `setHealthCalculator` 来替换"血量计算"函数。但缺点在于，如果"血量计算"所需信息为 non-public，那就比较危险，或许可能要适当降低封装性，比如提供一些 public 访问接口或将函数设为 friend。其优点是否足以弥补缺点，这是需要进行仔细考虑的。
 
 3. 通过 `std::function` 实现 **Strategy 设计模式**。上面的函数指针本质上是一个**可调用对象**。C++11 已经将所有的可调用对象进行了统一，推出了新特性 `std::function`（见[此文](../../C/C-Function)），那用此新特性进行替换，提高了更多的实现弹性，不是吗？只要函数签名与需求端兼容，那么就是可行的。
-   
+
    ```c++
    class GameCharacter;
    int defaultHealthCalc(const GameCharacter& gc);
@@ -1259,7 +1259,7 @@ class GameCharacter {
       : healthFunc(hcf) {}
 
      int healthValue() const { return healthFunc(*this); }
-    
+
     private:
      HealthCalFunc healthFunc;
    };
@@ -1290,7 +1290,7 @@ class GameCharacter {
    class EyeCandyCharacter: public GameCharacter {
      /* ... */
    };
-   
+
    GameLevel currentLevel;
 
    EvilBadGuy ebg1(calcHealth);                       // 1. 使用函数计算
@@ -1476,7 +1476,7 @@ d.bar();       // ERROR! Base<int> 不存在函数 foo()
 幸运的是，我们有三种办法使得派生类模板能成功调用基类模板。
 
 1. 在基类函数前加 `this->`
-   
+
    ```c++
    template<class T>
    class Derived : public Base<T> {
@@ -1490,7 +1490,7 @@ d.bar();       // ERROR! Base<int> 不存在函数 foo()
    ```
 
 2. 使用 using 声明，将基类名称引入派生类中
-   
+
    ```c++
    template<class T>
    class Derived : public Base<T> {
@@ -1505,7 +1505,7 @@ d.bar();       // ERROR! Base<int> 不存在函数 foo()
    ```
 
 3. 显式指明被调用函数的作用域
-   
+
    ```c++
    template<class T>
    class Derived : public Base<T> {
@@ -1517,7 +1517,7 @@ d.bar();       // ERROR! Base<int> 不存在函数 foo()
      }
    };
    ```
-   
+
    这种做法最糟糕，因为一旦 `foo()` 是个 virtual 函数，那么就完全无法实现多态了。
 
 上述做法仅仅是提供一个假设，而一旦实例化了一个 `Derived<int>` 对象，那么一切依然照旧——无法通过编译。

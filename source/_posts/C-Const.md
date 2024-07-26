@@ -45,7 +45,7 @@ int *p = &foo;             // ERROR! 常量只能被常量指针指向
 int *q = (int*)&foo;       // OK!
 
 const int* a = &foo;       // OK! 常量指针
-int const* b = &bar;       // OK! 可以指向非常量，但无法通过 *b = ? 的方式修改变量 bar    
+int const* b = &bar;       // OK! 可以指向非常量，但无法通过 *b = ? 的方式修改变量 bar
 int* const d = &bar;       // OK! 指针常量
 const int* const d = &foo; // OK! 指向常量的常量指针
 
@@ -152,7 +152,7 @@ const 与函数搭配只有两种情况：
       int nums1[test::foo];
       int nums2[test::bar];
     };
-    
+
     std::cout << A::test::foo; // output: 0
     ```
 

@@ -59,7 +59,7 @@ class Foo {
 
  public:
   // 静态函数既可在类内定义，也可在类外定义
-  static void func1();      
+  static void func1();
   static void func2() {
     std::cout << non_static; // ERROR! 不能在静态函数中使用非静态变量
     func();                  // ERROR! 不能在静态函数中调用非静态函数
@@ -76,7 +76,7 @@ int Foo::val1 = 1;  // 静态非常量只能在类外定义
 int main() {
   Foo::func1(); // OK!
   Foo::func();  // ERROR! 不能用此法调用非静态函数
-    
+
   Foo f;
   f.func1();    // OK! 既然 func1 属于 Foo 类，那么任一对象均可调用该函数
 }

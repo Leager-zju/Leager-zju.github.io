@@ -49,11 +49,11 @@ img:
 #include <stdio.h>
 
 int main() {
-    
+
     printf("Hello World!\n");	// 在屏幕上打印 "Hello World!"
-    
+
     return 0;
-    
+
 }
 ```
 
@@ -121,13 +121,13 @@ int main() {
 #include <stdio.h>
 
 int main() {
-    
+
     printf("Hello World!\n");	// 在屏幕上打印 "Hello World!"
-    
-    system("pause"); 
-    
+
+    system("pause");
+
     return 0;
-    
+
 }
 ```
 
@@ -145,23 +145,23 @@ int main() {
 #include <stdio.h>
 
 int add(int a, int b) {
-    
+
     int c = a + b;
-    
+
     return c;
-    
+
 }
 
 int main() {
-    
+
     int a = 10, b = 20;
-    
+
     int sum = add(a, b);
-    
+
     printf("sum = %d", sum);
-    
+
     return 0;
-    
+
 }
 ```
 
@@ -199,7 +199,7 @@ Dev C++ 给程序设置断点的方法很简单，想在哪一行代码处暂停
 - **跳过**：继续执行程序，遇到下一个断点暂停执行；
 - **停止执行**：停止调试程序。
 
- 
+
 
 举个例子，在"**调试**"框中单击右键，点击"**添加查看**"按钮监视变量 sum 值的变化情况，添加之后如下图所示：
 
@@ -207,7 +207,7 @@ Dev C++ 给程序设置断点的方法很简单，想在哪一行代码处暂停
 
 <center>图 3 添加要监控的变量</center>
 
- 
+
 
 初始状态下，变量 sum 的值为 0。点击"**下一步**"，执行第 13 行代码，箭头光标指向第 15 行，变量 sum 的值仍为 0。再点击"**下一步**"，执行第 15 行代码，箭头光标指向第 17 行，变量 sum 的值变为 30。
 

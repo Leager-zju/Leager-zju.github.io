@@ -193,7 +193,7 @@ template<typename Mutex>
 class lock_guard {
  public:
   using mutex_type = Mutex;
-    
+
   explicit lock_guard(mutex_type& m): m_(m) { m_.lock(); }
 
   lock_guard(mutex_type& m, adopt_lock_t) noexcept: m_(m) {} // 线程拥有锁时调用此构造函数
@@ -390,7 +390,7 @@ std::condition_variable cond;
   while (!predicate) {
     cond.wait(lock);  // 必须在持有锁的情况下调用 wait，会被其它线程通过 notify 唤醒
   }
-  
+
   // do something
 
   cond.notify();
@@ -406,10 +406,10 @@ std::condition_variable cond;
 ```c++
 // 1. wait
 // 原子地进行 unlock ，阻塞当前线程，并将它添加到等待队列。唤醒后，进行 lock 且 wait 退出。
-void wait( std::unique_lock<std::mutex>& lock ); 
+void wait( std::unique_lock<std::mutex>& lock );
 // 等价于 while(!pred()) { wait(lock); }，这里 pred 是一个返回 bool 值的可调用对象
 template< class Predicate >
-void wait( std::unique_lock<std::mutex>& lock, Predicate pred ); 
+void wait( std::unique_lock<std::mutex>& lock, Predicate pred );
 
 
 // 2. wait_until
@@ -740,7 +740,7 @@ else if (__builtin_expect (PTHREAD_MUTEX_TYPE (mutex) == PTHREAD_MUTEX_RECURSIVE
     if (__glibc_unlikely (mutex->__data.__count + 1 == 0))
       /* 意思是当前计数器达到了 unsigned int 的上界 */
       return EAGAIN;
-    
+
     ++mutex->__data.__count;
     return 0
   }
@@ -852,7 +852,7 @@ void __lll_lock_wait (int *futex, int private) {
   lll_futex_syscall (4, futexp,                                 \
 		     __lll_private_flag (FUTEX_WAIT, private),              \
 		     val, timeout)
-             
+
 #define lll_futex_syscall(nargs, futexp, op, ...)                       \
   ({                                                                    \
     INTERNAL_SYSCALL_DECL (__err);                                      \
@@ -876,7 +876,7 @@ void __lll_lock_wait (int *futex, int private) {
      if (__glibc_unlikely (__oldval > 1))              \
        lll_futex_wake (__futex, 1, private);           \
    }))
- 
+
 #define lll_unlock(futex, private)    \
   __lll_unlock (&(futex), private)
 ```

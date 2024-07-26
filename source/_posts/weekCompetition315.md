@@ -39,7 +39,7 @@ func findMaxK(nums []int) int {
     res := -1
     var null struct{}
     sort.Ints(nums)
-    
+
     for _, num := range nums {
         if num < 0 {
             mp[num] = null
@@ -47,7 +47,7 @@ func findMaxK(nums []int) int {
             res = num
         }
     }
-    
+
     return res
 }
 ```
@@ -181,7 +181,7 @@ func countSubarrays(nums []int, minK int, maxK int) int64 {
             res += leftIndex - errIndex
         }
     }
-    
+
     return int64(res)
 }
 ```

@@ -211,13 +211,13 @@ class Final: public Derive2, public Derive1 {
 int main() {
   Final *f = new Final;
   std::cout << sizeof(Base) << ' ' << sizeof(Derive1) << ' ' << sizeof(Derive2) << ' ' << sizeof(Final) << '\n';
-    
+
   int *q = reinterpret_cast<int*>(f);
   for (int i = 0; i < sizeof(Final) / sizeof(int); i++) {
     std::cout << q[i] << ' ';
   }
   std::cout << '\n';
-    
+
   f->modify1();
   for (int i = 0; i < sizeof(Final) / sizeof(int); i++) {
     std::cout << q[i] << ' ';
@@ -475,7 +475,7 @@ int main() {
 > class A {};
 > class B : public A {};
 > class C : public B {};
-> 
+>
 > class Base {
 >  public:
 >   virtual A *foo() {
@@ -483,7 +483,7 @@ int main() {
 >     return new A;
 >   }
 > };
-> 
+>
 > class Derived : public Base {
 >  public:
 >   B *foo() {
@@ -491,7 +491,7 @@ int main() {
 >     return new B;
 >   }
 > };
-> 
+>
 > class Final : public Derived {
 >  public:
 >   C *foo() {
@@ -499,11 +499,11 @@ int main() {
 >     return new C;
 >   }
 > };
-> 
+>
 > int main() {
 >   Base b;
 >   Final f;
-> 
+>
 >   Base *base_ptr = &f;
 >   base_ptr->foo();
 > }

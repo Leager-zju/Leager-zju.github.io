@@ -35,7 +35,7 @@ int main() {
 ```c sum.c
 int sum(int *a, int n) {
   int i, s = 0;
-  
+
   for (i = 0; i < n; i++) {
     s += a[i];
   }
@@ -91,7 +91,7 @@ Linux 将采用的 ELF 格式的文件分为四类，分别是：
 2. **可执行文件(Executable File)**：如 `.exe`；
 3. **共享目标文件(Shared Object File)**：如 `.so`；
 4. **核心转储文件(Core Dump File)**：当进程意外终止时，系统可以将该进程的地址空间的内容及终止时的一些其它信息转储到核心转储文件，如 `core dump`。
-  
+
 > Linux下使用 file 命令可以查看相应的文件格式：`file test.o`
 
 ### 可重定位文件
@@ -113,7 +113,7 @@ Linux 将采用的 ELF 格式的文件分为四类，分别是：
 3. `.data`：存放**已初始化**的全局变量和静态变量；
 4. `.bss`：存放**未初始化**全局变量和静态变量；
 5. `.symtab`：符号表，它存放在程序中定义和引用的**函数和全局变量**的信息。它不包含对应于 **non-static 局部变量**的任何符号，因为这些符号在运行时在**栈**中被管理，链接器对此类符号不感兴趣；
-   
+
    > 一些程序员错误地认为必须通过 `-g` 选项来编译一个程序，才能得到符号表信息。实际上，每个可重定位目标文件在 `.symtab` 中都有一张符号表（除非程序员特意用 `STRIP` 命令去掉它）。然而，和编译器中的符号表不同，`.symtab` 符号表**不**包含局部变量的条目。
 
 6. `.rel.text`：描述 `.text` 节中需重定位的符号位置信息；
@@ -287,7 +287,7 @@ typedef struct {
 Disassembly of section .text:
 
 0000000000000000 <main>:
-   0:   f3 0f 1e fa             endbr64 
+   0:   f3 0f 1e fa             endbr64
    4:   55                      push   %rbp
    5:   48 89 e5                mov    %rsp,%rbp
    8:   48 83 ec 10             sub    $0x10,%rsp
@@ -299,7 +299,7 @@ Disassembly of section .text:
                         1c: R_X86_64_PLT32      sum-0x4     # Relocation entry
   20:   89 45 fc                mov    %eax,-0x4(%rbp)
   23:   b8 00 00 00 00          mov    $0x0,%eax
-  28:   c9                      leave  
+  28:   c9                      leave
   29:   c3                      ret
 ```
 
@@ -327,23 +327,23 @@ SYMBOL TABLE:
 ```
 
 > 符号引用地址 `ADDR(ref)` 其实就是 `(符号引用所处的)节起始地址 + 偏移量offset`。
-> 
+>
 > 在上面的例子中，最终链接器确定的该模块 `.text` 起始地址为 `ADDR(.text) = 0x1129`，`array` 在符号表中的地址为 `0x4010`。
-> 
+>
 > 那么有 `ADDR(array_ref) = ADDR(.text) + array.offset = 0x1129 + 0x14 = 0x113d`。
 >
 > 最终链接器将会以增量 `0x4010 + (-0x4) - 0x113d = 0x2ecf` 进行相对寻址。其中取 array 的指令为
-> 
+>
 > ```S
 > 113a:  48 8d 05 cf 2e 00 00 	lea    0x2ecf(%rip),%rax        # 4010 <array>
 > ```
-> 
+>
 > PC 正好是以 CS:IP 进行确认的，其实就是这里的 `rip`，增量为 `0x2ecf`，验证成功。
 
 > 而 `sum` 在过程链接表中的地址为 `0x1020`。这里重定位表项虽然为 `R_X86_64_PLT32`，但事实上会以 `R_X86_64_PC32` 方式进行重定位。
-> 
+>
 > > "On x86-64, for 32-bit PC-relative branches, we can generate PLT32 relocation, instead of PC32 relocation, which can also be used as a marker for 32-bit PC-relative branches. Linker can always reduce PLT32 relocation to PC32 if function is defined locally. Local functions should use PC32 relocation." ([Related Commit](https://sourceware.org/git/?p=binutils-gdb.git;a=commitdiff;h=bd7ab16b4537788ad53521c45469a1bdae84ad4a;hp=80c96350467f23a54546580b3e2b67a65ec65b66))
-> 
+>
 > 那么有 `ADDR(sum_ref) = ADDR(.text) + sum.offset = 0x1129 + 0x1c = 0x1145`
 >
 > 查表得 `sum` 在符号表中的地址为 `0x1153`（这其实就是最终函数地址）。最终链接器将会以增量 `0x1153 + (-0x4) - 0x1145 = 0xa` 进行相对寻址。其中调用 sum 的指令为
@@ -359,13 +359,13 @@ SYMBOL TABLE:
 静态链接是指将所有相关的目标模块打包成为一个单独的文件，即**静态库**，它可以用做链接器的输入。这样一些公司在发布函数库时，只需要提供静态库即可，而不需要提供源文件让用户自行编译，同时还能起到隐藏源文件的效果。
 
 > 以 ISO C99 为例，它定义了一组广泛的标准 I/O、字符串操作和整数数学函数，例如 `atoi()`、`printf()` 和 `scanf()`，它们在 `libc.a` 库中，对每个 C 程序来说都是可用的。ISO C99 还在 `libm.a` 库中定义了一组广泛的浮点数学函数，例如 `sin()`、`cos()` 和 `sqrt`。
-> 
+>
 > 如果不采用库，那么如果还想为用户提供标准函数的话，要么在编译阶段将标准函数识别为关键字，并生成对应代码，要么提供一个包含所有函数的 `.o` 文件给用户，让用户自行链接。
-> 
+>
 > 然而，前者的缺陷在于，这给编译器带来了显著的复杂性，一旦修改一个标准函数，就需要一个新的编译器版本。
-> 
+>
 > 后者的缺陷在于，尽管用户可能不需要用到某些函数，这些函数的实现仍然被链接到了可执行文件中，并在运行时映射到内存，这是对内存的极度浪费，以及一旦修改一个标准函数，都需要库开发人员重新编译生成新的 `.o` 文件，这是个非常耗时的操作。
-> 
+>
 > 那有没有可能为每个标准函数单独生成 `.o` 呢？可以，但这加大了程序员编译的难度——这种方法要求应用程序员显式地链接合适的目标模块到它们的可执行文件中，这是一个容易出错而且耗时的过程。
 
 在静态库的手段下，相关的函数可以被编译为独立的目标模块，然后封装成一个单独的静态库文件。在链接时，链接器将只复制被程序引用的目标模块，这就减少了可执行文件在磁盘和内存中的大小。我们只需要在源文件 `#include` 相关头文件并调用函数，编译器才会识别出这是已声明的符号，最后链接阶段链接器会帮我们寻找到相关符号定义并关联。

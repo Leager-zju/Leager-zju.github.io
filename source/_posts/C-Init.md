@@ -96,7 +96,7 @@ A* a4 = new A{4};
     const int b = 2;
     char c = a;   // OK!
     char d = {a}; // ERROR! 发生截断
-    
+
     char e = b;   // OK!
     char f = {b}; // OK! 不发生截断，但如果去掉 const 属性，也报错
     ```
@@ -108,5 +108,5 @@ A* a4 = new A{4};
     float d = {1e70}; // ERROR! double -> float
     ```
 
-    
+
 

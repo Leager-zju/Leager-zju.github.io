@@ -81,20 +81,20 @@ func mostPopularCreator(creators []string, ids []string, views []int) [][]string
         } else {
             works[creators[i]] = append(work, info{ids[i], views[i]})
         }
-        
-        
+
+
         if popular[creators[i]] > maxm {
             maxm = popular[creators[i]]
         }
     }
-    
+
     names := make([]string, 0)	// 所有流行度最高的创作者的名字
     for k, v := range popular {
         if v == maxm {
             names = append(names, k)
         }
     }
-    
+
     res := make([][]string, 0)
     for _, name := range names {
         wks, _ := works[name]
@@ -151,7 +151,7 @@ func makeIntegerBeautiful(n int64, target int) int64 {
     if sum <= target {
         return 0
     }
-    
+
     mask := int64(1)    // 10^i
     for {
         if sum - getsum(n % mask) + 1 <= target {

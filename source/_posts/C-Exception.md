@@ -55,12 +55,12 @@ try {
 >  public:
 >   virtual ~Base() = default;
 > };
-> 
+>
 > class Derived : public Base {
 >  public:
 >   virtual ~Derived() = default;
 > };
-> 
+>
 > int main() {
 >   try {
 >     try {

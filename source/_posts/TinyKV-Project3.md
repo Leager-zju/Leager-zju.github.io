@@ -69,7 +69,7 @@ Raft 层首先会 `Step` 一条 `MsgTransferLeader`。由于任何节点都有�
 > 	...
 > 	}
 > }
-> 
+>
 > func (m *MockSchedulerClient) RegionHeartbeat(req *schedulerpb.RegionHeartbeatRequest) error {
 >   // check if BootStrap
 >
@@ -85,7 +85,7 @@ Raft 层首先会 `Step` 一条 `MsgTransferLeader`。由于任何节点都有�
 >   		m.makeRegionHeartbeatResponse(op, resp)
 >   	}
 >   }
-> 
+>
 >   // send response to store where the leader is located
 >   return nil
 > }
@@ -149,7 +149,7 @@ Raft 层首先会 `Step` 一条 `MsgTransferLeader`。由于任何节点都有�
 等到 Leader 收到回复后，新 `Peer` 才算正式加入 Group。
 
 > 当然，如果网络很差，snapshot 并没有收到，反而 Leader 早早挂了，那么新 `Peer` 并未被初始化，也无法参与原有节点在 election timeout 后发起的选举，可能会导致该 Group 彻底死掉——只有两个 `Peer` 时，Candidate 无论如何也无法从另一个未初始化的 `Peer` 处得到选票，也就无法成为 Leader。
-> 
+>
 > 但是在 apply snapshot 之前又不能回应其余消息——谁知道 apply snapshot 后会不会拒绝呢？
 >
 > 3B 的最后几个测试中概率出现这种情况，我的做法是：算我过了。
@@ -266,14 +266,14 @@ func (oc *OperatorController) Dispatch(region *core.RegionInfo, source string) {
 
 上面提到的 `Operator` 是怎么来的呢？有一部分就是 `Scheduler` 产生的。
 
-`Cluster` 一经创建便持有一个 `Coordinator`，其会通过 `runScheduler()` 来调用 `scheduler.Schedule()`，定期检查是否有存储节点超载，就需要找到该节点 `src` 的一个**合适**的 `Region`，将位于 `src` 中从属于该 `Region` 的 `Peer` 转移到某个**合适**的目标节点 `dst`，从而达成负载均衡，并通过函数返回的 `MovePeerOperator` 加到该 `Region` 对应的“待执行命令”中，等待下一次该 `Region` 发来心跳信息时执行。 
+`Cluster` 一经创建便持有一个 `Coordinator`，其会通过 `runScheduler()` 来调用 `scheduler.Schedule()`，定期检查是否有存储节点超载，就需要找到该节点 `src` 的一个**合适**的 `Region`，将位于 `src` 中从属于该 `Region` 的 `Peer` 转移到某个**合适**的目标节点 `dst`，从而达成负载均衡，并通过函数返回的 `MovePeerOperator` 加到该 `Region` 对应的“待执行命令”中，等待下一次该 `Region` 发来心跳信息时执行。
 
 > 一个 `MovePeerOperator` 包含以下步骤：
-> 
+>
 > 1. 删除原节点的 `Peer`（即 `RemovePeer` 操作）;
 > 2. 如果必要则还要进行 `transferLeader`;
 > 3. 将新 `Peer` 加入 `Region`（即 `AddPeer` 操作）;
-> 
+>
 > 最后等待该新 `Peer` 收到消息正式加入 Group。
 
 上文提到**合适**，那么究竟何谓**合适**？

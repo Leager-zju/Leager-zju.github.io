@@ -39,13 +39,13 @@ func gcd(a, b int) int {	// assert a < b
     return gcd(b % a, a)
 }
 func commonFactors(a int, b int) int {
-    cnt := 0    
+    cnt := 0
     for i := 1; i <= gcd(a, b); i++ {
         if a % i == 0 && b % i == 0 {
             cnt++
         }
     }
-    
+
     return cnt
 }
 ```
@@ -72,7 +72,7 @@ func commonFactors(a int, b int) int {
 ```go
 // go
 func maxSum(g [][]int) int {
-    res := 0    
+    res := 0
     for i := 0; i <= len(g)-3; i++ {
         for j := 0; j <= len(g[i])-3; j++ {
             sum := 0
@@ -126,7 +126,7 @@ func k(num int) int {
 }
 func minimizeXor(num1 int, num2 int) int {
     cnt1, cnt2, x := k(num1), k(num2), num1
-    
+
     if cnt1 > cnt2 {
         p := 1
         cnt1 -= cnt2    // x 为 num1 去掉低 cnt1-cnt2 位 1

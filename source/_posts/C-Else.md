@@ -125,16 +125,16 @@ constexpr T clone(const T& t) {
 void func(int) {
   std::cout << "函数 func(int) 已调用\n";
 }
- 
+
 void func(int*) {
   std::cout << "函数 func(int*) 已调用\n";
 }
- 
+
 int main() {
   func(nullptr);         // OK!
   func(0);               // OK!
   // func(NULL);         // ERROR! 二义性
- 
+
   func(clone(nullptr));  // OK!
   //  func(clone(0));    // ERROR! 非字面量的零不能为空指针常量
   //  func(clone(NULL)); // ERROR! 非字面量的零不能为空指针常量
@@ -155,7 +155,7 @@ struct A {
     virtual void foo();
     void bar();
 };
- 
+
 struct B : A {
   void foo() const override; // ERROR! A::foo 非 const，签名不匹配
   void foo() override;       // OK!
@@ -171,16 +171,16 @@ struct B : A {
 struct Base {
   virtual void foo();
 };
- 
+
 struct A : Base {
   void foo() final;    // OK! A::foo 为 final
   void bar() final;    // ERROR! A::bar 非虚，因此它不能是 final 的
 };
- 
+
 struct B final : A {   // OK! B 为 final
   void foo() override; // ERROR! foo 不能被重写，A::foo 为 final
 };
- 
+
 struct C : B{};        // ERROR! B 为 final，无法进一步派生
 ```
 
@@ -323,7 +323,7 @@ forward_list 内部实现以下功能：
 
 `std::map` 底层采用红黑树实现，会对 key 进行排序，适用于对有序有要求的场景，缺点是内存占用大。
 
- `std::unordered_map` 底层采用哈希表实现，并不会进行排序，且查找时间几乎为 `O(1)`，适用于查找多的场景。用法几乎与 `std::map` 一样。
+ `std::unordered_map` 底层采用哈希表实现，并不会进行排序，且查找时间几乎为 $O(1)$，适用于查找多的场景。用法几乎与 `std::map` 一样。
 
 ### std::unordered_set
 
@@ -384,7 +384,7 @@ forward_list 内部实现以下功能：
 
     ```c++
     std::unordered_map<int, std::string> m;
-    
+
     // 插入 (1, "aa")
     m.emplace(std::piecewise_construct,
               std::forward_as_tuple(1),       // 1 转发给 int 初始化

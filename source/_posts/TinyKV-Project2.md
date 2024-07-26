@@ -47,7 +47,7 @@ img:
       ...
     }
   }
-  ``` 
+  ```
 - 如果不是 Leader（防止恶趣味测试给 Leader 发一条 MsgHup），则成为候选人 `Candidate`（进入下一任期，投自己一票），并向其他 Peer （如果有）发送 `MsgRequestVote`。请求中除了自身 `CurrentTerm`，还需包含自己最后一个日志条目的 `LogTerm` 与 `LogIndex`；
 
   > **存在只有自己一个 Peer 的情况，那就直接成为 Leader 不用发请求了**；
@@ -129,21 +129,21 @@ if len(m.Entries) > 0 {
 主要是实现 `raft/rawnode.go` 中的 `Ready()`，`HasReady()`，`Advance()` 三个函数。
 
 > 首先要明确的一点是，一个 Raft 日志会长成以下这个样子：
-> 
+>
 > RaftLog manage the log entries, its struct look like:
 >
 > snapshot/first.....applied....committed....stabled.....last
-> 
+>
 > -------------|-------------------------------------------|
 >
 > 分别代表了快照截断、已被上层应用、Raft 层多数持有、已被持久化、最后一个日志的 Index。
-> 
-> 
+>
+>
 > 因为存在快照截断点，故 `Index` 到切片下标需进行转换。这里我顺着 6.824 的习惯将 `entries[0]` 设置为截断点，于是有
-> 
+>
 > `idx = Index2idx(Index) = Index - entries[0].Index`。
 >
-> 于是可以实现 `raft/log.go` 中 `RaftLog` 的相关函数。实际上就是根据那些 point 返回对应范围的切片。 
+> 于是可以实现 `raft/log.go` 中 `RaftLog` 的相关函数。实际上就是根据那些 point 返回对应范围的切片。
 > - `allEntries() => entries[1:]`
 > - `unstableEntries() => entries[Index2idx(stabled):]`
 > - `nextEnts() => entries[Index2idx(applied):Index2idx(committed)]`
@@ -282,7 +282,7 @@ if err == ErrSnapshotTemporarilyUnavailable {
 通过 `HandleRaftReady` 收集消息队列并发送，Peer 收到了 `MsgSnapshot`，触发 `Raft.handleSnapshot()`，还是一样的先判断发送方的 Term，接着如果发送方的截断点 `truncatedIndex < CommittedIndex`，是没有应用这个快照的必要的，因为之前的日志会不断被 apply，那么 `CompactLog` 必然会被上层捕获从而主动截断。
 
 > 这里还需要发一个 `MsgAppendResponse` 回去，以便 Leader 收到拒绝后修改 `Next` 字段。
-> 
+>
 最后才修改 Raft 层与 RaftLog 的相关数据，并令 `RaftLog.pendingSnapshot = msg.snapshot`（可以认为该数据一定不是 nil），这样下次收集 Ready 的时候会拿到待应用的快照数据，在 `SaveReadyState` 中调用 `PeerStorage.ApplySnapshot()` 将快照落实到 badger 中并修改 `ApplyState`。
 
 到此，所有需要修改的数据均已修改完毕。

@@ -264,7 +264,7 @@ while (true) {
     // 构造空值 Tuple
     return true;
   }
-    
+
   // INNER JOIN && JOIN EMPTY，需要外表继续 Next()，故外层用 while(true)
 }
 ```

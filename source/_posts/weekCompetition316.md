@@ -198,12 +198,12 @@ func makeSimilar(nums []int, target []int) int64 {
             t2 = append(t2, t)
         }
     }
-    
+
     sort.Ints(n1)
     sort.Ints(n2)
     sort.Ints(t1)
     sort.Ints(t2)
-    
+
     var d1, d2 int64 = 0, 0
     for i := range n1 {
         if t1[i] > n1[i] {

@@ -60,7 +60,7 @@ int main() {
       printf("%s\n", msg);
     }
   }
-  
+
   return 0;
 }
 ```
@@ -223,7 +223,7 @@ struct sigpending {
 当源进程(src)调用 `kill()` 打算将目标进程(dst)给杀掉时，该系统调用会进一步调用内核函数 `sys_kill()`：
 
 ```C
-asmlinkage long 
+asmlinkage long
 sys_kill(int pid, int sig)
 {
   struct siginfo info;
@@ -251,16 +251,16 @@ static int kill_something_info(int sig, struct siginfo *info, int pid)
         ++count;
         if (err != -EPERM)
           retval = err;
-      } 
-    } 
+      }
+    }
     read_unlock(&tasklist_lock);
     return count ? retval : -ESRCH;
   } else if (pid < 0) {
     return kill_pg_info(sig, info, -pid);
   } else {
     return kill_proc_info(sig, info, pid);
-  } 
-} 
+  }
+}
 ```
 
 从函数 `kill_something_info()` 可以得知，信号发送后具体的处理流程与 dst 的 `pid` 有很大关系，具体为：
@@ -338,13 +338,13 @@ int do_signal(struct pt_regs *regs, sigset_t *oldset)
 {
   siginfo_t info;
   struct k_sigaction *ka;
- 
+
   if ((regs->xcs & 3)!= 3)
     return 1;
 
   if (!oldset)
     oldset = &current->blocked;
- 
+
   for (;;) {
     unsigned long signr;
 
@@ -370,7 +370,7 @@ int do_signal(struct pt_regs *regs, sigset_t *oldset)
     if (ka->sa.sa_handler == SIG_DFL) { // default. 即指定为默认就用系统的默认处理方法
       int exit_code = signr;
 
-      /* Init gets no signals it doesn't want.  */ 
+      /* Init gets no signals it doesn't want.  */
       if (current->pid == 1)
         continue;
 
@@ -396,7 +396,7 @@ int do_signal(struct pt_regs *regs, sigset_t *oldset)
       case SIGBUS: case SIGSYS: case SIGXCPU: case SIGXFSZ:
         if (do_coredump(signr, regs))
           exit_code |= 0x80;
-        /* FALLTHRU */ 
+        /* FALLTHRU */
 
       default:
         sigaddset(&current->pending.signal, signr);
@@ -406,7 +406,7 @@ int do_signal(struct pt_regs *regs, sigset_t *oldset)
         /* NOTREACHED */
       }
     }
-    ... 
+    ...
     handle_signal(signr, ka, &info, oldset, regs); // 如果通过 signal() 注册了自定义处理方法，就用 handle_signal() 去处理
     return 1;
   }

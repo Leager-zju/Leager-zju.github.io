@@ -111,7 +111,7 @@ ptr = NULL;                      // nullptr in C++
 
 ```c++
 ::(opt) new (布置参数)(opt) (类型) 初始化器(opt) ;
-    
+
 int* p1 = new int (1);  // p1 指向 int 变量，并初始化为 1
 int* p2 = new int[2] {114, 514};  // p2 指向数组 int[2]，并初始化为 {114, 514}
 int* p3 = new(p1) int (3);        // 定位 new，不需要额外分配内存，而是直接在已分配的内存(p1)处调用构造函数即可
@@ -148,7 +148,7 @@ delete p4;
 > > ```c++
 > > auto ptr = new Foo[10]; // 默认初始化赋值一次
 > > for (int i = 0; i < 10; i++) {
-> >   Foo[i] = {...};       // 后续又进行了一次赋值 
+> >   Foo[i] = {...};       // 后续又进行了一次赋值
 > > }
 > > ```
 >
@@ -234,7 +234,7 @@ int main() {
         Foo::~Foo(); // or delete this;
       }
     }
-    
+
     // Good Example ^_^
     class Bar {
      protected:
@@ -285,7 +285,7 @@ template<
 ## 未初始化内存算法
 
 > 定义于头文件 `<memory>`
- 
+
 - `constexpr void destroy_at(T*)`：销毁在给定地址的对象；
 - `constexpr void destroy(ForwardIt, ForwardIt)`：销毁一个范围中的对象；
 - `constexpr ForwardIt destroy_n( ForwardIt first, Size n )`：销毁范围中一定数量的对象；
@@ -304,7 +304,7 @@ template<
 Valgrind 可以用来检测程序是否有非法使用内存的问题，例如访问未初始化的内存、访问数组时越界、忘记释放动态内存等问题。
 
 构建项目时加上编译选项 `-g`，之后调用 `valgrind --tool=memcheck --leak-check=full  {可执行文件}` 即可进行内存问题检测。
-   
+
 ### Address Sanitizer
 
 AddressSanitizer 是 Google 开发的一款用于检测内存访问错误的工具。它内置在 GCC 版本 >= 4.8 中，适用于 C 和 C++ 代码。它能够检测：

@@ -163,7 +163,7 @@ R operator()( Args... args ) const;
     ```c++
     template<typename T>
     void foo(T i) { std::cout << i; }
-    
+
     std::function<void(int)> f(foo<int>);
     f(2); // output: 2
     ```
@@ -173,7 +173,7 @@ R operator()( Args... args ) const;
     ```c++
     std::function<void(int)> f = [](int i) { std::cout << i; };
     f(3); // output: 3
-    
+
     // 同时，可以利用其在 lambda 表达式中模拟递归
     auto factorial = [](int n) {
         std::function<int(int)> fac = [&](int n){
@@ -181,7 +181,7 @@ R operator()( Args... args ) const;
         }; // 而 lambda 表达式 auto fac = [&](int n){...}; 无法用于递归
         return fac(n);
     };
-    
+
     std::cout << factorial(4);   // output: 24
     ```
 
@@ -191,7 +191,7 @@ R operator()( Args... args ) const;
     struct foo {
       void operator()(int i) const { std::cout << i; }
     };
-    
+
     std::function<void(int)> f(foo); // 必须是重载类型为 void operator() (int) 类型的函数对象
     f(4); // output: 4
     ```
@@ -233,7 +233,7 @@ R operator()( Args... args ) const;
     ```c++
     using std::placeholders::_1;
     std::function<void(int)> h;
-    
+
     h = std::bind( &Foo::foobar, foo, _1 ); // 由于绑定了对象 foo，所以生成的可调用对象被 std::function<void(int)> 接收
     // 或者 h = std::bind( &Foo::foobar, &foo, _1 );
     h(4); // 相当于调用 foo.foobar(4)

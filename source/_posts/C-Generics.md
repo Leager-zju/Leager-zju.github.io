@@ -176,7 +176,7 @@ int main() {
 ```c++
 template <class T>
 class Base1 {};
-    
+
 // case 1.1: 模板类派生类模板
 template <class T>
 class Derive11: Base1<int> { T val; };
@@ -190,7 +190,7 @@ class Derive12: Base<int> {};
 ```c++
 template <class T>
 class Base2 {};
-    
+
 // case 2.1: 类模板派生类模板
 template <class T>
 class Derive21: Base2<T> {};

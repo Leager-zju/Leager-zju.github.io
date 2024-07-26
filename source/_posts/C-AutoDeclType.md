@@ -40,13 +40,13 @@ auto foo = 0, bar = 1.0;   // ERROR! foo, bar 分别为 int 和 double 类型，
     ```c++
     int i = 0;
     const auto con_i = i;          // con_i 为 const int, auto 推导为 int
-    
+
     // no reference
     {
       auto auto_i = i;             // auto_i 为 const int, auto 推导为 int
       auto auto_con_i = con_i;     // auto_con_i 为 const int, auto 推导为 int
     }
-    
+
     // reference
     {
       auto &autoref_i = i;         // autoref_i 为 int&, auto 推导为 int&
@@ -98,13 +98,13 @@ decltype(func()) q; // ERROR!
     int i = 0;
     const int &j = i;
     int func();
-    
+
     class Foo {
       public:
         double bar;
     }
     const Foo *foo;
-    
+
     decltype(i) di = i;         // 推导结果为 int
     decltype(j) dj = j;         // 推导结果为 const int&
     decltype(i+j) k;            // 推导结果为 int
@@ -129,7 +129,7 @@ decltype(func()) q; // ERROR!
     ```c++
     int func(int a);
     decltype(func) f1; // OK! func 仅有一个重载
-    
+
     double func(double b);
     decltype(func) f2; // ERROR! func 有两个重载
     ```
@@ -154,4 +154,4 @@ auto func(T t, U u) -> decltype(t + u) {
 }
 ```
 
-**尾随返回类型**也是 C++11 新特性之一，就是用在这种需要根据函数形参类型判断返回值类型的场景中。 
+**尾随返回类型**也是 C++11 新特性之一，就是用在这种需要根据函数形参类型判断返回值类型的场景中。

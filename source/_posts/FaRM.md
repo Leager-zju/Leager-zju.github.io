@@ -128,7 +128,7 @@ CM 存储 region 标识符到其 primary/backup 的映射。这些映射可被�
 
 ### 故障检测
 
-FaRM 使用 **lease** 来检测故障。每台机器都在 CM 处持有 lease，而 CM 在其他每台机器上都持有 lease。任何 lease 到期都会触发故障恢复。FaRM 使用 **3 次握手**授予 lease。每台机器都会向 CM 发送一个 lease 请求，CM 在授权响应中捎带 CM 的 lease 请求，最后机器回复 CM 的 lease 许可。 
+FaRM 使用 **lease** 来检测故障。每台机器都在 CM 处持有 lease，而 CM 在其他每台机器上都持有 lease。任何 lease 到期都会触发故障恢复。FaRM 使用 **3 次握手**授予 lease。每台机器都会向 CM 发送一个 lease 请求，CM 在授权响应中捎带 CM 的 lease 请求，最后机器回复 CM 的 lease 许可。
 
 > FaRM 租期很短，以保证高可用性。
 
@@ -174,7 +174,7 @@ FaRM 在配置更改后使用日志来恢复事务状态。下图为事务恢复
     - `LastPrimaryChange[r]`：primary 最后一个配置标识符；
     - `LastReplicaChange[r]`：所有 replica 最后一个配置标识符。
 
-    在配置 $c-1$ 中开始提交的事务在配置 $c$ 中恢复，除非： 
+    在配置 $c-1$ 中开始提交的事务在配置 $c$ 中恢复，除非：
 
     - 包含由事务**读取**对象的所有 region $r$，`LastPrimaryChange[r] < c`；
     - 包含由事务**修改**对象的所有 region $r'$，`LastReplicaChange[r'] < c`；

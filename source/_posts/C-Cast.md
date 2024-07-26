@@ -285,10 +285,10 @@ int main() {
   const int a = 1;
   int* pa = const_cast<int*>(&a);
   int& ra = const_cast<int&>(a);
-    
+
   *pa = 2;
   std::cout << "a = " << a << " *pa = " << *pa << " ra = " << ra << '\n';
-    
+
   ra = 3;
   std::cout << "a = " << a << " *pa = " << *pa << " ra = " << ra << '\n';
 }
@@ -312,7 +312,7 @@ class Foo {
   // 初始化构造函数
   // 其他类型 -> Foo
   Foo(int v): val(v) { std::cout << "call Foo(int)\n" }
- 
+
   // 用户定义转换函数，不需要显式指定返回值
   // Foo -> 其他类型
   operator int() { return val; }               // 可隐式自定义转换

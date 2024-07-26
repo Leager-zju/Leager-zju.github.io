@@ -72,7 +72,7 @@ func lcm(a, b int64) int64{
 func subarrayLCM(nums []int, k int) int {
     res, i, j := 0, 0, 0
     for i < len(nums) {
-        var l int64 = 1;	// 以 nums[i] 为起点的子数组的最小公倍数 
+        var l int64 = 1;	// 以 nums[i] 为起点的子数组的最小公倍数
         for j = i; j < len(nums); j++ {
             l = lcm(int64(nums[j]), l);
             if (int64(k) % l != 0) {	// 剪枝
@@ -84,7 +84,7 @@ func subarrayLCM(nums []int, k int) int {
         }
         i++;
     }
-    
+
     return res;
 }
 ```
@@ -134,7 +134,7 @@ func minimumOperations(root *TreeNode) int {
             order = append(order, level)
         }
     }
-    
+
     res := 0
     for _, level := range order {
         if len(level) == 1 {
@@ -147,7 +147,7 @@ func minimumOperations(root *TreeNode) int {
         sort.Slice(temp, func(i, j int) bool {
             return temp[i].Val < temp[j].Val
         })
-        
+
         pos := make(map[int]int)
         for i := range temp {
             pos[temp[i].Val] = i
@@ -159,7 +159,7 @@ func minimumOperations(root *TreeNode) int {
             }
         }
     }
-    
+
     return res
 }
 ```
@@ -197,17 +197,17 @@ func maxPalindromes(s string, k int) int {
             isPalid[i][i+1] = true
         }
     }
-    
+
     for l := 3; l <= len(s); l++ {
         for i := 0; i <= len(s) - l; i++ {
             isPalid[i][i+l-1] = (s[i] == s[i+l-1] && isPalid[i+1][i+l-2])
         }
     }
-    
+
     dp := make([]int, len(s)+1)     // dp[i]: 前 i 个字符最大的回文子字符串数
     if isPalid[0][k-1] {
         dp[k] = 1
-    } 
+    }
     for i := k + 1; i <= len(s); i++ {
         for j := i-k; j >= 0; j-- {
             if isPalid[j][i-1] {

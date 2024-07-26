@@ -146,8 +146,8 @@ std::basic_istream& get( char& ch );
 
 ```C++
 // 从缓冲区中读并取出多个字符，结束符会保留在缓冲区中
-std::basic_istream& get( char* s, std::streamsize count ); 
-std::basic_istream& get( char* s, std::streamsize count, char delim ); 
+std::basic_istream& get( char* s, std::streamsize count );
+std::basic_istream& get( char* s, std::streamsize count, char delim );
 
 ```
 
@@ -175,8 +175,8 @@ std::basic_istream& getline( char* s, std::streamsize count, char delim );
 
 ```C++
 // 从缓冲区中读并取出多个字符
-std::getline( std::basic_istream& input, std::basic_string& str ); 
-std::getline( std::basic_istream& input, std::basic_string& str, char delim ); 
+std::getline( std::basic_istream& input, std::basic_string& str );
+std::getline( std::basic_istream& input, std::basic_string& str, char delim );
 
 ```
 
@@ -254,7 +254,7 @@ std::basic_ostream& put( char ch );
 int main() {
 
     std::istringstream iss("123 1.23 abc");
-    
+
     int a;
     double b;
     std::string c;
@@ -267,7 +267,7 @@ int main() {
     std::cout << "after: " << iss.str() << std::endl;
     iss >> a >> b >> c;
     std::cout << a << " " << b << " " << c << std::endl;
-    
+
     std::ostringstream oss1("foo", std::ios_base::ate);  // 指定打开模式，指针定位到末尾
     std::cout << oss1.str() << std::endl;
 
@@ -305,7 +305,7 @@ bar
 操纵符是令代码能以 `operator<<` 或 `operator>>` 控制流输入/输出格式的帮助函数，相当于一个"开关"。其函数原型统一如下：
 
 ```C++
-std::ios_base& std:: CONTROL_TYPE( std::ios_base& str ); 
+std::ios_base& std:: CONTROL_TYPE( std::ios_base& str );
 
 ```
 
@@ -327,7 +327,7 @@ operator>> (std::CONTROL_TYPE) {
 
 ```c++
 template< class CharT, class Traits >
-std::basic_ostream<CharT, Traits>& endl( std::basic_ostream<CharT, Traits>& os ); 
+std::basic_ostream<CharT, Traits>& endl( std::basic_ostream<CharT, Traits>& os );
 
 ```
 

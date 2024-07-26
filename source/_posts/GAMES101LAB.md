@@ -132,7 +132,7 @@ Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio,
               0, n, 0,   0,
               0, 0, n+f, -n*f,
               0, 0, 1,   0;
-    
+
     float top = abs(n)*tan(angleToRadians(eye_fov/2));
     float bottom = -top;
 
@@ -187,7 +187,7 @@ Eigen::Matrix4f get_rotation(Vector3f axis, float angle)
 
 ```C++
 static bool insideTriangle(float x, float y, const Vector3f* _v)
-{   
+{
     auto [alpha, beta, gamma] = computeBarycentric2D(x, y, _v);
     return alpha >= 0 && beta >= 0 && gamma >= 0;
 }
@@ -325,7 +325,7 @@ void rst::rasterizer::rasterize_triangle(const Triangle& t)
 有了作业 2 的前置知识，其实求真实属性已经不是什么难点了，只不过这次 `rasterize_triangle()` 函数中多了一个名为 `view_pos` 的参数，通过阅读 `draw()` 函数我们发现，这正是三角形顶点在可视空间中的坐标，这样一来真实深度就有了，只要在屏幕空间求一遍重心坐标即可。
 
 ```C++
-void rst::rasterizer::rasterize_triangle(const Triangle& t, const std::array<Eigen::Vector3f, 3>& view_pos) 
+void rst::rasterizer::rasterize_triangle(const Triangle& t, const std::array<Eigen::Vector3f, 3>& view_pos)
 {
     // 求解 bounding box（略）
 
@@ -344,7 +344,7 @@ void rst::rasterizer::rasterize_triangle(const Triangle& t, const std::array<Eig
                 alpha * v[0].z() / v[0].w() + beta * v[1].z() / v[1].w() +
                 gamma * v[2].z() / v[2].w();  // depth in projection space
             zp *= Z;
-            
+
             if (isinf(depth_buf[pixel_index]) || zp > depth_buf[pixel_index]) {
                 depth_buf[pixel_index] = zp;
 
@@ -539,7 +539,7 @@ Eigen::Vector3f getColorBilinear(float u, float v)
 递归版本的思路是：对于给定控制点集 $C=\{c_1, c_2, \dots, c_n\}$，取所有的相邻的两个控制点 $c_i, c_{i+1}$，找到所有的 $n-1$ 个 $t$ 分点 $c_{i, t} = t*c_i + (1-t)*c_{i+1}$ 加入新的控制点集合 $C' = \{c_{1,t}, c_{2,t}, \dots, c_{n-1, t}\}$ ，并作为递归函数的参数传入。
 
 ```C++
-cv::Point2f recursive_bezier(const std::vector<cv::Point2f> &control_points, float t) 
+cv::Point2f recursive_bezier(const std::vector<cv::Point2f> &control_points, float t)
 {
     if (control_points.size() == 1) {
         return control_points[0];
@@ -551,7 +551,7 @@ cv::Point2f recursive_bezier(const std::vector<cv::Point2f> &control_points, flo
     return recursive_bezier(new_control_points, t);
 }
 
-void bezier(const std::vector<cv::Point2f> &control_points, cv::Mat &window) 
+void bezier(const std::vector<cv::Point2f> &control_points, cv::Mat &window)
 {
     for (double t = 0.0; t <= 1.0; t += 0.001)
     {
@@ -575,7 +575,7 @@ void bezier(const std::vector<cv::Point2f> &control_points, cv::Mat &window)
 对于一个点来说，其与最近 4 个 pixel-center 的距离应该在区间 $[0, \sqrt{2}]$ 内，并且离一个 pixel 越近，这个 pixel 的 G 值就应该越高，可以简单的用公式 $\displaystyle G = 255*(1-\frac{d}{\sqrt{2}})$ 来线性计算，从而得到下面的代码
 
 ```C++
-void bezier_antialiasing(const std::vector<cv::Point2f> &control_points, cv::Mat &window) 
+void bezier_antialiasing(const std::vector<cv::Point2f> &control_points, cv::Mat &window)
 {
     for (double t = 0.0; t <= 1.0; t += 0.001)
     {
@@ -664,7 +664,7 @@ void Renderer::Render(const Scene& scene)
         }
         UpdateProgress(j / (float)h);
     }
-    ...  
+    ...
 }
 ```
 
@@ -883,7 +883,7 @@ void Renderer::Render(const Scene& scene)
     for (auto&& w : worker) {
         w.join();
     }
-    // save framebuffer to file  
+    // save framebuffer to file
 }
 ```
 
@@ -939,7 +939,7 @@ if (block.happened && dis - block.distance < EPSILON) {
     Vector3f eval = m->eval(wi, wo, N);
     float cosTheta = fmax(0.f, -dotProduct(wi, N));
     float cosThetaPrime = fmax(0.f, dotProduct(wi, light.normal));
-    
+
     L_dir = emit * eval * cosTheta * cosThetaPrime / dis2 / pdf;
 }
 ```
@@ -979,7 +979,7 @@ Vector3f Scene::castRay(const Ray &ray, int depth) const
     Material *m = intersection.m;
     Vector3f hitPoint = intersection.coords;
     Vector3f N = intersection.normal;
-    
+
     // 打到自发光物体
     // 如果是首次打到，说明是相机调用的 castRay()，直接返回其颜色；
     // 反之，说明是为了计算间接光照项，此时不能对自发光物体采样，返回空值；
@@ -996,7 +996,7 @@ Vector3f Scene::castRay(const Ray &ray, int depth) const
         float pdf;
         sampleLight(light, pdf);
         float dis = (hitPoint - light.coords).norm();
-        
+
         Vector3f wi = (hitPoint - light.coords).normalized(); // 自发光物体打来的直接光照
         Intersection block = intersect(Ray(hitPoint, -wi));   // 判断该光照是否被其它物体遮挡
         if (block.happened && dis - block.distance < EPSILON) {
@@ -1005,7 +1005,7 @@ Vector3f Scene::castRay(const Ray &ray, int depth) const
             Vector3f eval = m->eval(wi, wo, N);
             float cosTheta = fmax(0.f, -dotProduct(wi, N));
             float cosThetaPrime = fmax(0.f, dotProduct(wi, light.normal));
-            
+
             L_dir = emit * eval * cosTheta * cosThetaPrime / dis2 / pdf;
         }
     }

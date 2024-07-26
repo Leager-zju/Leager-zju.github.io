@@ -37,7 +37,7 @@ img:
 // go
 func hardestWorker(n int, logs [][]int) int {
     res, max := logs[0][0], logs[0][1]
-    
+
     for i := 1; i < len(logs); i++ {
         diff := logs[i][1] - logs[i-1][1]
         if diff > max {
@@ -47,7 +47,7 @@ func hardestWorker(n int, logs [][]int) int {
             res = logs[i][0]
         }
     }
-     
+
     return res
 }
 ```
@@ -73,11 +73,11 @@ func hardestWorker(n int, logs [][]int) int {
 func findArray(p []int) []int {
     res := make([]int, len(p))
     res[0] = p[0]
-    
+
     for i := 1; i < len(p); i++ {
         res[i] = p[i] ^ p[i-1]
     }
-    
+
     return res
 }
 ```
@@ -119,12 +119,12 @@ public:
         vector<char> minm(n);
         stack<char> t;
         string res;
-        
+
         minm[n-1] = s[n-1];
         for (int i = n-2; i >= 0; i--) {
             minm[i] = s[i] < minm[i+1] ? s[i] : minm[i+1];
-        }        
-        
+        }
+
         for (int i = 0; i < n-1; i++) {
             t.push(s[i]);	// 删除 s 的第一个字符并添加到 t 的尾部
             while (!t.empty() && t.top() <= minm[i+1]) {	// 若后面没有比 t 尾部字符更小的，写到纸上
@@ -132,14 +132,14 @@ public:
                 t.pop();
             }
         }
-        
+
         // 将 t 中所有字符写到纸上
         res.push_back(s[n-1]);
         while (!t.empty()) {
             res.push_back(t.top());
             t.pop();
         }
-        
+
         return res;
     }
 };

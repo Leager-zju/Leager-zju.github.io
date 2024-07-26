@@ -19,18 +19,18 @@ img:
 > - 昵称
 > - 金币
 > - 道具背包（支持多个道具, 用 `itemid` 代表道具类型，`itemcnt` 代表数量）
-> 
+>
 > 支持以下命令
-> 
+>
 > - login <用户账号 id> 如存在，从磁盘读取数据，如果不存，创建用户
 > - set-name <name>
 > - add-money 增加金币
 > - add-item <item-id> <item-cnt> 增加道具
 > - sub-item <item-id> <item-cnt> 减少道具
 > - logout 登出，并把数据写入磁盘
-> 
+>
 > 要求
-> 
+>
 > - 使用 git 进行源代码管理
 > - 使用 c++ 语言
 > - 代码在 linux 上运行通过
@@ -102,18 +102,18 @@ $ sudo apt-get install build-essential
 ```
 
 > 这一步可能会出现因换源导致的如下报错。
-> 
+>
 > ```bash
 > $ GPG error: The following signatures couldn't be verified because the public key is not available: NO_PUBKEY (一个 16 位十六进制数)
 > ```
-> 
+>
 > 解决方案为添加相应的 PUBKEY。
-> 
+>
 > ```bash
 > $ sudo gpg --keyserver keyserver.ubuntu.com --recv (上面的那个 PUBKEY)
 > $ sudo gpg --export --armor (上面的那个 PUBKEY) | sudo tee
 > ```
-> 
+>
 > 之后再进行 `apt-get` 的 `update`/`upgrade`。
 
 
@@ -127,7 +127,7 @@ $ cd foo
 $ code .
 ```
 
-## 项目编写 
+## 项目编写
 
 在 VScode 下键入 `ctrl + shift + p`，输入 `cmake`，选择 `CMake: Quick Start`，指定之前安装好的 `g++`，输入项目名，选择 `C++` 与 `Executable`（因人而异），就会在当前目录下生成以下文件：
 
@@ -337,7 +337,7 @@ void log(T&& arg) {
 #endif
 
 inline std::string extractFileName(const std::string& filePath) {
-    return filePath.substr(filePath.find_last_of("/\\") + 1);  
+    return filePath.substr(filePath.find_last_of("/\\") + 1);
 }
 
 inline std::string header(const std::string& filename, int line) {
@@ -369,7 +369,7 @@ inline std::string header(const std::string& filename, int line) {
 ```awk
 $3 ~ /log-in/ {     # $3 表示对每一行用空格（也可以用 -F 指定分隔符）进行 split 后的第三列（awk 的列索引从 1 开始），~ 表示匹配，!~ 表示不匹配，模式用两个 / 包裹
     ids[$6] += 1    # 全局有效
-} 
+}
 $3 ~ /add-item/ {
     count[$4] += $7
 }
@@ -382,7 +382,7 @@ END { # 表示将之后的命令在所有匹配项检查完后执行
     }
     for (item in count) {
         c = count[item]
-        if (c > 0) { 
+        if (c > 0) {
             print "item", item, "added", c, "times"
         } else if (c < 0) {
             print "item", item, "decreased", c, "times"

@@ -63,7 +63,7 @@ uservec:
 最开始，地址 `TRAPFRAME` 的值记录在寄存器 SSCRATCH 中，而 trapframe 用于保存所有的 32 个用户寄存器值，而寄存器 a0 存放了**第一个参数**。`uservec` 首先交换这两个寄存器的值，这样 a0 就指向 trapframe 了，然后再将所有寄存器依次写入页中。当然，原本的 a0，也就是现在的 SSCRATCH，也需要被保存。
 
 > 之所以交换，是因为诸如 `sd ra 40(a0)` 这些指令的操作数必须位于用户寄存器，而原本的 32 个用户寄存器都被各自的数据占用，没法存 `TRAPFRAME`，于是就用 SSCRATCH，这个寄存器的作用就是“保存其他寄存器的值”。只要将 `TRAPFRAME` 存入其中，通过交换，就可以让 `TRAPFRAME` 放到用户寄存器了，从而能够根据 a0 访存，将用户寄存器保存到内存中。
-> 
+>
 > 当然，别忘了后面还要换回来。
 
 ```S kernel/trampoline.S
@@ -87,7 +87,7 @@ uservec:
 一些内核数据保存在 trapframe 的前面几个变量中，这里将这些变量加载到寄存器中，方便使用。之后将 t1 与 SATP 交换，并清空页表缓存，我们就正式切换到了内核页表。又因为 trampoline 在用户态和内核态都处于同一个虚拟地址，并且映射到同一个物理地址，所以执行不会报错。
 
 > 原本 SATP 内的用户页表指针不用保存，因为它可以通过 `MAKE_SATP(p->pagetable)` 写回。
-> 
+>
 > 那么，叫 trampoline page 的原因就很好理解了——某种程度在它上面“弹跳”了一下，然后从用户空间走到了内核空间。
 
 ```S kernel/trampoline.S
@@ -122,13 +122,13 @@ usertrap(void)
 
 ```C kernel/trap.c
   struct proc *p = myproc();
-  
+
   // save user program counter.
   p->trapframe->epc = r_sepc();
 ```
 
 接着，它获取当前进程 p，并将 SEPC 的值保存在 p->trapframe 的 `epc` 字段中，这是为了防止切换进程时 SEPC 被覆写。
-   
+
    > 当前进程的获取需要通过当前 CPU。事实上我们上面已经把 hartid 保存在 tp 中了，这里只需读取编号并从一个叫 `cpus` 的表中获取即可，每个 `struct cpu` 内都有一个指针来指向当前进程。
 
 ```C kernel/trap.c
@@ -216,7 +216,7 @@ usertrapret(void)
 ```C kernel/trap.c
   // set up the registers that trampoline.S's sret will use
   // to get to user space.
-  
+
   // set S Previous Privilege mode to User.
   unsigned long x = r_sstatus();
   x &= ~SSTATUS_SPP; // clear SPP to 0 for user mode
@@ -233,7 +233,7 @@ usertrapret(void)
 还需要设置一些 `userret` 会用到的寄存器，将 SSTATUS 寄存器的 SPP 位与 SPIE 位——因为要回去了，同时也以便下次能够顺利在用户层执行中断；将 trapframe 中的 `epc` 字段写回 SEPC，即恢复用户程序计数器；调用 `MAKE_SATP` 生成一个参数；
 
 ```C kernel/trap.c
-  // jump to trampoline.S at the top of memory, which 
+  // jump to trampoline.S at the top of memory, which
   // switches to the user page table, restores user registers,
   // and switches to user mode with sret.
   uint64 fn = TRAMPOLINE + (userret - trampoline);
@@ -284,7 +284,7 @@ userret:
         csrrw a0, sscratch, a0
 ```
 
-而 SSCRATCH 在之前由于交换，放的**值**是 user a0，也就是系统调用传入的第一个实参（见 [uservec](#ecall-与-uservec)），并且被保存到了 trapframe->a0 中。尽管 trapframe->a0 在系统调用过程中变成了**系统调用函数返回值**，但无论如何，现在需要进行逆操作了——先从 trapframe->a0 中将返回值 载入 SSCRATCH，再和实际寄存器 a0 进行交换。于是乎，现在寄存器 a0 和 SSCRATCH 成为了我们想要的模样，前者存返回值，后者存 `TRAPFRAME`。之后 `TRAPFRAME` 会一直保存在SSCRATCH中，直到用户程序执行了另一次 trap。 
+而 SSCRATCH 在之前由于交换，放的**值**是 user a0，也就是系统调用传入的第一个实参（见 [uservec](#ecall-与-uservec)），并且被保存到了 trapframe->a0 中。尽管 trapframe->a0 在系统调用过程中变成了**系统调用函数返回值**，但无论如何，现在需要进行逆操作了——先从 trapframe->a0 中将返回值 载入 SSCRATCH，再和实际寄存器 a0 进行交换。于是乎，现在寄存器 a0 和 SSCRATCH 成为了我们想要的模样，前者存返回值，后者存 `TRAPFRAME`。之后 `TRAPFRAME` 会一直保存在SSCRATCH中，直到用户程序执行了另一次 trap。
 
 ```S kernel/trampoline.S
         # return to user mode and user pc.

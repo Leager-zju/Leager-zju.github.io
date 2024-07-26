@@ -787,7 +787,7 @@ $$
 
 - $L_d$ 为漫反射光强；
 - $k_d$ 为**漫反射系数**，表示这个点对光的吸收率；
-  
+
   > 对于一个点，它之所以会有颜色，是因为这个点会吸收一部分的颜色（能量），将那部分不吸收的能量进行反射。那不同的物体表面材质不同，因而有不同的**吸收率**，就会产生不同的反射光。当这个系数为 1 时，表示这个点完全不吸收能量；为 0 就表示所有能量都被吸收了。如果把这个系数表示为一个三通道的 RGB 颜色向量，那就可以在着色点上定义一个颜色了。
   >
   > 控制变量法得到的结果大概是下面这样
@@ -850,7 +850,7 @@ $$
 Blinn-Phong 模型下，我们最终能观测到的光强是以上三大项之和，即
 
 $$
-L = L_a+L_d+L_s = k_aI_a + k_d\frac{I}{r^2}\max{(0, \mathbf{n},\mathbf{l})}+k_s\frac{I}{r^2}\max{(0, \mathbf{n}·\mathbf{h})}^p 
+L = L_a+L_d+L_s = k_aI_a + k_d\frac{I}{r^2}\max{(0, \mathbf{n},\mathbf{l})}+k_s\frac{I}{r^2}\max{(0, \mathbf{n}·\mathbf{h})}^p
 $$
 
 下面是一个简单的示例
@@ -972,7 +972,7 @@ V = \alpha V_A + \beta V_B + \gamma V_C
 $$
 
 > 这里的“值”既可以是 Phong Shading 的法线，也可以是纹理值。
-> 
+>
 > 要注意的是，三维空间的点 $P$ 投影到二维屏幕上成为 $P'$ 后，$(\alpha,\beta,\gamma)_P\neq (\alpha,\beta,\gamma)_{P'}$。所以想要对三维空间的属性进行插值，就必须先在三维空间内做，再对应到二维结果上去。
 
 #### 纹理映射中的应用
@@ -1020,7 +1020,7 @@ Mipmap 的原理很简单，对于一个纹理图，不断将其分辨率缩放�
 <img src="irregular.png" style="zoom:60%">
 
 > 有一些替代方案，比如**各向异性过滤(Anisotropic Filtering)**可以用矩形进行近似，但并没有解决上面提到的问题。
-> 
+>
 > **EWA filtering** 可以将不规则形状拆分为若干圆形，每次查询其中一个圆，分多次查询来近似。虽然能够比较好的进行近似，但“多次查询”已经暴露了其开销过大的缺陷。
 
 ### 纹理的其他应用
@@ -1366,9 +1366,9 @@ $$
 对于显式物体表面，要分情况讨论。
 
 对于单个三角形而言，交点只有 0 个或 1 个。对于一个三角形而言，我们可以快速求出其**法线** $\mathbf{N}$，假设交点为 $\mathbf{p}=\mathbf{o}+t\mathbf{d}$，可以找到三角形所在平面上另一个确定的点 $\mathbf{p'}$，必然满足 $(\mathbf{p}-\mathbf{p'})\mathbf{N}=0$。解得 $\mathbf{p}$ 后，可以用**重心坐标**判断是否在三角形内部。
-   
+
 > 我们发现，光线与平面的交点 $\mathbf{p}$ 必然满足 $\mathbf{p} = b_1\mathbf{A}+b_2\mathbf{B}+(1-b_1-b_2)\mathbf{C}$，那么求解下面这个方程，就能把 $t$ 和重心坐标一起求出来，这就是 **Möller–Trumbore 算法**。
-> 
+>
 > $$
 > \mathbf{o}+t\mathbf{d} = b_1\mathbf{A}+b_2\mathbf{B}+(1-b_1-b_2)\mathbf{C}
 > $$
@@ -1379,18 +1379,18 @@ $$
 > -t\mathbf{d} + b_1(\mathbf{A}-\mathbf{C}) + b_2(\mathbf{B}-\mathbf{C}) = \mathbf{o} - \mathbf{C}
 > $$
 >
-> 不难发现这是一个关于 $t, b_1, b_2$ 的三元一次方程组，如果令 
-> 
+> 不难发现这是一个关于 $t, b_1, b_2$ 的三元一次方程组，如果令
+>
 > $$
 > \begin{aligned}
 > \mathbf{X} &= -\mathbf{d}\\ \mathbf{Y} &= \mathbf{A}-\mathbf{C}\\ \mathbf{Z} &= \mathbf{B}-\mathbf{C}\\ \mathbf{W} &= \mathbf{o}-\mathbf{C}
 > \end{aligned}
 > $$
-> 
+>
 > 那么上式可以写作 $[\mathbf{X}, \mathbf{Y}, \mathbf{Z}]·[t, b_1, b_2]^T = \mathbf{W}$。
 >
 > 根据克莱姆法则，我们能够得到
-> 
+>
 > $$
 > t = \det([\mathbf{W}, \mathbf{Y}, \mathbf{Z}])/\det([\mathbf{X}, \mathbf{Y}, \mathbf{Z}])
 > $$
@@ -1410,7 +1410,7 @@ $$
 #### 空间均匀切割(Uniform Spatial Partitions)
 
 该方法指的是将给定 AABB 划分为若干小的 AABB，并且将那些与物体表面相交的小 AABB 打上标记。在光线传播过程中，如果与某个打上标记的小 AABB 有交点，则认为可能与物体表面相交，需要进一步判断。
-   
+
 <img src="usp.png" style="zoom:60%">
 
 缺点是对于那些特别稀疏的场景而言，仍然需要较多的划分，并且需要找到一个划分疏密程度的平衡点。
@@ -1422,9 +1422,9 @@ $$
 之前常用的划分方式有八叉树(Oct-Tree)、KD-Tree、BSP-Tree。如果一条光线与某个 AABB 有交点，那么认为它可能与该 AABB 的所有划分结果有交点，需要在一个树状结构中进行递归判断。
 
 > 我们知道，光线与包围盒空间求交点是非常迅速的，但是与物体表面求交点相对而言更加困难，所以我们应当尽可能减少“与物体表面求交”这一操作。
-> 
+>
 > 前两者都有两个共同的问题，第一个是**物体可能存在于多个子空间中**，比如一条光线可能经过多个子空间，而这些子空间都与同一个物体相交，那就需要对该物体进行多次交点求解。第二个是**很难判定 AABB 是否和物体存在交集**。
-> 
+>
 > 而后者则没有划分为轴平行包围盒，不便于计算。
 
 <img src="sp.png" style="zoom:60%">
@@ -1477,9 +1477,9 @@ BVH 的求解伪代码如下：
 <img src="da.png" style="zoom:60%">
 
 > 可以认为单位面积是一块矩形区域，其长为 $d\theta$ 对应的弧长，宽为 $d\phi$ 在半径为 $r\sin\theta$ 的圆中对应的弧长。
-> 
+>
 > 此时整个球的立体角也可以用下式进行计算
-> 
+>
 > $$
 > \Omega=\displaystyle\int_{S^2}d\omega=\int_0^{2\pi}\int_0^\pi\sin\theta d\theta d\phi = 4\pi
 > $$

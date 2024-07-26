@@ -75,12 +75,12 @@ if (hours < 24 && minutes < 60 && seconds < 60) {
     ```C++
     if (...) {	// 判断表达式用...代替，下同
         if (...) {
-            
+
         } else {
-            
+
         }
     } else if (...) {
-    
+
     }
     ```
 
@@ -89,11 +89,11 @@ if (hours < 24 && minutes < 60 && seconds < 60) {
     ```C++
     if (...)
     {
-    
+
     }
     else if (...)
     {
-    
+
     }
     ```
 
@@ -106,9 +106,9 @@ if (hours < 24 && minutes < 60 && seconds < 60) {
     >  语句 a
     >     语句 b
     >  语句 c
-    > 
+    >
     > //-------等价于-------//
-    > 
+    >
     > if (...) {
     >  语句 a
     > }
@@ -139,31 +139,31 @@ if (hours < 24 && minutes < 60 && seconds < 60) {
     }
     ```
 
-    
+
 
 5. 代码中每个相对独立的逻辑段落之间，比如各函数定义之间，头文件、全局变量定义和函数定义之间，函数内部各语句块之间，应该插入空行分隔。空行得体将使程序的布局更加清晰，且不会浪费内存（虽然打印含有空行的程序会多消耗一些纸张，但是值得）。例如👇
 
     ```C++
     #include <stdio.h>
-    
+
     int a;
     double b;
-    
+
     void foo() {
-    
+
     }
-    
+
     int bar(int a) {
-    
+
     }
-    
+
     int main() {
         int a;
-        
+
         语句块 1
-        
+
         语句块 2
-        
+
         return 0;
     }
     ```
@@ -452,18 +452,18 @@ int main() {
     int i = 0;
     char target;
     char ch[MAXN];
-    
+
     scanf("%c", &target);
     while ((ch[i] = getchar()) != '\n') {
         i++;
     }
-    
+
     for (i = 0; ch[i] != '\n'; i++) {
         if (ch[i] != target) {
             putchar(ch[i]);
         }
     }
-    
+
     return 0;
 }
 ```
@@ -475,14 +475,14 @@ int main() {
 
 int main() {
     char target, ch;
-    
+
     scanf("%c", &target);
     while ((ch = getchar()) != '\n') {
         if (ch != target) {
             putchar(ch);
         }
     }
-    
+
     return 0;
 }
 ```
@@ -534,13 +534,13 @@ void calculate(int l, int w, int* perimeter, int* area) {
 int main() {
     int perimeter, area;
     int length, width;
-    
+
     scanf("%d %d", &length, &width);
-    
+
     calculate(length, width, &perimeter, &area);
-    
+
     printf("周长为 %d，面积为 %d", perimeter, area);
-    
+
     return 0;
 }
 ```

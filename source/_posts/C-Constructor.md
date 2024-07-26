@@ -173,27 +173,27 @@ B q(1, 2); // ERROR! A(int, int) is private
 >  public:
 >   A(int a = 3, double b = 4): _a(a), _b(b){ display(); }
 >   void display() { std::cout << _a << " " << _b << std::endl; }
-> 
+>
 >  private:
 >   int _a;
 >   double _b;
 > };
-> 
+>
 > class B: virtual A {
 >  public:
 >   using A::A;
 > };
-> 
+>
 > class C: virtual A {
 >  public:
 >   using A::A;
 > };
-> 
+>
 > class D: B, C {
 >   using B::B;
 >   using C::C;
 > };
-> 
+>
 > int main() {
 >   B b(1);
 >   D d();

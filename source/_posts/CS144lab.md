@@ -472,7 +472,7 @@ class TCPSender {
 这是本 lab 的第一个任务。随着时间流逝，如果最早发送的段在一定时间内未得到确认，则需要进行**超时重传**，而定时器的作用就是告诉 sender "超时了"，它应该有以下功能：
 
 1. `start()`，包括设置 rto 以及重置时间进度为 0，并将定时器状态设为 `WORK`；
-   
+
     ```c++
     void Timer::start(unsigned int rto) {
         _rto = rto;
@@ -490,7 +490,7 @@ class TCPSender {
     ```
 
 3. `tick()`，增加时间进度，并在超过 rto 时向调用者传递信息(true/false)；
-   
+
     ```c++
     bool Timer::tick(unsigned int interval) { // true for timeout, false else
         _current_time += interval;
@@ -807,7 +807,7 @@ optional<InternetDatagram> NetworkInterface::recv_frame(const EthernetFrame &fra
         if (parse_res == ParseResult::NoError) {
             _mp.emplace(make_pair(msg.sender_ip_address, msg.sender_ethernet_address));
             _holding_time.emplace(make_pair(msg.sender_ip_address, 0));
-            
+
             if (msg.target_ip_address == _ip_address.ipv4_numeric()) {
                 if (msg.opcode == ARPMessage::OPCODE_REQUEST) {
                     EthernetFrame reply;

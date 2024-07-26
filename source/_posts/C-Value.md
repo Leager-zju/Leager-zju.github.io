@@ -110,7 +110,7 @@ func(6); // output: 7
 using lref = int&;
 using rref = int&&;
 
-int n; 
+int n;
 lref&  r1 = n; // r1 的类型是 int&
 lref&& r2 = n; // r2 的类型是 int&
 rref&  r3 = n; // r3 的类型是 int&
@@ -211,7 +211,7 @@ int a = 0;
 FORWARD(a);                      // output: lvalue lvalue rvalue
 FORWARD(1);                      // output: lvalue rvalue rvalue
 
-/* 
+/*
  * std::forward<int>(a), std::forward<int&>(a), std::forward<int&&>(a) 分别会被转为
  * 右值引用、左值引用、右值引用
  */
