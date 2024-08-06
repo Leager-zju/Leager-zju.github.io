@@ -1,0 +1,1343 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="Raft 论文阅读, 没什么看头的地方">
+    <meta name="description" content="6.824 的第四篇论文是 Raft——一种基于多数原则的用于管理复制日志的共识算法。在容错性和性能方面，它相当于
+Paxos，但比
+Paxos 更易于理解，也为构建实际系统提供了更好的基础。
+
+背景
+一直以来，在共识算法方面，无论工业还是">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+    <title>Raft 论文阅读 | 没什么看头的地方</title>
+    <link rel="icon" type="image/png" href="/btt.png">
+    
+    <style>
+        body{
+            background-image: url(https://cdn.jsdelivr.net/gh/Tokisaki-Galaxy/res/site/medias/background.jpg);
+            background-repeat:no-repeat;
+            background-size: 100% 100%;
+            background-attachment:fixed;
+        }
+    </style>
+
+
+
+    <!-- bg-cover style     -->
+
+
+
+<link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+<link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+<link rel="stylesheet" type="text/css" href="/css/matery.css">
+<link rel="stylesheet" type="text/css" href="/css/my.css">
+<link rel="stylesheet" type="text/css" href="/css/dark.css" media="none" onload="if(media!='all')media='all'">
+
+
+
+
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+    <link rel="stylesheet" href="/css/post.css">
+
+
+
+
+    
+        <link rel="stylesheet" type="text/css" href="/css/reward.css">
+    
+
+
+
+    <script src="/libs/jquery/jquery-3.6.0.min.js"></script>
+
+<meta name="generator" content="Hexo 6.3.0">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/comment_bg.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">没什么看头的地方</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/archives" class="waves-effect waves-light">
+      
+      <i class="fas fa-archive" style="zoom: 0.6;"></i>
+      
+      <span>归档</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/contact" class="waves-effect waves-light">
+      
+      <i class="fas fa-comments" style="zoom: 0.6;"></i>
+      
+      <span>留言板</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/friends" class="waves-effect waves-light">
+      
+      <i class="fas fa-address-book" style="zoom: 0.6;"></i>
+      
+      <span>友情链接</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+  <li>
+    <a href="javascript:;" class="waves-effect waves-light" onclick="switchNightMode()" title="深色/浅色模式" >
+      <i id="sum-moon-icon" class="fas fa-sun" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/comment_bg.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">没什么看头的地方</div>
+        <div class="logo-desc">
+            
+            【数据删除】
+            
+        </div>
+    </div>
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/archives" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-archive"></i>
+			
+			归档
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/contact" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-comments"></i>
+			
+			留言板
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/friends" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-address-book"></i>
+			
+			友情链接
+		</a>
+          
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/blinkfox/hexo-theme-matery" class="waves-effect waves-light" target="_blank">
+                <i class="fab fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+            <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/blinkfox/hexo-theme-matery" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+   data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+        
+    </nav>
+
+</header>
+
+    
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/2.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">Raft 论文阅读</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/MIT-6-824/">
+                                <span class="chip bg-color">MIT 6.824</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/paperReading/" class="post-category">
+                                paperReading
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2022-10-04
+                </div>
+                
+
+                
+
+                
+
+                
+
+                
+            </div>
+        </div>
+        <hr class="clearfix">
+
+        
+        <!-- 是否加载使用自带的 prismjs. -->
+        <link rel="stylesheet" href="/libs/prism/prism.min.css">
+        
+
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <p>6.824 的第四篇论文是 <a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/papers/raft-extended.pdf"><strong>Raft</strong></a>——一种基于<strong>多数原则</strong>的用于管理复制日志的<strong>共识算法</strong>。在容错性和性能方面，它相当于
+<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/Paxos%E7%AE%97%E6%B3%95"><strong>Paxos</strong></a>，但比
+Paxos 更易于理解，也为构建实际系统提供了更好的基础。</p>
+<span id="more"></span>
+<h2 id="背景">背景</h2>
+<p>一直以来，在<a target="_blank" rel="noopener" href="https://www.8btc.com/article/6663559">共识算法</a>方面，无论工业还是教学领域，Paxos
+均占据主导地位，大多数共识的实现都基于它。但 Paxos
+很难理解，且其架构需要进行复杂的更改才能支持实际系统。</p>
+<p>Raft
+算法的主要目标是为了提高<strong>可理解性</strong>，又能提供与其他算法相近的效率。虽然它在很多方面与现有的共识算法类似，但它具有以下几个新特性：</p>
+<ol type="1">
+<li><strong>强领导</strong>：Leader 具有更强的话语权，Entry 仅从 Leader
+流向其他服务器。这简化了复制日志的管理，并使 Raft 更容易理解；</li>
+<li><strong>领导人选举</strong>：Raft 使用随机 timer 来选举
+Leader。这简单快速地解决了冲突，代价只是添加了少量机制；</li>
+<li><strong>成员变更</strong>：Raft
+使用了一种新的<strong>联合共识</strong>方法，这允许集群在配置更改期间继续正常运行；</li>
+</ol>
+<h2 id="复制状态机">复制状态机</h2>
+<p>复制状态机指的是一组机器计算相同状态的相同副本，并且即使某些服务器停机也可以继续运行，通常使用复制日志实现，如下图所示。</p>
+<p><img src="image-20221129133628657.png" alt="image-20221129133628657" style="zoom:80%;"></p>
+<ul>
+<li><p><strong>日志
+LOG</strong>：包含一系列命令，所有服务器日志中的命令及其顺序均相同；</p></li>
+<li><p><strong>状态机 STATE
+MACHINE</strong>：按序处理命令序列，由于命令序列都是一致的，故执行的结果都是一致的；</p></li>
+<li><p><strong>共识模块 CONSENSUS
+MODULE</strong>：接收来自客户端的命令并将它们添加到其日志中，它与其他服务器上的共识模块通信，以确保每个日志最终包含相同顺序的相同请求，从而保持复制日志的一致性。</p>
+<blockquote>
+<p>即使某些服务器出现故障，一旦命令被正确复制，每个服务器的状态机就会按日志顺序处理它们，并将输出返回给客户端。</p>
+</blockquote></li>
+</ul>
+<h2 id="raft-实现">Raft 实现</h2>
+<p>关于 lab2 Raft 的具体实现请参考<a href="../6-824lab2">这篇文章</a>。</p>
+<p>Raft 的核心就是下面这张图了。</p>
+<p><img src="image-20221129160151832.png" alt="image-20221129160151832" style="zoom:80%;"></p>
+<p>另外，Raft 还保证以下属性：</p>
+<p><img src="image-20221129160256071.png" alt="image-20221129160256071" style="zoom:80%;"></p>
+<blockquote>
+<p>上面两张图是 Raft 的重中之重。</p>
+</blockquote>
+<p>一个 Raft
+集群包含多个服务器。任意时刻，每个服务器都处于三种状态之一： Leader 、
+<code>Follower</code> 或 <code>Candidate</code>。Raft 首先选举出一个
+Leader ，然后令其全权负责管理复制日志。正常情况下，每个集群只有一个
+Leader，其他服务器都是 Follower。</p>
+<ul>
+<li><strong>Leader</strong>：处理所有客户端请求，打包为 Entry
+后将其复制到其他服务器上，并告诉服务器何时可以安全地将 Entry
+应用到它们的状态机。</li>
+<li><strong>Follower</strong>：被动响应 Leader 和 Candidate
+的请求。如果超时未响应消息，则转为 Candidate；</li>
+<li><strong>Candidate</strong>：向其它节点发起选举投票请求，以成为
+Leader；</li>
+</ul>
+<p>下图显示了不同状态之间的迁移过程：</p>
+<p><img src="image-20221129160356757.png" alt="image-20221129160356757" style="zoom:80%;"></p>
+<p>Raft 将时间划分为任意长度的任期
+<strong>Term</strong>，如下图所示。</p>
+<p><img src="image-20221129160523060.png" alt="image-20221129160523060" style="zoom:80%;"></p>
+<p>Term 用连续的整数编号。每个 Term 都以选举开始。Term 在 Raft
+中充当<strong>逻辑时钟</strong>，允许服务器检测过时的信息。为此，每个服务器存储一个
+<code>CurrentTerm</code>
+变量，并在进行通信时交换该变量以保证一致性。一旦收到的消息中包含更新的
+Term，服务器会将 CurrentTerm 更新为较大的那个，并转换为 Follwer。</p>
+<p>基于上述讨论，Raft 将共识问题分解为以下三个相对独立的子问题。</p>
+<h3 id="leader-选举">Leader 选举</h3>
+<p>Raft 使用<strong>心跳机制</strong>来触发 Leader
+选举。每个服务器初始化为 Follwer。Leader 定期向所有 Follower 发送
+Heartbeat（特殊
+<code>AppendEntries RPC</code>，不携带日志Entry），以维护自己的权威。只要服务器收到来自
+Leader/Candidate 的有效 RPC，它就会保持 Follwer 状态；否则，如果 Follwer
+在 <strong>ElectionTimeOut</strong>
+时间内没有收到任何通信，那么它会认为没有 Leader 并发起选举。</p>
+<p>为了开始选举，Follwer 首先增加其 CurrentTerm 并转换至
+Candidate。然后它为自己投票并向集群中的每个其他服务器并行发出
+<code>RequestVote RPC</code>。这段时间内，可能有以下三种情况会发生：</p>
+<ol type="1">
+<li><p>Candidate 收到集群中同一 Term
+下<strong>多数</strong>服务器的同意回复，则成功当选
+Leader，并立即发送一轮 Heartbeat；</p>
+<blockquote>
+<p>多数规则确保最多一个 Candidate 可以赢得特定任期的选举。</p>
+</blockquote></li>
+<li><p>集群中的另一服务器当选 Leader，此时 Candidate 可能会收到
+Heartbeat/AppendEntries 消息，如果消息捎带的 Term &gt;=
+CurrentTerm，则其退为 Follwer；反之，拒绝该消息并保持 Candidate
+状态；</p></li>
+<li><p>出现分裂投票导致选举超时未成功，则重新开始选举。为了防止该情况无限重复，Raft
+使用<strong>随机 ElectionTimeOut</strong>
+来解决——这在大多数情况下只有一个服务器会首先超时。同样的，每个 Candidate
+在选举开始时重新随机其
+ElectionTimeOut，这减少了在新选举中再次出现分裂投票的可能性；</p></li>
+</ol>
+<h3 id="日志复制">日志复制</h3>
+<p>日志的组织方式如下图所示。每个日志 Entry 都存储一个命令以及 Leader
+收到该 Entry 时的任期号。每个 Entry 还有一个 Index
+标识其在日志中的位置。</p>
+<p><img src="image-20221129161622628.png" alt="image-20221129161622628" style="zoom:80%;"></p>
+<p>Raft
+日志机制能够保证不同服务器上之间日志的高度一致性。这不仅简化了系统的行为并使其更具可预测性，而且还是确保安全的重要组成部分。
+Raft 保证以下日志匹配属性：<strong>如果不同日志中的两个 Entry 具有相同的
+Index 和 Term，则它们存储相同的命令，且之前所有的 Entry
+都是相同的</strong>。</p>
+<p>但 Leader 崩溃可能会导致日志不一致，比如下图这种情况。</p>
+<p><img src="image-20221129161839040.png" alt="image-20221129161839040" style="zoom:80%;"></p>
+<p>此时需要一些机制。Raft 的做法是令 <strong>Follower 无条件服从 Leader
+的日志</strong>。使用这种机制，服务器当选 Leader
+后无需要采取任何特殊措施来恢复日志一致性，因为日志会随时间自动收敛。</p>
+<p>日志复制流程如下：</p>
+<ol type="1">
+<li><p>Leader 将每个客户端请求中包含的命令作为新 Entry
+附加到其日志中，然后向其他服务器并行发出 <code>AppendEntries RPC</code>
+以复制日志，<code>AppendEntries RPC</code> 捎带第一个新 Entry 的
+<code>PrevLogIndex</code> 和 <code>PrevLogTerm</code>；</p>
+<blockquote>
+<p>事实上 Leader 并不会每次都发送所有 Entry，而是会为每个 Follower
+维护一个 <code>nextIndex</code>，表明 Leader 将发送给该 Follower
+的下一个 Entry 的 Index。当一个节点首次当选 Leader 时，它会将所有
+<code>nextIndex</code> 值初始化为它最后一个 Entry 的下一个 Index。</p>
+</blockquote></li>
+<li><p>如果 Follwer 在其日志中没有找到
+<code>Index == PrevLogIndex &amp;&amp; Term == PrevLogTerm</code> 的
+Entry，它会拒绝该消息。收到拒绝后，Leader 减少 <code>nextIndex</code>
+并重试 <code>AppendEntries RPC</code>。最终 <code>nextIndex</code>
+将达到 Leader 和 Follower 日志匹配的点；</p>
+<blockquote>
+<p>在这样的一致性检查下，每当 <code>AppendEntries</code>
+成功返回时，Leader 就知道 Follower 的日志已与自己的日志同步。</p>
+<p>如果需要，可以优化协议以快速定位 nextIndex。例如，当拒绝
+AppendEntries 请求时，Follwer 可以包括冲突 Entry 的 Term 和日志里该 Term
+的第一个 Index，这样一来，Leader 可以绕过该 Term 中的所有冲突Entry。</p>
+</blockquote></li>
+<li><p>Follwer 通过 AppendEntries 一致性检查，删除日志中的所有冲突 Entry
+并追加 Leader 日志中的 Entry，这样一来 Follower 的日志与 Leader
+的一致，并且长久保持；</p></li>
+<li><p>被复制到多数服务器的 Entry 会被 Leader 标为
+<code>Committed</code>，Leader 将这部分 Entry Apply
+于其状态机并将该执行的结果返回给客户端。所有服务器维护一个
+<code>CommitIndex</code> 变量，表示其提交的最后一个 Entry 的索引，Leader
+会将该变量包含在将来的 AppendEntries RPC 中；</p></li>
+<li><p>一旦 Follwer 收到一个更大的 <code>CommitIndex</code>，说明有新的
+Entry 已提交，它会按序将其 Apply 于其本地状态机。</p></li>
+</ol>
+<p>日志复制机制使得只要大多数服务器正常运行，Raft
+就可以接受、复制和应用新的日志 Entry。在正常情况下，一轮 RPC 即可将新
+Entry 复制到集群的大多数，并且少数"短板"不会影响性能。</p>
+<h3 id="安全性">安全性</h3>
+<h4 id="选举约束">选举约束</h4>
+<p>Leader 最终必须存储所有 committed 的 Entry。Raft 保证所有来自之前
+Term 的 committed 的 Entry 在选举时就存在于每个新 Leader
+的日志中，无需将这些条目转移给领导者。这意味着 Entry 仅沿
+Leader-&gt;Follower 方向流动，而 Leader
+永远不会覆盖其日志中的现有条目。</p>
+<p>为此，需对选举加入这一约束——<strong>Candidate 的 LastEntry 应与
+Follower 的 LastEntry 一样新或更新，否则 Follower
+拒绝其投票申请</strong>。这样能保证当选 Leader
+的服务器日志比多数服务器新，也就包含了所有 committed 的 Entry。</p>
+<blockquote>
+<p>如果日志的 LastEntry 具有不同的 Term，则具有 Term 大的的 Entry
+更新；反之，Index 大的那个更新。</p>
+</blockquote>
+<h4 id="提交旧-entry">提交旧 Entry</h4>
+<p>Leader 知道一旦某一 Entry 存储在多数服务器上，它就会被提交。如果
+Leader 在提交条目之前崩溃，新 Leader 将尝试完成复制条目。但新 Leader
+不能立即断定上一 Term 的 Entry
+是否存储在大多数服务器上且已提交。下图说明了一种情况，其中旧 Entry
+存储在大多数服务器上，但可能被新 Leader 覆盖。</p>
+<p><img src="image-20221129231528485.png" alt="image-20221129231528485" style="zoom:80%;"></p>
+<p>为了应对这一问题，Raft 规定<strong>只提交当前 Term 的
+Entry，而不能提交旧 Term 的 Entry</strong>。一旦以这种方式提交了
+Entry，则根据日志匹配属性，所有先前的 Entry 都将间接被提交。</p>
+<blockquote>
+<p>这样一来，上图的 (c) 中尽管 <code>Term 2 Entry</code>
+已被复制到大部分服务器上，但因为 S1 的 Term 此时已变成了 4，不能提交
+<code>Term 2 Entry</code>，只有出现 (e)
+这样的情况才能间接提交。而一旦出现 (d)
+这种情况，<code>Term 2 Entry</code>
+并不会被提交，从而客户端检测到超时，后续会重新发送该命令，那么即便覆盖也不会出现问题。</p>
+</blockquote>
+<h4 id="follower-与-candidate-崩溃">Follower 与 Candidate 崩溃</h4>
+<p>如果一个 Follower/Candidate 崩溃了，那么未来发送给它的
+<code>RequestVote</code> 和 <code>AppendEntries RPC</code>
+将失败。Leader 将无限重试 RPC，一旦崩溃的服务器重新启动，则 RPC
+将成功完成。如果服务器在完成 RPC
+之后但在响应之前崩溃，那么它将在重新启动后再次收到相同的 RPC。考虑到
+Raft RPC 是<strong>幂等</strong>的，所以这不会出现问题。</p>
+<blockquote>
+<p>例如，如果 Follower 收到一个
+<code>AppendEntries RPC</code>，其中包含已存在于其日志中的
+Entry，则它会忽略这些 Entry。</p>
+</blockquote>
+<h3 id="集群成员变更">集群成员变更</h3>
+<blockquote>
+<p>这一部分在 lab 中并未体现，但在 pingCAP 训练营中有涉及。</p>
+</blockquote>
+<p>Raft 支持配置自动化更改并将其合并到 Raft 算法中。</p>
+<p>为了使配置更改机制安全，在过渡期间不能存在在同一 Term 有两个 Leader
+当选。不幸的是，任何切换配置的方法都是不安全的——不可能一次原子地切换所有服务器，因此集群在转换期间可能会分裂成两个独立的部分，如下图所示。</p>
+<p><img src="image-20221129234745344.png" alt="image-20221129234745344" style="zoom:80%;"></p>
+<p>为了确保安全，配置更改必须使用<strong>两阶段</strong>的方法。在 Raft
+中，集群首先切换到一种称为<strong>联合共识</strong>的过渡配置；一旦达到这一配置，系统就会过渡到新的配置。联合共识对新旧配置进行了结合：</p>
+<ul>
+<li>Entry 被复制到两种配置中的所有服务器；</li>
+<li>来自任一配置的任何服务器都可以充当 Leader；</li>
+<li>用于选举和提交 Entry 的协议需要来自 <strong>both</strong>
+旧配置和新配置的不同多数派。</li>
+</ul>
+<p>联合共识允许各个服务器在不同时间在配置之间转换，而不会影响安全性。此外，联合共识允许集群在整个配置更改期间继续为客户端请求提供服务。</p>
+<h2 id="日志压缩">日志压缩</h2>
+<p>实际系统中，Raft
+日志不能无限增长。需要一种机制来丢弃日志中的过时信息，避免可用性问题。</p>
+<p>这一机制就是<strong>快照</strong>(Snapshot)。下图描述了快照的基本思想。</p>
+<p><img src="image-20221130000046184.png" alt="image-20221130000046184" style="zoom:80%;"></p>
+<p>快照包含服务器当前状态，以及少量元数据：</p>
+<ul>
+<li><strong>Last Included Index</strong>：快照覆盖的日志中最后一个
+Entry（状态机 Apply 的最后一个 Entry）的 Index；</li>
+<li><strong>Last Included Term</strong>：该 Entry 的 Term。</li>
+</ul>
+<p>这些元数据用于对快照后的第一个 Entry 的 AppendEntries
+一致性检查，因为该 Entry 需要 PrevLogIndex 与
+PrevLogTerm。为了启用集群成员更改，快照还包括日志中截至 Last Included
+Index 的最新配置。一旦服务器完成写入快照，它可能会删除 Last Included
+Index 前的所有 Entry，以及任何先前的快照。</p>
+<p>每个服务器独立建立快照，且仅覆盖其日志中已提交的 Entry，但当 Leader
+因建立快照而丢弃了它需要发送给 Follower 的下一个 Entry
+时，则必须使用一个名为 <code>InstallSnapshot</code> 的新 RPC
+将其写入的最新快照发送给"短板" Follower，如下图所示。</p>
+<p><img src="image-20221130001356775.png" alt="image-20221130001356775" style="zoom:80%;"></p>
+<p>当 Follower 收到此 RPC 时：</p>
+<ol type="1">
+<li>如果 LastIncludedIndex &gt;= Last Log Index of Follower，则 Follower
+丢弃整个日志，并令其被快照覆盖；</li>
+<li>相反，快照覆盖的 Entry
+将被删除，但快照之后的条目仍然有效并且必须保留；</li>
+</ol>
+<p>虽然这种机制与 Raft
+的强领导者原则相违背，但在快照时已经达成共识，因此没有决策冲突。数据仍然只从
+Leader 流向 Follower。</p>
+<p>还有两个影响快照性能的问题：</p>
+<ol type="1">
+<li><p>服务器必须决定何时进行快照。如果快照过于频繁，则会浪费磁盘带宽和能量；反之，则可能会耗尽其存储容量，并且会增加重新启动期间重放日志所需的时间；</p>
+<blockquote>
+<p>一种简单的策略是在日志达到固定大小（以字节为单位）时建立快照。如果此大小设置为明显大于快照的预期大小，则快照的磁盘带宽开销将很小。</p>
+</blockquote></li>
+<li><p>写快照会花费大量时间；</p>
+<blockquote>
+<p>解决方案是使用<strong>写时复制技术</strong>，这样可以在不影响正在写入的快照的情况下接受新的更新。例如，使用功能数据结构构建的状态机自然支持这一点，或者操作系统的<strong>写时复制支持</strong>（例如，Linux
+上的 fork）可用于创建整个状态机的内存快照。</p>
+</blockquote></li>
+</ol>
+<h2 id="总结">总结</h2>
+<p>论文的图 2 与图 8 值得细细品味。</p>
+
+                
+            </div>
+            <hr/>
+
+            
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/MIT-6-824/">
+                                    <span class="chip bg-color">MIT 6.824</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+    <script src="/libs/share/js/social-share.min.js"></script>
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+                <div id="reward">
+    <a href="#rewardModal" class="reward-link modal-trigger btn-floating btn-medium waves-effect waves-light red">赏</a>
+
+    <!-- Modal Structure -->
+    <div id="rewardModal" class="modal">
+        <div class="modal-content">
+            <a class="close modal-close"><i class="fas fa-times"></i></a>
+            <h4 class="reward-title">你的赏识是我前进的动力</h4>
+            <div class="reward-content">
+                <div class="reward-tabs">
+                    <ul class="tabs row">
+                        <li class="tab col s6 alipay-tab waves-effect waves-light"><a href="#alipay">支付宝</a></li>
+                        <li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li>
+                    </ul>
+                    <div id="alipay">
+                        <img src="/medias/reward/alipay.jpg" class="reward-img" alt="支付宝打赏二维码">
+                    </div>
+                    <div id="wechat">
+                        <img src="/medias/reward/wechat.png" class="reward-img" alt="微信打赏二维码">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $('.tabs').tabs();
+    });
+</script>
+
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/lab/6-824lab2/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/14.jpg" class="responsive-img" alt="6.824 Lab2 RAFT">
+                        
+                        <span class="card-title">6.824 Lab2 RAFT</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            本实验要求我们实现 Raft
+算法，包括其领导人选举、日志复制、快照等关键要素。
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2022-10-06
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/lab/" class="post-category">
+                                    lab
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/MIT-6-824/">
+                        <span class="chip bg-color">MIT 6.824</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/paperreading/vmware-ft/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/20.jpg" class="responsive-img" alt="VMware-FT 论文阅读">
+                        
+                        <span class="card-title">VMware-FT 论文阅读</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            6.824 的第三篇论文是 VMware-FT(VMware-FaultTolerance)，其描述了一个提供容错虚拟机的商业企业级系统——如果主服务器(primary)发生故障，备份服务器(backup)始终可以接管。backup
+的状态
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2022-10-03
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/paperReading/" class="post-category">
+                                    paperReading
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/MIT-6-824/">
+                        <span class="chip bg-color">MIT 6.824</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+
+  <!-- 是否加载使用自带的 prismjs. -->
+  <script type="text/javascript" src="/libs/prism/prism.min.js"></script>
+
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card" style="background-color: white;">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+<script src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+    MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$', '$'], ['\\(', '\\)']]}
+    });
+</script>
+
+
+
+    <footer class="page-footer bg-color">
+    
+
+    <div class="container row center-align"
+         style="margin-bottom: 15px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            
+                <span id="year">2023-2024</span>
+            
+            <a href="/about" target="_blank">Leager</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            
+            <br>
+            
+            
+            
+                
+            
+            
+                <span id="busuanzi_container_site_pv">
+                &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
+                    <span id="busuanzi_value_site_pv" class="white-color"></span>
+            </span>
+            
+            
+                <span id="busuanzi_container_site_uv">
+                &nbsp;|&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;
+                    <span id="busuanzi_value_site_uv" class="white-color"></span>
+            </span>
+            
+            <br>
+
+            <!-- 运行天数提醒. -->
+            
+                <span id="sitetime"> Loading ...</span>
+                <script>
+                    var calcSiteTime = function () {
+                        var seconds = 1000;
+                        var minutes = seconds * 60;
+                        var hours = minutes * 60;
+                        var days = hours * 24;
+                        var years = days * 365;
+                        var today = new Date();
+                        var startYear = "2023";
+                        var startMonth = "8";
+                        var startDate = "1";
+                        var startHour = "0";
+                        var startMinute = "0";
+                        var startSecond = "0";
+                        var todayYear = today.getFullYear();
+                        var todayMonth = today.getMonth() + 1;
+                        var todayDate = today.getDate();
+                        var todayHour = today.getHours();
+                        var todayMinute = today.getMinutes();
+                        var todaySecond = today.getSeconds();
+                        var t1 = Date.UTC(startYear, startMonth, startDate, startHour, startMinute, startSecond);
+                        var t2 = Date.UTC(todayYear, todayMonth, todayDate, todayHour, todayMinute, todaySecond);
+                        var diff = t2 - t1;
+                        var diffYears = Math.floor(diff / years);
+                        var diffDays = Math.floor((diff / days) - diffYears * 365);
+
+                        // 区分是否有年份.
+                        var language = 'zh-CN';
+                        if (startYear === String(todayYear)) {
+                            document.getElementById("year").innerHTML = todayYear;
+                            var daysTip = 'This site has been running for ' + diffDays + ' days';
+                            if (language === 'zh-CN') {
+                                daysTip = '本站已运行 ' + diffDays + ' 天';
+                            } else if (language === 'zh-HK') {
+                                daysTip = '本站已運行 ' + diffDays + ' 天';
+                            }
+                            document.getElementById("sitetime").innerHTML = daysTip;
+                        } else {
+                            document.getElementById("year").innerHTML = startYear + " - " + todayYear;
+                            var yearsAndDaysTip = 'This site has been running for ' + diffYears + ' years and '
+                                + diffDays + ' days';
+                            if (language === 'zh-CN') {
+                                yearsAndDaysTip = '本站已运行 ' + diffYears + ' 年 ' + diffDays + ' 天';
+                            } else if (language === 'zh-HK') {
+                                yearsAndDaysTip = '本站已運行 ' + diffYears + ' 年 ' + diffDays + ' 天';
+                            }
+                            document.getElementById("sitetime").innerHTML = yearsAndDaysTip;
+                        }
+                    }
+
+                    calcSiteTime();
+                </script>
+            
+            <br>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link social-statis">
+    <a href="https://github.com/Leager-zju" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:1004729740@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+
+
+
+
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1004729740" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1004729740" data-position="top" data-delay="50">
+        <i class="fab fa-qq"></i>
+    </a>
+
+
+
+
+
+
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    var searchFunc = function (path, search_id, content_id) {
+        'use strict';
+        $.ajax({
+            url: path,
+            dataType: "xml",
+            success: function (xmlResponse) {
+                // get the contents from search data
+                var datas = $("entry", xmlResponse).map(function () {
+                    return {
+                        title: $("title", this).text(),
+                        content: $("content", this).text(),
+                        url: $("url", this).text()
+                    };
+                }).get();
+                var $input = document.getElementById(search_id);
+                var $resultContent = document.getElementById(content_id);
+                $input.addEventListener('input', function () {
+                    var str = '<ul class=\"search-result-list\">';
+                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                    $resultContent.innerHTML = "";
+                    if (this.value.trim().length <= 0) {
+                        return;
+                    }
+                    // perform local searching
+                    datas.forEach(function (data) {
+                        var isMatch = true;
+                        var data_title = data.title.trim().toLowerCase();
+                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
+                        var data_url = data.url;
+                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
+                        var index_title = -1;
+                        var index_content = -1;
+                        var first_occur = -1;
+                        // only match artiles with not empty titles and contents
+                        if (data_title !== '' && data_content !== '') {
+                            keywords.forEach(function (keyword, i) {
+                                index_title = data_title.indexOf(keyword);
+                                index_content = data_content.indexOf(keyword);
+                                if (index_title < 0 && index_content < 0) {
+                                    isMatch = false;
+                                } else {
+                                    if (index_content < 0) {
+                                        index_content = 0;
+                                    }
+                                    if (i === 0) {
+                                        first_occur = index_content;
+                                    }
+                                }
+                            });
+                        }
+                        // show search results
+                        if (isMatch) {
+                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
+                            var content = data.content.trim().replace(/<[^>]+>/g, "");
+                            if (first_occur >= 0) {
+                                // cut out 100 characters
+                                var start = first_occur - 20;
+                                var end = first_occur + 80;
+                                if (start < 0) {
+                                    start = 0;
+                                }
+                                if (start === 0) {
+                                    end = 100;
+                                }
+                                if (end > content.length) {
+                                    end = content.length;
+                                }
+                                var match_content = content.substr(start, end);
+                                // highlight all keywords
+                                keywords.forEach(function (keyword) {
+                                    var regS = new RegExp(keyword, "gi");
+                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
+                                });
+
+                                str += "<p class=\"search-result\">" + match_content + "...</p>"
+                            }
+                            str += "</li>";
+                        }
+                    });
+                    str += "</ul>";
+                    $resultContent.innerHTML = str;
+                });
+            }
+        });
+    };
+
+    searchFunc('/search.xml', 'searchInput', 'searchResult');
+});
+</script>
+
+    <!-- 白天和黑夜主题 -->
+<div class="stars-con">
+    <div id="stars"></div>
+    <div id="stars2"></div>
+    <div id="stars3"></div>  
+</div>
+
+<script>
+    function switchNightMode() {
+        $('<div class="Cuteen_DarkSky"><div class="Cuteen_DarkPlanet"></div></div>').appendTo($('body')),
+        setTimeout(function () {
+            $('body').hasClass('DarkMode') 
+            ? ($('body').removeClass('DarkMode'), localStorage.setItem('isDark', '0'), $('#sum-moon-icon').removeClass("fa-sun").addClass('fa-moon')) 
+            : ($('body').addClass('DarkMode'), localStorage.setItem('isDark', '1'), $('#sum-moon-icon').addClass("fa-sun").removeClass('fa-moon')),
+            
+            setTimeout(function () {
+            $('.Cuteen_DarkSky').fadeOut(1e3, function () {
+                $(this).remove()
+            })
+            }, 2e3)
+        })
+    }
+</script>
+
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    
+
+    
+    
+    
+        
+        <script type="text/javascript">
+            // 只在桌面版网页启用特效
+            var windowWidth = $(window).width();
+            if (windowWidth > 768) {
+                document.write('<script type="text/javascript" src="/libs/others/sakura.js"><\/script>');
+            }
+        </script>
+    
+
+    <!-- 雪花特效 -->
+    
+
+    <!-- 鼠标星星特效 -->
+    
+
+     
+        <script src="https://ssl.captcha.qq.com/TCaptcha.js"></script>
+        <script src="/libs/others/TencentCaptcha.js"></script>
+        <button id="TencentCaptcha" data-appid="xxxxxxxxxx" data-cbfn="callback" type="button" hidden></button>
+    
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    <script src="/libs/others/clicklove.js" async="async"></script>
+    
+    
+    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
+    
+
+    
+
+    
+
+    <!--腾讯兔小巢-->
+    
+    
+
+    
+
+    
+
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+</body>
+
+</html>

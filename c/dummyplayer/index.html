@@ -1,0 +1,1457 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="从零开始 の 练手项目, 没什么看头的地方">
+    <meta name="description" content="运行环境：VScode + WSL(Ubuntu 22.04 LTS)
+&amp;gt;&amp;gt;&amp;gt;
+Github 仓库&amp;lt;&amp;lt;&amp;lt;
+
+
+实现一个命令行工具模拟游戏玩家。每个玩家存储数据结构 - 昵称 - 金币 -
+道具背包（支持多">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+    <title>从零开始 の 练手项目 | 没什么看头的地方</title>
+    <link rel="icon" type="image/png" href="/btt.png">
+    
+    <style>
+        body{
+            background-image: url(https://cdn.jsdelivr.net/gh/Tokisaki-Galaxy/res/site/medias/background.jpg);
+            background-repeat:no-repeat;
+            background-size: 100% 100%;
+            background-attachment:fixed;
+        }
+    </style>
+
+
+
+    <!-- bg-cover style     -->
+
+
+
+<link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+<link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+<link rel="stylesheet" type="text/css" href="/css/matery.css">
+<link rel="stylesheet" type="text/css" href="/css/my.css">
+<link rel="stylesheet" type="text/css" href="/css/dark.css" media="none" onload="if(media!='all')media='all'">
+
+
+
+
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+    <link rel="stylesheet" href="/css/post.css">
+
+
+
+
+    
+        <link rel="stylesheet" type="text/css" href="/css/reward.css">
+    
+
+
+
+    <script src="/libs/jquery/jquery-3.6.0.min.js"></script>
+
+<meta name="generator" content="Hexo 6.3.0">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/comment_bg.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">没什么看头的地方</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/archives" class="waves-effect waves-light">
+      
+      <i class="fas fa-archive" style="zoom: 0.6;"></i>
+      
+      <span>归档</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/contact" class="waves-effect waves-light">
+      
+      <i class="fas fa-comments" style="zoom: 0.6;"></i>
+      
+      <span>留言板</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/friends" class="waves-effect waves-light">
+      
+      <i class="fas fa-address-book" style="zoom: 0.6;"></i>
+      
+      <span>友情链接</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+  <li>
+    <a href="javascript:;" class="waves-effect waves-light" onclick="switchNightMode()" title="深色/浅色模式" >
+      <i id="sum-moon-icon" class="fas fa-sun" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/comment_bg.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">没什么看头的地方</div>
+        <div class="logo-desc">
+            
+            【数据删除】
+            
+        </div>
+    </div>
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/archives" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-archive"></i>
+			
+			归档
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/contact" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-comments"></i>
+			
+			留言板
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/friends" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-address-book"></i>
+			
+			友情链接
+		</a>
+          
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/blinkfox/hexo-theme-matery" class="waves-effect waves-light" target="_blank">
+                <i class="fab fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+            <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/blinkfox/hexo-theme-matery" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+   data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+        
+    </nav>
+
+</header>
+
+    
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/20.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">从零开始 の 练手项目</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/Project/">
+                                <span class="chip bg-color">Project</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/c/" class="post-category">
+                                c++
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2024-04-25
+                </div>
+                
+
+                
+
+                
+
+                
+
+                
+            </div>
+        </div>
+        <hr class="clearfix">
+
+        
+        <!-- 是否加载使用自带的 prismjs. -->
+        <link rel="stylesheet" href="/libs/prism/prism.min.css">
+        
+
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <p>运行环境：VScode + WSL(Ubuntu 22.04 LTS)</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/Leager-zju/DummyPlayer">&gt;&gt;&gt;
+Github 仓库&lt;&lt;&lt;</a></p>
+<span id="more"></span>
+<blockquote>
+<p>实现一个命令行工具模拟游戏玩家。每个玩家存储数据结构 - 昵称 - 金币 -
+道具背包（支持多个道具, 用 <code>itemid</code>
+代表道具类型，<code>itemcnt</code> 代表数量）</p>
+<p>支持以下命令</p>
+<ul>
+<li>login &lt;用户账号 id&gt; 如存在，从磁盘读取数据，如果不存，创建用户</li>
+<li>set-name <name></name></li>
+<li>add-money 增加金币</li>
+<li>add-item <item-id> <item-cnt> 增加道具</item-cnt></item-id></li>
+<li>sub-item <item-id> <item-cnt> 减少道具</item-cnt></item-id></li>
+<li>logout 登出，并把数据写入磁盘</li>
+</ul>
+<p>要求</p>
+<ul>
+<li>使用 git 进行源代码管理</li>
+<li>使用 c++ 语言</li>
+<li>代码在 linux 上运行通过</li>
+<li>使用 protobuf
+<ul>
+<li>内存数据结构，使用 protobuf 生成的代码</li>
+<li>保存到磁盘使用 protobuf 序列化后的数据</li>
+</ul></li>
+<li>使用 cmake 构建</li>
+<li>使用 gdb 调试、查看运行中的数据</li>
+<li>日志输出操作记录</li>
+<li>书写脚本，通过日志统计一下信息
+<ul>
+<li>登录的人数、次数</li>
+<li>每个道具的增加和减少的总数</li>
+</ul></li>
+</ul>
+</blockquote>
+<h2 id="环境搭建">环境搭建</h2>
+<h3 id="安装-wsl">安装 WSL</h3>
+<p>windows 下 <code>以管理员身份运行</code> 命令行，键入
+<code>wsl --install</code> 等待安装完成。</p>
+<p>设置用户 <code>id</code> 与 <code>passwd</code> 后用 VScode
+<code>连接到 WSL</code>。</p>
+<h3 id="github-public-key">Github public-key</h3>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ ssh-keygen <span class="token parameter variable">-t</span> rsa <span class="token parameter variable">-C</span> <span class="token string">"your@email.name"</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>一路回车，会在 <code>~/.ssh/</code> 下创建一个名为
+<code>id_rsa.pub</code> 的文件，将里面的内容拷贝到
+<code>Github -&gt; Settings -&gt; SSH and GPG keys -&gt; New SSH key</code>
+里，之后就可以实现<strong>免密</strong>操作。</p>
+<h3 id="更改镜像源">更改镜像源</h3>
+<p>默认的源访问速度过慢，可以用国内镜像源代替加速
+<code>apt-get install</code>。</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">sudo</span> <span class="token function">cp</span> /etc/apt/sources.list /etc/apt/sources.list.bak <span class="token comment"># 备份</span>
+$ <span class="token function">sudo</span> <span class="token function">vim</span> /etc/apt/sources.list<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>键入 <code>gg</code>（光标移到首行）+ <code>d</code>（删除选中内容）+
+<code>G</code>（光标移到最后一行）进行<strong>全选删除</strong>。</p>
+<p>键入 <code>i</code> 进入编辑模式，将下面内容拷贝粘贴后，键入
+<code>Esc</code> + <code>:wq</code> 保存退出。</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 清华源</span>
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal main restricted universe multiverse
+<span class="token comment"># deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal main restricted universe multiverse</span>
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-updates main restricted universe multiverse
+<span class="token comment"># deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-updates main restricted universe multiverse</span>
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-backports main restricted universe multiverse
+<span class="token comment"># deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-backports main restricted universe multiverse</span>
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-security main restricted universe multiverse
+<span class="token comment"># deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-security main restricted universe multiverse</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>最后更新 <code>apt-get</code></p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">sudo</span> <span class="token function">apt-get</span> update
+$ <span class="token function">sudo</span> <span class="token function">apt-get</span> upgrade<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<h3 id="工具安装">工具安装</h3>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">sudo</span> <span class="token function">apt-get</span> <span class="token function">install</span> g++
+$ <span class="token function">sudo</span> <span class="token function">apt-get</span> <span class="token function">install</span> cmake
+$ <span class="token function">sudo</span> <span class="token function">apt-get</span> <span class="token function">install</span> build-essential<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<blockquote>
+<p>这一步可能会出现因换源导致的如下报错。</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ GPG error: The following signatures couldn't be verified because the public key is not available: NO_PUBKEY <span class="token punctuation">(</span>一个 <span class="token number">16</span> 位十六进制数<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>解决方案为添加相应的 PUBKEY。</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">sudo</span> gpg <span class="token parameter variable">--keyserver</span> keyserver.ubuntu.com <span class="token parameter variable">--recv</span> <span class="token punctuation">(</span>上面的那个 PUBKEY<span class="token punctuation">)</span>
+$ <span class="token function">sudo</span> gpg <span class="token parameter variable">--export</span> <span class="token parameter variable">--armor</span> <span class="token punctuation">(</span>上面的那个 PUBKEY<span class="token punctuation">)</span> <span class="token operator">|</span> <span class="token function">sudo</span> <span class="token function">tee</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>之后再进行 <code>apt-get</code> 的
+<code>update</code>/<code>upgrade</code>。</p>
+</blockquote>
+<h3 id="建仓">建仓</h3>
+<p>在 Github 上 <code>Repositories -&gt; New</code>
+一个空仓库，执行下面的语句。</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">git</span> clone git@github.com:Your/Repository.git foo
+$ <span class="token builtin class-name">cd</span> foo
+$ code <span class="token builtin class-name">.</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<h2 id="项目编写">项目编写</h2>
+<p>在 VScode 下键入 <code>ctrl + shift + p</code>，输入
+<code>cmake</code>，选择
+<code>CMake: Quick Start</code>，指定之前安装好的
+<code>g++</code>，输入项目名，选择 <code>C++</code> 与
+<code>Executable</code>（因人而异），就会在当前目录下生成以下文件：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">├── build
+│    └── <span class="token punctuation">..</span>.
+├── main.cpp
+└── CMakeLists.txt<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>至此一个基本的结构就已经完成了。</p>
+<h3 id="修改-cmakelists.txt">修改 CMakeLists.txt</h3>
+<p>对于一个项目而言，我们会希望在根目录下设置两个文件夹
+<code>src/</code> 和 <code>include/</code>，分别用于存放
+<code>.cpp</code> 文件和 <code>.h</code>
+文件，那么修改后的目录结构应该长这样：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">├── build
+│    └── <span class="token punctuation">..</span>.
+├── include
+│    └── <span class="token punctuation">..</span>.
+├── src
+│    ├── main.cpp
+│    └── <span class="token punctuation">..</span>.
+└── CMakeLists.txt<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>此时再 <code>cd build &amp;&amp; cmake ..</code> 会报错，这是因为
+<code>CMakeLists.txt</code> 找不到相应文件了。默认生成的
+<code>CMakeLists.txt</code> 长下面这样：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">cmake_minimum_required<span class="token punctuation">(</span>VERSION <span class="token number">3.0</span>.0<span class="token punctuation">)</span>       <span class="token comment"># 指定 cmake 最低版本</span>
+project<span class="token punctuation">(</span>test VERSION <span class="token number">0.1</span>.0 LANGUAGES C CXX<span class="token punctuation">)</span> <span class="token comment"># 指定项目名与语言</span>
+
+include<span class="token punctuation">(</span>CTest<span class="token punctuation">)</span>
+enable_testing<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+add_executable<span class="token punctuation">(</span>test main.cpp<span class="token punctuation">)</span>
+
+set<span class="token punctuation">(</span>CPACK_PROJECT_NAME <span class="token variable">${PROJECT_NAME}</span><span class="token punctuation">)</span>
+set<span class="token punctuation">(</span>CPACK_PROJECT_VERSION <span class="token variable">${PROJECT_VERSION}</span><span class="token punctuation">)</span>
+include<span class="token punctuation">(</span>CPack<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h4 id="设置链接文件目录">设置链接文件目录</h4>
+<p>只需要关注 <code>add_executable(test main.cpp)</code>
+这一行即可，这句话的意思是将 <code>main.cpp</code> 生成的目标文件
+<code>main.o</code> 链接到最终的可执行文件 <code>test</code>
+里，默认是在 <code>CMakeLists.txt</code>
+同级目录下查找，因为我们修改了项目的文件结构，CMakeLists
+找不到就报错了。</p>
+<p>并且由于这里加了其它的 <code>.cpp</code>/<code>.h</code>
+文件，也需要将其纳入可执行文件的链接范围内。</p>
+<p>应当改为</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token function">set</span><span class="token punctuation">(</span>SRC_DIR $<span class="token punctuation">{</span>CMAKE_CURRENT_SOURCE_DIR<span class="token punctuation">}</span><span class="token operator">/</span>src<span class="token punctuation">)</span>
+<span class="token function">file</span><span class="token punctuation">(</span>GLOB_RECURSE SRC_FILES
+    <span class="token string">"${SRC_DIR}/*/*.c*"</span>
+    <span class="token string">"${SRC_DIR}/*.c*"</span>
+
+    <span class="token string">"${SRC_DIR}/*/*.h*"</span>
+    <span class="token string">"${SRC_DIR}/*.h*"</span>
+<span class="token punctuation">)</span>
+<span class="token function">add_executable</span><span class="token punctuation">(</span>test $<span class="token punctuation">{</span>SRC_FILES<span class="token punctuation">}</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>其中</p>
+<ul>
+<li><code>CMAKE_CURRENT_SOURCE_DIR</code> 宏是当前
+<code>CMakeLists.txt</code> 所在目录；</li>
+<li><code>file(GLOB_RECURSE SRC_FILES ...)</code>
+是指遍历目录下所有正则匹配的文件，并将其加到 <code>SRC_FILES</code>
+集合中；</li>
+</ul>
+<h4 id="设置头文件目录">设置头文件目录</h4>
+<p>还不够，还要让编译器知道 <code>#include</code> 中的 <code>.h</code>
+文件在哪，这就要用到其 <code>include_directories()</code>
+命令，设置头文件所在（根）路径，所有 <code>#include</code>
+预处理命令都会在这个路径下查找。</p>
+<h4 id="编译选项">编译选项</h4>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token function">set</span><span class="token punctuation">(</span>CMAKE_CXX_STANDARD <span class="token number">17</span><span class="token punctuation">)</span>
+<span class="token function">set</span><span class="token punctuation">(</span>CMAKE_BUILD_TYPE Release<span class="token punctuation">)</span>
+<span class="token function">target_compile_options</span><span class="token punctuation">(</span>dummyplayer PUBLIC <span class="token operator">-</span>Wall <span class="token operator">-</span>Werror <span class="token operator">-</span>g<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<h4 id="可执行文件输出路径">可执行文件输出路径</h4>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token function">set</span><span class="token punctuation">(</span>EXECUTABLE_OUTPUT_PATH $<span class="token punctuation">{</span>CMAKE_CURRENT_SOURCE_DIR<span class="token punctuation">}</span><span class="token operator">/</span>build<span class="token operator">/</span>bin<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<h3 id="引入-protobuf">引入 protobuf</h3>
+<h4 id="安装-protoc-编译器">安装 protoc 编译器</h4>
+<p>在<a target="_blank" rel="noopener" href="https://github.com/protocolbuffers/protobuf/releases/latest">这个页面</a>查看最新版本</p>
+<blockquote>
+<p>此时此刻为
+<code>https://github.com/protocolbuffers/protobuf/releases/download/v26.1/protoc-26.1-linux-x86_64.zip</code>。</p>
+</blockquote>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">wget</span> https://github.com/protocolbuffers/protobuf/releases/download/v26.1/protoc-26.1-linux-x86_64.zip
+$ <span class="token function">unzip</span> protoc-26.1-linux-x86_64.zip
+$ <span class="token function">sudo</span> <span class="token function">cp</span> path/to/protoc/bin/protoc /usr/bin/
+$ <span class="token function">sudo</span> <span class="token function">cp</span> <span class="token parameter variable">-r</span> path/to/protoc/include/ /usr/include/<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>通过 <code>protoc --version</code> 检查是否成功。</p>
+<h4 id="引入-protocol-buffers-库">引入 Protocol Buffers 库</h4>
+<p>通过如下命令安装</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">sudo</span> <span class="token function">apt-get</span> <span class="token function">install</span> protobuf-compiler libprotobuf-dev<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>然后在 <code>CMakeLists.txt</code> 中进行如下修改</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token function">find_package</span><span class="token punctuation">(</span>Protobuf REQUIRED<span class="token punctuation">)</span>
+<span class="token function">include_directories</span><span class="token punctuation">(</span>
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+    $<span class="token punctuation">{</span>PROTOBUF_INCLUDE_DIRS<span class="token punctuation">}</span>
+<span class="token punctuation">)</span>
+<span class="token function">target_link_libraries</span><span class="token punctuation">(</span>
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+    $<span class="token punctuation">{</span>PROTOBUF_LIBRARIES<span class="token punctuation">}</span>
+<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h4 id="编写-.proto">编写 .proto</h4>
+<pre class="line-numbers language-protobuf" data-language="protobuf"><code class="language-protobuf"><span class="token keyword">syntax</span> <span class="token operator">=</span> <span class="token string">"proto3"</span><span class="token punctuation">;</span> <span class="token comment">// 表示用 protobuf 3 的语法</span>
+
+<span class="token keyword">package</span> test<span class="token punctuation">;</span>      <span class="token comment">// 被编译成 .cpp 后就是下面各个结构体的 namespace</span>
+
+<span class="token keyword">message</span> <span class="token class-name">Users</span> <span class="token punctuation">{</span>
+    <span class="token keyword">repeated</span> <span class="token builtin">string</span> id <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span> <span class="token comment">// repeated 表示字段可重复，用于实现数组</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">message</span> <span class="token class-name">Player</span> <span class="token punctuation">{</span>
+    <span class="token builtin">string</span> id <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>               <span class="token comment">// 等号后面为该字段的唯一标识符，同一 message 中不能重复</span>
+    <span class="token builtin">string</span> name <span class="token operator">=</span> <span class="token number">2</span><span class="token punctuation">;</span>
+    <span class="token builtin">int32</span> money <span class="token operator">=</span> <span class="token number">3</span><span class="token punctuation">;</span>
+    <span class="token map class-name">map<span class="token punctuation">&lt;</span><span class="token builtin">int32</span><span class="token punctuation">,</span> <span class="token builtin">int32</span><span class="token punctuation">&gt;</span></span> items <span class="token operator">=</span> <span class="token number">4</span><span class="token punctuation">;</span> <span class="token comment">// 键值对类型</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h4 id="编译-.proto">编译 .proto</h4>
+<p>使用之前下载好的 <code>protoc</code> 来编译 <code>.proto</code>
+文件</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ protoc <span class="token parameter variable">-I</span><span class="token operator">=</span><span class="token variable">$SRC_DIR</span> <span class="token parameter variable">--cpp_out</span><span class="token operator">=</span><span class="token variable">$DST_DIR</span> <span class="token variable">$SRC_DIR</span>/xx.proto<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>其中，<code>$SRC_DIR</code> 是 <code>.proto</code>
+所在目录，<code>$DST_DIR</code> 是生成代码的目标目录。会在
+<code>$DST_DIR</code> 下生成两个文件 <code>xx.pb.cc</code> 和
+<code>xx.pb.h</code>，为了调用相应数据结构，需要将 <code>$DST_DIR</code>
+在 CMake 里加到 <code>include_directories</code> 里。</p>
+<h3 id="利用-protobuf-进行序列化反序列化与文件读写">利用 protobuf
+进行序列化/反序列化与文件读写</h3>
+<p>编译得到的 C++ 源码里为我们提供了以下两个函数</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">bool</span> <span class="token function">ParseFromIstream</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span>istream<span class="token operator">*</span> input<span class="token punctuation">)</span><span class="token punctuation">;</span>
+std<span class="token double-colon punctuation">::</span>string <span class="token function">SerializeAsString</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>配合 C++ 库 <code>&lt;fstream&gt;</code> 中的
+<code>ifstream</code>/<code>ofstream</code> 就能实现 protobuf
+与磁盘的交互。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token comment">// 读取文本并反序列化为结构体</span>
+std<span class="token double-colon punctuation">::</span>ifstream <span class="token function">fread</span><span class="token punctuation">(</span><span class="token string">"file/name"</span><span class="token punctuation">,</span> std<span class="token double-colon punctuation">::</span>ios<span class="token double-colon punctuation">::</span>in<span class="token punctuation">)</span><span class="token punctuation">;</span>
+player_<span class="token punctuation">.</span><span class="token function">ParseFromIstream</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>fread<span class="token punctuation">)</span><span class="token punctuation">;</span>
+fread<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// 将结构体序列化到文件中</span>
+std<span class="token double-colon punctuation">::</span>ofstream <span class="token function">fwrite</span><span class="token punctuation">(</span><span class="token string">"file/name"</span><span class="token punctuation">,</span> std<span class="token double-colon punctuation">::</span>ios<span class="token double-colon punctuation">::</span>trunc<span class="token punctuation">)</span><span class="token punctuation">;</span>
+fwrite <span class="token operator">&lt;&lt;</span> player_<span class="token punctuation">.</span><span class="token function">SerializeAsString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+fwrite<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="日志输出">日志输出</h3>
+<p>基本思路是在程序启动时用 <code>std::ofstream</code>
+打开日志文件，每次调用 <code>log()</code> 时以
+<code>std::ios::app</code>
+方式追加写入。为了提高泛用性，可以用参数包来作为输入。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">T</span><span class="token punctuation">,</span> <span class="token keyword">class</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>Args<span class="token operator">&gt;</span>
+<span class="token keyword">void</span> <span class="token function">log</span><span class="token punctuation">(</span>T<span class="token operator">&amp;&amp;</span> first<span class="token punctuation">,</span> Args<span class="token operator">&amp;&amp;</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>args<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    logWrite <span class="token operator">&lt;&lt;</span> first <span class="token operator">&lt;&lt;</span> <span class="token string">" "</span><span class="token punctuation">;</span>
+    <span class="token function">log</span><span class="token punctuation">(</span>args<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">T</span><span class="token operator">&gt;</span>
+<span class="token keyword">void</span> <span class="token function">log</span><span class="token punctuation">(</span>T<span class="token operator">&amp;&amp;</span> arg<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    logWrite <span class="token operator">&lt;&lt;</span> arg <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>用宏可以在不降低开发效率的同时，输出更多可用信息</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">LOG_ENABLED</span> <span class="token expression"><span class="token number">1</span></span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">HEADER</span> <span class="token expression"><span class="token function">header</span><span class="token punctuation">(</span><span class="token constant">__FILE__</span><span class="token punctuation">,</span> <span class="token constant">__LINE__</span><span class="token punctuation">)</span></span></span>
+
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">if</span> <span class="token expression">LOG_ENABLED</span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name function">LOG</span><span class="token expression"><span class="token punctuation">(</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span> <span class="token function">log</span><span class="token punctuation">(</span>HEADER<span class="token punctuation">,</span> __VA_ARGS__<span class="token punctuation">)</span></span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">else</span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name function">LOG</span><span class="token expression"><span class="token punctuation">(</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span></span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">endif</span></span>
+
+<span class="token keyword">inline</span> std<span class="token double-colon punctuation">::</span>string <span class="token function">extractFileName</span><span class="token punctuation">(</span><span class="token keyword">const</span> std<span class="token double-colon punctuation">::</span>string<span class="token operator">&amp;</span> filePath<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> filePath<span class="token punctuation">.</span><span class="token function">substr</span><span class="token punctuation">(</span>filePath<span class="token punctuation">.</span><span class="token function">find_last_of</span><span class="token punctuation">(</span><span class="token string">"/\\"</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">inline</span> std<span class="token double-colon punctuation">::</span>string <span class="token function">header</span><span class="token punctuation">(</span><span class="token keyword">const</span> std<span class="token double-colon punctuation">::</span>string<span class="token operator">&amp;</span> filename<span class="token punctuation">,</span> <span class="token keyword">int</span> line<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token string">"["</span> <span class="token operator">+</span> <span class="token function">extractFileName</span><span class="token punctuation">(</span>filename<span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token string">":"</span> <span class="token operator">+</span> std<span class="token double-colon punctuation">::</span><span class="token function">to_string</span><span class="token punctuation">(</span>line<span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token string">"]"</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="脚本统计信息">脚本统计信息</h3>
+<p>这里用了 <code>awk</code>
+这个大杀器，用下来感觉它是为这一需求量身定制的。通过
+<code>pattern { command }</code> 的语法，可以对于符合
+<code>pattern</code> 的文本行，应用相应的操作。</p>
+<p>比如我的日志输出内容是这样的</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token number">10</span><span class="token operator">:</span><span class="token number">26</span><span class="token operator">:</span><span class="token number">30</span> <span class="token punctuation">[</span>controller<span class="token punctuation">.</span>cpp<span class="token operator">:</span><span class="token number">114</span><span class="token punctuation">]</span> log<span class="token operator">-</span>in with account <span class="token number">123</span>
+<span class="token number">10</span><span class="token operator">:</span><span class="token number">26</span><span class="token operator">:</span><span class="token number">30</span> <span class="token punctuation">[</span>controller<span class="token punctuation">.</span>cpp<span class="token operator">:</span><span class="token number">122</span><span class="token punctuation">]</span> set<span class="token operator">-</span>name to user
+<span class="token number">10</span><span class="token operator">:</span><span class="token number">26</span><span class="token operator">:</span><span class="token number">30</span> <span class="token punctuation">[</span>controller<span class="token punctuation">.</span>cpp<span class="token operator">:</span><span class="token number">141</span><span class="token punctuation">]</span> add<span class="token operator">-</span>money <span class="token keyword">for</span> count <span class="token number">10</span>
+<span class="token number">10</span><span class="token operator">:</span><span class="token number">26</span><span class="token operator">:</span><span class="token number">30</span> <span class="token punctuation">[</span>controller<span class="token punctuation">.</span>cpp<span class="token operator">:</span><span class="token number">149</span><span class="token punctuation">]</span> get<span class="token operator">-</span>money
+<span class="token number">10</span><span class="token operator">:</span><span class="token number">26</span><span class="token operator">:</span><span class="token number">30</span> <span class="token punctuation">[</span>controller<span class="token punctuation">.</span>cpp<span class="token operator">:</span><span class="token number">163</span><span class="token punctuation">]</span> add<span class="token operator">-</span>item <span class="token number">1</span> <span class="token keyword">for</span> count <span class="token number">1</span>
+<span class="token number">10</span><span class="token operator">:</span><span class="token number">26</span><span class="token operator">:</span><span class="token number">30</span> <span class="token punctuation">[</span>controller<span class="token punctuation">.</span>cpp<span class="token operator">:</span><span class="token number">163</span><span class="token punctuation">]</span> add<span class="token operator">-</span>item <span class="token number">2</span> <span class="token keyword">for</span> count <span class="token number">1</span>
+<span class="token number">10</span><span class="token operator">:</span><span class="token number">26</span><span class="token operator">:</span><span class="token number">30</span> <span class="token punctuation">[</span>controller<span class="token punctuation">.</span>cpp<span class="token operator">:</span><span class="token number">163</span><span class="token punctuation">]</span> add<span class="token operator">-</span>item <span class="token number">3</span> <span class="token keyword">for</span> count <span class="token number">1</span>
+<span class="token number">10</span><span class="token operator">:</span><span class="token number">26</span><span class="token operator">:</span><span class="token number">30</span> <span class="token punctuation">[</span>controller<span class="token punctuation">.</span>cpp<span class="token operator">:</span><span class="token number">177</span><span class="token punctuation">]</span> sub<span class="token operator">-</span>item <span class="token number">1</span> <span class="token keyword">for</span> count <span class="token number">1</span>
+<span class="token number">10</span><span class="token operator">:</span><span class="token number">26</span><span class="token operator">:</span><span class="token number">30</span> <span class="token punctuation">[</span>controller<span class="token punctuation">.</span>cpp<span class="token operator">:</span><span class="token number">196</span><span class="token punctuation">]</span> log<span class="token operator">-</span>out
+<span class="token number">10</span><span class="token operator">:</span><span class="token number">26</span><span class="token operator">:</span><span class="token number">30</span> <span class="token punctuation">[</span>controller<span class="token punctuation">.</span>cpp<span class="token operator">:</span><span class="token number">208</span><span class="token punctuation">]</span> quit<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>则可以用以下 awk 脚本来处理</p>
+<pre class="line-numbers language-awk" data-language="awk"><code class="language-awk"><span class="token variable">$3</span> <span class="token operator">~</span> <span class="token regex">/log-in/</span> <span class="token punctuation">{</span>     <span class="token comment"># $3 表示对每一行用空格（也可以用 -F 指定分隔符）进行 split 后的第三列（awk 的列索引从 1 开始），~ 表示匹配，!~ 表示不匹配，模式用两个 / 包裹</span>
+    ids<span class="token punctuation">[</span><span class="token variable">$6</span><span class="token punctuation">]</span> <span class="token operator">+=</span> <span class="token number">1</span>    <span class="token comment"># 全局有效</span>
+<span class="token punctuation">}</span>
+<span class="token variable">$3</span> <span class="token operator">~</span> <span class="token regex">/add-item/</span> <span class="token punctuation">{</span>
+    count<span class="token punctuation">[</span><span class="token variable">$4</span><span class="token punctuation">]</span> <span class="token operator">+=</span> <span class="token variable">$7</span>
+<span class="token punctuation">}</span>
+<span class="token variable">$3</span> <span class="token operator">~</span> <span class="token regex">/sub-item/</span> <span class="token punctuation">{</span>
+    count<span class="token punctuation">[</span><span class="token variable">$4</span><span class="token punctuation">]</span> <span class="token operator">-=</span> <span class="token variable">$7</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">END</span> <span class="token punctuation">{</span> <span class="token comment"># 表示将之后的命令在所有匹配项检查完后执行</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span>id <span class="token keyword">in</span> ids<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">print</span> <span class="token string">"user"</span><span class="token punctuation">,</span> id<span class="token punctuation">,</span> <span class="token string">"log in"</span><span class="token punctuation">,</span> ids<span class="token punctuation">[</span>id<span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token string">"times"</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span>item <span class="token keyword">in</span> count<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        c <span class="token operator">=</span> count<span class="token punctuation">[</span>item<span class="token punctuation">]</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>c <span class="token operator">&gt;</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">print</span> <span class="token string">"item"</span><span class="token punctuation">,</span> item<span class="token punctuation">,</span> <span class="token string">"added"</span><span class="token punctuation">,</span> c<span class="token punctuation">,</span> <span class="token string">"times"</span>
+        <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>c <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">print</span> <span class="token string">"item"</span><span class="token punctuation">,</span> item<span class="token punctuation">,</span> <span class="token string">"decreased"</span><span class="token punctuation">,</span> c<span class="token punctuation">,</span> <span class="token string">"times"</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>执行下面语句，得到相应输出</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">awk</span> <span class="token parameter variable">-f</span> path/to/awk path/to/log <span class="token comment"># -f 指定脚本所在文件，然后单独跟待处理的文件</span>
+
+<span class="token comment"># output:</span>
+<span class="token comment"># user 123 log in 1 times</span>
+<span class="token comment"># item 2 added 1 times</span>
+<span class="token comment"># item 3 added 1 times</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="提高开发效率">提高开发效率</h2>
+<h3 id="使用-clangd-代替-c-intellisense">使用 Clangd 代替 C++
+Intellisense</h3>
+<blockquote>
+<p>后者就是一坨屎。</p>
+</blockquote>
+<p>首先 <code>sudo apt-get install clangd</code>，会在
+<code>/usr/bin/</code> 下进行程序的安装。</p>
+<p>接着在 VScode 的应用市场搜索 <code>clangd</code> 插件并安装。</p>
+<p>键入 <code>ctrl + ,</code> 进入用户设置，右上角
+<code>打开设置(json)</code>，添加如下设置：</p>
+<pre class="line-numbers language-json" data-language="json"><code class="language-json"><span class="token punctuation">{</span>
+    ...
+    <span class="token property">"clangd.path"</span><span class="token operator">:</span> <span class="token string">"/usr/bin/clangd"</span><span class="token punctuation">,</span>
+    <span class="token property">"clangd.arguments"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+        <span class="token string">"--all-scopes-completion"</span><span class="token punctuation">,</span>
+        <span class="token string">"--background-index"</span><span class="token punctuation">,</span>
+        <span class="token string">"--clang-tidy"</span><span class="token punctuation">,</span>
+        <span class="token string">"--completion-parse=auto"</span><span class="token punctuation">,</span>
+        <span class="token string">"--completion-style=bundled"</span><span class="token punctuation">,</span>
+        <span class="token string">"--enable-config"</span><span class="token punctuation">,</span>
+        <span class="token string">"--fallback-style=Google"</span><span class="token punctuation">,</span>
+        <span class="token string">"--function-arg-placeholders=false"</span><span class="token punctuation">,</span>
+        <span class="token string">"--header-insertion-decorators"</span><span class="token punctuation">,</span>
+        <span class="token string">"--header-insertion=never"</span><span class="token punctuation">,</span>
+        <span class="token string">"--log=verbose"</span><span class="token punctuation">,</span>
+        <span class="token string">"--pch-storage=memory"</span><span class="token punctuation">,</span>
+        <span class="token string">"--pretty"</span><span class="token punctuation">,</span>
+        <span class="token string">"--ranking-model=decision_forest"</span><span class="token punctuation">,</span>
+        <span class="token string">"-j=12"</span><span class="token punctuation">,</span>
+        <span class="token string">"--compile-commands-dir=${workspaceFolder}/build"</span>
+    <span class="token punctuation">]</span><span class="token punctuation">,</span>
+    ...
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>并禁用 <code>C/C++</code> 插件的
+<code>Intellisense</code>，具体做法是 <code>ctrl + ,</code> 搜索
+<code>intelli sense</code>，将 <code>C_Cpp: Intelli Sense Engine</code>
+项改为 <code>disabled</code>。</p>
+<p><code>clangd</code> 是根据一个叫 <code>compile_commands.json</code>
+的文件来进行代码提示的，这个文件的生成需要在 <code>CMakeLists.txt</code>
+中加入这一行：</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token function">set</span><span class="token punctuation">(</span>CMAKE_EXPORT_COMPILE_COMMANDS ON<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>这样在 <code>build</code> 目录下执行 <code>cmake ..</code>
+就能看到生成 <code>compile_commands.json</code> 文件了。</p>
+<blockquote>
+<p>也可以用 <code>cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON/OFF ..</code>
+的方式手动控制是否生成。</p>
+</blockquote>
+<p>这一切就绪后，就可以通过键入 <code>ctrl + shift + p</code>，输入
+<code>clangd</code>，选择 <code>clangd: Restart language server</code>
+来更新 <code>clangd</code> 运行环境了。此时可以看到代码提示 work。</p>
+
+                
+            </div>
+            <hr/>
+
+            
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/Project/">
+                                    <span class="chip bg-color">Project</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+    <script src="/libs/share/js/social-share.min.js"></script>
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+                <div id="reward">
+    <a href="#rewardModal" class="reward-link modal-trigger btn-floating btn-medium waves-effect waves-light red">赏</a>
+
+    <!-- Modal Structure -->
+    <div id="rewardModal" class="modal">
+        <div class="modal-content">
+            <a class="close modal-close"><i class="fas fa-times"></i></a>
+            <h4 class="reward-title">你的赏识是我前进的动力</h4>
+            <div class="reward-content">
+                <div class="reward-tabs">
+                    <ul class="tabs row">
+                        <li class="tab col s6 alipay-tab waves-effect waves-light"><a href="#alipay">支付宝</a></li>
+                        <li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li>
+                    </ul>
+                    <div id="alipay">
+                        <img src="/medias/reward/alipay.jpg" class="reward-img" alt="支付宝打赏二维码">
+                    </div>
+                    <div id="wechat">
+                        <img src="/medias/reward/wechat.png" class="reward-img" alt="微信打赏二维码">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $('.tabs').tabs();
+    });
+</script>
+
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/data-structure/suffixautomaton/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/6.jpg" class="responsive-img" alt="后缀自动机(Suffix Automaton)">
+                        
+                        <span class="card-title">后缀自动机(Suffix Automaton)</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            翻阅网络资料两天后顿悟，遂写下心得。
+
+参考资料
+
+OI
+Wiki
+知乎。并贴心地给出了构建过程的中间形态
+
+
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2024-08-05
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/data-structure/" class="post-category">
+                                    data structure
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/c/">
+                        <span class="chip bg-color">c++</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/lab/games101lab/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/3.jpg" class="responsive-img" alt="GAMES101（现代图形学入门）の 作业记录">
+                        
+                        <span class="card-title">GAMES101（现代图形学入门）の 作业记录</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            &gt;&gt;&gt; Github
+传送门&lt;&lt;&lt;
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2024-04-19
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/lab/" class="post-category">
+                                    lab
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/GAMES/">
+                        <span class="chip bg-color">GAMES</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+
+  <!-- 是否加载使用自带的 prismjs. -->
+  <script type="text/javascript" src="/libs/prism/prism.min.js"></script>
+
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card" style="background-color: white;">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+<script src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+    MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$', '$'], ['\\(', '\\)']]}
+    });
+</script>
+
+
+
+    <footer class="page-footer bg-color">
+    
+
+    <div class="container row center-align"
+         style="margin-bottom: 15px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            
+                <span id="year">2023-2024</span>
+            
+            <a href="/about" target="_blank">Leager</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            
+            <br>
+            
+            
+            
+                
+            
+            
+                <span id="busuanzi_container_site_pv">
+                &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
+                    <span id="busuanzi_value_site_pv" class="white-color"></span>
+            </span>
+            
+            
+                <span id="busuanzi_container_site_uv">
+                &nbsp;|&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;
+                    <span id="busuanzi_value_site_uv" class="white-color"></span>
+            </span>
+            
+            <br>
+
+            <!-- 运行天数提醒. -->
+            
+                <span id="sitetime"> Loading ...</span>
+                <script>
+                    var calcSiteTime = function () {
+                        var seconds = 1000;
+                        var minutes = seconds * 60;
+                        var hours = minutes * 60;
+                        var days = hours * 24;
+                        var years = days * 365;
+                        var today = new Date();
+                        var startYear = "2023";
+                        var startMonth = "8";
+                        var startDate = "1";
+                        var startHour = "0";
+                        var startMinute = "0";
+                        var startSecond = "0";
+                        var todayYear = today.getFullYear();
+                        var todayMonth = today.getMonth() + 1;
+                        var todayDate = today.getDate();
+                        var todayHour = today.getHours();
+                        var todayMinute = today.getMinutes();
+                        var todaySecond = today.getSeconds();
+                        var t1 = Date.UTC(startYear, startMonth, startDate, startHour, startMinute, startSecond);
+                        var t2 = Date.UTC(todayYear, todayMonth, todayDate, todayHour, todayMinute, todaySecond);
+                        var diff = t2 - t1;
+                        var diffYears = Math.floor(diff / years);
+                        var diffDays = Math.floor((diff / days) - diffYears * 365);
+
+                        // 区分是否有年份.
+                        var language = 'zh-CN';
+                        if (startYear === String(todayYear)) {
+                            document.getElementById("year").innerHTML = todayYear;
+                            var daysTip = 'This site has been running for ' + diffDays + ' days';
+                            if (language === 'zh-CN') {
+                                daysTip = '本站已运行 ' + diffDays + ' 天';
+                            } else if (language === 'zh-HK') {
+                                daysTip = '本站已運行 ' + diffDays + ' 天';
+                            }
+                            document.getElementById("sitetime").innerHTML = daysTip;
+                        } else {
+                            document.getElementById("year").innerHTML = startYear + " - " + todayYear;
+                            var yearsAndDaysTip = 'This site has been running for ' + diffYears + ' years and '
+                                + diffDays + ' days';
+                            if (language === 'zh-CN') {
+                                yearsAndDaysTip = '本站已运行 ' + diffYears + ' 年 ' + diffDays + ' 天';
+                            } else if (language === 'zh-HK') {
+                                yearsAndDaysTip = '本站已運行 ' + diffYears + ' 年 ' + diffDays + ' 天';
+                            }
+                            document.getElementById("sitetime").innerHTML = yearsAndDaysTip;
+                        }
+                    }
+
+                    calcSiteTime();
+                </script>
+            
+            <br>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link social-statis">
+    <a href="https://github.com/Leager-zju" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:1004729740@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+
+
+
+
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1004729740" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1004729740" data-position="top" data-delay="50">
+        <i class="fab fa-qq"></i>
+    </a>
+
+
+
+
+
+
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    var searchFunc = function (path, search_id, content_id) {
+        'use strict';
+        $.ajax({
+            url: path,
+            dataType: "xml",
+            success: function (xmlResponse) {
+                // get the contents from search data
+                var datas = $("entry", xmlResponse).map(function () {
+                    return {
+                        title: $("title", this).text(),
+                        content: $("content", this).text(),
+                        url: $("url", this).text()
+                    };
+                }).get();
+                var $input = document.getElementById(search_id);
+                var $resultContent = document.getElementById(content_id);
+                $input.addEventListener('input', function () {
+                    var str = '<ul class=\"search-result-list\">';
+                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                    $resultContent.innerHTML = "";
+                    if (this.value.trim().length <= 0) {
+                        return;
+                    }
+                    // perform local searching
+                    datas.forEach(function (data) {
+                        var isMatch = true;
+                        var data_title = data.title.trim().toLowerCase();
+                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
+                        var data_url = data.url;
+                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
+                        var index_title = -1;
+                        var index_content = -1;
+                        var first_occur = -1;
+                        // only match artiles with not empty titles and contents
+                        if (data_title !== '' && data_content !== '') {
+                            keywords.forEach(function (keyword, i) {
+                                index_title = data_title.indexOf(keyword);
+                                index_content = data_content.indexOf(keyword);
+                                if (index_title < 0 && index_content < 0) {
+                                    isMatch = false;
+                                } else {
+                                    if (index_content < 0) {
+                                        index_content = 0;
+                                    }
+                                    if (i === 0) {
+                                        first_occur = index_content;
+                                    }
+                                }
+                            });
+                        }
+                        // show search results
+                        if (isMatch) {
+                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
+                            var content = data.content.trim().replace(/<[^>]+>/g, "");
+                            if (first_occur >= 0) {
+                                // cut out 100 characters
+                                var start = first_occur - 20;
+                                var end = first_occur + 80;
+                                if (start < 0) {
+                                    start = 0;
+                                }
+                                if (start === 0) {
+                                    end = 100;
+                                }
+                                if (end > content.length) {
+                                    end = content.length;
+                                }
+                                var match_content = content.substr(start, end);
+                                // highlight all keywords
+                                keywords.forEach(function (keyword) {
+                                    var regS = new RegExp(keyword, "gi");
+                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
+                                });
+
+                                str += "<p class=\"search-result\">" + match_content + "...</p>"
+                            }
+                            str += "</li>";
+                        }
+                    });
+                    str += "</ul>";
+                    $resultContent.innerHTML = str;
+                });
+            }
+        });
+    };
+
+    searchFunc('/search.xml', 'searchInput', 'searchResult');
+});
+</script>
+
+    <!-- 白天和黑夜主题 -->
+<div class="stars-con">
+    <div id="stars"></div>
+    <div id="stars2"></div>
+    <div id="stars3"></div>  
+</div>
+
+<script>
+    function switchNightMode() {
+        $('<div class="Cuteen_DarkSky"><div class="Cuteen_DarkPlanet"></div></div>').appendTo($('body')),
+        setTimeout(function () {
+            $('body').hasClass('DarkMode') 
+            ? ($('body').removeClass('DarkMode'), localStorage.setItem('isDark', '0'), $('#sum-moon-icon').removeClass("fa-sun").addClass('fa-moon')) 
+            : ($('body').addClass('DarkMode'), localStorage.setItem('isDark', '1'), $('#sum-moon-icon').addClass("fa-sun").removeClass('fa-moon')),
+            
+            setTimeout(function () {
+            $('.Cuteen_DarkSky').fadeOut(1e3, function () {
+                $(this).remove()
+            })
+            }, 2e3)
+        })
+    }
+</script>
+
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    
+
+    
+    
+    
+        
+        <script type="text/javascript">
+            // 只在桌面版网页启用特效
+            var windowWidth = $(window).width();
+            if (windowWidth > 768) {
+                document.write('<script type="text/javascript" src="/libs/others/sakura.js"><\/script>');
+            }
+        </script>
+    
+
+    <!-- 雪花特效 -->
+    
+
+    <!-- 鼠标星星特效 -->
+    
+
+     
+        <script src="https://ssl.captcha.qq.com/TCaptcha.js"></script>
+        <script src="/libs/others/TencentCaptcha.js"></script>
+        <button id="TencentCaptcha" data-appid="xxxxxxxxxx" data-cbfn="callback" type="button" hidden></button>
+    
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    <script src="/libs/others/clicklove.js" async="async"></script>
+    
+    
+    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
+    
+
+    
+
+    
+
+    <!--腾讯兔小巢-->
+    
+    
+
+    
+
+    
+
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+</body>
+
+</html>
