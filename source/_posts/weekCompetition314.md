@@ -4,7 +4,7 @@ author: Leager
 mathjax: true
 date: 2022-10-09 19:34:27
 summary:
-categories: LeetCode
+categories: leetcode
 tags: weekly
 img:
 ---
@@ -110,7 +110,7 @@ func findArray(p []int) []int {
 
 ### code
 
-```c++
+```cpp
 // c++
 class Solution {
 public:

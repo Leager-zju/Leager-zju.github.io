@@ -4,7 +4,7 @@ author: Leager
 mathjax: true
 date: 2023-01-14 15:21:59
 summary:
-categories: C++
+categories: c++
 tags: C++ Basic
 img:
 ---
@@ -93,7 +93,7 @@ C++ 程序常用 `cin` ， `cout` 进行标准 I/O（从键盘读取数据，或
 
 该函数原型有以下两种重载形式：
 
-```C++
+```cpp
 std::basic_istream& operator>> ( Type& value ); // Type 特化为 int, short, char 等基本类型
 std::basic_istream& operator>> ( std:: IOtype& (func*)(IOtype&) ); // IOtype 主要指 istream 及其所有基类
 
@@ -103,13 +103,13 @@ std::basic_istream& operator>> ( std:: IOtype& (func*)(IOtype&) ); // IOtype 主
 
 可以看到所有返回值类型都为引用，实际上返回值为自身引用 `*this`，这也很好的支持了连续输入：
 
-```C++
+```cpp
 cin >> a >> b; // 等价于 (cin.operator>>(a)).operator>>(b);
 ```
 
 注意，当 cin 用运算符 **>>** 从缓冲区中读取数据时，会不断忽略并清除缓冲区开始的空白字符（空格、回车、制表符），直至读取成功，读取时也会将字符从缓冲区中取出。剩余部分残留在缓冲区中，不作处理。
 
-```C++
+```cpp
 #include <iostream>
 
 int main() {
@@ -136,7 +136,7 @@ int main() {
 
 该函数主要有以下四种重载形式：
 
-```C++
+```cpp
 // 从缓冲区中读并取出单个字符
 int get();
 std::basic_istream& get( char& ch );
@@ -144,7 +144,7 @@ std::basic_istream& get( char& ch );
 
 这两种形式均判断给定字符是否可用，若可用，第一种返回字符 ASCII 码值，否则返回 `Traits::eof()` 并设置 failbit 和 eofbit；第二种将字符赋给 ch，否则，返回 `Traits::eof()` 并设置 failbit 和 eofbit。
 
-```C++
+```cpp
 // 从缓冲区中读并取出多个字符，结束符会保留在缓冲区中
 std::basic_istream& get( char* s, std::streamsize count );
 std::basic_istream& get( char* s, std::streamsize count, char delim );
@@ -161,7 +161,7 @@ std::basic_istream& get( char* s, std::streamsize count, char delim );
 
 该函数主要有以下两种重载形式，以及一个同名的全局函数：
 
-```C++
+```cpp
 // 从缓冲区中读并取出多个字符
 std::basic_istream& getline( char* s, std::streamsize count );
 std::basic_istream& getline( char* s, std::streamsize count, char delim );
@@ -173,7 +173,7 @@ std::basic_istream& getline( char* s, std::streamsize count, char delim );
 2. 到达文件末尾，此时调用 `setstate(eofbit)`；
 3. 下一个字符为结束符。此条件下，结束符会被取出；
 
-```C++
+```cpp
 // 从缓冲区中读并取出多个字符
 std::getline( std::basic_istream& input, std::basic_string& str );
 std::getline( std::basic_istream& input, std::basic_string& str, char delim );
@@ -191,7 +191,7 @@ std::getline( std::basic_istream& input, std::basic_string& str, char delim );
 
 该函数原型为：
 
-```C++
+```cpp
 std::basic_istream& ignore( std::streamsize count = 1, int delim = Traits::eof() );
 ```
 
@@ -213,7 +213,7 @@ std::basic_istream& ignore( std::streamsize count = 1, int delim = Traits::eof()
 
 该函数主要有以下两种重载形式：
 
-```C++
+```cpp
 std::basic_istream& operator<< ( Type& value ); // Type 特化为 int, short, char 等基本类型
 std::basic_istream& operator<< ( std:: IOtype& (func*)(IOtype&) ); // IOtype 主要指 istream 及其所有基类
 
@@ -225,7 +225,7 @@ std::basic_istream& operator<< ( std:: IOtype& (func*)(IOtype&) ); // IOtype 主
 
 该函数原型为：
 
-```C++
+```cpp
 std::basic_ostream& put( char ch );
 ```
 
@@ -247,7 +247,7 @@ std::basic_ostream& put( char ch );
 
 下面是一个示例：
 
-```C++
+```cpp
 #include <iostream>
 #include <sstream>
 
@@ -283,7 +283,7 @@ int main() {
 
 最后输出如下：
 
-```C++
+```cpp
 before: 123 1.23 abc
 123 1.23 abcabc
 after: 456 4.56 def
@@ -304,7 +304,7 @@ bar
 
 操纵符是令代码能以 `operator<<` 或 `operator>>` 控制流输入/输出格式的帮助函数，相当于一个"开关"。其函数原型统一如下：
 
-```C++
+```cpp
 std::ios_base& std:: CONTROL_TYPE( std::ios_base& str );
 
 ```
@@ -313,7 +313,7 @@ std::ios_base& std:: CONTROL_TYPE( std::ios_base& str );
 
 传入  `operator<<` 或 `operator>>` 后，实际行为如下所示：
 
-```c++
+```cpp
 // 以 std::cin 为例
 operator>> (std::CONTROL_TYPE) {
     std::CONTROL_TYPE( *this);  // 对 * this 进行一些流控制比特位的设置，效果等同于 cin.setf(std::ios_base::CONTROL_TYPE)
@@ -325,7 +325,7 @@ operator>> (std::CONTROL_TYPE) {
 
 此为仅用于输出的控制符，其函数原型为：
 
-```c++
+```cpp
 template< class CharT, class Traits >
 std::basic_ostream<CharT, Traits>& endl( std::basic_ostream<CharT, Traits>& os );
 
@@ -342,7 +342,7 @@ std::basic_ostream<CharT, Traits>& endl( std::basic_ostream<CharT, Traits>& os )
 
 而 `noboolalpha` 则关闭这一开关。示例如下：
 
-```C++
+```cpp
 #include <sstream>
 #include <iostream>
 
@@ -363,7 +363,7 @@ int main() {
 
 输出为：
 
-```c++
+```cpp
 boolalpha: true false
 noboolalpha: 1 0
 true false: 1 0
@@ -374,7 +374,7 @@ true false: 1 0
 
 `skipws` 默认为开启状态，使得输入流跳过前导空白字符；而使用 `noskipws` 后不会跳过。示例：
 
-```C++
+```cpp
 #include <sstream>
 #include <iostream>
 
@@ -389,7 +389,7 @@ int main() {
 
 输出为：
 
-```c++
+```cpp
 skipws: a b c
 noskipws: a   b
 
@@ -399,7 +399,7 @@ noskipws: a   b
 
 开启后修改输入输出数的进制表示，分别对应八/十/十六进制。示例：
 
-```c++
+```cpp
 #include <sstream>
 #include <iostream>
 
@@ -419,7 +419,7 @@ int main() {
 
 输出为：
 
-```c++
+```cpp
 octal:   52
 decimal: 42
 hex:     2a

@@ -4,7 +4,7 @@ author: Leager
 mathjax: true
 date: 2023-02-06 23:02:41
 summary:
-categories: C++
+categories: c++
 tags: C++11
 img:
 ---
@@ -17,7 +17,7 @@ img:
 
 允许 for 循环中使用 `for (范围变量声明 : 范围表达式)` 的形式进行遍历，无需 `for(...;...;...)` 式的写法。
 
-```c++
+```cpp
 std::vector<int> v;
 
 // C++11 前
@@ -47,7 +47,7 @@ for (auto&& item : v) { // item 为 int& 型
 
 对于用 `constexpr` 修饰的函数，如果其传入的参数可以在编译时计算出来，那么这个函数就会产生编译时的值；反之，就和普通函数一样了。
 
-```c++
+```cpp
 constexpr int calculate(int x, int y) { return x + y; }
 
 int main() {
@@ -67,7 +67,7 @@ constexpr 函数也包含诸多限制：
 
 可以用 constexpr 函数实现递归，科技为**三元运算符**。`fact(5)` 将在编译时得到运算，这也是与 `inline` 函数的一个显著区别。
 
-```c++
+```cpp
 constexpr int fact(int i) {
   return i > 1 ? i * fact(i-1) : 1;
 }
@@ -82,7 +82,7 @@ constexpr int fact(int i) {
 1. constexpr 构造函数所有初始化必须都放在初始化列表里，并且函数体为空；
 2. 仅有 constexpr 对象可以调用声明为 `constexpr` 的成员函数；
 
-```c++
+```cpp
 class Test {
  public:
   constexpr Test(int val_): val(val_) {}
@@ -107,7 +107,7 @@ int main() {
 
 C++11 以前使用宏 `NULL` 来表示空指针。本质上它是 `#define NULL 0`，也就是一个数字 0，并不算真正意义上的指针。如果遇到以下代码，则会出现二义性：
 
-```c++
+```cpp
 void func(int) {}
 void func(void*) {}
 ```
@@ -116,7 +116,7 @@ void func(void*) {}
 
 C++11 引入的新关键词 `nullptr` 代表指针**字面量**，它是 `std::nullptr_t` 类型的纯右值，该类型可以隐式转换到任何指针类型及任何成员指针类型。注意这个转换是**单向**的！
 
-```c++
+```cpp
 template<class T>
 constexpr T clone(const T& t) {
   return t;
@@ -150,7 +150,7 @@ int main() {
 
 `override` 用于修饰派生类中的**虚函数**，告诉编译器（与程序员）该函数进行了重写。如果一个函数声明为 `override` 但父类却没有这个虚函数，编译报错，故可以避免程序员在重写基类函数时无意产生的错误，提高代码规范性。
 
-```c++
+```cpp
 struct A {
     virtual void foo();
     void bar();
@@ -167,7 +167,7 @@ struct B : A {
 
 `final` 用于指定某个**虚函数**不能在派生类中被重写，或者某个类不能被派生。
 
-```c++
+```cpp
 struct Base {
   virtual void foo();
 };
@@ -197,7 +197,7 @@ C++11 以前，**枚举**并不限定作用域，所有枚举成员均暴露在�
 
 C++11 引入了**限定作用域的枚举**来解决以上问题。
 
-```c++
+```cpp
 enum Color { red, blue, green };
 enum class newColor { red, blue, green };  // OK! 此限定域内自成一派，与其它枚举类型无影响
 // enum class newColor: typename {...};    // 枚举类型底层默认为 int，可以如此进行修改
@@ -224,7 +224,7 @@ std::cout << (red == 0);  // output: true
 
 `static_assert` 作为 C++11 新引入的**关键字**，为**静态断言**，即编译时进行断言，若表达式为 false，则编译错误。这样一来不会生成目标代码，也不会影响程序性能。用法为：
 
-```c++
+```cpp
 static_assert(expr, msg); // 如果 expr == false，则输出 msg
 ```
 
@@ -248,20 +248,20 @@ C++ 自带如下字面量（及其对应引用）：
 
 C++11 以前，我们如果希望定义一些描述时间相关的变量，或许会这样写：
 
-```c++
+```cpp
 int time = 1;
 ```
 
 但问题在于，这里的 `time` 的单位是什么？秒？微秒？还是纳秒？如果不加以注释，则会为代码阅读带来不便。有没有一种手段，能够让我们编写以下代码，使得开发者能够直接得到想要的信息？
 
-```c++
+```cpp
 auto time1 = 30_ms;
 auto time2 = 40_s;
 ```
 
 答案是**肯定**的，只需在上面的代码之前加上以下语句，就能成功编译并运行。
 
-```c++
+```cpp
 int operator""_ms (unsigned long long time) {
   return time;
 }
@@ -356,7 +356,7 @@ forward_list 内部实现以下功能：
 
 - 常规初始化；
 
-    ```c++
+    ```cpp
     std::tuple<int, double, char> t1 = {1, 2.0, '3'}; // 列表初始化
     std::tuple<int, double, char> t2(t1);             // 拷贝初始化
     std::tuple<int, double, char> t3(std::move(t1));  // 移动初始化
@@ -364,13 +364,13 @@ forward_list 内部实现以下功能：
 
 - 函数模板 `make_tuple<Types...>(args...)` 创建一个 tuple 对象，并根据 `Types` 定义具体类型；
 
-    ```c++
+    ```cpp
     std::tuple<int, double, char> t = make_tuple(1, 2.0, '3'); // 模板自动推导
     ```
 
 - `tie(args...)` 创建**左值引用**组成的 tuple，或将接收到的 tuple / pair 进行解包；
 
-    ```c++
+    ```cpp
     std::unordered_set<int> s;
     bool result;
     std::tie(std::ignore, result) = s.insert(1);
@@ -382,7 +382,7 @@ forward_list 内部实现以下功能：
 
 - `forward_as_tuple(args...)` 创建**转发引用**组成的 tuple；
 
-    ```c++
+    ```cpp
     std::unordered_map<int, std::string> m;
 
     // 插入 (1, "aa")
@@ -407,7 +407,7 @@ forward_list 内部实现以下功能：
 
 `std::none_of(first, last, pred)` 检查迭代器范围 `[first, last)` 内是否均不满足 `pred`；
 
-```c++
+```cpp
 std::vector<int> nums{1, 2, 3, 4, 5};
 std::cout << std::boolalpha << std::all_of(nums.begin(), nums.end(), [](int i) { return i > 0; });
 // output: true
@@ -421,7 +421,7 @@ std::cout << std::boolalpha << std::all_of(nums.begin(), nums.end(), [](int i) {
 
 `std::find_if_not(first, last, pred)` 返回迭代器范围 `[first, last)` 内第一个不满足 `pred` 的元素**的迭代器**；
 
-```c++
+```cpp
 std::vector<int> nums{1, 2, 3, 4, 5};
 std::cout << *std::find_if(nums.begin(), nums.end(), [](int i) { return i > 3; });
 // output: 4
@@ -435,7 +435,7 @@ std::cout << *std::find_if(nums.begin(), nums.end(), [](int i) { return i > 3; }
 
 `std::copy_n(first, count, begin)` 复制从 `first` 开始的 `count` 个元素到 `begin` 开始的范围；
 
-```c++
+```cpp
 std::vector<int> nums{1, 2, 3, 4, 5};
 std::vector<int> new_nums;
 std::copy_n(nums.begin(), 5, new_nums.begin());
@@ -446,7 +446,7 @@ std::copy_n(nums.begin(), 5, new_nums.begin());
 
 `std::is_partitioned(first, last, pred)` 检查迭代器范围 `[first, last)` 内是否所有满足 `pred` 的元素都在不满足 `pred` 的元素之前
 
-```c++
+```cpp
 std::vector<int> nums{1, 2, 3, 4, 5};
 std::cout << std::boolalpha << std::is_partitioned(nums.begin(), nums.end(), [](int i) { return i <= 3; });
 // output: true
@@ -456,7 +456,7 @@ std::cout << std::boolalpha << std::is_partitioned(nums.begin(), nums.end(), [](
 
 `std::is_sorted(first, last{, comp})` 检查迭代器范围 `[first, last)` 内是否有序。可自定义比较器 `comp`，默认为非降序，即 `comp <=> operator<`。
 
-```c++
+```cpp
 std::vector<int> nums{1, 2, 3, 4, 5};
 std::cout << std::boolalpha << std::is_sorted(nums.begin(), nums.end());
 // output: true
@@ -468,7 +468,7 @@ std::cout << std::boolalpha << std::is_sorted(nums.begin(), nums.end());
 
 若需要返回至少三个元素中的最小值与最大值的引用，则改为版本 `std::minmax(initializer_list{, comp})`。
 
-```c++
+```cpp
 int minm, maxm;
 std::tie(minm, maxm) = std::minmax({1, 2, 3, 4, 5});
 std::cout << minm << " " << maxm;
@@ -479,7 +479,7 @@ std::cout << minm << " " << maxm;
 
 `std::minmax_element(first, last{, comp})` 返回迭代器范围 `[first, last)` 中较小值与较大值**的迭代器**，并打包为 `std::pair` 返回，可自定义比较器 `comp`。
 
-```c++
+```cpp
 std::vector<int> nums{1, 2, 3, 4, 5};
 std::vector<int>::iterator min_iter, max_iter;
 std::tie(min_iter, max_iter) = std::minmax_element(nums.begin(), nums.end());
@@ -491,7 +491,7 @@ std::cout << *min_iter << " " << *max_iter;
 
 `std::itoa(first, last, value)` 以 value 为起始，并不断以 `++value` 填充迭代器范围 `[first, last)`。
 
-```c++
+```cpp
 std::vector<int> nums(10);
 std::itoa(nums.begin(), nums.end(), 1);
 // nums = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}

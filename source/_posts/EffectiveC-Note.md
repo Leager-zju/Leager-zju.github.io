@@ -27,7 +27,7 @@ C++ 高效编程守则视情况而变化，取决于使用 C++ 的哪一部分�
 
 1. 对于常量，尽量以 `const`, `enum` 替换。
 
-    ```c++
+    ```cpp
     #define PI 3.1415926
     // 改为
     const double pi = 3.1415926;
@@ -39,11 +39,11 @@ C++ 高效编程守则视情况而变化，取决于使用 C++ 的哪一部分�
 
     而替换为 `const` 则不会出现这一问题，编译器会将 `const` 变量加入符号表，避免了上述错误。`const` 还能进行常量指针的定义，并且 `const` 还能为一个类创建专属常量，自由控制访问级别以及静态与否。这些都是 `#define` 做不到的，毕竟 `#define` 不存在作用域这一说法，也不会进行类型检查。
 
-    > 具体区别请看[**此处**](../../C/C-Const/#与宏定义的区别)。
+    > 具体区别请看[**此处**](../../c/c-const/#与宏定义的区别)。
 
 2. 对于形似函数的宏，尽量以 `inline` 替换。
 
-    ```c++
+    ```cpp
     #define FUNC_MAX(a, b) f((a) > (b) ? (a) : (b))
     // 改为
     template<class T>
@@ -54,23 +54,23 @@ C++ 高效编程守则视情况而变化，取决于使用 C++ 的哪一部分�
 
     用宏定义函数属于是最**丑陋**的行为了，因为你需要时刻关心是否正确添加括号。并且有些调用还不一定得到正确反馈，比如下面 `a++` 的调用次数取决于比较的对象：
 
-    ```c++
+    ```cpp
     int a = 1, b = 0;
     FUNC_MAX(a++, b);    // a++ 调用 2 次
     FUNC_MAX(a++, b+10); // a++ 调用 1 次
     ```
 
-    而[**内联函数**](../../C/C-Inline)则不会出现上述问题。`func_max()` 成为了真正的函数，遵循作用域和访问规则，能利用泛型的同时，增加了类型检查，同时和 `const` 一样能在类内大显身手，故更为推荐。
+    而[**内联函数**](../../c/c-inline)则不会出现上述问题。`func_max()` 成为了真正的函数，遵循作用域和访问规则，能利用泛型的同时，增加了类型检查，同时和 `const` 一样能在类内大显身手，故更为推荐。
 
 但这并不是说预处理器就一无是处了，我们依然需要依靠 `#include` 来引入头文件，以及依赖 `#ifdef`，`#ifndef` 来控制编译。就像最开始说的那样，**尽量用编译器代替预处理器**。
 
 ## 3. 尽可能使用 const
 
-关于 `const` 具体可见[**本文**](../../C/C-Const)。
+关于 `const` 具体可见[**本文**](../../c/c-const)。
 
 `const` 更像是一种约束，只要某个变量确定性地能保持不变，我们应该尽可能加上这一约束，以取得编译器的优化。反之，则容易被玩坏，比如：
 
-```c++
+```cpp
 class Rational {
  public:
   Rational operator*(const Rational& lhs, const Rational& rhs) { /* ... */ }
@@ -87,9 +87,9 @@ if (a * b = c) {
 
 将返回值声明为 `const` 则可以预防上面一系列令人头疼的问题，我们需要做的不过是多打几个字符罢了。
 
-另外，虽然对于成员函数而言，const 与 non-const 是两种重载形式，但如果仅有约束不同，也是一件不好的事。我们拿 [C++のMutable](../../C/C-Mutable/#类中的-mutable) 里的 `TextBlock` 的例子来说：
+另外，虽然对于成员函数而言，const 与 non-const 是两种重载形式，但如果仅有约束不同，也是一件不好的事。我们拿 [C++のMutable](../../c/c-mutable/#类中的-mutable) 里的 `TextBlock` 的例子来说：
 
-```c++
+```cpp
 class TextBlock {
  public:
   TextBlock(const char* s) { /* ... */ }
@@ -113,7 +113,7 @@ class TextBlock {
 
 一个**明智**的做法是利用 non-const 版本调用 const 版本，从而避免**代码重复**：
 
-```c++
+```cpp
 class TextBlock {
  public:
   TextBlock(const char* s) { /* ... */ }
@@ -144,7 +144,7 @@ C++ 并不能保证变量在所有语境下声明时都能得到初始化，但�
 
 对于内置类型，我们应当手动初始化；而对于非内置类型，则需要用到构造函数，并保证初始化每一个成员变量，此时只有两种方式：要么赋值，要么初始化列表。
 
-```c++
+```cpp
 // 赋值
 class Entry {
  public:
@@ -159,7 +159,7 @@ class Entry {
 };
 ```
 
-```c++
+```cpp
 // 初始化列表
 class Entry {
  public:
@@ -173,13 +173,13 @@ class Entry {
 };
 ```
 
-**第二个版本比第一个版本效率更高**。事实上，类成员变量的初始化行为发生在构造函数之前（见[**构造顺序**](../../C/C-OOP/#派生类构造顺序)），所以对于大多数类型而言，赋值行为会先调用默认构造函数，然后再使用赋值运算符，这样就导致默认构造函数的操作被浪费，增加无意义的开销并不是一件好事。并且如果某个变量的默认构造函数被**弃置**，编译器还会报错。
+**第二个版本比第一个版本效率更高**。事实上，类成员变量的初始化行为发生在构造函数之前（见[**构造顺序**](../../c/c-oop/#派生类构造顺序)），所以对于大多数类型而言，赋值行为会先调用默认构造函数，然后再使用赋值运算符，这样就导致默认构造函数的操作被浪费，增加无意义的开销并不是一件好事。并且如果某个变量的默认构造函数被**弃置**，编译器还会报错。
 
 而使用初始化列表的方式，则只会影响这些成员变量调用构造函数的版本，相当于是拿着指定的实参去调用构造函数，不用担心顺序问题（但最好还是按照成员变量列出顺序来）。此时只需调用一次构造，比起赋值的方法高效许多。对于内置类型，两种方式开销一样，但为了一致性还是通过初始化列表来初始化。
 
 最后需要关心的事就是**定义于不同编译单元内的 non-local static 变量**了，即定义在作用域外的其它文件的静态变量。因为 C++ 对于这类变量的初始化顺序并未明确定义，甚至根本无解。所以我们在使用一个 `extern` 标识的变量时，它极有可能未被初始化！
 
-```c++
+```cpp
 // Tool.h
 class Tool {
  /* ... */
@@ -198,7 +198,7 @@ Human Jack(theTool); // 如果 theTool 未被初始化，则该语句的实现�
 
 为什么说它好？因为函数内部的 static 变量会在调用函数首次遇到定义式时进行初始化，且仅初始化这一次。所以只要调用该函数，便能保证变量必然被初始化。furthermore，如果不调用函数，则变量永远不会被初始化，构造和析构的开销也降低了。
 
-```c++
+```cpp
 // Tool.h
 class Tool {};
 
@@ -217,7 +217,7 @@ Human Jack(getTool()); // 保证得到初始化
 
 ## 5. 了解 C++ 默默编写并调用哪些函数
 
-[**见此处**](../../C/C-OOP/#装)
+[**见此处**](../../c/c-oop/#装)
 
 > C++11 引入移动语义之后，对于一个**空类**，编译器将为其默认生成以下 6 种特殊成员函数，且访问级别默认为 `public`（见下文）：**默认构造函数**、**析构函数**、**拷贝构造函数**、**拷贝赋值运算符**、**移动构造函数**、**移动赋值运算符**。
 
@@ -225,13 +225,13 @@ Human Jack(getTool()); // 保证得到初始化
 
 通常来说，如果不希望使用某函数，则不声明即可。但上面那点提到，尽管你可能没声明，但一旦尝试调用，编译器就会自动帮你声明。
 
-所以希望完全阻止这种调用行为，可以加上 [`delete` 说明符](../../C/C-DefaultAndDelete/#delete)。
+所以希望完全阻止这种调用行为，可以加上 [`delete` 说明符](../../c/c-defaultanddelete/#delete)。
 
 > 与 `default` 相对，后面加上 `= delete` 的函数会被视为**弃置**(deleted)，在编译器眼中这个函数**禁止被定义**，对该函数的调用会导致编译错误，继而从根本上解决了这个问题。
 
 ## 7. 为多态基类声明 virtual 析构函数
 
-见[**此处**](../../C/C-OOP/#注意)第 5 条。
+见[**此处**](../../c/c-oop/#注意)第 5 条。
 
 > 当可能用到基类指针/引用绑定派生类时，基类的析构函数必须为虚函数。这是因为当出现 `Base* ptr = new Derived` 这样的代码时，虽然 `ptr` 是 `Base` 类的指针，但我们实际上还分配了一个 `Derived` 类的空间，如果析构函数非虚，则只会执行 `Base` 类的析构函数，而属于 `Derived` 的那一部分并没有被析构。为了程序安全运行，我们应该要调用派生类的析构函数，也就是通过将基类析构函数设为虚函数来实现；
 
@@ -239,7 +239,7 @@ Human Jack(getTool()); // 保证得到初始化
 
 C++ 虽然并不禁止析构函数吐出异常，但**不建议**。考虑这种情况：
 
-```c++
+```cpp
 class Widget {
  public:
   ~Widget() { /* 存在抛出异常的可能 */ }
@@ -254,7 +254,7 @@ std::vector<Widget> widgets;
 
 1. 直接终止
 
-   ```c++
+   ```cpp
    class Widget {
     public:
      ~Widget() {
@@ -269,7 +269,7 @@ std::vector<Widget> widgets;
 
 2. 吞下异常
 
-   ```c++
+   ```cpp
    class Widget {
     public:
      ~Widget() {
@@ -287,7 +287,7 @@ std::vector<Widget> widgets;
 
 假设有一个 transaction 类体系，用于模拟股市的买卖等操作，每次创建一个交易对象时，都会根据交易类型进行一次适当的记录。比如下面这个看起来挺好的做法：
 
-```c++
+```cpp
 class Transaction {
  public:
   virtual void logTxn() const = 0; // 创建一份因类型不同而不同的交易日志
@@ -310,13 +310,13 @@ class SellTransaction: public Transaction {
 BuyTransation buyTxn;
 ```
 
-创建 `buyTxn` 时，根据[**构造顺序**](../../C/C-OOP/#派生类构造顺序)，其基类的构造一定会更早被调用，然后才是派生类的专属部分。而其基类的构造函数中出现了一个纯虚函数 `logTxn()`，这是万恶之源！
+创建 `buyTxn` 时，根据[**构造顺序**](../../c/c-oop/#派生类构造顺序)，其基类的构造一定会更早被调用，然后才是派生类的专属部分。而其基类的构造函数中出现了一个纯虚函数 `logTxn()`，这是万恶之源！
 
 我们本意是希望通过该虚函数完成派生类版本的构造，但事实上，构造 `BuyTransaction` 对象时，优先构造的是对象中的基类部分，也就是 `Transaction` 部分，此时调用的 `logTxn()` 尽管为虚，但其无法表现出多态性质，相当于将其视为了 non-virtual，执行的还是 `Transaction` 版本的函数，并不会下降到派生类 `BuyTransaction`。毕竟，此时派生类专属部分尚未得到初始化，如果派生类版本的 `logTxn()` 将用到其成员变量，那将成为"**通往彻夜调试的直达车票**"——C++ 不允许你使用对象内部尚未初始化的部分。
 
 还有一个更根本的原因是，在基类部分构造期间，对象类型会被视为基类而非派生类，请看：
 
-```c++
+```cpp
 class B {
  public:
   B() { std::cout << typeid(*this).name() << "cons\n"; }
@@ -343,7 +343,7 @@ int main() {
 
 如果非要实现"**根据不同类型使用不同构造函数**"，一个好的做法是，将基类的 `logTxn()` 设为 non-virtual，然后要求为该函数传入必要的信息，如:
 
-```c++
+```cpp
 class Transaction {
  public:
   void logTxn(const TransactionInfo& info) const {
@@ -372,7 +372,7 @@ class BuyTransaction: public Transaction {
 
 关于赋值，可以写为如下形式：
 
-```c++
+```cpp
 int a, b, c;
 a = b = c = 15;
 // 由于赋值遵循右结合律，故被解析为
@@ -383,7 +383,7 @@ a = (b = (c = 15));
 
 ## 11. 在 operator= 中处理"自我赋值"
 
-```c++
+```cpp
 class Object {
   /* ... */
  private:
@@ -395,7 +395,7 @@ ob = ob;
 
 是的这很蠢，但为了演示，没办法（摊手）。当然这种写法是被允许的，只不过自我赋值增加了无意义的开销——这还算能接受，但如果类的赋值运算符写成这样，那就要当心点了：
 
-```c++
+```cpp
 Object& opeartor=(Object& rhs) {
   delete this->name;
   this->name = new std::string(*rhs.name);
@@ -407,7 +407,7 @@ Object& opeartor=(Object& rhs) {
 
 为了避免这种危害，**传统做法**是在最开始执行**证同测试**，实现**自我赋值安全性**：
 
-```c++
+```cpp
 Object& opeartor=(Object& rhs) {
   if (this == &rhs) return *this; // 比较地址比比较对象本身更好
 
@@ -419,7 +419,7 @@ Object& opeartor=(Object& rhs) {
 
 但该做法无法保证**异常安全性**，也就是说，如果 `new` 操作中出现异常（内存不够 or 构造函数异常），最后还是会得到一份**不安全**的反馈——`name` 可能因此被永久 delete，既无法删除，也无法读取。看 solution！
 
-```c++
+```cpp
 Object& opeartor=(Object& rhs) {
   const std::string* tmp = this->name;
   this->name = new std::string(*rhs.name);
@@ -432,7 +432,7 @@ Object& opeartor=(Object& rhs) {
 
 上一方案的替代做法是 **copy and swap**。
 
-```c++
+```cpp
 class Object {
   /* ... */
   void swap(Object& rhs) { /* 交换 *this 和 rhs 的数据 */ }
@@ -448,7 +448,7 @@ Object& opeartor=(Object& rhs) {
 
 或者直接这样写：
 
-```c++
+```cpp
 class Object {
   /* ... */
   void swap(Object& rhs) { /* 交换 *this 和 rhs 的数据 */ }
@@ -471,7 +471,7 @@ Object& opeartor=(Object rhs) {
 
 当然这还好说，但一旦出现继承，另一个噩梦又来了……
 
-```c++
+```cpp
 class Customer {
  public:
   /* ... */
@@ -500,7 +500,7 @@ class PriorityCustomer: public Customer {
 
 所以通过拷贝的方式进行构造时，一定不要忘了调用所有基类的适当的拷贝函数，拷贝赋值也是同理的。就像下面这样：
 
-```c++
+```cpp
 class PriorityCustomer: public Customer {
  public:
   PriorityCustomer(const PriorityCustomer& rhs)
@@ -518,11 +518,11 @@ class PriorityCustomer: public Customer {
 };
 ```
 
-最后要注意的是，如果拷贝构造与拷贝赋值出现了重复部分，可以将这些重复的部分写入新的函数(eg.`init()`)，然后让它俩一起调用，从而消除冗余。而不是让一个拷贝调用另一个拷贝——[构造跟赋值不能混为一谈](../../C/C-OOP/#赋值运算符)！
+最后要注意的是，如果拷贝构造与拷贝赋值出现了重复部分，可以将这些重复的部分写入新的函数(eg.`init()`)，然后让它俩一起调用，从而消除冗余。而不是让一个拷贝调用另一个拷贝——[构造跟赋值不能混为一谈](../../c/c-oop/#赋值运算符)！
 
 ## 13. 以对象管理资源
 
-关于本条款，可以阅读 [**RAII**](https://zhuanlan.zhihu.com/p/34660259) 与[**智能指针**](../../C/C-SmartPtr) 相关内容。
+关于本条款，可以阅读 [**RAII**](https://zhuanlan.zhihu.com/p/34660259) 与[**智能指针**](../../c/c-smartptr) 相关内容。
 
 > 构造时获取资源，析构时释放资源。
 
@@ -530,7 +530,7 @@ class PriorityCustomer: public Customer {
 
 资源管理类的核心是 RAII 技术，而智能指针则将其表现在了 heap-based 资源上。但并非所有资源都是 heap-based，一个很常见的例子就是**互斥锁**，获取资源相当于进行 `lock()`，而释放资源则相当于 `unlock()`。我们希望利用 RAII 来管理这种资源，则可以很容易写出以下代码：
 
-```c++
+```cpp
 class Lock {
  public:
   explicit Lock(std::mutex* pm_): pm(pm_) {
@@ -555,7 +555,7 @@ std::mutex* m;
 
 但如果 `Lock` 对象被拷贝，会发生什么事？（不言而喻了）
 
-```c++
+```cpp
 Lock lock2(lock1);
 ```
 
@@ -563,11 +563,11 @@ Lock lock2(lock1);
 
 第一，**禁止拷贝**，即设为 `=delete`，正如[**条款 6**](#6.-若不想使用编译器自动生成的函数，就该明确拒绝) 所说的那样；
 
-第二，**引用计数法**，正如 [**shared_ptr**](../../C/C-SmartPtr/#std::shared_ptr) 做的那样，直到该资源的最后一个使用者被销毁后才释放；
+第二，**引用计数法**，正如 [**shared_ptr**](../../c/c-smartptr/#std::shared_ptr) 做的那样，直到该资源的最后一个使用者被销毁后才释放；
 
 第三，**拷贝底部资源**，注意这里的拷贝是指深拷贝，即不仅仅拷贝指针，同时拷贝一份指针指向的内存；
 
-第四，**转移底部资源所有权**，即实现[**移动语义**](../../C/C-Value/#移动语义)；
+第四，**转移底部资源所有权**，即实现[**移动语义**](../../c/c-value/#移动语义)；
 
 ## 15. 在资源管理类中提供对原始资源的访问
 
@@ -581,7 +581,7 @@ Lock lock2(lock1);
 
 考虑这样一个函数 `foo()`：
 
-```c++
+```cpp
 int bar();
 void foo(std::shared_ptr<Object> pInt, int someint) {
   /* ... */
@@ -592,7 +592,7 @@ foo(new Object, bar()); // ERROR！
 
 像这样调用是不行的，因为 `shared_ptr` 尽管有形参为裸指针的构造函数，但却是声明为 `explicit`，没法如此隐式转换，也就无法通过编译。或许我们可以如此做来通过编译：
 
-```c++
+```cpp
 foo(std::shared_ptr<Object>(new Object), bar()); // OK!
 ```
 
@@ -604,7 +604,7 @@ foo(std::shared_ptr<Object>(new Object), bar()); // OK!
 
 设想一下，如果 `bar()` 抛出一个异常，导致程序终止，会发生什么？new 出来的 `Object` 指针将无家可归，它并没有被 shared_ptr 保有，而我们依赖后者来防止资源泄漏，但很遗憾，资源泄漏发生了。解决方案很简单，就像条款说的，**以独立语句将 newed 对象置入智能指针**。
 
-```c++
+```cpp
 std::shared_ptr<Object> pObj(new Object);
 foo(pObj, bar()); // perfect! 绝不会引发泄漏
 ```
@@ -615,13 +615,13 @@ foo(pObj, bar()); // perfect! 绝不会引发泄漏
 
 但误用却时有发生。任何一个 api 如果要求客户必须记得做某些事，就是有着"不正确使用"的倾向，因为客户可能会忘记。比如[**工厂函数**](https://refactoringguru.cn/design-patterns/factory-method)如果在内部 new 了一个指针并将其返回，则客户很容易忘记 delete，或是 delete 多次。
 
-```c++
+```cpp
 Object* factory();
 ```
 
 或许你会想到将该指针托付给一个智能指针，比如 `std::shared_ptr<Object> pObj(factory());`，但客户也很可能会忘记使用智能指针。事实上，一个好的设计是令该 api 返回一个智能指针，即
 
-```c++
+```cpp
 std::shared_ptr<Object> factory();
 ```
 
@@ -662,7 +662,7 @@ C++ 就像其他 OOP 语言一样，当我们定义一个新 class，也就定�
 
 以[**条款 3**](#3-尽可能使用-const) 中 `Rational` 类为例，它内含一个函数用于计算两个有理数的乘积。
 
-```c++
+```cpp
 class Rational {
  public:
   Rational(int numerator = 0,
@@ -676,7 +676,7 @@ class Rational {
 
 虽然返回值是以值传递，但这点开销是值得且必要的。如果我们试图通过引用传递来逃避这一开销，那必然要有一个已经存在的 `Rational` 对象来给引用绑定，这是引用的刚需。事实上这并不合理，如果我们有以下代码：
 
-```c++
+```cpp
 Rational a(1, 2);
 Rational b(3, 5);
 Rational c = a * b;
@@ -686,7 +686,7 @@ Rational c = a * b;
 
 在 stack 上创建的对象会因为函数的退出而消亡，显然是无法作为引用返回值的。任何调用者甚至只是对此函数的返回值做任何一点点运用，都将立刻坠入"无定义行为"的恶地。事情的真相是，任何函数如果返回一个 reference 指向某个局部变量，都将一败涂地（指针亦是如此）。
 
-```c++
+```cpp
 // on-the-stack
 const Rational& operator* (const Rational& lhs,
                            const Rational& rhs) {
@@ -697,7 +697,7 @@ const Rational& operator* (const Rational& lhs,
 
 那么在 heap 上创建呢？只会更糟！还带来了一个额外的问题——如何 delete？
 
-```c++
+```cpp
 // on-the-heap
 const Rational& operator* (const Rational& lhs,
                            const Rational& rhs) {
@@ -708,7 +708,7 @@ const Rational& operator* (const Rational& lhs,
 
 尽管你可能非常小心谨慎，但还是无法在以下代码中幸存：
 
-```c++
+```cpp
 Rational w, x, y, z;
 w = x * y * z; // 等价于 operator*(operator*(x, y), z);
 ```
@@ -717,7 +717,7 @@ w = x * y * z; // 等价于 operator*(operator*(x, y), z);
 
 或许会想到返回 `static` 变量来避免上述情况，我只能说没有任何区别，就像下面这串代码：
 
-```c++
+```cpp
 // static
 const Rational& operator* (const Rational& lhs,
                            const Rational& rhs) {
@@ -736,7 +736,7 @@ if ((a * b) == (c * d)) {
 
 至于其它一些想法，梅耶懒得一一驳斥了，他的想法很简单：对于一个"必须返回新对象"的函数，就让那个函数返回一个新对象呗！就像下面这样：
 
-```c++
+```cpp
 inline const Rational operator* (const Rational& lhs,
                                  const Rational& rhs) {
   return Rational(lhs.n * rhs.n, lhs.d * rhs.d);
@@ -751,7 +751,7 @@ inline const Rational operator* (const Rational& lhs,
 
 另外，使用函数可以对成员变量的处理有着更精确的**访问控制**。如果将成员变量设为 public，那么可以很轻易地直接读写，而通过函数，则可以人为控制读写权限，就像下面这样：
 
-```c++
+```cpp
 class AccessLevels {
  public:
   int getReadOnly() const { return readOnly; }
@@ -773,7 +773,7 @@ class AccessLevels {
 
 考虑一个网页浏览器的例子，它拥有清理缓存、清理访问历史，以及清理所有 cookies 的功能
 
-```c++
+```cpp
 class WebBrowser {
  public:
   /* ... */
@@ -786,7 +786,7 @@ class WebBrowser {
 
 可能很多人会想要添加一个这样的功能：
 
-```c++
+```cpp
 class WebBrowser {
  public:
   /* ... */
@@ -797,7 +797,7 @@ class WebBrowser {
 
 当然，这一功能也可以通过一个 non-member 函数调用适当的成员函数实现：
 
-```c++
+```cpp
 void clearBrowser(WebBrowser& wb) {
   wb.clearCache();
   wb.clearHistory();
@@ -817,7 +817,7 @@ void clearBrowser(WebBrowser& wb) {
 
 注意到，类中进行乘积的函数被设为 non-member 函数。当然也可以写成成员函数，比如这样：
 
-```c++
+```cpp
 class Rational {
  public:
   /* ... */
@@ -827,7 +827,7 @@ class Rational {
 
 但这样写却忽略了一种混合式乘法场景：
 
-```c++
+```cpp
 Rational oneHalf(1, 2);
 Rational result;
 result = oneHalf * 2;  // OK! oneHalf.operator* (Rational(2));
@@ -847,7 +847,7 @@ result = 2 * oneHalf;  // ERROR! int 并没有运算符 operator* (Rational) 的
 
 当 `std::swap` 的缺省实现版，或对其全特化无法满足需求（无法访问 private 成员）时，考虑添加一个 `swap` 成员函数，并确保其不抛出异常。为了方便，可以在同一个命名空间中提供一个 non-member non-std `swap` 来调用前者。调用成员函数 `swap` 时，应针对 `std::swap` 使用 `using` 声明，然后不带任何作用域运算符 `::` 地来为具体的成员变量调用 `swap`。就像这样：
 
-```c++
+```cpp
 namespace WidgetStuff {
   template<class T>
   class Widget {
@@ -879,7 +879,7 @@ namespace WidgetStuff {
 
 那么，在循环中，我们可能容易产生疑虑：如果变量只在循环内使用，那么是定义在循环外，然后每次循环迭代时赋值，还是定义在循环内，每次循环构造一个新的 on-the-stack 变量？
 
-```c++
+```cpp
 // 方法 A：循环外定义
 Widget w;
 for (int i = 0; i < n; ++i) {
@@ -900,17 +900,17 @@ for (int i = 0; i < n; ++i) {
 
 ## 27. 尽量少做转型动作
 
-文章 [**C++ の Cast**](../../C/C-Cast) 中已经介绍过 C++ 中类型转换的内容。尽量避免转型，特别是在注重效率的代码中避免 `dynamic_cast`。如果非要转型，也尽可能使用 C++-style 转型。
+文章 [**C++ の Cast**](../../c/c-cast) 中已经介绍过 C++ 中类型转换的内容。尽量避免转型，特别是在注重效率的代码中避免 `dynamic_cast`。如果非要转型，也尽可能使用 C++-style 转型。
 
 ## 28. 避免返回 handles 指向对象内部成分
 
 通常我们认为，对象的"内部"就是指它的成员变量，但其实 non-public 成员函数也是对象"内部"的一部分，因此也应该留心不要返回它们的 handles，这意味你绝对不该令成员函数返回一个指针/引用指向"访问级别较低"的成员函数。如果你那么做，后者的实际访问级别就会提高如同访问级别较高者，因为客户可以取得一个指针指向那个"访问级别较低"的函数，然后通过那个指针调用它。这无形中相当于将 private 变量变成了 public，就跟之前提到的那样，这降低了封装性。
 
-此外，handles 也可能出现**悬空**的情况，即获取一个对象内部变量的指针/引用后，该对象在真正使用之前销毁，那么该指针/引用实际上指向了一个未知的变量，这极为糟糕。毕竟，handles 并不能延长变量的生命周期。这和 [**lambda 表达式**](../../C/C-Function/#悬垂引用)中提到的有异曲同工之妙。
+此外，handles 也可能出现**悬空**的情况，即获取一个对象内部变量的指针/引用后，该对象在真正使用之前销毁，那么该指针/引用实际上指向了一个未知的变量，这极为糟糕。毕竟，handles 并不能延长变量的生命周期。这和 [**lambda 表达式**](../../c/c-function/#悬垂引用)中提到的有异曲同工之妙。
 
 ## 29. 为"异常安全"而努力是值得的
 
-关于异常可见[**此文**](../../C/C-Exception)。
+关于异常可见[**此文**](../../c/c-exception)。
 
 **异常安全函数**提供以下三个保证之一：
 
@@ -920,7 +920,7 @@ for (int i = 0; i < n; ++i) {
 
 ## 30. 透彻了解 inlining 的里里外外
 
-关于 inline，请看[**此文**](../../C/C-Inline)。
+关于 inline，请看[**此文**](../../c/c-inline)。
 
 > inline 函数背后的整体观念是，将"对此函数的每一个调用"都以函数本体替换之。优点是能够免除函数调用成本，比宏多了类型检查，以及其他编译器优化。缺点是增加了目标码大小，导致程序体积太大，可能导致额外的换页行为，降低 cache 命中率，以及隐性的其他效率降低。
 
@@ -928,7 +928,7 @@ for (int i = 0; i < n; ++i) {
 
 我们不希望仅仅修改某个头文件后，重新 make 项目还要花大量时间将所有文件重新编译链接一遍。问题出在 C++ 并没有把接口从实现很好地分离。类的定义式不仅有各种 api，还有各种数据的实现条目。
 
-```c++
+```cpp
 class Person {
  public:
   Person(const std::string& name, const Date& birthday, const Address& addr);
@@ -946,7 +946,7 @@ class Person {
 
 如果没有取得合适的定义式，则编译失败。事实上，文件的最开始总会有下面这样的语句。
 
-```c++
+```cpp
  #include <string>
  #include "date.h"
  #include "address.h"
@@ -956,7 +956,7 @@ class Person {
 
 好的设计是**前置声明**，并将所有实现条目由指向其实现类的指针代替，即 **pimpl**(pointer to implementation)，这样也方便令编译器计算出所需分配空间的大小。如果仅修改了前者，则编译器很难在不了解定义式的前提下知道一个 Data，一个 Address 应该分配的空间是多少。
 
-```c++
+```cpp
 #include <string>
 #include <memory>
 
@@ -984,7 +984,7 @@ class Person {
 
 像 `Person` 这样使用 pimpl 的类一般称为 **handle class**，它必须要通过调用 pImpl 的成员函数来真正做点事情。当然，在调用 `pImpl->` 函数时，必须先引入 `"PersonImpl.h"`（定义式），否则无法调用其成员函数。
 
-```c++
+```cpp
 #include "PersonImpl.h"
 
 Person::Person(const std::string& name, const Date& birthday, const Address& addr)
@@ -999,7 +999,7 @@ std::string Person::name() const {
 
 在这种接口类中，往往有一个静态的**工厂函数**来创建新对象。尽管接口类不存在构造函数，无法实例化，但它完全可以通过实例化派生类来达成目的。
 
-```c++
+```cpp
 class Person {
  public:
   static std::shared_ptr<Person> create(const std::string& name,
@@ -1048,7 +1048,7 @@ std::shared_ptr<Person> create(const std::string& name,
 
 如果令 `class Derived` 以 public 继承自 `class Base`，这就是告诉编译器与读者，每个 Derived 对象同时也是一个 Base 对象，Derived 是 Base 的特殊化，而 Base 是 Derived 的一般化，Base 能派上用场的地方，Derived 一定也可以。因为**每个 Derived 都 is-a（是一种） Base 对象**，而反之不成立。
 
-```c++
+```cpp
 class Person { /* ... */};
 class Student: public Person { /* ... */};
 ```
@@ -1063,7 +1063,7 @@ class Student: public Person { /* ... */};
 
 众所周知，当编译器遇到某个名称时，它会从内向外逐个作用域去查找是否有匹配的"东西"，因为内层作用域的名称会**遮掩**外层作用域的名称。
 
-```c++
+```cpp
 int x;
 void func() {
   double x;
@@ -1073,7 +1073,7 @@ void func() {
 
 在继承中亦是如此。当在派生类成员函数内指涉某个基类成员时，编译器很容易能找到，因为派生类继承了基类的所有东西，就好像派生类的作用域嵌套在基类作用域内一样。
 
-```c++
+```cpp
 class Base {
  private:
   int x;
@@ -1099,7 +1099,7 @@ void Derived::mf4() {
 
 上面只是提供了一个简单的例子，下面这个才是我们真正想讨论的：
 
-```c++
+```cpp
 class Base {
  private:
   int x;
@@ -1121,7 +1121,7 @@ class Derived: public Base {
 
 这很难不能称为一种💩的代码，但无关紧要，之前提到的**名称遮掩规则**并没有改变。因此 `Base::mf1(int)` 与 `Base::mf3(double)` 都被 `Derived::mf1()` 与 `Derived::mf3()` 掩盖了。换个角度来讲，`mf1(int)` 与 `mf3(double)` 并没有得到继承。
 
-```c++
+```cpp
 Derived d;
 int x;
 
@@ -1134,7 +1134,7 @@ d.mf3(x);  // ERROR! Derived::mf3() 遮掩了 Base::mf3(double)
 
 不幸的是，我们通常会想继承重载函数，但上面这种继承又不继承的写法实际上是在破坏 is-a 关系。可以通过 using 声明达成目标。
 
-```c++
+```cpp
 class Derived: public Base {
  public:
   using Base::mf1; // 让 Base 内名为 mf1 和 mf3 的所有东西
@@ -1147,7 +1147,7 @@ class Derived: public Base {
 
 现在，继承机制正常运转。
 
-```c++
+```cpp
 Derived d;
 int x;
 
@@ -1160,7 +1160,7 @@ d.mf3(x);  // OK! 调用 Base::mf3(double)
 
 可问题又产生了——我们只希望继承 `mf1()` 的无参版本！这在 public 继承下没有意义，因为破坏了 is-a 关系，但在 private 继承下值得讨论。既然 using 声明并不能满足要求，那我们干脆实现一个**转发函数**好了。
 
-```c++
+```cpp
 class Derived: private Base {
  public:
   virtual void mf1() {
@@ -1199,7 +1199,7 @@ public 继承实际上由两部分组成：**函数接口继承**与**函数实�
 
 假设你正在写一个暴力砍杀类型的游戏，你打算为游戏内的人物设计一个继承体系，人物会因被伤害或其他因素而扣血。你因此决定提供一个成员函数 `healthValue()`，它会返回一个整数，表示人物的血量。由于不同的人物可能以不同的方式计算他们的血量，将 `healthValue()` 声明为 virtual 似乎是再明白不过的做法。
 
-```c++
+```cpp
 class GameCharacter {
  public:
   virtual int healthValue() const;
@@ -1210,7 +1210,7 @@ class GameCharacter {
 
 1. 通过 **NVI**(Non-Virtual Interface) 手法实现 **Template Method 设计模式**。该模式主张令 virtual 函数称为 private，然后通过一个称为 **wrapper** 的 public non-virtual 函数来调用它。
 
-   ```c++
+   ```cpp
    class GameCharacter {
     public:
      int healthValue() const {
@@ -1229,7 +1229,7 @@ class GameCharacter {
 
 2. 通过函数指针实现 **Strategy 设计模式**。该方案主张"人物血量计算与人物类型无关"，而是在构造函数中接受一个函数指针指向一个"血量计算"函数，通过调用该函数实现效果：
 
-   ```c++
+   ```cpp
    class GameCharacter;
    int defaultHealthCalc(const GameCharacter& gc);
    class GameCharacter {
@@ -1247,9 +1247,9 @@ class GameCharacter {
 
    这使得同一人物类型下不同实体也可以拥有不同"血量计算"函数，并且某人物的计算函数可以在运行时期变化，比如可以通过提供一个 `setHealthCalculator` 来替换"血量计算"函数。但缺点在于，如果"血量计算"所需信息为 non-public，那就比较危险，或许可能要适当降低封装性，比如提供一些 public 访问接口或将函数设为 friend。其优点是否足以弥补缺点，这是需要进行仔细考虑的。
 
-3. 通过 `std::function` 实现 **Strategy 设计模式**。上面的函数指针本质上是一个**可调用对象**。C++11 已经将所有的可调用对象进行了统一，推出了新特性 `std::function`（见[此文](../../C/C-Function)），那用此新特性进行替换，提高了更多的实现弹性，不是吗？只要函数签名与需求端兼容，那么就是可行的。
+3. 通过 `std::function` 实现 **Strategy 设计模式**。上面的函数指针本质上是一个**可调用对象**。C++11 已经将所有的可调用对象进行了统一，推出了新特性 `std::function`（见[此文](../../c/c-function)），那用此新特性进行替换，提高了更多的实现弹性，不是吗？只要函数签名与需求端兼容，那么就是可行的。
 
-   ```c++
+   ```cpp
    class GameCharacter;
    int defaultHealthCalc(const GameCharacter& gc);
    class GameCharacter {
@@ -1267,7 +1267,7 @@ class GameCharacter {
 
    那么，接下来表演个戏法：
 
-   ```c++
+   ```cpp
    // 函数
    short calcHealth(const GameCharacter&);
 
@@ -1316,14 +1316,14 @@ class GameCharacter {
 
 当某种类型的对象内含另一种类型的对象，这就是复合关系。如同 public 含有 is-a 意义一样，复合关系也有着 has-a（有一个）或"根据某物实现出"的意义。就比如想实现一个 set 数据结构，复用 `std::set` 是最方便的，但是其为了提高时间效率，提高了空间开销，每个元素额外有三个指针的空间占用。加一条限制：我们希望空间比时间重要。那么复用 `std::set` 就并不可取。于是在万千种替代方法中，随机挑选了一个用 `std::list` 实现，决定复用它。
 
-```c++
+```cpp
 template<class T>
 class Set: public std::list<T> { /* ... */ };
 ```
 
 看起来很美好，但实际上这违背了 is-a 准则。`std::list` 允许重复元素，而我们想实现的 set 不允许，该冲突决定了这一设计是糟糕的——public 继承并不适合这种情况。正确的做法是，令 `std::list` 作为我们 `Set` 类的底层数据结构，用于存放数据，即根据 `std::list` 实现出，就像这样：
 
-```c++
+```cpp
 template<class T>
 class Set {
  public:
@@ -1349,7 +1349,7 @@ public 继承可以实现 is-a 语义，这是前文讨论过的。那么 privat
 
 ## 40. 明智而审慎地使用多重继承
 
-关于多继承的事，请看[**此文**](../../C/C-OOP/#继承)。
+关于多继承的事，请看[**此文**](../../c/c-oop/#继承)。
 
 多重继承容易引发歧义，且带来了虚继承的需求。虚继承还会带来一系列成本，除非虚基类不带任何数据。
 
@@ -1357,7 +1357,7 @@ public 继承可以实现 is-a 语义，这是前文讨论过的。那么 privat
 
 ## 41. 了解隐式接口和编译期多态
 
-```c++
+```cpp
 // 隐式接口
 template<class T>
 void doProcessing(T& w) {
@@ -1379,14 +1379,14 @@ w 必须支持在 **template** 中指定需要 w 进行执行的操作，这里�
 
 在 template 中，`typename` 和 `class` 具有同样的含义。就比如下面这两种声明方式，其实是没有区别的。
 
-```c++
+```cpp
 template<typename T> class Widget;
 template<class T> class Widget;
 ```
 
 然而在这两者并不总是等价，有时候我们不得不用 `typename`。比如下面一个函数模板，接受一个 STL 容器作为模板参数，该容器内持有的对象可被赋值为 int，函数功能是打印容器内的第二个元素。
 
-```c++
+```cpp
 template<class C>
 void print2nd(const C& container) {
   if (container.size() > 2) {
@@ -1404,7 +1404,7 @@ void print2nd(const C& container) {
 
 此时我们发现应该明确指出这是一个类型，做法很简单，只要在前面加上一个关键字 `typename` 即可。
 
-```c++
+```cpp
 template<class C>
 void print2nd(const C& container) {
   if (container.size() > 2) {
@@ -1416,7 +1416,7 @@ void print2nd(const C& container) {
 
 然而这个做法也有例外，即，`typename` 不可以出现在基类继承列表中的嵌套从属名称前，也不可以在成员初始化列表中作为基类的修饰符，比如：
 
-```c++
+```cpp
 template<class T>
 class Derived: public Base<T>::Nested {         // 继承列表，不允许 typename
  public:
@@ -1430,7 +1430,7 @@ class Derived: public Base<T>::Nested {         // 继承列表，不允许 type
 
 如果一个派生类模板继承自基类模板，并且派生类试图调用基类中的函数，那么极有可能无法通过编译：
 
-```c++
+```cpp
 template<class T>
 class Base {
  public:
@@ -1450,7 +1450,7 @@ class Derived : public Base<T> {
 
 这是因为，在 Template C++ 中，任何一个模板均存在被**特化**的可能性，而那个特化版本可能并不提供和一般性 template 相同的接口。也就是说我们可以实现一个 `Base<int>`，它不包含 `foo()` 这个函数。
 
-```c++
+```cpp
 template<>
 class Base<int> {
  public:
@@ -1477,7 +1477,7 @@ d.bar();       // ERROR! Base<int> 不存在函数 foo()
 
 1. 在基类函数前加 `this->`
 
-   ```c++
+   ```cpp
    template<class T>
    class Derived : public Base<T> {
     public:
@@ -1491,7 +1491,7 @@ d.bar();       // ERROR! Base<int> 不存在函数 foo()
 
 2. 使用 using 声明，将基类名称引入派生类中
 
-   ```c++
+   ```cpp
    template<class T>
    class Derived : public Base<T> {
     public:
@@ -1506,7 +1506,7 @@ d.bar();       // ERROR! Base<int> 不存在函数 foo()
 
 3. 显式指明被调用函数的作用域
 
-   ```c++
+   ```cpp
    template<class T>
    class Derived : public Base<T> {
     public:
@@ -1532,7 +1532,7 @@ template 是节省时间和避免代码重复的奇技淫巧。但如果不小�
 
 比如希望实现某个矩阵，并支持求逆运算：
 
-```c++
+```cpp
 template<class T, std::size_t n>
 class SquareMatrix {
  public:
@@ -1553,7 +1553,7 @@ m2.invert();
 
 两份实例化了的对象，产生了两份除了常量 5 和 10 不同，其它完全相同的函数。这就是一个典型的代码膨胀例子。为了消除这一膨胀行为，进行如下修改：
 
-```c++
+```cpp
 template<class T>
 class SquareMatrixBase {
  protected:
@@ -1584,7 +1584,7 @@ class SquareMatrix: private SquareMatrixBase<T> {
 
 ## 45. 运用成员函数模板接受所有兼容类型
 
-```c++
+```cpp
 template<class T>
 class SmartPtr {
  public:
@@ -1606,7 +1606,7 @@ class SmartPtr {
 
 [**条款 24**](#24-若所有参数皆需类型转换请为此采用-non-member-函数) 讨论过为什么惟有 non-member 函数才有能力"在所有实参身上实施院式类型转换"，该条款并以 `Rational` 类的 `operator*()` 函数为例。本条款将对该例子进行扩充——模板化。
 
-```c++
+```cpp
 template<class T>
 class Rational {
  public:
@@ -1630,7 +1630,7 @@ Rational<int> result = oneHalf * 2; // ERROR! 无法通过 2 来生成一个 Rat
 
 而只需要在类模板中用 `friend` 指涉某个特定函数（即 `operator*`）即可应对挑战。
 
-```c++
+```cpp
 template<class T>
 class Rational {
  public:
@@ -1654,7 +1654,7 @@ Rational<int> result = oneHalf * 2; // OK!
 
 现在对 `operator*` 的混合式调用可以通过编译了，因为当对象 `oneHalf` 被声明为一个 `Rational<int>` 时，相应的类被实例化，同时友元函数 `operator*(const Rational<int>, const Rational<int>)` 也就被自动声明出来。后者身为一个函数而非函数模板，因此编译器可在调用它时使用隐式转换函数，而这便是混合式调用之所以成功的原因。但这个函数虽然声明于类内，却并没有被定义——既然我们声明了一个函数，那就有责任定义这个函数！最简单可行的办法就是将函数定义式直接写到类内，并令其调用一个辅助函数：
 
-```c++
+```cpp
 template<class T> class Rational;
 
 template<class T>
@@ -1688,7 +1688,7 @@ STL 里使用 [**iterator_traits**](https://blog.csdn.net/qq_15730877/article/de
 
 当 `operator new` 抛出异常以反映一个未获满足的内存需求之前，它会先调用一个错误处理函数，即 `new-handler`，定义为一个 `void(*)()` 类型的函数指针。我们可以通过 `set_new_handler()` 函数来自定义这个处理函数。
 
-```c++
+```cpp
 // 已声明于 <new> 中的代码
 namespace std {
   using new_handler = void(*)();
@@ -1718,7 +1718,7 @@ int main() {
 
 有时候我们希望根据分配对象的类型不同而调用不同的 `new_handler`，只需要令每个类提供一个 `set_new_handler()` 和 `operator new` 即可。
 
-```c++
+```cpp
 class Widget {
  public:
   static std::new_handler set_new_handler(std::new_handler p) noexcept;
@@ -1742,7 +1742,7 @@ std::new_handler Widget::set_new_handler(std::new_handler p) noexcept {
 2. 调用全局 `operator new`
    - 如果分配失败，调用 `Widget` 的 `new-handler`。如果全局 `operator new` 最终无法分配足够内存，会抛出 `std::bad_alloc` 异常。此时 `Widget` 的 `operator new` 必须恢复原本的全局 `new-handler`，再传播该异常；
 
-      ```c++
+      ```cpp
       class NewHandlerHolder {
        public:
         explicit NewHandlerHolder(std::new_handler nh): handler(nh) {} // 取得原先 new-handler
@@ -1758,7 +1758,7 @@ std::new_handler Widget::set_new_handler(std::new_handler p) noexcept {
 
       这样就使得 `Widget::operator new` 的实现非常简单：
 
-      ```c++
+      ```cpp
       void* Widget::operator new(std::size_t size) noexcept(false) {
         NewHandlerHolder h(std::set_new_handler(currentHandler));
         return ::operator new(size);
@@ -1792,7 +1792,7 @@ std::new_handler Widget::set_new_handler(std::new_handler p) noexcept {
 
 btw，如[**条款 33**](#33-避免遮掩继承而来的名称) 讨论的那样，我们必须小心让 `operator new` 掩盖外层作用域的其它版本。
 
-```c++
+```cpp
 class Base {
  public:
   static void* operator new(std::size_t size, std::ostream& logstram) noexcept(false); // 掩盖 global operator new
@@ -1811,7 +1811,7 @@ Derived* pd = new Derived;             // OK!
 
 解决方案为：对于撰写内存分配函数，需要在缺省情况下，在全局作用域内提供以下所有形式的 `operator new`。
 
-```c++
+```cpp
 void* operator new(std::size_t) noexcept(false);                  // normal new
 void* operator new(std::size_t, void*) noexcept;                  // placement new
 void* operator new(std::size_t, const std::nothrow_t&) noexcept;  // nothrow new

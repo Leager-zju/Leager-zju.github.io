@@ -4,7 +4,7 @@ author: Leager
 mathjax: true
 date: 2023-11-09 00:23:58
 summary:
-categories: C++
+categories: c++
 tags: C++ Basic
 img:
 ---
@@ -56,7 +56,7 @@ vector 内部维护了三个迭代器，分别是:
 
 那么如何释放内存呢？比如一个 `vector<int> nums`， 比较 hack 的一种方式是 `nums = {}`，这样既可以清空元素还会释放内存。正规的做法是令一个空 vector（右值）调用 `vector::swap()` 进行底层数组的交换，交换后 `nums` 指向一个空数组，而另一个右值会在当前作用域结束后被回收。
 
-```C++
+```cpp
 vector<int>().swap(nums); // nums 为待释放的 vector
 nums.swap(vector<int>()); // Error: Non-const lvalue reference to type 'vector<...>' cannot bind to a temporary of type 'vector<...>' 因为 swap 的形参类型是 T&，不能传递右值
 
@@ -69,7 +69,7 @@ nums.swap(vector<int>()); // Error: Non-const lvalue reference to type 'vector<.
 
 而当 `vector` 里面存了指针时，上面的做法并不会释放指针指向的那片内存，从而导致内存泄漏。应当首先遍历 `vector` 逐个 `delete`/`free()`。
 
-```C++
+```cpp
 for (auto&& iter = nums.begin(); iter != nums.end(); iter++) {
   if (*iter) {
     delete *iter;
@@ -217,7 +217,7 @@ priority_queue 允许自定义比较规则，其应当是一个实现了 `bool o
 
 默认情况下使用 `std::less<T>` 作为比较规则，其实现形式可能是下面这样，也就意味着**元素值越「小」，优先级越低**。所以当我们使用 `priority_queue<int>` 时，总是能取到优先队列中的最大值。
 
-```C++
+```cpp
 template<class T>
 struct less {
   bool operator()(const T& a, const T& b) {

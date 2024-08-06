@@ -4,7 +4,7 @@ author: Leager
 mathjax: true
 date: 2023-02-02 17:19:10
 summary:
-categories: C++
+categories: c++
 tags: C++11
 img:
 ---
@@ -17,7 +17,7 @@ C++ 不像 Java 那样有虚拟机动态的管理内存，如果使用裸指针�
 
 前面提到使用**裸指针**会存在内存泄漏等问题。这里用具体代码来说明：
 
-```c++
+```cpp
 class A {};
 void func() {
   auto p = new A; // 定义 p 为指向 A 对象的裸指针
@@ -44,7 +44,7 @@ void func() {
 
 1. 管理单个对象（例如以 `new` 分配）；
 
-    ```c++
+    ```cpp
     template<
         class T,
         class Deleter = std::default_delete<T>
@@ -53,7 +53,7 @@ void func() {
 
 2. 管理动态分配的对象数组（例如以 `new[]` 分配）；
 
-    ```c++
+    ```cpp
     template <
         class T,
         class Deleter
@@ -64,7 +64,7 @@ void func() {
 
 > `unique_ptr` 的**删除器**要求必须是能且仅能够传入 `T*` 类型参数的左值可调用对象，而不能是 lambda 表达式：
 >
-> ```c++
+> ```cpp
 > template<typename T>
 > struct deleter {
 >   void operator(T* p) { delete p; }
@@ -76,7 +76,7 @@ void func() {
 
 用法如下：
 
-```c++
+```cpp
 struct A {
   ~A() { std::cout << "~A\n"; }
   void Print() { std::cout << "Print\n"; }
@@ -143,7 +143,7 @@ ptrs[1].Print();
 
 `shared_ptr` 还可以自定义**删除器**，在引用计数为零的时候自动调用删除器来释放对象的内存，这里删除器只需要是传入 `T*` 参数的可调用对象即可：
 
-```c++
+```cpp
 std::shared_ptr<int> ptr(new int, [](int *p){ delete p; });
 ```
 
@@ -152,7 +152,7 @@ std::shared_ptr<int> ptr(new int, [](int *p){ delete p; });
 1. 不用同一个裸指针初始化多个 `shared_ptr`，也不要对 `get()` 返回的裸指针进行 `delete`，否则会出现 **double free** 导致出问题；
 2. 不将 `this` 指针初始化 `shared_ptr` 并返回，否则会出现 **double free**，比如：
 
-    ```c++
+    ```cpp
     class A {
       shared_ptr<A> func() {
         return std::shared_ptr<A>(this);
@@ -164,7 +164,7 @@ std::shared_ptr<int> ptr(new int, [](int *p){ delete p; });
 
 3. 尽量用 `make_shared` 代替 `new`，比如：
 
-    ```c++
+    ```cpp
     class A {
       A(int i) { std::cout << i; }
     };
@@ -174,7 +174,7 @@ std::shared_ptr<int> ptr(new int, [](int *p){ delete p; });
 
     > `make_shared()` 为我们提供了一个新的创建共享指针的方法，其函数原型为：
     >
-    > ```c++
+    > ```cpp
     > template< class T, class... Args >
     > shared_ptr<T> make_shared( Args&&... args );
     > ```
@@ -185,7 +185,7 @@ std::shared_ptr<int> ptr(new int, [](int *p){ delete p; });
 
 4. 避免**循环引用**。所谓循环引用，就是存在一个引用通过一系列的引用链，最后引用回自身，且看代码：
 
-    ```c++
+    ```cpp
     struct A;
     struct B;
 
@@ -222,7 +222,7 @@ std::shared_ptr<int> ptr(new int, [](int *p){ delete p; });
 
 具体用法为：
 
-```c++
+```cpp
 int* a = new int{0};
 std::shared_ptr<int> shared_p(a);
 std::weak_ptr<int> weak_p = shared_p; // weak_ptr 不共享所有权，仅作监视用
@@ -238,7 +238,7 @@ std::cout << shared_p.use_count() << " " << weak_p.use_count() << " " << q.use_c
 
 在这样的基础上，`weak_ptr` 也就能够打破 `shared_ptr` 中所存在的循环引用现象——令循环中的其中一个指针为 `weak_ptr` 即可。
 
-```c++
+```cpp
 struct A;
 struct B;
 
@@ -270,7 +270,7 @@ int main() {
 4. 支持用派生类构造；
 5. 正确释放指针；
 
-```C++
+```cpp
 template<class T>
 class SharedPointer {
   public:

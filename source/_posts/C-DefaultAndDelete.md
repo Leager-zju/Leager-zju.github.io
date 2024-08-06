@@ -4,7 +4,7 @@ author: Leager
 mathjax: true
 date: 2023-02-04 12:15:21
 summary:
-categories: C++
+categories: c++
 tags: C++11
 img:
 ---
@@ -17,7 +17,7 @@ C++11 中新增了 **`default`** 与 **`delete`** 这俩关键字。请不要误
 
 众所周知，如果用户自定义了一个类的构造函数，则编译器不会为其隐式生成默认构造函数。可能它觉得你想根据自己的需求定义构造函数。
 
-```c++
+```cpp
 class A {
  public:
   A(int i) {}
@@ -43,7 +43,7 @@ C c;  // OK! 所有形参都具有默认值
 
 需要**注意**的是，`default` **只能**用于**六大特殊函数**：默认构造、拷贝构造、拷贝赋值、移动构造、移动赋值、析构。毕竟用户自定义的函数不在"默认"范畴中。除此之外 `default` 既支持在类**体内**(in-line)声明，也支持**体外**(out-line)声明。
 
-```c++
+```cpp
 class A {
  public:
   A() = default; // in-line
@@ -66,7 +66,7 @@ A a; // OK!
 
 于是，`delete` 被提出。与 `default` 相对，后面加上 `= delete` 的函数会被视为**弃置**(deleted)，在编译器眼中这个函数**禁止被定义**，对该函数的调用会导致编译错误，继而从根本上解决了这个问题。与 `default` 不同，`delete` 可以用于修饰任何类成员函数。
 
-```c++
+```cpp
 class A {
  public:
   A() = default;

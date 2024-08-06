@@ -4,7 +4,7 @@ author: Leager
 mathjax: true
 date: 2024-04-07 11:28:36
 summary:
-categories: LeetCode
+categories: leetcode
 tags: weekly
 img:
 ---
@@ -27,7 +27,7 @@ img:
 
 ### code
 
-```C++
+```cpp
 // C++
 class Solution {
 public:
@@ -70,7 +70,7 @@ public:
 
 ### code
 
-```C++
+```cpp
 // C++
 class Solution {
 public:
@@ -123,7 +123,7 @@ public:
 
 ### code
 
-```C++
+```cpp
 // C++
 class Solution {
 public:
@@ -184,7 +184,7 @@ public:
 
 ### code
 
-```C++
+```cpp
 // C++
 class Solution {
 public:

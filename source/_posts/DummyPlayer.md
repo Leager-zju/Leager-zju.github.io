@@ -4,7 +4,7 @@ author: Leager
 mathjax: true
 date: 2024-04-25 10:28:13
 summary:
-categories: C++
+categories: c++
 tags: Project
 img:
 ---
@@ -180,7 +180,7 @@ include(CPack)
 
 应当改为
 
-```C++
+```cpp
 set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 file(GLOB_RECURSE SRC_FILES
     "${SRC_DIR}/*/*.c*"
@@ -203,7 +203,7 @@ add_executable(test ${SRC_FILES})
 
 #### 编译选项
 
-```C++
+```cpp
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_BUILD_TYPE Release)
 target_compile_options(dummyplayer PUBLIC -Wall -Werror -g)
@@ -211,7 +211,7 @@ target_compile_options(dummyplayer PUBLIC -Wall -Werror -g)
 
 #### 可执行文件输出路径
 
-```C++
+```cpp
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/build/bin)
 ```
 
@@ -242,7 +242,7 @@ $ sudo apt-get install protobuf-compiler libprotobuf-dev
 
 然后在 `CMakeLists.txt` 中进行如下修改
 
-```C++
+```cpp
 find_package(Protobuf REQUIRED)
 include_directories(
     ...
@@ -288,14 +288,14 @@ $ protoc -I=$SRC_DIR --cpp_out=$DST_DIR $SRC_DIR/xx.proto
 
 编译得到的 C++ 源码里为我们提供了以下两个函数
 
-```C++
+```cpp
 bool ParseFromIstream(std::istream* input);
 std::string SerializeAsString() const;
 ```
 
 配合 C++ 库 `<fstream>` 中的 `ifstream`/`ofstream` 就能实现 protobuf 与磁盘的交互。
 
-```C++
+```cpp
 // 读取文本并反序列化为结构体
 std::ifstream fread("file/name", std::ios::in);
 player_.ParseFromIstream(&fread);
@@ -311,7 +311,7 @@ fwrite.close();
 
 基本思路是在程序启动时用 `std::ofstream` 打开日志文件，每次调用 `log()` 时以 `std::ios::app` 方式追加写入。为了提高泛用性，可以用参数包来作为输入。
 
-```C++
+```cpp
 template<class T, class ...Args>
 void log(T&& first, Args&& ...args) {
     logWrite << first << " ";
@@ -326,7 +326,7 @@ void log(T&& arg) {
 
 用宏可以在不降低开发效率的同时，输出更多可用信息
 
-```C++
+```cpp
 #define LOG_ENABLED 1
 #define HEADER header(__FILE__, __LINE__)
 
@@ -351,7 +351,7 @@ inline std::string header(const std::string& filename, int line) {
 
 比如我的日志输出内容是这样的
 
-```C++
+```cpp
 10:26:30 [controller.cpp:114] log-in with account 123
 10:26:30 [controller.cpp:122] set-name to user
 10:26:30 [controller.cpp:141] add-money for count 10
@@ -444,7 +444,7 @@ $ awk -f path/to/awk path/to/log # -f 指定脚本所在文件，然后单独跟
 
 `clangd` 是根据一个叫 `compile_commands.json` 的文件来进行代码提示的，这个文件的生成需要在 `CMakeLists.txt` 中加入这一行：
 
-```C++
+```cpp
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 ```
 

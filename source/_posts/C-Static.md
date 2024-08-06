@@ -4,7 +4,7 @@ author: Leager
 mathjax: true
 date: 2023-02-13 17:02:49
 summary:
-categories: C++
+categories: c++
 tags: C++ Basic
 img:
 ---
@@ -17,7 +17,7 @@ img:
 
 `static` 修饰的普通变量存储在**静态区**，其生命周期延长至整个程序结束。只有第一次会执行初始化，若无初始值，则用默认值进行初始化。
 
-```c++
+```cpp
 class Foo {
  public:
   Foo() { std::cout << "Foo\n"; }
@@ -52,7 +52,7 @@ int main() {
 
 > 非静态成员变量依附于特定的对象，而静态成员函数在类实例化之前就已经分配空间，此时非静态成员变量连个影子都见不到，更别说使用了。
 
-```c++
+```cpp
 class Foo {
  private:
   int non_static{0};

@@ -61,7 +61,7 @@ CMakelists 参见相应分支。
 
 实现如下：
 
-```C++
+```cpp
 // 角度转弧度
 float angleToRadians(float angle) { return MY_PI*angle/180; }
 
@@ -87,7 +87,7 @@ Eigen::Matrix4f get_model_matrix(float rotation_angle)
 
 实现如下
 
-```C++
+```cpp
 Eigen::Matrix4f get_view_matrix(Eigen::Vector3f eye_pos)
 {
     Eigen::Matrix4f translate;
@@ -115,7 +115,7 @@ $$
 
 我的做法是：依然采用**右手系**，不同的是需要将这两个参数理解为近/远平面离原点的距离，$n$ 和 $f$ 各取相应的负值，这样就能解决这一问题了。
 
-```C++
+```cpp
 Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio,
                                       float zNear, float zFar)
 {
@@ -157,7 +157,7 @@ Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio,
 
 按照课程推导结果代入即可
 
-```C++
+```cpp
 Eigen::Matrix4f get_rotation(Vector3f axis, float angle)
 {
     Eigen::Matrix4f K = Eigen::Matrix4f::Identity();
@@ -185,7 +185,7 @@ Eigen::Matrix4f get_rotation(Vector3f axis, float angle)
 
 经过透视投影后，我们知道了三角形三个顶点在屏幕空间中的坐标。那么对于屏幕空间内的 pixel，可以利用重心坐标来判断是否在三角形内，如果重心坐标的三个值均在 $[0, 1]$ 之间，那么就认为这个 pixel 在三角形内。
 
-```C++
+```cpp
 static bool insideTriangle(float x, float y, const Vector3f* _v)
 {
     auto [alpha, beta, gamma] = computeBarycentric2D(x, y, _v);
@@ -203,7 +203,7 @@ static bool insideTriangle(float x, float y, const Vector3f* _v)
 
 如果一个 pixel 在三角形内，那么我们需要利用重心坐标求出对应的深度值，并判断是否需要用当前 RGB 覆盖原有的。因为这里是右手系，所以求出的点的 $\mathbf{z}$ 值都是负数，这个值越大，说明离原点（相机）越近，就是要覆盖的。
 
-```C++
+```cpp
 void rst::rasterizer::rasterize_triangle(const Triangle& t)
 {
     // 求解 bounding box（略）
@@ -261,7 +261,7 @@ $$
 
 为了实现 MSAA，就不能对于一个 pixel 设置一个 Z Buffer 值了。假设我们用 $n\times n$ 个采样点对同一个 pixel 进行采样，那么就需要对同一个 pixel 设置 $n\times n$ 个 Z Buffer，与等量的 RGB Buffer，这样之后就可以求一个 pixel 内所有采样点的 RGB 平均值来上色。
 
-```C++
+```cpp
 void rst::rasterizer::rasterize_triangle(const Triangle& t)
 {
     // 求解 bounding box（略）
@@ -324,7 +324,7 @@ void rst::rasterizer::rasterize_triangle(const Triangle& t)
 
 有了作业 2 的前置知识，其实求真实属性已经不是什么难点了，只不过这次 `rasterize_triangle()` 函数中多了一个名为 `view_pos` 的参数，通过阅读 `draw()` 函数我们发现，这正是三角形顶点在可视空间中的坐标，这样一来真实深度就有了，只要在屏幕空间求一遍重心坐标即可。
 
-```C++
+```cpp
 void rst::rasterizer::rasterize_triangle(const Triangle& t, const std::array<Eigen::Vector3f, 3>& view_pos)
 {
     // 求解 bounding box（略）
@@ -401,7 +401,7 @@ Blinn Phong 模型里面有三个项：漫反射项、高光项、环境光项�
 
 那么 $\mathbf{l},\mathbf{v},\mathbf{h}$ 就很好求了，要注意的是公式里的这些变量都是单位向量，要调用 `normalized()` 进行单位化。
 
-```C++
+```cpp
 Eigen::Vector3f phong_fragment_shader(const fragment_shader_payload& payload)
 {
     Eigen::Vector3f ka = Eigen::Vector3f(0.005, 0.005, 0.005);
@@ -453,7 +453,7 @@ Eigen::Vector3f phong_fragment_shader(const fragment_shader_payload& payload)
 
 这一步是在 Blinn Phong 的基础上用纹理中的 RGB 值代替模型本身 RGB 值，在前面加上以下代码即可。
 
-```C++
+```cpp
 if (payload.texture)
 {
     float u = payload.tex_coords.x();
@@ -486,7 +486,7 @@ if (payload.texture)
 
 第一步要做的是找出离纹理坐标系上的一点 $(u, v)$ 最近的 4 个 texel，那么就需要根据这个点在当前 texel 的位置进行判断。我们可以计算当前点到左侧 texel 中心在横坐标上的距离（对应公式中的 $s$），如果值大于 1，说明在横向上最近的是右侧 texel，反之是左侧的 texel。我们只需要将当前 $(u, v)$ 定位到 4 个 texel 中左下的那个，就可以很方便地进行计算了。
 
-```C++
+```cpp
 Eigen::Vector3f getColorBilinear(float u, float v)
 {
     // 纹理图是一个矩阵，要用行/列的形式访问
@@ -538,7 +538,7 @@ Eigen::Vector3f getColorBilinear(float u, float v)
 
 递归版本的思路是：对于给定控制点集 $C=\{c_1, c_2, \dots, c_n\}$，取所有的相邻的两个控制点 $c_i, c_{i+1}$，找到所有的 $n-1$ 个 $t$ 分点 $c_{i, t} = t*c_i + (1-t)*c_{i+1}$ 加入新的控制点集合 $C' = \{c_{1,t}, c_{2,t}, \dots, c_{n-1, t}\}$ ，并作为递归函数的参数传入。
 
-```C++
+```cpp
 cv::Point2f recursive_bezier(const std::vector<cv::Point2f> &control_points, float t)
 {
     if (control_points.size() == 1) {
@@ -574,7 +574,7 @@ void bezier(const std::vector<cv::Point2f> &control_points, cv::Mat &window)
 
 对于一个点来说，其与最近 4 个 pixel-center 的距离应该在区间 $[0, \sqrt{2}]$ 内，并且离一个 pixel 越近，这个 pixel 的 G 值就应该越高，可以简单的用公式 $\displaystyle G = 255*(1-\frac{d}{\sqrt{2}})$ 来线性计算，从而得到下面的代码
 
-```C++
+```cpp
 void bezier_antialiasing(const std::vector<cv::Point2f> &control_points, cv::Mat &window)
 {
     for (double t = 0.0; t <= 1.0; t += 0.001)
@@ -639,7 +639,7 @@ void bezier_antialiasing(const std::vector<cv::Point2f> &control_points, cv::Mat
 
 所以得到以下代码（稍作修改，更加可读）
 
-```C++
+```cpp
 void Renderer::Render(const Scene& scene)
 {
     static const int w = scene.width;
@@ -674,7 +674,7 @@ void Renderer::Render(const Scene& scene)
 
 用上课讲的 Möller–Trumbore 算法即可。
 
-```C++
+```cpp
 bool rayTriangleIntersect(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, const Vector3f& orig,
                           const Vector3f& dir, float& tnear, float& u, float& v)
 {
@@ -721,7 +721,7 @@ CMakeLists 里的编译选项中有一个 `-fsanitize=undefined`，这会导致�
 
 求出光线与三对平面的 $tmin, tmax$，然后判断这三个区间是否在 $\geq0$ 处有交集即可。
 
-```C++
+```cpp
 inline bool Bounds3::IntersectP(const Ray& ray, const Vector3f& invDir,
                                 const std::array<int, 3>& dirIsNeg) const
 {
@@ -746,7 +746,7 @@ inline bool Bounds3::IntersectP(const Ray& ray, const Vector3f& invDir,
 - 如果和左右子节点都相交，那么需要求出两个交点中最近的那个；
 - 如果只和一个节点相交，那直接返回交点即可；
 
-```C++
+```cpp
 Intersection BVHAccel::getIntersection(BVHBuildNode* node, const Ray& ray) const
 {
     std::array<int, 3> dirIsNeg{ray.direction.x < 0, ray.direction.y < 0, ray.direction.z < 0};
@@ -776,7 +776,7 @@ Intersection BVHAccel::getIntersection(BVHBuildNode* node, const Ray& ray) const
 
 首先将所有物体根据分布关系进行排序——在哪个轴上分布的最多就按哪个轴排。
 
-```C++
+```cpp
 Bounds3 centroidBounds;
 for (size_t i = 0; i < objects.size(); ++i)
     centroidBounds =
@@ -806,7 +806,7 @@ case 2:
 
 然后找到所有 `object` 中最中间的那个，划分成两个部分
 
-```C++
+```cpp
 auto beginning = objects.begin();
 auto middling = objects.begin() + objects.size()/2;
 auto ending = objects.end();
@@ -817,7 +817,7 @@ auto rightshapes = std::vector<Object*>(middling, ending);
 
 对这两部分分别进行构建
 
-```C++
+```cpp
 node->left = recursiveBuild(leftshapes);
 node->right = recursiveBuild(rightshapes);
 
@@ -826,7 +826,7 @@ node->bounds = Union(node->left->bounds, node->right->bounds);
 
 对于特殊情况（只有一个或两个 `object`），则无需排序。
 
-```C++
+```cpp
 if (objects.size() == 1) {
     // Create leaf _BVHBuildNode_
     node->bounds = objects[0]->getBounds();
@@ -864,7 +864,7 @@ SAH 的优化效果并没有特别明显，就不掰扯了。
 
 如果要做多线程版本，比如说设置 `n_thread` 个线程，那第 `i` 个线程负责 `rowId % n_thread = i` 的行即可。
 
-```C++
+```cpp
 void Renderer::Render(const Scene& scene)
 {
     ...
@@ -925,7 +925,7 @@ void Renderer::Render(const Scene& scene)
 
 这里如果改用光源向物体打出的光线进行遮挡判断会出现 `Intersection.distance = 0` 的错误，认为应该是光线与光源的 AABB 产生了交点，需要将起点进行偏移处理。为了方便还是采用从 $p$ 点出发的方法。
 
-```C++
+```cpp
 Intersection light;
 float pdf;
 sampleLight(light, pdf);
@@ -950,7 +950,7 @@ if (block.happened && dis - block.distance < EPSILON) {
 
 如果需要继续递归，那么就根据黎曼积分，在物体表面半球区域随机采样一个方向，框架提供的方法是 `Material::sample()`，根据入射方向与法线随机生成出射方向，然后根据公式计算间接光照项 `L_indir`。
 
-```C++
+```cpp
 if (get_random_float() < RussianRoulette) {
     Vector3f sampleDir = m->sample(ray.direction, N).normalized();
     Vector3f wi = -sampleDir; // 其它物体打来的间接光照
@@ -968,7 +968,7 @@ if (get_random_float() < RussianRoulette) {
 
 完整的函数如下：
 
-```C++
+```cpp
 Vector3f Scene::castRay(const Ray &ray, int depth) const
 {
     Intersection intersection = intersect(ray);

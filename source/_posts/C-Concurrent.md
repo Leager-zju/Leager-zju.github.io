@@ -4,7 +4,7 @@ author: Leager
 mathjax: true
 date: 2023-01-29 22:44:35
 summary:
-categories: C++
+categories: c++
 tags: C++11
 img:
 ---
@@ -69,7 +69,7 @@ C++11 新增了官方**并发支持库**，使得我们能够更好地在系统�
 
 下面用具体代码进行演示。
 
-```c++
+```cpp
 #include <bits/stdc++.h>
 using namespace std;
 
@@ -115,14 +115,14 @@ int main() {
 2. `yield()`：让出 CPU 资源；
 3. `sleep_for()`：当前线程主动睡眠指定时间后醒来。**函数原型**为
 
-    ```c++
+    ```cpp
     template< typename Rep, typename Period >
     inline void sleep_for(const std::chrono::duration<Rep, Period>& time)
     ```
 
 4. `sleep_until()`：当前线程主动睡眠，直至指定时刻。**函数原型**为
 
-    ```c++
+    ```cpp
     template< typename Clock, typename Duration >
     inline void sleep_until(const std::chrono::time_point<Clock, Duration>& time)
     ```
@@ -168,7 +168,7 @@ mutex 类是所有锁的基础，其**成员函数**只有三个，都是基于�
 
 除了各个锁类以外，<mutex\> 头文件下还定义了两个全局函数 `std::lock()` 与 `std::try_lock()`，提供了通用的**一次性加多个锁**的方法。**函数原型**如下：
 
-```c++
+```cpp
 template< class Lockable1, class Lockable2, class... LockableN >
 void lock( Lockable1& lock1, Lockable2& lock2, LockableN&... lockn );
 
@@ -188,7 +188,7 @@ int try_lock( Lockable1& lock1, Lockable2& lock2, LockableN&... lockn );
 
 其类定义如下：
 
-```c++
+```cpp
 template<typename Mutex>
 class lock_guard {
  public:
@@ -210,7 +210,7 @@ class lock_guard {
 
 两种构造函数区别在于：第一种在构造时上锁；而第二种重载形式形参中的 `adopt_lock_t` 为空结构体类型，表示**构造模式**，即**假设调用方线程已拥有 mutex 的所有权**，以此种方式进行构造时不会上锁。`std` 命名空间下已为我们实现了名为 `adopt_lock` 的全局变量，故可以用以下方式进行初始化：
 
-```c++
+```cpp
 std::mutex a;
 std::lock_guard b(a);             // 构造后 a 上锁
 
@@ -226,7 +226,7 @@ std::lock_guard c(a, adopt_lock); // 告知 a 已上锁，此时用这种初始�
 
 类定义如下：
 
-```c++
+```cpp
 template <typename Mutex>
 class unique_lock {
  public:
@@ -295,14 +295,14 @@ unique_lock 在 lock_guard 基础上添加了超时语义，并且支持另外�
 
 此函数保证某一函数在多线程环境中只调用一次，它需要配合 `std::once_flag` 使用。**函数原型**为：
 
-```c++
+```cpp
 template< class Callable, class... Args >
 void call_once( std::once_flag& flag, Callable&& f, Args&&... args );
 ```
 
 若 `flag == true`，则直接返回；反之，利用 `std::forward` 调用 `f`，且仅当正常返回时将 `flag` 由 `false` 改为 `true`。具体代码如下：
 
-```c++
+```cpp
 #include <bits/stdc++.h>
 using namespace std;
 
@@ -343,7 +343,7 @@ int main() {
 
 我们希望最终结果是**确定性**的，就需要严格控制线程同步，一个很好的考虑是使用前面提到的 mutex，代码可以写为：
 
-```c++
+```cpp
 int x = 0;
 std::mutex m;
 void add() {
@@ -358,7 +358,7 @@ void sub() {
 
 而如果使用**原子变量**，则代码可以简化为：
 
-```c++
+```cpp
 std::atomic<int> x(0);  // or std::atomic_int x(0)
 void add() { x++; }
 void sub() { x--; }
@@ -376,7 +376,7 @@ void sub() { x--; }
 
 即使共享变量是原子的，也必须互斥地修改它，故尝试进行 P/V 的线程必须在持有锁时进行 P/V，这里的锁必须采用 `unique_lock`，因为需要 RAII 以及手动 lock/unlock。具体用法大致如下：
 
-```c++
+```cpp
 std::condition_variable cond;
 
 {
@@ -403,7 +403,7 @@ std::condition_variable cond;
 
 首先是 **wait** 系列：
 
-```c++
+```cpp
 // 1. wait
 // 原子地进行 unlock ，阻塞当前线程，并将它添加到等待队列。唤醒后，进行 lock 且 wait 退出。
 void wait( std::unique_lock<std::mutex>& lock );
@@ -453,7 +453,7 @@ bool wait_for( std::unique_lock<std::mutex>& lock,
 
 接下来是 **notify** 系列：
 
-```c++
+```cpp
 // 唤醒等待队列中的某一线程，一般只有两个线程的时候才会用 notify_one，因为非此即彼。
 void notify_one() noexcept;
 
@@ -469,7 +469,7 @@ void notify_all() noexcept;
 
 在此线程完全结束时调用 `notify_all()`。函数原型为：
 
-```c++
+```cpp
 void notify_all_at_thread_exit( std::condition_variable& cond,
                                 std::unique_lock<std::mutex> lk );
 ```
@@ -480,7 +480,7 @@ void notify_all_at_thread_exit( std::condition_variable& cond,
 
 上面讲条件变量用法时，我提到"**尝试进行 P/V 的线程必须在持有锁时进行 P/V**"，那么如果不上锁就 wait/notify 会怎样呢？不加锁便进行wait 操作的行为我们已经说过是 UB，而不加锁便进行 notify 的行为会导致**唤醒丢失**，且看：
 
-```c++
+```cpp
 // case1 唤醒丢失
 std::mutex m;
 std::condition_variable cond;
@@ -510,7 +510,7 @@ thread2.join();
 
 为了解决这一问题，我们需要在 notify 前上锁，这样保证了在 thread1 的上锁与 wait 之间不会发生 notify 行为——thread2 会因竞争锁资源而被阻塞。
 
-```c++
+```cpp
 // OK
 std::mutex m;
 std::condition_variable cond;
@@ -537,7 +537,7 @@ thread2.join();
 
 上面这种情况中，我们只考虑了 notify 是否会发生在上锁与 wait 之间，但 notify 也有可能发生在上锁之前，这也可能导致唤醒丢失。考虑下面这种情况：
 
-```c++
+```cpp
 // case2 唤醒丢失
 std::mutex m;
 std::condition_variable cond;
@@ -562,7 +562,7 @@ thread2.join();
 
 为了解决这一问题，我们应当加上某些限制，使得 notify 确定性地位于 wait 之后。于是需要套上一层条件判断的语句（如 `while`），检测当前是否应当 wait，套上 `while` 后，即便 thread2 首先执行，但由于 thread2 中修改了 predicate，thread1 也就能够很快检测到，能够跳过 wait 阶段。当然也可以不用 `while`，而是写成下面这种样子，这两者是等价的。
 
-```c++
+```cpp
 cond.wait(lock, [] { return flag; });
 ```
 
@@ -574,7 +574,7 @@ cond.wait(lock, [] { return flag; });
 
 用一个例子来说明：在**生产者消费者**问题中，生产者每生产出一个产品，就通知所有消费者；当所有消费者被唤醒时，它们对产品的获取顺序为竞争关系，此时第一个赢得竞争的消费者取走了产品，而之后的消费者会发现并没有任何产品存在，又此时已经退出了 wait 阶段，也就继续推进下去直至消亡，最后就导致只有一个消费者进行了消费。比如下面这段代码：
 
-```c++
+```cpp
 // case3 虚假唤醒
 std::mutex m;
 std::condition_variable cond;
@@ -608,7 +608,7 @@ void producer() {
 
 `std::promise<T>` 属于 Provider。它关联了一个 `std::future<T>` 对象，并可以通过 `get_future()` 返回该对象。同样的，它也可以通过 `set_value(T)` 进行共享变量的赋值，从而唤醒另一个调用了 `std::future::get()` 的线程（如果有）。
 
-```C++
+```cpp
 #include <functional>
 #include <future>
 #include <iostream>
@@ -638,7 +638,7 @@ int main() {
 
 当线程 a 用一个 `std::packaged_task` 初始化新线程 b 时，a 可以调用 `std::packaged_task::get_future()` 返回一个 future 对象，并调用 `get()` 阻塞直至 b 执行完返回。
 
-```C++
+```cpp
 #include <chrono>
 #include <future>
 #include <iostream>
@@ -688,7 +688,7 @@ pthread 是一个在类 UNIX 系统下广泛使用的并发包，Linux 系统下
 
 这是 pthread 中对于锁的数据结构定义，如下所示：
 
-```c++
+```cpp
 typedef union
 {
   struct __pthread_mutex_s
@@ -718,7 +718,7 @@ typedef union
 
 对于**普通锁**，直接进行加锁。
 
-```C++
+```cpp
 if (__glibc_likely (type == PTHREAD_MUTEX_TIMED_NP)) {
   /* 普通锁 */
   simple:
@@ -731,7 +731,7 @@ if (__glibc_likely (type == PTHREAD_MUTEX_TIMED_NP)) {
 
 对于**可重入锁**，如果同一线程加锁，则直接增加计数器；否则，像普通锁一样加锁。
 
-```C++
+```cpp
 else if (__builtin_expect (PTHREAD_MUTEX_TYPE (mutex) == PTHREAD_MUTEX_RECURSIVE_NP, 1)) {
   /* 可重入锁 */
   pid_t id = THREAD_GETMEM (THREAD_SELF, tid);
@@ -755,7 +755,7 @@ else if (__builtin_expect (PTHREAD_MUTEX_TYPE (mutex) == PTHREAD_MUTEX_RECURSIVE
 
 对于**自适应锁**，则是首先进行一定次数的「自旋」，如果达到次数上限后依然没有获得锁，则像普通锁一样加锁。
 
-```C++
+```cpp
 else if (__builtin_expect (PTHREAD_MUTEX_TYPE (mutex) == PTHREAD_MUTEX_ADAPTIVE_NP, 1)) {
   /* 自适应锁 */
   if (! __is_smp)
@@ -785,7 +785,7 @@ else if (__builtin_expect (PTHREAD_MUTEX_TYPE (mutex) == PTHREAD_MUTEX_ADAPTIVE_
 
 对于**检错锁**，则首先检查是否为同一线程重复上锁，是一种简单的避免死锁的逻辑。
 
-```C++
+```cpp
 else {
   /* 检错锁 */
   pid_t id = THREAD_GETMEM (THREAD_SELF, tid);
@@ -803,7 +803,7 @@ else {
 
 来看看上锁的策略吧！简单来说就是先尝试用 CAS 获取锁，如果获取失败（被占用）就执行 `__lll_lock_wait*()` 挂起等待。
 
-```C++
+```cpp
 #define __lll_lock(futex, private)                                      \
   ((void)                                                               \
    ({                                                                   \
@@ -833,7 +833,7 @@ The lock is always acquired on return.」
 
 `*futex` 为 2 表示 "acquired, possibly with waiters"，所以如果已经为 2 了，就直接等待；之后检查锁状态是否为 0，然后将其置 2，如果最开始状态非 0 则等待。
 
-```C++
+```cpp
 void __lll_lock_wait (int *futex, int private) {
   if (*futex == 2)
     lll_futex_wait (futex, 2, private); /* Wait if *futex == 2. */
@@ -847,7 +847,7 @@ void __lll_lock_wait (int *futex, int private) {
 
 `lll_futex_wait` 这个宏走的是 `lll_futex_timed_wait()`。如果 lll_futex_wake 后 *futexp 值还是 val，则以 **FUTEX_WAIT** 执行系统调用 `futex()` 进行等待。
 
-```C++
+```cpp
 #define lll_futex_timed_wait(futexp, val, timeout, private)     \
   lll_futex_syscall (4, futexp,                                 \
 		     __lll_private_flag (FUTEX_WAIT, private),              \
@@ -867,7 +867,7 @@ void __lll_lock_wait (int *futex, int private) {
 
 释放锁的核心函数。无条件将锁的状态置 0，如果旧状态值为 2，则还需要执行 `lll_futex_wake` 去唤醒等待的线程，此时第一个竞争成功的线程通过 `atomic_exchange_acq (futex, 2)` 将状态置 2 后成功获取到锁，如此往复。
 
-```C++
+```cpp
 #define __lll_unlock(futex, private)                   \
   ((void)                                              \
    ({                                                  \
@@ -885,7 +885,7 @@ void __lll_lock_wait (int *futex, int private) {
 
 以 **FUTEX_WAKE** 去执行系统调用 `futex()`。
 
-```C++
+```cpp
 
 #define lll_futex_wake(futexp, nr, private)            \
   ({                                                   \
@@ -909,7 +909,7 @@ void __lll_lock_wait (int *futex, int private) {
 
 和普通的仅支持**执行但不返回结果**的线程池相比，其核心在于一个 `ThreadPool::execute()` 执行函数。该函数为模板函数，允许传入一个可调用对象及其参数列表，内部通过 `std::packaged_task` 包装后交付给空闲线程执行，并将返回结果保存在其关联的 `std::future` 对象中。执行函数可以返回这个 future，并让用户通过 `std::future::get()` 等待执行结果。
 
-```C++
+```cpp
 template<class F, class ...Args>
 auto ThreadPool::execute(F&& callable, Args&& ...args) -> decltype(callable(args...)) {
   using returnType = decltype(callable(args...));

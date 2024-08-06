@@ -4,7 +4,7 @@ author: Leager
 mathjax: true
 date: 2023-08-20 23:37:15
 summary:
-categories: TinyKV
+categories: lab
 tags: lab
 img:
 ---

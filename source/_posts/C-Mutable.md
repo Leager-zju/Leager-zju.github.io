@@ -4,7 +4,7 @@ author: Leager
 mathjax: true
 date: 2023-03-02 14:29:34
 summary:
-categories: C++
+categories: c++
 tags: C++ Basic
 img:
 ---
@@ -15,7 +15,7 @@ img:
 
 ## 类中的 mutable
 
-先聊聊一个有趣的话题，关于 [**const**](../../C/C-Const) 类成员函数有两大观点流派：
+先聊聊一个有趣的话题，关于 [**const**](../../c/c-const) 类成员函数有两大观点流派：
 
 1. **bitwise constness**：主张成员函数只有在不更改对象的任何非静态成员变量时才被认为是 const，即**绝对**常量；
 
@@ -25,7 +25,7 @@ img:
 
 对于第一种主张，有些成员函数并不具备 bitwise 特性，却能通过编译，一个很直观的例子便是，一个 const 类成员函数修改了类中某个指针指向的内容，却没有改变其指向：
 
-```c++
+```cpp
 class TextBlock {
  public:
   TextBlock(const char* s) { /* ... */ }
@@ -49,7 +49,7 @@ int main() {
 
 对于第二种主张，编译器并不支持这一做法，于是 `mutable` 关键字派上用场。如果将一个成员变量声明为 `mutable`（保证声明前提），则可以在 `const` 成员函数中对其进行修改，如下：
 
-```c++
+```cpp
 class Foo {
  public:
   /* ... */
@@ -63,6 +63,6 @@ class Foo {
 
 ## lambda 表达式中的 mutable
 
-详情请见[本文](../../C/C-Function/#可选说明符)。
+详情请见[本文](../../c/c-function/#可选说明符)。
 
 简单来说就是 lambda 表达式会将值捕获的变量视为 `const`，若想要对其进行修改需加上 `mutable` 说明符。

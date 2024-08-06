@@ -4,7 +4,7 @@ author: Leager
 mathjax: true
 date: 2023-01-20 15:10:57
 summary:
-categories: C++
+categories: c++
 tags: C++11
 img:
 ---
@@ -29,7 +29,7 @@ img:
 
 相反，不是左值的值，就是右值，其只存在于**临时寄存器**中，无法在内存中寻址，不具有持久性，因而无法放在等号左侧进行赋值操作，并且同一个作用域里的两个相等的右值事实上是两个**不同**的右值。例如：
 
-```c++
+```cpp
 char *ch = "hello"; // ch 是左值，"hello" 是字符串字面量，也是左值
 int b = 1, c = 2;   // b, c 是左值，1, 2 是右值
 int a = b + c;      // a 是左值，b + c 是右值
@@ -60,7 +60,7 @@ b + c = &3;         // ERROR! 右值不能放左边，且不能取地址
 
 C++11 以前，所有的引用都是**左值引用**，用 `Type&` 表示，只能用左值进行初始化，初始化时即绑定，不能更改绑定对象，其效果相当于为指定变量起"别名"，对引用变量的所有操作都会等效地施加在原变量上（对应内存中的实际数据是一致的），例如：
 
-```c++
+```cpp
 int x = 0;
 const int y = 1;
 
@@ -88,7 +88,7 @@ const int& ref_e = 3;    // OK! 常量引用甚至还可以用右值初始化，
 
 右值引用类型用 `Type&&` 表示，与左值引用相反，其只能用**右值**进行初始化，即便是常量右值引用也不例外。在引入了右值引用后，函数就可以写为：
 
-```c++
+```cpp
 void func( int&& num ) {
   std::cout << ++num;
 }
@@ -106,7 +106,7 @@ func(6); // output: 7
 
 通过模板或 `typedef` / `using` 中的类型操作可以构成引用的引用，即右值引用的右值引用折叠成右值引用，其余组合均折叠成左值引用：
 
-```c++
+```cpp
 using lref = int&;
 using rref = int&&;
 
@@ -121,7 +121,7 @@ rref&& r4 = 1; // r4 的类型是 int&&
 
 对于模板函数，希望传入的参数类型既能是左值，又能是右值，对于初学者而言，或许会通过以下代码实现：
 
-```c++
+```cpp
 template< class T >
 void func( T& t ) {}  // 接受左值
 
@@ -131,7 +131,7 @@ void func( T&& t ) {} // 接受右值
 
 以上为两种重载形式，显得很累赘。一种简化代码的方式是**万能引用**，只需一个函数就能实现既能接受左值又能接受右值：
 
-```c++
+```cpp
 template< class T >
 void func( T&& t ) {}
 ```
@@ -156,7 +156,7 @@ C++11 引入了移动语义，旨在进行一些**转移所有权**的操作，�
 
 ### std::move
 
-```c++
+```cpp
 // 一个示例实现
 template< class T >
 typename std::remove_reference<T>::type&& move( T&& t ) noexcept {
@@ -181,7 +181,7 @@ typename std::remove_reference<T>::type&& move( T&& t ) noexcept {
 
 函数原型如下：
 
-```c++
+```cpp
 template< class T >
 T&& forward( typename std::remove_reference<T>::type& t ) noexcept;
 
@@ -195,7 +195,7 @@ T&& forward( typename std::remove_reference<T>::type&& t ) noexcept;
 
 直接上例子：
 
-```c++
+```cpp
 void func( int& t ) { std::cout << "lvalue\n"; }
 
 void func( int&& t ) { std::cout << "rvalue\n"; }

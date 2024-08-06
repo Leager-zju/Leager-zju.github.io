@@ -4,7 +4,7 @@ author: Leager
 mathjax: true
 date: 2023-02-05 12:20:37
 summary:
-categories: C++
+categories: c++
 tags: C++11
 img:
 ---
@@ -76,7 +76,7 @@ C++11 为支持正则表达式新增了若干类，并将这些类封装在头�
 
 ### 代码示例
 
-```c++
+```cpp
 // 完全匹配
 std::regex r("\\w+day");
 std::smatch res;
@@ -97,7 +97,7 @@ std::cout << boolalpha
 // false
 ```
 
-```c++
+```cpp
 // 部分匹配
 std::regex r("\\w+day");
 std::smatch res;
@@ -112,7 +112,7 @@ std::cout << boolalpha
 // true Monday
 ```
 
-```c++
+```cpp
 // 子串替换
 std::regex r("\\w+day");
 std::smatch res;

@@ -33,7 +33,7 @@ img:
 
 Projection 算子的构造函数如下
 
-```C++
+```cpp
 ProjectionExecutor::ProjectionExecutor(ExecutorContext *exec_ctx, const ProjectionPlanNode *plan, std::unique_ptr<AbstractExecutor> &&child_executor):
   AbstractExecutor(exec_ctx),
   plan_(plan),
@@ -89,7 +89,7 @@ PNT 上的所有 node 在执行层就对应了不同的 Operator，Operator 接�
 
 Projection 操作实际上是语句 `SELECT col_name FROM table_name` 的具象化，在 PNT 中其接收 `SELECT` 部分对应算子返回表的所有 Tuple，然后选取 col_name 对应的列，构造新的 Tuple 进行返回。
 
-```C++
+```cpp
 bool ProjectionExecutor::Next(Tuple *tuple, RID *rid) {
   Tuple child_tuple{};
 
@@ -146,7 +146,7 @@ ExecutorContext 所有算子都是一样的，先来看看 Plan 为我们提供�
 
 考虑到这两个算子实际上是在单次 `Next()` 调用中就将所有操作完成，后续的调用直接返回 `false`，也就是说上层最多调用 Insert/Delete 算子的 `Next()` 两次。那么事情就好办了，我的做法是参考了 TEST-AND-SET 思想：定义了一个 `still_need_read` 变量，初始化为 `true`，然后
 
-```C++
+```cpp
 bool res = still_need_read_;
 if (still_need_read_) {
   still_need_read_ = false;
@@ -162,7 +162,7 @@ return res;
 
 根据 Guide，我们可以通过以下语句来将 Index 对象变为 B+ 树
 
-```C++
+```cpp
 tree_ = dynamic_cast<BPlusTreeIndexForOneIntegerColumn *>(index_info_->index_.get());
 ```
 
@@ -194,7 +194,7 @@ Plan 中为我们提供了如下新变量：
 
 该函数会在聚合表的另一个函数 `InsertCombine()` 中被调用，简单来说就是根据输入的 `AggregateValue` 去更新聚合表中具体的聚合函数值。生成这些聚合函数值所使用的聚合函数与 `agg_types_` 一一对应，所以遍历时需要
 
-```C++
+```cpp
 for (uint32_t i = 0; i < agg_types_.size(); i++) {
     switch(agg_types_[i]) {
       // 根据不同聚合类型采用不同方式更新聚合函数值
@@ -240,7 +240,7 @@ for (uint32_t i = 0; i < agg_types_.size(); i++) {
 
 代码框架大概长这样：
 
-```C++
+```cpp
 while (true) {
   if (next_) {
     if (!outer_executor_->Next(...)) {
@@ -275,7 +275,7 @@ while (true) {
 
 `key_predicate` 是一个 Expression 变量，利用 `Evaluate()` 找到传入 Tuple 中建立了索引的列上的 Value，然后再根据 `key_schema` 模式来构造元组。probe key 的构建大概长这样：
 
-```C++
+```cpp
 probe_value = plan_->KeyPredicate()->Evaluate(&outer_tuple_, outer_schema_);
 probe_key = Tuple({probe_value}, index_info_->index_->GetKeySchema());
 ```
@@ -292,7 +292,7 @@ Sort 也是个 Pipeline Breaker，因为其需要等到获取完所有 Tuple 再
 
 构建的过程也很简单，不断调用下层算子获取 Tuple 后加入数组，然后调用 `std::sort()` 并自定义排序方法。对于每个 `ORDER BY` 对应的列，若相等则比较下一列，否则按照排序类型直接返回 true or false。由于不会出现完全相同的两行，故自定义排序方法必定能在 `for` 循环中退出。
 
-```C++
+```cpp
 // 自定义排序方法
 [&](const Tuple &a, const Tuple &b) -> bool {
     bool res = false;
@@ -327,7 +327,7 @@ Top-N 将以上两个算子融合到一起，它动态维护当前所需的最�
 
 与此同时，我们还要实现 Optimizer 中的 `sort_limit_as_topn` 优化策略，观察其它策略我们发现，都有这样一段代码:
 
-```C++
+```cpp
 std::vector<AbstractPlanNodeRef> children;
 for (const auto &child : plan->GetChildren()) {
   children.emplace_back(OptimizeSortLimitAsTopN(child));

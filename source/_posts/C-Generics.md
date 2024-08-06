@@ -4,7 +4,7 @@ author: Leager
 mathjax: true
 date: 2023-02-28 11:11:02
 summary:
-categories: C++
+categories: c++
 tags: C++ Basic
 img:
 ---
@@ -23,7 +23,7 @@ img:
 
 **函数模板**定义一族函数。
 
-```c++
+```cpp
 template<模板形参列表> 函数声明;
 ```
 
@@ -34,7 +34,7 @@ template<模板形参列表> 函数声明;
 3. **模板形参**：形如 `template<形参列表> typename|class T`，类型名 `T` 是可选的；
 4. 上述的**形参包**；
 
-```c++
+```cpp
 // 于是 swap 函数可以写成这样
 template<class T>
 void swap(T& first, T& second) {
@@ -46,7 +46,7 @@ void swap(T& first, T& second) {
 
 **注意**，函数模板自身并不是类型、函数或任何其他实体，不会从只包含模板定义的源文件生成任何代码。函数模板只有**实例化**后才会有代码出现。所谓**实例化**，就是用实参填充模板形参列表，让编译器生成指定类型函数，不用定义函数实现。实例化一个函数模板需要知道它的所有模板实参，但不需要指定每个模板实参，允许编译器进行**隐式实例化**，即**模板实参推导**，即尽可能从函数实参推导缺失的模板实参。
 
-```c++
+```cpp
 int main() {
   int a = 1, b = 2;
   swap(a, b); // 隐式实例化。允许省略尖括号，编译器会自动进行模板实参推导
@@ -60,7 +60,7 @@ int main() {
 
 对于特定的实现，我们或许不想要依照原来函数模板那样执行，而是自定义函数体，这也是可以的。**函数模板特化**能够将某一个或某几个要处理的数据类型进行单独处理，但需要额外定义对应数据类型的模板函数，比如：
 
-```c++
+```cpp
 template<char>
 void swap(char& first, char& second) {
   std::cout << "我不 swap，哎，就是玩\n";
@@ -75,7 +75,7 @@ int main() {
 
 如果同时又加上一个这样的普通函数：
 
-```c++
+```cpp
 char swap(char& first, char& second) {
   std::cout << "只因你太美\n";
 }
@@ -89,13 +89,13 @@ char swap(char& first, char& second) {
 
 与函数模板一样，**类模板**定义一族类。
 
-```c++
+```cpp
 template<模板形参列表> 类声明;
 ```
 
 模板形参列表与函数模板完全一致。**注意**，类模板自身并不是类型、对象或任何其他实体，不会从只包含模板定义的源文件生成任何代码。类模板同样只有**实例化**后才会有代码出现，并且也支持**类模板实参推导**，即尽可能从类构造函数实参推导缺失的模板实参。此外，类模板的**特化**还进一步分为了**全特化**与**偏特化**。
 
-```c++
+```cpp
 #include <iostream>
 
 template <class First, class Second>
@@ -173,7 +173,7 @@ int main() {
 
 ### 模板类的派生
 
-```c++
+```cpp
 template <class T>
 class Base1 {};
 
@@ -187,7 +187,7 @@ class Derive12: Base<int> {};
 
 ### 类模板的派生
 
-```c++
+```cpp
 template <class T>
 class Base2 {};
 
@@ -198,7 +198,7 @@ class Derive21: Base2<T> {};
 
 ### 普通类的派生
 
-```c++
+```cpp
 class Base3 {};
 
 // case 3.1: 普通类派生类模板
@@ -212,7 +212,7 @@ class Derive31: Base3 { T val; };
 
 子类和父类的模板参数列表可以不一样，但必须一一对应。
 
-```c++
+```cpp
 template <class T, class U>
 class Base {
  public:
@@ -267,7 +267,7 @@ int main() {
 
 **变参类模板**可以用任意数量的模板实参实例化，以 `std::tuple` 为例，其定义为：
 
-```c++
+```cpp
 template<class... Types>
 class tuple;
 
@@ -279,7 +279,7 @@ std::tuple<0> error;       // ERROR! 0 不是类型
 
 **变参函数模板**也是同理，可以用任意数量的函数实参调用：
 
-```c++
+```cpp
 template<class... Types>
 void f(Types... args);
 
@@ -308,7 +308,7 @@ f(2, 1.0); // OK：args 包含两个实参：int 与 double
 
 而对于类模板，如果也将成员函数实现写在 `.cpp` 里，比如
 
-```C++ test.h
+```cpp test.h
 template<class T>
 class test {
   public:
@@ -320,7 +320,7 @@ class test {
 };
 ```
 
-```C++ test.cpp
+```cpp test.cpp
 template<class T>
 T test::get() {
   return value;
@@ -345,7 +345,7 @@ void set(const T& v) {
 1. 将声明和定义统一放在头文件中；
 2. 将声明和定义分离，但在 `.cpp` 中显式实例化声明，比如下面这样：
 
-```C++ test.cpp
+```cpp test.cpp
 template<class T>
 T test::get() {
   return value;

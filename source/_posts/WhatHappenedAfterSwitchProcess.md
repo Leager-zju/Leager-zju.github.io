@@ -4,7 +4,7 @@ author: Leager
 mathjax: true
 date: 2023-10-09 20:04:44
 summary:
-categories: Operating System
+categories: operating system
 tags: What Happened
 img:
 ---

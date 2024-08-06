@@ -4,7 +4,7 @@ author: Leager
 mathjax: true
 date: 2023-03-06 11:59:32
 summary:
-categories: LeetCode
+categories: leetcode
 tags: daily
 img:
 ---
@@ -35,7 +35,7 @@ img:
 
 ## 代码
 
-```c++
+```cpp
 // C++
 class Solution {
 public:

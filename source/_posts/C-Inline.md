@@ -4,7 +4,7 @@ author: Leager
 mathjax: true
 date: 2023-02-13 21:48:43
 summary:
-categories: C++
+categories: c++
 tags: C++ Basic
 img:
 ---
@@ -19,7 +19,7 @@ img:
 
 关键字 `inline` 所带来的就是在编译时期在函数调用处进行函数体内容展开（代码**复制**），换句话说就是不用执行正常的进入函数的步骤，直接执行函数体，这样一来就无需进行栈内存的分配。
 
-```c++
+```cpp
 inline void func1() { std::cout << "inline func1"; }
 inline void func2();
 void func2() { std::cout << "non-inline func2"; } // inline 必须与定义在一起，否则不生效
@@ -37,7 +37,7 @@ int main() {
 
 `inline` 还可以进行类成员函数的修饰。事实上，在类内定义的函数，除了虚函数以外，均会隐式地视作 `inline` 函数；类外定义的函数则需要程序员显式 `inline`，否则当作普通成员函数对待。
 
-```c++
+```cpp
 class Foo {
   void func1() { ... }             // 类内定义，隐式 inline
   void func2();

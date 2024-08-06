@@ -168,7 +168,7 @@ Total Test time (real) =   3.86 sec
 
 lab1 ~ lab4 均围绕此图进行。在 lab0 中，我们实现了有序字节流，而事实上真实的网络并不会按顺序向我们发送数据包，我们需要利用一个整合器将收到的无序字节流片段以正确顺序拼接并写到 `ByteStream` 中。数据包以 `{data, index}` 的形式被接收，其中 `data` 为 `std::string`，`index` 为 `data` 作为子串在原始字节流中的下标，如
 
-```c++
+```cpp
                      1         2
            01234567890123456789012345
 原始字符串: abcdefghijklmnopqrstuvwxyz...
@@ -202,7 +202,7 @@ lab1 ~ lab4 均围绕此图进行。在 lab0 中，我们实现了有序字节�
 
 部分代码如下所示：
 
-```c++
+```cpp
 void StreamReassembler::map(const std::string &data, const uint64_t index) {
     if (data.empty()) {
         return;
@@ -326,7 +326,7 @@ $$
 
 故得到
 
-```c++
+```cpp
 uint64_t unwrap(WrappingInt32 n, WrappingInt32 isn, uint64_t checkpoint) {
     uint64_t c_high32 = checkpoint >> 32;
     uint64_t offset = 1ul << 32;
@@ -436,7 +436,7 @@ Total Test time (real) =   1.18 sec
 
 这就需要我们添加一系列成员变量，我的数据结构设计如下：
 
-```c++
+```cpp
 class TCPSender {
  private:
   // (new!) 定时器
@@ -473,7 +473,7 @@ class TCPSender {
 
 1. `start()`，包括设置 rto 以及重置时间进度为 0，并将定时器状态设为 `WORK`；
 
-    ```c++
+    ```cpp
     void Timer::start(unsigned int rto) {
         _rto = rto;
         _current_time = 0;
@@ -483,7 +483,7 @@ class TCPSender {
 
 2. `stop()`，将定时器状态设为 `IDLE`；
 
-    ```c++
+    ```cpp
     void Timer::stop() {
         _state = TimerState::IDLE;
     }
@@ -491,7 +491,7 @@ class TCPSender {
 
 3. `tick()`，增加时间进度，并在超过 rto 时向调用者传递信息(true/false)；
 
-    ```c++
+    ```cpp
     bool Timer::tick(unsigned int interval) { // true for timeout, false else
         _current_time += interval;
         return _current_time >= _rto;
@@ -508,7 +508,7 @@ class TCPSender {
 
 故 `TCPSender::tick()` 部分代码很容易能写出来
 
-```c++
+```cpp
 void TCPSender::tick(const size_t ms_since_last_tick) {
     if (!_outstanding_segments.empty() && _timer.tick(ms_since_last_tick)) {
         if (_rws != 0) {
@@ -542,7 +542,7 @@ $$
 
 与此同时，还应满足 $\text{abs_ackno}\leq \text{abs_next_seqno}$，否则会被认为是无效确认号。
 
-```c++
+```cpp
 bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_size) {
     uint64_t abs_ackno = unwrap(ackno, _isn, _next_seqno);
     if (abs_ackno > _next_seqno || abs_ackno < _ackno) {
@@ -595,7 +595,7 @@ $$
 
 最后实现如下：
 
-```c++
+```cpp
 void TCPSender::fill_window() {
     if (_timer.state() == TimerState::IDLE) {
         _timer.start(_rto);
@@ -678,7 +678,7 @@ Total Test time (real) =   1.30 sec
 
 发送操作很简单，`sender` 调用相应函数然后从 `segment_out` 中取出来再插到发送队列即可。
 
-```c++
+```cpp
 while (!_sender.segments_out().empty()) {
     TCPSegment &seg = _sender.segments_out().front();
     auto ackno = _receiver.ackno();
@@ -697,7 +697,7 @@ while (!_sender.segments_out().empty()) {
 
 接收是一个比较麻烦的事情，有一个细节是连接处于 `LISTEN` 阶段时只处理 `SYN=1` 的段，也就是会忽略 `RST=1` 段。
 
-```c++
+```cpp
 if (_receiver.in_listen() && _sender.in_closed()) {
     if (!seg.header().syn) {
         return;
@@ -710,7 +710,7 @@ if (_receiver.in_listen() && _sender.in_closed()) {
 
 其他时候，如果收到（或发送） `RST=1` 段后，会引发 `unclean_shutdown`。
 
-```c++
+```cpp
 void TCPConnection::unclean_shutdown() {
     if (_active) {
         // cerr << "[unclean_shutdown]\n\n";
@@ -727,7 +727,7 @@ void TCPConnection::unclean_shutdown() {
 
 变量 `_linger_after_streams_finish` 就是用于标识哪一方需要等待 `10*timeout` 才关闭。
 
-```c++
+```cpp
 // after receive a segment
 if (_receiver.stream_out().input_ended() && !_sender.stream_in().eof()) {
     _linger_after_streams_finish = false;
@@ -758,7 +758,7 @@ if (_receiver.in_fin_recv() && _sender.in_fin_acked() &&
 
 > 包装操作应使用 `serialize()` 方法转换为 `string`，再隐式转换为 `Buffer`。
 
-```c++
+```cpp
 void NetworkInterface::send_datagram(const InternetDatagram &dgram, const Address &next_hop) {
     const uint32_t next_hop_ip = next_hop.ipv4_numeric();
     uint32_t next_ipv4_addr = next_hop.ipv4_numeric();
@@ -789,7 +789,7 @@ void NetworkInterface::send_datagram(const InternetDatagram &dgram, const Addres
 
 反之，检查这是一个 ARP 请求还是 ARP 答复。如果是前者，并其目的 IP 地址是否与自身一致，则发回一个 ARP 答复；反之，发送等待答复的数据包。同时，还要根据发送方的信息更新 IP/MAC 映射表，对应条目保持 30s，时间到后删除条目。
 
-```c++
+```cpp
 optional<InternetDatagram> NetworkInterface::recv_frame(const EthernetFrame &frame) {
     const EthernetHeader &f_header = frame.header();
     if (f_header.dst != _ethernet_address && f_header.dst != ETHERNET_BROADCAST) {
@@ -851,7 +851,7 @@ Built target check_lab5
 2. 一般有一个默认网关为 `0.0.0.0/0`，如果将一个 32 位整数移位 32 位是未定义行为，需要考虑到这种情况；
 3. 数据包必然是能发出去的，实在没有匹配到的也会发至默认网关，如果有其他匹配的网段可能是 direct 直达的，此时 `next_hop` 不一定有值，此时将发送的下一跳设置为数据包的 `dst ip_addr` 即可；
 
-```c++
+```cpp
 void Router::route_one_datagram(InternetDatagram &dgram) {
     if (dgram.header().ttl-- <= 1) {
         return;

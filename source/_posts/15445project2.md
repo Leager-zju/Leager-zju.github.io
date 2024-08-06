@@ -72,7 +72,7 @@ HEADER 内的 `page_id` 实际上和外层 Page 对象的 `page_id` 是相等的
 
 查操作较为简单，只需根据 Key 从根节点开始不断往下走即可，重点在于找 child，而不涉及多余的操作。根据 B+ 树的特性，对于 $Page\_id_i$ 对应节点为根的子树中，所有 key $K$ 均满足 $Key_i \leq K < Key_{i+1}$，且作索引的内部节点的第一个 Key 不参与比较。故查找子节点 page_id 所在索引的函数可以实现为：
 
-```C++
+```cpp
 int GetChildPageIndex(InternalPage *internal_node, const KeyType &key) {
   int child_index;
   for (child_index = 0; child_index < internal_node->GetSize() - 1; child_index++) {
@@ -113,7 +113,7 @@ B+ 树的插入规则如下：
 
 基于上述讨论，总体过程大概如下所示：
 
-```c++
+```cpp
 bool Insert(const KeyType &key, const ValueType &value) {
   if (IsEmpty()) {
     // 新建 root node 后直接插入
@@ -183,7 +183,7 @@ bool RecursivelyInsert(const KeyType &key, const ValueType &value, BPlusTreePage
 
 由于 `IndexIterator` 是遍历 leaf node 的迭代器，故需要记录当前 kv 对的一些信息，如所在的 leaf page 以及当前 kv 对所在下标，即：
 
-```C++
+```cpp
   BPlusTreeLeafPage<KeyType, ValueType, KeyComparator> *cur_page_;
   int cur_index_;
 ```

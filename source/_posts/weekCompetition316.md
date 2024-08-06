@@ -4,7 +4,7 @@ author: Leager
 mathjax: true
 date: 2022-10-23 13:39:34
 summary:
-categories: LeetCode
+categories: leetcode
 tags: weekly
 img:
 ---

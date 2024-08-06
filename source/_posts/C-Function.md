@@ -4,7 +4,7 @@ author: Leager
 mathjax: true
 date: 2023-01-18 14:23:28
 summary:
-categories: C++
+categories: c++
 tags: C++11
 img:
 ---
@@ -17,7 +17,7 @@ C++11 新增了若干使**函数调用**更加方便的特性。
 
 lambda 表达式是**闭包类型**的**纯右值**变量，也可以称之为[**匿名函数**](https://www.google.com.hk/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&ved=2ahUKEwijk6yxhNP8AhVY7XMBHQtYCeQQFnoECAwQAQ&url=https%3A%2F%2Fzh.wikipedia.org%2Fwiki%2F%25E5%258C%25BF%25E5%2590%258D%25E5%2587%25BD%25E6%2595%25B0&usg=AOvVaw0TjqSvvMd1ENd3yfCUYuz-)。其基本用法为：
 
-```c++
+```cpp
 auto func = [ 捕获 ] ( 参数列表 ) 可选说明符 -> 返回值类型 { 函数体 };
 ```
 
@@ -43,7 +43,7 @@ auto func = [ 捕获 ] ( 参数列表 ) 可选说明符 -> 返回值类型 { 函
 
 在 C++11 中，说明符只有 `mutable`。不加上该说明符，编译器会将值捕获的对象视为**常量**，只能调用其 const 成员函数；只有加上后，捕获对象的 const 限定消除，才能修改值捕获的对象，以及调用它们的非 const 成员函数。就像这样：
 
-```c++
+```cpp
 class A {
   public:
     int i = 0;
@@ -73,7 +73,7 @@ auto h = [&]() {          // OK! 引用捕获不受影响
 
 在值捕获的情况下，除了会将捕获的对象视为 const，还会发生下面这种情况：
 
-```c++
+```cpp
 int a = 0;
 auto f = [a]() { std::cout << a; };
 a++;
@@ -86,7 +86,7 @@ f(); // 输出 0
 
 值捕获存在这样那样的注意事项，但引用捕获也并不是完美的。当引用捕获的对象在 lambda 表达式调用之前就已经因生命周期结束而被回收时，此时若在 lambda 表达式中使用该对象，那么会发生**未定义行为**。比如：
 
-```c++
+```cpp
 class A {
  public:
   int x = 0;
@@ -112,7 +112,7 @@ lambda 表达式作为一种变量存在，其又能通 `operator()` 来进行�
 
 `std::function` 是一个包装器，能够存储复制和调用任何**可调用对象**。函数原型为：
 
-```c++
+```cpp
 template< class R, class... Args >
 class function<R(Args...)>;
 ```
@@ -127,7 +127,7 @@ class function<R(Args...)>;
 
 函数原型为：
 
-```c++
+```cpp
 R operator()( Args... args ) const;
 ```
 
@@ -148,7 +148,7 @@ R operator()( Args... args ) const;
 
 - 存储**函数**
 
-    ```c++
+    ```cpp
     void foo(int i) { std::cout << i; }
     std::function<void(int)> f(foo); // 存储 void(int) 类型的函数
 
@@ -160,7 +160,7 @@ R operator()( Args... args ) const;
 
 - 存储**模板函数**
 
-    ```c++
+    ```cpp
     template<typename T>
     void foo(T i) { std::cout << i; }
 
@@ -170,7 +170,7 @@ R operator()( Args... args ) const;
 
 - 存储 **lambda 表达式**
 
-    ```c++
+    ```cpp
     std::function<void(int)> f = [](int i) { std::cout << i; };
     f(3); // output: 3
 
@@ -187,7 +187,7 @@ R operator()( Args... args ) const;
 
 - 存储**函数对象**
 
-    ```c++
+    ```cpp
     struct foo {
       void operator()(int i) const { std::cout << i; }
     };
@@ -198,7 +198,7 @@ R operator()( Args... args ) const;
 
 - 存储**类成员函数**
 
-    ```c++
+    ```cpp
     class Foo {
      public:
       Foo(int num) : num_(num) {}
@@ -223,14 +223,14 @@ R operator()( Args... args ) const;
 
 - 🎈存储**类成员变量访问器**
 
-    ```c++
+    ```cpp
     std::function<int(Foo const&)> g = &Foo::num_; // 理由同上
     std::cout << g(foo); // 相当于调用 foo.num_
     ```
 
 - 存储 **std::bind 表达式**
 
-    ```c++
+    ```cpp
     using std::placeholders::_1;
     std::function<void(int)> h;
 
@@ -253,7 +253,7 @@ R operator()( Args... args ) const;
 
 先上例子：
 
-```c++
+```cpp
 void foo(int i, int j, int k) {
   std::cout << i + j + k;
 }

@@ -26,7 +26,7 @@ img:
 
 用到的时候才创建实例。C++ 11 以前容易产生线程安全的问题，但 C++11 标准之后的最佳的选择是 **`Meyers' Singleton`**，它利用了局部静态变量在第一次使用时才初始化的特性，并且由于 C++11 标准解决了局部静态变量的线程安全问题，使得它成为当前**最优雅**的实现方式。
 
-```C++
+```cpp
 class Singleton {
   public:
     static Singleton& getInstance() {
@@ -56,7 +56,7 @@ class Singleton {
 
 简单工厂的工厂类里封装了创建具体产品对象的函数。
 
-```C++
+```cpp
 enum class ProductType;
 class Factory {
   public:
@@ -80,7 +80,7 @@ class Factory {
 
 工厂方法模式将工厂类进行抽象，仅提供创建具体产品的接口，而具体实现交由子类（即具体工厂）去完成。
 
-```C++
+```cpp
 class AbstractFactory {
   public:
     virtual Product* CreateProduct() = 0;
@@ -109,7 +109,7 @@ class ConcreteFactory2: public AbstractFactory {
 
 以上三种方式，在新增产品时，要么修改工厂类，要么需新增具体的工厂类，说明工厂类的封装性还不够好。模板工厂是将工厂方法模式封装成模板工厂类，那么这样在新增产品时，是不需要新增具体的工厂类，减少了代码的编写量。
 
-```C++
+```cpp
 // 抽象模板工厂类
 // AbstractProduct_t 产品抽象类
 template <class AbstractProduct_t>

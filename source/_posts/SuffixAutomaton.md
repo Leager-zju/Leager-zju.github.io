@@ -4,8 +4,8 @@ author: Leager
 mathjax: true
 date: 2024-08-05 20:10:24
 summary:
-categories:
-tags:
+categories: data structure
+tags: c++
 img:
 ---
 
@@ -52,7 +52,7 @@ img:
 
 那么只需要遍历 $Last$ 的所有祖先即可。因为如果一个 State 不是 $Last$ 的祖先，其表示的字符串也不会是 $Last$ 所表示字符串的后缀，也就无法在添加 `ch` 后成为 `newStr` 的后缀了。这也是板子的前半段代码的基本思想。对于上述 States，需要在 `next` 中添加到 $New$ 的转移。
 
-```C++
+```cpp
 // 新建状态
 automaton.emplace_back(++strLength_, 0);
 State& newState = automaton.back();
@@ -78,7 +78,7 @@ for (p = last_; p != NIL && !automaton[p].next.count(ch); p = automaton[p].paren
 
 对于第一种情况，表明 $Q$ 就是我们要找的 parent。因为此时不存在一个 State 能够表示更长且与 `newStr` 的 endpos 不同的字符串了。
 
-```C++
+```cpp
 if (automaton[p].length + 1 == automaton[q].length) {
   newState.parent = q;
 }
@@ -88,7 +88,7 @@ if (automaton[p].length + 1 == automaton[q].length) {
 
 于是就又产生了一个新的 State，并且这个新的 State 是基于 $Q$ 的——对于 $P$ 及其所有祖先，一旦能够通过 `ch` 转移到 $Q$，那就必然能够转移到这个新的 State；同时又能继承 $Q$ 的所有转移（这很显然，毕竟是 $Q$ 的后缀）。所以一般把这个 State 称为 $Clone$。
 
-```C++
+```cpp
 else {
   automaton.emplace_back(automaton[q]);
   State& cloneState = automaton.back();
@@ -112,7 +112,7 @@ else {
 
 最后的最后，还要修改 $Last$ 使其指向 $New$。到这就大功告成了。完整实现如下：
 
-```C++
+```cpp
 void SuffixAutomaton::insert(char ch) {
   automaton.emplace_back(++strLength_, 0);
   State& newState = automaton.back();

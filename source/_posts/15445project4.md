@@ -87,7 +87,7 @@ LM 负责以五种不同的模式保持 Table 和 Tuple 两个粒度的锁：`In
 
 插入请求后，就进入停等状态。这里就要用到 `lock_request_queue` 中的条件变量了，通过调用 `cv_.wait` 使得当前线程挂起，直到被唤醒，具体用法如下：
 
-```C++
+```cpp
 std::unique_lock<std::mutex> lock(lock_request_queue->latch_);	// 必须为 unique_lock
 while(!不满足授予条件) {
     lock_request_queue->cv_.wait(lock);
@@ -96,7 +96,7 @@ while(!不满足授予条件) {
 
 每次被唤醒，都会先检查授予条件是否满足，如果满足则直接退出循环，不再 `wait`。这里的授予条件是指，排在前面的所有锁（无论是否授予）的类型与其均兼容。只要有一个不兼容的锁，那就不满足条件。为了简化判断代码，我定义了一个锁兼容矩阵，如下所示：
 
-```C++
+```cpp
 compatibility_matrix_[LockMode::SHARED][LockMode::SHARED] = true;
 compatibility_matrix_[LockMode::SHARED][LockMode::INTENTION_SHARED] = true;
 compatibility_matrix_[LockMode::SHARED][LockMode::EXCLUSIVE] = false;
@@ -148,7 +148,7 @@ compatibility_matrix_[LockMode::INTENTION_EXCLUSIVE][LockMode::SHARED_INTENTION_
 
 另外，lab 要求我们在每次检测开始时进行图构建，检测完后再把图销毁，于是 `RunCycleDetection()` 函数就变成了
 
-```C++
+```cpp
 void LockManager::RunCycleDetection() {
   while (enable_cycle_detection_) {
     std::this_thread::sleep_for(cycle_detection_interval);

@@ -4,7 +4,7 @@ author: Leager
 mathjax: true
 date: 2023-02-19 14:07:28
 summary:
-categories: C++
+categories: c++
 tags: C++ Basic
 img:
 ---
@@ -39,7 +39,7 @@ C++ 程序的内存分为 5 大区域，分别为**代码区**、**常量存储�
 
 ### malloc()
 
-```c++
+```cpp
 void* malloc( std::size_t size );
 ```
 
@@ -54,7 +54,7 @@ void* malloc( std::size_t size );
 
 ### calloc()
 
-```c++
+```cpp
 void* calloc( std::size_t num, std::size_t size );
 ```
 
@@ -64,7 +64,7 @@ void* calloc( std::size_t num, std::size_t size );
 
 ### realloc()
 
-```c++
+```cpp
 void* realloc( void* ptr, std::size_t new_size );
 ```
 
@@ -74,7 +74,7 @@ void* realloc( void* ptr, std::size_t new_size );
 
 ### free()
 
-```c++
+```cpp
 void free( void* ptr );
 ```
 
@@ -87,7 +87,7 @@ void free( void* ptr );
 
 注意，`free` 仅仅是释放了指针指向的那片内存，并没有改变指针的指向，但 `free` 之后再次使用指针是不合理的，应当置空。
 
-```c++
+```cpp
 int* ptr = (int*)malloc(sizeof(int));
 printf("before free: %p\n", ptr);
 
@@ -109,7 +109,7 @@ ptr = NULL;                      // nullptr in C++
 
 > 定义于头文件 `<new>`
 
-```c++
+```cpp
 ::(opt) new (布置参数)(opt) (类型) 初始化器(opt) ;
 
 int* p1 = new int (1);  // p1 指向 int 变量，并初始化为 1
@@ -145,7 +145,7 @@ delete p4;
 > 1. 可能会构造出我们用不到的对象；
 > 2. 初始化与后续使用时各进行一次赋值，产生不必要的开销；
 >
-> > ```c++
+> > ```cpp
 > > auto ptr = new Foo[10]; // 默认初始化赋值一次
 > > for (int i = 0; i < 10; i++) {
 > >   Foo[i] = {...};       // 后续又进行了一次赋值
@@ -162,7 +162,7 @@ delete p4;
 
 `new` / `delete` 是关键字，我们无法修改其功能本身，但其底层所使用的运算符 `operator new()` / `operator delete()` 则能为我们根据需要所重载使用。
 
-```c++
+```cpp
 class Foo {
  public:
   void* operator new(size_t size) {
@@ -182,7 +182,7 @@ int main() {
 
 当然，重载形式也可以加入更多参数，但第一个参数必须为 `size_t` 类型，且返回值必须为 `void*` 类型。比如上面说的定位 new，就是在参数列表中加了一个 `void*` 的重载形式。
 
-```c++
+```cpp
 class Foo {
  public:
   void* operator new(size_t size, void* ptr) {
@@ -223,7 +223,7 @@ int main() {
 
 - **只能在堆上**：将析构函数设置为**非公有**。C++ 是静态绑定语言，编译器管理栈上对象的生命周期，编译器在为类对象分配栈空间时，会先检查类的析构函数的访问性。若析构函数不可访问，则不能在栈上创建对象。
 
-    ```c++
+    ```cpp
     // Bad Example →_→
     // can't derive and inconvenient
     class Foo {
@@ -261,7 +261,7 @@ int main() {
 > 定义于头文件 `<memory>`
 
 C++ 的所有容器都是类模板，以 `std::vector` 为例，其在定义中包含了两个模板参数。
-```c++
+```cpp
 template<
     class T,
     class Allocator = std::allocator<T>
@@ -293,7 +293,7 @@ template<
 
 ## 智能指针
 
-智能指针是针对裸指针进行封装的类，它能够更安全、更方便地使用动态内存。具体见 [C++11 の 智能指针](../../C/C-SmartPtr)。
+智能指针是针对裸指针进行封装的类，它能够更安全、更方便地使用动态内存。具体见 [C++11 の 智能指针](../../c/c-smartptr)。
 
 ## 内存泄漏及其常用工具
 
@@ -322,7 +322,7 @@ AddressSanitizer 可在使用运行时检测跟踪内存分配，这意味着必
 
 构建项目时，用 `-fsanitize=address` 选项编译和链接（同时记得加上编译选项 `-g`）。此时可执行文件就进入 ASan 模式。在程序运行时首次检测到问题时，会打印错误信息并退出。
 
-```C++ main.c
+```cpp main.c
 int main() {
   int *ptr = new int(1);
   return 0;

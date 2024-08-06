@@ -4,7 +4,7 @@ author: Leager
 mathjax: true
 date: 2022-09-29 14:21:50
 summary:
-categories: MIT 18.06
+categories: note
 tags: math
 img:
 ---

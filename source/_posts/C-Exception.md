@@ -4,7 +4,7 @@ author: Leager
 mathjax: true
 date: 2023-03-01 11:31:18
 summary:
-categories: C++
+categories: c++
 tags: C++ Basic
 img:
 ---
@@ -17,7 +17,7 @@ img:
 
 一个完整的异常处理流程如下：
 
-```c++
+```cpp
 try {
   /* code */
   throw SomeException;
@@ -50,7 +50,7 @@ try {
 >
 > **注意**，`throw` 出的异常对象类型取静态类型，即便存在运行时多态。
 >
-> ```c++
+> ```cpp
 > class Base {
 >  public:
 >   virtual ~Base() = default;
@@ -84,7 +84,7 @@ try {
 
 当然，你甚至可以在 `try-catch` 外再套一层 `try-catch`，是为**重抛**：
 
-```c++
+```cpp
 try {
   try {
     throw SomeException;
@@ -121,7 +121,7 @@ try {
 
 1. 只有异常说明不同的函数无法实现重载。
 
-    ```c++
+    ```cpp
     void foo() noexcept;
     void foo();  // ERROR!
     ```

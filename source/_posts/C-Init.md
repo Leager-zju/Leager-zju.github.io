@@ -4,7 +4,7 @@ author: Leager
 mathjax: true
 date: 2023-01-28 19:52:46
 summary:
-categories: C++
+categories: c++
 tags: C++11
 img:
 ---
@@ -17,7 +17,7 @@ img:
 
 C++11 以前，各种初始化方式如神仙打架，百花齐放，在同一个项目中，你或许可以看到如以下几种不同的初始化方式：
 
-```c++
+```cpp
 class A {
  public:
   A() {}
@@ -53,7 +53,7 @@ B b = {0, 0};            // 聚合初始化
 
 为了统一代码，C++11 将列表初始化的功能进行拓展，使其能够应用于绝大多数构造情况，同样的，`new` 操作符等可以用圆括号进行初始化的地方，也可以使用初始化列表。如：
 
-```c++
+```cpp
 class A {
  public:
   A(int i): i_(i) {}
@@ -75,14 +75,14 @@ A* a4 = new A{4};
 
 1. 从浮点类型到整数类型的转换；
 
-    ```c++
+    ```cpp
     int a = 1.2;   // OK!
     int b = {1.2}; // ERROR!
     ```
 
 2. 从整数类型到浮点类型的转换，除非源是常量表达式且不发生截断；
 
-    ```c++
+    ```cpp
     float a = (unsigned long long)(-1);    // OK!
     float b = {(unsigned long long)(-1)};  // ERROR! -1 为 11..11，转换到 float 会将高位 1 截断
     float c = (unsigned long long)(1);     // OK!
@@ -91,7 +91,7 @@ A* a4 = new A{4};
 
 3. 从整数或无作用域枚举类型到不能表示原类型所有值的整数类型的转换，除非源是常量表达式且不发生截断；
 
-    ```c++
+    ```cpp
     const int a = 1000;
     const int b = 2;
     char c = a;   // OK!
@@ -103,7 +103,7 @@ A* a4 = new A{4};
 
 4. 路线 `long double -> double -> float` 的转换，除非来源是常量表达式且不发生溢出；
 
-    ```c++
+    ```cpp
     float c = 1e70;   // OK!
     float d = {1e70}; // ERROR! double -> float
     ```

@@ -4,7 +4,7 @@ author: Leager
 mathjax: true
 date: 2023-02-14 11:13:46
 summary:
-categories: C++
+categories: c++
 tags: C++ Basic
 img:
 ---
@@ -27,7 +27,7 @@ C++11 引入移动语义之后，对于一个**空类**，编译器将为其默�
 
 其中，**默认构造函数**是初始化构造函数的一种特殊（无参）形式。所谓初始化构造函数，就是**不以其他同类对象引用为参数**的构造函数，即：
 
-```c++
+```cpp
 class Foo {
  public:
   Foo() = default;
@@ -36,7 +36,7 @@ class Foo {
 
 用户可以自定义初始化构造函数，但会覆盖编译器原先生成的默认构造函数。如果需要使用默认构造函数，则需显式声明。
 
-```c++
+```cpp
 class Foo {
  public:
   Foo(int i) {};
@@ -56,7 +56,7 @@ int main() {
 
 **拷贝构造函数**/**移动构造函数**就是仅以**同类对象左值引用**/**同类对象右值引用**为参数的构造函数。
 
-```c++
+```cpp
 class Foo {
  public:
   Foo(const Foo&) = default;  // 拷贝构造，拷贝每一个 non-static 变量
@@ -66,7 +66,7 @@ class Foo {
 
 拷贝构造函数的形参也可以写为**值传递**，但这样会发生什么事呢？我们尝试调用值传递版本的拷贝构造函数 `Foo foo(another_foo)`，`another_foo` 因值传递而进行了一次形参拷贝，此时还需要调用一次拷贝构造函数，然后因值传递进行形参拷贝……直接死循环！而且值拷贝的过程也是申请内存的过程，接下来就看内存和 CPU 哪个先撑不住了~基于此，所有拷贝构造函数都应写为**引用传递**。
 
-> 关于**移动语义**，请参见[此文](../../C/C-Value)。
+> 关于**移动语义**，请参见[此文](../../c/c-value)。
 
 **注意**：想要用到的构造函数需声明为 `public`，否则创建对象时将报错，下面也是一样的~
 
@@ -74,7 +74,7 @@ class Foo {
 
 与构造函数不同，赋值运算符仅在**对象创建完毕**后才能调用，拷贝语义/移动语义与前面提到的类似。
 
-```c++
+```cpp
 class Foo {
  public:
   Foo& operator=(const Foo&) = default;  // 拷贝赋值
@@ -86,7 +86,7 @@ class Foo {
 
 那么下面这段代码，执行的是哪个函数呢？【<font color=white>拷贝构造函数</font>】
 
-```c++
+```cpp
 Foo foo1 = foo2;
 ```
 
@@ -94,7 +94,7 @@ Foo foo1 = foo2;
 
 析构函数以类名为函数名，需额外在前面加一个`~`，没有返回值，无需显式调用，一个对象的生命周期结束时，就会自动调用析构函数。析构函数主要完成释放对象内存的工作，但编译器默认生成析构函数只是尸位素餐，实际上什么都不干，真想利用析构函数做点什么的话，则需要自定义析构函数。
 
-```c++
+```cpp
 class Foo {
  public:
   ~Foo() = default;
@@ -119,7 +119,7 @@ class Foo {
 | `protected` |   √   |      √      |   √    |   ×   |
 |  `private`  |   √   |      √      |   ×    |   ×   |
 
-```c++
+```cpp
 class Foo {
   int value;
  public:
@@ -144,7 +144,7 @@ int main() {
 - **保护继承**：基类的**公有/保护**成员将成为派生类的**保护**成员。
 - **私有继承**：基类的**公有/保护**成员将成为派生类的**私有**成员。
 
-```c++
+```cpp
 class Base {
  public:
   int value{1};
@@ -167,7 +167,7 @@ int main() {
 
 上面展示了一个基本的继承过程。可以看到 `Derived` 可以将 `Base` 中的成员变量/函数进行覆盖，在 `Derived` 的命名空间中优先取 `Derived` 的成员。但覆盖后，基类的变量并不是消失了，而是依然可以通过 `Base::value` 进行访问，这是怎么做到的？类继承时，内存是如何分配的？不妨加入以下代码进行分析：
 
-```c++
+```cpp
 std::cout << sizeof(Base) << ' ' << sizeof(Derived) << '\n';
 int *q = reinterpret_cast<int*>(&d);
 std::cout << q << ' ' << q[0] << ' ' << q[1] << '\n';
@@ -184,7 +184,7 @@ std::cout << q << ' ' << q[0] << ' ' << q[1] << '\n';
 
 再来点更复杂的情况：
 
-```c++
+```cpp
 class Base {
  public:
   int value{1};
@@ -236,7 +236,7 @@ int main() {
 
 如何解决这个问题？答案为使用关键字 `virtual` 的**虚继承**。对于每个指定为 `virtual` 的不同基类，最终派生对象中仅含有该类型的一个基类子对象，即使该类在继承层级中出现多次也是如此，只要它每次都以 `virtual` 继承。
 
-```c++
+```cpp
 class Base {
  public:
   int value{0};
@@ -266,7 +266,7 @@ int main() {
 
 直接贴代码，有助于理解。
 
-```c++
+```cpp
 class B1 {
  public:
   B1() { std::cout << "B1 cons\n"; }
@@ -338,7 +338,7 @@ int main() {
 
 > 所以仅有返回值不一样的两个同名同参数列表函数并不构成重载。
 
-```c++
+```cpp
 class Foo {
  public:
   void bar(int a) { std::cout << "int " << a << '\n'; }
@@ -363,7 +363,7 @@ int main() {
 
 CRTP 是一种 C++ 的设计模式，精巧地结合了继承和模板编程的技术，也可以用于实现静态多态。其原理可以由以下代码简述：
 
-```C++
+```cpp
 template<class T>
 class Base {
   public:
@@ -406,7 +406,7 @@ int main() {
 
 先来说说什么是虚函数。前面提到了虚继承，用到 `virtual` 关键字，事实上，如果一个函数被 `virtual` 修饰，那么这个函数就成为了**虚函数**。正常情况下，虚函数表现的和普通函数一样，而一旦通过**基类指针**或**引用**调用虚函数，多态发生了。
 
-```c++
+```cpp
 class Base {
  public:
   virtual void foo() { std::cout << "Base foo\n"; }
@@ -446,7 +446,7 @@ int main() {
 
 值得注意的是，需要派生类进行了虚函数的**重写/覆盖**才能达到这一效果，即要求**派生类中有一个和基类完全相同的虚函数**。在这里，`Base` 和 `Derived` 的 `foo()` 函数（不管 `virtual`）正是完全相同的。如果派生类并没有进行重写，则会按照派生类的直接基类来。在多继承语境下，需避免二义性。
 
-```c++
+```cpp
 class Base {
  public:
   virtual void foo() { std::cout << "Base foo\n"; }
@@ -471,7 +471,7 @@ int main() {
 
 > 有一个例外，就是**协变**，也就是基类和派生类的返回值类型的相对关系与基类和派生类的相对关系一样，并且继承方式也相同（即族谱路线都一样），此时也满足多态，不需要返回值类型相同。
 >
-> ```c++
+> ```cpp
 > class A {};
 > class B : public A {};
 > class C : public B {};
@@ -545,7 +545,7 @@ int main() {
 
 归根结底，程序具体行为还是得看编译器是怎么生成汇编代码的。对于某些一眼就能看出来基类指针指向哪个派生类对象的情况，比如：
 
-```C++
+```cpp
 Derived d;
 Base *b = &d;
 ```
@@ -578,7 +578,7 @@ Base *b = &d;
 
 先看下面这段代码。
 
-```c++ main.cpp
+```cpp main.cpp
 #include <iostream>
 
 class Base {
@@ -652,7 +652,7 @@ $11 = {<Base> = {_vptr.Base = 0x555555557d50 <vtable for Derived+16>, x = 1}, y 
 
 以上是派生类**进行虚函数重写**的情况，下面再来看看派生类**未进行重写**的情况：
 
-```c++ main.cpp
+```cpp main.cpp
 #include <iostream>
 
 class Base {

@@ -4,7 +4,7 @@ author: Leager
 mathjax: true
 date: 2023-11-13 19:11:09
 summary:
-categories: What Happened
+categories: what happened
 tags: C++ Basic
 img:
 ---

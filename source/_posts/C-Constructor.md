@@ -4,7 +4,7 @@ author: Leager
 mathjax: true
 date: 2023-02-03 15:05:39
 summary:
-categories: C++
+categories: c++
 tags: C++11
 img:
 ---
@@ -17,7 +17,7 @@ img:
 
 **委托构造函数**允许构造函数通过初始化列表调用同一个类的其他构造函数，相当于将自己的构造职责**委托**给了其它构造函数。目的是简化构造函数的书写，提高代码的可维护性，避免代码冗余膨胀。
 
-```c++
+```cpp
 // 不使用委托，显得十分臃肿且冗余
 class A {
  public:
@@ -56,7 +56,7 @@ class A {
 
 委托构造不能形成循环，比如下面这种代码：
 
-```c++
+```cpp
 class A {
  public:
   A(char i_): A(i_, 'c') {}
@@ -73,7 +73,7 @@ class A {
 
 子类为完成基类初始化，在 C++11 之前，需要须要在构造函数中**显式**声明，即在初始化列表调用基类的构造函数，从而完成构造函数的传递。如果基类拥有多个构造函数，那么子类也需要实现多个与基类构造函数对应的构造函数，比如：
 
-```c++
+```cpp
 class Base {
  public:
   Base() { display(); }
@@ -99,7 +99,7 @@ class Derived: public Base {
 
 从 C++11 开始，我们可以直接使用 `using Base::Base` 的方式来将基类中的构造函数全继承到派生类中，而无需重复书写，比如：
 
-```c++
+```cpp
 class Base {
  public:
   Base() { display(); }
@@ -124,7 +124,7 @@ class Derived: public Base {
 
 2）当派生类拥有多个基类时，如果多个基类中的部分构造函数的参数列表（中的类型与顺序）完全一致，那么派生类中的继承构造函数将产生冲突，比如：
 
-```c++
+```cpp
 class A {
  public:
   A(int i) {}
@@ -143,7 +143,7 @@ class C: A, B {
 
 3）若基类构造函数声明为 `private`，则派生类无法使用该构造函数；若为 `public`，即便 `using` 处于 `private` 中，也能使用。比如：
 
-```c++
+```cpp
 class A {
  public:
   A(int i) {}
@@ -168,7 +168,7 @@ B q(1, 2); // ERROR! A(int, int) is private
 >
 > 但这两点在实践中都被推翻，但我也无法判断是否是错，这两点存疑。代码如下：
 >
-> ```c++
+> ```cpp
 > class A {
 >  public:
 >   A(int a = 3, double b = 4): _a(a), _b(b){ display(); }
