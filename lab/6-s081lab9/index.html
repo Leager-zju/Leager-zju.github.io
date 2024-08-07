@@ -10,10 +10,8 @@
 
 Preparation
 切换到对应分支
-$ git fetch
-$ git checkout mmap
-$ make clean
-我们需要实现的 mma">
+123$ git fetch$ git checkout mmap$ make clean
+我们需要">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -26,7 +24,7 @@ $ make clean
 
 
     <title>6.s081 Lab9 Mmap | 没什么看头的地方</title>
-    <link rel="icon" type="image/png" href="/btt.png">
+    <link rel="icon" type="image/png" href="/dt.png">
     
     <style>
         body{
@@ -434,9 +432,7 @@ $ make clean
 <span id="more"></span>
 <h2 id="preparation">Preparation</h2>
 <p>切换到对应分支</p>
-<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">git</span> fetch
-$ <span class="token function">git</span> checkout mmap
-$ <span class="token function">make</span> clean<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ git fetch</span><br><span class="line">$ git checkout mmap</span><br><span class="line">$ make clean</span><br></pre></td></tr></table></figure>
 <p>我们需要实现的 <code>mmap()</code> 与 <code>munmap()</code>
 这两个是系统调用，那就要修改若干文件，这在之前的 lab
 中已经操作过很多次了，跳过不聊。</p>
@@ -504,17 +500,7 @@ fault，防止映射大文件时一次 alloc 所有空间导致物理内存不�
 <code>usertrap()</code>
 里根据这些数据，在页表中建立页表项并且映射到物理地址即可。所以，进程结构体中可以增加这样一个字段，用于分配并追踪某个虚拟地址的使用情况。</p>
 <p>这个字段除了标明某一对映射的虚拟地址、长度，还要有偏移量以及标志位等信息，以及对应的文件信息，那么就有：</p>
-<pre class="line-numbers language-C" data-language="C"><code class="language-C">struct vma {
-  int valid;      // 该字段是否有效
-
-  uint64 va;      // 虚拟起始地址
-  uint64 length;  // 长度，可以不是 PGSIZE 的整数倍
-  int prot;       // 权限标志位
-  int flags;      // 脏数据处理标志位
-  int fd;         // 文件描述符
-  struct file* f; // 文件
-  int offset;     // 相对于文件的偏移量
-};<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">vma</span> &#123;</span></span><br><span class="line">  <span class="type">int</span> valid;      <span class="comment">// 该字段是否有效</span></span><br><span class="line"></span><br><span class="line">  uint64 va;      <span class="comment">// 虚拟起始地址</span></span><br><span class="line">  uint64 length;  <span class="comment">// 长度，可以不是 PGSIZE 的整数倍</span></span><br><span class="line">  <span class="type">int</span> prot;       <span class="comment">// 权限标志位</span></span><br><span class="line">  <span class="type">int</span> flags;      <span class="comment">// 脏数据处理标志位</span></span><br><span class="line">  <span class="type">int</span> fd;         <span class="comment">// 文件描述符</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">file</span>* <span class="title">f</span>;</span> <span class="comment">// 文件</span></span><br><span class="line">  <span class="type">int</span> offset;     <span class="comment">// 相对于文件的偏移量</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 <p>如果 <code>valid</code> 为 1，那么就表明从 <code>va</code> 开始
 <code>length</code> 个 bytes
 的这段虚拟空间已经被使用了，下次要分配时也应当避开这段空间。一个进程很可能调用多次
@@ -532,136 +518,15 @@ Table 的时候，我们实现了一个功能，是通过固定的虚拟地址�
 <code>mmap()</code> 时，<code>max_VMA</code> 会减去待映射的长度
 <code>length</code>，然后找到一个 <code>valid=0</code> 的 vma，进行
 <code>vma.va = max_VMA</code> 的赋值。</p>
-<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/proc.h</span></div><code class="language-C">struct proc {
-  ...
-#define NVMA 16
-  struct vma vma[NVMA]; // mmap record
-  uint64 max_VMA;         // trampoline and trapframe
-};<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<figure class="highlight c"><figcaption><span>kernel/proc.h</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">proc</span> &#123;</span></span><br><span class="line">  ...</span><br><span class="line"><span class="meta">#<span class="keyword">define</span> NVMA 16</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">vma</span> <span class="title">vma</span>[<span class="title">NVMA</span>];</span> <span class="comment">// mmap record</span></span><br><span class="line">  uint64 max_VMA;         <span class="comment">// trampoline and trapframe</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 <p>到此，虚拟内存的分配记录就完成了。</p>
 <h3 id="sys_mmap">sys_mmap</h3>
 <p>读取参数，找到可用 vma 并设置数据即可。</p>
-<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/sysfile.c</span></div><code class="language-C">uint64
-sys_mmap(void)
-{
-  uint64 addr;
-  int length;
-  int prot;
-  int flags;
-  int fd;
-  struct file *f;
-  int offset;
-  if (argaddr(0, &amp;addr) &lt; 0 || argint(1, &amp;length) &lt; 0 || argint(2, &amp;prot) &lt; 0 ||
-      argint(3, &amp;flags) &lt; 0 || argfd(4, &amp;fd, &amp;f) &lt; 0 || argint(5, &amp;offset) &lt; 0) {
-    return -1;
-  }
-
-  // 权限不匹配
-  if (!f-&gt;readable &amp;&amp; (prot &amp; PROT_READ)) {
-    return -1;
-  }
-  if (!f-&gt;writable &amp;&amp; (prot &amp; PROT_WRITE) &amp;&amp; (flags &amp; MAP_PRIVATE) == 0) { // 如果文件不可写，但是允许对 MAP_PRIVATE 模式映射的内存进行写操作，反之不行
-    return -1;
-  }
-
-  uint64 va = -1;
-  struct proc *p = myproc();
-  struct vma *vma;
-  for (int i = 0; i &lt; NVMA; i++) {
-    if (!p-&gt;vma[i].valid) {
-      vma = &amp;p-&gt;vma[i];
-      break;
-    }
-  }
-
-  vma-&gt;valid = 1;
-
-  if (addr == 0) {
-    p-&gt;max_VMA -= PGROUNDUP(length);
-    vma-&gt;va = va = p-&gt;max_VMA;
-  }
-  // else { // 现有测试不会跳到这一个分支
-  //   vma-&gt;va = va = addr;
-  // }
-
-  vma-&gt;length = length;
-  vma-&gt;prot = prot;
-  vma-&gt;flags = flags;
-  vma-&gt;fd = fd;
-  vma-&gt;f = filedup(f);  // 映射会增加文件引用计数
-  vma-&gt;offset = offset;
-  return va;
-}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<figure class="highlight c"><figcaption><span>kernel/sysfile.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line">uint64</span><br><span class="line"><span class="title function_">sys_mmap</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  uint64 addr;</span><br><span class="line">  <span class="type">int</span> length;</span><br><span class="line">  <span class="type">int</span> prot;</span><br><span class="line">  <span class="type">int</span> flags;</span><br><span class="line">  <span class="type">int</span> fd;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">file</span> *<span class="title">f</span>;</span></span><br><span class="line">  <span class="type">int</span> offset;</span><br><span class="line">  <span class="keyword">if</span> (argaddr(<span class="number">0</span>, &amp;addr) &lt; <span class="number">0</span> || argint(<span class="number">1</span>, &amp;length) &lt; <span class="number">0</span> || argint(<span class="number">2</span>, &amp;prot) &lt; <span class="number">0</span> ||</span><br><span class="line">      argint(<span class="number">3</span>, &amp;flags) &lt; <span class="number">0</span> || argfd(<span class="number">4</span>, &amp;fd, &amp;f) &lt; <span class="number">0</span> || argint(<span class="number">5</span>, &amp;offset) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 权限不匹配</span></span><br><span class="line">  <span class="keyword">if</span> (!f-&gt;readable &amp;&amp; (prot &amp; PROT_READ)) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (!f-&gt;writable &amp;&amp; (prot &amp; PROT_WRITE) &amp;&amp; (flags &amp; MAP_PRIVATE) == <span class="number">0</span>) &#123; <span class="comment">// 如果文件不可写，但是允许对 MAP_PRIVATE 模式映射的内存进行写操作，反之不行</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  uint64 va = <span class="number">-1</span>;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">proc</span> *<span class="title">p</span> =</span> myproc();</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">vma</span> *<span class="title">vma</span>;</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; NVMA; i++) &#123;</span><br><span class="line">    <span class="keyword">if</span> (!p-&gt;vma[i].valid) &#123;</span><br><span class="line">      vma = &amp;p-&gt;vma[i];</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  vma-&gt;valid = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (addr == <span class="number">0</span>) &#123;</span><br><span class="line">    p-&gt;max_VMA -= PGROUNDUP(length);</span><br><span class="line">    vma-&gt;va = va = p-&gt;max_VMA;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// else &#123; // 现有测试不会跳到这一个分支</span></span><br><span class="line">  <span class="comment">//   vma-&gt;va = va = addr;</span></span><br><span class="line">  <span class="comment">// &#125;</span></span><br><span class="line"></span><br><span class="line">  vma-&gt;length = length;</span><br><span class="line">  vma-&gt;prot = prot;</span><br><span class="line">  vma-&gt;flags = flags;</span><br><span class="line">  vma-&gt;fd = fd;</span><br><span class="line">  vma-&gt;f = filedup(f);  <span class="comment">// 映射会增加文件引用计数</span></span><br><span class="line">  vma-&gt;offset = offset;</span><br><span class="line">  <span class="keyword">return</span> va;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h3 id="page-fault">page fault</h3>
 <p>当出现读/写的 page fault 时，就需要检查是否是在 mmap
 内存上引起的。如果是，那就进行物理内存的分配，页表项的建立，以及文件数据的拷贝。注意需要逐页进行物理内存分配。</p>
-<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/trap.c</span></div><code class="language-C">void
-usertrap(void)
-{
-  ...
-  if (r_scause() == 13 || r_scause() == 15) {
-    // page fault occured by reading or writing a mmap virtual address
-    // that hasn't been allocated any physical page
-    if(p-&gt;killed)
-      exit(-1);
-
-    uint64 va = PGROUNDDOWN(r_stval());
-    if (va &gt;= MAXVA)
-      exit(-1);
-
-    // 找到相应的字段
-    struct vma *vma = 0;
-    for (int i = 0; i &lt; NVMA; i++) {
-      if (p-&gt;vma[i].valid &amp;&amp; p-&gt;vma[i].va &lt;= va &amp;&amp; p-&gt;vma[i].va + PGROUNDUP(p-&gt;vma[i].length) &gt; va) {
-        vma = &amp;p-&gt;vma[i];
-        break;
-      }
-    }
-
-    // 如果没有找到，说明出错的虚拟地址没有进行映射，直接退出
-    if (!vma) {
-      exit(-1);
-    }
-
-    // 完善页表项的标志位
-    int flags = PTE_U;
-    if (vma-&gt;prot &amp; PROT_READ) {
-      flags |= PTE_R;
-    }
-    if (vma-&gt;prot &amp; PROT_WRITE) {
-      flags |= PTE_W;
-    }
-    if (vma-&gt;prot &amp; PROT_EXEC) {
-      flags |= PTE_X;
-    }
-
-    uint64 pa;
-    uint64 following = vma-&gt;va - va + PGROUNDUP(vma-&gt;length);
-    // 逐页进行映射+拷贝操作
-    ilock(vma-&gt;f-&gt;ip);
-    for (uint64 off = 0; off &lt; following; off += PGSIZE) {
-      // 如果当前地址已有映射，跳过
-      if ((pa = walkaddr(p-&gt;pagetable, va+off)) != 0) {
-        continue;
-      }
-      // 无可用内存，报错
-      if ((pa = (uint64)kalloc()) == 0) {
-        panic("no free memory");
-      }
-
-      // 清空数据，并建立映射，再进行拷贝
-      memset((void*)pa, 0, PGSIZE);
-      if (mappages(p-&gt;pagetable, va+off, PGSIZE, pa, flags) != 0) {
-        panic("cannot map");
-      }
-      if (readi(vma-&gt;f-&gt;ip, 0, pa, vma-&gt;offset+off, PGSIZE) == -1) {
-        panic("read file failed");
-      }
-    }
-    iunlock(vma-&gt;f-&gt;ip);
-  }
-  ...
-}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<figure class="highlight c"><figcaption><span>kernel/trap.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">usertrap</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">if</span> (r_scause() == <span class="number">13</span> || r_scause() == <span class="number">15</span>) &#123;</span><br><span class="line">    <span class="comment">// page fault occured by reading or writing a mmap virtual address</span></span><br><span class="line">    <span class="comment">// that hasn&#x27;t been allocated any physical page</span></span><br><span class="line">    <span class="keyword">if</span>(p-&gt;killed)</span><br><span class="line">      <span class="built_in">exit</span>(<span class="number">-1</span>);</span><br><span class="line"></span><br><span class="line">    uint64 va = PGROUNDDOWN(r_stval());</span><br><span class="line">    <span class="keyword">if</span> (va &gt;= MAXVA)</span><br><span class="line">      <span class="built_in">exit</span>(<span class="number">-1</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 找到相应的字段</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">vma</span> *<span class="title">vma</span> =</span> <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; NVMA; i++) &#123;</span><br><span class="line">      <span class="keyword">if</span> (p-&gt;vma[i].valid &amp;&amp; p-&gt;vma[i].va &lt;= va &amp;&amp; p-&gt;vma[i].va + PGROUNDUP(p-&gt;vma[i].length) &gt; va) &#123;</span><br><span class="line">        vma = &amp;p-&gt;vma[i];</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果没有找到，说明出错的虚拟地址没有进行映射，直接退出</span></span><br><span class="line">    <span class="keyword">if</span> (!vma) &#123;</span><br><span class="line">      <span class="built_in">exit</span>(<span class="number">-1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 完善页表项的标志位</span></span><br><span class="line">    <span class="type">int</span> flags = PTE_U;</span><br><span class="line">    <span class="keyword">if</span> (vma-&gt;prot &amp; PROT_READ) &#123;</span><br><span class="line">      flags |= PTE_R;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (vma-&gt;prot &amp; PROT_WRITE) &#123;</span><br><span class="line">      flags |= PTE_W;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (vma-&gt;prot &amp; PROT_EXEC) &#123;</span><br><span class="line">      flags |= PTE_X;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    uint64 pa;</span><br><span class="line">    uint64 following = vma-&gt;va - va + PGROUNDUP(vma-&gt;length);</span><br><span class="line">    <span class="comment">// 逐页进行映射+拷贝操作</span></span><br><span class="line">    ilock(vma-&gt;f-&gt;ip);</span><br><span class="line">    <span class="keyword">for</span> (uint64 off = <span class="number">0</span>; off &lt; following; off += PGSIZE) &#123;</span><br><span class="line">      <span class="comment">// 如果当前地址已有映射，跳过</span></span><br><span class="line">      <span class="keyword">if</span> ((pa = walkaddr(p-&gt;pagetable, va+off)) != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">continue</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">// 无可用内存，报错</span></span><br><span class="line">      <span class="keyword">if</span> ((pa = (uint64)kalloc()) == <span class="number">0</span>) &#123;</span><br><span class="line">        panic(<span class="string">&quot;no free memory&quot;</span>);</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// 清空数据，并建立映射，再进行拷贝</span></span><br><span class="line">      <span class="built_in">memset</span>((<span class="type">void</span>*)pa, <span class="number">0</span>, PGSIZE);</span><br><span class="line">      <span class="keyword">if</span> (mappages(p-&gt;pagetable, va+off, PGSIZE, pa, flags) != <span class="number">0</span>) &#123;</span><br><span class="line">        panic(<span class="string">&quot;cannot map&quot;</span>);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">if</span> (readi(vma-&gt;f-&gt;ip, <span class="number">0</span>, pa, vma-&gt;offset+off, PGSIZE) == <span class="number">-1</span>) &#123;</span><br><span class="line">        panic(<span class="string">&quot;read file failed&quot;</span>);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    iunlock(vma-&gt;f-&gt;ip);</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h2 id="进行-munmap">进行 munmap</h2>
 <blockquote>
 <p>int munmap(void *addr, int length)</p>
@@ -689,32 +554,7 @@ usertrap(void)
 数组发现已经有映射了，这显然与现实矛盾。</p>
 </blockquote>
 <h3 id="sys_munmap">sys_munmap</h3>
-<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/sysfile.c</span></div><code class="language-C">uint64
-sys_munmap(void)
-{
-  uint64 addr;
-  int length;
-
-  if (argaddr(0, &amp;addr) &lt; 0 || argint(1, &amp;length) &lt; 0) {
-    return -1;
-  }
-
-  struct proc *p = myproc();
-  struct vma *vma = 0;
-  for (int i = 0; i &lt; NVMA; i++) {
-    if (p-&gt;vma[i].valid &amp;&amp; p-&gt;vma[i].va &lt;= addr &amp;&amp; p-&gt;vma[i].va + PGROUNDUP(p-&gt;vma[i].length) &gt; addr) {
-      vma = &amp;p-&gt;vma[i];
-      break;
-    }
-  }
-
-  if (vma) {
-    vmaunmap(p, vma, addr, length);
-    return 0;
-  }
-
-  return -1;
-}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<figure class="highlight c"><figcaption><span>kernel/sysfile.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">uint64</span><br><span class="line"><span class="title function_">sys_munmap</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  uint64 addr;</span><br><span class="line">  <span class="type">int</span> length;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (argaddr(<span class="number">0</span>, &amp;addr) &lt; <span class="number">0</span> || argint(<span class="number">1</span>, &amp;length) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">proc</span> *<span class="title">p</span> =</span> myproc();</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">vma</span> *<span class="title">vma</span> =</span> <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; NVMA; i++) &#123;</span><br><span class="line">    <span class="keyword">if</span> (p-&gt;vma[i].valid &amp;&amp; p-&gt;vma[i].va &lt;= addr &amp;&amp; p-&gt;vma[i].va + PGROUNDUP(p-&gt;vma[i].length) &gt; addr) &#123;</span><br><span class="line">      vma = &amp;p-&gt;vma[i];</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (vma) &#123;</span><br><span class="line">    vmaunmap(p, vma, addr, length);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>其中 <code>vmaunmap()</code> 就是做了所需要的全部工作——修改 page
 table、释放内存、修改 vma。</p>
 <h3 id="还不够">还不够</h3>
@@ -732,81 +572,9 @@ table、释放内存、修改 vma。</p>
 即可，而不需要拷贝物理内存，这也是利用了 page fault 的 lazy allocation
 策略——用到再分配。</p>
 <p>当然，还要增加 <code>vma[]</code> 中记录的文件的引用计数。</p>
-<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/proc.c</span></div><code class="language-C">static struct proc*
-allocproc(void)
-{
-  ...
-found:
-  ...
-  memset(&amp;p-&gt;vma, 0, sizeof(p-&gt;vma));
-  p-&gt;max_VMA = PGROUNDUP(MAXVA) - PGSIZE*2;
-  ...
-}
-
-static void
-freeproc(struct proc *p)
-{
-  ...
-  memset(&amp;p-&gt;vma, 0, sizeof(p-&gt;vma));
-  p-&gt;max_VMA = 0;
-}
-
-void
-exit(int status)
-{
-  ...
-  for (int i = 0; i &lt; NVMA; i++) {
-    struct vma* vma = &amp;p-&gt;vma[i];
-    if (vma-&gt;valid) {
-      vmaunmap(p, vma, vma-&gt;va, vma-&gt;length);
-    }
-  }
-  p-&gt;max_VMA = 0;
-  ...
-}
-
-int
-fork(void)
-{
-  ...
-  for (int i = 0; i &lt; NVMA; i++) {
-    np-&gt;vma[i] = p-&gt;vma[i];
-    if (np-&gt;vma[i].f) {
-      np-&gt;vma[i].f-&gt;ref++;
-    }
-    np-&gt;max_VMA = p-&gt;max_VMA;
-  }
-  ...
-}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<figure class="highlight c"><figcaption><span>kernel/proc.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="keyword">struct</span> proc*</span><br><span class="line"><span class="title function_">allocproc</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">found:</span><br><span class="line">  ...</span><br><span class="line">  <span class="built_in">memset</span>(&amp;p-&gt;vma, <span class="number">0</span>, <span class="keyword">sizeof</span>(p-&gt;vma));</span><br><span class="line">  p-&gt;max_VMA = PGROUNDUP(MAXVA) - PGSIZE*<span class="number">2</span>;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span></span><br><span class="line"><span class="title function_">freeproc</span><span class="params">(<span class="keyword">struct</span> proc *p)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="built_in">memset</span>(&amp;p-&gt;vma, <span class="number">0</span>, <span class="keyword">sizeof</span>(p-&gt;vma));</span><br><span class="line">  p-&gt;max_VMA = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">exit</span><span class="params">(<span class="type">int</span> status)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; NVMA; i++) &#123;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">vma</span>* <span class="title">vma</span> =</span> &amp;p-&gt;vma[i];</span><br><span class="line">    <span class="keyword">if</span> (vma-&gt;valid) &#123;</span><br><span class="line">      vmaunmap(p, vma, vma-&gt;va, vma-&gt;length);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  p-&gt;max_VMA = <span class="number">0</span>;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">fork</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; NVMA; i++) &#123;</span><br><span class="line">    np-&gt;vma[i] = p-&gt;vma[i];</span><br><span class="line">    <span class="keyword">if</span> (np-&gt;vma[i].f) &#123;</span><br><span class="line">      np-&gt;vma[i].f-&gt;ref++;</span><br><span class="line">    &#125;</span><br><span class="line">    np-&gt;max_VMA = p-&gt;max_VMA;</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h2 id="测试结果">测试结果</h2>
-<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">make</span> grade
-<span class="token punctuation">..</span>.
-<span class="token operator">==</span> Test running mmaptest <span class="token operator">==</span>
-$ <span class="token function">make</span> qemu-gdb
-<span class="token punctuation">(</span><span class="token number">3</span>.9s<span class="token punctuation">)</span>
-<span class="token operator">==</span> Test   mmaptest: mmap f <span class="token operator">==</span>
-  mmaptest: mmap f: OK
-<span class="token operator">==</span> Test   mmaptest: mmap private <span class="token operator">==</span>
-  mmaptest: mmap private: OK
-<span class="token operator">==</span> Test   mmaptest: mmap read-only <span class="token operator">==</span>
-  mmaptest: mmap read-only: OK
-<span class="token operator">==</span> Test   mmaptest: mmap read/write <span class="token operator">==</span>
-  mmaptest: mmap read/write: OK
-<span class="token operator">==</span> Test   mmaptest: mmap dirty <span class="token operator">==</span>
-  mmaptest: mmap dirty: OK
-<span class="token operator">==</span> Test   mmaptest: not-mapped unmap <span class="token operator">==</span>
-  mmaptest: not-mapped unmap: OK
-<span class="token operator">==</span> Test   mmaptest: two files <span class="token operator">==</span>
-  mmaptest: two files: OK
-<span class="token operator">==</span> Test   mmaptest: fork_test <span class="token operator">==</span>
-  mmaptest: fork_test: OK
-<span class="token operator">==</span> Test usertests <span class="token operator">==</span>
-$ <span class="token function">make</span> qemu-gdb
-usertests: OK <span class="token punctuation">(</span><span class="token number">129</span>.9s<span class="token punctuation">)</span>
-    <span class="token punctuation">(</span>Old xv6.out.usertests failure log removed<span class="token punctuation">)</span>
-<span class="token operator">==</span> Test <span class="token function">time</span> <span class="token operator">==</span>
-time: OK
-Score: <span class="token number">140</span>/140<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">$ make grade</span><br><span class="line">...</span><br><span class="line">== Test running mmaptest ==</span><br><span class="line">$ make qemu-gdb</span><br><span class="line">(3.9s)</span><br><span class="line">== Test   mmaptest: mmap f ==</span><br><span class="line">  mmaptest: mmap f: OK</span><br><span class="line">== Test   mmaptest: mmap private ==</span><br><span class="line">  mmaptest: mmap private: OK</span><br><span class="line">== Test   mmaptest: mmap read-only ==</span><br><span class="line">  mmaptest: mmap read-only: OK</span><br><span class="line">== Test   mmaptest: mmap <span class="built_in">read</span>/write ==</span><br><span class="line">  mmaptest: mmap <span class="built_in">read</span>/write: OK</span><br><span class="line">== Test   mmaptest: mmap dirty ==</span><br><span class="line">  mmaptest: mmap dirty: OK</span><br><span class="line">== Test   mmaptest: not-mapped unmap ==</span><br><span class="line">  mmaptest: not-mapped unmap: OK</span><br><span class="line">== Test   mmaptest: two files ==</span><br><span class="line">  mmaptest: two files: OK</span><br><span class="line">== Test   mmaptest: fork_test ==</span><br><span class="line">  mmaptest: fork_test: OK</span><br><span class="line">== Test usertests ==</span><br><span class="line">$ make qemu-gdb</span><br><span class="line">usertests: OK (129.9s)</span><br><span class="line">    (Old xv6.out.usertests failure <span class="built_in">log</span> removed)</span><br><span class="line">== Test time ==</span><br><span class="line">time: OK</span><br><span class="line">Score: 140/140</span><br></pre></td></tr></table></figure>
 <h2 id="最后的工作">最后的工作</h2>
 <ol type="1">
 <li><code>git commit -am ""</code> 将所有修改提交到本地;</li>
@@ -1423,6 +1191,16 @@ $(function () {
     
     <script src="/libs/instantpage/instantpage.js" type="module"></script>
     
+
+    <script type="text/javascript">
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden) {
+                document.title = '你会有一天后悔';
+            } else {
+                document.title = '欢迎来到 G8 北海道 洞爷湖 高峰会 博物馆';
+            }
+        });
+    </script>
 
 </body>
 

@@ -9,11 +9,9 @@
 
 Preparation
 切换到对应分支
-$ git fetch
-$ git checkout traps
-$ make clean
+123$ git fetch$ git checkout traps$ make clean
 Task1: RISC-V assembly
-第一个任务就是了解一下 RISC-V">
+第一个任务就是了解一下">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -26,7 +24,7 @@ Task1: RISC-V assembly
 
 
     <title>6.s081 Lab3 Traps | 没什么看头的地方</title>
-    <link rel="icon" type="image/png" href="/btt.png">
+    <link rel="icon" type="image/png" href="/dt.png">
     
     <style>
         body{
@@ -433,9 +431,7 @@ Task1: RISC-V assembly
 <span id="more"></span>
 <h2 id="preparation">Preparation</h2>
 <p>切换到对应分支</p>
-<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">git</span> fetch
-$ <span class="token function">git</span> checkout traps
-$ <span class="token function">make</span> clean<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ git fetch</span><br><span class="line">$ git checkout traps</span><br><span class="line">$ make clean</span><br></pre></td></tr></table></figure>
 <h2 id="task1-risc-v-assembly">Task1: RISC-V assembly</h2>
 <p>第一个任务就是了解一下 RISC-V 汇编语言，直接跳过。</p>
 <blockquote>
@@ -446,7 +442,7 @@ $ <span class="token function">make</span> clean<span aria-hidden="true" class="
 特性，打印函数调用层次，方便 debug。</p>
 <p>课程笔记中已经为我们展示了栈中各个栈帧(Stack
 Frame)的排布情况，如下图所示。</p>
-<p><img src="1.png"></p>
+<p><img src="1.png"/></p>
 <p>每当一个函数被调用，就会在栈中为其分配一个栈帧，先 push
 函数返回地址，再 push 上一个栈帧的地址。如果用 <code>fp</code>
 指向当前栈帧，则有 <code>return_addr = *(fp-8)</code>，以及
@@ -454,19 +450,7 @@ Frame)的排布情况，如下图所示。</p>
 xv6 中，一个栈就是一个 PGSIZE
 大小，由于栈从高往低增长，那么最开始那个栈帧必然大于该页的最大地址（事实上就是下一页的起始地址）。</p>
 <p>有了这些知识，那么实现起来就很简单了，只需在一个有限循环里遍历栈帧即可。</p>
-<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/printf.c</span></div><code class="language-C">void
-backtrace(void)
-{
-  printf("backtrace:\n");
-
-  uint64 fp = r_fp();
-  uint64 top = PGROUNDUP(fp);
-
-  for (; fp &lt; top; fp = *(uint64*)(fp-16)) {
-    uint64 ret = *(uint64*)(fp-8);    // get return addr
-    printf("%p\n", ret);
-  }
-}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<figure class="highlight c"><figcaption><span>kernel/printf.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">backtrace</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;backtrace:\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">  uint64 fp = r_fp();</span><br><span class="line">  uint64 top = PGROUNDUP(fp);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> (; fp &lt; top; fp = *(uint64*)(fp<span class="number">-16</span>)) &#123;</span><br><span class="line">    uint64 ret = *(uint64*)(fp<span class="number">-8</span>);    <span class="comment">// get return addr</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%p\n&quot;</span>, ret);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h2 id="task3-alarm">Task3: Alarm</h2>
 <p>该任务要求我们实现定时器功能，即给定 interval 和一个 handler，每
 interval 次时钟中断，调用一次 <code>handler()</code>。</p>
@@ -497,37 +481,12 @@ SP。</p>
 进行一个拷贝，也就要在 <code>struct proc</code> 里新增一个
 <code>trapframe_copy</code> 变量用于拷贝 origin
 进入内核态时暂存的用户寄存器。</p>
-<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/proc.h</span></div><code class="language-C">struct proc {
-  ...
-
-  // every timeout ticks, call handler
-  int timeout;
-  int tick;         // ticks since last call
-  uint64 handler;
-  uint8 in_handler; // 1 for is running handler, 0 for else
-  struct trapframe trapframe_copy;
-};<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<figure class="highlight c"><figcaption><span>kernel/proc.h</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">proc</span> &#123;</span></span><br><span class="line">  ...</span><br><span class="line"></span><br><span class="line">  <span class="comment">// every timeout ticks, call handler</span></span><br><span class="line">  <span class="type">int</span> timeout;</span><br><span class="line">  <span class="type">int</span> tick;         <span class="comment">// ticks since last call</span></span><br><span class="line">  uint64 handler;</span><br><span class="line">  uint8 in_handler; <span class="comment">// 1 for is running handler, 0 for else</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">trapframe</span> <span class="title">trapframe_copy</span>;</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 <p>test2 中要求我们在执行 handler 时忽视时钟中断，就还要一个
 <code>in_handler</code> 变量用来指示当前是否正在调用 handler。</p>
 <p>这样一来，<code>sys_sigalarm()</code>
 函数就很好实现了——仅仅是保存一些变量而已。</p>
-<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/sysproc.c</span></div><code class="language-C">uint64
-sys_sigalarm(void)
-{
-  int timeout;
-  uint64 handler;
-
-  if (argint(0, &amp;timeout) &lt; 0 || argaddr(1, &amp;handler) &lt; 0) {
-    return -1;
-  }
-
-  struct proc* p = myproc();
-  p-&gt;timeout = timeout;
-  p-&gt;tick = 0;
-  p-&gt;handler = handler;
-  p-&gt;in_handler = 0;
-  return 0;
-}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<figure class="highlight c"><figcaption><span>kernel/sysproc.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">uint64</span><br><span class="line"><span class="title function_">sys_sigalarm</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">int</span> timeout;</span><br><span class="line">  uint64 handler;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (argint(<span class="number">0</span>, &amp;timeout) &lt; <span class="number">0</span> || argaddr(<span class="number">1</span>, &amp;handler) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">proc</span>* <span class="title">p</span> =</span> myproc();</span><br><span class="line">  p-&gt;timeout = timeout;</span><br><span class="line">  p-&gt;tick = <span class="number">0</span>;</span><br><span class="line">  p-&gt;handler = handler;</span><br><span class="line">  p-&gt;in_handler = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>以及别忘了需要在 <code>allocproc()</code> 和 <code>freeproc()</code>
 中进行一些修改。</p>
 <h3 id="when-and-how-to-call-handler">when and how to call handler?</h3>
@@ -542,25 +501,7 @@ sys_sigalarm(void)
 <p>如果当前未运行 handler，将 tick 增加，一旦达到阈值 timeout，就将
 trapframe 进行拷贝，然后修改 trapframe 的 epc 字段，等待
 <code>usertrapret()</code> 结束后跳转到 handler 并执行。</p>
-<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/trap.c</span></div><code class="language-C">void
-usertrap(void)
-{
-  ...
-  if(which_dev == 2) {
-    if (p-&gt;timeout &amp;&amp; !p-&gt;in_handler) {
-      p-&gt;tick++;
-      if (p-&gt;tick &gt;= p-&gt;timeout) {
-        p-&gt;tick = 0;
-        p-&gt;in_handler = 1;
-        memmove(&amp;p-&gt;trapframe_copy, p-&gt;trapframe, sizeof(struct trapframe));
-        p-&gt;trapframe-&gt;epc = p-&gt;handler; // p-&gt;trapframe-&gt;epc should be set as the handler address
-      }
-    }
-    yield();
-  }
-
-  usertrapret();
-}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<figure class="highlight c"><figcaption><span>kernel/trap.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">usertrap</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">if</span>(which_dev == <span class="number">2</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (p-&gt;timeout &amp;&amp; !p-&gt;in_handler) &#123;</span><br><span class="line">      p-&gt;tick++;</span><br><span class="line">      <span class="keyword">if</span> (p-&gt;tick &gt;= p-&gt;timeout) &#123;</span><br><span class="line">        p-&gt;tick = <span class="number">0</span>;</span><br><span class="line">        p-&gt;in_handler = <span class="number">1</span>;</span><br><span class="line">        memmove(&amp;p-&gt;trapframe_copy, p-&gt;trapframe, <span class="keyword">sizeof</span>(<span class="keyword">struct</span> trapframe));</span><br><span class="line">        p-&gt;trapframe-&gt;epc = p-&gt;handler; <span class="comment">// p-&gt;trapframe-&gt;epc should be set as the handler address</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    yield();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  usertrapret();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h3 id="sys_sigreturn">sys_sigreturn</h3>
 <p>定时器返回函数就更简单了。恢复原来的 trapframe
 数据，这样对硬件而言，中间发生的事都无所谓，毕竟从 origin
@@ -569,37 +510,9 @@ usertrap(void)
 <blockquote>
 <p>由此可见 trapframe 在恢复用户态的重要性。</p>
 </blockquote>
-<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/sysproc.c</span></div><code class="language-C">uint64
-sys_sigreturn(void)
-{
-  struct proc* p = myproc();
-  p-&gt;tick = 0;
-  p-&gt;in_handler = 0; // finish calling handler, set it as 0
-  memmove(p-&gt;trapframe, &amp;p-&gt;trapframe_copy, sizeof(struct trapframe));
-  return 0;
-}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<figure class="highlight c"><figcaption><span>kernel/sysproc.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">uint64</span><br><span class="line"><span class="title function_">sys_sigreturn</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">proc</span>* <span class="title">p</span> =</span> myproc();</span><br><span class="line">  p-&gt;tick = <span class="number">0</span>;</span><br><span class="line">  p-&gt;in_handler = <span class="number">0</span>; <span class="comment">// finish calling handler, set it as 0</span></span><br><span class="line">  memmove(p-&gt;trapframe, &amp;p-&gt;trapframe_copy, <span class="keyword">sizeof</span>(<span class="keyword">struct</span> trapframe));</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h2 id="测试结果">测试结果</h2>
-<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">make</span> grade
-<span class="token punctuation">..</span>.
-<span class="token operator">==</span> Test answers-traps.txt <span class="token operator">==</span> answers-traps.txt: OK
-<span class="token operator">==</span> Test backtrace <span class="token builtin class-name">test</span> <span class="token operator">==</span>
-$ <span class="token function">make</span> qemu-gdb
-backtrace test: OK <span class="token punctuation">(</span><span class="token number">3</span>.6s<span class="token punctuation">)</span>
-<span class="token operator">==</span> Test running alarmtest <span class="token operator">==</span>
-$ <span class="token function">make</span> qemu-gdb
-<span class="token punctuation">(</span><span class="token number">3</span>.9s<span class="token punctuation">)</span>
-<span class="token operator">==</span> Test   alarmtest: test0 <span class="token operator">==</span>
-  alarmtest: test0: OK
-<span class="token operator">==</span> Test   alarmtest: test1 <span class="token operator">==</span>
-  alarmtest: test1: OK
-<span class="token operator">==</span> Test   alarmtest: test2 <span class="token operator">==</span>
-  alarmtest: test2: OK
-<span class="token operator">==</span> Test usertests <span class="token operator">==</span>
-$ <span class="token function">make</span> qemu-gdb
-usertests: OK <span class="token punctuation">(</span><span class="token number">123</span>.9s<span class="token punctuation">)</span>
-<span class="token operator">==</span> Test <span class="token function">time</span> <span class="token operator">==</span>
-time: OK
-Score: <span class="token number">85</span>/85<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">$ make grade</span><br><span class="line">...</span><br><span class="line">== Test answers-traps.txt == answers-traps.txt: OK</span><br><span class="line">== Test backtrace <span class="built_in">test</span> ==</span><br><span class="line">$ make qemu-gdb</span><br><span class="line">backtrace <span class="built_in">test</span>: OK (3.6s)</span><br><span class="line">== Test running alarmtest ==</span><br><span class="line">$ make qemu-gdb</span><br><span class="line">(3.9s)</span><br><span class="line">== Test   alarmtest: test0 ==</span><br><span class="line">  alarmtest: test0: OK</span><br><span class="line">== Test   alarmtest: test1 ==</span><br><span class="line">  alarmtest: test1: OK</span><br><span class="line">== Test   alarmtest: test2 ==</span><br><span class="line">  alarmtest: test2: OK</span><br><span class="line">== Test usertests ==</span><br><span class="line">$ make qemu-gdb</span><br><span class="line">usertests: OK (123.9s)</span><br><span class="line">== Test time ==</span><br><span class="line">time: OK</span><br><span class="line">Score: 85/85</span><br></pre></td></tr></table></figure>
 <h2 id="最后的工作">最后的工作</h2>
 <ol type="1">
 <li><code>git commit -am ""</code> 将所有修改提交到本地;</li>
@@ -1224,6 +1137,16 @@ $(function () {
     
     <script src="/libs/instantpage/instantpage.js" type="module"></script>
     
+
+    <script type="text/javascript">
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden) {
+                document.title = '你会有一天后悔';
+            } else {
+                document.title = '欢迎来到 G8 北海道 洞爷湖 高峰会 博物馆';
+            }
+        });
+    </script>
 
 </body>
 

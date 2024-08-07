@@ -18,7 +18,7 @@
 
 
     <title>归档: 2022/11 | 没什么看头的地方</title>
-    <link rel="icon" type="image/png" href="/btt.png">
+    <link rel="icon" type="image/png" href="/dt.png">
     
     <style>
         body{
@@ -364,7 +364,7 @@
                         startDelay: 300,
                         typeSpeed: 100,
                         loop: true,
-                        backSpeed: 50,
+                        backSpeed: 100,
                         showCursor: true
                     });
                 </script>
@@ -705,7 +705,7 @@ Plus, Causal+)的 ALPS 键值存储系统，并且具有高可扩展性。在 CO
                                     对于单个副本组而言，所有机器存储共享同一存储空间，机器数量的增加并不会扩大存储能力。而当
 kv 对数量不断增长时，副本组的存储能力成为瓶颈。
 参考 Aurora
-的做法，不妨将数据划分为多个片段，每个副本组负责分片(Shard)的一个子集。
+的做法，不妨将数据划分为多个片段，每个副本组负责分片(Shard)的一个
                                 
                             </div>
                             <div class="publish-info">
@@ -1272,6 +1272,16 @@ $(function () {
     
     <script src="/libs/instantpage/instantpage.js" type="module"></script>
     
+
+    <script type="text/javascript">
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden) {
+                document.title = '你会有一天后悔';
+            } else {
+                document.title = '欢迎来到 G8 北海道 洞爷湖 高峰会 博物馆';
+            }
+        });
+    </script>
 
 </body>
 

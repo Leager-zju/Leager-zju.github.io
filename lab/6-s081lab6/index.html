@@ -9,12 +9,10 @@
 
 Preparation
 切换到对应分支
-$ git fetch
-$ git checkout net
-$ make clean
+123$ git fetch$ git checkout net$ make clean
 模拟网络
 我们将使用名为 E1000
-的网络设备来处理网络通信，实">
+的网络设备来">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -27,7 +25,7 @@ $ make clean
 
 
     <title>6.s081 Lab6 Networking | 没什么看头的地方</title>
-    <link rel="icon" type="image/png" href="/btt.png">
+    <link rel="icon" type="image/png" href="/dt.png">
     
     <style>
         body{
@@ -434,9 +432,7 @@ $ make clean
 <span id="more"></span>
 <h2 id="preparation">Preparation</h2>
 <p>切换到对应分支</p>
-<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">git</span> fetch
-$ <span class="token function">git</span> checkout net
-$ <span class="token function">make</span> clean<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ git fetch</span><br><span class="line">$ git checkout net</span><br><span class="line">$ make clean</span><br></pre></td></tr></table></figure>
 <h2 id="模拟网络">模拟网络</h2>
 <p>我们将使用名为 <strong>E1000</strong>
 的网络设备来处理网络通信，实际上是 qemu 模拟了一个网卡和 PCI
@@ -455,57 +451,8 @@ $ <span class="token function">make</span> clean<span aria-hidden="true" class="
 文件，下一步就会执行 <code>sockwrite()</code>。该函数就是将数据拷贝到
 <code>struct mbuf</code> 类型的变量中，然后利用协议栈，不断封装 TCP/UDP
 首部、IP 首部、以太网首部，最后得到一个完整的数据包，就可以发送了。</p>
-<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/sysnet.c</span></div><code class="language-C">int
-sockwrite(struct sock *si, uint64 addr, int n)
-{
-  struct proc *pr = myproc();
-  struct mbuf *m;
-
-  m = mbufalloc(MBUF_DEFAULT_HEADROOM); // 分配一个 mbuf，并留出首部空间。
-  if (!m)
-    return -1;
-
-  if (copyin(pr-&gt;pagetable, mbufput(m, n), addr, n) == -1) { // 载入数据
-    mbuffree(m);
-    return -1;
-  }
-  net_tx_udp(m, si-&gt;raddr, si-&gt;lport, si-&gt;rport);
-  return n;
-}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/net.c</span></div><code class="language-C">void
-net_tx_udp(struct mbuf *m, uint32 dip,
-           uint16 sport, uint16 dport)
-{
-  struct udp *udphdr;
-
-  // put the UDP header...
-
-  // now on to the IP layer
-  net_tx_ip(m, IPPROTO_UDP, dip);
-}
-
-static void
-net_tx_ip(struct mbuf *m, uint8 proto, uint32 dip)
-{
-  struct ip *iphdr;
-
-  // push the IP header...
-
-  // now on to the ethernet layer
-  net_tx_eth(m, ETHTYPE_IP);
-}
-
-static void
-net_tx_eth(struct mbuf *m, uint16 ethtype)
-{
-  struct eth *ethhdr;
-
-  // push the ethernet header...
-
-  if (e1000_transmit(m)) { // 发送，该函数需要我们实现
-    mbuffree(m);
-  }
-}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<figure class="highlight c"><figcaption><span>kernel/sysnet.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">sockwrite</span><span class="params">(<span class="keyword">struct</span> sock *si, uint64 addr, <span class="type">int</span> n)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">proc</span> *<span class="title">pr</span> =</span> myproc();</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">mbuf</span> *<span class="title">m</span>;</span></span><br><span class="line"></span><br><span class="line">  m = mbufalloc(MBUF_DEFAULT_HEADROOM); <span class="comment">// 分配一个 mbuf，并留出首部空间。</span></span><br><span class="line">  <span class="keyword">if</span> (!m)</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (copyin(pr-&gt;pagetable, mbufput(m, n), addr, n) == <span class="number">-1</span>) &#123; <span class="comment">// 载入数据</span></span><br><span class="line">    mbuffree(m);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  net_tx_udp(m, si-&gt;raddr, si-&gt;lport, si-&gt;rport);</span><br><span class="line">  <span class="keyword">return</span> n;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><figcaption><span>kernel/net.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">net_tx_udp</span><span class="params">(<span class="keyword">struct</span> mbuf *m, uint32 dip,</span></span><br><span class="line"><span class="params">           uint16 sport, uint16 dport)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">udp</span> *<span class="title">udphdr</span>;</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// put the UDP header...</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// now on to the IP layer</span></span><br><span class="line">  net_tx_ip(m, IPPROTO_UDP, dip);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span></span><br><span class="line"><span class="title function_">net_tx_ip</span><span class="params">(<span class="keyword">struct</span> mbuf *m, uint8 proto, uint32 dip)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">ip</span> *<span class="title">iphdr</span>;</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// push the IP header...</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// now on to the ethernet layer</span></span><br><span class="line">  net_tx_eth(m, ETHTYPE_IP);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span></span><br><span class="line"><span class="title function_">net_tx_eth</span><span class="params">(<span class="keyword">struct</span> mbuf *m, uint16 ethtype)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">eth</span> *<span class="title">ethhdr</span>;</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// push the ethernet header...</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (e1000_transmit(m)) &#123; <span class="comment">// 发送，该函数需要我们实现</span></span><br><span class="line">    mbuffree(m);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h3 id="readfd">read(fd)</h3>
 <p>收数据的流程基本与上面类似。在用户态执行 <code>read(fd)</code>
 会跳转到系统调用 <code>sys_read(fd)</code>，进一步执行
@@ -520,72 +467,9 @@ net_tx_eth(struct mbuf *m, uint16 ethtype)
 <code>sockrecvudp()</code>，它会将数据（实际上是 <code>mbuf</code>）push
 进接收队列，并唤醒沉睡中的
 <code>sockread()</code>。醒了以后发现数据已经有了，那就美滋滋地读取，最后返回给用户态。</p>
-<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/sysnet.c</span></div><code class="language-C">int
-sockread(struct sock *si, uint64 addr, int n)
-{
-  ...
-  acquire(&amp;si-&gt;lock);
-  while (mbufq_empty(&amp;si-&gt;rxq) &amp;&amp; !pr-&gt;killed) { // 等待 sockrecvudp 的唤醒
-    sleep(&amp;si-&gt;rxq, &amp;si-&gt;lock);
-  }
-  ...
-  m = mbufq_pophead(&amp;si-&gt;rxq); // 取出 socket 的接收队列队首数据
-  ...
-  if (copyout(pr-&gt;pagetable, addr, m-&gt;head, len) == -1) {
-    mbuffree(m);
-    return -1;
-  }
-  ...
-}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/net.c</span></div><code class="language-C">// called by e1000_recv
-void net_rx(struct mbuf *m)
-{
-  ...
-  if (type == ETHTYPE_IP) // type 为以太网首部的类型字段
-    net_rx_ip(m);
-  else if (type == ETHTYPE_ARP)
-    net_rx_arp(m);
-  else
-    mbuffree(m);
-}
-
-static void
-net_rx_ip(struct mbuf *m)
-{
-  ...
-  struct ip *iphdr;
-  iphdr = mbufpullhdr(m, *iphdr);
-  net_rx_udp(m, len, iphdr);
-  ...
-}
-
-static void
-net_rx_udp(struct mbuf *m, uint16 len, struct ip *iphdr)
-{
-  struct udp *udphdr;
-  udphdr = mbufpullhdr(m, *udphdr);
-  ...
-  sockrecvudp(m, sip, dport, sport); // 分别从首部中提取出，并经过 ntohs 的大小端转换
-  ...
-}
-
-static void
-net_rx_arp(struct mbuf *m)
-{
-  ...
-  net_tx_arp(ARP_OP_REPLY, smac, sip); // 这个要特别注意，收到一个 ARP 包后要马上发回去
-  ...
-}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/sysnet.c</span></div><code class="language-C">void
-sockrecvudp(struct mbuf *m, uint32 raddr, uint16 lport, uint16 rport)
-{
-  ...
-found:
-  ...
-  mbufq_pushtail(&amp;si-&gt;rxq, m);  // 将数据插到 socket 的接收队列末尾
-  wakeup(&amp;si-&gt;rxq);             // 并唤醒
-  ...
-}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<figure class="highlight c"><figcaption><span>kernel/sysnet.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">sockread</span><span class="params">(<span class="keyword">struct</span> sock *si, uint64 addr, <span class="type">int</span> n)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  acquire(&amp;si-&gt;lock);</span><br><span class="line">  <span class="keyword">while</span> (mbufq_empty(&amp;si-&gt;rxq) &amp;&amp; !pr-&gt;killed) &#123; <span class="comment">// 等待 sockrecvudp 的唤醒</span></span><br><span class="line">    sleep(&amp;si-&gt;rxq, &amp;si-&gt;lock);</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">  m = mbufq_pophead(&amp;si-&gt;rxq); <span class="comment">// 取出 socket 的接收队列队首数据</span></span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">if</span> (copyout(pr-&gt;pagetable, addr, m-&gt;head, len) == <span class="number">-1</span>) &#123;</span><br><span class="line">    mbuffree(m);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><figcaption><span>kernel/net.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// called by e1000_recv</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">net_rx</span><span class="params">(<span class="keyword">struct</span> mbuf *m)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">if</span> (type == ETHTYPE_IP) <span class="comment">// type 为以太网首部的类型字段</span></span><br><span class="line">    net_rx_ip(m);</span><br><span class="line">  <span class="keyword">else</span> <span class="keyword">if</span> (type == ETHTYPE_ARP)</span><br><span class="line">    net_rx_arp(m);</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">    mbuffree(m);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span></span><br><span class="line"><span class="title function_">net_rx_ip</span><span class="params">(<span class="keyword">struct</span> mbuf *m)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">ip</span> *<span class="title">iphdr</span>;</span></span><br><span class="line">  iphdr = mbufpullhdr(m, *iphdr);</span><br><span class="line">  net_rx_udp(m, len, iphdr);</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span></span><br><span class="line"><span class="title function_">net_rx_udp</span><span class="params">(<span class="keyword">struct</span> mbuf *m, uint16 len, <span class="keyword">struct</span> ip *iphdr)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">udp</span> *<span class="title">udphdr</span>;</span></span><br><span class="line">  udphdr = mbufpullhdr(m, *udphdr);</span><br><span class="line">  ...</span><br><span class="line">  sockrecvudp(m, sip, dport, sport); <span class="comment">// 分别从首部中提取出，并经过 ntohs 的大小端转换</span></span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span></span><br><span class="line"><span class="title function_">net_rx_arp</span><span class="params">(<span class="keyword">struct</span> mbuf *m)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  net_tx_arp(ARP_OP_REPLY, smac, sip); <span class="comment">// 这个要特别注意，收到一个 ARP 包后要马上发回去</span></span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><figcaption><span>kernel/sysnet.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">sockrecvudp</span><span class="params">(<span class="keyword">struct</span> mbuf *m, uint32 raddr, uint16 lport, uint16 rport)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">found:</span><br><span class="line">  ...</span><br><span class="line">  mbufq_pushtail(&amp;si-&gt;rxq, m);  <span class="comment">// 将数据插到 socket 的接收队列末尾</span></span><br><span class="line">  wakeup(&amp;si-&gt;rxq);             <span class="comment">// 并唤醒</span></span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h2 id="task1-e1000-transmit">Task1: E1000 Transmit</h2>
 <p>OK，接下来我们首先进行一个发送函数的实现。关于
 <code>tx_ring[]</code>、<code>tx_mbufs[]</code>
@@ -605,38 +489,7 @@ found:
 字段都可以不用设置；</li>
 <li>别忘了用<strong>锁</strong>来对并发 transmit 进行互斥处理；</li>
 </ol>
-<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/e1000.c</span></div><code class="language-C">int
-e1000_transmit(struct mbuf *m)
-{
-  acquire(&amp;e1000_lock);
-  uint32 tail = regs[E1000_TDT];
-  struct tx_desc* txd = &amp;tx_ring[tail];
-  struct mbuf* last_mbuf = tx_mbufs[tail];
-
-  if ((txd-&gt;status &amp; E1000_TXD_STAT_DD) == 0) {
-    release(&amp;e1000_lock);
-    return -1;
-  }
-
-  if (last_mbuf) {
-    struct mbuf* t;
-    while (last_mbuf) {
-      t = last_mbuf-&gt;next;
-      mbuffree(last_mbuf);
-      last_mbuf = t;
-    }
-  }
-
-  tx_mbufs[tail] = m;
-  txd-&gt;addr = (uint64)(m-&gt;head);
-  txd-&gt;length = (uint16)(m-&gt;len);
-  txd-&gt;cmd = E1000_TXD_CMD_RS | E1000_TXD_CMD_EOP;
-  txd-&gt;status = 0;  // not done
-  regs[E1000_TDT] = (tail+1) % TX_RING_SIZE;
-
-  release(&amp;e1000_lock);
-  return 0;
-}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<figure class="highlight c"><figcaption><span>kernel/e1000.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">e1000_transmit</span><span class="params">(<span class="keyword">struct</span> mbuf *m)</span></span><br><span class="line">&#123;</span><br><span class="line">  acquire(&amp;e1000_lock);</span><br><span class="line">  uint32 tail = regs[E1000_TDT];</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">tx_desc</span>* <span class="title">txd</span> =</span> &amp;tx_ring[tail];</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">mbuf</span>* <span class="title">last_mbuf</span> =</span> tx_mbufs[tail];</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> ((txd-&gt;status &amp; E1000_TXD_STAT_DD) == <span class="number">0</span>) &#123;</span><br><span class="line">    release(&amp;e1000_lock);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (last_mbuf) &#123;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">mbuf</span>* <span class="title">t</span>;</span></span><br><span class="line">    <span class="keyword">while</span> (last_mbuf) &#123;</span><br><span class="line">      t = last_mbuf-&gt;next;</span><br><span class="line">      mbuffree(last_mbuf);</span><br><span class="line">      last_mbuf = t;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  tx_mbufs[tail] = m;</span><br><span class="line">  txd-&gt;addr = (uint64)(m-&gt;head);</span><br><span class="line">  txd-&gt;length = (uint16)(m-&gt;len);</span><br><span class="line">  txd-&gt;cmd = E1000_TXD_CMD_RS | E1000_TXD_CMD_EOP;</span><br><span class="line">  txd-&gt;status = <span class="number">0</span>;  <span class="comment">// not done</span></span><br><span class="line">  regs[E1000_TDT] = (tail+<span class="number">1</span>) % TX_RING_SIZE;</span><br><span class="line"></span><br><span class="line">  release(&amp;e1000_lock);</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h2 id="task2-e1000-recv">Task2: E1000 Recv</h2>
 <p>接收函数也是按照 hint 来即可。也说下坑点：</p>
 <ol type="1">
@@ -650,50 +503,9 @@ ARP 包会马上调用
 的读完，而不能一次调用只读一个
 <code>mbuf</code>，所以需要一个大的循环；</li>
 </ol>
-<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/e1000.c</span></div><code class="language-C">static void
-e1000_recv(void)
-{
-  uint32 tail;
-  struct rx_desc* rxd;
-  struct mbuf* m;
-
-  for (;;) {
-    regs[E1000_RDT] = (regs[E1000_RDT]+1) % RX_RING_SIZE;
-    tail = regs[E1000_RDT];
-    rxd = &amp;rx_ring[tail];
-    m = rx_mbufs[tail];
-
-    if ((rxd-&gt;status &amp; E1000_RXD_STAT_DD) == 0) {
-      regs[E1000_RDT] = (regs[E1000_RDT]-1) % RX_RING_SIZE;
-      break;
-    }
-
-    m-&gt;len = rxd-&gt;length;
-    net_rx(m);
-
-    if ((rx_mbufs[tail] = mbufalloc(0)) == 0)
-      panic("e1000_recv");
-    rxd-&gt;status = 0;
-    rxd-&gt;addr = (uint64)rx_mbufs[tail]-&gt;head;
-  }
-}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<figure class="highlight c"><figcaption><span>kernel/e1000.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span></span><br><span class="line"><span class="title function_">e1000_recv</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  uint32 tail;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">rx_desc</span>* <span class="title">rxd</span>;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">mbuf</span>* <span class="title">m</span>;</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">    regs[E1000_RDT] = (regs[E1000_RDT]+<span class="number">1</span>) % RX_RING_SIZE;</span><br><span class="line">    tail = regs[E1000_RDT];</span><br><span class="line">    rxd = &amp;rx_ring[tail];</span><br><span class="line">    m = rx_mbufs[tail];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((rxd-&gt;status &amp; E1000_RXD_STAT_DD) == <span class="number">0</span>) &#123;</span><br><span class="line">      regs[E1000_RDT] = (regs[E1000_RDT]<span class="number">-1</span>) % RX_RING_SIZE;</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    m-&gt;len = rxd-&gt;length;</span><br><span class="line">    net_rx(m);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((rx_mbufs[tail] = mbufalloc(<span class="number">0</span>)) == <span class="number">0</span>)</span><br><span class="line">      panic(<span class="string">&quot;e1000_recv&quot;</span>);</span><br><span class="line">    rxd-&gt;status = <span class="number">0</span>;</span><br><span class="line">    rxd-&gt;addr = (uint64)rx_mbufs[tail]-&gt;head;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h2 id="测试结果">测试结果</h2>
-<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">make</span> grade
-<span class="token punctuation">..</span>.
-<span class="token operator">==</span> Test running nettests <span class="token operator">==</span>
-$ <span class="token function">make</span> qemu-gdb
-<span class="token punctuation">(</span><span class="token number">3</span>.1s<span class="token punctuation">)</span>
-<span class="token operator">==</span> Test   nettest: <span class="token function">ping</span> <span class="token operator">==</span>
-  nettest: ping: OK
-<span class="token operator">==</span> Test   nettest: single process <span class="token operator">==</span>
-  nettest: single process: OK
-<span class="token operator">==</span> Test   nettest: multi-process <span class="token operator">==</span>
-  nettest: multi-process: OK
-<span class="token operator">==</span> Test   nettest: DNS <span class="token operator">==</span>
-  nettest: DNS: OK
-<span class="token operator">==</span> Test <span class="token function">time</span> <span class="token operator">==</span>
-time: OK
-Score: <span class="token number">100</span>/100<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">$ make grade</span><br><span class="line">...</span><br><span class="line">== Test running nettests ==</span><br><span class="line">$ make qemu-gdb</span><br><span class="line">(3.1s)</span><br><span class="line">== Test   nettest: ping ==</span><br><span class="line">  nettest: ping: OK</span><br><span class="line">== Test   nettest: single process ==</span><br><span class="line">  nettest: single process: OK</span><br><span class="line">== Test   nettest: multi-process ==</span><br><span class="line">  nettest: multi-process: OK</span><br><span class="line">== Test   nettest: DNS ==</span><br><span class="line">  nettest: DNS: OK</span><br><span class="line">== Test time ==</span><br><span class="line">time: OK</span><br><span class="line">Score: 100/100</span><br></pre></td></tr></table></figure>
 <h2 id="最后的工作">最后的工作</h2>
 <ol type="1">
 <li><code>git commit -am ""</code> 将所有修改提交到本地;</li>
@@ -1318,6 +1130,16 @@ $(function () {
     
     <script src="/libs/instantpage/instantpage.js" type="module"></script>
     
+
+    <script type="text/javascript">
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden) {
+                document.title = '你会有一天后悔';
+            } else {
+                document.title = '欢迎来到 G8 北海道 洞爷湖 高峰会 博物馆';
+            }
+        });
+    </script>
 
 </body>
 

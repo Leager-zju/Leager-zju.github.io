@@ -18,7 +18,7 @@
 
 
     <title>没什么看头的地方</title>
-    <link rel="icon" type="image/png" href="/btt.png">
+    <link rel="icon" type="image/png" href="/dt.png">
     
     <style>
         body{
@@ -409,7 +409,7 @@
                         startDelay: 300,
                         typeSpeed: 100,
                         loop: true,
-                        backSpeed: 50,
+                        backSpeed: 100,
                         showCursor: true
                     });
                 </script>
@@ -555,7 +555,7 @@
                         <div class="dream">
     
     <div class="title center-align">
-        <i class="far fa-lightbulb"></i>&nbsp;&nbsp;陶比特
+        <i class="far fa-lightbulb"></i>&nbsp;&nbsp;这里是陶比特
     </div>
     
     <div class="row">
@@ -1847,6 +1847,16 @@ $(function () {
     
     <script src="/libs/instantpage/instantpage.js" type="module"></script>
     
+
+    <script type="text/javascript">
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden) {
+                document.title = '你会有一天后悔';
+            } else {
+                document.title = '欢迎来到 G8 北海道 洞爷湖 高峰会 博物馆';
+            }
+        });
+    </script>
 
 </body>
 

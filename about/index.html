@@ -18,7 +18,7 @@
 
 
     <title>About Me | 没什么看头的地方</title>
-    <link rel="icon" type="image/png" href="/btt.png">
+    <link rel="icon" type="image/png" href="/dt.png">
     
     <style>
         body{
@@ -371,7 +371,7 @@
                         startDelay: 300,
                         typeSpeed: 100,
                         loop: true,
-                        backSpeed: 50,
+                        backSpeed: 100,
                         showCursor: true
                     });
                 </script>
@@ -630,7 +630,7 @@
                 type: 'pie',
                 radius: '50%',
                 color: ['#6772e5', '#ff9e0f', '#fa755a', '#3ecf8e', '#82d3f4', '#ab47bc', '#525f7f', '#f51c47', '#26A69A'],
-                data: [{"name":"lab","value":27},{"name":"paperReading","value":13},{"name":"c++","value":25},{"name":"what happened","value":1},{"name":"编程思想","value":1},{"name":"note","value":5},{"name":"leetcode","value":10},{"name":"operating system","value":2},{"name":"linux","value":1},{"name":"data structure","value":2},{"name":"Computer Network","value":2},{"name":"algorithm","value":1},{"name":"💩","value":1},{"name":"interview","value":1}],
+                data: [{"name":"lab","value":27},{"name":"paperReading","value":13},{"name":"note","value":5},{"name":"编程思想","value":1},{"name":"operating system","value":2},{"name":"Computer Network","value":2},{"name":"💩","value":1},{"name":"data structure","value":2},{"name":"c++","value":25},{"name":"what happened","value":1},{"name":"linux","value":1},{"name":"leetcode","value":10},{"name":"algorithm","value":1},{"name":"interview","value":1}],
                 itemStyle: {
                     emphasis: {
                         shadowBlur: 10,
@@ -654,7 +654,7 @@
         xAxis: [
             {
                 type: 'category',
-                data: ["MIT 6.824","C++11","MIT 6.s081","C++ Basic","weekly","CMU 15445","lab","GAMES","daily","math"]
+                data: ["MIT 6.824","C++11","MIT 6.s081","C++ Basic","weekly","CMU 15445","lab","GAMES","What Happened","daily"]
             }
         ],
         yAxis: [
@@ -833,16 +833,28 @@
             
             
             
-            <a href="/tags/Project/">
-                <span class="chip center-align waves-effect waves-light chip-default">Project</span>
-            </a>
-            
-            
-            
             
             
             <a href="/tags/GAMES/">
                 <span class="chip center-align waves-effect waves-light chip-default">GAMES</span>
+            </a>
+            
+            
+            
+            <a href="/tags/command/">
+                <span class="chip center-align waves-effect waves-light chip-default">command</span>
+            </a>
+            
+            
+            
+            <a href="/tags/lab/">
+                <span class="chip center-align waves-effect waves-light chip-default">lab</span>
+            </a>
+            
+            
+            
+            <a href="/tags/What-Happened/">
+                <span class="chip center-align waves-effect waves-light chip-default">What Happened</span>
             </a>
             
             
@@ -859,38 +871,26 @@
             
             
             
-            <a href="/tags/command/">
-                <span class="chip center-align waves-effect waves-light chip-default">command</span>
-            </a>
-            
-            
-            
-            <a href="/tags/c/">
-                <span class="chip center-align waves-effect waves-light chip-default">c++</span>
-            </a>
-            
-            
-            
-            <a href="/tags/lab/">
-                <span class="chip center-align waves-effect waves-light chip-default">lab</span>
-            </a>
-            
-            
-            
             <a href="/tags/weekly/">
                 <span class="chip center-align waves-effect waves-light chip-default">weekly</span>
             </a>
             
             
             
-            <a href="/tags/What-Happened/">
-                <span class="chip center-align waves-effect waves-light chip-default">What Happened</span>
+            <a href="/tags/%F0%9F%92%A9/">
+                <span class="chip center-align waves-effect waves-light chip-default">💩</span>
             </a>
             
             
             
-            <a href="/tags/%F0%9F%92%A9/">
-                <span class="chip center-align waves-effect waves-light chip-default">💩</span>
+            <a href="/tags/Project/">
+                <span class="chip center-align waves-effect waves-light chip-default">Project</span>
+            </a>
+            
+            
+            
+            <a href="/tags/c/">
+                <span class="chip center-align waves-effect waves-light chip-default">c++</span>
             </a>
             
             
@@ -1249,6 +1249,16 @@ $(function () {
     
     <script src="/libs/instantpage/instantpage.js" type="module"></script>
     
+
+    <script type="text/javascript">
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden) {
+                document.title = '你会有一天后悔';
+            } else {
+                document.title = '欢迎来到 G8 北海道 洞爷湖 高峰会 博物馆';
+            }
+        });
+    </script>
 
 </body>
 
