@@ -617,8 +617,7 @@ cdef</td>
 <li><code>regex_replace</code>：以新字符串替换所有匹配的子字符串；</li>
 </ul>
 <h3 id="代码示例">代码示例</h3>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token comment">// 完全匹配</span>
-std<span class="token double-colon punctuation">::</span>regex <span class="token function">r</span><span class="token punctuation">(</span><span class="token string">"\\w+day"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>完全匹配</span></div><code class="language-cpp">std<span class="token double-colon punctuation">::</span>regex <span class="token function">r</span><span class="token punctuation">(</span><span class="token string">"\\w+day"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 std<span class="token double-colon punctuation">::</span>smatch res<span class="token punctuation">;</span>
 std<span class="token double-colon punctuation">::</span>string <span class="token function">s1</span><span class="token punctuation">(</span><span class="token string">"Monday"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 std<span class="token double-colon punctuation">::</span>string <span class="token function">s2</span><span class="token punctuation">(</span><span class="token string">"Tuesday"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -634,9 +633,8 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 <span class="token comment">// true Monday</span>
 <span class="token comment">// true Tuesday</span>
 <span class="token comment">// false</span>
-<span class="token comment">// false</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token comment">// 部分匹配</span>
-std<span class="token double-colon punctuation">::</span>regex <span class="token function">r</span><span class="token punctuation">(</span><span class="token string">"\\w+day"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">// false</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>部分匹配</span></div><code class="language-cpp">std<span class="token double-colon punctuation">::</span>regex <span class="token function">r</span><span class="token punctuation">(</span><span class="token string">"\\w+day"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 std<span class="token double-colon punctuation">::</span>smatch res<span class="token punctuation">;</span>
 std<span class="token double-colon punctuation">::</span>string <span class="token function">s1</span><span class="token punctuation">(</span><span class="token string">"MondayTuesdaySunday"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 std<span class="token double-colon punctuation">::</span>string <span class="token function">s2</span><span class="token punctuation">(</span><span class="token string">"Monday and Tuesday and Sunday"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -646,15 +644,14 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 
 <span class="token comment">// output:</span>
 <span class="token comment">// true MondayTuesdaySunday</span>
-<span class="token comment">// true Monday</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token comment">// 子串替换</span>
-std<span class="token double-colon punctuation">::</span>regex <span class="token function">r</span><span class="token punctuation">(</span><span class="token string">"\\w+day"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">// true Monday</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>子串替换</span></div><code class="language-cpp">std<span class="token double-colon punctuation">::</span>regex <span class="token function">r</span><span class="token punctuation">(</span><span class="token string">"\\w+day"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 std<span class="token double-colon punctuation">::</span>smatch res<span class="token punctuation">;</span>
 std<span class="token double-colon punctuation">::</span>string <span class="token function">s</span><span class="token punctuation">(</span><span class="token string">"Monday and Tuesday and Sunday"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token function">regex_replace</span><span class="token punctuation">(</span>s<span class="token punctuation">,</span> r<span class="token punctuation">,</span> <span class="token string">"Weekend"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
 <span class="token comment">// output:</span>
-<span class="token comment">// Weekend and Weekend and Weekend</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<span class="token comment">// Weekend and Weekend and Weekend</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
                 
             </div>

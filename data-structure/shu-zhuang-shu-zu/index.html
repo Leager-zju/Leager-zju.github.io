@@ -469,137 +469,24 @@ Indexed Tree)或 <strong>Fenwick 树</strong>。 它可以在 <span class="math 
 干脆管整个区间好了！”</p>
 <p>于是，整个区间的管辖级别就浮现出来了，以 <code>n=8</code> 为例：</p>
 <p><img src="1.png" style="zoom:80%;"></p>
-<p>由于这种管辖级别像树一样，所以就叫树状数组了。</p>
-<blockquote>
-<p><strong>例</strong></p>
-<p>对于原始数组 <code>nums[] = {1, 0, 1, 2, 3, 7, 100, 5}</code>
-而言，对应的树状数组 <code>biTree</code> 结果为：</p>
-<table>
-<thead>
-<tr>
-<th style="text-align: center;">i</th>
-<th style="text-align: center;">求和序列</th>
-<th style="text-align: center;">结果</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;"><code>nums[1]</code></td>
-<td style="text-align: center;">1</td>
-</tr>
-<tr>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;"><code>nums[1] + nums[2]</code></td>
-<td style="text-align: center;">1</td>
-</tr>
-<tr>
-<td style="text-align: center;">3</td>
-<td style="text-align: center;"><code>nums[3]</code></td>
-<td style="text-align: center;">1</td>
-</tr>
-<tr>
-<td style="text-align: center;">4</td>
-<td style="text-align: center;"><code>nums[1] + ... + nums[4]</code></td>
-<td style="text-align: center;">4</td>
-</tr>
-<tr>
-<td style="text-align: center;">5</td>
-<td style="text-align: center;"><code>nums[5]</code></td>
-<td style="text-align: center;">3</td>
-</tr>
-<tr>
-<td style="text-align: center;">6</td>
-<td style="text-align: center;"><code>nums[5] + nums[6]</code></td>
-<td style="text-align: center;">10</td>
-</tr>
-<tr>
-<td style="text-align: center;">7</td>
-<td style="text-align: center;"><code>nums[7]</code></td>
-<td style="text-align: center;">100</td>
-</tr>
-<tr>
-<td style="text-align: center;">8</td>
-<td style="text-align: center;"><code>nums[1] + ... + nums[8]</code></td>
-<td style="text-align: center;">119</td>
-</tr>
-</tbody>
-</table>
-</blockquote>
+<p>由于这种管辖级别像树一样，所以就叫树状数组了，而每个树状数组中的元素对应着的就是其管辖区间内原数组的所有元素之和。</p>
 <h3 id="区间查询-1">区间查询</h3>
 <p>先来看看树状数组的<strong>读</strong>性能如何。对于原始数组
-<code>nums</code>，为了求其 <code>nums[1:i]</code>
-之和，则要考虑怎么取树状数组中的区间。</p>
-<p>刚开始，我们或许很难直接得出一个合适的公式，那不妨找找规律：</p>
-<table>
-<colgroup>
-<col style="width: 7%">
-<col style="width: 53%">
-<col style="width: 39%">
-</colgroup>
-<thead>
-<tr>
-<th style="text-align: center;">i</th>
-<th style="text-align: center;">求和序列</th>
-<th style="text-align: center;">对应二进制</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;"><code>biTree[1]</code></td>
-<td style="text-align: center;">0001 =&gt; 0001</td>
-</tr>
-<tr>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;"><code>biTree[2]</code></td>
-<td style="text-align: center;">0010 =&gt; 0010</td>
-</tr>
-<tr>
-<td style="text-align: center;">3</td>
-<td style="text-align: center;"><code>biTree[3] + biTree[2]</code></td>
-<td style="text-align: center;">0011 =&gt; 0011 + 0010</td>
-</tr>
-<tr>
-<td style="text-align: center;">4</td>
-<td style="text-align: center;"><code>biTree[4]</code></td>
-<td style="text-align: center;">0100 =&gt; 0100</td>
-</tr>
-<tr>
-<td style="text-align: center;">5</td>
-<td style="text-align: center;"><code>biTree[5] + biTree[4]</code></td>
-<td style="text-align: center;">0101 =&gt; 0101 + 0100</td>
-</tr>
-<tr>
-<td style="text-align: center;">6</td>
-<td style="text-align: center;"><code>biTree[6] + biTree[4]</code></td>
-<td style="text-align: center;">0110 =&gt; 0110 + 0100</td>
-</tr>
-<tr>
-<td style="text-align: center;">7</td>
-<td style="text-align: center;"><code>biTree[7] + biTree[6] + biTree[4]</code></td>
-<td style="text-align: center;">0111 =&gt; 0111 + 0110 + 0100</td>
-</tr>
-<tr>
-<td style="text-align: center;">8</td>
-<td style="text-align: center;"><code>biTree[8]</code></td>
-<td style="text-align: center;">1000 =&gt; 1000</td>
-</tr>
-</tbody>
-</table>
-<p>我们发现：</p>
-<ol type="1">
-<li>只需要不断地将 <code>i</code> 对应二进制最后一个 <code>1</code>
-移除，<del>直至剩下只有一个 <code>1</code> 的时候（如果令
-<code>biTree[0] = 0</code>，甚至不用考虑这一点），</del>将所有生成的数对应的区间相加，就是想要的结果；</li>
-<li><code>i</code> 对应二进制最后一个 <code>1</code> 后面的
-<code>0</code> 越多，<code>biTree[i]</code> 的“管辖范围”也越大；</li>
-</ol>
-<p>事情的本质逐渐浮现，似乎一切都与“二进制的最后一个
-<strong>1</strong>”扯上了关系。</p>
+<code>nums</code>，为了求 <code>sum(i)</code>（即 <code>nums[1:i]</code>
+之和），则要考虑怎么取树状数组中的区间。</p>
+<p>以 <code>sum(6)</code> 为例，根据上图，我们很容易能得到最后的结果是
+<code>biTree[6] + biTree[4]</code>；同样的，<code>sum(7)</code> 对应
+<code>biTree[7] + biTree[6] + biTree[4]</code>；……</p>
+<p>如果仅考虑上图，不难发现 <code>sum(i)</code> 其实就是以
+<code>biTree[i]</code>
+为起点，一直往左上方遍历求和即可（<code>biTree[6]</code> 的左上方只有
+<code>biTree[4]</code>）。那么问题就转化为：如何遍历到下一个，也就是左上方的树状数组元素？</p>
+<p>这里就有一个 trick：只需要将 <code>i</code> 对应二进制最后一个
+<code>1</code> 移除，就能得到下一个要遍历的元素下标，直到 <code>i</code>
+返回到 0；</p>
 <h4 id="lowbitx">lowbit(x)</h4>
 <p><code>lowbit(x)</code> 是一种用于快速找出数 <code>x</code>
-对应二进制最后一个 <code>1</code> 的位置，其表达式为：</p>
+对应二进制最后一个 <code>1</code> 的位置的方法，其表达式为：</p>
 <p><span class="math display">\[
 \text{lowbit}(x) = x\ \&amp;\ (-x)
 \]</span></p>
@@ -617,7 +504,7 @@ Indexed Tree)或 <strong>Fenwick 树</strong>。 它可以在 <span class="math 
 <h4 id="结论">结论</h4>
 <p>根据上面的理论，只要不断把最后一个 <code>1</code>
 去掉就行，那么可以得到这样一个实现区间查询的函数：</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token comment">// rangeQuery returns the sum of nums from 1 to n</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>区间查询</span></div><code class="language-cpp"><span class="token comment">// rangeQuery returns the sum of nums[1:n]</span>
 <span class="token keyword">int</span> <span class="token function">rangeQuery</span><span class="token punctuation">(</span><span class="token keyword">int</span> n<span class="token punctuation">)</span> <span class="token punctuation">{</span>
   <span class="token keyword">int</span> res <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
   <span class="token keyword">while</span> <span class="token punctuation">(</span>n<span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -626,20 +513,26 @@ Indexed Tree)或 <strong>Fenwick 树</strong>。 它可以在 <span class="math 
   <span class="token punctuation">}</span>
   <span class="token keyword">return</span> res<span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>时间复杂度为 <code>n</code> 对应二进制中 <code>1</code> 的个数，即
-<span class="math inline">\(O(\log n)\)</span></p>
+<p>时间复杂度为 <code>n</code> 对应二进制中 <code>1</code>
+的个数，最坏情况下为 <span class="math inline">\(O(\log n)\)</span></p>
 <h3 id="单点修改-1">单点修改</h3>
 <p>如果对某个 <code>nums[i]</code> 进行了修改，则需要将所有管辖该元素的
 <code>biTree[j]</code>——即<strong>数组树</strong>中的父节点——也进行修改，这样才能保证一致性。</p>
-<p>从子节点定位到直接父节点的方法与上面的恰好相反：</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">void</span> <span class="token function">update</span><span class="token punctuation">(</span><span class="token keyword">int</span> n<span class="token punctuation">,</span> <span class="token keyword">int</span> delte<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+<p>从子节点定位到直接父节点的方法与上面的恰好相反，证明略。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>单点修改</span></div><code class="language-cpp"><span class="token keyword">void</span> <span class="token function">update</span><span class="token punctuation">(</span><span class="token keyword">int</span> n<span class="token punctuation">,</span> <span class="token keyword">int</span> delta<span class="token punctuation">)</span> <span class="token punctuation">{</span>
   <span class="token keyword">while</span> <span class="token punctuation">(</span>n <span class="token operator">&lt;</span> biTree<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
     biTree<span class="token punctuation">[</span>n<span class="token punctuation">]</span> <span class="token operator">+=</span> delta<span class="token punctuation">;</span>
     n <span class="token operator">+=</span> <span class="token function">lowbit</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">}</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>也很容易得以验证。时间复杂度为 <span class="math inline">\(O(\log
-n)\)</span>。</p>
+<p>时间复杂度为 <span class="math inline">\(O(\log n)\)</span>。</p>
+<p>这个函数也可以用于树状数组的初始化，只需要保证 <code>biTree</code>
+最开始所有元素均为 0 即可：</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>初始化</span></div><code class="language-cpp"><span class="token keyword">void</span> <span class="token function">init</span><span class="token punctuation">(</span>vector<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span> nums<span class="token punctuation">,</span> <span class="token keyword">int</span> n<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span> i <span class="token operator">&lt;=</span> n<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token function">update</span><span class="token punctuation">(</span>i<span class="token punctuation">,</span> nums<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h2 id="应用">应用</h2>
 <p>传送门：</p>
 <ol type="1">

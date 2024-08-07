@@ -449,23 +449,22 @@ set 中，若存在则更新最大值。</p>
 <span class="math inline">\(O(nlogn)\)</span></p>
 <p>也可以先对数组进行升序排序，这样负数就集中在左侧，正数集中在右侧，只需一次遍历即可。</p>
 <h3 id="code">code</h3>
-<pre class="line-numbers language-go" data-language="go"><code class="language-go"><span class="token comment">// go</span>
-<span class="token keyword">func</span> <span class="token function">findMaxK</span><span class="token punctuation">(</span>nums <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token builtin">int</span><span class="token punctuation">)</span> <span class="token builtin">int</span> <span class="token punctuation">{</span>
-    mp <span class="token operator">:=</span> <span class="token function">make</span><span class="token punctuation">(</span><span class="token keyword">map</span><span class="token punctuation">[</span><span class="token builtin">int</span><span class="token punctuation">]</span><span class="token keyword">struct</span><span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">)</span>
-    res <span class="token operator">:=</span> <span class="token operator">-</span><span class="token number">1</span>
-    <span class="token keyword">var</span> null <span class="token keyword">struct</span><span class="token punctuation">{</span><span class="token punctuation">}</span>
-    sort<span class="token punctuation">.</span><span class="token function">Ints</span><span class="token punctuation">(</span>nums<span class="token punctuation">)</span>
+<pre class="line-numbers language-go" data-language="go"><div class="caption"><span>与对应负数同时存在的最大正整数</span></div><code class="language-go"><span class="token keyword">func</span> <span class="token function">findMaxK</span><span class="token punctuation">(</span>nums <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token builtin">int</span><span class="token punctuation">)</span> <span class="token builtin">int</span> <span class="token punctuation">{</span>
+  mp <span class="token operator">:=</span> <span class="token function">make</span><span class="token punctuation">(</span><span class="token keyword">map</span><span class="token punctuation">[</span><span class="token builtin">int</span><span class="token punctuation">]</span><span class="token keyword">struct</span><span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">)</span>
+  res <span class="token operator">:=</span> <span class="token operator">-</span><span class="token number">1</span>
+  <span class="token keyword">var</span> null <span class="token keyword">struct</span><span class="token punctuation">{</span><span class="token punctuation">}</span>
+  sort<span class="token punctuation">.</span><span class="token function">Ints</span><span class="token punctuation">(</span>nums<span class="token punctuation">)</span>
 
-    <span class="token keyword">for</span> <span class="token boolean">_</span><span class="token punctuation">,</span> num <span class="token operator">:=</span> <span class="token keyword">range</span> nums <span class="token punctuation">{</span>
-        <span class="token keyword">if</span> num <span class="token operator">&lt;</span> <span class="token number">0</span> <span class="token punctuation">{</span>
-            mp<span class="token punctuation">[</span>num<span class="token punctuation">]</span> <span class="token operator">=</span> null
-        <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token boolean">_</span><span class="token punctuation">,</span> ok <span class="token operator">:=</span> mp<span class="token punctuation">[</span><span class="token operator">-</span>num<span class="token punctuation">]</span><span class="token punctuation">;</span> ok <span class="token operator">&amp;&amp;</span> num <span class="token operator">&gt;</span> res <span class="token punctuation">{</span>
-            res <span class="token operator">=</span> num
-        <span class="token punctuation">}</span>
+  <span class="token keyword">for</span> <span class="token boolean">_</span><span class="token punctuation">,</span> num <span class="token operator">:=</span> <span class="token keyword">range</span> nums <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> num <span class="token operator">&lt;</span> <span class="token number">0</span> <span class="token punctuation">{</span>
+      mp<span class="token punctuation">[</span>num<span class="token punctuation">]</span> <span class="token operator">=</span> null
+    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token boolean">_</span><span class="token punctuation">,</span> ok <span class="token operator">:=</span> mp<span class="token punctuation">[</span><span class="token operator">-</span>num<span class="token punctuation">]</span><span class="token punctuation">;</span> ok <span class="token operator">&amp;&amp;</span> num <span class="token operator">&gt;</span> res <span class="token punctuation">{</span>
+      res <span class="token operator">=</span> num
     <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
 
-    <span class="token keyword">return</span> res
-<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+  <span class="token keyword">return</span> res
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h2 id="反转之后不同整数的数目">2. <a target="_blank" rel="noopener" href="https://leetcode.cn/problems/count-number-of-distinct-integers-after-reverse-operations/">反转之后不同整数的数目</a></h2>
 <blockquote>
 <p>给你一个由 <strong>正</strong> 整数组成的数组 <code>nums</code>。</p>
@@ -477,25 +476,24 @@ set 中，若存在则更新最大值。</p>
 <p>对原始数组中每一个值，将其和其反转后的数字加入 set，最后返回 set
 大小即可。</p>
 <h3 id="code-1">code</h3>
-<pre class="line-numbers language-go" data-language="go"><code class="language-go"><span class="token comment">// go</span>
-<span class="token keyword">func</span> <span class="token function">reverse</span><span class="token punctuation">(</span>num <span class="token builtin">int</span><span class="token punctuation">)</span> <span class="token builtin">int</span> <span class="token punctuation">{</span>
-    res <span class="token operator">:=</span> <span class="token number">0</span>
-    <span class="token keyword">for</span> num <span class="token operator">&gt;</span> <span class="token number">0</span> <span class="token punctuation">{</span>
-        res <span class="token operator">=</span> res <span class="token operator">*</span> <span class="token number">10</span> <span class="token operator">+</span> <span class="token punctuation">(</span>num <span class="token operator">%</span> <span class="token number">10</span><span class="token punctuation">)</span>
-        num <span class="token operator">/=</span> <span class="token number">10</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">return</span> res
+<pre class="line-numbers language-go" data-language="go"><div class="caption"><span>反转之后不同整数的数目</span></div><code class="language-go"><span class="token keyword">func</span> <span class="token function">reverse</span><span class="token punctuation">(</span>num <span class="token builtin">int</span><span class="token punctuation">)</span> <span class="token builtin">int</span> <span class="token punctuation">{</span>
+  res <span class="token operator">:=</span> <span class="token number">0</span>
+  <span class="token keyword">for</span> num <span class="token operator">&gt;</span> <span class="token number">0</span> <span class="token punctuation">{</span>
+    res <span class="token operator">=</span> res <span class="token operator">*</span> <span class="token number">10</span> <span class="token operator">+</span> <span class="token punctuation">(</span>num <span class="token operator">%</span> <span class="token number">10</span><span class="token punctuation">)</span>
+    num <span class="token operator">/=</span> <span class="token number">10</span>
+  <span class="token punctuation">}</span>
+  <span class="token keyword">return</span> res
 <span class="token punctuation">}</span>
 
 <span class="token keyword">func</span> <span class="token function">countDistinctIntegers</span><span class="token punctuation">(</span>nums <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token builtin">int</span><span class="token punctuation">)</span> <span class="token builtin">int</span> <span class="token punctuation">{</span>
-    mp <span class="token operator">:=</span> <span class="token function">make</span><span class="token punctuation">(</span><span class="token keyword">map</span><span class="token punctuation">[</span><span class="token builtin">int</span><span class="token punctuation">]</span><span class="token keyword">struct</span><span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">)</span>
-    <span class="token keyword">var</span> null <span class="token keyword">struct</span><span class="token punctuation">{</span><span class="token punctuation">}</span>
-    <span class="token keyword">for</span> <span class="token boolean">_</span><span class="token punctuation">,</span> num <span class="token operator">:=</span> <span class="token keyword">range</span> nums <span class="token punctuation">{</span>
-        mp<span class="token punctuation">[</span>num<span class="token punctuation">]</span> <span class="token operator">=</span> null
-        mp<span class="token punctuation">[</span><span class="token function">reverse</span><span class="token punctuation">(</span>num<span class="token punctuation">)</span><span class="token punctuation">]</span> <span class="token operator">=</span> null
-    <span class="token punctuation">}</span>
-    <span class="token keyword">return</span> <span class="token function">len</span><span class="token punctuation">(</span>mp<span class="token punctuation">)</span>
-<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+  mp <span class="token operator">:=</span> <span class="token function">make</span><span class="token punctuation">(</span><span class="token keyword">map</span><span class="token punctuation">[</span><span class="token builtin">int</span><span class="token punctuation">]</span><span class="token keyword">struct</span><span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">)</span>
+  <span class="token keyword">var</span> null <span class="token keyword">struct</span><span class="token punctuation">{</span><span class="token punctuation">}</span>
+  <span class="token keyword">for</span> <span class="token boolean">_</span><span class="token punctuation">,</span> num <span class="token operator">:=</span> <span class="token keyword">range</span> nums <span class="token punctuation">{</span>
+    mp<span class="token punctuation">[</span>num<span class="token punctuation">]</span> <span class="token operator">=</span> null
+    mp<span class="token punctuation">[</span><span class="token function">reverse</span><span class="token punctuation">(</span>num<span class="token punctuation">)</span><span class="token punctuation">]</span> <span class="token operator">=</span> null
+  <span class="token punctuation">}</span>
+  <span class="token keyword">return</span> <span class="token function">len</span><span class="token punctuation">(</span>mp<span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h2 id="反转之后的数字和">3. <a target="_blank" rel="noopener" href="https://leetcode.cn/problems/sum-of-number-and-its-reverse/">反转之后的数字和</a></h2>
 <blockquote>
 <p>给你一个 <strong>非负</strong> 整数 <code>num</code>。如果存在某个
@@ -508,24 +506,23 @@ set 中，若存在则更新最大值。</p>
 <h3 id="思路-2">思路</h3>
 <p>直接无脑枚举即可。</p>
 <h3 id="code-2">code</h3>
-<pre class="line-numbers language-go" data-language="go"><code class="language-go"><span class="token comment">// go</span>
-<span class="token keyword">func</span> <span class="token function">reverse</span><span class="token punctuation">(</span>num <span class="token builtin">int</span><span class="token punctuation">)</span> <span class="token builtin">int</span> <span class="token punctuation">{</span>
-    res <span class="token operator">:=</span> <span class="token number">0</span>
-    <span class="token keyword">for</span> num <span class="token operator">&gt;</span> <span class="token number">0</span> <span class="token punctuation">{</span>
-        res <span class="token operator">=</span> res <span class="token operator">*</span> <span class="token number">10</span> <span class="token operator">+</span> <span class="token punctuation">(</span>num <span class="token operator">%</span> <span class="token number">10</span><span class="token punctuation">)</span>
-        num <span class="token operator">/=</span> <span class="token number">10</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">return</span> res
+<pre class="line-numbers language-go" data-language="go"><div class="caption"><span>反转之后的数字和</span></div><code class="language-go"><span class="token keyword">func</span> <span class="token function">reverse</span><span class="token punctuation">(</span>num <span class="token builtin">int</span><span class="token punctuation">)</span> <span class="token builtin">int</span> <span class="token punctuation">{</span>
+  res <span class="token operator">:=</span> <span class="token number">0</span>
+  <span class="token keyword">for</span> num <span class="token operator">&gt;</span> <span class="token number">0</span> <span class="token punctuation">{</span>
+    res <span class="token operator">=</span> res <span class="token operator">*</span> <span class="token number">10</span> <span class="token operator">+</span> <span class="token punctuation">(</span>num <span class="token operator">%</span> <span class="token number">10</span><span class="token punctuation">)</span>
+    num <span class="token operator">/=</span> <span class="token number">10</span>
+  <span class="token punctuation">}</span>
+  <span class="token keyword">return</span> res
 <span class="token punctuation">}</span>
 
 <span class="token keyword">func</span> <span class="token function">sumOfNumberAndReverse</span><span class="token punctuation">(</span>num <span class="token builtin">int</span><span class="token punctuation">)</span> <span class="token builtin">bool</span> <span class="token punctuation">{</span>
-    <span class="token keyword">for</span> i <span class="token operator">:=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;=</span> num<span class="token punctuation">;</span> i<span class="token operator">++</span> <span class="token punctuation">{</span>
-        <span class="token keyword">if</span> i <span class="token operator">+</span> <span class="token function">reverse</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span> <span class="token operator">==</span> num <span class="token punctuation">{</span>
-            <span class="token keyword">return</span> <span class="token boolean">true</span>
-        <span class="token punctuation">}</span>
+  <span class="token keyword">for</span> i <span class="token operator">:=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;=</span> num<span class="token punctuation">;</span> i<span class="token operator">++</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> i <span class="token operator">+</span> <span class="token function">reverse</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span> <span class="token operator">==</span> num <span class="token punctuation">{</span>
+      <span class="token keyword">return</span> <span class="token boolean">true</span>
     <span class="token punctuation">}</span>
-    <span class="token keyword">return</span> <span class="token boolean">false</span>
-<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+  <span class="token punctuation">}</span>
+  <span class="token keyword">return</span> <span class="token boolean">false</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h2 id="统计定界子数组的数目">4. <a target="_blank" rel="noopener" href="https://leetcode.cn/problems/count-subarrays-with-fixed-bounds/">统计定界子数组的数目</a></h2>
 <blockquote>
 <p>给你一个整数数组 <code>nums</code> 和两个整数 <code>minK</code> 以及
@@ -559,32 +556,32 @@ set 中，若存在则更新最大值。</p>
 \min(minIndex, maxIndex) - errIndex
 \]</span></p>
 <h3 id="code-3">code</h3>
-<pre class="line-numbers language-go" data-language="go"><code class="language-go"><span class="token keyword">func</span> <span class="token function">min</span><span class="token punctuation">(</span>a<span class="token punctuation">,</span> b <span class="token builtin">int</span><span class="token punctuation">)</span> <span class="token builtin">int</span> <span class="token punctuation">{</span>
-    <span class="token keyword">if</span> a <span class="token operator">&lt;</span> b <span class="token punctuation">{</span>
-        <span class="token keyword">return</span> a
-    <span class="token punctuation">}</span>
-    <span class="token keyword">return</span> b
+<pre class="line-numbers language-go" data-language="go"><div class="caption"><span>统计定界子数组的数目</span></div><code class="language-go"><span class="token keyword">func</span> <span class="token function">min</span><span class="token punctuation">(</span>a<span class="token punctuation">,</span> b <span class="token builtin">int</span><span class="token punctuation">)</span> <span class="token builtin">int</span> <span class="token punctuation">{</span>
+  <span class="token keyword">if</span> a <span class="token operator">&lt;</span> b <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> a
+  <span class="token punctuation">}</span>
+  <span class="token keyword">return</span> b
 <span class="token punctuation">}</span>
 <span class="token keyword">func</span> <span class="token function">countSubarrays</span><span class="token punctuation">(</span>nums <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token builtin">int</span><span class="token punctuation">,</span> minK <span class="token builtin">int</span><span class="token punctuation">,</span> maxK <span class="token builtin">int</span><span class="token punctuation">)</span> <span class="token builtin">int64</span> <span class="token punctuation">{</span>
-    minIndex<span class="token punctuation">,</span> maxIndex<span class="token punctuation">,</span> errIndex <span class="token operator">:=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">1</span>	       <span class="token comment">// -1 代表未出现</span>
-    res <span class="token operator">:=</span> <span class="token number">0</span>
-    <span class="token keyword">for</span> i<span class="token punctuation">,</span> num <span class="token operator">:=</span> <span class="token keyword">range</span> nums <span class="token punctuation">{</span>
-        <span class="token keyword">if</span> num <span class="token operator">==</span> minK <span class="token punctuation">{</span>
-            minIndex <span class="token operator">=</span> i
-        <span class="token punctuation">}</span>
-        <span class="token keyword">if</span> num <span class="token operator">==</span> maxK <span class="token punctuation">{</span>
-            maxIndex <span class="token operator">=</span> i
-        <span class="token punctuation">}</span>
-        <span class="token keyword">if</span> num <span class="token operator">&gt;</span> maxK <span class="token operator">||</span> num <span class="token operator">&lt;</span> minK <span class="token punctuation">{</span>
-            errIndex <span class="token operator">=</span> i
-        <span class="token punctuation">}</span>
-        leftIndex <span class="token operator">:=</span> <span class="token function">min</span><span class="token punctuation">(</span>minIndex<span class="token punctuation">,</span> maxIndex<span class="token punctuation">)</span>
-        <span class="token keyword">if</span> leftIndex <span class="token operator">&gt;</span> errIndex <span class="token punctuation">{</span>
-            res <span class="token operator">+=</span> leftIndex <span class="token operator">-</span> errIndex
-        <span class="token punctuation">}</span>
+  minIndex<span class="token punctuation">,</span> maxIndex<span class="token punctuation">,</span> errIndex <span class="token operator">:=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">1</span>	     <span class="token comment">// -1 代表未出现</span>
+  res <span class="token operator">:=</span> <span class="token number">0</span>
+  <span class="token keyword">for</span> i<span class="token punctuation">,</span> num <span class="token operator">:=</span> <span class="token keyword">range</span> nums <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> num <span class="token operator">==</span> minK <span class="token punctuation">{</span>
+      minIndex <span class="token operator">=</span> i
     <span class="token punctuation">}</span>
+    <span class="token keyword">if</span> num <span class="token operator">==</span> maxK <span class="token punctuation">{</span>
+      maxIndex <span class="token operator">=</span> i
+    <span class="token punctuation">}</span>
+    <span class="token keyword">if</span> num <span class="token operator">&gt;</span> maxK <span class="token operator">||</span> num <span class="token operator">&lt;</span> minK <span class="token punctuation">{</span>
+      errIndex <span class="token operator">=</span> i
+    <span class="token punctuation">}</span>
+    leftIndex <span class="token operator">:=</span> <span class="token function">min</span><span class="token punctuation">(</span>minIndex<span class="token punctuation">,</span> maxIndex<span class="token punctuation">)</span>
+    <span class="token keyword">if</span> leftIndex <span class="token operator">&gt;</span> errIndex <span class="token punctuation">{</span>
+      res <span class="token operator">+=</span> leftIndex <span class="token operator">-</span> errIndex
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
 
-    <span class="token keyword">return</span> <span class="token function">int64</span><span class="token punctuation">(</span>res<span class="token punctuation">)</span>
+  <span class="token keyword">return</span> <span class="token function">int64</span><span class="token punctuation">(</span>res<span class="token punctuation">)</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
                 

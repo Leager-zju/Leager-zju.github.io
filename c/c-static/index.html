@@ -482,11 +482,13 @@ static
   <span class="token keyword">void</span> <span class="token function">func</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token function">func1</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>   <span class="token comment">// OK! 可以在非静态函数中调用静态函数，这里的 func1 并不会隐式使用 this</span>
 
   <span class="token keyword">static</span> <span class="token keyword">int</span> val1；
-  <span class="token keyword">static</span> <span class="token keyword">const</span> <span class="token keyword">int</span> val2<span class="token punctuation">{</span><span class="token number">0</span><span class="token punctuation">}</span><span class="token punctuation">;</span> <span class="token comment">// 静态常量只能在类内定义</span>
+  <span class="token keyword">static</span> <span class="token keyword">const</span> <span class="token keyword">int</span> val2<span class="token punctuation">{</span><span class="token number">2</span><span class="token punctuation">}</span><span class="token punctuation">;</span> <span class="token comment">// 静态常量可以在类内定义</span>
+  <span class="token keyword">static</span> <span class="token keyword">const</span> <span class="token keyword">int</span> val3<span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span>
 
 <span class="token keyword">void</span> <span class="token class-name">Foo</span><span class="token double-colon punctuation">::</span><span class="token function">func1</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
-<span class="token keyword">int</span> Foo<span class="token double-colon punctuation">::</span>val1 <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>  <span class="token comment">// 静态非常量只能在类外定义</span>
+<span class="token keyword">int</span> Foo<span class="token double-colon punctuation">::</span>val1 <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>        <span class="token comment">// 静态非常量只能在类外定义</span>
+<span class="token keyword">const</span> <span class="token keyword">int</span> Foo<span class="token double-colon punctuation">::</span>val3 <span class="token operator">=</span> <span class="token number">3</span><span class="token punctuation">;</span>  <span class="token comment">// 静态常量也能在类外定义</span>
 
 <span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
   <span class="token class-name">Foo</span><span class="token double-colon punctuation">::</span><span class="token function">func1</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// OK!</span>
@@ -494,12 +496,25 @@ static
 
   Foo f<span class="token punctuation">;</span>
   f<span class="token punctuation">.</span><span class="token function">func1</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token comment">// OK! 既然 func1 属于 Foo 类，那么任一对象均可调用该函数</span>
-<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>需要注意的是：</p>
 <ul>
 <li>静态成员变量必须先初始化；</li>
 <li>构造函数与析构函数、运算符重载这类特殊函数不能用 <code>static</code>
 进行修饰；</li>
+<li>⚠️如果在类内初始化静态常量，并且采用声明与实现分离的方式编码，则此时在
+<code>.cpp</code> 文件中访问 <code>.h</code> 中初始化的
+<code>static const</code> 变量则可能报 「undefined reference」
+的链接错误。如果遇到这种情况，有两种解决方案
+<ul>
+<li><p>改为类外初始化；</p></li>
+<li><p>改用 <code>constexpr</code> 在类内初始化；</p>
+<blockquote>
+<p>之所以说「<strong>可能</strong>」，是因为在某些情况下编译器可能会直接进行对
+<code>.cpp</code> 中的 <code>static const</code>
+变量直接用值进行替换，这样就不会用到符号了，也就不会在链接器种报错。</p>
+</blockquote></li>
+</ul></li>
 </ul>
 
                 

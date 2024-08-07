@@ -503,7 +503,7 @@ UB；</li>
 </ul>
 <p>注意，<code>free</code>
 仅仅是释放了指针指向的那片内存，并没有改变指针的指向，但
-<code>free</code> 之后再次使用指针是不合理的，应当置空。</p>
+<code>free</code> 之后再次使用指针是 UB，应当置空。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">int</span><span class="token operator">*</span> ptr <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">int</span><span class="token operator">*</span><span class="token punctuation">)</span><span class="token function">malloc</span><span class="token punctuation">(</span><span class="token keyword">sizeof</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"before free: %p\n"</span><span class="token punctuation">,</span> ptr<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
@@ -527,7 +527,7 @@ ptr <span class="token operator">=</span> <span class="token constant">NULL</spa
 <blockquote>
 <p>定义于头文件 <code>&lt;new&gt;</code></p>
 </blockquote>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token double-colon punctuation">::</span><span class="token punctuation">(</span>opt<span class="token punctuation">)</span> <span class="token keyword">new</span> <span class="token punctuation">(</span>布置参数<span class="token punctuation">)</span><span class="token punctuation">(</span>opt<span class="token punctuation">)</span> <span class="token punctuation">(</span>类型<span class="token punctuation">)</span> 初始化器<span class="token punctuation">(</span>opt<span class="token punctuation">)</span> <span class="token punctuation">;</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>use of new/delete</span></div><code class="language-cpp"><span class="token double-colon punctuation">::</span><span class="token punctuation">(</span>opt<span class="token punctuation">)</span> <span class="token keyword">new</span> <span class="token punctuation">(</span>布置参数<span class="token punctuation">)</span><span class="token punctuation">(</span>opt<span class="token punctuation">)</span> <span class="token punctuation">(</span>类型<span class="token punctuation">)</span> 初始化器<span class="token punctuation">(</span>opt<span class="token punctuation">)</span> <span class="token punctuation">;</span>
 
 <span class="token keyword">int</span><span class="token operator">*</span> p1 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token keyword">int</span> <span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// p1 指向 int 变量，并初始化为 1</span>
 <span class="token keyword">int</span><span class="token operator">*</span> p2 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span> <span class="token punctuation">{</span><span class="token number">114</span><span class="token punctuation">,</span> <span class="token number">514</span><span class="token punctuation">}</span><span class="token punctuation">;</span>  <span class="token comment">// p2 指向数组 int[2]，并初始化为 {114, 514}</span>
@@ -652,7 +652,7 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 <ul>
 <li><p><strong>只能在堆上</strong>：将析构函数设置为<strong>非公有</strong>。C++
 是静态绑定语言，编译器管理栈上对象的生命周期，编译器在为类对象分配栈空间时，会先检查类的析构函数的访问性。若析构函数不可访问，则不能在栈上创建对象。</p>
-<p></p><pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token comment">// Bad Example →_→</span>
+<p></p><pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>定义一个只能在堆上生成的类</span></div><code class="language-cpp"><span class="token comment">// Bad Example →_→</span>
 <span class="token comment">// can't derive and inconvenient</span>
 <span class="token keyword">class</span> <span class="token class-name">Foo</span> <span class="token punctuation">{</span>
  <span class="token keyword">private</span><span class="token operator">:</span>
@@ -691,8 +691,8 @@ new，则会在任意位置进行分配，不易管理。</p>
 </blockquote>
 <p>C++ 的所有容器都是类模板，以 <code>std::vector</code>
 为例，其在定义中包含了两个模板参数。 </p><pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">template</span><span class="token operator">&lt;</span>
-    <span class="token keyword">class</span> <span class="token class-name">T</span><span class="token punctuation">,</span>
-    <span class="token keyword">class</span> <span class="token class-name">Allocator</span> <span class="token operator">=</span> std<span class="token double-colon punctuation">::</span>allocator<span class="token operator">&lt;</span>T<span class="token operator">&gt;</span>
+  <span class="token keyword">class</span> <span class="token class-name">T</span><span class="token punctuation">,</span>
+  <span class="token keyword">class</span> <span class="token class-name">Allocator</span> <span class="token operator">=</span> std<span class="token double-colon punctuation">::</span>allocator<span class="token operator">&lt;</span>T<span class="token operator">&gt;</span>
 <span class="token operator">&gt;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 第一个参数就是容器包含的元素类型，第二个参数就是下面要讲的<strong>分配器类</strong>，默认为
 C++ 自带的 <code>std::allocator</code>。<p></p>

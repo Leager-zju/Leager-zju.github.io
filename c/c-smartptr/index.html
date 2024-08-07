@@ -432,7 +432,7 @@ C++11 引入的<strong>智能指针</strong>来解决。</p>
 <span id="more"></span>
 <h2 id="裸指针的内存泄漏问题">裸指针的内存泄漏问题</h2>
 <p>前面提到使用<strong>裸指针</strong>会存在内存泄漏等问题。这里用具体代码来说明：</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">A</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>裸指针的内存泄漏</span></div><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">A</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
 <span class="token keyword">void</span> <span class="token function">func</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
   <span class="token keyword">auto</span> p <span class="token operator">=</span> <span class="token keyword">new</span> A<span class="token punctuation">;</span> <span class="token comment">// 定义 p 为指向 A 对象的裸指针</span>
   <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -485,7 +485,7 @@ deleter<span class="token operator">&lt;</span><span class="token keyword">int</
 std<span class="token double-colon punctuation">::</span>unique_ptr<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token punctuation">,</span> deleter<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;&gt;</span> <span class="token function">ptr</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token keyword">int</span><span class="token punctuation">,</span> d<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 </blockquote>
 <p>用法如下：</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">struct</span> <span class="token class-name">A</span> <span class="token punctuation">{</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>unique_ptr</span></div><code class="language-cpp"><span class="token keyword">struct</span> <span class="token class-name">A</span> <span class="token punctuation">{</span>
   <span class="token operator">~</span><span class="token function">A</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"~A\n"</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
   <span class="token keyword">void</span> <span class="token function">Print</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Print\n"</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span>
@@ -568,13 +568,17 @@ ptrs<span class="token punctuation">[</span><span class="token number">1</span><
 <strong>double free</strong> 导致出问题；</p></li>
 <li><p>不将 <code>this</code> 指针初始化 <code>shared_ptr</code>
 并返回，否则会出现 <strong>double free</strong>，比如：</p>
-<p></p><pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">A</span> <span class="token punctuation">{</span>
+<p></p><pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>this 的 double free</span></div><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">A</span> <span class="token punctuation">{</span>
   shared_ptr<span class="token operator">&lt;</span>A<span class="token operator">&gt;</span> <span class="token function">func</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
     <span class="token keyword">return</span> std<span class="token double-colon punctuation">::</span><span class="token generic-function"><span class="token function">shared_ptr</span><span class="token generic class-name"><span class="token operator">&lt;</span>A<span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">}</span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre><p></p>
 <p>A 本身会调用析构函数，函数返回值由于关联了 <code>this</code>
-指针，进行 <code>delete this</code> 时还会调用一遍析构函数。</p></li>
+指针，进行 <code>delete this</code>
+时还会调用一遍析构函数。如果非要实现这一功能，请继承自
+<code>std::enable_shared_from_this&lt;A&gt;</code>，之后就可以调用
+<code>shared_from_this()</code> 来获取一个指向自身的 shared ptr
+了。</p></li>
 <li><p>尽量用 <code>make_shared</code> 代替 <code>new</code>，比如：</p>
 <p></p><pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">A</span> <span class="token punctuation">{</span>
   <span class="token function">A</span><span class="token punctuation">(</span><span class="token keyword">int</span> i<span class="token punctuation">)</span> <span class="token punctuation">{</span> std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> i<span class="token punctuation">;</span> <span class="token punctuation">}</span>
@@ -593,7 +597,7 @@ shared_ptr<span class="token operator">&lt;</span>T<span class="token operator">
 类型对象的存储的 <code>void*</code> 指针。</p>
 </blockquote></li>
 <li><p>避免<strong>循环引用</strong>。所谓循环引用，就是存在一个引用通过一系列的引用链，最后引用回自身，且看代码：</p>
-<p></p><pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">struct</span> <span class="token class-name">A</span><span class="token punctuation">;</span>
+<p></p><pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>循环引用</span></div><code class="language-cpp"><span class="token keyword">struct</span> <span class="token class-name">A</span><span class="token punctuation">;</span>
 <span class="token keyword">struct</span> <span class="token class-name">B</span><span class="token punctuation">;</span>
 
 <span class="token keyword">struct</span> <span class="token class-name">A</span> <span class="token punctuation">{</span>
@@ -640,7 +644,7 @@ bptr，其 other
 <code>shared_ptr</code> 被销毁，则该对象的生命周期将被延长至这个临时的
 <code>shared_ptr</code> 同样被销毁为止。</p>
 <p>具体用法为：</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">int</span><span class="token operator">*</span> a <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token keyword">int</span><span class="token punctuation">{</span><span class="token number">0</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>weak_ptr</span></div><code class="language-cpp"><span class="token keyword">int</span><span class="token operator">*</span> a <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token keyword">int</span><span class="token punctuation">{</span><span class="token number">0</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
 std<span class="token double-colon punctuation">::</span>shared_ptr<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span> <span class="token function">shared_p</span><span class="token punctuation">(</span>a<span class="token punctuation">)</span><span class="token punctuation">;</span>
 std<span class="token double-colon punctuation">::</span>weak_ptr<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span> weak_p <span class="token operator">=</span> shared_p<span class="token punctuation">;</span> <span class="token comment">// weak_ptr 不共享所有权，仅作监视用</span>
 std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> shared_p<span class="token punctuation">.</span><span class="token function">use_count</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;&lt;</span> <span class="token string">" "</span> <span class="token operator">&lt;&lt;</span> weak_p<span class="token punctuation">.</span><span class="token function">use_count</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
@@ -654,7 +658,7 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 <p>在这样的基础上，<code>weak_ptr</code> 也就能够打破
 <code>shared_ptr</code> 中所存在的循环引用现象——令循环中的其中一个指针为
 <code>weak_ptr</code> 即可。</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">struct</span> <span class="token class-name">A</span><span class="token punctuation">;</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>解决循环引用</span></div><code class="language-cpp"><span class="token keyword">struct</span> <span class="token class-name">A</span><span class="token punctuation">;</span>
 <span class="token keyword">struct</span> <span class="token class-name">B</span><span class="token punctuation">;</span>
 
 <span class="token keyword">struct</span> <span class="token class-name">A</span> <span class="token punctuation">{</span>
@@ -683,69 +687,66 @@ ptr</h2>
 <li>支持用派生类构造；</li>
 <li>正确释放指针；</li>
 </ol>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">T</span><span class="token operator">&gt;</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>实现 shared_ptr</span></div><code class="language-cpp">
+<span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">T</span><span class="token operator">&gt;</span>
 <span class="token keyword">class</span> <span class="token class-name">SharedPointer</span> <span class="token punctuation">{</span>
-  <span class="token keyword">public</span><span class="token operator">:</span>
-   <span class="token keyword">class</span> <span class="token class-name">Counter</span> <span class="token punctuation">{</span>
-    <span class="token keyword">public</span><span class="token operator">:</span>
-      <span class="token function">Counter</span><span class="token punctuation">(</span>T<span class="token operator">*</span> ptr<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token function">ptr_</span><span class="token punctuation">(</span>ptr<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token function">cnt_</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
-      <span class="token operator">~</span><span class="token function">Counter</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">delete</span> ptr_<span class="token punctuation">;</span> <span class="token punctuation">}</span>
-      <span class="token keyword">void</span> <span class="token function">addRef</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> cnt_<span class="token punctuation">.</span><span class="token function">fetch_add</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
-      <span class="token keyword">void</span> <span class="token function">release</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> cnt_<span class="token punctuation">.</span><span class="token function">fetch_sub</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
-      <span class="token keyword">int</span> <span class="token function">getCount</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> cnt_<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
-      T<span class="token operator">*</span> ptr_<span class="token punctuation">;</span>
-    <span class="token keyword">private</span><span class="token operator">:</span>
-      std<span class="token double-colon punctuation">::</span>atomic<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span> cnt_<span class="token punctuation">;</span>
-   <span class="token punctuation">}</span><span class="token punctuation">;</span>
-  <span class="token keyword">public</span><span class="token operator">:</span>
-    <span class="token function">SharedPointer</span><span class="token punctuation">(</span>T<span class="token operator">*</span> ptr<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-      counter_ <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token function">Counter</span><span class="token punctuation">(</span>ptr<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token comment">// copy constructor</span>
-    <span class="token function">SharedPointer</span><span class="token punctuation">(</span><span class="token keyword">const</span> SharedPointer<span class="token operator">&lt;</span>T<span class="token operator">&gt;</span> <span class="token operator">&amp;</span>sp<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-      counter_ <span class="token operator">=</span> sp<span class="token punctuation">.</span>counter_<span class="token punctuation">;</span>
-      counter_<span class="token operator">-&gt;</span><span class="token function">addRef</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    SharedPointer<span class="token operator">&amp;</span> <span class="token keyword">operator</span><span class="token operator">=</span><span class="token punctuation">(</span><span class="token keyword">const</span> SharedPointer<span class="token operator">&lt;</span>T<span class="token operator">&gt;</span> <span class="token operator">&amp;</span>sp<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-      counter_ <span class="token operator">=</span> sp<span class="token punctuation">.</span>counter_<span class="token punctuation">;</span>
-      counter_<span class="token operator">-&gt;</span><span class="token function">addRef</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+ <span class="token keyword">public</span><span class="token operator">:</span>
+  <span class="token keyword">class</span> <span class="token class-name">Counter</span> <span class="token punctuation">{</span>
+   <span class="token keyword">public</span><span class="token operator">:</span>
+    <span class="token function">Counter</span><span class="token punctuation">(</span>T<span class="token operator">*</span> ptr<span class="token punctuation">)</span> <span class="token operator">:</span> <span class="token function">ptr_</span><span class="token punctuation">(</span>ptr<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token function">cnt_</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+    <span class="token operator">~</span><span class="token function">Counter</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">delete</span> ptr_<span class="token punctuation">;</span> <span class="token punctuation">}</span>
+    <span class="token keyword">void</span> <span class="token function">addRef</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> cnt_<span class="token punctuation">.</span><span class="token function">fetch_add</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+    <span class="token keyword">void</span> <span class="token function">release</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> cnt_<span class="token punctuation">.</span><span class="token function">fetch_sub</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+    <span class="token keyword">int</span> <span class="token function">getCount</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> cnt_<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+    T<span class="token operator">*</span> ptr_<span class="token punctuation">;</span>
 
-    <span class="token comment">// move constructor</span>
-    <span class="token function">SharedPointer</span><span class="token punctuation">(</span>SharedPointer<span class="token operator">&lt;</span>T<span class="token operator">&gt;</span><span class="token operator">&amp;&amp;</span> sp<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-      counter_ <span class="token operator">=</span> sp<span class="token punctuation">.</span>counter_<span class="token punctuation">;</span>
-      sp<span class="token punctuation">.</span>counter_ <span class="token operator">=</span> <span class="token keyword">nullptr</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    SharedPointer<span class="token operator">&amp;</span> <span class="token keyword">operator</span><span class="token operator">=</span><span class="token punctuation">(</span>SharedPointer<span class="token operator">&lt;</span>T<span class="token operator">&gt;</span> <span class="token operator">&amp;&amp;</span>sp<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-      counter_ <span class="token operator">=</span> sp<span class="token punctuation">.</span>counter_<span class="token punctuation">;</span>
-      sp<span class="token punctuation">.</span>counter_ <span class="token operator">=</span> <span class="token keyword">nullptr</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+   <span class="token keyword">private</span><span class="token operator">:</span>
+    std<span class="token double-colon punctuation">::</span>atomic<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span> cnt_<span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">;</span>
 
-    <span class="token comment">// derived constructor</span>
-    <span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">U</span><span class="token operator">&gt;</span>
-    <span class="token function">SharedPointer</span><span class="token punctuation">(</span>U<span class="token operator">*</span> derive<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-      <span class="token function">assert</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span>is_base_of<span class="token operator">&lt;</span>T<span class="token punctuation">,</span> U<span class="token operator">&gt;</span><span class="token double-colon punctuation">::</span>value<span class="token punctuation">)</span><span class="token punctuation">;</span>
-      counter_ <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token function">Counter</span><span class="token punctuation">(</span>derive<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+ <span class="token keyword">public</span><span class="token operator">:</span>
+  <span class="token function">SharedPointer</span><span class="token punctuation">(</span>T<span class="token operator">*</span> ptr<span class="token punctuation">)</span> <span class="token punctuation">{</span> counter_ <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token function">Counter</span><span class="token punctuation">(</span>ptr<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+  <span class="token comment">// copy constructor</span>
+  <span class="token function">SharedPointer</span><span class="token punctuation">(</span><span class="token keyword">const</span> SharedPointer<span class="token operator">&lt;</span>T<span class="token operator">&gt;</span><span class="token operator">&amp;</span> sp<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    counter_ <span class="token operator">=</span> sp<span class="token punctuation">.</span>counter_<span class="token punctuation">;</span>
+    counter_<span class="token operator">-&gt;</span><span class="token function">addRef</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+  SharedPointer<span class="token operator">&amp;</span> <span class="token keyword">operator</span><span class="token operator">=</span><span class="token punctuation">(</span><span class="token keyword">const</span> SharedPointer<span class="token operator">&lt;</span>T<span class="token operator">&gt;</span><span class="token operator">&amp;</span> sp<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    counter_ <span class="token operator">=</span> sp<span class="token punctuation">.</span>counter_<span class="token punctuation">;</span>
+    counter_<span class="token operator">-&gt;</span><span class="token function">addRef</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
 
-    <span class="token operator">~</span><span class="token function">SharedPointer</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-      counter_<span class="token operator">-&gt;</span><span class="token function">release</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-      <span class="token keyword">if</span> <span class="token punctuation">(</span>counter_<span class="token operator">-&gt;</span><span class="token function">getCount</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">delete</span> counter_<span class="token punctuation">;</span>
-      <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
+  <span class="token comment">// move constructor</span>
+  <span class="token function">SharedPointer</span><span class="token punctuation">(</span>SharedPointer<span class="token operator">&lt;</span>T<span class="token operator">&gt;</span><span class="token operator">&amp;&amp;</span> sp<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    counter_ <span class="token operator">=</span> sp<span class="token punctuation">.</span>counter_<span class="token punctuation">;</span>
+    sp<span class="token punctuation">.</span>counter_ <span class="token operator">=</span> <span class="token keyword">nullptr</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+  SharedPointer<span class="token operator">&amp;</span> <span class="token keyword">operator</span><span class="token operator">=</span><span class="token punctuation">(</span>SharedPointer<span class="token operator">&lt;</span>T<span class="token operator">&gt;</span><span class="token operator">&amp;&amp;</span> sp<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    counter_ <span class="token operator">=</span> sp<span class="token punctuation">.</span>counter_<span class="token punctuation">;</span>
+    sp<span class="token punctuation">.</span>counter_ <span class="token operator">=</span> <span class="token keyword">nullptr</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
 
-    T<span class="token operator">*</span> <span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-      <span class="token keyword">return</span> counter_<span class="token operator">-&gt;</span>ptr_<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+  <span class="token comment">// derived constructor</span>
+  <span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">U</span><span class="token operator">&gt;</span>
+  <span class="token function">SharedPointer</span><span class="token punctuation">(</span>U<span class="token operator">*</span> derive<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token function">assert</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span>is_base_of<span class="token operator">&lt;</span>T<span class="token punctuation">,</span> U<span class="token operator">&gt;</span><span class="token double-colon punctuation">::</span>value<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    counter_ <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token function">Counter</span><span class="token punctuation">(</span>derive<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
 
-    <span class="token keyword">bool</span> <span class="token function">isNull</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-      <span class="token keyword">return</span> <span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token keyword">nullptr</span><span class="token punctuation">;</span>
+  <span class="token operator">~</span><span class="token function">SharedPointer</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    counter_<span class="token operator">-&gt;</span><span class="token function">release</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>counter_<span class="token operator">-&gt;</span><span class="token function">getCount</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token keyword">delete</span> counter_<span class="token punctuation">;</span>
     <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
 
-  <span class="token keyword">private</span><span class="token operator">:</span>
-    Counter<span class="token operator">*</span> counter_<span class="token punctuation">;</span>
-<span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+  T<span class="token operator">*</span> <span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> counter_<span class="token operator">-&gt;</span>ptr_<span class="token punctuation">;</span> <span class="token punctuation">}</span>
+
+  <span class="token keyword">bool</span> <span class="token function">isNull</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> <span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token keyword">nullptr</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+
+ <span class="token keyword">private</span><span class="token operator">:</span>
+  Counter<span class="token operator">*</span> counter_<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
                 
             </div>

@@ -439,9 +439,9 @@ InterProcess Communication)</strong>技术。</p>
 建立匿名管道，其中 <code>fd[0]</code> 为读取端，<code>fd[1]</code>
 为写入端，两个都是<strong>文件描述符</strong>，从而可以用
 <code>read()/write()</code> 系统调用进行数据传输。比如下面这段代码：</p>
-<pre class="line-numbers language-C" data-language="C"><code class="language-C">#include&lt;stdio.h&gt;
-#include&lt;unistd.h&gt;
-#include&lt;string.h&gt;
+<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>匿名管道</span></div><code class="language-C">#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;string.h&gt;
 
 int main() {
   int fd[2];
@@ -465,7 +465,7 @@ int main() {
     close(fd[1]); // 关闭写入才能读取
     int i = 0;
     char msg[100];
-    while(i++ &lt; 100) {
+    while (i++ &lt; 100) {
       memset(msg, '\0', sizeof(msg));
       read(fd[0], msg, sizeof(msg));
       printf("%s\n", msg);
@@ -488,12 +488,11 @@ int main() {
 <code>int mkfifo(const char *path, mode_t mode)</code>
 建立命名管道，其中 <code>path</code> 指明文件路径，<code>mode</code>
 指明管道文件的存取权限。比如下面这段代码：</p>
-<pre class="line-numbers language-C" data-language="C"><code class="language-C">/* server.c */
-#include&lt;stdio.h&gt;
-#include&lt;unistd.h&gt;
-#include&lt;string.h&gt;
+<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>命名管道 - server.c</span></div><code class="language-C">#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;unistd.h&gt;
 #define _PATH_NAME_ "/tmp/file.tmp"
-#define _SIZE_  100
+#define _SIZE_ 100
 
 int main() {
   int ret = mkfifo(_PATH_NAME_, S_IFIFO | 0666);
@@ -505,8 +504,8 @@ int main() {
   char buf[_SIZE_] = {0};
   int fd = open(_PATH_NAME_, O_WRONLY);
   while (true) {
-    fget(buf, sizeof(buf)-1, stdin);
-    int ret = write(fd, buf, strlen(buf)+1);
+    fget(buf, sizeof(buf) - 1, stdin);
+    int ret = write(fd, buf, strlen(buf) + 1);
     if (ret &lt; 0) {
       printf("Write Error\n");
       break;
@@ -515,13 +514,12 @@ int main() {
   close(fd);
 
   return 0;
-}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<pre class="line-numbers language-C" data-language="C"><code class="language-C">/* client.c */
-#include&lt;stdio.h&gt;
-#include&lt;unistd.h&gt;
-#include&lt;string.h&gt;
+}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>命名管道 - client.c</span></div><code class="language-C">#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;unistd.h&gt;
 #define _PATH_NAME_ "/tmp/file.tmp"
-#define _SIZE_  100
+#define _SIZE_ 100
 
 int main() {
   int fd = open(_PATH_NAME_, O_RDONLY);
@@ -542,7 +540,7 @@ int main() {
   close(fd);
 
   return 0;
-}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>服务端利用系统函数 <code>mkfifo()</code> 创建一个名为
 <code>file.tmp</code>
 的文件作为管道并写入。客户端同样也能打开该文件进行读取。而它们却是无关进程。</p>
@@ -615,7 +613,7 @@ int main() {
 <h3 id="linux-信号相关数据结构">Linux 信号相关数据结构</h3>
 <p>Linux 在进程管理结构 <code>task_struct</code>
 中定义了信号相关的变量。</p>
-<pre class="line-numbers language-C" data-language="C"><code class="language-C">struct task_struct {
+<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>task_struct 定义</span></div><code class="language-C">struct task_struct {
   ...
   int sigpending; // 是否有待处理信号
   ...
@@ -624,7 +622,7 @@ int main() {
   struct sigpending pending; // 待处理信号队列
   ...
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<pre class="line-numbers language-C" data-language="C"><code class="language-C">#define  _NSIG  64
+<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>信号相关结构体定义</span></div><code class="language-C">#define  _NSIG  64
 
 struct signal_struct {
   atomic_t count;
@@ -867,74 +865,71 @@ C++ 中的 <code>std::list&lt;Message&gt;</code>
 <p>和管道相同之处在于，如果管道/队列存放的数据/消息满了，写会被阻塞，读同理。</p>
 <p>不同之处在于，虽然写都是写到末尾，但是消息队列可以根据消息字段<strong>随机读取</strong>，而不一定要从队首。并且，消息队列允许多个进程对其读写。</p>
 <h3 id="消息队列使用">消息队列使用</h3>
-<pre class="line-numbers language-C" data-language="C"><code class="language-C">/* writer.c */
-#include &lt;sys/types.h&gt;
+<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>消息队列 - writer.c</span></div><code class="language-C">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
 #include &lt;sys/ipc.h&gt;
 #include &lt;sys/msg.h&gt;
-#include &lt;stdio.h&gt;
-#include &lt;string.h&gt;
-#include &lt;stdlib.h&gt;
+#include &lt;sys/types.h&gt;
 
-struct msgbuf { // 待写入消息节点数据结构，必须以 long 类型变量开始
-	long mtype;
-	char mtext[255];
+struct msgbuf {  // 待写入消息节点数据结构，必须以 long 类型变量开始
+  long mtype;
+  char mtext[255];
 };
 
 int main() {
-	int mq_id = msgget(123, IPC_CREAT | 0666); // 创建一个消息队列
-	if (mq_id != -1) {
-		// 初始化要发生的消息
-		struct msgbuf mybuf;
-		mybuf.mtype = 1;
-		strcpy(mybuf.mtext, "I'm send process.\n");
+  int mq_id = msgget(123, IPC_CREAT | 0666);  // 创建一个消息队列
+  if (mq_id != -1) {
+    // 初始化要发生的消息
+    struct msgbuf mybuf;
+    mybuf.mtype = 1;
+    strcpy(mybuf.mtext, "I'm send process.\n");
 
-		// 发送消息
-		if (msgsnd(mq_id, &amp;mybuf, sizeof(mybuf.mtext), 0)) {
-			printf("success\n");
-    }
-		else {
+    // 发送消息
+    if (msgsnd(mq_id, &amp;mybuf, sizeof(mybuf.mtext), 0)) {
+      printf("success\n");
+    } else {
       printf("msgsnd Fail\n");
     }
-	} else {
-		printf("msgget Fail\n");
-	}
+  } else {
+    printf("msgget Fail\n");
+  }
 
-	return 0;
-}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<pre class="line-numbers language-C" data-language="C"><code class="language-C">/* reader.c */
-#include &lt;sys/types.h&gt;
+  return 0;
+}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>消息队列 - reader.c</span></div><code class="language-C">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
 #include &lt;sys/ipc.h&gt;
 #include &lt;sys/msg.h&gt;
-#include &lt;stdio.h&gt;
-#include &lt;string.h&gt;
-#include &lt;stdlib.h&gt;
+#include &lt;sys/types.h&gt;
 
-struct msgbuf { // 待读取消息节点数据结构，必须与消息队列节点格式一致
-	long mtype;
-	char mtext[255];
+struct msgbuf {  // 待读取消息节点数据结构，必须与消息队列节点格式一致
+  long mtype;
+  char mtext[255];
 };
 
 int main() {
-	int mq_id = msgget(123, IPC_CREAT | 0666); // 获取消息队列
-	if (mq_id != -1) {
-		struct msgbuf mybuf;
-		// 接收第一条消息，存到 mybuf 中
-		if (msgrcv(mq_id, &amp;mybuf, sizeof(mybuf.mtext), 0, IPC_NOWAIT) != -1) {
-			printf("read success: %s\n", mybuf.mtext);
-			// 删除这个消息队列
-			if (msgctl(mq_id, IPC_RMID, 0) != -1){
-				printf("delete msg success\n");
+  int mq_id = msgget(123, IPC_CREAT | 0666);  // 获取消息队列
+  if (mq_id != -1) {
+    struct msgbuf mybuf;
+    // 接收第一条消息，存到 mybuf 中
+    if (msgrcv(mq_id, &amp;mybuf, sizeof(mybuf.mtext), 0, IPC_NOWAIT) != -1) {
+      printf("read success: %s\n", mybuf.mtext);
+      // 删除这个消息队列
+      if (msgctl(mq_id, IPC_RMID, 0) != -1) {
+        printf("delete msg success\n");
       }
-		} else {
-			printf("msgsnd Fail\n");
-		}
+    } else {
+      printf("msgsnd Fail\n");
+    }
 
-	} else {
-		printf("msgget Fail\n");
-	}
+  } else {
+    printf("msgget Fail\n");
+  }
 
-	return 0;
-}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+  return 0;
+}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h2 id="共享内存shared-memory">共享内存(Shared Memory)</h2>
 <p>共享内存是指将同一片内存映射到多个进程的虚拟地址空间，进程就可以直接读写这一块内存而不需要进行数据的拷贝，从而大大提高效率。</p>
 <p>当然，建立共享内存的过程无需进行数据复制，直接在内存中操作，是最快的可用通信机制。然而还需要一些信号量提供同步/互斥手段，否则会出现一致性的问题。</p>
@@ -950,7 +945,7 @@ int main() {
 <h3 id="mmap-共享内存">mmap 共享内存</h3>
 <p>mmap
 本来的是存储映射功能。它可以将一个文件映射到内存中，在程序里就可以直接使用内存地址对文件内容进行访问，这可以让程序对文件访问更方便。</p>
-<pre class="line-numbers language-C" data-language="C"><code class="language-C">#include &lt;sys/mman.h&gt;
+<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>mmap api</span></div><code class="language-C">#include &lt;sys/mman.h&gt;
 
 // 通过设置 fd，就可以映射到文件，返回值是相应的内存地址。
 void *mmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset);
@@ -963,73 +958,71 @@ int munmap(void *addr, size_t length);<span aria-hidden="true" class="line-numbe
 <code>flags = MAP_SHARED|MAP_ANONYMOUS, fd = -1</code>。这样一来，配合
 <code>fork()</code>，父子进程都可以获取相同的 <code>mmap()</code>
 返回的共享内存地址，从而实现通信。样例代码如下：</p>
-<pre class="line-numbers language-C" data-language="C"><code class="language-C">#include &lt;unistd.h&gt;
-#include &lt;stdlib.h&gt;
-#include &lt;stdio.h&gt;
-#include &lt;errno.h&gt;
+<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>mmap.c</span></div><code class="language-C">#include &lt;errno.h&gt;
 #include &lt;fcntl.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
 #include &lt;string.h&gt;
 #include &lt;sys/file.h&gt;
-#include &lt;wait.h&gt;
 #include &lt;sys/mman.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;wait.h&gt;
 
 #define COUNT 100
 
-int do_child(int *count)
-{
-	int interval;
+int do_child(int* count) {
+  int interval;
 
-	/* critical section */
-	interval = *count;
-	interval++;
-	usleep(1);
-	*count = interval;
-	/* critical section */
+  /* critical section */
+  interval = *count;
+  interval++;
+  usleep(1);
+  *count = interval;
+  /* critical section */
 
-	exit(0);
+  exit(0);
 }
 
-int main()
-{
-	pid_t pid;
-	int count;
-	int *shm_p;
+int main() {
+  pid_t pid;
+  int count;
+  int* shm_p;
 
-	shm_p = (int *)mmap(NULL, sizeof(int), PROT_WRITE|PROT_READ, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
-	if (MAP_FAILED == shm_p) {
-		perror("mmap()");
-		exit(1);
-	}
-	
-	*shm_p = 0;
+  shm_p = (int*)mmap(NULL, sizeof(int), PROT_WRITE | PROT_READ,
+                     MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+  if (MAP_FAILED == shm_p) {
+    perror("mmap()");
+    exit(1);
+  }
 
-	for (count = 0; count &lt; COUNT; count++) {
-		pid = fork();
-		if (pid &lt; 0) {
-			perror("fork()");
-			exit(1);
-		}
+  *shm_p = 0;
 
-		if (pid == 0) {
-			do_child(shm_p);
-		}
-	}
+  for (count = 0; count &lt; COUNT; count++) {
+    pid = fork();
+    if (pid &lt; 0) {
+      perror("fork()");
+      exit(1);
+    }
 
-	for (count=0;count&lt;COUNT;count++) {
-		wait(NULL);
-	}
+    if (pid == 0) {
+      do_child(shm_p);
+    }
+  }
 
-	printf("shm_p: %d\n", *shm_p);
-	munmap(shm_p, sizeof(int));
-	exit(0);
-}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+  for (count = 0; count &lt; COUNT; count++) {
+    wait(NULL);
+  }
+
+  printf("shm_p: %d\n", *shm_p);
+  munmap(shm_p, sizeof(int));
+  exit(0);
+}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h3 id="xsi-共享内存">XSI 共享内存</h3>
 <p>mmap 实现共享内存的方式需要 <code>fork()</code>
 配合，只能支持相关进程。XSI 采取更为通用的手段，能够支持无关进程。</p>
-<pre class="line-numbers language-C" data-language="C"><code class="language-C">#include &lt;sys/ipc.h&gt;
+<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>XSI api</span></div><code class="language-C">#include &lt;sys/ipc.h&gt;
 #include &lt;sys/shm.h&gt;
 #include &lt;sys/types.h&gt;
-#include &lt;sys/ipc.h&gt;
 
 // 根据指定文件的 inode 编号和文件所在设备的设备编号来生成 key
 key_t ftok(const char *pathname, int proj_id);
@@ -1038,7 +1031,8 @@ key_t ftok(const char *pathname, int proj_id);
 // Linux 限制了系统最大能创建的共享内存为 128 个
 int shmget(key_t key, size_t size, int shmflg);
 
-// 将 {虚拟地址: 物理地址} 的映射绑定到进程内，并令该共享内存的 `shm_nattach` 计数器加一
+// 将 {虚拟地址: 物理地址} 的映射绑定到进程内，并令该共享内存的 `shm_nattach`
+// 计数器加一
 void *shmat(int shmid, const void *shmaddr, int shmflg);
 
 // 移除映射，并令该共享内存的 `shm_nattach` 计数器减一
@@ -1059,128 +1053,126 @@ int shmctl(int shmid, int cmd, struct shmid_ds *buf);<span aria-hidden="true" cl
 的参数是一样的，那么生成的 <code>key</code> 也必然是一样且唯一的，根据
 <code>shmget()</code> 得到的 <code>shmid</code>
 也是唯一的，这就实现了任意进程能够对共享内存进行访问。样例代码如下：</p>
-<pre class="line-numbers language-C" data-language="C"><code class="language-C">#include &lt;unistd.h&gt;
-#include &lt;stdlib.h&gt;
-#include &lt;stdio.h&gt;
-#include &lt;errno.h&gt;
+<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>XSI.c</span></div><code class="language-C">#include &lt;errno.h&gt;
 #include &lt;fcntl.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
 #include &lt;string.h&gt;
 #include &lt;sys/file.h&gt;
-#include &lt;wait.h&gt;
-#include &lt;sys/mman.h&gt;
 #include &lt;sys/ipc.h&gt;
+#include &lt;sys/mman.h&gt;
 #include &lt;sys/shm.h&gt;
 #include &lt;sys/types.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;wait.h&gt;
 
 #define COUNT 100
 #define PATHNAME "/etc/passwd"
 
-int do_child(int proj_id)
-{
-	int interval;
-	int *shm_p, shm_id;
-	key_t shm_key;
-	// 使用 ftok() 产生shmkey
-	if ((shm_key = ftok(PATHNAME, proj_id)) == -1) {
-		perror("ftok()");
-		exit(1);
-	}
+int do_child(int proj_id) {
+  int interval;
+  int *shm_p, shm_id;
+  key_t shm_key;
+  // 使用 ftok() 产生shmkey
+  if ((shm_key = ftok(PATHNAME, proj_id)) == -1) {
+    perror("ftok()");
+    exit(1);
+  }
 
-	// 在子进程中获取到已经在父进程中创建好的 shmid
-	shm_id = shmget(shm_key, sizeof(int), 0);
-	if (shm_id &lt; 0) {
-		perror("shmget()");
-		exit(1);
-	}
-	
-	// 将相关共享内存段映射到本进程的内存地址
-	shm_p = (int *)shmat(shm_id, NULL, 0);
-	if ((void *)shm_p == (void *)-1) {
-		perror("shmat()");
-		exit(1);
-	}
+  // 在子进程中获取到已经在父进程中创建好的 shmid
+  shm_id = shmget(shm_key, sizeof(int), 0);
+  if (shm_id &lt; 0) {
+    perror("shmget()");
+    exit(1);
+  }
 
-	/* critical section */
-	interval = *shm_p;
-	interval++;
-	usleep(1);
-	*shm_p = interval;
-	/* critical section */
+  // 将相关共享内存段映射到本进程的内存地址
+  shm_p = (int *)shmat(shm_id, NULL, 0);
+  if ((void *)shm_p == (void *)-1) {
+    perror("shmat()");
+    exit(1);
+  }
 
-	// 解除本进程内对共享内存的地址映射
-	if (shmdt(shm_p) &lt; 0) {
-		perror("shmdt()");
-		exit(1);
-	}
+  /* critical section */
+  interval = *shm_p;
+  interval++;
+  usleep(1);
+  *shm_p = interval;
+  /* critical section */
 
-	exit(0);
+  // 解除本进程内对共享内存的地址映射
+  if (shmdt(shm_p) &lt; 0) {
+    perror("shmdt()");
+    exit(1);
+  }
+
+  exit(0);
 }
 
-int main()
-{
-	pid_t pid;
-	int count;
-	int *shm_p;
-	int shm_id, proj_id;
-	key_t shm_key;
+int main() {
+  pid_t pid;
+  int count;
+  int *shm_p;
+  int shm_id, proj_id;
+  key_t shm_key;
 
-	proj_id = 1234;
-	
-	// 使用约定好的文件路径和 proj_id 产生 shm_key
-	if ((shm_key = ftok(PATHNAME, proj_id)) == -1) {
-		perror("ftok()");
-		exit(1);
-	}
+  proj_id = 1234;
 
-	// 创建一个共享内存，如果系统中已经存在此共享内存则报错退出，创建出来的共享内存权限为 0600(-rw-------)
-	shm_id = shmget(shm_key, sizeof(int), IPC_CREAT|IPC_EXCL|0600);
-	if (shm_id &lt; 0) {
-		perror("shmget()");
-		exit(1);
-	}
+  // 使用约定好的文件路径和 proj_id 产生 shm_key
+  if ((shm_key = ftok(PATHNAME, proj_id)) == -1) {
+    perror("ftok()");
+    exit(1);
+  }
 
-	// 绑定映射
-	shm_p = (int *)shmat(shm_id, NULL, 0);
-	if ((void *)shm_p == (void *)-1) {
-		perror("shmat()");
-		exit(1);
-	}
+  // 创建一个共享内存，如果系统中已经存在此共享内存则报错退出，创建出来的共享内存权限为
+  // 0600(-rw-------)
+  shm_id = shmget(shm_key, sizeof(int), IPC_CREAT | IPC_EXCL | 0600);
+  if (shm_id &lt; 0) {
+    perror("shmget()");
+    exit(1);
+  }
 
+  // 绑定映射
+  shm_p = (int *)shmat(shm_id, NULL, 0);
+  if ((void *)shm_p == (void *)-1) {
+    perror("shmat()");
+    exit(1);
+  }
 
-	*shm_p = 0;
+  *shm_p = 0;
 
-	// 并发读写
-	for (count = 0; count &lt; COUNT; count++) {
-		pid = fork();
-		if (pid &lt; 0) {
-			perror("fork()");
-			exit(1);
-		}
+  // 并发读写
+  for (count = 0; count &lt; COUNT; count++) {
+    pid = fork();
+    if (pid &lt; 0) {
+      perror("fork()");
+      exit(1);
+    }
 
-		if (pid == 0) {
-			do_child(proj_id);
-		}
-	}
-	
-	// 等待所有子进程执行完毕
-	for (count = 0; count &lt; COUNT; count++) {
-		wait(NULL);
-	}
+    if (pid == 0) {
+      do_child(proj_id);
+    }
+  }
 
-	// 解除映射
-	if (shmdt(shm_p) &lt; 0) {
-		perror("shmdt()");
-		exit(1);
-	}
+  // 等待所有子进程执行完毕
+  for (count = 0; count &lt; COUNT; count++) {
+    wait(NULL);
+  }
 
-	// 删除共享内存
-	if (shmctl(shm_id, IPC_RMID, NULL) &lt; 0) {
-		perror("shmctl()");
-		exit(1);
-	}
+  // 解除映射
+  if (shmdt(shm_p) &lt; 0) {
+    perror("shmdt()");
+    exit(1);
+  }
 
-	exit(0);
-}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+  // 删除共享内存
+  if (shmctl(shm_id, IPC_RMID, NULL) &lt; 0) {
+    perror("shmctl()");
+    exit(1);
+  }
+
+  exit(0);
+}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h3 id="posix-共享内存">POSIX 共享内存</h3>
 <p>POSIX 共享内存本质上就是在 <code>/dev/shm</code>
 上创建一个文件，并将其 mmap 之后映射其内存地址。</p>

@@ -436,7 +436,7 @@ T1，但语境不接受该类型，而接受另一类型 T2
 <p>凡是在语境中使用了某种表达式类型
 <code>T1</code>，但语境不接受该类型，而接受另一类型 <code>T2</code>
 的时候，会进行<strong>隐式转换</strong>。</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">int</span> a <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>隐式转换</span></div><code class="language-cpp"><span class="token keyword">int</span> a <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
 <span class="token keyword">long</span> <span class="token keyword">long</span> b <span class="token operator">=</span> a <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">;</span> <span class="token comment">// int -&gt; long long</span>
 <span class="token keyword">if</span> <span class="token punctuation">(</span>a<span class="token punctuation">)</span> <span class="token punctuation">{</span>             <span class="token comment">// int -&gt; bool</span>
   <span class="token keyword">char</span> c <span class="token operator">=</span> a<span class="token punctuation">;</span>        <span class="token comment">// int -&gt; char</span>
@@ -469,7 +469,7 @@ T1，但语境不接受该类型，而接受另一类型 T2
 <h3 id="cast-in-c">Cast in C</h3>
 <p>C 中的类型转换语法非常简单粗暴，直接在表达式前加上
 <code>(Target_Type)</code> 即可，如：</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">double</span> pi <span class="token operator">=</span> <span class="token number">3.14</span><span class="token punctuation">;</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>显式转换</span></div><code class="language-cpp"><span class="token keyword">double</span> pi <span class="token operator">=</span> <span class="token number">3.14</span><span class="token punctuation">;</span>
 <span class="token keyword">int</span> p <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">)</span>pi<span class="token punctuation">;</span>
 std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> p<span class="token punctuation">;</span> <span class="token comment">// output: 3</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <p>但这种粗暴的强转会带来许多难以察觉的安全性问题。于是，C++
@@ -495,7 +495,7 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 值，故需要程序员来验证转换的结果是否安全。</p>
 </blockquote>
 <p>但在类的层次结构之间进行转换时，比如将基类指针<strong>向下转换</strong>为派生类指针这一操作，由于派生类可能有自己新定义的字段或信息，故<strong>向下转换是不安全</strong>的。但<strong>向上转换一定是安全</strong>的，因为派生类一定包含基类的所有信息。</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">B</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>static_cast</span></div><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">B</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
 <span class="token keyword">class</span> <span class="token class-name">D</span><span class="token operator">:</span> <span class="token base-clause"><span class="token keyword">public</span> <span class="token class-name">B</span></span> <span class="token punctuation">{</span>
  <span class="token keyword">public</span><span class="token operator">:</span>
   <span class="token keyword">int</span> val<span class="token punctuation">;</span>
@@ -518,7 +518,7 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 <li>如果转型失败且 <code>new_type</code> 是引用类型，那么它会抛出
 <code>std::bad_cast</code> 异常。</li>
 </ul>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;iostream&gt;</span></span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>dynamic_cast</span></div><code class="language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;iostream&gt;</span></span>
 
 <span class="token keyword">class</span> <span class="token class-name">A</span> <span class="token punctuation">{</span>
  <span class="token keyword">public</span><span class="token operator">:</span>
@@ -615,19 +615,19 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 <code>new_type</code>
 的相同类型或派生类，而不用关心指针/引用类型本身。</p>
 <p>再来看另一种情况。</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">A</span> <span class="token punctuation">{</span> <span class="token keyword">virtual</span> <span class="token function">f</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
-<span class="token keyword">class</span> <span class="token class-name">B</span> <span class="token operator">:</span> <span class="token base-clause"><span class="token keyword">public</span> <span class="token class-name">A</span></span> <span class="token punctuation">{</span> <span class="token keyword">virtual</span> <span class="token function">f</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
-<span class="token keyword">class</span> <span class="token class-name">C</span> <span class="token operator">:</span> <span class="token base-clause"><span class="token keyword">public</span> <span class="token class-name">A</span></span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>复杂继承关系</span></div><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">A</span> <span class="token punctuation">{</span> <span class="token keyword">virtual</span> <span class="token function">f</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token keyword">class</span> <span class="token class-name">B</span> <span class="token operator">:</span> <span class="token base-clause"><span class="token keyword">virtual</span> <span class="token keyword">public</span> <span class="token class-name">A</span></span> <span class="token punctuation">{</span> <span class="token keyword">virtual</span> <span class="token function">f</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token keyword">class</span> <span class="token class-name">C</span> <span class="token operator">:</span> <span class="token base-clause"><span class="token keyword">virtual</span> <span class="token keyword">public</span> <span class="token class-name">A</span></span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
 <span class="token keyword">class</span> <span class="token class-name">D</span> <span class="token punctuation">{</span> <span class="token keyword">virtual</span> <span class="token function">f</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
 <span class="token keyword">class</span> <span class="token class-name">E</span> <span class="token operator">:</span> <span class="token base-clause"><span class="token keyword">public</span> <span class="token class-name">B</span><span class="token punctuation">,</span> <span class="token keyword">public</span> <span class="token class-name">C</span><span class="token punctuation">,</span> <span class="token keyword">public</span> <span class="token class-name">D</span></span> <span class="token punctuation">{</span> <span class="token keyword">virtual</span> <span class="token function">f</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
 
 <span class="token comment">/********
- A  A
- |  |
- B  C  D
- |__|__|
-    |
-    E
+   A  
+  / \
+ B   C   D
+ |___|___|
+     |
+     E
 ********/</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>如果我们拥有一个 <code>D* pd = new E;</code> 的指针，希望将其转换为
 <code>A*</code>，一种可行的思路是先转到 <code>E*</code> 再转到
@@ -646,7 +646,7 @@ coding 效率。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token generic-function"><span class="token function">reinterpret_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span>new_type<span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span>expr<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p><code>reinterpret_cast</code>
 通过对底层比特位重新解读来进行类型间的转换。当然，这也是不安全的，需要程序员手动检查。</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>reinterpret_cast</span></div><code class="language-cpp"><span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
   <span class="token keyword">int</span> a<span class="token punctuation">;</span>
   std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token operator">&amp;</span>a <span class="token operator">&lt;&lt;</span> <span class="token char">'\n'</span>
             <span class="token operator">&lt;&lt;</span> <span class="token generic-function"><span class="token function">reinterpret_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token keyword">unsigned</span> <span class="token keyword">long</span> <span class="token keyword">long</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span><span class="token operator">&amp;</span>a<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 将 64 位指针类型的 &amp;a 重新解读为 64 位 unsigned long long 类型。</span>
@@ -658,7 +658,7 @@ coding 效率。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token generic-function"><span class="token function">const_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span>new_type<span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span>expr<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p><code>const_cast</code> 最大特点就在于它可以移除 <code>expr</code> 的
 cv 限定，这是其余几个算子都做不到的。</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">A</span> <span class="token punctuation">{</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>const_cast</span></div><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">A</span> <span class="token punctuation">{</span>
   <span class="token keyword">int</span> val<span class="token punctuation">;</span>
  <span class="token keyword">public</span><span class="token operator">:</span>
   <span class="token function">A</span><span class="token punctuation">(</span><span class="token keyword">int</span> val_<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token function">val</span><span class="token punctuation">(</span>val_<span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
@@ -699,7 +699,7 @@ cv 限定，这是其余几个算子都做不到的。</p>
 <p>在现代 C++
 中，传统转换已然无法轻易满足日益增长的应用需求，需要用户自己制定转换规则，来提高代码效率。</p>
 <p>但用户能修改的只有两种，初始化构造函数与用户定义转换函数。</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;iostream&gt;</span></span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>User Defined Cast</span></div><code class="language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;iostream&gt;</span></span>
 
 <span class="token keyword">class</span> <span class="token class-name">Foo</span> <span class="token punctuation">{</span>
   <span class="token keyword">int</span> val<span class="token punctuation">;</span>
@@ -741,7 +741,7 @@ cv 限定，这是其余几个算子都做不到的。</p>
 <p><code>typeid</code> 用于获取当前对象的类型信息，返回一个
 <code>type_info</code> 类，可以通过调用 <code>type_info</code> 的
 <code>name()</code> 方法来获取相应的字符串型名称。</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">A</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>typeid</span></div><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">A</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
 <span class="token keyword">class</span> <span class="token class-name">B</span> <span class="token operator">:</span> <span class="token base-clause"><span class="token keyword">public</span> <span class="token class-name">A</span></span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
 
 <span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -772,7 +772,7 @@ cv 限定，这是其余几个算子都做不到的。</p>
 <p>不难发现，<code>typeid</code>
 不仅支持内置类型，还允许获取用户自定义类型的信息。但上面只描述了静态类型的情况，在编译期就能确定类型，下面看看涉及多态的
 RTTI 情况。</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Base</span> <span class="token punctuation">{</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>RTTI</span></div><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Base</span> <span class="token punctuation">{</span>
  <span class="token keyword">public</span><span class="token operator">:</span>
   <span class="token keyword">virtual</span> <span class="token operator">~</span><span class="token function">Base</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token keyword">default</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span>
@@ -814,17 +814,17 @@ RTTI 情况。</p>
 类，实际上它保有一个类型的实现指定信息，包括类型的名称和比较二个类型相等的方法或相对顺序。定义如下：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">type_info</span> <span class="token punctuation">{</span>
 <span class="token keyword">public</span><span class="token operator">:</span>
-    <span class="token keyword">virtual</span> <span class="token operator">~</span><span class="token function">type_info</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">virtual</span> <span class="token operator">~</span><span class="token function">type_info</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    <span class="token keyword">bool</span> <span class="token keyword">operator</span><span class="token operator">==</span><span class="token punctuation">(</span><span class="token keyword">const</span> type_info<span class="token operator">&amp;</span> rhs<span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token keyword">noexcept</span><span class="token punctuation">;</span>
-    <span class="token keyword">bool</span> <span class="token keyword">operator</span><span class="token operator">!=</span><span class="token punctuation">(</span><span class="token keyword">const</span> type_info<span class="token operator">&amp;</span> rhs<span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token keyword">noexcept</span><span class="token punctuation">;</span> <span class="token comment">// C++20 移除</span>
+  <span class="token keyword">bool</span> <span class="token keyword">operator</span><span class="token operator">==</span><span class="token punctuation">(</span><span class="token keyword">const</span> type_info<span class="token operator">&amp;</span> rhs<span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token keyword">noexcept</span><span class="token punctuation">;</span>
+  <span class="token keyword">bool</span> <span class="token keyword">operator</span><span class="token operator">!=</span><span class="token punctuation">(</span><span class="token keyword">const</span> type_info<span class="token operator">&amp;</span> rhs<span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token keyword">noexcept</span><span class="token punctuation">;</span> <span class="token comment">// C++20 移除</span>
 
-    <span class="token keyword">bool</span> <span class="token function">before</span><span class="token punctuation">(</span><span class="token keyword">const</span> type_info<span class="token operator">&amp;</span> rhs<span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token keyword">noexcept</span><span class="token punctuation">;</span>
-    size_t <span class="token function">hash_code</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token keyword">noexcept</span><span class="token punctuation">;</span>
-    <span class="token keyword">const</span> <span class="token keyword">char</span><span class="token operator">*</span> <span class="token function">name</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token keyword">noexcept</span><span class="token punctuation">;</span>
+  <span class="token keyword">bool</span> <span class="token function">before</span><span class="token punctuation">(</span><span class="token keyword">const</span> type_info<span class="token operator">&amp;</span> rhs<span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token keyword">noexcept</span><span class="token punctuation">;</span>
+  size_t <span class="token function">hash_code</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token keyword">noexcept</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> <span class="token keyword">char</span><span class="token operator">*</span> <span class="token function">name</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token keyword">noexcept</span><span class="token punctuation">;</span>
 
-    <span class="token function">type_info</span><span class="token punctuation">(</span><span class="token keyword">const</span> type_info<span class="token operator">&amp;</span> rhs<span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token keyword">delete</span><span class="token punctuation">;</span>
-    type_info<span class="token operator">&amp;</span> <span class="token keyword">operator</span><span class="token operator">=</span><span class="token punctuation">(</span><span class="token keyword">const</span> type_info<span class="token operator">&amp;</span> rhs<span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token keyword">delete</span><span class="token punctuation">;</span>
+  <span class="token function">type_info</span><span class="token punctuation">(</span><span class="token keyword">const</span> type_info<span class="token operator">&amp;</span> rhs<span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token keyword">delete</span><span class="token punctuation">;</span>
+  type_info<span class="token operator">&amp;</span> <span class="token keyword">operator</span><span class="token operator">=</span><span class="token punctuation">(</span><span class="token keyword">const</span> type_info<span class="token operator">&amp;</span> rhs<span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token keyword">delete</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>每个类型的 <code>type_info</code>
 是独一无二的，故禁止了拷贝。除了之前提过的 <code>name()</code>

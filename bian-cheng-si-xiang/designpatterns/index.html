@@ -439,18 +439,18 @@ API，且该实例为全局共享。</p>
 <strong><code>Meyers' Singleton</code></strong>，它利用了局部静态变量在第一次使用时才初始化的特性，并且由于
 C++11
 标准解决了局部静态变量的线程安全问题，使得它成为当前<strong>最优雅</strong>的实现方式。</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Singleton</span> <span class="token punctuation">{</span>
-  <span class="token keyword">public</span><span class="token operator">:</span>
-    <span class="token keyword">static</span> Singleton<span class="token operator">&amp;</span> <span class="token function">getInstance</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-      <span class="token keyword">static</span> Singleton instance<span class="token punctuation">;</span>  <span class="token comment">// so elegent</span>
-      <span class="token keyword">return</span> instance<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>Meyers' Singleton</span></div><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Singleton</span> <span class="token punctuation">{</span>
+ <span class="token keyword">public</span><span class="token operator">:</span>
+  <span class="token keyword">static</span> Singleton<span class="token operator">&amp;</span> <span class="token function">getInstance</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">static</span> Singleton instance<span class="token punctuation">;</span>  <span class="token comment">// so elegent</span>
+    <span class="token keyword">return</span> instance<span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
 
-  <span class="token keyword">private</span><span class="token operator">:</span>
-    <span class="token function">Singleton</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token keyword">default</span><span class="token punctuation">;</span>
-    <span class="token operator">~</span><span class="token function">Singleton</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token keyword">default</span><span class="token punctuation">;</span>
-    <span class="token function">Singleton</span><span class="token punctuation">(</span><span class="token keyword">const</span> Singleton<span class="token operator">&amp;</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token keyword">default</span><span class="token punctuation">;</span>
-    Singleton<span class="token operator">&amp;</span> <span class="token keyword">operator</span><span class="token operator">=</span><span class="token punctuation">(</span><span class="token keyword">const</span> Singleton<span class="token operator">&amp;</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token keyword">default</span><span class="token punctuation">;</span>
+ <span class="token keyword">private</span><span class="token operator">:</span>
+  <span class="token function">Singleton</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token keyword">default</span><span class="token punctuation">;</span>
+  <span class="token operator">~</span><span class="token function">Singleton</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token keyword">default</span><span class="token punctuation">;</span>
+  <span class="token function">Singleton</span><span class="token punctuation">(</span><span class="token keyword">const</span> Singleton<span class="token operator">&amp;</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token keyword">default</span><span class="token punctuation">;</span>
+  Singleton<span class="token operator">&amp;</span> <span class="token keyword">operator</span><span class="token operator">=</span><span class="token punctuation">(</span><span class="token keyword">const</span> Singleton<span class="token operator">&amp;</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token keyword">default</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h3 id="饿汉式-eager">饿汉式 eager</h3>
 <p>指单例实例在程序运行时被立即执行初始化，保证线程安全，但在某些程序中，初始化语句与调用语句的先后顺序并不确定，故存在潜在问题。目前最好的办法还是用
@@ -460,40 +460,38 @@ Meyers' Singleton。</p>
 <p>它利用了面向对象中<strong>多态</strong>的特性，将存在着继承关系的类，通过一个工厂类创建对应的子类（派生类）对象。</p>
 <h3 id="简单工厂">简单工厂</h3>
 <p>简单工厂的工厂类里封装了创建具体产品对象的函数。</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">enum</span> <span class="token keyword">class</span> <span class="token class-name">ProductType</span><span class="token punctuation">;</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>简单工厂</span></div><code class="language-cpp"><span class="token keyword">enum</span> <span class="token keyword">class</span> <span class="token class-name">ProductType</span><span class="token punctuation">;</span>
 <span class="token keyword">class</span> <span class="token class-name">Factory</span> <span class="token punctuation">{</span>
-  <span class="token keyword">public</span><span class="token operator">:</span>
-    Product<span class="token operator">*</span> <span class="token function">CreateProduct</span><span class="token punctuation">(</span>ProductType type<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-      <span class="token keyword">switch</span><span class="token punctuation">(</span>type<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">case</span> TYPEA<span class="token operator">:</span>
-          <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token function">ProductA</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">case</span> TYPEB<span class="token operator">:</span>
-          <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token function">ProductB</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
-        <span class="token keyword">default</span><span class="token operator">:</span>
-          <span class="token keyword">return</span> <span class="token keyword">nullptr</span><span class="token punctuation">;</span>
-      <span class="token punctuation">}</span>
+ <span class="token keyword">public</span><span class="token operator">:</span>
+  Product<span class="token operator">*</span> <span class="token function">CreateProduct</span><span class="token punctuation">(</span>ProductType type<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">switch</span> <span class="token punctuation">(</span>type<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token keyword">case</span> TYPEA<span class="token operator">:</span>
+        <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token function">ProductA</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token keyword">case</span> TYPEB<span class="token operator">:</span>
+        <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token function">ProductB</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token keyword">default</span> <span class="token operator">:</span> <span class="token keyword">return</span> <span class="token keyword">nullptr</span><span class="token punctuation">;</span>
     <span class="token punctuation">}</span>
-<span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>缺陷是扩展性差，一旦需要新增产品，则必须修改 <code>ProductType</code>
 以及工厂类的创建函数。</p>
 <h3 id="工厂方法">工厂方法</h3>
 <p>工厂方法模式将工厂类进行抽象，仅提供创建具体产品的接口，而具体实现交由子类（即具体工厂）去完成。</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">AbstractFactory</span> <span class="token punctuation">{</span>
-  <span class="token keyword">public</span><span class="token operator">:</span>
-    <span class="token keyword">virtual</span> Product<span class="token operator">*</span> <span class="token function">CreateProduct</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
-    <span class="token keyword">virtual</span> <span class="token operator">~</span><span class="token function">AbstractFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token keyword">default</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>工厂方法</span></div><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">AbstractFactory</span> <span class="token punctuation">{</span>
+ <span class="token keyword">public</span><span class="token operator">:</span>
+  <span class="token keyword">virtual</span> Product<span class="token operator">*</span> <span class="token function">CreateProduct</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+  <span class="token keyword">virtual</span> <span class="token operator">~</span><span class="token function">AbstractFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token keyword">default</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
 
-<span class="token keyword">class</span> <span class="token class-name">ConcreteFactory1</span><span class="token operator">:</span> <span class="token base-clause"><span class="token keyword">public</span> <span class="token class-name">AbstractFactory</span></span> <span class="token punctuation">{</span>
-  <span class="token keyword">public</span><span class="token operator">:</span>
-    <span class="token keyword">virtual</span> Product<span class="token operator">*</span> <span class="token function">CreateProductA</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token function">ProductA</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
-<span class="token punctuation">}</span>
+<span class="token keyword">class</span> <span class="token class-name">ConcreteFactory1</span> <span class="token operator">:</span> <span class="token base-clause"><span class="token keyword">public</span> <span class="token class-name">AbstractFactory</span></span> <span class="token punctuation">{</span>
+ <span class="token keyword">public</span><span class="token operator">:</span>
+  <span class="token keyword">virtual</span> Product<span class="token operator">*</span> <span class="token function">CreateProductA</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token function">ProductA</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
 
-<span class="token keyword">class</span> <span class="token class-name">ConcreteFactory2</span><span class="token operator">:</span> <span class="token base-clause"><span class="token keyword">public</span> <span class="token class-name">AbstractFactory</span></span> <span class="token punctuation">{</span>
-  <span class="token keyword">public</span><span class="token operator">:</span>
-    <span class="token keyword">virtual</span> Product<span class="token operator">*</span> <span class="token function">CreateProductB</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token function">ProductB</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
-<span class="token punctuation">}</span>
+<span class="token keyword">class</span> <span class="token class-name">ConcreteFactory2</span> <span class="token operator">:</span> <span class="token base-clause"><span class="token keyword">public</span> <span class="token class-name">AbstractFactory</span></span> <span class="token punctuation">{</span>
+ <span class="token keyword">public</span><span class="token operator">:</span>
+  <span class="token keyword">virtual</span> Product<span class="token operator">*</span> <span class="token function">CreateProductB</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token function">ProductB</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
 <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>和简单工厂一样，每新增一个产品，就需要增加一个对应的产品的具体工厂类。相比简单工厂而言，工厂方法模式需要更多的类定义。</p>
 <h3 id="抽象工厂">抽象工厂</h3>
@@ -501,21 +499,21 @@ Meyers' Singleton。</p>
 override，否则什么也不做。这样就实现了创建多个产品族中的产品对象。代码略。</p>
 <h3 id="模板工厂">模板工厂</h3>
 <p>以上三种方式，在新增产品时，要么修改工厂类，要么需新增具体的工厂类，说明工厂类的封装性还不够好。模板工厂是将工厂方法模式封装成模板工厂类，那么这样在新增产品时，是不需要新增具体的工厂类，减少了代码的编写量。</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token comment">// 抽象模板工厂类</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>抽象模板工厂 &amp; 具体模板工厂</span></div><code class="language-cpp"><span class="token comment">// 抽象模板工厂类</span>
 <span class="token comment">// AbstractProduct_t 产品抽象类</span>
 <span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">AbstractProduct_t</span><span class="token operator">&gt;</span>
 <span class="token keyword">class</span> <span class="token class-name">AbstractFactory</span> <span class="token punctuation">{</span>
-  <span class="token keyword">public</span><span class="token operator">:</span>
-    <span class="token keyword">virtual</span> AbstractProduct_t <span class="token operator">*</span><span class="token function">CreateProduct</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
-    <span class="token keyword">virtual</span> <span class="token operator">~</span><span class="token function">AbstractFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token keyword">default</span><span class="token punctuation">;</span>
+ <span class="token keyword">public</span><span class="token operator">:</span>
+  <span class="token keyword">virtual</span> AbstractProduct_t<span class="token operator">*</span> <span class="token function">CreateProduct</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+  <span class="token keyword">virtual</span> <span class="token operator">~</span><span class="token function">AbstractFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token keyword">default</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span>
 
 <span class="token comment">// 具体模板工厂类</span>
 <span class="token comment">// AbstractProduct_t 产品抽象类，ConcreteProduct_t 产品具体类</span>
 <span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">AbstractProduct_t</span><span class="token punctuation">,</span> <span class="token keyword">class</span> <span class="token class-name">ConcreteProduct_t</span><span class="token operator">&gt;</span>
 <span class="token keyword">class</span> <span class="token class-name">ConcreteFactory</span> <span class="token operator">:</span> <span class="token base-clause"><span class="token keyword">public</span> <span class="token class-name">AbstractFactory</span><span class="token operator">&lt;</span><span class="token class-name">AbstractProduct_t</span><span class="token operator">&gt;</span></span> <span class="token punctuation">{</span>
-  <span class="token keyword">public</span><span class="token operator">:</span>
-    AbstractProduct_t <span class="token operator">*</span><span class="token function">CreateProduct</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token function">ConcreteProduct_t</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+ <span class="token keyword">public</span><span class="token operator">:</span>
+  AbstractProduct_t<span class="token operator">*</span> <span class="token function">CreateProduct</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token function">ConcreteProduct_t</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>当然，也可以在创建产品时通过某种 primary key 将其注册进
 <code>std::map</code>/<code>std::unordered_map</code> 中，后续可以通过该

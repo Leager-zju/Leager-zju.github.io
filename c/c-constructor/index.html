@@ -517,10 +517,11 @@ C++11 新增的用于提高编码效率的特性。</p>
 打印输出。更巧妙的是，这是<strong>隐式</strong>声明继承的，即假设一个继承来的构造函数不被相关的代码使用，编译器不会为之产生真正的函数代码，这样比显式书写各种构造函数更加节省代码量。</p>
 <h3 id="注意事项-1">注意事项</h3>
 <p><strong>继承构造函数</strong>的注意事项较多，一一说明。</p>
-<p>1）继承构造函数无法初始化派生类数据成员。这很显然，因为继承来的构造函数仅对基类进行初始化。如果要初始化派生类变量，有两种做法。一是使用
+<ol type="1">
+<li>继承构造函数无法初始化派生类数据成员。这很显然，因为继承来的构造函数仅对基类进行初始化。如果要初始化派生类变量，有两种做法。一是使用
 <code>=</code> / <code>{}</code>
-对非静态成员就地初始化，二是额外书写构造函数，两种做法各有优劣，第一种减少了代码量，第二种更加灵活，需根据具体应用场景进行选择。</p>
-<p>2）当派生类拥有多个基类时，如果多个基类中的部分构造函数的参数列表（中的类型与顺序）完全一致，那么派生类中的继承构造函数将产生冲突，比如：</p>
+对非静态成员就地初始化，二是额外书写构造函数，两种做法各有优劣，第一种减少了代码量，第二种更加灵活，需根据具体应用场景进行选择。</li>
+<li>当派生类拥有多个基类时，如果多个基类中的部分构造函数的参数列表（中的类型与顺序）完全一致，那么派生类中的继承构造函数将产生冲突，比如：
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">A</span> <span class="token punctuation">{</span>
  <span class="token keyword">public</span><span class="token operator">:</span>
   <span class="token function">A</span><span class="token punctuation">(</span><span class="token keyword">int</span> i<span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
@@ -534,12 +535,11 @@ C++11 新增的用于提高编码效率的特性。</p>
   <span class="token keyword">using</span> A<span class="token double-colon punctuation">::</span>A<span class="token punctuation">;</span> <span class="token comment">// 等价于 C(int i): A(i) {}</span>
   <span class="token keyword">using</span> B<span class="token double-colon punctuation">::</span>B<span class="token punctuation">;</span> <span class="token comment">// 等价于 C(int i): B(i) {}</span>
   <span class="token function">C</span><span class="token punctuation">(</span><span class="token keyword">int</span> i<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token function">A</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token function">B</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token comment">// 应显式声明会产生冲突的构造函数，会将上面两个"等价于"覆盖，阻止了隐式生成对应的构造函数，避免了冲突</span>
-<span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>3）若基类构造函数声明为
+<span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></li>
+<li>若基类构造函数声明为
 <code>private</code>，则派生类无法使用该构造函数；若为
 <code>public</code>，即便 <code>using</code> 处于 <code>private</code>
-中，也能使用。比如：</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">A</span> <span class="token punctuation">{</span>
+中，也能使用。比如： <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">A</span> <span class="token punctuation">{</span>
  <span class="token keyword">public</span><span class="token operator">:</span>
   <span class="token function">A</span><span class="token punctuation">(</span><span class="token keyword">int</span> i<span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
  <span class="token keyword">private</span><span class="token operator">:</span>
@@ -552,7 +552,8 @@ C++11 新增的用于提高编码效率的特性。</p>
 <span class="token punctuation">}</span><span class="token punctuation">;</span>
 
 B <span class="token function">p</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token comment">// OK! although using is private</span>
-B <span class="token function">q</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// ERROR! A(int, int) is private</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+B <span class="token function">q</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// ERROR! A(int, int) is private</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></li>
+</ol>
 <blockquote>
 <p>网上好多文章提到两点：</p>
 <p>一是若基类构造函数存在默认值，则无法继承该默认值；</p>

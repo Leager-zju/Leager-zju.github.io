@@ -10,7 +10,7 @@
 线程切换 in xv6
 在 xv6
 中，每个进程都可以视为有一个主线程，逐行运行指令，享有所有寄存器的使用权。然而，时间片到期，也就是进程收到时钟中断后，会调用
-yield() 函数自愿让出">
+yield() 函数自愿让出 CPU。">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -470,12 +470,82 @@ Register</strong>，这里主要关注 ra）。也就是说，调用
 <code>proc-&gt;pagetable</code>。</p>
 <h2 id="preparation">Preparation</h2>
 <p>切换到对应分支</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ git fetch</span><br><span class="line">$ git checkout thread</span><br><span class="line">$ make clean</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">git</span> fetch
+$ <span class="token function">git</span> checkout thread
+$ <span class="token function">make</span> clean<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <h2 id="task1-uthread-switching-between-threads">Task1: Uthread:
 switching between threads</h2>
 <p>该任务就是实现线程间的切换，其实现完全可以参考进程切换，毕竟本质上也是主线程的切换。</p>
-<figure class="highlight c"><figcaption><span>user/uthread.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line"><span class="comment">// 定义上下文结构体，其实就是直接抄了 proc.h 里的。</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">context</span> &#123;</span></span><br><span class="line">  uint64 ra;</span><br><span class="line">  uint64 sp;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// callee-saved</span></span><br><span class="line">  uint64 s0;</span><br><span class="line">  uint64 s1;</span><br><span class="line">  uint64 s2;</span><br><span class="line">  uint64 s3;</span><br><span class="line">  uint64 s4;</span><br><span class="line">  uint64 s5;</span><br><span class="line">  uint64 s6;</span><br><span class="line">  uint64 s7;</span><br><span class="line">  uint64 s8;</span><br><span class="line">  uint64 s9;</span><br><span class="line">  uint64 s10;</span><br><span class="line">  uint64 s11;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">thread</span> &#123;</span></span><br><span class="line">  <span class="type">char</span>           <span class="built_in">stack</span>[STACK_SIZE]; <span class="comment">/* the thread&#x27;s stack */</span></span><br><span class="line">  <span class="type">int</span>            state;             <span class="comment">/* FREE, RUNNING, RUNNABLE */</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">context</span> <span class="title">ctx</span>;</span>               <span class="comment">// (!new)</span></span><br><span class="line">&#125;;</span><br><span class="line">...</span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">thread_schedule</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">thread</span> *<span class="title">t</span>, *<span class="title">next_thread</span>;</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">/* Find another runnable thread. */</span></span><br><span class="line">  ...</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (current_thread != next_thread) &#123;         <span class="comment">/* switch threads?  */</span></span><br><span class="line">    next_thread-&gt;state = RUNNING;</span><br><span class="line">    t = current_thread;</span><br><span class="line">    current_thread = next_thread;</span><br><span class="line">    thread_switch((uint64)&amp;t-&gt;ctx, (uint64)&amp;next_thread-&gt;ctx); <span class="comment">// (!new)</span></span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    next_thread = <span class="number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">thread_create</span><span class="params">(<span class="type">void</span> (*func)())</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">thread</span> *<span class="title">t</span>;</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> (t = all_thread; t &lt; all_thread + MAX_THREAD; t++) &#123;</span><br><span class="line">    <span class="keyword">if</span> (t-&gt;state == FREE) <span class="keyword">break</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  t-&gt;state = RUNNABLE;</span><br><span class="line"></span><br><span class="line">  <span class="built_in">memset</span>(&amp;t-&gt;ctx, <span class="number">0</span>, <span class="keyword">sizeof</span>(<span class="keyword">struct</span> context)); <span class="comment">// (!new)</span></span><br><span class="line">  t-&gt;ctx.ra = (uint64)func;                   <span class="comment">// (!new)</span></span><br><span class="line">  t-&gt;ctx.sp = (uint64)&amp;t-&gt;<span class="built_in">stack</span> + STACK_SIZE; <span class="comment">// (!new)</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight plaintext"><figcaption><span>user/uthread_switch.S</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">.globl thread_switch</span><br><span class="line">thread_switch:</span><br><span class="line">	sd ra, 0(a0)</span><br><span class="line">  ...</span><br><span class="line">  sd s11, 104(a0)</span><br><span class="line"></span><br><span class="line">  ld ra, 0(a1)</span><br><span class="line">  ...</span><br><span class="line">  ld s11, 104(a1)</span><br><span class="line"></span><br><span class="line">	ret    /* return to ra */</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>user/uthread.c</span></div><code class="language-C">...
+// 定义上下文结构体，其实就是直接抄了 proc.h 里的。
+struct context {
+  uint64 ra;
+  uint64 sp;
+
+  // callee-saved
+  uint64 s0;
+  uint64 s1;
+  uint64 s2;
+  uint64 s3;
+  uint64 s4;
+  uint64 s5;
+  uint64 s6;
+  uint64 s7;
+  uint64 s8;
+  uint64 s9;
+  uint64 s10;
+  uint64 s11;
+};
+
+struct thread {
+  char           stack[STACK_SIZE]; /* the thread's stack */
+  int            state;             /* FREE, RUNNING, RUNNABLE */
+  struct context ctx;               // (!new)
+};
+...
+void
+thread_schedule(void)
+{
+  struct thread *t, *next_thread;
+
+  /* Find another runnable thread. */
+  ...
+
+  if (current_thread != next_thread) {         /* switch threads?  */
+    next_thread-&gt;state = RUNNING;
+    t = current_thread;
+    current_thread = next_thread;
+    thread_switch((uint64)&amp;t-&gt;ctx, (uint64)&amp;next_thread-&gt;ctx); // (!new)
+  } else {
+    next_thread = 0;
+  }
+}
+
+void
+thread_create(void (*func)())
+{
+  struct thread *t;
+
+  for (t = all_thread; t &lt; all_thread + MAX_THREAD; t++) {
+    if (t-&gt;state == FREE) break;
+  }
+  t-&gt;state = RUNNABLE;
+
+  memset(&amp;t-&gt;ctx, 0, sizeof(struct context)); // (!new)
+  t-&gt;ctx.ra = (uint64)func;                   // (!new)
+  t-&gt;ctx.sp = (uint64)&amp;t-&gt;stack + STACK_SIZE; // (!new)
+}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-S" data-language="S"><div class="caption"><span>user/uthread_switch.S</span></div><code class="language-S">.globl thread_switch
+thread_switch:
+	sd ra, 0(a0)
+  ...
+  sd s11, 104(a0)
+
+  ld ra, 0(a1)
+  ...
+  ld s11, 104(a1)
+
+	ret    /* return to ra */<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>基本都是参考已有的实现，但关键是弄明白具体发生了什么。</p>
 <h2 id="task2-using-threads">Task2: Using threads</h2>
 <p>该任务（和下一个任务）是熟悉 <code>pthread.h</code>
@@ -491,12 +561,44 @@ key 的映射结果决定给哪个桶上锁放锁，这样效率会比之前快�
 <p>大锁的设计粒度太粗，无法通过 <code>ph_fast</code>
 测试，改为“一桶一锁”方能通过。</p>
 </blockquote>
-<figure class="highlight c"><figcaption><span>notxv6/ph.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line"><span class="type">pthread_mutex_t</span> locks[NBUCKET];</span><br><span class="line">...</span><br><span class="line"><span class="type">static</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">put</span><span class="params">(<span class="type">int</span> key, <span class="type">int</span> value)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">int</span> i = key % NBUCKET;</span><br><span class="line">  pthread_mutex_lock(&amp;locks[i]);</span><br><span class="line">  <span class="comment">// insert</span></span><br><span class="line">  pthread_mutex_unlock(&amp;locks[i]);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="comment">// before put</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; NBUCKET; i++) &#123;</span><br><span class="line">    pthread_mutex_init(&amp;locks[i], <span class="number">0</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>notxv6/ph.c</span></div><code class="language-C">...
+pthread_mutex_t locks[NBUCKET];
+...
+static
+void put(int key, int value)
+{
+  int i = key % NBUCKET;
+  pthread_mutex_lock(&amp;locks[i]);
+  // insert
+  pthread_mutex_unlock(&amp;locks[i]);
+}
+
+int
+main(int argc, char *argv[])
+{
+  ...
+  // before put
+  for (int i = 0; i &lt; NBUCKET; i++) {
+    pthread_mutex_init(&amp;locks[i], 0);
+  }
+  ...
+}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h2 id="task3-barrier">Task3: Barrier</h2>
 <p>这个任务就是用到条件变量相关的库函数了。场景是每个线程都有一个 for
 循环，每次循环都要调用 <code>barrier()</code>
 进行短暂阻塞，保证每个线程的循环轮次保持一致。</p>
-<figure class="highlight c"><figcaption><span>notxv6/barrier.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span> *</span><br><span class="line"><span class="title function_">thread</span><span class="params">(<span class="type">void</span> *xa)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; <span class="number">20000</span>; i++) &#123;</span><br><span class="line">    <span class="type">int</span> t = bstate.round;</span><br><span class="line">    assert (i == t);</span><br><span class="line">    barrier();</span><br><span class="line">    usleep(random() % <span class="number">100</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>notxv6/barrier.c</span></div><code class="language-C">static void *
+thread(void *xa)
+{
+  ...
+  for (i = 0; i &lt; 20000; i++) {
+    int t = bstate.round;
+    assert (i == t);
+    barrier();
+    usleep(random() % 100);
+  }
+  ...
+}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>有一个全局结构体
 <code>struct barrier bstate</code>，里面设置了一些变量，比如
 <code>bstate.nthread</code> 就是当前位于 barrier
@@ -509,7 +611,22 @@ barrier_0。一开始所有线程都会进入
 barrier_0，如果不是最后一个进入的，就阻塞，反之，唤醒其他线程。此外，还要有一个线程负责修改
 <code>bstate.round</code>，那么由谁来修改呢？是最后一个进入的，还是最后一个离开的？</p>
 <p>如果是最后一个出去的进行修改，那就会出问题。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span></span><br><span class="line"><span class="title function_">barrier</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  pthread_mutex_lock(&amp;bstate.barrier_mutex);</span><br><span class="line">  bstate.nthread++;</span><br><span class="line">  <span class="keyword">if</span> (bstate.nthread &lt; nthread) &#123; <span class="comment">// 不是最后一个进来的</span></span><br><span class="line">    pthread_cond_wait(&amp;bstate.barrier_cond, &amp;bstate.barrier_mutex);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123; <span class="comment">// 是最后一个进来的</span></span><br><span class="line">    pthread_cond_broadcast(&amp;bstate.barrier_cond);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (--bstate.nthread == <span class="number">0</span>) &#123; <span class="comment">// 是最后一个离开的</span></span><br><span class="line">    bstate.round++;</span><br><span class="line">  &#125;</span><br><span class="line">  pthread_mutex_unlock(&amp;bstate.barrier_mutex);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>Wrong Case1</span></div><code class="language-C">static void
+barrier()
+{
+  pthread_mutex_lock(&amp;bstate.barrier_mutex);
+  bstate.nthread++;
+  if (bstate.nthread &lt; nthread) { // 不是最后一个进来的
+    pthread_cond_wait(&amp;bstate.barrier_cond, &amp;bstate.barrier_mutex);
+  } else { // 是最后一个进来的
+    pthread_cond_broadcast(&amp;bstate.barrier_cond);
+  }
+
+  if (--bstate.nthread == 0) { // 是最后一个离开的
+    bstate.round++;
+  }
+  pthread_mutex_unlock(&amp;bstate.barrier_mutex);
+}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>这里，每个进程在进入后与离开前都会修改
 <code>bstate.nthread</code>，如果由最后一个离开的修改
 <code>bstate.round</code>，就会导致其他先离开的线程经历短暂的
@@ -517,7 +634,19 @@ barrier_0，如果不是最后一个进入的，就阻塞，反之，唤醒其�
 <code>bstate.round</code> 为 0，但 <code>i</code> 为
 1，断言失败，程序报错。问题的本质在于，<code>bstate.round</code>
 没有得到及时修改。那么是不是改完这个问题就没事了呢？当然不是。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span></span><br><span class="line"><span class="title function_">barrier</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  pthread_mutex_lock(&amp;bstate.barrier_mutex);</span><br><span class="line">  bstate.nthread++;</span><br><span class="line">  <span class="keyword">if</span> (bstate.nthread &lt; nthread) &#123; <span class="comment">// 不是最后一个进来的</span></span><br><span class="line">    pthread_cond_wait(&amp;bstate.barrier_cond, &amp;bstate.barrier_mutex);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123; <span class="comment">// 是最后一个进来的，也是第一个离开的，毕竟从进来到退出之间一直持有锁</span></span><br><span class="line">    bstate.round++;</span><br><span class="line">    pthread_cond_broadcast(&amp;bstate.barrier_cond);</span><br><span class="line">  &#125;</span><br><span class="line">  pthread_mutex_unlock(&amp;bstate.barrier_mutex);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>Wrong Case2</span></div><code class="language-C">static void
+barrier()
+{
+  pthread_mutex_lock(&amp;bstate.barrier_mutex);
+  bstate.nthread++;
+  if (bstate.nthread &lt; nthread) { // 不是最后一个进来的
+    pthread_cond_wait(&amp;bstate.barrier_cond, &amp;bstate.barrier_mutex);
+  } else { // 是最后一个进来的，也是第一个离开的，毕竟从进来到退出之间一直持有锁
+    bstate.round++;
+    pthread_cond_broadcast(&amp;bstate.barrier_cond);
+  }
+  pthread_mutex_unlock(&amp;bstate.barrier_mutex);
+}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>尽管上面的修改确实解决了断言的问题，但断言之后，线程会进入
 barrier_1，获取锁，然后修改 <code>bstate.nthread</code>。然而，还有其他
 <code>nthread-1</code> 个线程还逗留在 <code>barrier_0()</code>
@@ -537,18 +666,55 @@ barrier_1，获取锁，然后修改 <code>bstate.nthread</code>。然而，还�
 派上用场了。如果将这个变量解释为，<strong>最晚的线程所处的 barrier
 轮次</strong>，那么只要有线程没有退出 barrier_{i-1}，<code>round</code>
 就会停留在 <code>i-1</code>，直到所有线程都阻塞在
-<code>barrier_i</code>（或退出 <code>barrier_&#123;i-1&#125;</code>），此时
+<code>barrier_i</code>（或退出 <code>barrier_{i-1}</code>），此时
 <code>round</code> 才会被设置为 <code>i</code>。</p>
 <p>所以，在修改 <code>bstate.nthread</code> 之前，所有线程都要阻塞，直到
 <code>round</code> 被修改为与 <code>bstate.round</code> 一致，然后被修改
 <code>round</code> 的那个线程唤醒。</p>
 <blockquote>
 <p>修改 <code>round</code> 的线程其实就是最后一个离开
-<code>barrier_&#123;i-1&#125;</code> 的线程。</p>
+<code>barrier_{i-1}</code> 的线程。</p>
 </blockquote>
-<figure class="highlight c"><figcaption><span>notxv6/barrier.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span></span><br><span class="line"><span class="title function_">barrier</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  pthread_mutex_lock(&amp;bstate.barrier_mutex);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">while</span> (round != bstate.round) &#123; <span class="comment">// 等待所有线程退出前一个 barrier</span></span><br><span class="line">    pthread_cond_wait(&amp;bstate.barrier_cond, &amp;bstate.barrier_mutex);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  bstate.nthread++;</span><br><span class="line">  <span class="keyword">if</span> (bstate.nthread &lt; nthread) &#123; <span class="comment">// 等待所有线程进入当前 barrier</span></span><br><span class="line">    pthread_cond_wait(&amp;bstate.barrier_cond, &amp;bstate.barrier_mutex);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123; <span class="comment">// 最后一个进入的，负责修改 bstate.round，并唤醒其他线程</span></span><br><span class="line">    bstate.round++;</span><br><span class="line">    pthread_cond_broadcast(&amp;bstate.barrier_cond);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (--bstate.nthread == <span class="number">0</span>) &#123; <span class="comment">// 最后一个离开的，负责修改 round，并唤醒下一个 barrier 等待的所有线程</span></span><br><span class="line">    round = bstate.round;</span><br><span class="line">    pthread_cond_broadcast(&amp;bstate.barrier_cond);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  pthread_mutex_unlock(&amp;bstate.barrier_mutex);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>notxv6/barrier.c</span></div><code class="language-C">static void
+barrier()
+{
+  pthread_mutex_lock(&amp;bstate.barrier_mutex);
+
+  while (round != bstate.round) { // 等待所有线程退出前一个 barrier
+    pthread_cond_wait(&amp;bstate.barrier_cond, &amp;bstate.barrier_mutex);
+  }
+
+  bstate.nthread++;
+  if (bstate.nthread &lt; nthread) { // 等待所有线程进入当前 barrier
+    pthread_cond_wait(&amp;bstate.barrier_cond, &amp;bstate.barrier_mutex);
+  } else { // 最后一个进入的，负责修改 bstate.round，并唤醒其他线程
+    bstate.round++;
+    pthread_cond_broadcast(&amp;bstate.barrier_cond);
+  }
+
+  if (--bstate.nthread == 0) { // 最后一个离开的，负责修改 round，并唤醒下一个 barrier 等待的所有线程
+    round = bstate.round;
+    pthread_cond_broadcast(&amp;bstate.barrier_cond);
+  }
+
+  pthread_mutex_unlock(&amp;bstate.barrier_mutex);
+}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h2 id="测试结果">测试结果</h2>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">$ make grade</span><br><span class="line">...</span><br><span class="line">== Test uthread ==</span><br><span class="line">$ make qemu-gdb</span><br><span class="line">uthread: OK (3.1s)</span><br><span class="line">== Test answers-thread.txt == answers-thread.txt: OK</span><br><span class="line">== Test ph_safe == make[1]:</span><br><span class="line">ph_safe: OK (14.1s)</span><br><span class="line">== Test ph_fast == make[1]:</span><br><span class="line">ph_fast: OK (32.3s)</span><br><span class="line">== Test barrier == make[1]:</span><br><span class="line">barrier: OK (2.7s)</span><br><span class="line">== Test time ==</span><br><span class="line">time: OK</span><br><span class="line">Score: 60/60</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">make</span> grade
+<span class="token punctuation">..</span>.
+<span class="token operator">==</span> Test uthread <span class="token operator">==</span>
+$ <span class="token function">make</span> qemu-gdb
+uthread: OK <span class="token punctuation">(</span><span class="token number">3</span>.1s<span class="token punctuation">)</span>
+<span class="token operator">==</span> Test answers-thread.txt <span class="token operator">==</span> answers-thread.txt: OK
+<span class="token operator">==</span> Test ph_safe <span class="token operator">==</span> make<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span>:
+ph_safe: OK <span class="token punctuation">(</span><span class="token number">14</span>.1s<span class="token punctuation">)</span>
+<span class="token operator">==</span> Test ph_fast <span class="token operator">==</span> make<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span>:
+ph_fast: OK <span class="token punctuation">(</span><span class="token number">32</span>.3s<span class="token punctuation">)</span>
+<span class="token operator">==</span> Test barrier <span class="token operator">==</span> make<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span>:
+barrier: OK <span class="token punctuation">(</span><span class="token number">2</span>.7s<span class="token punctuation">)</span>
+<span class="token operator">==</span> Test <span class="token function">time</span> <span class="token operator">==</span>
+time: OK
+Score: <span class="token number">60</span>/60<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h2 id="最后的工作">最后的工作</h2>
 <ol type="1">
 <li><code>git commit -am ""</code> 将所有修改提交到本地;</li>

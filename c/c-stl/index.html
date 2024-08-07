@@ -458,9 +458,12 @@ vector 的迭代器而满足所有必要条件，因为 vector
 支持随机存取，而普通指针正有着这样的能力。所以，vector 提供的是 Random
 Access Iterators。——选自《STL 源码剖析》</p>
 </blockquote>
-<p>vector 内部维护了三个迭代器，分别是: - <code>start</code>:
-指向数组起始； - <code>finish</code>: 指向数组使用空间的尾部； -
-<code>end_of_storage</code>: 指向数组可用空间的尾部；</p>
+<p>vector 内部维护了三个迭代器，分别是:</p>
+<ul>
+<li><code>start</code>: 指向数组起始；</li>
+<li><code>finish</code>: 指向数组使用空间的尾部；</li>
+<li><code>end_of_storage</code>: 指向数组可用空间的尾部；</li>
+</ul>
 <blockquote>
 <p><code>vector::size()</code> 指容器内数组元素个数，而
 <code>vector::capacity()</code> 指当前已分配的数组大小。</p>
@@ -489,7 +492,7 @@ CRUD 后，同一迭代器在操作前后指向的元素可能会不同，甚至
 vector（右值）调用 <code>vector::swap()</code>
 进行底层数组的交换，交换后 <code>nums</code>
 指向一个空数组，而另一个右值会在当前作用域结束后被回收。</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token generic-function"><span class="token function">vector</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">swap</span><span class="token punctuation">(</span>nums<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// nums 为待释放的 vector</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>一个手动释放 vector 内存的例子</span></div><code class="language-cpp"><span class="token generic-function"><span class="token function">vector</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">swap</span><span class="token punctuation">(</span>nums<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// nums 为待释放的 vector</span>
 nums<span class="token punctuation">.</span><span class="token function">swap</span><span class="token punctuation">(</span><span class="token generic-function"><span class="token function">vector</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// Error: Non-const lvalue reference to type 'vector&lt;...&gt;' cannot bind to a temporary of type 'vector&lt;...&gt;' 因为 swap 的形参类型是 T&amp;，不能传递右值</span>
 
 <span class="token comment">// 第二种写法的解决方案如下</span>
@@ -500,7 +503,7 @@ nums<span class="token punctuation">.</span><span class="token function">swap</s
 <p>而当 <code>vector</code>
 里面存了指针时，上面的做法并不会释放指针指向的那片内存，从而导致内存泄漏。应当首先遍历
 <code>vector</code> 逐个 <code>delete</code>/<code>free()</code>。</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">auto</span><span class="token operator">&amp;&amp;</span> iter <span class="token operator">=</span> nums<span class="token punctuation">.</span><span class="token function">begin</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> iter <span class="token operator">!=</span> nums<span class="token punctuation">.</span><span class="token function">end</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> iter<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>释放每个指针</span></div><code class="language-cpp"><span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">auto</span><span class="token operator">&amp;&amp;</span> iter <span class="token operator">=</span> nums<span class="token punctuation">.</span><span class="token function">begin</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> iter <span class="token operator">!=</span> nums<span class="token punctuation">.</span><span class="token function">end</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> iter<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
   <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">*</span>iter<span class="token punctuation">)</span> <span class="token punctuation">{</span>
     <span class="token keyword">delete</span> <span class="token operator">*</span>iter<span class="token punctuation">;</span>
     <span class="token operator">*</span>iter <span class="token operator">=</span> <span class="token keyword">nullptr</span><span class="token punctuation">;</span>
@@ -508,11 +511,13 @@ nums<span class="token punctuation">.</span><span class="token function">swap</s
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h4 id="emplace_back-和-push_back-的异同">emplace_back() 和 push_back()
 的异同</h4>
-<p>两者都是在数组末尾追加元素。区别在于: -
-前者是直接根据传入的参数列表，通过 <code>std::forward</code> +
+<p>两者都是在数组末尾追加元素。区别在于:</p>
+<ul>
+<li>前者是直接根据传入的参数列表，通过 <code>std::forward</code> +
 <code>placement new</code>
-的方式在指定位置（数组末尾）进行<strong>初始化构造</strong>。 -
-后者则需要调用<strong>拷贝/移动构造函数</strong>，效率较前者更低。</p>
+的方式在指定位置（数组末尾）进行<strong>初始化构造</strong>。</li>
+<li>后者则需要调用<strong>拷贝/移动构造函数</strong>，效率较前者更低。</li>
+</ul>
 <blockquote>
 <p>当然，如果当前 <code>size == capacity</code>，则会触发扩容。</p>
 </blockquote>
@@ -674,7 +679,7 @@ FIFO。</p>
 作为比较规则，其实现形式可能是下面这样，也就意味着<strong>元素值越「小」，优先级越低</strong>。所以当我们使用
 <code>priority_queue&lt;int&gt;</code>
 时，总是能取到优先队列中的最大值。</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">T</span><span class="token operator">&gt;</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>std::less 的可能实现形式</span></div><code class="language-cpp"><span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">T</span><span class="token operator">&gt;</span>
 <span class="token keyword">struct</span> <span class="token class-name">less</span> <span class="token punctuation">{</span>
   <span class="token keyword">bool</span> <span class="token keyword">operator</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token keyword">const</span> T<span class="token operator">&amp;</span> a<span class="token punctuation">,</span> <span class="token keyword">const</span> T<span class="token operator">&amp;</span> b<span class="token punctuation">)</span> <span class="token punctuation">{</span>
     <span class="token keyword">return</span> a <span class="token operator">&lt;</span> b<span class="token punctuation">;</span>

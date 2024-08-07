@@ -604,7 +604,7 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 <p><img src="image-20230215125309320.png" alt="image-20230215125309320" style="zoom:50%;"></p>
 <h3 id="虚继承">虚继承</h3>
 <p>再来点更复杂的情况：</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Base</span> <span class="token punctuation">{</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>菱形继承</span></div><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Base</span> <span class="token punctuation">{</span>
  <span class="token keyword">public</span><span class="token operator">:</span>
   <span class="token keyword">int</span> value<span class="token punctuation">{</span><span class="token number">1</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span>
@@ -664,7 +664,7 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 的<strong>虚继承</strong>。对于每个指定为 <code>virtual</code>
 的不同基类，最终派生对象中仅含有该类型的一个基类子对象，即使该类在继承层级中出现多次也是如此，只要它每次都以
 <code>virtual</code> 继承。</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Base</span> <span class="token punctuation">{</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>虚继承</span></div><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Base</span> <span class="token punctuation">{</span>
  <span class="token keyword">public</span><span class="token operator">:</span>
   <span class="token keyword">int</span> value<span class="token punctuation">{</span><span class="token number">0</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span>
@@ -690,7 +690,7 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 </blockquote>
 <h3 id="派生类构造顺序">派生类构造顺序</h3>
 <p>直接贴代码，有助于理解。</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">B1</span> <span class="token punctuation">{</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>派生类构造顺序</span></div><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">B1</span> <span class="token punctuation">{</span>
  <span class="token keyword">public</span><span class="token operator">:</span>
   <span class="token function">B1</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"B1 cons\n"</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
   <span class="token operator">~</span><span class="token function">B1</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"B1 des\n"</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
@@ -759,7 +759,7 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 <blockquote>
 <p>所以仅有返回值不一样的两个同名同参数列表函数并不构成重载。</p>
 </blockquote>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Foo</span> <span class="token punctuation">{</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>静态多态</span></div><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Foo</span> <span class="token punctuation">{</span>
  <span class="token keyword">public</span><span class="token operator">:</span>
   <span class="token keyword">void</span> <span class="token function">bar</span><span class="token punctuation">(</span><span class="token keyword">int</span> a<span class="token punctuation">)</span> <span class="token punctuation">{</span> std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"int "</span> <span class="token operator">&lt;&lt;</span> a <span class="token operator">&lt;&lt;</span> <span class="token char">'\n'</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
   <span class="token keyword">void</span> <span class="token function">bar</span><span class="token punctuation">(</span><span class="token keyword">char</span> b<span class="token punctuation">)</span> <span class="token punctuation">{</span> std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"char "</span> <span class="token operator">&lt;&lt;</span> b <span class="token operator">&lt;&lt;</span> <span class="token char">'\n'</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
@@ -783,7 +783,7 @@ C 版本的函数，名字对不上，就找不到。</p>
 recurring template pattern, CRTP)</h4>
 <p>CRTP 是一种 C++
 的设计模式，精巧地结合了继承和模板编程的技术，也可以用于实现静态多态。其原理可以由以下代码简述：</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">T</span><span class="token operator">&gt;</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>CRTP</span></div><code class="language-cpp"><span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">T</span><span class="token operator">&gt;</span>
 <span class="token keyword">class</span> <span class="token class-name">Base</span> <span class="token punctuation">{</span>
   <span class="token keyword">public</span><span class="token operator">:</span>
     <span class="token keyword">void</span> <span class="token function">show</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -838,7 +838,7 @@ RTTI。</p>
 <p>先来说说什么是虚函数。前面提到了虚继承，用到 <code>virtual</code>
 关键字，事实上，如果一个函数被 <code>virtual</code>
 修饰，那么这个函数就成为了<strong>虚函数</strong>。正常情况下，虚函数表现的和普通函数一样，而一旦通过<strong>基类指针</strong>或<strong>引用</strong>调用虚函数，多态发生了。</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Base</span> <span class="token punctuation">{</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>动态多态</span></div><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Base</span> <span class="token punctuation">{</span>
  <span class="token keyword">public</span><span class="token operator">:</span>
   <span class="token keyword">virtual</span> <span class="token keyword">void</span> <span class="token function">foo</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Base foo\n"</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span>
@@ -873,7 +873,7 @@ RTTI。</p>
 <code>Base*</code> 与 <code>Base&amp;</code> 类型，但却能与派生类
 <code>Derive1</code> / <code>Derive2</code> 绑定，并且这两者调用虚函数
 <code>foo()</code>
-时，执行的效果如同派生类对象执行的那样，并且进一步发现，<strong>调用哪个类型的虚函数，取决于基类指针指向或引用的对象是哪种类型的对象</strong>。这便是多态。</p>
+时，执行的效果如同派生类对象执行的那样，并且进一步发现，<strong>调用哪个类型的虚函数，取决于基类指针指向或引用的对象是哪种类型的对象</strong>。这便实现了多态。</p>
 <p>而不使用指针或引用直接调用，则与普通函数无异，就比如
 <code>base.foo()</code> 表现的那样。</p>
 <p>值得注意的是，需要派生类进行了虚函数的<strong>重写/覆盖</strong>才能达到这一效果，即要求<strong>派生类中有一个和基类完全相同的虚函数</strong>。在这里，<code>Base</code>
@@ -901,7 +901,7 @@ RTTI。</p>
 <span class="token comment">// Derived foo</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <blockquote>
 <p>有一个例外，就是<strong>协变</strong>，也就是基类和派生类的返回值类型的相对关系与基类和派生类的相对关系一样，并且继承方式也相同（即族谱路线都一样），此时也满足多态，不需要返回值类型相同。</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">A</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>协变</span></div><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">A</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
 <span class="token keyword">class</span> <span class="token class-name">B</span> <span class="token operator">:</span> <span class="token base-clause"><span class="token keyword">public</span> <span class="token class-name">A</span></span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
 <span class="token keyword">class</span> <span class="token class-name">C</span> <span class="token operator">:</span> <span class="token base-clause"><span class="token keyword">public</span> <span class="token class-name">B</span></span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
 
@@ -970,11 +970,12 @@ Base-&gt;Derived-&gt;Final，并且均为公有继承，于是<strong>协变</st
 </ol>
 <h3 id="误区">误区</h3>
 <p>之所以说动态多态是在运行时绑定，是因为编译器<strong>可能</strong>无法在编译时期确定指针指向的到底是哪个类型的对象，只有在运行时才能去对应的虚函数表中找到对应虚函数并执行，比如将指针或引用作为函数入参的情况。</p>
-<p>但“虚函数一定是运行期间绑定”这一说法是错误的，如果基类 <code>B</code>
-的指针 <code>B* foo</code> 指向的某个对象类型，其派生序列中某个祖先
-<code>D</code>（同样为 <code>B</code> 的派生类）对虚函数
-<code>func()</code> 增加了 <strong><code>final</code></strong>
-关键字，那么调用 <code>Foo-&gt;func()</code>
+<p>但「虚函数一定是运行期间绑定」这一说法是<strong>错误</strong>的，如果基类
+<code>B</code> 的指针 <code>B* foo</code>
+指向的某个对象类型，其派生序列中某个祖先 <code>D</code>（同样为
+<code>B</code> 的派生类）对虚函数 <code>func()</code> 增加了
+<strong><code>final</code></strong> 关键字，那么调用
+<code>Foo-&gt;func()</code>
 时，编译器会在<strong>编译时期</strong>直接生成 <code>D</code> 类型的
 <code>func()</code>
 版本，而不是在运行时去查虚函数表。毕竟后面没法重写了，那只能看作调用
@@ -1135,32 +1136,32 @@ $ gdb m
 <p>那么需要引入一个概念，叫<strong>运行时决议</strong>，即运行时确定调用函数的地址。在多态场景下，就是编译完后通过指令，去对象中的虚表里找到相应虚函数并运行。这一决议是在汇编级别实现的，暂时只学到这。</p>
 <h3 id="虚继承-1">虚继承</h3>
 <p>虚继承是用于解决菱形继承问题的，通过共享虚基类来消除歧义。那么<strong>共享</strong>这一功能是如何实现的？且看代码。</p>
-<pre class="line-numbers language-C" data-language="C"><code class="language-C">#include &lt;iostream&gt;
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>main.cpp</span></div><code class="language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;iostream&gt;</span></span>
 
-class Base {
- public:
-  int x = 1;
-};
+<span class="token keyword">class</span> <span class="token class-name">Base</span> <span class="token punctuation">{</span>
+ <span class="token keyword">public</span><span class="token operator">:</span>
+  <span class="token keyword">int</span> x <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
 
-class Child1: public virtual Base {
- public:
-  int c1 = 2;
-};
+<span class="token keyword">class</span> <span class="token class-name">Child1</span><span class="token operator">:</span> <span class="token base-clause"><span class="token keyword">public</span> <span class="token keyword">virtual</span> <span class="token class-name">Base</span></span> <span class="token punctuation">{</span>
+ <span class="token keyword">public</span><span class="token operator">:</span>
+  <span class="token keyword">int</span> c1 <span class="token operator">=</span> <span class="token number">2</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
 
-class Child2: public virtual Base {
- public:
-  int c2 = 3;
-};
+<span class="token keyword">class</span> <span class="token class-name">Child2</span><span class="token operator">:</span> <span class="token base-clause"><span class="token keyword">public</span> <span class="token keyword">virtual</span> <span class="token class-name">Base</span></span> <span class="token punctuation">{</span>
+ <span class="token keyword">public</span><span class="token operator">:</span>
+  <span class="token keyword">int</span> c2 <span class="token operator">=</span> <span class="token number">3</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
 
-class Derived : public Child1, public Child2 {
- public:
-  int d = 4;
-};
+<span class="token keyword">class</span> <span class="token class-name">Derived</span> <span class="token operator">:</span> <span class="token base-clause"><span class="token keyword">public</span> <span class="token class-name">Child1</span><span class="token punctuation">,</span> <span class="token keyword">public</span> <span class="token class-name">Child2</span></span> <span class="token punctuation">{</span>
+ <span class="token keyword">public</span><span class="token operator">:</span>
+  <span class="token keyword">int</span> d <span class="token operator">=</span> <span class="token number">4</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
 
-int main() {
-  Derived d;
-  return 0;
-}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  Derived d<span class="token punctuation">;</span>
+  <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>依然通过 gdb 查看变量</p>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ g++ main.cpp <span class="token parameter variable">-g</span> <span class="token parameter variable">-o</span> main
 $ gdb main

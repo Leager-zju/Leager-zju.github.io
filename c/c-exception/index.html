@@ -432,7 +432,7 @@
 <span id="more"></span>
 <h2 id="异常处理流程">异常处理流程</h2>
 <p>一个完整的异常处理流程如下：</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">try</span> <span class="token punctuation">{</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>异常处理</span></div><code class="language-cpp"><span class="token keyword">try</span> <span class="token punctuation">{</span>
   <span class="token comment">/* code */</span>
   <span class="token keyword">throw</span> SomeException<span class="token punctuation">;</span>
 <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span>ExceptionType_1<span class="token operator">&amp;</span> e1<span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -469,7 +469,7 @@
 之后，那么按照顺序策略，派生类子句将永远无法执行——能被派生类接收的一定能被基类接收。</p>
 <p><strong>注意</strong>，<code>throw</code>
 出的异常对象类型取静态类型，即便存在运行时多态。</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Base</span> <span class="token punctuation">{</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>取静态类型</span></div><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Base</span> <span class="token punctuation">{</span>
  <span class="token keyword">public</span><span class="token operator">:</span>
   <span class="token keyword">virtual</span> <span class="token operator">~</span><span class="token function">Base</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token keyword">default</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span>
@@ -504,7 +504,7 @@
 </blockquote>
 <p>当然，你甚至可以在 <code>try-catch</code> 外再套一层
 <code>try-catch</code>，是为<strong>重抛</strong>：</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">try</span> <span class="token punctuation">{</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>重抛</span></div><code class="language-cpp"><span class="token keyword">try</span> <span class="token punctuation">{</span>
   <span class="token keyword">try</span> <span class="token punctuation">{</span>
     <span class="token keyword">throw</span> SomeException<span class="token punctuation">;</span>
   <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span>ExceptionType<span class="token operator">&amp;</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>

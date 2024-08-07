@@ -452,15 +452,14 @@ C++ 里，这是与 OOP 并列的一大分支，通过<strong>模板</strong>来
 <code>T</code> 是可选的；</li>
 <li>上述的<strong>形参包</strong>；</li>
 </ol>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token comment">// 于是 swap 函数可以写成这样</span>
-<span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">T</span><span class="token operator">&gt;</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>swap 函数可以写成这样</span></div><code class="language-cpp"><span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">T</span><span class="token operator">&gt;</span>
 <span class="token keyword">void</span> <span class="token function">swap</span><span class="token punctuation">(</span>T<span class="token operator">&amp;</span> first<span class="token punctuation">,</span> T<span class="token operator">&amp;</span> second<span class="token punctuation">)</span> <span class="token punctuation">{</span>
   T temp <span class="token operator">=</span> first<span class="token punctuation">;</span>
   first <span class="token operator">=</span> second<span class="token punctuation">;</span>
   second <span class="token operator">=</span> temp<span class="token punctuation">;</span>
-<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p><strong>注意</strong>，函数模板自身并不是类型、函数或任何其他实体，不会从只包含模板定义的源文件生成任何代码。函数模板只有<strong>实例化</strong>后才会有代码出现。所谓<strong>实例化</strong>，就是用实参填充模板形参列表，让编译器生成指定类型函数，不用定义函数实现。实例化一个函数模板需要知道它的所有模板实参，但不需要指定每个模板实参，允许编译器进行<strong>隐式实例化</strong>，即<strong>模板实参推导</strong>，即尽可能从函数实参推导缺失的模板实参。</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>模板实参推导</span></div><code class="language-cpp"><span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
   <span class="token keyword">int</span> a <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">,</span> b <span class="token operator">=</span> <span class="token number">2</span><span class="token punctuation">;</span>
   <span class="token function">swap</span><span class="token punctuation">(</span>a<span class="token punctuation">,</span> b<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 隐式实例化。允许省略尖括号，编译器会自动进行模板实参推导</span>
               <span class="token comment">// 推导结果为 swap&lt;int&gt;</span>
@@ -471,7 +470,7 @@ C++ 里，这是与 OOP 并列的一大分支，通过<strong>模板</strong>来
 <p>在模板出现以前，对同名函数的重载如果只有某些值的类型不同，那么需要为每一个值定义一遍函数，这是非常麻烦的。有了模板，就能直接在函数名后用尖括号带上特定的类型即可。</p>
 </blockquote>
 <p>对于特定的实现，我们或许不想要依照原来函数模板那样执行，而是自定义函数体，这也是可以的。<strong>函数模板特化</strong>能够将某一个或某几个要处理的数据类型进行单独处理，但需要额外定义对应数据类型的模板函数，比如：</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">char</span><span class="token operator">&gt;</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>函数模板特化</span></div><code class="language-cpp"><span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">char</span><span class="token operator">&gt;</span>
 <span class="token keyword">void</span> <span class="token function">swap</span><span class="token punctuation">(</span><span class="token keyword">char</span><span class="token operator">&amp;</span> first<span class="token punctuation">,</span> <span class="token keyword">char</span><span class="token operator">&amp;</span> second<span class="token punctuation">)</span> <span class="token punctuation">{</span>
   std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"我不 swap，哎，就是玩\n"</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span>
@@ -482,7 +481,7 @@ C++ 里，这是与 OOP 并列的一大分支，通过<strong>模板</strong>来
 <span class="token punctuation">}</span>
 <span class="token comment">// output: 我不 swap，哎，就是玩</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>如果同时又加上一个这样的普通函数：</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">char</span> <span class="token function">swap</span><span class="token punctuation">(</span><span class="token keyword">char</span><span class="token operator">&amp;</span> first<span class="token punctuation">,</span> <span class="token keyword">char</span><span class="token operator">&amp;</span> second<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>优先识别为普通函数</span></div><code class="language-cpp"><span class="token keyword">char</span> <span class="token function">swap</span><span class="token punctuation">(</span><span class="token keyword">char</span><span class="token operator">&amp;</span> first<span class="token punctuation">,</span> <span class="token keyword">char</span><span class="token operator">&amp;</span> second<span class="token punctuation">)</span> <span class="token punctuation">{</span>
   std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"只因你太美\n"</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <p>那么原来的代码会输出
@@ -495,7 +494,7 @@ C++ 里，这是与 OOP 并列的一大分支，通过<strong>模板</strong>来
 <p>与函数模板一样，<strong>类模板</strong>定义一族类。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">template</span><span class="token operator">&lt;</span>模板形参列表<span class="token operator">&gt;</span> 类声明<span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>模板形参列表与函数模板完全一致。<strong>注意</strong>，类模板自身并不是类型、对象或任何其他实体，不会从只包含模板定义的源文件生成任何代码。类模板同样只有<strong>实例化</strong>后才会有代码出现，并且也支持<strong>类模板实参推导</strong>，即尽可能从类构造函数实参推导缺失的模板实参。此外，类模板的<strong>特化</strong>还进一步分为了<strong>全特化</strong>与<strong>偏特化</strong>。</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;iostream&gt;</span></span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>类模板特化</span></div><code class="language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;iostream&gt;</span></span>
 
 <span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">First</span><span class="token punctuation">,</span> <span class="token keyword">class</span> <span class="token class-name">Second</span><span class="token operator">&gt;</span>
 <span class="token keyword">class</span> <span class="token class-name">MyPair</span> <span class="token punctuation">{</span>
@@ -566,8 +565,7 @@ C++ 里，这是与 OOP 并列的一大分支，通过<strong>模板</strong>来
 <code>class MyPair</code>，则编译报错。</p>
 <h2 id="派生">派生</h2>
 <p>类模板、模板类和普通类之间可以互相派生。它们之间的派生关系有以下几种情况。</p>
-<h3 id="模板类的派生">模板类的派生</h3>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">T</span><span class="token operator">&gt;</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>模板类派生</span></div><code class="language-cpp"><span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">T</span><span class="token operator">&gt;</span>
 <span class="token keyword">class</span> <span class="token class-name">Base1</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
 
 <span class="token comment">// case 1.1: 模板类派生类模板</span>
@@ -576,15 +574,13 @@ C++ 里，这是与 OOP 并列的一大分支，通过<strong>模板</strong>来
 
 <span class="token comment">// case 1.2: 模板类派生普通类</span>
 <span class="token keyword">class</span> <span class="token class-name">Derive12</span><span class="token operator">:</span> <span class="token base-clause"><span class="token class-name">Base</span><span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span></span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="类模板的派生">类模板的派生</h3>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">T</span><span class="token operator">&gt;</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>类模板派生</span></div><code class="language-cpp"><span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">T</span><span class="token operator">&gt;</span>
 <span class="token keyword">class</span> <span class="token class-name">Base2</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
 
 <span class="token comment">// case 2.1: 类模板派生类模板</span>
 <span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">T</span><span class="token operator">&gt;</span>
 <span class="token keyword">class</span> <span class="token class-name">Derive21</span><span class="token operator">:</span> <span class="token base-clause"><span class="token class-name">Base2</span><span class="token operator">&lt;</span><span class="token class-name">T</span><span class="token operator">&gt;</span></span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="普通类的派生">普通类的派生</h3>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Base3</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>普通类派生</span></div><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Base3</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
 
 <span class="token comment">// case 3.1: 普通类派生类模板</span>
 <span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">T</span><span class="token operator">&gt;</span>
@@ -593,7 +589,7 @@ C++ 里，这是与 OOP 并列的一大分支，通过<strong>模板</strong>来
 <span class="token comment">// case 3.2: 普通类派生普通类，略</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h2 id="多态">多态</h2>
 <p>子类和父类的模板参数列表可以不一样，但必须一一对应。</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">T</span><span class="token punctuation">,</span> <span class="token keyword">class</span> <span class="token class-name">U</span><span class="token operator">&gt;</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>模板中的多态</span></div><code class="language-cpp"><span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">T</span><span class="token punctuation">,</span> <span class="token keyword">class</span> <span class="token class-name">U</span><span class="token operator">&gt;</span>
 <span class="token keyword">class</span> <span class="token class-name">Base</span> <span class="token punctuation">{</span>
  <span class="token keyword">public</span><span class="token operator">:</span>
   <span class="token keyword">virtual</span> <span class="token keyword">void</span> <span class="token function">foo</span><span class="token punctuation">(</span>T<span class="token punctuation">,</span> U<span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
@@ -645,7 +641,7 @@ C++ 里，这是与 OOP 并列的一大分支，通过<strong>模板</strong>来
 <p>至少有一个形参包的模板被称作<strong>变参模板</strong>。</p>
 <p><strong>变参类模板</strong>可以用任意数量的模板实参实例化，以
 <code>std::tuple</code> 为例，其定义为：</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">class</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> Types<span class="token operator">&gt;</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>可变参类模板</span></div><code class="language-cpp"><span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">class</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> Types<span class="token operator">&gt;</span>
 <span class="token keyword">class</span> <span class="token class-name">tuple</span><span class="token punctuation">;</span>
 
 std<span class="token double-colon punctuation">::</span>tuple<span class="token operator">&lt;</span><span class="token operator">&gt;</span> t0<span class="token punctuation">;</span>           <span class="token comment">// Types 不包含实参</span>
@@ -653,7 +649,7 @@ std<span class="token double-colon punctuation">::</span>tuple<span class="token
 std<span class="token double-colon punctuation">::</span>tuple<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token punctuation">,</span> <span class="token keyword">float</span><span class="token operator">&gt;</span> t2<span class="token punctuation">;</span> <span class="token comment">// Types 包含两个实参：int 与 float</span>
 std<span class="token double-colon punctuation">::</span>tuple<span class="token operator">&lt;</span><span class="token number">0</span><span class="token operator">&gt;</span> error<span class="token punctuation">;</span>       <span class="token comment">// ERROR! 0 不是类型</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p><strong>变参函数模板</strong>也是同理，可以用任意数量的函数实参调用：</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">class</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> Types<span class="token operator">&gt;</span>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>可变参函数模板</span></div><code class="language-cpp"><span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">class</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> Types<span class="token operator">&gt;</span>
 <span class="token keyword">void</span> <span class="token function">f</span><span class="token punctuation">(</span>Types<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> args<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
 <span class="token function">f</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>       <span class="token comment">// OK：args 不包含实参</span>
