@@ -10,7 +10,7 @@
 LAB 主页传送门 &amp;lt;&amp;lt;&amp;lt;
 
 本项目要求我们实现存储管理器的 Buffer Pool
-部分，即完善对物理">
+部分，即完善对物理页面进行调">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -427,8 +427,7 @@ LAB 主页传送门 &amp;lt;&amp;lt;&amp;lt;
         <div class="card-content article-card-content">
             <div id="articleContent">
                 <p>从这个 lab 起，就正式开始构建本课程 bustub DBMS 数据库系统了。</p>
-<p><a
-target="_blank" rel="noopener" href="https://15445.courses.cs.cmu.edu/fall2022/project1/">&gt;&gt;&gt;
+<p><a target="_blank" rel="noopener" href="https://15445.courses.cs.cmu.edu/fall2022/project1/">&gt;&gt;&gt;
 LAB 主页传送门 &lt;&lt;&lt;</a></p>
 <span id="more"></span>
 <p>本项目要求我们实现存储管理器的 <strong>Buffer Pool</strong>
@@ -437,7 +436,7 @@ LAB 主页传送门 &lt;&lt;&lt;</a></p>
 API，如获取页（FetchPage）、结束访问页（UnpinPage）等。上层根据
 <code>page_id</code> 通过调用这些 API
 从内存中获取相应数据。本项目的整体框架如下：</p>
-<p><img src="image-20221217221523177.png" alt="image-20221217221523177" style="zoom:60%;" /></p>
+<p><img src="image-20221217221523177.png" alt="image-20221217221523177" style="zoom:60%;"></p>
 <ul>
 <li><strong>pages</strong>：每个数组元素（即Page
 对象）存放数据。模拟了实际内存对存储空间进行分页。</li>
@@ -450,30 +449,20 @@ LRU-K 算法提供最先被换出的帧号。</li>
 <p>基于上述讨论，可以开始进行 lab tasks 的构思了。</p>
 <h2 id="task-1---extendable-hash-table">Task #1 - Extendable Hash
 Table</h2>
-<p>具体概念请参考<a
-target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/537292608">可扩展哈希实现</a>。</p>
+<p>具体概念请参考<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/537292608">可扩展哈希实现</a>。</p>
 <p>由于今年不需要实现删除元素后哈希表的收缩，所以这里的关键部分就是桶满了之后的
 Split 操作。若 <code>Indexof(Key) = index</code>
 的键值对插入前对应桶满了：</p>
 <ol type="1">
-<li><p>增加对应桶 <span class="math inline">\(bucket_i\)</span> 的 <span
-class="math inline">\(local\_depth\)</span>；</p></li>
+<li><p>增加对应桶 <span class="math inline">\(bucket_i\)</span> 的 <span class="math inline">\(local\_depth\)</span>；</p></li>
 <li><p>如果此时 <span class="math inline">\(local\_depth\)</span> 超过了
 <span class="math inline">\(global\_
 depth\)</span>，则对目录进行扩展；</p></li>
 <li><p>对所有指向桶 <span class="math inline">\(bucket_i\)</span>
 的索引，作一次数据的再分配；</p>
 <blockquote>
-<p>若 <span class="math inline">\(bucket_i\)</span> 原先的 <span
-class="math inline">\(local\_ depth\)</span> 为 <span
-class="math inline">\(l\)</span>，则指向该桶的所有索引的低 <span
-class="math inline">\(l\)</span> 位都是一致的。当桶进行分裂时，第 <span
-class="math inline">\(l+1\)</span> 位出现了差异，则令与
-<code>index</code> 的二进制表示中低 <span
-class="math inline">\(l\)</span> 位相同，第 <span
-class="math inline">\(l+1\)</span> 不同的索引指向新的桶 <span
-class="math inline">\(new\_bucket_i\)</span>。取出 <span
-class="math inline">\(bucket_i\)</span> 中所有键值对，对其重新插入。</p>
+<p>若 <span class="math inline">\(bucket_i\)</span> 原先的 <span class="math inline">\(local\_ depth\)</span> 为 <span class="math inline">\(l\)</span>，则指向该桶的所有索引的低 <span class="math inline">\(l\)</span> 位都是一致的。当桶进行分裂时，第 <span class="math inline">\(l+1\)</span> 位出现了差异，则令与
+<code>index</code> 的二进制表示中低 <span class="math inline">\(l\)</span> 位相同，第 <span class="math inline">\(l+1\)</span> 不同的索引指向新的桶 <span class="math inline">\(new\_bucket_i\)</span>。取出 <span class="math inline">\(bucket_i\)</span> 中所有键值对，对其重新插入。</p>
 </blockquote></li>
 <li><p>重复插入 Key 的操作直至不再分裂。</p></li>
 </ol>
@@ -491,10 +480,7 @@ buffer pool 发生了偶然性的大量冷页面的读取，根据 LRU
 最大的那一帧。如果有多个 <span class="math inline">\(k-distance =
 inf\)</span> 的帧，则换出最早被访问的那一个。</p>
 <blockquote>
-<p><span class="math inline">\(k-distance\)</span>：与倒数第 <span
-class="math inline">\(k\)</span> 次访问的时间差。若访问次数不足 <span
-class="math inline">\(k\)</span> 次，则认为该值为 <span
-class="math inline">\(inf\)</span>。</p>
+<p><span class="math inline">\(k-distance\)</span>：与倒数第 <span class="math inline">\(k\)</span> 次访问的时间差。若访问次数不足 <span class="math inline">\(k\)</span> 次，则认为该值为 <span class="math inline">\(inf\)</span>。</p>
 </blockquote>
 <p>在 LRU-K
 策略下，上述热点页的问题就能得到解决，即便发生了多个偶然性的冷页面访问，置换也仅仅发生在固定一帧，其余热点页面则会受到保护。</p>
@@ -507,8 +493,7 @@ frame_id 进行置换，同时这里有个坑点，即选出一个 frame_id_t
 <li><code>RecordAccess(frame_id_t frame_id)</code>：追加一条关于
 frame_id 的访问记录；</li>
 <li><code>SetEvictable(frame_id_t frame_id, bool set_evictable)</code>：设置
-frame_id 的可置换性，即能否在 Evict 操作中参与 <span
-class="math inline">\(k-d\)</span> 的比较；</li>
+frame_id 的可置换性，即能否在 Evict 操作中参与 <span class="math inline">\(k-d\)</span> 的比较；</li>
 <li><code>Remove(frame_id_t frame_id)</code>：移除 frame_id 在 replacer
 中的所有信息；</li>
 </ul>
@@ -524,12 +509,10 @@ class="math inline">\(k-d\)</span> 的比较；</li>
 <code>AccessRecord</code>。对于访问记录而言，只需维护 K
 条记录，在追加记录时，若记录数已达 K
 次，则移除最早的那次。显然，访问记录需要频繁的插入删除，以及末尾（倒数第
-K 次记录）的访问，而 list 底层为一个双向链表，支持 <span
-class="math inline">\(O(1)\)</span> 的增删查。</p>
+K 次记录）的访问，而 list 底层为一个双向链表，支持 <span class="math inline">\(O(1)\)</span> 的增删查。</p>
 <h4 id="置换队列与队列位置信息">置换队列与队列位置信息</h4>
 <p>每次置换时，可以选择遍历一遍访问记录表，再取合适的帧进行置换，但这样每次置换的时间开销为
-<span
-class="math inline">\(O(n)\)</span>。不难想到可以定义一个"<strong>置换队列</strong>"，按照
+<span class="math inline">\(O(n)\)</span>。不难想到可以定义一个"<strong>置换队列</strong>"，按照
 <span class="math inline">\(k-dis\)</span>
 大小进行排序，使得队首恒为下一次进行置换的帧号，用空间换时间，将置换开销提升至
 <span class="math inline">\(O(1)\)</span>。</p>
@@ -627,8 +610,7 @@ Page 的所有信息。如果该 Page 不在帧中，则直接返回，否则，
 <p>总体实现并不难，跟着注释以及 lab guide 一步步来即可。</p>
 <p>善用框架提供的 <code>BUSTUB_ASSERT</code> 进行防御性编程，以便 DEBUG
 时针对性地检测异常。</p>
-<p>并发所采用的 <code>std::scope_lock</code> 实际上采用了 <a
-target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/34660259">RAII</a>
+<p>并发所采用的 <code>std::scope_lock</code> 实际上采用了 <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/34660259">RAII</a>
 的思想，简单来说就是利用类析构函数的特性来保证退出函数时必定能够释放锁，而无需手动释放，效果相当于
 Go 里面的 <code>lock, defer unlock</code>。</p>
 

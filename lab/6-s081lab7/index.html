@@ -9,9 +9,11 @@
 
 Preparation
 切换到对应分支
-123$ git fetch$ git checkout lock$ make clean
+$ git fetch
+$ git checkout lock
+$ make clean
 Task1: Memory allocator
-">
+原来的内存分配">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -431,7 +433,9 @@ Task1: Memory allocator
 <span id="more"></span>
 <h2 id="preparation">Preparation</h2>
 <p>切换到对应分支</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ git fetch</span><br><span class="line">$ git checkout lock</span><br><span class="line">$ make clean</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">git</span> fetch
+$ <span class="token function">git</span> checkout lock
+$ <span class="token function">make</span> clean<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <h2 id="task1-memory-allocator">Task1: Memory allocator</h2>
 <p>原来的内存分配模块持有一把大锁，每当要分配内存时都会将大锁锁定，直至分配完成。这样对多核的机器并不是很友好，因为每个
 CPU core 都需要在大锁上竞争，造成资源浪费。</p>
@@ -439,11 +443,53 @@ CPU core 都需要在大锁上竞争，造成资源浪费。</p>
 对应整个空闲链表的一部分，且各自维护相应的锁，不同 core
 只需要在自己负责那部分即可。当然有的 core
 上运行的进程可能需要多个页，一旦自己那部分空闲内存不够了，就需要从其他
-core 的空闲内存中“窃取”一页出来。</p>
+core 的空闲内存中「窃取」一页出来。</p>
 <blockquote>
 <p>毕竟闲着也是闲着，不如最大化利用。</p>
 </blockquote>
-<figure class="highlight c"><figcaption><span>kernel/kalloc.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line"><span class="comment">// NCPU 个 freelist 与 lock</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">spinlock</span> <span class="title">lock</span>;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">run</span> *<span class="title">freelist</span>;</span></span><br><span class="line">&#125; kmems[NCPU];</span><br><span class="line">...</span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">kinit</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; NCPU; i++) &#123;</span><br><span class="line">    initlock(&amp;kmems[i].lock, <span class="string">&quot;kmem&quot;</span>); <span class="comment">// 初始化所有 kmem</span></span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">kfree</span><span class="params">(<span class="type">void</span> *pa)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="comment">// 将原本的 kmem 改为 kmems[cpu_id] 即可</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> *</span><br><span class="line"><span class="title function_">kalloc</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="comment">// 从当前 core 开始遍历所有 core 负责的 kmem</span></span><br><span class="line">  <span class="comment">// 直到找到一个有空闲页的 kmem，直接拿来用</span></span><br><span class="line">  <span class="comment">// 最后 kfree 会将该页加到当前 core 的 kmem 里</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; NCPU; i++) &#123;</span><br><span class="line">    acquire(&amp;kmems[cpu_id].lock);</span><br><span class="line">    r = kmems[cpu_id].freelist;</span><br><span class="line">    <span class="keyword">if</span> (r) &#123;</span><br><span class="line">      kmems[cpu_id].freelist = r-&gt;next;</span><br><span class="line">    &#125;</span><br><span class="line">    release(&amp;kmems[cpu_id].lock);</span><br><span class="line">    <span class="keyword">if</span> (r) &#123;</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    cpu_id = (cpu_id+<span class="number">1</span>)%NCPU;</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/kalloc.c</span></div><code class="language-C">...
+// NCPU 个 freelist 与 lock
+struct {
+  struct spinlock lock;
+  struct run *freelist;
+} kmems[NCPU];
+...
+void
+kinit()
+{
+  for (int i = 0; i &lt; NCPU; i++) {
+    initlock(&amp;kmems[i].lock, "kmem"); // 初始化所有 kmem
+  }
+  ...
+}
+
+void
+kfree(void *pa)
+{
+  // 将原本的 kmem 改为 kmems[cpu_id] 即可
+}
+
+void *
+kalloc(void)
+{
+  ...
+  // 从当前 core 开始遍历所有 core 负责的 kmem
+  // 直到找到一个有空闲页的 kmem，直接拿来用
+  // 最后 kfree 会将该页加到当前 core 的 kmem 里
+  for (int i = 0; i &lt; NCPU; i++) {
+    acquire(&amp;kmems[cpu_id].lock);
+    r = kmems[cpu_id].freelist;
+    if (r) {
+      kmems[cpu_id].freelist = r-&gt;next;
+    }
+    release(&amp;kmems[cpu_id].lock);
+    if (r) {
+      break;
+    }
+    cpu_id = (cpu_id+1)%NCPU;
+  }
+  ...
+}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h2 id="task2-buffer-cache">Task2: Buffer cache</h2>
 <p>这个 task 也是对并发控制进行优化，只不过针对的是磁盘块在内存中的
 cache。<code>kernel/bio.c</code> 里有相关实现，结构体
@@ -457,10 +503,110 @@ cache。<code>kernel/bio.c</code> 里有相关实现，结构体
 字段，用于标识最后访问该块的时间戳，这样就不需要双向链表来做 LRU
 了，每次 victim 的时候找到 <code>timestamp</code> 最小的 block
 即可。</p>
-<figure class="highlight c"><figcaption><span>kernel/buf.h</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 移除了 prev 和 next 字段，新增 timestamp 字段</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">buf</span> &#123;</span></span><br><span class="line">  <span class="type">int</span> valid;   <span class="comment">// has data been read from disk?</span></span><br><span class="line">  <span class="type">int</span> disk;    <span class="comment">// does disk &quot;own&quot; buf?</span></span><br><span class="line">  uint dev;</span><br><span class="line">  uint blockno;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">sleeplock</span> <span class="title">lock</span>;</span></span><br><span class="line">  uint refcnt;</span><br><span class="line">  uint timestamp; <span class="comment">// (!new)</span></span><br><span class="line">  uchar data[BSIZE];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-<figure class="highlight c"><figcaption><span>kernel/bio.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> NBUCKETS 5</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">spinlock</span> <span class="title">lock</span>;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">buf</span> <span class="title">buf</span>[<span class="title">NBUF</span>];</span> <span class="comment">// 这里相当于做了个 tricky，单纯增加 Cache 容量来降低 miss 概率</span></span><br><span class="line">&#125; bcache[NBUCKETS];</span><br><span class="line"></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">binit</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">buf</span> *<span class="title">b</span>;</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; NBUCKETS; i++) &#123;</span><br><span class="line">    initlock(&amp;bcache[i].lock, <span class="string">&quot;bcache&quot;</span>);</span><br><span class="line">    <span class="keyword">for</span>(b = bcache[i].buf; b &lt; bcache[i].buf+NBUF; b++)&#123;</span><br><span class="line">      initsleeplock(&amp;b-&gt;lock, <span class="string">&quot;buffer&quot;</span>);</span><br><span class="line">      b-&gt;timestamp = <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="keyword">struct</span> buf*</span><br><span class="line"><span class="title function_">bget</span><span class="params">(uint dev, uint blockno)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">buf</span> *<span class="title">b</span>;</span></span><br><span class="line">  uint bucketno = blockno % NBUCKETS;</span><br><span class="line">  uint earliest = __INT_MAX__;</span><br><span class="line">  uint idx = <span class="number">-1</span>;</span><br><span class="line"></span><br><span class="line">  acquire(&amp;bcache[bucketno].lock);</span><br><span class="line">  <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">0</span>; i &lt; NBUF; i++)&#123;</span><br><span class="line">    b = &amp;bcache[bucketno].buf[i];</span><br><span class="line">    <span class="keyword">if</span> (b-&gt;dev == dev &amp;&amp; b-&gt;blockno == blockno) &#123;</span><br><span class="line">      <span class="comment">// 意味着缓存命中</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 同时也进行 LRU 策略，如果 miss 就可以直接用，不用再次 for 遍历</span></span><br><span class="line">    <span class="keyword">if</span> (b-&gt;refcnt == <span class="number">0</span> &amp;&amp; b-&gt;timestamp &lt; earliest) &#123;</span><br><span class="line">      earliest = b-&gt;timestamp;</span><br><span class="line">      idx = i;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (idx != <span class="number">-1</span>) &#123; <span class="comment">// 意味着有 block 被 victim，且就在 buf[idx] 处</span></span><br><span class="line">    ...</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  panic(<span class="string">&quot;bget: no buffers&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">brelse</span><span class="params">(<span class="keyword">struct</span> buf *b)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">if</span> (--b-&gt;refcnt == <span class="number">0</span>) &#123;</span><br><span class="line">    b-&gt;timestamp = <span class="number">0</span>; <span class="comment">// 将其置 0，以便 victim</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">bpin</span><span class="params">(<span class="keyword">struct</span> buf *b)</span> &#123;</span><br><span class="line">  <span class="comment">// 根据 b-&gt;blockno 映射到 bucket</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">bunpin</span><span class="params">(<span class="keyword">struct</span> buf *b)</span> &#123;</span><br><span class="line">  <span class="comment">// 根据 b-&gt;blockno 映射到 bucket</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/buf.h</span></div><code class="language-C">// 移除了 prev 和 next 字段，新增 timestamp 字段
+struct buf {
+  int valid;   // has data been read from disk?
+  int disk;    // does disk "own" buf?
+  uint dev;
+  uint blockno;
+  struct sleeplock lock;
+  uint refcnt;
+  uint timestamp; // (!new)
+  uchar data[BSIZE];
+};<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/bio.c</span></div><code class="language-C">#define NBUCKETS 5
+
+struct {
+  struct spinlock lock;
+  struct buf buf[NBUF]; // 这里相当于做了个 tricky，单纯增加 Cache 容量来降低 miss 概率
+} bcache[NBUCKETS];
+
+void
+binit(void)
+{
+  struct buf *b;
+  for (int i = 0; i &lt; NBUCKETS; i++) {
+    initlock(&amp;bcache[i].lock, "bcache");
+    for(b = bcache[i].buf; b &lt; bcache[i].buf+NBUF; b++){
+      initsleeplock(&amp;b-&gt;lock, "buffer");
+      b-&gt;timestamp = 0;
+    }
+  }
+}
+
+static struct buf*
+bget(uint dev, uint blockno)
+{
+  struct buf *b;
+  uint bucketno = blockno % NBUCKETS;
+  uint earliest = __INT_MAX__;
+  uint idx = -1;
+
+  acquire(&amp;bcache[bucketno].lock);
+  for(int i = 0; i &lt; NBUF; i++){
+    b = &amp;bcache[bucketno].buf[i];
+    if (b-&gt;dev == dev &amp;&amp; b-&gt;blockno == blockno) {
+      // 意味着缓存命中
+    }
+
+    // 同时也进行 LRU 策略，如果 miss 就可以直接用，不用再次 for 遍历
+    if (b-&gt;refcnt == 0 &amp;&amp; b-&gt;timestamp &lt; earliest) {
+      earliest = b-&gt;timestamp;
+      idx = i;
+    }
+  }
+
+  if (idx != -1) { // 意味着有 block 被 victim，且就在 buf[idx] 处
+    ...
+  }
+
+  panic("bget: no buffers");
+}
+
+void
+brelse(struct buf *b)
+{
+  ...
+  if (--b-&gt;refcnt == 0) {
+    b-&gt;timestamp = 0; // 将其置 0，以便 victim
+  }
+}
+
+void
+bpin(struct buf *b) {
+  // 根据 b-&gt;blockno 映射到 bucket
+}
+
+void
+bunpin(struct buf *b) {
+  // 根据 b-&gt;blockno 映射到 bucket
+}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h2 id="测试结果">测试结果</h2>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">$ make grade</span><br><span class="line">...</span><br><span class="line">== Test running kalloctest ==</span><br><span class="line">$ make qemu-gdb</span><br><span class="line">(70.1s)</span><br><span class="line">== Test   kalloctest: test1 ==</span><br><span class="line">  kalloctest: test1: OK</span><br><span class="line">== Test   kalloctest: test2 ==</span><br><span class="line">  kalloctest: test2: OK</span><br><span class="line">== Test kalloctest: sbrkmuch ==</span><br><span class="line">$ make qemu-gdb</span><br><span class="line">kalloctest: sbrkmuch: OK (10.5s)</span><br><span class="line">== Test running bcachetest ==</span><br><span class="line">$ make qemu-gdb</span><br><span class="line">(8.7s)</span><br><span class="line">== Test   bcachetest: test0 ==</span><br><span class="line">  bcachetest: test0: OK</span><br><span class="line">== Test   bcachetest: test1 ==</span><br><span class="line">  bcachetest: test1: OK</span><br><span class="line">== Test usertests ==</span><br><span class="line">$ make qemu-gdb</span><br><span class="line">usertests: OK (134.2s)</span><br><span class="line">== Test time ==</span><br><span class="line">time: OK</span><br><span class="line">Score: 70/70</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">make</span> grade
+<span class="token punctuation">..</span>.
+<span class="token operator">==</span> Test running kalloctest <span class="token operator">==</span>
+$ <span class="token function">make</span> qemu-gdb
+<span class="token punctuation">(</span><span class="token number">70</span>.1s<span class="token punctuation">)</span>
+<span class="token operator">==</span> Test   kalloctest: test1 <span class="token operator">==</span>
+  kalloctest: test1: OK
+<span class="token operator">==</span> Test   kalloctest: test2 <span class="token operator">==</span>
+  kalloctest: test2: OK
+<span class="token operator">==</span> Test kalloctest: sbrkmuch <span class="token operator">==</span>
+$ <span class="token function">make</span> qemu-gdb
+kalloctest: sbrkmuch: OK <span class="token punctuation">(</span><span class="token number">10</span>.5s<span class="token punctuation">)</span>
+<span class="token operator">==</span> Test running bcachetest <span class="token operator">==</span>
+$ <span class="token function">make</span> qemu-gdb
+<span class="token punctuation">(</span><span class="token number">8</span>.7s<span class="token punctuation">)</span>
+<span class="token operator">==</span> Test   bcachetest: test0 <span class="token operator">==</span>
+  bcachetest: test0: OK
+<span class="token operator">==</span> Test   bcachetest: test1 <span class="token operator">==</span>
+  bcachetest: test1: OK
+<span class="token operator">==</span> Test usertests <span class="token operator">==</span>
+$ <span class="token function">make</span> qemu-gdb
+usertests: OK <span class="token punctuation">(</span><span class="token number">134</span>.2s<span class="token punctuation">)</span>
+<span class="token operator">==</span> Test <span class="token function">time</span> <span class="token operator">==</span>
+time: OK
+Score: <span class="token number">70</span>/70<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h2 id="最后的工作">最后的工作</h2>
 <ol type="1">
 <li><code>git commit -am ""</code> 将所有修改提交到本地;</li>

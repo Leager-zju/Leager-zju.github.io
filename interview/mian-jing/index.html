@@ -442,7 +442,7 @@ RAII
 哲学应用到了语言上，进一步产生了各种容器、智能指针、锁管理者这些标准库对象，不得不说析构函数是
 C++ 的几大根基之一了；</li>
 <li><strong>右值和移动语义</strong>: 虽然 C
-中可以通过「指针常量」模拟左值引用，但却无法实现对右值/匿名对象的“引用”（因为右值没有地址，无法被指针指向），函数调用中传入一个匿名的
+中可以通过「指针常量」模拟左值引用，但却无法实现对右值/匿名对象的「引用」（因为右值没有地址，无法被指针指向），函数调用中传入一个匿名的
 struct 会涉及到数据拷贝，影响性能。而 C++11
 之后引入了「右值」这一概念，同时加入了右值引用、万能引用、<code>std::forward</code>、<code>std::move</code>
 等内容；</li>
@@ -505,7 +505,7 @@ OOP</a></p>
 Modern C++ Item23</a></p>
 </blockquote>
 <p><code>std::move</code> 仅仅做了个 become
-右值引用的类型转换，并没有真正的“移动”。即</p>
+右值引用的类型转换，并没有真正的「移动」。即</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">T</span><span class="token operator">&gt;</span>
 <span class="token keyword">typename</span> <span class="token class-name">remove_reference</span><span class="token operator">&lt;</span>T<span class="token operator">&gt;</span><span class="token double-colon punctuation">::</span>type<span class="token operator">&amp;&amp;</span> <span class="token function">move</span><span class="token punctuation">(</span>T<span class="token operator">&amp;&amp;</span> param<span class="token punctuation">)</span> <span class="token punctuation">{</span>
   <span class="token keyword">return</span> <span class="token generic-function"><span class="token function">static_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span>remove_reference<span class="token operator">&lt;</span>T<span class="token operator">&gt;</span><span class="token double-colon punctuation">::</span>type<span class="token operator">&amp;&amp;</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span>param<span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -600,8 +600,8 @@ free 的错误。</p>
 Undefined Behavior，输出可能是任意数。</p>
 <h3 id="int-和-void-的区别">int* 和 void* 的区别？</h3>
 <p><code>int*</code>
-类型的变量会有类型信息，告诉编译器“我指向的这块内存是个 <code>int</code>
-变量，如果你要读取就只能一次性读 4 字节”。其他的
+类型的变量会有类型信息，告诉编译器「我指向的这块内存是个
+<code>int</code> 变量，如果你要读取就只能一次性读 4 字节」。其他的
 <code>double*</code>、<code>long long*</code> 同理。</p>
 <p><code>void*</code> 意为无类型指针，可以指向任意类型的数据，但赋值给
 <code>int*</code> 这种的就要配合类型转换了。直接读取是读 1

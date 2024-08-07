@@ -492,7 +492,7 @@ SSCRATCH，也需要被保存。</p>
 <p>之所以交换，是因为诸如 <code>sd ra 40(a0)</code>
 这些指令的操作数必须位于用户寄存器，而原本的 32
 个用户寄存器都被各自的数据占用，没法存 <code>TRAPFRAME</code>，于是就用
-SSCRATCH，这个寄存器的作用就是“保存其他寄存器的值”。只要将
+SSCRATCH，这个寄存器的作用就是「保存其他寄存器的值」。只要将
 <code>TRAPFRAME</code> 存入其中，通过交换，就可以让
 <code>TRAPFRAME</code> 放到用户寄存器了，从而能够根据 a0
 访存，将用户寄存器保存到内存中。</p>
@@ -521,7 +521,7 @@ SATP 交换，并清空页表缓存，我们就正式切换到了内核页表。
 <p>原本 SATP 内的用户页表指针不用保存，因为它可以通过
 <code>MAKE_SATP(p-&gt;pagetable)</code> 写回。</p>
 <p>那么，叫 trampoline page
-的原因就很好理解了——某种程度在它上面“弹跳”了一下，然后从用户空间走到了内核空间。</p>
+的原因就很好理解了——某种程度在它上面「弹跳」了一下，然后从用户空间走到了内核空间。</p>
 </blockquote>
 <pre class="line-numbers language-S" data-language="S"><div class="caption"><span>kernel/trampoline.S</span></div><code class="language-S"># a0 is no longer valid, since the kernel page
 # table does not specially map p-&gt;tf.

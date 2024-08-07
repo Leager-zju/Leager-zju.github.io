@@ -517,7 +517,8 @@ $U/_sysinfo<br>
 <code>kernel/syscall.h</code>: #define SYS_sysinfo 23
 <code>kernel/syscall.c</code>: [SYS_sysinfo] sys_sysinfo</p>
 </blockquote>
-<p>然而，lab 并没有为我们提供现成的“获取空闲字节数”与“获取当前进程数”的
+<p>然而，lab
+并没有为我们提供现成的「获取空闲字节数」与「获取当前进程数」的
 API，需要我们自己实现。这两个 API 可以分别在
 <code>kernel/kalloc.c</code> 与 <code>kernel/proc.c</code>
 中实现（需要在 <code>kernel/defs.h</code> 中添加声明）。</p>

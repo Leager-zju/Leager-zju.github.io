@@ -464,9 +464,9 @@ Indexed Tree)或 <strong>Fenwick 树</strong>。 它可以在 <span class="math 
 <code>nums[1 : n/2]</code> 与 <code>nums[n/2+1 : n]</code>，分别由
 <code>biTree[n/2]</code> 与 <code>biTree[n]</code>
 去管辖这两个区间。这样一来，每个子区间中进行的<strong>写</strong>并不会给其他区间增加负载，而求前缀和只需将多个区间和相加即可。</p>
-<p>“既然最后整个区间和就是
+<p>「既然最后整个区间和就是
 <code>biTree[n/2] + biTree[n]</code>，那不如让 <code>biTree[n]</code>
-干脆管整个区间好了！”</p>
+干脆管整个区间好了！」</p>
 <p>于是，整个区间的管辖级别就浮现出来了，以 <code>n=8</code> 为例：</p>
 <p><img src="1.png" style="zoom:80%;"></p>
 <p>由于这种管辖级别像树一样，所以就叫树状数组了，而每个树状数组中的元素对应着的就是其管辖区间内原数组的所有元素之和。</p>

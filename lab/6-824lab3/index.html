@@ -11,7 +11,7 @@ Raft 节点中。
 整个模式大概长这样。
 主要流程是这样的：
 
-client ">
+client 寻找对应 R">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -430,8 +430,7 @@ client ">
                 <p>本实验要求在每一个 Raft 节点上实现一个 K/V
 服务器(server)，向上接受客户端(client)的请求并返回请求结果，向下生成日志应用到
 Raft 节点中。</p>
-<p>整个模式大概长<a
-target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/notes/raft_diagram.pdf">这样</a>。</p>
+<p>整个模式大概长<a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/notes/raft_diagram.pdf">这样</a>。</p>
 <p>主要流程是这样的：</p>
 <ol type="1">
 <li>client 寻找对应 Raft 节点是 Leader 的
@@ -465,12 +464,21 @@ ErrWrongLeader 错误。若成功，则等待流程 4。</p>
 <p>注意到，在等待的过程中 server 是上了锁的，那必然被阻塞，此时就需要在
 startKVserver 的时候额外开启一个叫 Applier() 的 goroutine 来进行
 applyChannel 的读取。</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(kv *KVServer)</span></span> Applier() &#123;</span><br><span class="line">  <span class="keyword">for</span> !kv.killed() &#123;</span><br><span class="line">    msg := &lt;-kv.applyCh</span><br><span class="line">    <span class="keyword">if</span> msg.CommandValid &#123;</span><br><span class="line">        <span class="comment">// 应用请求</span></span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> msg.SnapshotValid &#123;</span><br><span class="line">        <span class="comment">// 应用快照</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-go" data-language="go"><code class="language-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>kv <span class="token operator">*</span>KVServer<span class="token punctuation">)</span> <span class="token function">Applier</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">for</span> <span class="token operator">!</span>kv<span class="token punctuation">.</span><span class="token function">killed</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    msg <span class="token operator">:=</span> <span class="token operator">&lt;-</span>kv<span class="token punctuation">.</span>applyCh
+    <span class="token keyword">if</span> msg<span class="token punctuation">.</span>CommandValid <span class="token punctuation">{</span>
+        <span class="token comment">// 应用请求</span>
+    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> msg<span class="token punctuation">.</span>SnapshotValid <span class="token punctuation">{</span>
+        <span class="token comment">// 应用快照</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>同时遇到这样一个问题：存在一个网络分区 [1] | [2, 3, 4, 5]，Peer1
 是分区前的 leader，分区后 1 仍然是 leader。分区 [2, 3, 4, 5]
 由于选举导致它们的 Term 大于 Peer1 的 Term，假设该分区的 Leader 为
 Peer2。现在有一个 clientA 一直给分区 [1] 发送请求，某一个请求
-<code>&#123;requestID: x，clientID: A&#125;</code> 发给 Peer1 后，其调用
+<code>{requestID: x，clientID: A}</code> 发给 Peer1 后，其调用
 <code>Start()</code> 并返回日志所在索引 <code>Index=i</code>
 后，网络恢复，Peer1 收到 Term 更高的 Peer2 的 AppendEntries 消息后将原先
 <code>Index=i</code> 处的日志覆盖，更新 commitIndex 后告知上层进行
@@ -482,7 +490,11 @@ A，但应用到存储却是另一请求 B。</p>
 是否匹配，如果不匹配，说明可能被其他日志覆盖，返回一个 ErrWrongLeader
 让上层重发。</p>
 <p>注意，只有 Leader 需要对请求做出答复。</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> kv.rf.GetRaftState() == raft.Leader &amp;&amp; kv.rf.GetCurrentTerm() == msg.CommandTerm &#123;</span><br><span class="line">  <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(reply_ *Reply)</span></span> &#123;</span><br><span class="line">    ch &lt;- reply_</span><br><span class="line">  &#125;(reply)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-go" data-language="go"><code class="language-go"><span class="token keyword">if</span> kv<span class="token punctuation">.</span>rf<span class="token punctuation">.</span><span class="token function">GetRaftState</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> raft<span class="token punctuation">.</span>Leader <span class="token operator">&amp;&amp;</span> kv<span class="token punctuation">.</span>rf<span class="token punctuation">.</span><span class="token function">GetCurrentTerm</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> msg<span class="token punctuation">.</span>CommandTerm <span class="token punctuation">{</span>
+  <span class="token keyword">go</span> <span class="token keyword">func</span><span class="token punctuation">(</span>reply_ <span class="token operator">*</span>Reply<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    ch <span class="token operator">&lt;-</span> reply_
+  <span class="token punctuation">}</span><span class="token punctuation">(</span>reply<span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h3 id="应用到状态机">应用到状态机</h3>
 <p>Applier() 对 applyChannel 进行一个 for
 的等待，收到消息后，根据收到消息的命令类型的不同，执行不同的应用操作。</p>
@@ -505,7 +517,20 @@ serverId，认为这是
 Leader，每次发请求时都可以利用这一信息，避免了不必要的 RPC，加快速度。当
 RPC 失败，或发生了 ErrWrongLeader，只需要简单的令 Leader
 切换到下一个即可（0-&gt;1-&gt;...-&gt;n-1-&gt;0-&gt;...）</p>
-<p><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ck *Clerk)</span></span> SendRequest(args *Args) <span class="type">string</span> &#123;</span><br><span class="line">  ck.mu.Lock()</span><br><span class="line">  <span class="keyword">defer</span> ck.mu.Unlock()</span><br><span class="line">  args.RequestId, args.ClerkId = ck.RequestId, ck.ClerkId</span><br><span class="line">  <span class="keyword">for</span> &#123;</span><br><span class="line">    reply := &amp;Reply&#123;&#125;</span><br><span class="line">    ok := ck.servers[ck.volatileLeader].Call(<span class="string">&quot;KVServer.HandleRequest&quot;</span>, args, reply)</span><br><span class="line">    <span class="keyword">if</span> ok &amp;&amp; reply.Err != ErrWrongLeader &#123;</span><br><span class="line">        ck.RequestId++</span><br><span class="line">        <span class="keyword">return</span> reply.Value</span><br><span class="line">    &#125;</span><br><span class="line">    ck.volatileLeader = (ck.volatileLeader + <span class="number">1</span>) % <span class="built_in">len</span>(ck.servers)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p></li>
+<p></p><pre class="line-numbers language-go" data-language="go"><code class="language-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>ck <span class="token operator">*</span>Clerk<span class="token punctuation">)</span> <span class="token function">SendRequest</span><span class="token punctuation">(</span>args <span class="token operator">*</span>Args<span class="token punctuation">)</span> <span class="token builtin">string</span> <span class="token punctuation">{</span>
+  ck<span class="token punctuation">.</span>mu<span class="token punctuation">.</span><span class="token function">Lock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">defer</span> ck<span class="token punctuation">.</span>mu<span class="token punctuation">.</span><span class="token function">Unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  args<span class="token punctuation">.</span>RequestId<span class="token punctuation">,</span> args<span class="token punctuation">.</span>ClerkId <span class="token operator">=</span> ck<span class="token punctuation">.</span>RequestId<span class="token punctuation">,</span> ck<span class="token punctuation">.</span>ClerkId
+  <span class="token keyword">for</span> <span class="token punctuation">{</span>
+    reply <span class="token operator">:=</span> <span class="token operator">&amp;</span>Reply<span class="token punctuation">{</span><span class="token punctuation">}</span>
+    ok <span class="token operator">:=</span> ck<span class="token punctuation">.</span>servers<span class="token punctuation">[</span>ck<span class="token punctuation">.</span>volatileLeader<span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">Call</span><span class="token punctuation">(</span><span class="token string">"KVServer.HandleRequest"</span><span class="token punctuation">,</span> args<span class="token punctuation">,</span> reply<span class="token punctuation">)</span>
+    <span class="token keyword">if</span> ok <span class="token operator">&amp;&amp;</span> reply<span class="token punctuation">.</span>Err <span class="token operator">!=</span> ErrWrongLeader <span class="token punctuation">{</span>
+        ck<span class="token punctuation">.</span>RequestId<span class="token operator">++</span>
+        <span class="token keyword">return</span> reply<span class="token punctuation">.</span>Value
+    <span class="token punctuation">}</span>
+    ck<span class="token punctuation">.</span>volatileLeader <span class="token operator">=</span> <span class="token punctuation">(</span>ck<span class="token punctuation">.</span>volatileLeader <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">%</span> <span class="token function">len</span><span class="token punctuation">(</span>ck<span class="token punctuation">.</span>servers<span class="token punctuation">)</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><p></p></li>
 <li><p>在分区测试中，有可能发生 Leader 超时未 apply 的情况（即一个
 Leader 被分到了 minority 的网络区），此时需要在 server 等待环节加一个
 &lt;-time.After()

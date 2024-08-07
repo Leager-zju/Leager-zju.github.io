@@ -466,7 +466,7 @@ Leadership/Membership Change in Raft</h3>
 <p>节点的增减其实就是对 <code>Raft.Prs</code> 哈希表的修改： -
 如果待增加节点未出现在 <code>RaftGroup</code> 中，则新增一个条目; -
 如果待删除节点出现在 <code>RaftGroup</code> 中，则删除一个条目;</p>
-<p>对节点的增删会导致“大多数”发送变化：若节点增加，则新节点等待
+<p>对节点的增删会导致「大多数」发送变化：若节点增加，则新节点等待
 <code>AppendEntries</code> 即可。若节点减少，则需要重新更新
 <code>committed</code> 并发送;</p>
 <h3 id="part-b-implement-admin-commands">Part B Implement Admin
@@ -656,10 +656,10 @@ Leader 下一次群发 heartbeat 或 append 时，会给新 <code>Peer</code>
 <code>truncatedIndex</code>，Leader 会立刻发送 snapshot 过去。由于是通过
 <code>replicatePeer()</code> 的方式进行创建，我们会发现这种方式创建的
 <code>Peer</code>，其 Raft 层的 <code>Prs</code>
-最开始是空的，甚至不包含自身，在这种状态下可以认为其属于一个“<strong>待机</strong>”状态，只允许处理
+最开始是空的，甚至不包含自身，在这种状态下可以认为其属于一个「<strong>待机</strong>」状态，只允许处理
 <code>MsgSnapshot</code>，其余消息一律作废。</p>
 <p>只有收到了 snapshot 并更细状态后，<code>Prs</code>
-也被正确赋值，其才知道了其他节点的存在，此时脱离“<strong>待机</strong>”状态。</p>
+也被正确赋值，其才知道了其他节点的存在，此时脱离「<strong>待机</strong>」状态。</p>
 <p>等到 Leader 收到回复后，新 <code>Peer</code> 才算正式加入 Group。</p>
 <blockquote>
 <p>当然，如果网络很差，snapshot 并没有收到，反而 Leader 早早挂了，那么新
@@ -837,7 +837,7 @@ scheduler</h4>
 转移到某个<strong>合适</strong>的目标节点
 <code>dst</code>，从而达成负载均衡，并通过函数返回的
 <code>MovePeerOperator</code> 加到该 <code>Region</code>
-对应的“待执行命令”中，等待下一次该 <code>Region</code>
+对应的「待执行命令」中，等待下一次该 <code>Region</code>
 发来心跳信息时执行。</p>
 <blockquote>
 <p>一个 <code>MovePeerOperator</code> 包含以下步骤：</p>
@@ -923,8 +923,8 @@ newPeer <span class="token operator">:=</span> <span class="token function">Allo
 </blockquote>
 <p>有一点不能理解的是，虽然任务书中表示 <code>RegionEpoch.ConfVer</code>
 会在 confchange 中改变，但并没有说 <code>RegionEpoch.Version</code>
-也会改，只说了在 split 中改变。然而测试用例会不通过“只修改了 confver
-而不修改 version”的代码。</p>
+也会改，只说了在 split 中改变。然而测试用例会不通过「只修改了 confver
+而不修改 version」的代码。</p>
 <h4 id="regionsplit">3 RegionSplit</h4>
 <p>不同 RaftGroup 负责不同 Region，随着时间推进必然会有一些 Region
 会超出一个值

@@ -4,8 +4,11 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="keywords" content="标签: MIT6.s081, 没什么看头的地方">
-    <meta name="description" content="【数据删除】">
+    <meta name="keywords" content="用 C++ 的方式学习 Lua, 没什么看头的地方">
+    <meta name="description" content="花了一晚上浅学了一下 Lua 脚本语言。作为 C++
+Coder，对我而言，学一门新语言的最容易接受的方式就是将它和 C++
+进行对比，看看能不能实现 C++ 相关特性，或者额外的 C++
+做不到的事，观摩了网上的资料以及骚扰 GPT 后，">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -17,7 +20,7 @@
     <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
-    <title>标签: MIT6.s081 | 没什么看头的地方</title>
+    <title>用 C++ 的方式学习 Lua | 没什么看头的地方</title>
     <link rel="icon" type="image/png" href="/dt.png">
     
     <style>
@@ -339,270 +342,471 @@
 
 </header>
 
-    <div class="bg-cover pd-header about-cover">
-    <div class="container">
+    
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/1.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">用 C++ 的方式学习 Lua</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
     <div class="row">
-    <div class="col s10 offset-s1 m8 offset-m2 l8 offset-l2">
-        <div class="brand">
-            <div class="title center-align">
-                
-                这里可能没有你想看的...
-                
-            </div>
-
-            <div class="description center-align">
-                
-                <span id="subtitle"></span>
-                <script src="/libs/typed/typed.js"></script>
-                <script>
-                    var typed = new Typed("#subtitle", {
-                        strings: [ 
-                            
-                                "是不是拥有以后就会开始要失去..",
-                            
-                        ],
-                        startDelay: 300,
-                        typeSpeed: 100,
-                        loop: true,
-                        backSpeed: 100,
-                        showCursor: true
-                    });
-                </script>
-                
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<script>
-    // 每天切换 banner 图.  Switch banner image every day.
-    var bannerUrl = "/medias/banner/" + new Date().getDay() + '.jpg';
-    $('.bg-cover').css('background-image', 'url(' + bannerUrl + ')');
-</script>
-<script>
-    
-      var bannerUrl = "/medias/featureimages/" + Math.floor(Math.random() * 24) + '.jpg';
-    
-    $('.bg-cover.about-cover').css('background-image', 'url(' + bannerUrl + ')');
-
-</script>
-
-
-    </div>
-</div>
-
-<main class="content">
-
-    
-
-<div id="tags" class="container chip-container">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
     <div class="card">
-        <div class="card-content">
-            <div class="tag-title center-align">
-                <i class="fas fa-tags"></i>&nbsp;&nbsp;文章标签
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                          <div class="article-tag">
+                            <span class="chip bg-color">无标签</span>
+                          </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/lua/" class="post-category">
+                                lua
+                            </a>
+                        
+                    </div>
+                    
+                </div>
             </div>
-            <div class="tag-chips">
+
+            <div class="post-info">
                 
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2024-08-07
+                </div>
                 
-                <a href="/tags/CMU-15445/" title="CMU 15445: 5">
-                    <span class="chip center-align waves-effect waves-light
-                             chip-default "
-                            data-tagname="CMU 15445" style="background-color: #F9EBEA;">CMU 15445
-                        <span class="tag-length">5</span>
-                    </span>
-                </a>
+
                 
+
                 
-                <a href="/tags/MIT-6-824/" title="MIT 6.824: 18">
-                    <span class="chip center-align waves-effect waves-light
-                             chip-default "
-                            data-tagname="MIT 6.824" style="background-color: #F5EEF8;">MIT 6.824
-                        <span class="tag-length">18</span>
-                    </span>
-                </a>
+
                 
-                
-                <a href="/tags/MIT-6-s081/" title="MIT 6.s081: 10">
-                    <span class="chip center-align waves-effect waves-light
-                             chip-default "
-                            data-tagname="MIT 6.s081" style="background-color: #D5F5E3;">MIT 6.s081
-                        <span class="tag-length">10</span>
-                    </span>
-                </a>
-                
-                
-                <a href="/tags/MIT6-s081/" title="MIT6.s081: 1">
-                    <span class="chip center-align waves-effect waves-light
-                             chip-active "
-                            data-tagname="MIT6.s081" style="background-color: #E8F8F5;">MIT6.s081
-                        <span class="tag-length">1</span>
-                    </span>
-                </a>
-                
-                
-                <a href="/tags/C-11/" title="C++11: 13">
-                    <span class="chip center-align waves-effect waves-light
-                             chip-default "
-                            data-tagname="C++11" style="background-color: #FEF9E7;">C++11
-                        <span class="tag-length">13</span>
-                    </span>
-                </a>
-                
-                
-                <a href="/tags/CS144/" title="CS144: 1">
-                    <span class="chip center-align waves-effect waves-light
-                             chip-default "
-                            data-tagname="CS144" style="background-color: #F8F9F9;">CS144
-                        <span class="tag-length">1</span>
-                    </span>
-                </a>
-                
-                
-                <a href="/tags/CS149/" title="CS149: 1">
-                    <span class="chip center-align waves-effect waves-light
-                             chip-default "
-                            data-tagname="CS149" style="background-color: #82E0AA;">CS149
-                        <span class="tag-length">1</span>
-                    </span>
-                </a>
-                
-                
-                <a href="/tags/C/" title="C++: 25">
-                    <span class="chip center-align waves-effect waves-light
-                             chip-default "
-                            data-tagname="C++" style="background-color: #D7BDE2;">C++
-                        <span class="tag-length">25</span>
-                    </span>
-                </a>
-                
-                
-                <a href="/tags/GAMES/" title="GAMES: 2">
-                    <span class="chip center-align waves-effect waves-light
-                             chip-default "
-                            data-tagname="GAMES" style="background-color: #A3E4D7;">GAMES
-                        <span class="tag-length">2</span>
-                    </span>
-                </a>
-                
-                
-                <a href="/tags/command/" title="command: 1">
-                    <span class="chip center-align waves-effect waves-light
-                             chip-default "
-                            data-tagname="command" style="background-color: #85C1E9;">command
-                        <span class="tag-length">1</span>
-                    </span>
-                </a>
-                
-                
-                <a href="/tags/lab/" title="lab: 4">
-                    <span class="chip center-align waves-effect waves-light
-                             chip-default "
-                            data-tagname="lab" style="background-color: #F8C471;">lab
-                        <span class="tag-length">4</span>
-                    </span>
-                </a>
-                
-                
-                <a href="/tags/What-Happened/" title="What Happened: 2">
-                    <span class="chip center-align waves-effect waves-light
-                             chip-default "
-                            data-tagname="What Happened" style="background-color: #F9E79F;">What Happened
-                        <span class="tag-length">2</span>
-                    </span>
-                </a>
-                
-                
-                <a href="/tags/daily/" title="daily: 2">
-                    <span class="chip center-align waves-effect waves-light
-                             chip-default "
-                            data-tagname="daily" style="background-color: #D5F5E3;">daily
-                        <span class="tag-length">2</span>
-                    </span>
-                </a>
-                
-                
-                <a href="/tags/math/" title="math: 2">
-                    <span class="chip center-align waves-effect waves-light
-                             chip-default "
-                            data-tagname="math" style="background-color: #E8F8F5;">math
-                        <span class="tag-length">2</span>
-                    </span>
-                </a>
-                
-                
-                <a href="/tags/weekly/" title="weekly: 8">
-                    <span class="chip center-align waves-effect waves-light
-                             chip-default "
-                            data-tagname="weekly" style="background-color: #F8F9F9;">weekly
-                        <span class="tag-length">8</span>
-                    </span>
-                </a>
-                
-                
-                <a href="/tags/%F0%9F%92%A9/" title="💩: 1">
-                    <span class="chip center-align waves-effect waves-light
-                             chip-default "
-                            data-tagname="💩" style="background-color: #82E0AA;">💩
-                        <span class="tag-length">1</span>
-                    </span>
-                </a>
-                
-                
-                <a href="/tags/Project/" title="Project: 1">
-                    <span class="chip center-align waves-effect waves-light
-                             chip-default "
-                            data-tagname="Project" style="background-color: #FFF;">Project
-                        <span class="tag-length">1</span>
-                    </span>
-                </a>
+
                 
             </div>
         </div>
-    </div>
-</div>
+        <hr class="clearfix">
+
+        
+        <!-- 是否加载使用自带的 prismjs. -->
+        <link rel="stylesheet" href="/libs/prism/prism.min.css">
+        
+
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <p>花了一晚上浅学了一下 Lua 脚本语言。作为 C++
+Coder，对我而言，学一门新语言的最容易接受的方式就是将它和 C++
+进行对比，看看能不能实现 C++ 相关特性，或者额外的 C++
+做不到的事，观摩了网上的资料以及骚扰 GPT 后，彻底顿悟，写下心得。</p>
+<span id="more"></span>
+<h2 id="基础概念">基础概念</h2>
+<h3 id="hello-world">Hello World</h3>
+<p>作为一门「脚本语言」，它本身是<strong>解释性</strong>的，对应的解释器就是
+<code>lua</code>。可以新建一个 <code>.lua</code> 文件，然后以
+<code>lua &lt;filename&gt;.lua</code> 的方式运行。比如</p>
+<pre class="line-numbers language-lua" data-language="lua"><div class="caption"><span>HelloWorld.lua</span></div><code class="language-lua"><span class="token function">print</span><span class="token punctuation">(</span><span class="token string">"Hello"</span><span class="token punctuation">)</span> <span class="token comment">-- 控制台输出函数</span>
+<span class="token function">print</span><span class="token punctuation">(</span><span class="token string">"World"</span><span class="token punctuation">)</span> <span class="token comment">-- 这个也是</span>
+<span class="token comment">--[[
+  执行 lua HelloWorld.lua，能看到输出如下:
+    Hello
+    World
+
+--]]</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>那么就从上面这个例子开始，进入到对 Lua 的探索中。</p>
+<h3 id="注释">注释</h3>
+<p><code>--</code> 后跟单行注释，<code>--[[</code> 和 <code>--]]</code>
+之间允许跨行注释。</p>
+<blockquote>
+<p>对应 C++ 的 <code>//</code> 和 <code>/**/</code>。</p>
+</blockquote>
+<h3 id="变量作用域">变量作用域</h3>
+<p>所有变量默认为「<strong>全局</strong>变量」，如果要声明一个仅在当前作用域下生效的局部变量，需要用
+<code>local</code>
+关键词进行修饰。并且在内部作用域声明的局部变量，访问优先级高于全局变量。</p>
+<blockquote>
+<p>不难发现 Lua 中「作用域」的概念和 C++ 是基本一致的。</p>
+</blockquote>
+<pre class="line-numbers language-lua" data-language="lua"><div class="caption"><span>作用域</span></div><code class="language-lua">a <span class="token operator">=</span> <span class="token number">5</span>           <span class="token comment">-- 全局变量</span>
+<span class="token keyword">local</span> b <span class="token operator">=</span> <span class="token number">5</span>     <span class="token comment">-- 局部变量</span>
+
+<span class="token keyword">function</span> <span class="token function">foo</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token keyword">local</span> a <span class="token operator">=</span> <span class="token number">6</span> <span class="token comment">-- 该变量优先级高于 line 1 的 a</span>
+    b <span class="token operator">=</span> <span class="token keyword">nil</span>     <span class="token comment">-- 上层作用域的局部变量亦能在本作用域中访问，将其设置为 nil 相当于删除该变量</span>
+    c <span class="token operator">=</span> <span class="token number">5</span>       <span class="token comment">-- 全局变量</span>
+    <span class="token keyword">local</span> d <span class="token operator">=</span> <span class="token number">6</span> <span class="token comment">-- 仅在 foo() 的作用域内生效</span>
+    <span class="token function">print</span><span class="token punctuation">(</span>a<span class="token punctuation">,</span> b<span class="token punctuation">)</span> <span class="token comment">--&gt; 6 nil</span>
+<span class="token keyword">end</span>
+
+<span class="token function">foo</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token function">print</span><span class="token punctuation">(</span>a<span class="token punctuation">,</span> b<span class="token punctuation">)</span>     <span class="token comment">--&gt; 5 nil</span>
+<span class="token function">print</span><span class="token punctuation">(</span>c<span class="token punctuation">,</span> d<span class="token punctuation">)</span>     <span class="token comment">--&gt; 5 nil</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>根据最后一行执行结果，我们得出一个额外的结论：<strong>一个不在本作用域生效的变量的值为
+nil</strong>。</p>
+<h3 id="基本数据类型">基本数据类型</h3>
+<p>Lua 有 8 大基本类型：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">数据类型</th>
+<th style="text-align: center;">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">nil</td>
+<td style="text-align: center;">本作用域内无效的变量均为该类型，打印结果也是
+nil</td>
+</tr>
+<tr>
+<td style="text-align: center;">boolean</td>
+<td style="text-align: center;">只有 false 和 nil 算
+<code>false</code>，其余都是 <code>true</code></td>
+</tr>
+<tr>
+<td style="text-align: center;">number</td>
+<td style="text-align: center;">双精度浮点数</td>
+</tr>
+<tr>
+<td style="text-align: center;">string</td>
+<td style="text-align: center;">字符串，用<strong>成对</strong>的单引号/双引号包裹</td>
+</tr>
+<tr>
+<td style="text-align: center;">function</td>
+<td style="text-align: center;">Lua 或 C 的函数</td>
+</tr>
+<tr>
+<td style="text-align: center;">userdata</td>
+<td style="text-align: center;">C 中的数据结构</td>
+</tr>
+<tr>
+<td style="text-align: center;">thread</td>
+<td style="text-align: center;">线程</td>
+</tr>
+<tr>
+<td style="text-align: center;">table</td>
+<td style="text-align: center;">支持任意类型的 key-value 映射</td>
+</tr>
+</tbody>
+</table>
+<p>可以通过 <code>type()</code>
+函数获取某个变量的类型，函数返回值为字符串类型。</p>
+<pre class="line-numbers language-lua" data-language="lua"><div class="caption"><span>type</span></div><code class="language-lua">x <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>               <span class="token comment">-- 可以通过 {} 建表</span>
+<span class="token function">print</span><span class="token punctuation">(</span><span class="token function">type</span><span class="token punctuation">(</span><span class="token keyword">nil</span><span class="token punctuation">)</span><span class="token punctuation">)</span>     <span class="token comment">--&gt; nil</span>
+<span class="token function">print</span><span class="token punctuation">(</span><span class="token function">type</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">)</span>       <span class="token comment">--&gt; table</span>
+<span class="token function">print</span><span class="token punctuation">(</span><span class="token function">type</span><span class="token punctuation">(</span><span class="token function">type</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token comment">--&gt; string</span>
+x <span class="token operator">=</span> <span class="token number">1</span>
+<span class="token function">print</span><span class="token punctuation">(</span><span class="token function">type</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">)</span>       <span class="token comment">--&gt; number</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>我们又可以得出一个额外的结论：<strong>Lua
+中的变量可以绑定到任意类型的值，并非像 C++
+那样一经声明就确定了变量名与类型的强绑定关系</strong>。</p>
+<blockquote>
+<p>Lua 最初是用 C 语言编写的，这使得 Lua 可以很容易地与 C
+语言进行交互，所以一些数据类型也与 C 存在关系。</p>
+</blockquote>
+
+                
+            </div>
+            <hr/>
+
+            
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            <span class="chip bg-color">无标签</span>
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
 
     
 
-    <article id="articles" class="container articles">
-        <div class="row tags-posts">
-            
-            
-            <div class="article tag-post col s12 m6 l4" data-tags="MIT6.s081" data-aos="fade-up">
-                <div class="card">
-                    <a href="/lab/6-s081lab7/">
-                        <div class="card-image tag-image">
-                            
-                            
-                            <img src="/medias/featureimages/9.jpg" class="responsive-img" alt="6.s081 Lab7 Lock">
-                            
-                            <span class="card-title">6.s081 Lab7 Lock</span>
-                        </div>
-                    </a>
-                    <div class="card-content article-content">
-                        <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2023-11-01
-                            </span>
-                            <span class="publish-author">
-                                
-                                <i class="fas fa-bookmark fa-fw icon-category"></i>
-                                
-                                <a href="/categories/lab/" class="post-category">
-                                lab
-                                </a>
-                                
-                                
-                            </span>
-                        </div>
-                    </div>
+    
+
+</div>
+
                 </div>
             </div>
             
         </div>
-    </article>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="far fa-dot-circle"></i>&nbsp;本篇
+            </div>
+            <div class="card">
+                <a href="/lua/learnluawithcpp/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/1.jpg" class="responsive-img" alt="用 C++ 的方式学习 Lua">
+                        
+                        <span class="card-title">用 C++ 的方式学习 Lua</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            花了一晚上浅学了一下 Lua 脚本语言。作为 C++
+Coder，对我而言，学一门新语言的最容易接受的方式就是将它和 C++
+进行对比，看看能不能实现 C++ 相关特性，或者额外的 C++
+做不到的事，观摩了网上的资料以及骚扰 GPT 后，
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2024-08-07
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/lua/" class="post-category">
+                                    lua
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/data-structure/suffixautomaton/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/6.jpg" class="responsive-img" alt="后缀自动机(Suffix Automaton)">
+                        
+                        <span class="card-title">后缀自动机(Suffix Automaton)</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            翻阅网络资料两天后顿悟，遂写下心得。
+
+参考资料
+
+OI
+Wiki
+知乎。并贴心地给出了构建过程的中间形态
+
+
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2024-08-05
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/data-structure/" class="post-category">
+                                    data structure
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/C/">
+                        <span class="chip bg-color">C++</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+
+  <!-- 是否加载使用自带的 prismjs. -->
+  <script type="text/javascript" src="/libs/prism/prism.min.js"></script>
+
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card" style="background-color: white;">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
 </main>
 
+
+<script src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+    MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$', '$'], ['\\(', '\\)']]}
+    });
+</script>
 
 
 

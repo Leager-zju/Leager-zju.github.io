@@ -426,13 +426,13 @@ InterProcess Communication)</strong>技术。</p>
 <h2 id="管道pipe">管道(Pipe)</h2>
 <p>管道是最基本的通信机制，实质是一个半双工的通信方式，即数据只能单向流通，每次从头读取，向尾写入，并且遵循
 <strong>FIFO(First In First Out)</strong>
-原则，以<strong>字节流</strong>的方式进行传输，就仿佛一个单向队列。并且管道双方必须均处于“在线”状态，一旦一方退出，另一方也自动断开。</p>
+原则，以<strong>字节流</strong>的方式进行传输，就仿佛一个单向队列。并且管道双方必须均处于「在线」状态，一旦一方退出，另一方也自动断开。</p>
 <blockquote>
 <p>如果双方相互通信时，则需要建立两个管道。</p>
 </blockquote>
 <p>根据<strong>是否存在于文件系统</strong>中，又可将管道分为<strong>匿名管道</strong>和<strong>命名管道</strong>两种。</p>
 <blockquote>
-<p>“<strong>名</strong>”指的就是路径名啦。</p>
+<p>「<strong>名</strong>」指的就是路径名啦。</p>
 </blockquote>
 <h3 id="匿名管道">匿名管道</h3>
 <p>Linux 中可以通过函数 <code>int pipe(int fd[2])</code>
@@ -474,9 +474,9 @@ int main() {
 
   return 0;
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>事实上，匿名管道并<strong>不</strong>位于文件系统中，它本质上是一个位于<strong>内核空间</strong>中的缓冲区，只不过将两端以“文件”的形式提供了数据读写的渠道。如果缓冲区已满，则阻塞写入；如果缓冲区为空，则阻塞读取。</p>
+<p>事实上，匿名管道并<strong>不</strong>位于文件系统中，它本质上是一个位于<strong>内核空间</strong>中的缓冲区，只不过将两端以「文件」的形式提供了数据读写的渠道。如果缓冲区已满，则阻塞写入；如果缓冲区为空，则阻塞读取。</p>
 <p><img src="1.png"></p>
-<p>同时，读写端的文件描述符仅仅位于通信双方公共祖先进程的地址空间内部，也是因为如此，匿名管道仅适用于<strong>父子进程</strong>这种有“亲缘关系”（或称相关）的进程之间的通信，而无法跨进程通信。</p>
+<p>同时，读写端的文件描述符仅仅位于通信双方公共祖先进程的地址空间内部，也是因为如此，匿名管道仅适用于<strong>父子进程</strong>这种有「亲缘关系」（或称相关）的进程之间的通信，而无法跨进程通信。</p>
 <blockquote>
 <p>毕竟调用 <code>fork()</code> 会进行一次完整的拷贝操作，也就会复制该
 <code>fd[]</code>。</p>

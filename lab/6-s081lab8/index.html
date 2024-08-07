@@ -9,9 +9,11 @@
 
 Preparation
 切换到对应分支
-123$ git fetch$ git checkout fs$ make clean
+$ git fetch
+$ git checkout fs
+$ make clean
 Task1: Large files
-该任务要求我们为 inode ">
+该任务要求我们为 inode 实现二级间接索">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -431,7 +433,9 @@ Task1: Large files
 <span id="more"></span>
 <h2 id="preparation">Preparation</h2>
 <p>切换到对应分支</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ git fetch</span><br><span class="line">$ git checkout fs</span><br><span class="line">$ make clean</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">git</span> fetch
+$ <span class="token function">git</span> checkout fs
+$ <span class="token function">make</span> clean<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <h2 id="task1-large-files">Task1: Large files</h2>
 <p>该任务要求我们为 inode 实现<strong>二级间接索引</strong>。</p>
 <p>原本的 inode 含有 11 个直接索引和 1 个一级间接索引，已知一个 disk
@@ -444,9 +448,24 @@ block 大小为 <code>1024</code>，一个块地址大小为 4B，那一个 bloc
 外，内存中还包含磁盘 inode 的拷贝
 <code>struct inode</code>，这两者分别位于 <code>kernel/fs.h</code> 与
 <code>kernel/file.h</code>。同时，还要修改一些宏字段如
-<code>MAXFILE</code>，以适配我们“升级”后的文件系统。</p>
-<figure class="highlight c"><figcaption><span>kernel/fs.h</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line"><span class="meta">#<span class="keyword">define</span> NDIRECT 11                                                      <span class="comment">// (!new)</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> NINDIRECT (BSIZE / sizeof(uint))</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> NDOUBLYINDIRECT ((BSIZE / sizeof(uint))*(BSIZE / sizeof(uint))) <span class="comment">// (!new)</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MAXFILE (NDIRECT + NINDIRECT + NDOUBLYINDIRECT)                 <span class="comment">// (!new)</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// On-disk inode structure</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">dinode</span> &#123;</span></span><br><span class="line">  ...</span><br><span class="line">  uint addrs[NDIRECT+<span class="number">1</span>+<span class="number">1</span>];  <span class="comment">// (!new)</span></span><br><span class="line">&#125;;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
-<figure class="highlight c"><figcaption><span>kernel/file.h</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// in-memory copy of an inode</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">inode</span> &#123;</span></span><br><span class="line">  ...</span><br><span class="line">  uint addrs[NDIRECT+<span class="number">1</span>+<span class="number">1</span>];  <span class="comment">// (!new)</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<code>MAXFILE</code>，以适配我们「升级」后的文件系统。</p>
+<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/fs.h</span></div><code class="language-C">...
+#define NDIRECT 11                                                      // (!new)
+#define NINDIRECT (BSIZE / sizeof(uint))
+#define NDOUBLYINDIRECT ((BSIZE / sizeof(uint))*(BSIZE / sizeof(uint))) // (!new)
+#define MAXFILE (NDIRECT + NINDIRECT + NDOUBLYINDIRECT)                 // (!new)
+
+// On-disk inode structure
+struct dinode {
+  ...
+  uint addrs[NDIRECT+1+1];  // (!new)
+};
+...<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/file.h</span></div><code class="language-C">// in-memory copy of an inode
+struct inode {
+  ...
+  uint addrs[NDIRECT+1+1];  // (!new)
+};<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>修改完后，便可以通过 <code>make fs.img</code> 重构 qemu
 的文件系统了。</p>
 <p>现在，我们就能尝试创建更大的文件了。当然，最开始创建一个文件时，文件系统仅仅是为其分配了一个
@@ -467,7 +486,53 @@ block，只有当对文件进行写入时，才根据写入文件的 offset
 <p><code>bmap()</code>
 的基本思路很简单，首先查直接索引，然后查一级间接索引。如果某一逻辑块号没有对应的索引块，那就为其分配一个索引块。从这也能看出，索引块是按需分配的，即便支持了二级间接索引，也不会因此导致大量的磁盘块分配。</p>
 <p>参考一级索引的查找方式，很容易能写出二级的：</p>
-<figure class="highlight c"><figcaption><span>kernel/fs.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> uint</span><br><span class="line"><span class="title function_">bmap</span><span class="params">(<span class="keyword">struct</span> inode *ip, uint bn)</span></span><br><span class="line">&#123;</span><br><span class="line">  uint addr, *a;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">buf</span> *<span class="title">bp</span>;</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>(bn &lt; NDIRECT)&#123;</span><br><span class="line">    ...</span><br><span class="line">  &#125;</span><br><span class="line">  bn -= NDIRECT;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>(bn &lt; NINDIRECT)&#123;</span><br><span class="line">    <span class="comment">// Load indirect block, allocating if necessary.</span></span><br><span class="line">    ...</span><br><span class="line">  &#125;</span><br><span class="line">  bn -= NINDIRECT;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 在二级索引块中，包含了 256 个一级间接索引块号，相当于其 `addr[]` 中的每个下标都覆盖了 256 个物理块</span></span><br><span class="line">  <span class="comment">// 由于这里逻辑块号 bn 已经被映射到 0~256*256-1 的范围，所以</span></span><br><span class="line">  <span class="comment">// bn/NINDIRECT 为二级索引块的下标</span></span><br><span class="line">  <span class="comment">// bn%NINDIRECT 为二级索引块指向的一级索引块的下标</span></span><br><span class="line">  <span class="keyword">if</span> (bn &lt; NDOUBLYINDIRECT) &#123;</span><br><span class="line">    <span class="comment">// Load doubly-indirect block, allocating if necessary.</span></span><br><span class="line">    <span class="keyword">if</span>((addr = ip-&gt;addrs[NDIRECT+<span class="number">1</span>]) == <span class="number">0</span>)</span><br><span class="line">      ip-&gt;addrs[NDIRECT+<span class="number">1</span>] = addr = balloc(ip-&gt;dev);</span><br><span class="line">    bp = bread(ip-&gt;dev, addr);</span><br><span class="line">    a = (uint*)bp-&gt;data;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((addr = a[bn/NINDIRECT]) == <span class="number">0</span>) &#123;</span><br><span class="line">      a[bn/NINDIRECT] = addr = balloc(ip-&gt;dev);</span><br><span class="line">      log_write(bp);</span><br><span class="line">    &#125;</span><br><span class="line">    brelse(bp); <span class="comment">// 在指向新的 block 前，释放原来的，下同</span></span><br><span class="line"></span><br><span class="line">    bp = bread(ip-&gt;dev, addr);</span><br><span class="line">    a = (uint*)bp-&gt;data;</span><br><span class="line">    bn %= NINDIRECT;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>((addr = a[bn]) == <span class="number">0</span>)&#123;</span><br><span class="line">      a[bn] = addr = balloc(ip-&gt;dev);</span><br><span class="line">      log_write(bp);</span><br><span class="line">    &#125;</span><br><span class="line">    brelse(bp);</span><br><span class="line">    <span class="keyword">return</span> addr;</span><br><span class="line">  &#125;</span><br><span class="line">  panic(<span class="string">&quot;bmap: out of range&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/fs.c</span></div><code class="language-C">static uint
+bmap(struct inode *ip, uint bn)
+{
+  uint addr, *a;
+  struct buf *bp;
+
+  if(bn &lt; NDIRECT){
+    ...
+  }
+  bn -= NDIRECT;
+
+  if(bn &lt; NINDIRECT){
+    // Load indirect block, allocating if necessary.
+    ...
+  }
+  bn -= NINDIRECT;
+
+  // 在二级索引块中，包含了 256 个一级间接索引块号，相当于其 `addr[]` 中的每个下标都覆盖了 256 个物理块
+  // 由于这里逻辑块号 bn 已经被映射到 0~256*256-1 的范围，所以
+  // bn/NINDIRECT 为二级索引块的下标
+  // bn%NINDIRECT 为二级索引块指向的一级索引块的下标
+  if (bn &lt; NDOUBLYINDIRECT) {
+    // Load doubly-indirect block, allocating if necessary.
+    if((addr = ip-&gt;addrs[NDIRECT+1]) == 0)
+      ip-&gt;addrs[NDIRECT+1] = addr = balloc(ip-&gt;dev);
+    bp = bread(ip-&gt;dev, addr);
+    a = (uint*)bp-&gt;data;
+
+    if ((addr = a[bn/NINDIRECT]) == 0) {
+      a[bn/NINDIRECT] = addr = balloc(ip-&gt;dev);
+      log_write(bp);
+    }
+    brelse(bp); // 在指向新的 block 前，释放原来的，下同
+
+    bp = bread(ip-&gt;dev, addr);
+    a = (uint*)bp-&gt;data;
+    bn %= NINDIRECT;
+
+    if((addr = a[bn]) == 0){
+      a[bn] = addr = balloc(ip-&gt;dev);
+      log_write(bp);
+    }
+    brelse(bp);
+    return addr;
+  }
+  panic("bmap: out of range");
+}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>当然，有写操作，自然有相应的清空操作。什么时候要清空呢？我们这里写的都是位于内存的
 block cache 中的数据，<code>struct inode</code>
 也是位于内存的相对于磁盘的缓存。有 cache 那必然有 victim，当一个
@@ -484,7 +549,42 @@ inode 的操作总是伴随着 <code>ilock()</code> 与
 <code>itruc()</code> 将 inode 所使用的所有块写入磁盘并释放。</p>
 <p>同样的，我们现在支持了二级索引，那必然要对<strong>用到 inode
 索引</strong>的所有函数进行修改。<code>itrunc()</code> 即是如此。</p>
-<figure class="highlight c"><figcaption><span>kernel/fs.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">itrunc</span><span class="params">(<span class="keyword">struct</span> inode *ip)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">for</span>(i = <span class="number">0</span>; i &lt; NDIRECT; i++)&#123;</span><br><span class="line">    ...</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>(ip-&gt;addrs[NDIRECT])&#123;</span><br><span class="line">    ...</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (ip-&gt;addrs[NDIRECT+<span class="number">1</span>]) &#123;</span><br><span class="line">    bp = bread(ip-&gt;dev, ip-&gt;addrs[NDIRECT+<span class="number">1</span>]);</span><br><span class="line">    a = (uint*)bp-&gt;data;</span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; NINDIRECT; i++) &#123; <span class="comment">// 释放二级索引下的所有一级索引</span></span><br><span class="line">      <span class="keyword">if</span> (a[i]) &#123;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> <span class="title">buf</span> *<span class="title">tmp</span> =</span> bread(ip-&gt;dev, a[i]);</span><br><span class="line">        uint *tmp_addr = (uint*)tmp-&gt;data;</span><br><span class="line">        <span class="keyword">for</span> (j = <span class="number">0</span>; j &lt; NINDIRECT; j++) &#123;</span><br><span class="line">          <span class="keyword">if</span> (tmp_addr[j]) &#123;</span><br><span class="line">            bfree(ip-&gt;dev, tmp_addr[j]);</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        brelse(tmp);</span><br><span class="line">        bfree(ip-&gt;dev, a[i]);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    brelse(bp);</span><br><span class="line">    bfree(ip-&gt;dev, ip-&gt;addrs[NDIRECT+<span class="number">1</span>]);</span><br><span class="line">    ip-&gt;addrs[NDIRECT+<span class="number">1</span>] = <span class="number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  ip-&gt;size = <span class="number">0</span>;</span><br><span class="line">  iupdate(ip);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/fs.c</span></div><code class="language-C">void
+itrunc(struct inode *ip)
+{
+  ...
+  for(i = 0; i &lt; NDIRECT; i++){
+    ...
+  }
+
+  if(ip-&gt;addrs[NDIRECT]){
+    ...
+  }
+
+  if (ip-&gt;addrs[NDIRECT+1]) {
+    bp = bread(ip-&gt;dev, ip-&gt;addrs[NDIRECT+1]);
+    a = (uint*)bp-&gt;data;
+    for (i = 0; i &lt; NINDIRECT; i++) { // 释放二级索引下的所有一级索引
+      if (a[i]) {
+        struct buf *tmp = bread(ip-&gt;dev, a[i]);
+        uint *tmp_addr = (uint*)tmp-&gt;data;
+        for (j = 0; j &lt; NINDIRECT; j++) {
+          if (tmp_addr[j]) {
+            bfree(ip-&gt;dev, tmp_addr[j]);
+          }
+        }
+        brelse(tmp);
+        bfree(ip-&gt;dev, a[i]);
+      }
+    }
+    brelse(bp);
+    bfree(ip-&gt;dev, ip-&gt;addrs[NDIRECT+1]);
+    ip-&gt;addrs[NDIRECT+1] = 0;
+  }
+
+  ip-&gt;size = 0;
+  iupdate(ip);
+}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h2 id="task2-symbolic-links">Task2: Symbolic links</h2>
 <p>该任务要求我们实现创建符号链接的系统调用，也就是创建一个 SYMLINK
 类型的
@@ -499,13 +599,91 @@ option，就不用进一步打开链接对象，而是直接打开文件。否�
 <code>sys_symlink()</code>，那么该函数要做什么呢？只需要新建一个
 inode，然后调用 <code>writei()</code>
 将目标文件路径写入即可。对就这么简单。</p>
-<figure class="highlight c"><figcaption><span>kernel/sysfile.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Create the path with content target in block data.</span></span><br><span class="line">uint64</span><br><span class="line"><span class="title function_">sys_symlink</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">char</span> target[MAXPATH], path[MAXPATH];</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">inode</span>* <span class="title">ip</span>;</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (argstr(<span class="number">0</span>, target, MAXPATH) &lt; <span class="number">0</span> || argstr(<span class="number">1</span>, path, MAXPATH) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  begin_op();</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">if</span> ((ip = create(path, T_FILE, <span class="number">0</span>, <span class="number">0</span>)) == <span class="number">0</span>) &#123;</span><br><span class="line">      end_op();</span><br><span class="line">      <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    ip-&gt;type = T_SYMLINK;</span><br><span class="line">    writei(ip, <span class="number">0</span>, (uint64)target, <span class="number">0</span>, MAXPATH);</span><br><span class="line">    iunlockput(ip); <span class="comment">// 调用</span></span><br><span class="line">  &#125;</span><br><span class="line">  end_op();</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/sysfile.c</span></div><code class="language-C">// Create the path with content target in block data.
+uint64
+sys_symlink(void)
+{
+  char target[MAXPATH], path[MAXPATH];
+  struct inode* ip;
+
+  if (argstr(0, target, MAXPATH) &lt; 0 || argstr(1, path, MAXPATH) &lt; 0) {
+    return -1;
+  }
+
+  begin_op();
+  {
+    if ((ip = create(path, T_FILE, 0, 0)) == 0) {
+      end_op();
+      return -1;
+    }
+    ip-&gt;type = T_SYMLINK;
+    writei(ip, 0, (uint64)target, 0, MAXPATH);
+    iunlockput(ip); // 调用
+  }
+  end_op();
+  return 0;
+}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>还要改的是 <code>sys_open()</code>
 函数，我们需要新增一条特性，以便打开 SYMLINK inode
 时能打开其链接的目标文件。</p>
-<figure class="highlight c"><figcaption><span>kernel/sysfile.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">uint64</span><br><span class="line"><span class="title function_">sys_open</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">if</span>(ip-&gt;type == T_DEVICE)&#123;</span><br><span class="line">    ...</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (ip-&gt;type == T_SYMLINK &amp;&amp; (omode &amp; O_NOFOLLOW) == <span class="number">0</span>) &#123; <span class="comment">// 意味着要 follow 下去</span></span><br><span class="line">      <span class="type">char</span> target[MAXPATH];</span><br><span class="line">      uint threshold = <span class="number">10</span>; <span class="comment">// 以防出现 b-&gt;a-&gt;b-&gt;... 的循环链接</span></span><br><span class="line">      <span class="keyword">while</span> (threshold) &#123;</span><br><span class="line">        <span class="keyword">if</span> (readi(ip, <span class="number">0</span>, (uint64)target, <span class="number">0</span>, MAXPATH) != MAXPATH) &#123; <span class="comment">// 读取 inode 存储的 target 文件路径</span></span><br><span class="line">          panic(<span class="string">&quot;link error&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        iunlockput(ip); <span class="comment">// ip 即将赋值为下一个 inode，记得释放</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> ((ip = namei(target)) == <span class="number">0</span>) &#123; <span class="comment">// 根据路径获取相应的 inode</span></span><br><span class="line">          end_op();</span><br><span class="line">          <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        ilock(ip);</span><br><span class="line">        <span class="keyword">if</span> (ip-&gt;type != T_SYMLINK) &#123;</span><br><span class="line">          <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        threshold--;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> (threshold &lt;= <span class="number">0</span>) &#123; <span class="comment">// 突破阈值，说明可能存在循环，直接报错</span></span><br><span class="line">        iunlockput(ip);</span><br><span class="line">        end_op();</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    f-&gt;type = FD_INODE;</span><br><span class="line">    f-&gt;off = <span class="number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/sysfile.c</span></div><code class="language-C">uint64
+sys_open(void)
+{
+  ...
+  if(ip-&gt;type == T_DEVICE){
+    ...
+  } else {
+    if (ip-&gt;type == T_SYMLINK &amp;&amp; (omode &amp; O_NOFOLLOW) == 0) { // 意味着要 follow 下去
+      char target[MAXPATH];
+      uint threshold = 10; // 以防出现 b-&gt;a-&gt;b-&gt;... 的循环链接
+      while (threshold) {
+        if (readi(ip, 0, (uint64)target, 0, MAXPATH) != MAXPATH) { // 读取 inode 存储的 target 文件路径
+          panic("link error");
+        }
+        iunlockput(ip); // ip 即将赋值为下一个 inode，记得释放
+
+        if ((ip = namei(target)) == 0) { // 根据路径获取相应的 inode
+          end_op();
+          return -1;
+        }
+
+        ilock(ip);
+        if (ip-&gt;type != T_SYMLINK) {
+          break;
+        }
+        threshold--;
+      }
+
+      if (threshold &lt;= 0) { // 突破阈值，说明可能存在循环，直接报错
+        iunlockput(ip);
+        end_op();
+        return -1;
+      }
+    }
+    f-&gt;type = FD_INODE;
+    f-&gt;off = 0;
+  }
+  ...
+}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h2 id="测试结果">测试结果</h2>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">$ make grade</span><br><span class="line">...</span><br><span class="line">== Test running bigfile ==</span><br><span class="line">$ make qemu-gdb</span><br><span class="line">running bigfile: OK (106.6s)</span><br><span class="line">== Test running symlinktest ==</span><br><span class="line">$ make qemu-gdb</span><br><span class="line">(0.8s)</span><br><span class="line">== Test   symlinktest: symlinks ==</span><br><span class="line">  symlinktest: symlinks: OK</span><br><span class="line">== Test   symlinktest: concurrent symlinks ==</span><br><span class="line">  symlinktest: concurrent symlinks: OK</span><br><span class="line">== Test usertests ==</span><br><span class="line">$ make qemu-gdb</span><br><span class="line">usertests: OK (197.8s)</span><br><span class="line">== Test time ==</span><br><span class="line">time: OK</span><br><span class="line">Score: 100/100</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">make</span> grade
+<span class="token punctuation">..</span>.
+<span class="token operator">==</span> Test running bigfile <span class="token operator">==</span>
+$ <span class="token function">make</span> qemu-gdb
+running bigfile: OK <span class="token punctuation">(</span><span class="token number">106</span>.6s<span class="token punctuation">)</span>
+<span class="token operator">==</span> Test running symlinktest <span class="token operator">==</span>
+$ <span class="token function">make</span> qemu-gdb
+<span class="token punctuation">(</span><span class="token number">0</span>.8s<span class="token punctuation">)</span>
+<span class="token operator">==</span> Test   symlinktest: symlinks <span class="token operator">==</span>
+  symlinktest: symlinks: OK
+<span class="token operator">==</span> Test   symlinktest: concurrent symlinks <span class="token operator">==</span>
+  symlinktest: concurrent symlinks: OK
+<span class="token operator">==</span> Test usertests <span class="token operator">==</span>
+$ <span class="token function">make</span> qemu-gdb
+usertests: OK <span class="token punctuation">(</span><span class="token number">197</span>.8s<span class="token punctuation">)</span>
+<span class="token operator">==</span> Test <span class="token function">time</span> <span class="token operator">==</span>
+time: OK
+Score: <span class="token number">100</span>/100<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h2 id="最后的工作">最后的工作</h2>
 <ol type="1">
 <li><code>git commit -am ""</code> 将所有修改提交到本地;</li>
@@ -519,7 +697,15 @@ APIKey，故直接成功提交；</li>
 用索引节点(inode)来定位文件所对应的磁盘块号。C 语言实现中，inode
 是一个结构体，存放若干文件属性，例如 xv6 完整的 inode
 结构体如下所示：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// On-disk inode structure</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">dinode</span> &#123;</span></span><br><span class="line">  <span class="type">short</span> type;               <span class="comment">// File type</span></span><br><span class="line">  <span class="type">short</span> major;              <span class="comment">// Major device number (T_DEVICE only)</span></span><br><span class="line">  <span class="type">short</span> minor;              <span class="comment">// Minor device number (T_DEVICE only)</span></span><br><span class="line">  <span class="type">short</span> nlink;              <span class="comment">// Number of links to inode in file system</span></span><br><span class="line">  uint size;                <span class="comment">// Size of file (bytes)</span></span><br><span class="line">  uint addrs[NDIRECT+<span class="number">1</span>+<span class="number">1</span>];  <span class="comment">// Data block addresses</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-C" data-language="C"><code class="language-C">// On-disk inode structure
+struct dinode {
+  short type;               // File type
+  short major;              // Major device number (T_DEVICE only)
+  short minor;              // Minor device number (T_DEVICE only)
+  short nlink;              // Number of links to inode in file system
+  uint size;                // Size of file (bytes)
+  uint addrs[NDIRECT+1+1];  // Data block addresses
+};<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>对于 unix fs 而言，根目录对应的 inode（unix
 的<strong>万物皆文件</strong>理念）位置是全局可知的。一个目录文件对应的磁盘块数据中，有目录下所有子文件的
 {文件名 =&gt; inode} 索引，根据此即可通过文件名到 inode cache
@@ -541,7 +727,7 @@ APIKey，故直接成功提交；</li>
 <code>target</code> 的<strong>新</strong>文件，访问 <code>symlink</code>
 依然成功。继续强调一遍，软链接即<strong>文件路径</strong>，只不过存放在磁盘中，不需要我们手打。在
 Linux 中，利用 PATH 创建用户自定义目录下的软链接十分好用，不必进行 cp/mv
-等操作。同时，允许用户<strong>跨文件系统</strong>进行访问。根据“万物即文件”，软链接也可以对<strong>目录</strong>创建。</p>
+等操作。同时，允许用户<strong>跨文件系统</strong>进行访问。根据「万物即文件」，软链接也可以对<strong>目录</strong>创建。</p>
 <p>缺点是相比直接访问 <code>target</code>
 多了一次（如果路径上的文件还是软链接类型文件则需要多次）读盘操作，同时存在一些创建文件的系统调用开销。</p>
 <h2 id="硬链接">硬链接</h2>

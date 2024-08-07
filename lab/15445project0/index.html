@@ -10,7 +10,7 @@
 &amp;gt;&amp;gt;&amp;gt;
 LAB 主页传送门 &amp;lt;&amp;lt;&amp;lt;
 
-此项目要求我们实现一个基于并发 ">
+此项目要求我们实现一个基于并发 Trie ">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -428,22 +428,20 @@ LAB 主页传送门 &amp;lt;&amp;lt;&amp;lt;
             <div id="articleContent">
                 <p>本项目与课程教学内容无关，仅作 C++ 水平检验用，但我在 code
 过程中发现还是涉及到部分比较重要的知识点，故作记录。</p>
-<p><a
-target="_blank" rel="noopener" href="https://15445.courses.cs.cmu.edu/fall2022/project0/">&gt;&gt;&gt;
+<p><a target="_blank" rel="noopener" href="https://15445.courses.cs.cmu.edu/fall2022/project0/">&gt;&gt;&gt;
 LAB 主页传送门 &lt;&lt;&lt;</a></p>
 <span id="more"></span>
 <p>此项目要求我们实现一个基于并发 Trie 的 k/v 存储，支持 Insert, Remove,
 GetValue 三种操作。</p>
 <blockquote>
-<p>有关 Trie 这种数据结构可以参考<a
-target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Trie">维基百科</a>。</p>
+<p>有关 Trie 这种数据结构可以参考<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Trie">维基百科</a>。</p>
 </blockquote>
 <p>为了简化，这里假设 Key 都是非空的可变长度字符串，即
 <code>std::string</code>。Value
 存储在该键最后一个字符所处的节点（<strong>Terminal
 Node</strong>）中。例如，考虑将 kv 对 <code>("ab", 1)</code> 和
 <code>("ac", "val")</code> 插入到 Trie 中，将如下所示。</p>
-<p><img src="graph.png" style="zoom: 80%;" /></p>
+<p><img src="graph.png" style="zoom: 80%;"></p>
 <h2 id="task-1---templated-trie">Task #1 - templated trie</h2>
 <h3 id="trienode">TrieNode</h3>
 <blockquote>
@@ -459,19 +457,16 @@ Node。可以根据字符通过
 <blockquote>
 <p>这里<strong>智能指针</strong>只涉及
 <strong>unique_ptr</strong>，我的理解是将裸指针封装成类以保证析构释放资源，同时独占该指针的使用权，既能防止其它指针指向该地址导致错误释放，也能在不生成副本的情况下访问数据。</p>
-<p>具体可参考<a
-target="_blank" rel="noopener" href="https://xhy3054.github.io/cpp-unique-ptr/">这篇文章</a>。</p>
+<p>具体可参考<a target="_blank" rel="noopener" href="https://xhy3054.github.io/cpp-unique-ptr/">这篇文章</a>。</p>
 </blockquote>
 <blockquote>
 <p><strong>左值</strong>简单来说是指有名的、可通过地址访问的变量，一般在等号左侧；相反，<strong>右值</strong>就是字面量，一般在等号右侧。<strong>左值引用</strong>只能绑定到左值，<strong>右值引用</strong>只能绑定到右值。然而，<strong>右值引用</strong>既可以是左值（函数形参）也可以是右值（函数返回值）。</p>
-<p>具体可参考<a
-target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/335994370">这篇文章</a>。</p>
+<p>具体可参考<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/335994370">这篇文章</a>。</p>
 </blockquote>
 <blockquote>
 <p>与深拷贝不同，<strong>移动语义</strong>直接移动数据的所有权。与
 <strong>unique_ptr</strong> 结合就变成了转移指针的所有权。</p>
-<p>具体可参考<a
-target="_blank" rel="noopener" href="https://www.cnblogs.com/zhangyi1357/p/16018810.html">这篇文章</a>。</p>
+<p>具体可参考<a target="_blank" rel="noopener" href="https://www.cnblogs.com/zhangyi1357/p/16018810.html">这篇文章</a>。</p>
 </blockquote>
 <p>再来看这两个函数。移动构造函数需要接管所有数据，基本类型变量直接赋值即可，对
 <strong>unique_ptr</strong> 而言需使用 <code>std::move()</code>

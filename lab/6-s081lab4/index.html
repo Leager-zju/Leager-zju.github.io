@@ -11,7 +11,7 @@
 写时拷贝)
 The Problem
 
-The fork() system call in xv6 copies all of th">
+The fork() system call in xv6 copies all of the pare">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -482,8 +482,8 @@ RISC-V 文档可知，出现该异常时，<strong>SCAUSE 寄存器中的值为 
 STVAL
 中的值为引起异常的虚拟地址</strong>。一旦遇到该异常，说明我们尝试写入一个
 <code>PTE_W=0</code> 的页，在 COW
-策略下，我们就需要在这里进行拷贝了，那第一步就是判断该虚拟地址对应的物理页是否“有资格享用
-COW”。方法很简单，只需要检查页表项的
+策略下，我们就需要在这里进行拷贝了，那第一步就是判断该虚拟地址对应的物理页是否「有资格享用
+COW」。方法很简单，只需要检查页表项的
 <code>PTE_V</code>，<code>PTE_U</code> 和 <code>PTE_COW</code>
 位是否均为 1 即可。</p>
 <p>如果通过检查，那就分配新的数据页
@@ -500,7 +500,7 @@ COW”。方法很简单，只需要检查页表项的
 <code>return -1</code> 即可。</p>
 <p>到这里就够了吗？还不够。因为还有一个关键问题我们没有解决，那就是父子进程中的如果都使用
 COW
-分配新页并修改页表项后，原来的那个页面将没有任何页表项指向——内存泄漏产生了。本质原因在于现有的机制没法意识到一个页面什么时候该被释放，一个合理的措施是维护所有页面的“<strong>引用计数</strong>”，每当一个页面被一个页表项指向时，调用
+分配新页并修改页表项后，原来的那个页面将没有任何页表项指向——内存泄漏产生了。本质原因在于现有的机制没法意识到一个页面什么时候该被释放，一个合理的措施是维护所有页面的「<strong>引用计数</strong>」，每当一个页面被一个页表项指向时，调用
 <code>pin()</code>
 将其计数值加一，同样的，每当一个页表项取消指向时，调用
 <code>unpin()</code> 将其计数值减一，而减到 0 后就调用
@@ -525,21 +525,246 @@ COW
 <p>思路捋清了，那代码就很好写了。</p>
 <h2 id="preparation">Preparation</h2>
 <p>切换到对应分支</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ git fetch</span><br><span class="line">$ git checkout cow</span><br><span class="line">$ make clean</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">git</span> fetch
+$ <span class="token function">git</span> checkout cow
+$ <span class="token function">make</span> clean<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <h2 id="task-implement-copy-on-write">Task: Implement copy-on write</h2>
 <h3 id="引用计数">引用计数</h3>
 <p>首先实现引用计数。</p>
-<figure class="highlight c"><figcaption><span>kernel/kalloc.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> NPAGES (PHYSTOP-KERNBASE)/PGSIZE</span></span><br><span class="line"></span><br><span class="line"><span class="type">static</span> uint8 ref_count[NPAGES];</span><br><span class="line"></span><br><span class="line"><span class="comment">// arg start_pa must be PGROUNDed</span></span><br><span class="line">uint64</span><br><span class="line"><span class="title function_">page_idx</span><span class="params">(<span class="type">void</span>* start_pa)</span></span><br><span class="line">&#123;</span><br><span class="line">  uint64 idx = ((uint64)start_pa-KERNBASE) &gt;&gt; <span class="number">12</span>;</span><br><span class="line">  <span class="keyword">if</span> (idx &gt;= NPAGES) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> idx;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// plus the reference count of page at pa</span></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">pin</span><span class="params">(<span class="type">void</span>* pa)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">void</span>* start_pa = (<span class="type">void</span>*)PGROUNDDOWN((uint64)pa);</span><br><span class="line">  uint64 idx = page_idx(start_pa);</span><br><span class="line">  <span class="keyword">if</span> (idx == <span class="number">-1</span>) &#123;</span><br><span class="line">    panic(<span class="string">&quot;invalid page\n&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  ref_count[idx]++;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// minus the reference count of page at pa</span></span><br><span class="line"><span class="comment">// if the count is 0 after unpin, free it</span></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">unpin</span><span class="params">(<span class="type">void</span>* pa)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">void</span>* start_pa = (<span class="type">void</span>*)PGROUNDDOWN((uint64)pa);</span><br><span class="line">  uint64 idx = page_idx(start_pa);</span><br><span class="line">  <span class="keyword">if</span> (idx == <span class="number">-1</span>) &#123;</span><br><span class="line">    panic(<span class="string">&quot;invalid page\n&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (--ref_count[idx] == <span class="number">0</span>) &#123;</span><br><span class="line">    kfree(start_pa);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">uint8</span><br><span class="line"><span class="title function_">getcount</span><span class="params">(<span class="type">void</span>* pa)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">void</span>* start_pa = (<span class="type">void</span>*)PGROUNDDOWN((uint64)pa);</span><br><span class="line">  uint64 idx = page_idx(start_pa);</span><br><span class="line">  <span class="keyword">if</span> (idx == <span class="number">-1</span>) &#123;</span><br><span class="line">    panic(<span class="string">&quot;invalid page\n&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> ref_count[idx];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">pinned</span><span class="params">(<span class="type">void</span>* pa)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">return</span> getcount(pa) &gt; <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">exown</span><span class="params">(<span class="type">void</span>* pa)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">return</span> getcount(pa) == <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">kinit</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  initlock(&amp;kmem.lock, <span class="string">&quot;kmem&quot;</span>);</span><br><span class="line">  <span class="built_in">memset</span>(ref_count, <span class="number">0</span>, <span class="keyword">sizeof</span>(ref_count));   <span class="comment">// (!new)</span></span><br><span class="line">  freerange(end, (<span class="type">void</span>*)PHYSTOP);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Allocate one 4096-byte page of physical memory.</span></span><br><span class="line"><span class="comment">// Returns a pointer that the kernel can use.</span></span><br><span class="line"><span class="comment">// Returns 0 if the memory cannot be allocated.</span></span><br><span class="line"><span class="type">void</span> *</span><br><span class="line"><span class="title function_">kalloc</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">run</span> *<span class="title">r</span>;</span></span><br><span class="line"></span><br><span class="line">  acquire(&amp;kmem.lock);</span><br><span class="line">  r = kmem.freelist;</span><br><span class="line">  <span class="keyword">if</span>(r)</span><br><span class="line">    kmem.freelist = r-&gt;next;</span><br><span class="line">  release(&amp;kmem.lock);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>(r)&#123;</span><br><span class="line">    <span class="built_in">memset</span>((<span class="type">char</span>*)r, <span class="number">5</span>, PGSIZE);</span><br><span class="line">    pin((<span class="type">void</span>*)r);   <span class="comment">// (!new)</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> (<span class="type">void</span>*)r;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/kalloc.c</span></div><code class="language-C">#define NPAGES (PHYSTOP-KERNBASE)/PGSIZE
+
+static uint8 ref_count[NPAGES];
+
+// arg start_pa must be PGROUNDed
+uint64
+page_idx(void* start_pa)
+{
+  uint64 idx = ((uint64)start_pa-KERNBASE) &gt;&gt; 12;
+  if (idx &gt;= NPAGES) {
+    return -1;
+  }
+  return idx;
+}
+
+// plus the reference count of page at pa
+void
+pin(void* pa)
+{
+  void* start_pa = (void*)PGROUNDDOWN((uint64)pa);
+  uint64 idx = page_idx(start_pa);
+  if (idx == -1) {
+    panic("invalid page\n");
+  }
+
+  ref_count[idx]++;
+}
+
+// minus the reference count of page at pa
+// if the count is 0 after unpin, free it
+void
+unpin(void* pa)
+{
+  void* start_pa = (void*)PGROUNDDOWN((uint64)pa);
+  uint64 idx = page_idx(start_pa);
+  if (idx == -1) {
+    panic("invalid page\n");
+  }
+
+  if (--ref_count[idx] == 0) {
+    kfree(start_pa);
+  }
+}
+
+uint8
+getcount(void* pa)
+{
+  void* start_pa = (void*)PGROUNDDOWN((uint64)pa);
+  uint64 idx = page_idx(start_pa);
+  if (idx == -1) {
+    panic("invalid page\n");
+  }
+  return ref_count[idx];
+}
+
+int
+pinned(void* pa)
+{
+  return getcount(pa) &gt; 0;
+}
+
+int
+exown(void* pa)
+{
+  return getcount(pa) == 1;
+}
+
+void
+kinit()
+{
+  initlock(&amp;kmem.lock, "kmem");
+  memset(ref_count, 0, sizeof(ref_count));   // (!new)
+  freerange(end, (void*)PHYSTOP);
+}
+
+// Allocate one 4096-byte page of physical memory.
+// Returns a pointer that the kernel can use.
+// Returns 0 if the memory cannot be allocated.
+void *
+kalloc(void)
+{
+  struct run *r;
+
+  acquire(&amp;kmem.lock);
+  r = kmem.freelist;
+  if(r)
+    kmem.freelist = r-&gt;next;
+  release(&amp;kmem.lock);
+
+  if(r){
+    memset((char*)r, 5, PGSIZE);
+    pin((void*)r);   // (!new)
+  }
+  return (void*)r;
+}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>为了在其他文件中调用，部分函数需要在 <code>def.h</code>
 中添加声明。</p>
 <h3 id="uvmcopy">uvmcopy()</h3>
-<figure class="highlight c"><figcaption><span>kernel/vm.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">uvmcopy</span><span class="params">(<span class="type">pagetable_t</span> old, <span class="type">pagetable_t</span> new, uint64 sz)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">pte_t</span> *pte;</span><br><span class="line">  uint64 pa, i;</span><br><span class="line">  uint flags;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span>(i = <span class="number">0</span>; i &lt; sz; i += PGSIZE)&#123;</span><br><span class="line">    <span class="keyword">if</span> ((pte = walk(old, i, <span class="number">0</span>)) == <span class="number">0</span>)</span><br><span class="line">      panic(<span class="string">&quot;uvmcopy: pte should exist&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> ((*pte &amp; PTE_V) == <span class="number">0</span>)</span><br><span class="line">      panic(<span class="string">&quot;uvmcopy: page not present&quot;</span>);</span><br><span class="line"></span><br><span class="line">    pa = PTE2PA(*pte);</span><br><span class="line">    *pte &amp;= ~PTE_W;   <span class="comment">// clear PTE_W</span></span><br><span class="line">    *pte |= PTE_COW;  <span class="comment">// add PTE_COW</span></span><br><span class="line"></span><br><span class="line">    flags = PTE_FLAGS(*pte);</span><br><span class="line">    <span class="keyword">if</span> (mappages(new, i, PGSIZE, pa, flags) != <span class="number">0</span>) &#123;</span><br><span class="line">      uvmunmap(new, <span class="number">0</span>, i / PGSIZE, <span class="number">0</span>);</span><br><span class="line">      <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    pin((<span class="type">void</span>*)pa); <span class="comment">// !!!很重要</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/vm.c</span></div><code class="language-C">int
+uvmcopy(pagetable_t old, pagetable_t new, uint64 sz)
+{
+  pte_t *pte;
+  uint64 pa, i;
+  uint flags;
+
+  for(i = 0; i &lt; sz; i += PGSIZE){
+    if ((pte = walk(old, i, 0)) == 0)
+      panic("uvmcopy: pte should exist");
+    if ((*pte &amp; PTE_V) == 0)
+      panic("uvmcopy: page not present");
+
+    pa = PTE2PA(*pte);
+    *pte &amp;= ~PTE_W;   // clear PTE_W
+    *pte |= PTE_COW;  // add PTE_COW
+
+    flags = PTE_FLAGS(*pte);
+    if (mappages(new, i, PGSIZE, pa, flags) != 0) {
+      uvmunmap(new, 0, i / PGSIZE, 0);
+      return -1;
+    }
+
+    pin((void*)pa); // !!!很重要
+  }
+  return 0;
+}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h3 id="usertrap">usertrap()</h3>
-<figure class="highlight c"><figcaption><span>kernel/trap.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">usertrap</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">if</span>(r_scause() == <span class="number">8</span>)&#123;</span><br><span class="line">    ...</span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span> (r_scause() == <span class="number">15</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span>(p-&gt;killed)</span><br><span class="line">      <span class="built_in">exit</span>(<span class="number">-1</span>);</span><br><span class="line"></span><br><span class="line">    uint64 start_va = PGROUNDDOWN(r_stval());</span><br><span class="line">    <span class="keyword">if</span> (start_va &gt;= MAXVA) <span class="comment">// walk 前检查一下，避免 panic 导致测试卡住</span></span><br><span class="line">      <span class="built_in">exit</span>(<span class="number">-1</span>);</span><br><span class="line"></span><br><span class="line">    <span class="type">pte_t</span>* pte = walk(p-&gt;pagetable, start_va, <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">if</span> (pte == <span class="number">0</span> || (*pte &amp; PTE_V) == <span class="number">0</span> || (*pte &amp; PTE_U) == <span class="number">0</span> || (*pte &amp; PTE_COW) == <span class="number">0</span>)</span><br><span class="line">      panic(<span class="string">&quot;invalid pte&quot;</span>);</span><br><span class="line"></span><br><span class="line">    uint64 pa = PTE2PA(*pte);</span><br><span class="line">    <span class="keyword">if</span> (exown((<span class="type">void</span>*)pa)) &#123; <span class="comment">// 如果独占，只需修改标志位，无需拷贝，省时省力</span></span><br><span class="line">      *pte &amp;= ~PTE_COW;</span><br><span class="line">      *pte |= PTE_W;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="type">char</span>* npa = (<span class="type">char</span>*)kalloc();</span><br><span class="line">      <span class="keyword">if</span>(npa == <span class="number">0</span>)&#123;</span><br><span class="line">        <span class="comment">// 如果没有可用内存，杀掉进程</span></span><br><span class="line">        acquire(&amp;p-&gt;lock);</span><br><span class="line">        p-&gt;killed = <span class="number">1</span>;</span><br><span class="line">        release(&amp;p-&gt;lock);</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        memmove(npa, (<span class="type">char</span>*)pa, PGSIZE);</span><br><span class="line"></span><br><span class="line">        *pte &amp;= ~PTE_COW;</span><br><span class="line">        *pte |= PTE_W;</span><br><span class="line">        *pte = PTE_FLAGS(*pte) | PA2PTE(npa);</span><br><span class="line"></span><br><span class="line">        unpin((<span class="type">void</span>*)pa);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/trap.c</span></div><code class="language-C">void
+usertrap(void)
+{
+  ...
+  if(r_scause() == 8){
+    ...
+  } else if (r_scause() == 15) {
+    if(p-&gt;killed)
+      exit(-1);
+
+    uint64 start_va = PGROUNDDOWN(r_stval());
+    if (start_va &gt;= MAXVA) // walk 前检查一下，避免 panic 导致测试卡住
+      exit(-1);
+
+    pte_t* pte = walk(p-&gt;pagetable, start_va, 0);
+    if (pte == 0 || (*pte &amp; PTE_V) == 0 || (*pte &amp; PTE_U) == 0 || (*pte &amp; PTE_COW) == 0)
+      panic("invalid pte");
+
+    uint64 pa = PTE2PA(*pte);
+    if (exown((void*)pa)) { // 如果独占，只需修改标志位，无需拷贝，省时省力
+      *pte &amp;= ~PTE_COW;
+      *pte |= PTE_W;
+    } else {
+      char* npa = (char*)kalloc();
+      if(npa == 0){
+        // 如果没有可用内存，杀掉进程
+        acquire(&amp;p-&gt;lock);
+        p-&gt;killed = 1;
+        release(&amp;p-&gt;lock);
+      } else {
+        memmove(npa, (char*)pa, PGSIZE);
+
+        *pte &amp;= ~PTE_COW;
+        *pte |= PTE_W;
+        *pte = PTE_FLAGS(*pte) | PA2PTE(npa);
+
+        unpin((void*)pa);
+      }
+    }
+  }
+  ...
+}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h3 id="copyout">copyout()</h3>
-<figure class="highlight c"><figcaption><span>kernel/vm.c</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">copyout</span><span class="params">(<span class="type">pagetable_t</span> pagetable, uint64 dstva, <span class="type">char</span> *src, uint64 len)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">pte_t</span> *pte;</span><br><span class="line">  uint64 n, va0, pa0;</span><br><span class="line">  <span class="keyword">while</span>(len &gt; <span class="number">0</span>)&#123;</span><br><span class="line">    va0 = PGROUNDDOWN(dstva);</span><br><span class="line">    <span class="keyword">if</span> (va0 &gt;= MAXVA) <span class="comment">// walk 前检查一下，避免 panic 导致测试卡住</span></span><br><span class="line">      <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line"></span><br><span class="line">    pte = walk(pagetable, va0, <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">if</span> (pte == <span class="number">0</span> || (*pte &amp; PTE_V) == <span class="number">0</span> || (*pte &amp; PTE_U) == <span class="number">0</span>)</span><br><span class="line">      <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line"></span><br><span class="line">    pa0 = PTE2PA(*pte);</span><br><span class="line">    <span class="keyword">if</span> (*pte &amp; PTE_COW) &#123;</span><br><span class="line">      <span class="keyword">if</span> (exown((<span class="type">void</span>*)pa0)) &#123;</span><br><span class="line">        *pte &amp;= ~PTE_COW;</span><br><span class="line">        *pte |= PTE_W;</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="type">char</span>* npa = (<span class="type">char</span>*)kalloc();</span><br><span class="line">        <span class="keyword">if</span>(npa)&#123;</span><br><span class="line">          memmove(npa, (<span class="type">char</span>*)pa0, PGSIZE);</span><br><span class="line"></span><br><span class="line">          *pte &amp;= ~PTE_COW;</span><br><span class="line">          *pte |= PTE_W;</span><br><span class="line">          *pte = PTE_FLAGS(*pte) | PA2PTE(npa);</span><br><span class="line"></span><br><span class="line">          unpin((<span class="type">void</span>*)pa0);</span><br><span class="line">        &#125;</span><br><span class="line">        pa0 = (uint64)npa;  <span class="comment">// 如果 npa 为 0，则最终会 return -1</span></span><br><span class="line">                            <span class="comment">// 反之，npa 成为新的 pa0，即 dst pa</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(pa0 == <span class="number">0</span>)</span><br><span class="line">      <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    ...</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/vm.c</span></div><code class="language-C">int
+copyout(pagetable_t pagetable, uint64 dstva, char *src, uint64 len)
+{
+  pte_t *pte;
+  uint64 n, va0, pa0;
+  while(len &gt; 0){
+    va0 = PGROUNDDOWN(dstva);
+    if (va0 &gt;= MAXVA) // walk 前检查一下，避免 panic 导致测试卡住
+      return -1;
+
+    pte = walk(pagetable, va0, 0);
+    if (pte == 0 || (*pte &amp; PTE_V) == 0 || (*pte &amp; PTE_U) == 0)
+      return -1;
+
+    pa0 = PTE2PA(*pte);
+    if (*pte &amp; PTE_COW) {
+      if (exown((void*)pa0)) {
+        *pte &amp;= ~PTE_COW;
+        *pte |= PTE_W;
+      } else {
+        char* npa = (char*)kalloc();
+        if(npa){
+          memmove(npa, (char*)pa0, PGSIZE);
+
+          *pte &amp;= ~PTE_COW;
+          *pte |= PTE_W;
+          *pte = PTE_FLAGS(*pte) | PA2PTE(npa);
+
+          unpin((void*)pa0);
+        }
+        pa0 = (uint64)npa;  // 如果 npa 为 0，则最终会 return -1
+                            // 反之，npa 成为新的 pa0，即 dst pa
+      }
+    }
+
+    if(pa0 == 0)
+      return -1;
+    ...
+  }
+  return 0;
+}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h2 id="测试结果">测试结果</h2>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">$ make grade</span><br><span class="line">...</span><br><span class="line">== Test running cowtest ==</span><br><span class="line">$ make qemu-gdb</span><br><span class="line">(6.8s)</span><br><span class="line">== Test   simple ==</span><br><span class="line">  simple: OK</span><br><span class="line">== Test   three ==</span><br><span class="line">  three: OK</span><br><span class="line">== Test   file ==</span><br><span class="line">  file: OK</span><br><span class="line">== Test usertests ==</span><br><span class="line">$ make qemu-gdb</span><br><span class="line">(116.5s)</span><br><span class="line">== Test   usertests: copyin ==</span><br><span class="line">  usertests: copyin: OK</span><br><span class="line">== Test   usertests: copyout ==</span><br><span class="line">  usertests: copyout: OK</span><br><span class="line">== Test   usertests: all tests ==</span><br><span class="line">  usertests: all tests: OK</span><br><span class="line">== Test time ==</span><br><span class="line">time: OK</span><br><span class="line">Score: 110/110</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">make</span> grade
+<span class="token punctuation">..</span>.
+<span class="token operator">==</span> Test running cowtest <span class="token operator">==</span>
+$ <span class="token function">make</span> qemu-gdb
+<span class="token punctuation">(</span><span class="token number">6</span>.8s<span class="token punctuation">)</span>
+<span class="token operator">==</span> Test   simple <span class="token operator">==</span>
+  simple: OK
+<span class="token operator">==</span> Test   three <span class="token operator">==</span>
+  three: OK
+<span class="token operator">==</span> Test   <span class="token function">file</span> <span class="token operator">==</span>
+  file: OK
+<span class="token operator">==</span> Test usertests <span class="token operator">==</span>
+$ <span class="token function">make</span> qemu-gdb
+<span class="token punctuation">(</span><span class="token number">116</span>.5s<span class="token punctuation">)</span>
+<span class="token operator">==</span> Test   usertests: copyin <span class="token operator">==</span>
+  usertests: copyin: OK
+<span class="token operator">==</span> Test   usertests: copyout <span class="token operator">==</span>
+  usertests: copyout: OK
+<span class="token operator">==</span> Test   usertests: all tests <span class="token operator">==</span>
+  usertests: all tests: OK
+<span class="token operator">==</span> Test <span class="token function">time</span> <span class="token operator">==</span>
+time: OK
+Score: <span class="token number">110</span>/110<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h2 id="最后的工作">最后的工作</h2>
 <ol type="1">
 <li><code>git commit -am ""</code> 将所有修改提交到本地;</li>
