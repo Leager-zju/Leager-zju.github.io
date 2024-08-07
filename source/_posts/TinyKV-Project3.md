@@ -60,14 +60,14 @@ Raft 层首先会 `Step` 一条 `MsgTransferLeader`。由于任何节点都有�
 
 > 在 MockClient 里，测试用例做出的操作会被缓存，等到下次 `RegionHeartbeat()` 时，判断对应 `Region` 是否有未执行完毕的操作，如果有，则在 Response 中告知。
 >
-> ```go
+> ```go kv/test_raftstore/scheduler.go
 > func (r *SchedulerTaskHandler) Handle(t worker.Task) {
-> 	switch task := t.(type) {
-> 	...
-> 	case *SchedulerRegionHeartbeatTask:
-> 		r.onHeartbeat(task) // 调用 RegionHeartbeat
-> 	...
-> 	}
+>   switch task := t.(type) {
+>   ...
+>   case *SchedulerRegionHeartbeatTask:
+>     r.onHeartbeat(task) // 调用 RegionHeartbeat
+>   ...
+>   }
 > }
 >
 > func (m *MockSchedulerClient) RegionHeartbeat(req *schedulerpb.RegionHeartbeatRequest) error {
@@ -79,11 +79,11 @@ Raft 层首先会 `Step` 一条 `MsgTransferLeader`。由于任何节点都有�
 >
 >   resp := makeResp(req)
 >   if op := m.operators[regionID]; op != nil {
->  	  if m.tryFinished(op, req.Region, req.Leader) {
->   		delete(m.operators, regionID)
->   	} else {
->   		m.makeRegionHeartbeatResponse(op, resp)
->   	}
+>      if m.tryFinished(op, req.Region, req.Leader) {
+>       delete(m.operators, regionID)
+>     } else {
+>       m.makeRegionHeartbeatResponse(op, resp)
+>     }
 >   }
 >
 >   // send response to store where the leader is located
@@ -186,33 +186,33 @@ region split 中并没有很难处理的疑难杂症。
 
 首先，`Region` 的 Leader 发送心跳，`Server` 通过 `RegionHeartbeat()` 不断收取心跳信息，并从中提取出发送方的 `RegionInfo`，然后下放到 `Cluster`，通过 `HandleRegionHeartbeat()` 根据当前 `RegionInfo` 进行处理：
 
-```go
+```go scheduler/server/grpc_service.go
 func (s *Server) RegionHeartbeat(stream schedulerpb.Scheduler_RegionHeartbeatServer) error {
-	for {
+  for {
     ...
-		request, err := server.Recv()
+    request, err := server.Recv()
     ...
-		region := core.RegionFromHeartbeat(request)
+    region := core.RegionFromHeartbeat(request)
     ...
-		err = cluster.HandleRegionHeartbeat(region)
+    err = cluster.HandleRegionHeartbeat(region)
     ...
-	}
+  }
 }
 ```
 
 在处理的过程中，`Cluster` 首先调用 `processRegionHeartbeat()` 更新信息，若成功且该 `Region` 拥有至少一个 `Peer`，就调用 `Dispatch(Heartbeat)` 检查是否有对该 `Region` 待执行的命令 `Operator`：
 
-```go
+```go scheduler/server/cluster_worker.go
 func (c *RaftCluster) HandleRegionHeartbeat(region *core.RegionInfo) error {
-	if err := c.processRegionHeartbeat(region); err != nil {
-		return err
-	}
+  if err := c.processRegionHeartbeat(region); err != nil {
+    return err
+  }
 
-	c.RLock()
-	co := c.coordinator
-	c.RUnlock()
-	co.opController.Dispatch(region, schedule.DispatchFromHeartBeat)
-	return nil
+  c.RLock()
+  co := c.coordinator
+  c.RUnlock()
+  co.opController.Dispatch(region, schedule.DispatchFromHeartBeat)
+  return nil
 }
 ```
 
@@ -222,30 +222,30 @@ func (c *RaftCluster) HandleRegionHeartbeat(region *core.RegionInfo) error {
 2. 如果已执行完毕，将其移除，并将状态设置为 `OperatorStatus_SUCCESS`;
 3. 如果超时，将其移除，并将状态设置为 `OperatorStatus_TIMEOUT`;
 
-```go
+```go scheduler/server/schedule/operator_controller.go
 func (oc *OperatorController) Dispatch(region *core.RegionInfo, source string) {
-	if op := oc.GetOperator(region.GetID()); op != nil {
-		timeout := op.IsTimeout()
-		if step := op.Check(region); step != nil && !timeout {
-			origin := op.RegionEpoch()
-			latest := region.GetRegionEpoch()
-			changes := latest.GetConfVer() - origin.GetConfVer()
-			if source == DispatchFromHeartBeat &&
-				changes > uint64(op.ConfVerChanged(region)) {
-				if oc.RemoveOperator(op) {
-					oc.opRecords.Put(op, schedulerpb.OperatorStatus_CANCEL)
-				}
-				return
-			}
-			oc.SendScheduleCommand(region, step, source)
-			return
-		}
-		if op.IsFinish() && oc.RemoveOperator(op) {
-			oc.opRecords.Put(op, schedulerpb.OperatorStatus_SUCCESS)
-		} else if timeout && oc.RemoveOperator(op) {
-			oc.opRecords.Put(op, schedulerpb.OperatorStatus_TIMEOUT)
-		}
-	}
+  if op := oc.GetOperator(region.GetID()); op != nil {
+    timeout := op.IsTimeout()
+    if step := op.Check(region); step != nil && !timeout {
+      origin := op.RegionEpoch()
+      latest := region.GetRegionEpoch()
+      changes := latest.GetConfVer() - origin.GetConfVer()
+      if source == DispatchFromHeartBeat &&
+        changes > uint64(op.ConfVerChanged(region)) {
+        if oc.RemoveOperator(op) {
+          oc.opRecords.Put(op, schedulerpb.OperatorStatus_CANCEL)
+        }
+        return
+      }
+      oc.SendScheduleCommand(region, step, source)
+      return
+    }
+    if op.IsFinish() && oc.RemoveOperator(op) {
+      oc.opRecords.Put(op, schedulerpb.OperatorStatus_SUCCESS)
+    } else if timeout && oc.RemoveOperator(op) {
+      oc.opRecords.Put(op, schedulerpb.OperatorStatus_TIMEOUT)
+    }
+  }
 }
 ```
 
@@ -296,40 +296,40 @@ func (oc *OperatorController) Dispatch(region *core.RegionInfo, source string) {
 
 整个代码如下：
 
-```go
+```go scheduler/server/cluster.go
   var originalRegion *core.RegionInfo
-	var originalStore *core.StoreInfo
+  var originalStore *core.StoreInfo
   var targetStore *core.StoreInfo
-	stores := GetAllSortedSuitableStores(cluster)
-	
+  stores := GetAllSortedSuitableStores(cluster)
+  
   // find original region and original store
-	cb := func(container core.RegionsContainer) {
-		originalRegion = container.RandomRegion([]byte{}, []byte{})
-	}
-	for i, store := range stores {
-		if originalRegion = SelectSuitableRegion(cb); originalRegion != nil {
+  cb := func(container core.RegionsContainer) {
+    originalRegion = container.RandomRegion([]byte{}, []byte{})
+  }
+  for i, store := range stores {
+    if originalRegion = SelectSuitableRegion(cb); originalRegion != nil {
       originalStore = stores[i]
       break
     }
-	}
-	if originalStore == nil {
-		return nil
-	}
+  }
+  if originalStore == nil {
+    return nil
+  }
 
   // find target store
-	for target := len(stores) - 1; target >= 0; target-- {
-		regionInTargetStore := RegionIsInStore(originalRegion, stores[target])
-		if !regionInTargetStore && isDifferenceBigEnough(stores[original], stores[target], originalRegion) {
+  for target := len(stores) - 1; target >= 0; target-- {
+    regionInTargetStore := RegionIsInStore(originalRegion, stores[target])
+    if !regionInTargetStore && isDifferenceBigEnough(stores[original], stores[target], originalRegion) {
       targetStore = stores[target]
-			break
-		}
-	}
-	if targetStore == nil {
-		return nil
-	}
+      break
+    }
+  }
+  if targetStore == nil {
+    return nil
+  }
 
-	newPeer := AllocPeer(cluster, stores[target].GetID())
-	return CreateMovePeerOperator(s.GetName(), cluster, originalRegion, operator.OpBalance, stores[original].GetID(), stores[target].GetID(), newPeer.GetId())
+  newPeer := AllocPeer(cluster, stores[target].GetID())
+  return CreateMovePeerOperator(s.GetName(), cluster, originalRegion, operator.OpBalance, stores[original].GetID(), stores[target].GetID(), newPeer.GetId())
 ```
 > 并且由于 `RaftGroup` 随时可能变化，故对于不在组内的节点而言，任何消息都是无效的——即便收到消息，也不能做任何事。对于新加入组的节点而言，Raft 层的 `Prs` 可能未被正确初始化，所以如果收到一条 peer 的消息而该 peer 又不在 `Prs` 中时，将其加入。
 
@@ -338,4 +338,3 @@ func (oc *OperatorController) Dispatch(region *core.RegionInfo, source string) {
 #### 3 RegionSplit
 
 不同 RaftGroup 负责不同 Region，随着时间推进必然会有一些 Region 会超出一个值 `RegionSplitSize`，为了负载均衡，必须将这些过大的 Region 一分为二。
-

@@ -71,7 +71,7 @@ TinyKV 存储使用 3 个 CF 来存放不同类型数据，分别为：
 
 > 一把锁的有效时间范围在 `[lock.Ts, lock.Ts + lock.Ttl]` 中（如果 `lock.Ttl = 0` 则表明永久有效，直到被删除）。
 
-```go
+```go kv/server/server.go
 lock := getLock(txn, key)
 if lock.IsLockedAt(Version) {
   // err: the key has been locked
@@ -92,7 +92,7 @@ if lock.IsLockedAt(Version) {
 
 其次检查该 Key 的最后一次修改是否与当前事务冲突，即获取 `MostRecentWrite` 并检查区间 `[StartTs, CommitTs]` 是否与当前请求时间戳重合，若是则说明存在其他客户端已经发起请求并对数据进行了修改，报告错误。（要保证对同一个 Key 所有修改的时间区间 `[StartTs, CommitTs]` 不发生重叠）
 
-```go
+```go kv/server/server.go
 mostRecentWrite, commitTs, err := txn.MostRecentWrite(key)
 if mostRecentWrite != nil && mostRecentWrite.StartTS < StartVersion && commitTs >= StartVersion {
   // err: conflict with another transaction
@@ -115,7 +115,7 @@ if mostRecentWrite != nil && mostRecentWrite.StartTS < StartVersion && commitTs 
 
 再检查是否由**当前事务上锁**，即
 
-```go
+```go kv/server/server.go
 lock := getLock(txn, key)
 if !lock.IsLockedAt(req.GetStartVersion()) {
   response.Error = &kvrpcpb.KeyError{
@@ -155,7 +155,7 @@ if lock.Ts != req.GetStartVersion() {
 2. 检查是否存在 `Lock`，若无则回滚;
 3. 检查 `Lock` 是否超时，若超时则删除原有 `Value` 与 `Lock` 并回滚;
 
-```go
+```go kv/server/server.go
 lock := getLock(txn, PrimaryKey)
 if !lock.ExistAt(CurrentTs) {
   response.Action = Action_LockNotExistRollback
@@ -185,7 +185,7 @@ if !lock.ExistAt(CurrentTs) {
 1. `CommitVersion = 0`: 执行 `BatchRollback`;
 2. `CommitVersion != 0`: 执行 `Commit`;
 
-```go
+```go kv/server/server.go
 func (server *Server) KvResolveLock(_ context.Context, req *kvrpcpb.ResolveLockRequest) (*kvrpcpb.ResolveLockResponse, error) {
   ...
   if CommitVersion > 0 {

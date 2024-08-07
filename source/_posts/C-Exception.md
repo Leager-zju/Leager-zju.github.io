@@ -17,7 +17,7 @@ img:
 
 一个完整的异常处理流程如下：
 
-```cpp
+```cpp 异常处理
 try {
   /* code */
   throw SomeException;
@@ -50,7 +50,7 @@ try {
 >
 > **注意**，`throw` 出的异常对象类型取静态类型，即便存在运行时多态。
 >
-> ```cpp
+> ```cpp 取静态类型
 > class Base {
 >  public:
 >   virtual ~Base() = default;
@@ -84,7 +84,7 @@ try {
 
 当然，你甚至可以在 `try-catch` 外再套一层 `try-catch`，是为**重抛**：
 
-```cpp
+```cpp 重抛
 try {
   try {
     throw SomeException;

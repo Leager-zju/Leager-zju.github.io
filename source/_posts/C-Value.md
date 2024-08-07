@@ -17,7 +17,7 @@ img:
 
 所有**值类别**可用以下韦恩图描述：
 
-<img src="image-20230120230912975.png" alt="image-20230120230912975" style="zoom:50%;" />
+<img src="image-20230120230912975.png" style="zoom:50%;" />
 
 ### 左值(Lvalue)，右值(Rvalue)
 

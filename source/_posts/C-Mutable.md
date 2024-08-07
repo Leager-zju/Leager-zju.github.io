@@ -25,7 +25,7 @@ img:
 
 对于第一种主张，有些成员函数并不具备 bitwise 特性，却能通过编译，一个很直观的例子便是，一个 const 类成员函数修改了类中某个指针指向的内容，却没有改变其指向：
 
-```cpp
+```cpp bitwise constness
 class TextBlock {
  public:
   TextBlock(const char* s) { /* ... */ }
@@ -49,7 +49,7 @@ int main() {
 
 对于第二种主张，编译器并不支持这一做法，于是 `mutable` 关键字派上用场。如果将一个成员变量声明为 `mutable`（保证声明前提），则可以在 `const` 成员函数中对其进行修改，如下：
 
-```cpp
+```cpp logical constness
 class Foo {
  public:
   /* ... */
@@ -63,6 +63,6 @@ class Foo {
 
 ## lambda 表达式中的 mutable
 
-详情请见[本文](../../c/c-function/#可选说明符)。
+具体可参考[本文](../../c/c-function/#可选说明符)。
 
 简单来说就是 lambda 表达式会将值捕获的变量视为 `const`，若想要对其进行修改需加上 `mutable` 说明符。

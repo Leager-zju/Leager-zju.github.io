@@ -85,7 +85,7 @@ void free( void* ptr );
 - 对同一个 `ptr` 多次 `free` 的行为为 UB；
 - 对已 `free` 的 `ptr` 进行内存访问，为 UB；
 
-注意，`free` 仅仅是释放了指针指向的那片内存，并没有改变指针的指向，但 `free` 之后再次使用指针是不合理的，应当置空。
+注意，`free` 仅仅是释放了指针指向的那片内存，并没有改变指针的指向，但 `free` 之后再次使用指针是 UB，应当置空。
 
 ```cpp
 int* ptr = (int*)malloc(sizeof(int));
@@ -109,7 +109,7 @@ ptr = NULL;                      // nullptr in C++
 
 > 定义于头文件 `<new>`
 
-```cpp
+```cpp use of new/delete
 ::(opt) new (布置参数)(opt) (类型) 初始化器(opt) ;
 
 int* p1 = new int (1);  // p1 指向 int 变量，并初始化为 1
@@ -223,7 +223,7 @@ int main() {
 
 - **只能在堆上**：将析构函数设置为**非公有**。C++ 是静态绑定语言，编译器管理栈上对象的生命周期，编译器在为类对象分配栈空间时，会先检查类的析构函数的访问性。若析构函数不可访问，则不能在栈上创建对象。
 
-    ```cpp
+    ```cpp 定义一个只能在堆上生成的类
     // Bad Example →_→
     // can't derive and inconvenient
     class Foo {
@@ -263,8 +263,8 @@ int main() {
 C++ 的所有容器都是类模板，以 `std::vector` 为例，其在定义中包含了两个模板参数。
 ```cpp
 template<
-    class T,
-    class Allocator = std::allocator<T>
+  class T,
+  class Allocator = std::allocator<T>
 >
 ```
 第一个参数就是容器包含的元素类型，第二个参数就是下面要讲的**分配器类**，默认为 C++ 自带的 `std::allocator`。

@@ -28,9 +28,9 @@ img:
 
 ```go
 if num1[i] <= nums1[i-1] || nums2[i] <= nums2[i-1] {
-    dp[i] = dp[i-1] + 1
+  dp[i] = dp[i-1] + 1
 } else {
-    dp[i] = dp[i-1]
+  dp[i] = dp[i-1]
 }
 ```
 
@@ -73,36 +73,36 @@ if num1[i] <= nums1[i-1] || nums2[i] <= nums2[i-1] {
 
 于是代码就很清晰了
 
-```go
-// go
+```go 使序列递增的最小操作次数
 func min(a, b int) int {
-    if a < b {
-        return a
-    }
-    return b
+  if a < b {
+    return a
+  }
+  return b
 }
-func minSwap(nums1 []int, nums2 []int) int {
-    n := len(nums1)
-    dp := make([][]int, n)
-    for i := 0; i < n; i++ {
-        dp[i] = make([]int, 2)
-    }
 
-    dp[0][0] = 0
-    dp[0][1] = 1
-    for i := 1; i < n; i++ {
-        if nums1[i] <= nums1[i-1] || nums2[i] <= nums2[i-1] {
-            dp[i][0] = dp[i-1][1]
-            dp[i][1] = dp[i-1][0] + 1
-        } else if nums1[i] <= nums2[i-1] || nums2[i] <= nums1[i-1] {
-            dp[i][0] = dp[i-1][0]
-            dp[i][1] = dp[i-1][1] + 1
-        } else {
-            dp[i][0] = min(dp[i-1][0], dp[i-1][1])
-            dp[i][1] = dp[i][0] + 1
-        }
+func minSwap(nums1 []int, nums2 []int) int {
+  n := len(nums1)
+  dp := make([][]int, n)
+  for i := 0; i < n; i++ {
+    dp[i] = make([]int, 2)
+  }
+
+  dp[0][0] = 0
+  dp[0][1] = 1
+  for i := 1; i < n; i++ {
+    if nums1[i] <= nums1[i-1] || nums2[i] <= nums2[i-1] {
+      dp[i][0] = dp[i-1][1]
+      dp[i][1] = dp[i-1][0] + 1
+    } else if nums1[i] <= nums2[i-1] || nums2[i] <= nums1[i-1] {
+      dp[i][0] = dp[i-1][0]
+      dp[i][1] = dp[i-1][1] + 1
+    } else {
+      dp[i][0] = min(dp[i-1][0], dp[i-1][1])
+      dp[i][1] = dp[i][0] + 1
     }
-    return min(dp[n-1][0], dp[n-1][1])
+  }
+  return min(dp[n-1][0], dp[n-1][1])
 }
 ```
 
@@ -116,28 +116,28 @@ func minSwap(nums1 []int, nums2 []int) int {
 
 注意到，每个 `dp[i]` 的状态只与 `dp[i-1]` 有关，之前的信息就被淘汰了，于是可以采用**滚动数组**的技巧优化空间。
 
-```go
-// go
+```go 优化版本
 func min(a, b int) int {
-    if a < b {
-        return a
-    }
-    return b
+  if a < b {
+    return a
+  }
+  return b
 }
+
 func minSwap(nums1 []int, nums2 []int) int {
-    n := len(nums1)
-    a, b := 0, 1
-    for i := 1; i < n; i++ {
-        if nums1[i] <= nums1[i-1] || nums2[i] <= nums2[i-1] {
-            a, b = b, a + 1
-        } else if nums1[i] <= nums2[i-1] || nums2[i] <= nums1[i-1] {
-            b++
-        } else {
-            a = min(a, b)
-            b = a + 1
-        }
+  n := len(nums1)
+  a, b := 0, 1
+  for i := 1; i < n; i++ {
+    if nums1[i] <= nums1[i-1] || nums2[i] <= nums2[i-1] {
+      a, b = b, a + 1
+    } else if nums1[i] <= nums2[i-1] || nums2[i] <= nums1[i-1] {
+      b++
+    } else {
+      a = min(a, b)
+      b = a + 1
     }
-    return min(a, b)
+  }
+  return min(a, b)
 }
 ```
 

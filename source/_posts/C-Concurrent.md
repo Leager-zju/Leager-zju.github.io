@@ -69,7 +69,7 @@ C++11 新增了官方**并发支持库**，使得我们能够更好地在系统�
 
 下面用具体代码进行演示。
 
-```cpp
+```cpp thread
 #include <bits/stdc++.h>
 using namespace std;
 
@@ -909,7 +909,7 @@ void __lll_lock_wait (int *futex, int private) {
 
 和普通的仅支持**执行但不返回结果**的线程池相比，其核心在于一个 `ThreadPool::execute()` 执行函数。该函数为模板函数，允许传入一个可调用对象及其参数列表，内部通过 `std::packaged_task` 包装后交付给空闲线程执行，并将返回结果保存在其关联的 `std::future` 对象中。执行函数可以返回这个 future，并让用户通过 `std::future::get()` 等待执行结果。
 
-```cpp
+```cpp 线程池
 template<class F, class ...Args>
 auto ThreadPool::execute(F&& callable, Args&& ...args) -> decltype(callable(args...)) {
   using returnType = decltype(callable(args...));

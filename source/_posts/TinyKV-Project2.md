@@ -38,7 +38,7 @@ img:
 - 上层调用 `Tick()`；
 - Raft 层检查是否满足发起选举条件，即 `electionElapsed >= electionTimeout` 且不是 Leader；
 - 若超时，则视为收到收到一条本地 `MsgHup` 消息，对该消息的处理就是正式进入开始选举事件，即
-  ```go
+  ```go raft/raft.go
   func (r *Raft) Step(m pb.Message) error {
     switch m.MsgType {
       ...
@@ -64,7 +64,7 @@ img:
 
 需要注意的是，`electionTimeout` 应返回一个随机数，防止出现多个 Peer 不断同时发起选举的死局。这里我用一个函数代替，随机返回 1~3 倍的给定超时值。
 
-```go
+```go raft/common.go
 func (r *Raft) getElectionTimeout() int {
   return rand.Intn(2*r.electionTimeout) + r.electionTimeout
 }
@@ -90,7 +90,7 @@ func (r *Raft) getElectionTimeout() int {
 
 反之遍历 `Entries`，直到第一条不匹配的为止，后续的都删掉，然后将新来的条目加到自己的日志中，即
 
-```go
+```go raft/heartbeat.go
 if len(m.Entries) > 0 {
   firstNewLogIndex := m.Entries[0].GetIndex()
   newLogIndex := firstNewLogIndex
@@ -218,12 +218,16 @@ if len(m.Entries) > 0 {
 >
 > 要注意的是，在应用日志时似乎不能把 `WriteToDB()` 放在最后，防止出现 Read After Write 但由于未写入出现 Stale Read 的情况。我这里就这样设置了：
 >
-> ```go
+> ```go kv/raftstore/peer_msg_handler.go
+> func (d *peerMsgHandler) HandleRaftReady() {
+>   ...
 >   for _, entry := range ready.CommittedEntries {
 >     kvWB := new(engine_util.WriteBatch)
 >     d.applyCommittedEntry(&entry, kvWB)
 >     kvWB.MustWriteToDB(d.ctx.engine.Kv)
 >   }
+>   ...
+> }
 > ```
 >
 > 发送回复时，遍历 Proposals 发现 `Index` 相同但 `Term` 不同，则发个 `ErrStaleCommand`。
@@ -246,7 +250,7 @@ if len(m.Entries) > 0 {
 
 等到该日志被 Ready 捕获时，上层就知道可以安全截断日志了，即调用 `PeerMsgHandler.ScheduleCompactLog()` 删除冗余日志。由于 `PeerStorage` 没法通过 Ready 修改 `applyState` 中的 `TruncatedState`，那就在 apply 里头改了。
 
-```go
+```go kv/raftstore/peer_msg_handler.go
 func (d *peerMsgHandler) applyAdminRequest(adminReq *AdminRequest, entry *Entry, wb *WriteBatch) {
   switch adminReq.CmdType {
     ...

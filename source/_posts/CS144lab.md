@@ -202,54 +202,54 @@ lab1 ~ lab4 均围绕此图进行。在 lab0 中，我们实现了有序字节�
 
 部分代码如下所示：
 
-```cpp
+```cpp libsponge/stream_reassembler.cc
 void StreamReassembler::map(const std::string &data, const uint64_t index) {
-    if (data.empty()) {
-        return;
-    }
-    // 只取 data 的 [start_index, last_index) 区间
-    size_t start_index = max(index, _next_index);
-    size_t last_index = min(_next_index + _capacity - _output.buffer_size(), index + data.length());
+  if (data.empty()) {
+    return;
+  }
+  // 只取 data 的 [start_index, last_index) 区间
+  size_t start_index = max(index, _next_index);
+  size_t last_index = min(_next_index + _capacity - _output.buffer_size(), index + data.length());
 
-    for (auto &&entry : _buffer) {
-        if (start_index >= last_index) {
-            return;
-        }
-        size_t end_index = entry.first + entry.second.length();
-        if (entry.first > start_index) {
-            if (last_index <= entry.first) {
-                _buffer.emplace(make_pair(start_index, data.substr(start_index - index, last_index - start_index)));
-                start_index = last_index;
-                break;
-            } else {
-                _buffer.emplace(make_pair(start_index, data.substr(start_index - index, entry.first - start_index)));
-                start_index = end_index;
-            }
-        } else {
-            start_index = max(start_index, end_index);
-        }
+  for (auto &&entry : _buffer) {
+    if (start_index >= last_index) {
+      return;
     }
-    // 仍有有效部分
-    if (start_index < last_index) {
+    size_t end_index = entry.first + entry.second.length();
+    if (entry.first > start_index) {
+      if (last_index <= entry.first) {
         _buffer.emplace(make_pair(start_index, data.substr(start_index - index, last_index - start_index)));
+        start_index = last_index;
+        break;
+      } else {
+        _buffer.emplace(make_pair(start_index, data.substr(start_index - index, entry.first - start_index)));
+        start_index = end_index;
+      }
+    } else {
+      start_index = max(start_index, end_index);
     }
+  }
+  // 仍有有效部分
+  if (start_index < last_index) {
+    _buffer.emplace(make_pair(start_index, data.substr(start_index - index, last_index - start_index)));
+  }
 }
 
 void StreamReassembler::reduce() {
-    std::string res;
-    while (_buffer.count(_next_index)) {
-        auto entry = _buffer.find(_next_index);
-        res.append(entry->second);
-        _next_index += entry->second.length();
-        _size -= entry->second.length();
-        _buffer.erase(entry);
-    }
-    if (!res.empty()) {
-        _output.write(res);
-    }
-    if (_next_index == _eof_index) {
-        _output.end_input();
-    }
+  std::string res;
+  while (_buffer.count(_next_index)) {
+    auto entry = _buffer.find(_next_index);
+    res.append(entry->second);
+    _next_index += entry->second.length();
+    _size -= entry->second.length();
+    _buffer.erase(entry);
+  }
+  if (!res.empty()) {
+    _output.write(res);
+  }
+  if (_next_index == _eof_index) {
+    _output.end_input();
+  }
 }
 ```
 
@@ -326,25 +326,25 @@ $$
 
 故得到
 
-```cpp
+```cpp libsponge/wrapping_integers.cc
 uint64_t unwrap(WrappingInt32 n, WrappingInt32 isn, uint64_t checkpoint) {
-    uint64_t c_high32 = checkpoint >> 32;
-    uint64_t offset = 1ul << 32;
-    uint64_t lower_bound = 1ul << 32;
-    uint64_t upper_bound = (lower_bound-1) << 32;
-    uint64_t res = static_cast<uint64_t>(n - isn) + (c_high32 << 32);
+  uint64_t c_high32 = checkpoint >> 32;
+  uint64_t offset = 1ul << 32;
+  uint64_t lower_bound = 1ul << 32;
+  uint64_t upper_bound = (lower_bound-1) << 32;
+  uint64_t res = static_cast<uint64_t>(n - isn) + (c_high32 << 32);
 
-    if (res > checkpoint) {
-        if (res > lower_bound && res - checkpoint >= offset >> 1) {
-          res -= offset;
-        }
-    } else if (res < checkpoint){
-        if (res < upper_bound && checkpoint - res >= offset >> 1) {
-          res += offset;
-        }
+  if (res > checkpoint) {
+    if (res > lower_bound && res - checkpoint >= offset >> 1) {
+      res -= offset;
     }
+  } else if (res < checkpoint){
+    if (res < upper_bound && checkpoint - res >= offset >> 1) {
+      res += offset;
+    }
+  }
 
-    return res;
+  return res;
 }
 ```
 
@@ -436,7 +436,7 @@ Total Test time (real) =   1.18 sec
 
 这就需要我们添加一系列成员变量，我的数据结构设计如下：
 
-```cpp
+```cpp libsponge/tcp_sender.cc
 class TCPSender {
  private:
   // (new!) 定时器
@@ -473,30 +473,30 @@ class TCPSender {
 
 1. `start()`，包括设置 rto 以及重置时间进度为 0，并将定时器状态设为 `WORK`；
 
-    ```cpp
-    void Timer::start(unsigned int rto) {
-        _rto = rto;
-        _current_time = 0;
-        _state = TimerState::WORK;
-    }
-    ```
+  ```cpp libsponge/tcp_sender.cc
+  void Timer::start(unsigned int rto) {
+    _rto = rto;
+    _current_time = 0;
+    _state = TimerState::WORK;
+  }
+  ```
 
 2. `stop()`，将定时器状态设为 `IDLE`；
 
-    ```cpp
-    void Timer::stop() {
-        _state = TimerState::IDLE;
-    }
-    ```
+  ```cpp libsponge/tcp_sender.cc
+  void Timer::stop() {
+    _state = TimerState::IDLE;
+  }
+  ```
 
 3. `tick()`，增加时间进度，并在超过 rto 时向调用者传递信息(true/false)；
 
-    ```cpp
-    bool Timer::tick(unsigned int interval) { // true for timeout, false else
-        _current_time += interval;
-        return _current_time >= _rto;
-    }
-    ```
+  ```cpp libsponge/tcp_sender.cc
+  bool Timer::tick(unsigned int interval) { // true for timeout, false else
+    _current_time += interval;
+    return _current_time >= _rto;
+  }
+  ```
 
 根据 guide，`TCPSender::tick()` 会被自动调用，其传入参数为距离上一次调用该方法经过的时长，那么在 `TCPSender::tick()` 中，我们就需要调用 `Timer::tick()` 并根据返回值判断是否需要重传。重传时需要做的事有：
 
@@ -508,18 +508,18 @@ class TCPSender {
 
 故 `TCPSender::tick()` 部分代码很容易能写出来
 
-```cpp
+```cpp libsponge/tcp_sender.cc
 void TCPSender::tick(const size_t ms_since_last_tick) {
-    if (!_outstanding_segments.empty() && _timer.tick(ms_since_last_tick)) {
-        if (_rws != 0) {
-            _retransmission_times++;
-            _rto *= 2;
-        }
-        if (_retransmission_times <= TCPConfig::MAX_RETX_ATTEMPTS) {
-            segments_out().push(_outstanding_segments.front());
-            _timer.start(_rto);
-        }
+  if (!_outstanding_segments.empty() && _timer.tick(ms_since_last_tick)) {
+    if (_rws != 0) {
+      _retransmission_times++;
+      _rto *= 2;
     }
+    if (_retransmission_times <= TCPConfig::MAX_RETX_ATTEMPTS) {
+      segments_out().push(_outstanding_segments.front());
+      _timer.start(_rto);
+    }
+  }
 }
 ```
 
@@ -542,32 +542,32 @@ $$
 
 与此同时，还应满足 $\text{abs_ackno}\leq \text{abs_next_seqno}$，否则会被认为是无效确认号。
 
-```cpp
+```cpp libsponge/tcp_sender.cc
 bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_size) {
-    uint64_t abs_ackno = unwrap(ackno, _isn, _next_seqno);
-    if (abs_ackno > _next_seqno || abs_ackno < _ackno) {
-        return false;
+  uint64_t abs_ackno = unwrap(ackno, _isn, _next_seqno);
+  if (abs_ackno > _next_seqno || abs_ackno < _ackno) {
+    return false;
+  }
+  bool flag{false};
+  _ackno = abs_ackno;  // abs ackno
+  _rws = window_size;
+  while (!_outstanding_segments.empty()) {
+    TCPSegment &seg = _outstanding_segments.front();
+    size_t seq_length = seg.length_in_sequence_space();
+    if (seg.header().seqno + seq_length > ackno) {
+      break;
     }
-    bool flag{false};
-    _ackno = abs_ackno;  // abs ackno
-    _rws = window_size;
-    while (!_outstanding_segments.empty()) {
-        TCPSegment &seg = _outstanding_segments.front();
-        size_t seq_length = seg.length_in_sequence_space();
-        if (seg.header().seqno + seq_length > ackno) {
-            break;
-        }
-        flag = true;
-        _outstanding_segments.pop();
-    }
+    flag = true;
+    _outstanding_segments.pop();
+  }
 
-    if (flag) {
-        _rto = _initial_retransmission_timeout;
-        _outstanding_segments.empty() ? _timer.stop() : _timer.start(_rto);
-        _retransmission_times = 0;
-    }
+  if (flag) {
+    _rto = _initial_retransmission_timeout;
+    _outstanding_segments.empty() ? _timer.stop() : _timer.start(_rto);
+    _retransmission_times = 0;
+  }
 
-    return flag;
+  return flag;
 }
 ```
 
@@ -595,38 +595,38 @@ $$
 
 最后实现如下：
 
-```cpp
+```cpp libsponge/tcp_sender.cc
 void TCPSender::fill_window() {
-    if (_timer.state() == TimerState::IDLE) {
-        _timer.start(_rto);
+  if (_timer.state() == TimerState::IDLE) {
+    _timer.start(_rto);
+  }
+
+  while (true) {
+    bool syn{false};
+    bool fin{false};
+    std::string data;
+
+    if (in_closed()) { // 尚未发过 seg
+      syn = true;
+    } else {
+      size_t read_size = min(send_window_size(), TCPConfig::MAX_PAYLOAD_SIZE);
+      data = stream_in().read(read_size);
+
+      if (!fin_sent && stream_in().eof() && data.length() < send_window_size()) {
+        fin = true;
+        fin_sent = true;
+      }
     }
 
-    while (true) {
-        bool syn{false};
-        bool fin{false};
-        std::string data;
-
-        if (in_closed()) { // 尚未发过 seg
-            syn = true;
-        } else {
-            size_t read_size = min(send_window_size(), TCPConfig::MAX_PAYLOAD_SIZE);
-            data = stream_in().read(read_size);
-
-            if (!fin_sent && stream_in().eof() && data.length() < send_window_size()) {
-                fin = true;
-                fin_sent = true;
-            }
-        }
-
-        TCPSegment seg = TCPSegment{}.with_syn(syn).with_fin(fin).with_data(std::move(data)).with_seqno(next_seqno());
-        size_t seq_length = seg.length_in_sequence_space();
-        if (seq_length == 0) {
-            break;
-        }
-        _segments_out.push(seg);
-        _outstanding_segments.push(seg);
-        _next_seqno += seq_length;
+    TCPSegment seg = TCPSegment{}.with_syn(syn).with_fin(fin).with_data(std::move(data)).with_seqno(next_seqno());
+    size_t seq_length = seg.length_in_sequence_space();
+    if (seq_length == 0) {
+      break;
     }
+    _segments_out.push(seg);
+    _outstanding_segments.push(seg);
+    _next_seqno += seq_length;
+  }
 }
 ```
 
@@ -678,18 +678,18 @@ Total Test time (real) =   1.30 sec
 
 发送操作很简单，`sender` 调用相应函数然后从 `segment_out` 中取出来再插到发送队列即可。
 
-```cpp
+```cpp libsponge/tcp_connection.cc
 while (!_sender.segments_out().empty()) {
-    TCPSegment &seg = _sender.segments_out().front();
-    auto ackno = _receiver.ackno();
-    if (ackno.has_value()) { // 说明 receiver 至少进入了 SYN_RECV 阶段
-        seg.with_ack(true).with_ackno(ackno.value());
-    }
-    seg.with_win(_receiver.window_size());
-    if (seg.header().ack || seg.length_in_sequence_space() != 0) {
-        segments_out().push(seg);
-    }
-    _sender.segments_out().pop();
+  TCPSegment &seg = _sender.segments_out().front();
+  auto ackno = _receiver.ackno();
+  if (ackno.has_value()) { // 说明 receiver 至少进入了 SYN_RECV 阶段
+    seg.with_ack(true).with_ackno(ackno.value());
+  }
+  seg.with_win(_receiver.window_size());
+  if (seg.header().ack || seg.length_in_sequence_space() != 0) {
+    segments_out().push(seg);
+  }
+  _sender.segments_out().pop();
 }
 ```
 
@@ -697,27 +697,27 @@ while (!_sender.segments_out().empty()) {
 
 接收是一个比较麻烦的事情，有一个细节是连接处于 `LISTEN` 阶段时只处理 `SYN=1` 的段，也就是会忽略 `RST=1` 段。
 
-```cpp
+```cpp libsponge/tcp_connection.cc
 if (_receiver.in_listen() && _sender.in_closed()) {
-    if (!seg.header().syn) {
-        return;
-    }
-    _receiver.segment_received(seg);
-    connect();
+  if (!seg.header().syn) {
     return;
+  }
+  _receiver.segment_received(seg);
+  connect();
+  return;
 }
 ```
 
 其他时候，如果收到（或发送） `RST=1` 段后，会引发 `unclean_shutdown`。
 
-```cpp
+```cpp libsponge/tcp_connection.cc
 void TCPConnection::unclean_shutdown() {
-    if (_active) {
-        // cerr << "[unclean_shutdown]\n\n";
-        _sender.stream_in().set_error();
-        _receiver.stream_out().set_error();
-        _active = false;
-    }
+  if (_active) {
+    // cerr << "[unclean_shutdown]\n\n";
+    _sender.stream_in().set_error();
+    _receiver.stream_out().set_error();
+    _active = false;
+  }
 }
 ```
 
@@ -727,16 +727,16 @@ void TCPConnection::unclean_shutdown() {
 
 变量 `_linger_after_streams_finish` 就是用于标识哪一方需要等待 `10*timeout` 才关闭。
 
-```cpp
+```cpp libsponge/tcp_connection.cc
 // after receive a segment
 if (_receiver.stream_out().input_ended() && !_sender.stream_in().eof()) {
-    _linger_after_streams_finish = false;
+  _linger_after_streams_finish = false;
 }
 ...
 // anytime need check if shutdown
 if (_receiver.in_fin_recv() && _sender.in_fin_acked() &&
-    (!_linger_after_streams_finish || _time_since_last_segment_received >= 10 * _cfg.rt_timeout)) {
-    clean_shutdown();
+  (!_linger_after_streams_finish || _time_since_last_segment_received >= 10 * _cfg.rt_timeout)) {
+  clean_shutdown();
 }
 ```
 
@@ -758,28 +758,28 @@ if (_receiver.in_fin_recv() && _sender.in_fin_acked() &&
 
 > 包装操作应使用 `serialize()` 方法转换为 `string`，再隐式转换为 `Buffer`。
 
-```cpp
+```cpp libsponge/network_interface.cc
 void NetworkInterface::send_datagram(const InternetDatagram &dgram, const Address &next_hop) {
-    const uint32_t next_hop_ip = next_hop.ipv4_numeric();
-    uint32_t next_ipv4_addr = next_hop.ipv4_numeric();
+  const uint32_t next_hop_ip = next_hop.ipv4_numeric();
+  uint32_t next_ipv4_addr = next_hop.ipv4_numeric();
 
-    EthernetFrame frame;
-    if (_mp.count(next_ipv4_addr)) { // 目的 MAC 地址已知
-        EthernetAddress next_ethernet_addr = _mp[next_ipv4_addr];
-        // make frame
-    } else {
-        // 广播 ARP
-        if (_time_since_last_send.count(next_hop_ip) && _time_since_last_send[next_hop_ip] <= 5000) {
-            return;
-        }
-        _time_since_last_send[next_hop_ip] = 0;
-        // make frame
-        // 这里有一个坑点，ARPMessage 的目的 MAC 地址为空，因为帧头处已经设置为广播地址 ff:ff:ff:ff:ff:ff
-
-        _waiting_for_arp_reply.push(make_pair(dgram, next_hop));
+  EthernetFrame frame;
+  if (_mp.count(next_ipv4_addr)) { // 目的 MAC 地址已知
+    EthernetAddress next_ethernet_addr = _mp[next_ipv4_addr];
+    // make frame
+  } else {
+    // 广播 ARP
+    if (_time_since_last_send.count(next_hop_ip) && _time_since_last_send[next_hop_ip] <= 5000) {
+      return;
     }
+    _time_since_last_send[next_hop_ip] = 0;
+    // make frame
+    // 这里有一个坑点，ARPMessage 的目的 MAC 地址为空，因为帧头处已经设置为广播地址 ff:ff:ff:ff:ff:ff
 
-    _frames_out.push(frame);
+    _waiting_for_arp_reply.push(make_pair(dgram, next_hop));
+  }
+
+  _frames_out.push(frame);
 }
 ```
 
@@ -789,39 +789,39 @@ void NetworkInterface::send_datagram(const InternetDatagram &dgram, const Addres
 
 反之，检查这是一个 ARP 请求还是 ARP 答复。如果是前者，并其目的 IP 地址是否与自身一致，则发回一个 ARP 答复；反之，发送等待答复的数据包。同时，还要根据发送方的信息更新 IP/MAC 映射表，对应条目保持 30s，时间到后删除条目。
 
-```cpp
+```cpp libsponge/network_interface.cc
 optional<InternetDatagram> NetworkInterface::recv_frame(const EthernetFrame &frame) {
-    const EthernetHeader &f_header = frame.header();
-    if (f_header.dst != _ethernet_address && f_header.dst != ETHERNET_BROADCAST) {
-        // 说明发错人了，直接不处理
-    } else if (f_header.type == EthernetHeader::TYPE_IPv4) {
-        InternetDatagram dgram;
-        ParseResult parse_res = dgram.parse(frame.payload());
-        if (parse_res == ParseResult::NoError) {
-            // 成功解析则返回，否则丢弃
-            return optional<InternetDatagram>{dgram};
-        }
-    } else if (f_header.type == EthernetHeader::TYPE_ARP) {
-        ARPMessage msg;
-        ParseResult parse_res = msg.parse(frame.payload());
-        if (parse_res == ParseResult::NoError) {
-            _mp.emplace(make_pair(msg.sender_ip_address, msg.sender_ethernet_address));
-            _holding_time.emplace(make_pair(msg.sender_ip_address, 0));
-
-            if (msg.target_ip_address == _ip_address.ipv4_numeric()) {
-                if (msg.opcode == ARPMessage::OPCODE_REQUEST) {
-                    EthernetFrame reply;
-                    // make reply
-                    _frames_out.push(reply);
-                } else if (msg.opcode == ARPMessage::OPCODE_REPLY) {
-                    send_datagram(_waiting_for_arp_reply.front().first, _waiting_for_arp_reply.front().second);
-                    _waiting_for_arp_reply.pop();
-                }
-            }
-        }
+  const EthernetHeader &f_header = frame.header();
+  if (f_header.dst != _ethernet_address && f_header.dst != ETHERNET_BROADCAST) {
+    // 说明发错人了，直接不处理
+  } else if (f_header.type == EthernetHeader::TYPE_IPv4) {
+    InternetDatagram dgram;
+    ParseResult parse_res = dgram.parse(frame.payload());
+    if (parse_res == ParseResult::NoError) {
+      // 成功解析则返回，否则丢弃
+      return optional<InternetDatagram>{dgram};
     }
+  } else if (f_header.type == EthernetHeader::TYPE_ARP) {
+    ARPMessage msg;
+    ParseResult parse_res = msg.parse(frame.payload());
+    if (parse_res == ParseResult::NoError) {
+      _mp.emplace(make_pair(msg.sender_ip_address, msg.sender_ethernet_address));
+      _holding_time.emplace(make_pair(msg.sender_ip_address, 0));
 
-    return {};
+      if (msg.target_ip_address == _ip_address.ipv4_numeric()) {
+        if (msg.opcode == ARPMessage::OPCODE_REQUEST) {
+          EthernetFrame reply;
+          // make reply
+          _frames_out.push(reply);
+        } else if (msg.opcode == ARPMessage::OPCODE_REPLY) {
+          send_datagram(_waiting_for_arp_reply.front().first, _waiting_for_arp_reply.front().second);
+          _waiting_for_arp_reply.pop();
+        }
+      }
+    }
+  }
+
+  return {};
 }
 ```
 
@@ -851,27 +851,27 @@ Built target check_lab5
 2. 一般有一个默认网关为 `0.0.0.0/0`，如果将一个 32 位整数移位 32 位是未定义行为，需要考虑到这种情况；
 3. 数据包必然是能发出去的，实在没有匹配到的也会发至默认网关，如果有其他匹配的网段可能是 direct 直达的，此时 `next_hop` 不一定有值，此时将发送的下一跳设置为数据包的 `dst ip_addr` 即可；
 
-```cpp
+```cpp libsponge/router.cc
 void Router::route_one_datagram(InternetDatagram &dgram) {
-    if (dgram.header().ttl-- <= 1) {
-        return;
-    }
+  if (dgram.header().ttl-- <= 1) {
+    return;
+  }
 
-    uint8_t longest_match_length{0};
-    uint32_t ipv4_addr = dgram.header().dst;
-    optional<Address> next_hop{};
-    size_t interface_num{0};
+  uint8_t longest_match_length{0};
+  uint32_t ipv4_addr = dgram.header().dst;
+  optional<Address> next_hop{};
+  size_t interface_num{0};
 
-    for (auto &&entry : _route_table) {
-        // find Longest-Match Prefix
-    }
+  for (auto &&entry : _route_table) {
+    // find Longest-Match Prefix
+  }
 
-    if (next_hop.has_value()) {
-        _interfaces[interface_num].send_datagram(dgram, next_hop.value());
-    } else {
-        // 可直接发送至目的 IP 地址
-        _interfaces[interface_num].send_datagram(dgram, Address::from_ipv4_numeric(ipv4_addr));
-    }
+  if (next_hop.has_value()) {
+    _interfaces[interface_num].send_datagram(dgram, next_hop.value());
+  } else {
+    // 可直接发送至目的 IP 地址
+    _interfaces[interface_num].send_datagram(dgram, Address::from_ipv4_numeric(ipv4_addr));
+  }
 }
 ```
 

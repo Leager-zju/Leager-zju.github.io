@@ -19,7 +19,7 @@ img:
 
 凡是在语境中使用了某种表达式类型 `T1`，但语境不接受该类型，而接受另一类型 `T2` 的时候，会进行**隐式转换**。
 
-```cpp
+```cpp 隐式转换
 int a = 1;
 long long b = a + 1; // int -> long long
 if (a) {             // int -> bool
@@ -51,7 +51,7 @@ const int d = a;     // int -> const int
 
 C 中的类型转换语法非常简单粗暴，直接在表达式前加上 `(Target_Type)` 即可，如：
 
-```cpp
+```cpp 显式转换
 double pi = 3.14;
 int p = (int)pi;
 std::cout << p; // output: 3
@@ -79,7 +79,7 @@ static_cast<new_type>(expr);
 
 但在类的层次结构之间进行转换时，比如将基类指针**向下转换**为派生类指针这一操作，由于派生类可能有自己新定义的字段或信息，故**向下转换是不安全**的。但**向上转换一定是安全**的，因为派生类一定包含基类的所有信息。
 
-```cpp
+```cpp static_cast
 class B {};
 class D: public B {
  public:
@@ -105,7 +105,7 @@ dynamic_cast<new_type>(expr); // 其中 new_type/expr 必须为指针或引用�
 - 如果转型失败且 `new_type` 是指针类型，那么它会返回 `nullptr`；
 - 如果转型失败且 `new_type` 是引用类型，那么它会抛出 `std::bad_cast` 异常。
 
-```cpp
+```cpp dynamic_cast
 #include <iostream>
 
 class A {
@@ -197,20 +197,20 @@ int main() {
 
 再来看另一种情况。
 
-```cpp
+```cpp 复杂继承关系
 class A { virtual f(); };
-class B : public A { virtual f(); };
-class C : public A {};
+class B : virtual public A { virtual f(); };
+class C : virtual public A {};
 class D { virtual f(); };
 class E : public B, public C, public D { virtual f(); };
 
 /********
- A  A
- |  |
- B  C  D
- |__|__|
-    |
-    E
+   A  
+  / \
+ B   C   D
+ |___|___|
+     |
+     E
 ********/
 ```
 
@@ -238,7 +238,7 @@ reinterpret_cast<new_type>(expr);
 
 `reinterpret_cast` 通过对底层比特位重新解读来进行类型间的转换。当然，这也是不安全的，需要程序员手动检查。
 
-```cpp
+```cpp reinterpret_cast
 int main() {
   int a;
   std::cout << &a << '\n'
@@ -257,7 +257,7 @@ const_cast<new_type>(expr);
 
 `const_cast` 最大特点就在于它可以移除 `expr` 的 cv 限定，这是其余几个算子都做不到的。
 
-```cpp
+```cpp const_cast
 class A {
   int val;
  public:
@@ -303,7 +303,7 @@ int main() {
 
 但用户能修改的只有两种，初始化构造函数与用户定义转换函数。
 
-```cpp
+```cpp User Defined Cast
 #include <iostream>
 
 class Foo {
@@ -347,7 +347,7 @@ int main() {
 
 `typeid` 用于获取当前对象的类型信息，返回一个 `type_info` 类，可以通过调用 `type_info` 的 `name()` 方法来获取相应的字符串型名称。
 
-```cpp
+```cpp typeid
 class A {};
 class B : public A {};
 
@@ -380,7 +380,7 @@ int main() {
 
 不难发现，`typeid` 不仅支持内置类型，还允许获取用户自定义类型的信息。但上面只描述了静态类型的情况，在编译期就能确定类型，下面看看涉及多态的 RTTI 情况。
 
-```cpp
+```cpp RTTI
 class Base {
  public:
   virtual ~Base() = default;
@@ -421,17 +421,17 @@ int main() {
 ```cpp
 class type_info {
 public:
-    virtual ~type_info();
+  virtual ~type_info();
 
-    bool operator==(const type_info& rhs) const noexcept;
-    bool operator!=(const type_info& rhs) const noexcept; // C++20 移除
+  bool operator==(const type_info& rhs) const noexcept;
+  bool operator!=(const type_info& rhs) const noexcept; // C++20 移除
 
-    bool before(const type_info& rhs) const noexcept;
-    size_t hash_code() const noexcept;
-    const char* name() const noexcept;
+  bool before(const type_info& rhs) const noexcept;
+  size_t hash_code() const noexcept;
+  const char* name() const noexcept;
 
-    type_info(const type_info& rhs) = delete;
-    type_info& operator=(const type_info& rhs) = delete;
+  type_info(const type_info& rhs) = delete;
+  type_info& operator=(const type_info& rhs) = delete;
 };
 ```
 

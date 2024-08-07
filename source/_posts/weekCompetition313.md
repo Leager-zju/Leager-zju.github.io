@@ -27,26 +27,25 @@ img:
 
 ## code
 
-```go
-// go
+```go 公因子的数目
 func gcd(a, b int) int {	// assert a < b
-    if a > b {
-        return gcd(b, a)
-    }
-    if b % a == 0 {
-        return a
-    }
-    return gcd(b % a, a)
+  if a > b {
+    return gcd(b, a)
+  }
+  if b % a == 0 {
+    return a
+  }
+  return gcd(b % a, a)
 }
 func commonFactors(a int, b int) int {
-    cnt := 0
-    for i := 1; i <= gcd(a, b); i++ {
-        if a % i == 0 && b % i == 0 {
-            cnt++
-        }
+  cnt := 0
+  for i := 1; i <= gcd(a, b); i++ {
+    if a % i == 0 && b % i == 0 {
+      cnt++
     }
+  }
 
-    return cnt
+  return cnt
 }
 ```
 
@@ -69,20 +68,19 @@ func commonFactors(a int, b int) int {
 
 ## code
 
-```go
-// go
+```go 沙漏的最大总和
 func maxSum(g [][]int) int {
-    res := 0
-    for i := 0; i <= len(g)-3; i++ {
-        for j := 0; j <= len(g[i])-3; j++ {
-            sum := 0
-            sum += g[i][j] + g[i][j+1] + g[i][j+2] + g[i+1][j+1] + g[i+2][j] + g[i+2][j+1] + g[i+2][j+2]
-            if sum > res {
-                res = sum
-            }
-        }
+  res := 0
+  for i := 0; i <= len(g)-3; i++ {
+    for j := 0; j <= len(g[i])-3; j++ {
+      sum := 0
+      sum += g[i][j] + g[i][j+1] + g[i][j+2] + g[i+1][j+1] + g[i+2][j] + g[i+2][j+1] + g[i+2][j+2]
+      if sum > res {
+        res = sum
+      }
     }
-    return res
+  }
+  return res
 }
 ```
 
@@ -108,47 +106,46 @@ func maxSum(g [][]int) int {
 
 2. $k(num1) < k(num2)$：$k(num1)$ 个 ‘1’ 与 $num1$ 中的 ‘1’ 相互抵消后，还剩下 $k(num2) - k(num1)$ 个 ‘1’ 未安排位置，这部分应尽量"靠左"，并且不与 $num1$ 中 ‘1’ 的位置冲突。
 
-    例如，当 $num1=10, k(num2)=3$ 时，$num1=(1010)_2$。首先能够得到 $x=(1\_1\_)_2$，最后一个 ‘1’ 的位置显然易见，应该放在最右边，故得到 $x = (1011)_2$
+  例如，当 $num1=10, k(num2)=3$ 时，$num1=(1010)_2$。首先能够得到 $x=(1\_1\_)_2$，最后一个 ‘1’ 的位置显然易见，应该放在最右边，故得到 $x = (1011)_2$
 
 3. $k(num1) > k(num2)$：$x$ 的值即保留 $num1$ 右侧 $k(num2)$ 个 ‘1’ 的结果。
 
 ## code
 
-```go
-// go
+```go 最小 XOR
 func k(num int) int {
-    res := 0
-    for num > 0 {
-        res += num & 1
-        num >>= 1
-    }
-    return res
+  res := 0
+  for num > 0 {
+    res += num & 1
+    num >>= 1
+  }
+  return res
 }
 func minimizeXor(num1 int, num2 int) int {
-    cnt1, cnt2, x := k(num1), k(num2), num1
+  cnt1, cnt2, x := k(num1), k(num2), num1
 
-    if cnt1 > cnt2 {
-        p := 1
-        cnt1 -= cnt2    // x 为 num1 去掉低 cnt1-cnt2 位 1
-        for cnt1 > 0 {
-            if x & p > 0 {
-                x -= p
-                cnt1--
-            }
-            p <<= 1
-        }
-    } else if cnt1 < cnt2 {
-        p := 1
-        cnt2 -= cnt1	// x 为 num1 再加上 cnt2-cnt1 位 1
-        for cnt2 > 0 {
-            if x & p == 0 {
-                x += p
-                cnt2--
-            }
-            p <<= 1
-        }
+  if cnt1 > cnt2 {
+    p := 1
+    cnt1 -= cnt2  // x 为 num1 去掉低 cnt1-cnt2 位 1
+    for cnt1 > 0 {
+      if x & p > 0 {
+        x -= p
+        cnt1--
+      }
+      p <<= 1
     }
-    return temp
+  } else if cnt1 < cnt2 {
+    p := 1
+    cnt2 -= cnt1	// x 为 num1 再加上 cnt2-cnt1 位 1
+    for cnt2 > 0 {
+      if x & p == 0 {
+        x += p
+        cnt2--
+      }
+      p <<= 1
+    }
+  }
+  return temp
 }
 ```
 
@@ -172,22 +169,21 @@ func minimizeXor(num1 int, num2 int) int {
 
 ## code
 
-```go
-// go
+```go 对字母串可执行的最大删除数
 func deleteString(s string) int {
-    n := len(s)
-    dp := make([]int, n)  // dp[i]: s[i:] 所需最大删除数
+  n := len(s)
+  dp := make([]int, n)  // dp[i]: s[i:] 所需最大删除数
 
-    for i := n-1; i >= 0; i-- {
-        dp[i] = 1
-        l := n-i
-        for j := i+1; j <= i+l/2; j++ {
-            if temp[i:j] == temp[j:2*j-i] && dp[i] < dp[j] + 1 {
-                dp[i] = dp[j] + 1
-            }
-        }
+  for i := n-1; i >= 0; i-- {
+    dp[i] = 1
+    l := n-i
+    for j := i+1; j <= i+l/2; j++ {
+      if temp[i:j] == temp[j:2*j-i] && dp[i] < dp[j] + 1 {
+        dp[i] = dp[j] + 1
+      }
     }
+  }
 
-    return dp[0]
+  return dp[0]
 }
 ```

@@ -34,10 +34,9 @@ img:
 
 ### code
 
-```go
-// go
+```go 温度转换
 func convertTemperature(celsius float64) []float64 {
-    return []float64{celsius + 273.15, celsius * 1.8 + 32}
+  return []float64{celsius + 273.15, celsius * 1.8 + 32}
 }
 ```
 
@@ -55,37 +54,38 @@ func convertTemperature(celsius float64) []float64 {
 
 ### code
 
-```go
-// go
+```go 最小公倍数为 K 的子数组数目
 func gcd(a, b int64) int64{
-    if a < b {
-        return gcd(b, a);
-    }
-    if a % b == 0 {
-        return b;
-    }
-    return gcd(b, a % b);
+  if a < b {
+    return gcd(b, a);
+  }
+  if a % b == 0 {
+    return b;
+  }
+  return gcd(b, a % b);
 }
-func lcm(a, b int64) int64{
-    return a * b / gcd(a, b);
-}
-func subarrayLCM(nums []int, k int) int {
-    res, i, j := 0, 0, 0
-    for i < len(nums) {
-        var l int64 = 1;	// 以 nums[i] 为起点的子数组的最小公倍数
-        for j = i; j < len(nums); j++ {
-            l = lcm(int64(nums[j]), l);
-            if (int64(k) % l != 0) {	// 剪枝
-                break;
-            }
-            if (int64(k) == l) {
-                res++;
-            }
-        }
-        i++;
-    }
 
-    return res;
+func lcm(a, b int64) int64{
+  return a * b / gcd(a, b);
+}
+
+func subarrayLCM(nums []int, k int) int {
+  res, i, j := 0, 0, 0
+  for i < len(nums) {
+    var l int64 = 1;	// 以 nums[i] 为起点的子数组的最小公倍数
+    for j = i; j < len(nums); j++ {
+      l = lcm(int64(nums[j]), l);
+      if (int64(k) % l != 0) {	// 剪枝
+        break;
+      }
+      if (int64(k) == l) {
+        res++;
+      }
+    }
+    i++;
+  }
+
+  return res;
 }
 ```
 
@@ -106,61 +106,60 @@ func subarrayLCM(nums []int, k int) int {
 
 ### code
 
-```go
-// go
+```go 逐层排序二叉树所需的最少操作数目
 /**
  * Definition for a binary tree node.
  * type TreeNode struct {
- *     Val int
- *     Left *TreeNode
- *     Right *TreeNode
+ *   Val int
+ *   Left *TreeNode
+ *   Right *TreeNode
  * }
  */
 func minimumOperations(root *TreeNode) int {
-    order := make([][]*TreeNode, 0)
+  order := make([][]*TreeNode, 0)
 
-    order = append(order, []*TreeNode{root})
-    for i := 0; i < len(order); i++ {
-        level := make([]*TreeNode, 0)
-        for _, r := range order[i] {
-            if r.Left != nil {
-                level = append(level, r.Left)
-            }
-            if r.Right != nil {
-                level = append(level, r.Right)
-            }
-        }
-        if len(level) > 0 {
-            order = append(order, level)
-        }
+  order = append(order, []*TreeNode{root})
+  for i := 0; i < len(order); i++ {
+    level := make([]*TreeNode, 0)
+    for _, r := range order[i] {
+      if r.Left != nil {
+        level = append(level, r.Left)
+      }
+      if r.Right != nil {
+        level = append(level, r.Right)
+      }
     }
-
-    res := 0
-    for _, level := range order {
-        if len(level) == 1 {
-            continue
-        }
-        temp := make([]*TreeNode, len(level))
-        for i := range temp {
-            temp[i] = level[i]
-        }
-        sort.Slice(temp, func(i, j int) bool {
-            return temp[i].Val < temp[j].Val
-        })
-
-        pos := make(map[int]int)
-        for i := range temp {
-            pos[temp[i].Val] = i
-        }
-        for i := range level {
-            for level[pos[level[i].Val]] != level[i] {
-                level[i], level[pos[level[i].Val]] = level[pos[level[i].Val]], level[i]
-                res++
-            }
-        }
+    if len(level) > 0 {
+      order = append(order, level)
     }
+  }
 
-    return res
+  res := 0
+  for _, level := range order {
+    if len(level) == 1 {
+      continue
+    }
+    temp := make([]*TreeNode, len(level))
+    for i := range temp {
+      temp[i] = level[i]
+    }
+    sort.Slice(temp, func(i, j int) bool {
+      return temp[i].Val < temp[j].Val
+    })
+
+    pos := make(map[int]int)
+    for i := range temp {
+      pos[temp[i].Val] = i
+    }
+    for i := range level {
+      for level[pos[level[i].Val]] != level[i] {
+        level[i], level[pos[level[i].Val]] = level[pos[level[i].Val]], level[i]
+        res++
+      }
+    }
+  }
+
+  return res
 }
 ```
 
@@ -186,45 +185,44 @@ func minimumOperations(root *TreeNode) int {
 
 ### code
 
-```go
-// go
+```go 不重叠回文子字符串的最大数目
 func maxPalindromes(s string, k int) int {
-    isPalid := make([][]bool, len(s))
-    for i := range isPalid {
-        isPalid[i] = make([]bool, len(s))
-        isPalid[i][i] = true
-        if i < len(s)-1 && s[i] == s[i+1] {
-            isPalid[i][i+1] = true
-        }
+  isPalid := make([][]bool, len(s))
+  for i := range isPalid {
+    isPalid[i] = make([]bool, len(s))
+    isPalid[i][i] = true
+    if i < len(s)-1 && s[i] == s[i+1] {
+      isPalid[i][i+1] = true
     }
+  }
 
-    for l := 3; l <= len(s); l++ {
-        for i := 0; i <= len(s) - l; i++ {
-            isPalid[i][i+l-1] = (s[i] == s[i+l-1] && isPalid[i+1][i+l-2])
-        }
+  for l := 3; l <= len(s); l++ {
+    for i := 0; i <= len(s) - l; i++ {
+      isPalid[i][i+l-1] = (s[i] == s[i+l-1] && isPalid[i+1][i+l-2])
     }
+  }
 
-    dp := make([]int, len(s)+1)     // dp[i]: 前 i 个字符最大的回文子字符串数
-    if isPalid[0][k-1] {
-        dp[k] = 1
+  dp := make([]int, len(s)+1)   // dp[i]: 前 i 个字符最大的回文子字符串数
+  if isPalid[0][k-1] {
+    dp[k] = 1
+  }
+  for i := k + 1; i <= len(s); i++ {
+    for j := i-k; j >= 0; j-- {
+      if isPalid[j][i-1] {
+        dp[i] = max(dp[i], dp[j] + 1)
+      }
     }
-    for i := k + 1; i <= len(s); i++ {
-        for j := i-k; j >= 0; j-- {
-            if isPalid[j][i-1] {
-                dp[i] = max(dp[i], dp[j] + 1)
-            }
-        }
-        dp[i] = max(dp[i], dp[i-1])
-    }
-    fmt.Println(dp)
-    return dp[len(s)]
+    dp[i] = max(dp[i], dp[i-1])
+  }
+  fmt.Println(dp)
+  return dp[len(s)]
 }
 
 func max(i, j int) int {
-    if i > j {
-        return i
-    }
-    return j
+  if i > j {
+    return i
+  }
+  return j
 }
 ```
 

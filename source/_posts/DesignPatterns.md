@@ -26,19 +26,19 @@ img:
 
 用到的时候才创建实例。C++ 11 以前容易产生线程安全的问题，但 C++11 标准之后的最佳的选择是 **`Meyers' Singleton`**，它利用了局部静态变量在第一次使用时才初始化的特性，并且由于 C++11 标准解决了局部静态变量的线程安全问题，使得它成为当前**最优雅**的实现方式。
 
-```cpp
+```cpp Meyers' Singleton
 class Singleton {
-  public:
-    static Singleton& getInstance() {
-      static Singleton instance;  // so elegent
-      return instance;
-    }
+ public:
+  static Singleton& getInstance() {
+    static Singleton instance;  // so elegent
+    return instance;
+  }
 
-  private:
-    Singleton() = default;
-    ~Singleton() = default;
-    Singleton(const Singleton&) = default;
-    Singleton& operator=(const Singleton&) = default;
+ private:
+  Singleton() = default;
+  ~Singleton() = default;
+  Singleton(const Singleton&) = default;
+  Singleton& operator=(const Singleton&) = default;
 };
 ```
 
@@ -56,21 +56,19 @@ class Singleton {
 
 简单工厂的工厂类里封装了创建具体产品对象的函数。
 
-```cpp
+```cpp 简单工厂
 enum class ProductType;
 class Factory {
-  public:
-    Product* CreateProduct(ProductType type) {
-      switch(type) {
-        case TYPEA:
-          return new ProductA();
-        case TYPEB:
-          return new ProductB();
-        ...
-        default:
-          return nullptr;
-      }
+ public:
+  Product* CreateProduct(ProductType type) {
+    switch (type) {
+      case TYPEA:
+        return new ProductA();
+      case TYPEB:
+        return new ProductB();
+        ... default : return nullptr;
     }
+  }
 };
 ```
 
@@ -80,22 +78,22 @@ class Factory {
 
 工厂方法模式将工厂类进行抽象，仅提供创建具体产品的接口，而具体实现交由子类（即具体工厂）去完成。
 
-```cpp
+```cpp 工厂方法
 class AbstractFactory {
-  public:
-    virtual Product* CreateProduct() = 0;
-    virtual ~AbstractFactory() = default;
-}
+ public:
+  virtual Product* CreateProduct() = 0;
+  virtual ~AbstractFactory() = default;
+};
 
-class ConcreteFactory1: public AbstractFactory {
-  public:
-    virtual Product* CreateProductA() { return new ProductA(); }
-}
+class ConcreteFactory1 : public AbstractFactory {
+ public:
+  virtual Product* CreateProductA() { return new ProductA(); }
+};
 
-class ConcreteFactory2: public AbstractFactory {
-  public:
-    virtual Product* CreateProductB() { return new ProductB(); }
-}
+class ConcreteFactory2 : public AbstractFactory {
+ public:
+  virtual Product* CreateProductB() { return new ProductB(); }
+};
 ...
 ```
 
@@ -109,22 +107,22 @@ class ConcreteFactory2: public AbstractFactory {
 
 以上三种方式，在新增产品时，要么修改工厂类，要么需新增具体的工厂类，说明工厂类的封装性还不够好。模板工厂是将工厂方法模式封装成模板工厂类，那么这样在新增产品时，是不需要新增具体的工厂类，减少了代码的编写量。
 
-```cpp
+```cpp 抽象模板工厂 & 具体模板工厂
 // 抽象模板工厂类
 // AbstractProduct_t 产品抽象类
 template <class AbstractProduct_t>
 class AbstractFactory {
-  public:
-    virtual AbstractProduct_t *CreateProduct() = 0;
-    virtual ~AbstractFactory() = default;
+ public:
+  virtual AbstractProduct_t* CreateProduct() = 0;
+  virtual ~AbstractFactory() = default;
 };
 
 // 具体模板工厂类
 // AbstractProduct_t 产品抽象类，ConcreteProduct_t 产品具体类
 template <class AbstractProduct_t, class ConcreteProduct_t>
 class ConcreteFactory : public AbstractFactory<AbstractProduct_t> {
-  public:
-    AbstractProduct_t *CreateProduct() { return new ConcreteProduct_t(); }
+ public:
+  AbstractProduct_t* CreateProduct() { return new ConcreteProduct_t(); }
 };
 ```
 

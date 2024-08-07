@@ -17,7 +17,7 @@ C++ 不像 Java 那样有虚拟机动态的管理内存，如果使用裸指针�
 
 前面提到使用**裸指针**会存在内存泄漏等问题。这里用具体代码来说明：
 
-```cpp
+```cpp 裸指针的内存泄漏
 class A {};
 void func() {
   auto p = new A; // 定义 p 为指向 A 对象的裸指针
@@ -76,7 +76,7 @@ void func() {
 
 用法如下：
 
-```cpp
+```cpp unique_ptr
 struct A {
   ~A() { std::cout << "~A\n"; }
   void Print() { std::cout << "Print\n"; }
@@ -152,7 +152,7 @@ std::shared_ptr<int> ptr(new int, [](int *p){ delete p; });
 1. 不用同一个裸指针初始化多个 `shared_ptr`，也不要对 `get()` 返回的裸指针进行 `delete`，否则会出现 **double free** 导致出问题；
 2. 不将 `this` 指针初始化 `shared_ptr` 并返回，否则会出现 **double free**，比如：
 
-    ```cpp
+    ```cpp this 的 double free
     class A {
       shared_ptr<A> func() {
         return std::shared_ptr<A>(this);
@@ -160,7 +160,7 @@ std::shared_ptr<int> ptr(new int, [](int *p){ delete p; });
     };
     ```
 
-    A 本身会调用析构函数，函数返回值由于关联了 `this` 指针，进行 `delete this` 时还会调用一遍析构函数。
+    A 本身会调用析构函数，函数返回值由于关联了 `this` 指针，进行 `delete this` 时还会调用一遍析构函数。如果非要实现这一功能，请继承自 `std::enable_shared_from_this<A>`，之后就可以调用 `shared_from_this()` 来获取一个指向自身的 shared ptr 了。
 
 3. 尽量用 `make_shared` 代替 `new`，比如：
 
@@ -185,7 +185,7 @@ std::shared_ptr<int> ptr(new int, [](int *p){ delete p; });
 
 4. 避免**循环引用**。所谓循环引用，就是存在一个引用通过一系列的引用链，最后引用回自身，且看代码：
 
-    ```cpp
+    ```cpp 循环引用
     struct A;
     struct B;
 
@@ -222,7 +222,7 @@ std::shared_ptr<int> ptr(new int, [](int *p){ delete p; });
 
 具体用法为：
 
-```cpp
+```cpp weak_ptr
 int* a = new int{0};
 std::shared_ptr<int> shared_p(a);
 std::weak_ptr<int> weak_p = shared_p; // weak_ptr 不共享所有权，仅作监视用
@@ -238,7 +238,7 @@ std::cout << shared_p.use_count() << " " << weak_p.use_count() << " " << q.use_c
 
 在这样的基础上，`weak_ptr` 也就能够打破 `shared_ptr` 中所存在的循环引用现象——令循环中的其中一个指针为 `weak_ptr` 即可。
 
-```cpp
+```cpp 解决循环引用
 struct A;
 struct B;
 
@@ -270,68 +270,65 @@ int main() {
 4. 支持用派生类构造；
 5. 正确释放指针；
 
-```cpp
-template<class T>
+```cpp 实现 shared_ptr
+
+template <class T>
 class SharedPointer {
-  public:
-   class Counter {
-    public:
-      Counter(T* ptr): ptr_(ptr), cnt_(0) {}
-      ~Counter() { delete ptr_; }
-      void addRef() { cnt_.fetch_add(1); }
-      void release() { cnt_.fetch_sub(1); }
-      int getCount() { return cnt_.load(); }
-      T* ptr_;
-    private:
-      std::atomic<int> cnt_;
-   };
-  public:
-    SharedPointer(T* ptr) {
-      counter_ = new Counter(ptr);
-    }
-    // copy constructor
-    SharedPointer(const SharedPointer<T> &sp) {
-      counter_ = sp.counter_;
-      counter_->addRef();
-    }
-    SharedPointer& operator=(const SharedPointer<T> &sp) {
-      counter_ = sp.counter_;
-      counter_->addRef();
-    }
+ public:
+  class Counter {
+   public:
+    Counter(T* ptr) : ptr_(ptr), cnt_(0) {}
+    ~Counter() { delete ptr_; }
+    void addRef() { cnt_.fetch_add(1); }
+    void release() { cnt_.fetch_sub(1); }
+    int getCount() { return cnt_.load(); }
+    T* ptr_;
 
-    // move constructor
-    SharedPointer(SharedPointer<T>&& sp) {
-      counter_ = sp.counter_;
-      sp.counter_ = nullptr;
-    }
-    SharedPointer& operator=(SharedPointer<T> &&sp) {
-      counter_ = sp.counter_;
-      sp.counter_ = nullptr;
-    }
+   private:
+    std::atomic<int> cnt_;
+  };
 
-    // derived constructor
-    template<class U>
-    SharedPointer(U* derive) {
-      assert(std::is_base_of<T, U>::value);
-      counter_ = new Counter(derive);
-    }
+ public:
+  SharedPointer(T* ptr) { counter_ = new Counter(ptr); }
+  // copy constructor
+  SharedPointer(const SharedPointer<T>& sp) {
+    counter_ = sp.counter_;
+    counter_->addRef();
+  }
+  SharedPointer& operator=(const SharedPointer<T>& sp) {
+    counter_ = sp.counter_;
+    counter_->addRef();
+  }
 
-    ~SharedPointer() {
-      counter_->release();
-      if (counter_->getCount() == 0) {
-        delete counter_;
-      }
-    }
+  // move constructor
+  SharedPointer(SharedPointer<T>&& sp) {
+    counter_ = sp.counter_;
+    sp.counter_ = nullptr;
+  }
+  SharedPointer& operator=(SharedPointer<T>&& sp) {
+    counter_ = sp.counter_;
+    sp.counter_ = nullptr;
+  }
 
-    T* get() {
-      return counter_->ptr_;
-    }
+  // derived constructor
+  template <class U>
+  SharedPointer(U* derive) {
+    assert(std::is_base_of<T, U>::value);
+    counter_ = new Counter(derive);
+  }
 
-    bool isNull() {
-      return get() == nullptr;
+  ~SharedPointer() {
+    counter_->release();
+    if (counter_->getCount() == 0) {
+      delete counter_;
     }
+  }
 
-  private:
-    Counter* counter_;
+  T* get() { return counter_->ptr_; }
+
+  bool isNull() { return get() == nullptr; }
+
+ private:
+  Counter* counter_;
 };
 ```

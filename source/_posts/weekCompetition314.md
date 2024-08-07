@@ -33,22 +33,21 @@ img:
 
 ### code
 
-```go
-// go
+```go 处理用时最长的那个任务的员工
 func hardestWorker(n int, logs [][]int) int {
-    res, max := logs[0][0], logs[0][1]
+  res, max := logs[0][0], logs[0][1]
 
-    for i := 1; i < len(logs); i++ {
-        diff := logs[i][1] - logs[i-1][1]
-        if diff > max {
-            max = diff
-            res = logs[i][0]
-        } else if diff == max && res > logs[i][0] {
-            res = logs[i][0]
-        }
+  for i := 1; i < len(logs); i++ {
+    diff := logs[i][1] - logs[i-1][1]
+    if diff > max {
+      max = diff
+      res = logs[i][0]
+    } else if diff == max && res > logs[i][0] {
+      res = logs[i][0]
     }
+  }
 
-    return res
+  return res
 }
 ```
 
@@ -68,17 +67,16 @@ func hardestWorker(n int, logs [][]int) int {
 
 ### code
 
-```go
-// go
+```go 找出前缀异或的原始数组
 func findArray(p []int) []int {
-    res := make([]int, len(p))
-    res[0] = p[0]
+  res := make([]int, len(p))
+  res[0] = p[0]
 
-    for i := 1; i < len(p); i++ {
-        res[i] = p[i] ^ p[i-1]
-    }
+  for i := 1; i < len(p); i++ {
+    res[i] = p[i] ^ p[i-1]
+  }
 
-    return res
+  return res
 }
 ```
 
@@ -102,7 +100,7 @@ func findArray(p []int) []int {
 
 1. 如果 s 中尚存的字符中没有比它更小的，则将其 append 到结果字符串的末尾（写到纸上）；
 
-    > 不难证明，这样贪心的做法一定会使字典序最小。
+  > 不难证明，这样贪心的做法一定会使字典序最小。
 
 2. 反之，先将其加入栈中（添加到 t 的尾部），最后一并写出。
 
@@ -110,38 +108,37 @@ func findArray(p []int) []int {
 
 ### code
 
-```cpp
-// c++
+```cpp 使用机器人打印字典序最小的字符串
 class Solution {
 public:
-    string robotWithString(string s) {
-        int n = s.length();
-        vector<char> minm(n);
-        stack<char> t;
-        string res;
+  string robotWithString(string s) {
+    int n = s.length();
+    vector<char> minm(n);
+    stack<char> t;
+    string res;
 
-        minm[n-1] = s[n-1];
-        for (int i = n-2; i >= 0; i--) {
-            minm[i] = s[i] < minm[i+1] ? s[i] : minm[i+1];
-        }
-
-        for (int i = 0; i < n-1; i++) {
-            t.push(s[i]);	// 删除 s 的第一个字符并添加到 t 的尾部
-            while (!t.empty() && t.top() <= minm[i+1]) {	// 若后面没有比 t 尾部字符更小的，写到纸上
-                res.push_back(st.top());
-                t.pop();
-            }
-        }
-
-        // 将 t 中所有字符写到纸上
-        res.push_back(s[n-1]);
-        while (!t.empty()) {
-            res.push_back(t.top());
-            t.pop();
-        }
-
-        return res;
+    minm[n-1] = s[n-1];
+    for (int i = n-2; i >= 0; i--) {
+      minm[i] = s[i] < minm[i+1] ? s[i] : minm[i+1];
     }
+
+    for (int i = 0; i < n-1; i++) {
+      t.push(s[i]);	// 删除 s 的第一个字符并添加到 t 的尾部
+      while (!t.empty() && t.top() <= minm[i+1]) {	// 若后面没有比 t 尾部字符更小的，写到纸上
+        res.push_back(st.top());
+        t.pop();
+      }
+    }
+
+    // 将 t 中所有字符写到纸上
+    res.push_back(s[n-1]);
+    while (!t.empty()) {
+      res.push_back(t.top());
+      t.pop();
+    }
+
+    return res;
+  }
 };
 ```
 
@@ -169,35 +166,34 @@ public:
 
 ### code
 
-```go
-// go
+```go 矩阵中和能被 K 整除的路径
 func numberOfPaths(grid [][]int, k int) int {
-    mod := 1000000007
-    m, n := len(grid), len(grid[0])
-    dp := make([][][]int, m)
-    for i := 0; i < m; i++ {
-        dp[i] = make([][]int, n)
-        for j := 0; j < n; j++ {
-            dp[i][j] = make([]int, k)
-        }
+  mod := 1000000007
+  m, n := len(grid), len(grid[0])
+  dp := make([][][]int, m)
+  for i := 0; i < m; i++ {
+    dp[i] = make([][]int, n)
+    for j := 0; j < n; j++ {
+      dp[i][j] = make([]int, k)
     }
+  }
 
-    dp[0][0][grid[0][0] % k] = 1
-    for i := 0; i < m; i++ {
-        for j := 0; j < n; j++ {
-            for v := 0; v < k; v++ {
-                if i > 0 {
-                    dp[i][j][v] += dp[i-1][j][(v - grid[i][j] + 100*k) % k]
-                    dp[i][j][v] %= mod
-                }
-                if j > 0 {
-                    dp[i][j][v] += dp[i][j-1][(v - grid[i][j] + 100*k) % k]
-                    dp[i][j][v] %= mod
-                }
-            }
+  dp[0][0][grid[0][0] % k] = 1
+  for i := 0; i < m; i++ {
+    for j := 0; j < n; j++ {
+      for v := 0; v < k; v++ {
+        if i > 0 {
+          dp[i][j][v] += dp[i-1][j][(v - grid[i][j] + 100*k) % k]
+          dp[i][j][v] %= mod
         }
+        if j > 0 {
+          dp[i][j][v] += dp[i][j-1][(v - grid[i][j] + 100*k) % k]
+          dp[i][j][v] %= mod
+        }
+      }
     }
+  }
 
-    return dp[m-1][n-1][0]
+  return dp[m-1][n-1][0]
 }
 ```

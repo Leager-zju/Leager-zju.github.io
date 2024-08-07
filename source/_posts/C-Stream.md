@@ -15,7 +15,7 @@ C++ 程序常用 `cin` ， `cout` 进行标准 I/O（从键盘读取数据，或
 
 整个"流式家族"的类继承图长这样：
 
-<img src="image-20230114162631819.png" alt="image-20230114162631819" style="zoom:67%; " />
+<img src="image-20230114162631819.png" alt="Stream 继承结构" style="zoom:67%; " />
 
 > 其中 istream 与 ostream 共同派生了 iostream，为了避免"菱形继承"，其对 ios 的继承采用虚继承。
 

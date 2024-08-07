@@ -120,45 +120,41 @@ class Derived: public Base {
 
 **继承构造函数**的注意事项较多，一一说明。
 
-1）继承构造函数无法初始化派生类数据成员。这很显然，因为继承来的构造函数仅对基类进行初始化。如果要初始化派生类变量，有两种做法。一是使用 `=` / `{}` 对非静态成员就地初始化，二是额外书写构造函数，两种做法各有优劣，第一种减少了代码量，第二种更加灵活，需根据具体应用场景进行选择。
+1. 继承构造函数无法初始化派生类数据成员。这很显然，因为继承来的构造函数仅对基类进行初始化。如果要初始化派生类变量，有两种做法。一是使用 `=` / `{}` 对非静态成员就地初始化，二是额外书写构造函数，两种做法各有优劣，第一种减少了代码量，第二种更加灵活，需根据具体应用场景进行选择。
+2. 当派生类拥有多个基类时，如果多个基类中的部分构造函数的参数列表（中的类型与顺序）完全一致，那么派生类中的继承构造函数将产生冲突，比如：
+  ```cpp
+  class A {
+   public:
+    A(int i) {}
+  };
+  class B {
+   public:
+    B(int i) {}
+  };
+  class C: A, B {
+   public:
+    using A::A; // 等价于 C(int i): A(i) {}
+    using B::B; // 等价于 C(int i): B(i) {}
+    C(int i): A(i), B(i) {} // 应显式声明会产生冲突的构造函数，会将上面两个"等价于"覆盖，阻止了隐式生成对应的构造函数，避免了冲突
+  };
+  ```
+3. 若基类构造函数声明为 `private`，则派生类无法使用该构造函数；若为 `public`，即便 `using` 处于 `private` 中，也能使用。比如：
+  ```cpp
+  class A {
+   public:
+    A(int i) {}
+   private:
+    A(int i, int j) {}
+  };
 
-2）当派生类拥有多个基类时，如果多个基类中的部分构造函数的参数列表（中的类型与顺序）完全一致，那么派生类中的继承构造函数将产生冲突，比如：
+  class B: A {
+   private:
+    using A::A;
+  };
 
-```cpp
-class A {
- public:
-  A(int i) {}
-};
-class B {
- public:
-  B(int i) {}
-};
-class C: A, B {
- public:
-  using A::A; // 等价于 C(int i): A(i) {}
-  using B::B; // 等价于 C(int i): B(i) {}
-  C(int i): A(i), B(i) {} // 应显式声明会产生冲突的构造函数，会将上面两个"等价于"覆盖，阻止了隐式生成对应的构造函数，避免了冲突
-};
-```
-
-3）若基类构造函数声明为 `private`，则派生类无法使用该构造函数；若为 `public`，即便 `using` 处于 `private` 中，也能使用。比如：
-
-```cpp
-class A {
- public:
-  A(int i) {}
- private:
-  A(int i, int j) {}
-};
-
-class B: A {
- private:
-  using A::A;
-};
-
-B p(1);    // OK! although using is private
-B q(1, 2); // ERROR! A(int, int) is private
-```
+  B p(1);    // OK! although using is private
+  B q(1, 2); // ERROR! A(int, int) is private
+  ```
 
 > 网上好多文章提到两点：
 >

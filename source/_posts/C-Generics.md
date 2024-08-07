@@ -34,8 +34,7 @@ template<模板形参列表> 函数声明;
 3. **模板形参**：形如 `template<形参列表> typename|class T`，类型名 `T` 是可选的；
 4. 上述的**形参包**；
 
-```cpp
-// 于是 swap 函数可以写成这样
+```cpp swap 函数可以写成这样
 template<class T>
 void swap(T& first, T& second) {
   T temp = first;
@@ -46,7 +45,7 @@ void swap(T& first, T& second) {
 
 **注意**，函数模板自身并不是类型、函数或任何其他实体，不会从只包含模板定义的源文件生成任何代码。函数模板只有**实例化**后才会有代码出现。所谓**实例化**，就是用实参填充模板形参列表，让编译器生成指定类型函数，不用定义函数实现。实例化一个函数模板需要知道它的所有模板实参，但不需要指定每个模板实参，允许编译器进行**隐式实例化**，即**模板实参推导**，即尽可能从函数实参推导缺失的模板实参。
 
-```cpp
+```cpp 模板实参推导
 int main() {
   int a = 1, b = 2;
   swap(a, b); // 隐式实例化。允许省略尖括号，编译器会自动进行模板实参推导
@@ -60,7 +59,7 @@ int main() {
 
 对于特定的实现，我们或许不想要依照原来函数模板那样执行，而是自定义函数体，这也是可以的。**函数模板特化**能够将某一个或某几个要处理的数据类型进行单独处理，但需要额外定义对应数据类型的模板函数，比如：
 
-```cpp
+```cpp 函数模板特化
 template<char>
 void swap(char& first, char& second) {
   std::cout << "我不 swap，哎，就是玩\n";
@@ -75,7 +74,7 @@ int main() {
 
 如果同时又加上一个这样的普通函数：
 
-```cpp
+```cpp 优先识别为普通函数
 char swap(char& first, char& second) {
   std::cout << "只因你太美\n";
 }
@@ -95,7 +94,7 @@ template<模板形参列表> 类声明;
 
 模板形参列表与函数模板完全一致。**注意**，类模板自身并不是类型、对象或任何其他实体，不会从只包含模板定义的源文件生成任何代码。类模板同样只有**实例化**后才会有代码出现，并且也支持**类模板实参推导**，即尽可能从类构造函数实参推导缺失的模板实参。此外，类模板的**特化**还进一步分为了**全特化**与**偏特化**。
 
-```cpp
+```cpp 类模板特化
 #include <iostream>
 
 template <class First, class Second>
@@ -171,9 +170,7 @@ int main() {
 
 类模板、模板类和普通类之间可以互相派生。它们之间的派生关系有以下几种情况。
 
-### 模板类的派生
-
-```cpp
+```cpp 模板类派生
 template <class T>
 class Base1 {};
 
@@ -185,9 +182,7 @@ class Derive11: Base1<int> { T val; };
 class Derive12: Base<int> {};
 ```
 
-### 类模板的派生
-
-```cpp
+```cpp 类模板派生
 template <class T>
 class Base2 {};
 
@@ -196,9 +191,7 @@ template <class T>
 class Derive21: Base2<T> {};
 ```
 
-### 普通类的派生
-
-```cpp
+```cpp 普通类派生
 class Base3 {};
 
 // case 3.1: 普通类派生类模板
@@ -212,7 +205,7 @@ class Derive31: Base3 { T val; };
 
 子类和父类的模板参数列表可以不一样，但必须一一对应。
 
-```cpp
+```cpp 模板中的多态
 template <class T, class U>
 class Base {
  public:
@@ -267,7 +260,7 @@ int main() {
 
 **变参类模板**可以用任意数量的模板实参实例化，以 `std::tuple` 为例，其定义为：
 
-```cpp
+```cpp 可变参类模板
 template<class... Types>
 class tuple;
 
@@ -279,7 +272,7 @@ std::tuple<0> error;       // ERROR! 0 不是类型
 
 **变参函数模板**也是同理，可以用任意数量的函数实参调用：
 
-```cpp
+```cpp 可变参函数模板
 template<class... Types>
 void f(Types... args);
 

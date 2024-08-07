@@ -73,7 +73,7 @@ cover:
 dream:
   enable: true
   showTitle: true
-  title: 陶比特
+  title: 这里是陶比特
   text: 听说现在的你成了大经理，前途好比闪亮的星星。——《小镇姑娘》
 
 # Whether to display the musics.
@@ -144,7 +144,7 @@ recommend:
 
 # Configure website favicon and LOGO
 # 配置网站favicon和网站LOGO
-favicon: /btt.png
+favicon: /dt.png
 logo: /medias/comment_bg.png
 
 # The configuration of the second button in the home banner,
@@ -616,7 +616,7 @@ subtitle:
   showCursor: true # 是否显示光标
   startDelay: 300 # 开始延迟
   typeSpeed: 100 # 打字速度
-  backSpeed: 50 # 删除速度
+  backSpeed: 100 # 删除速度
   sub:
     - 是不是拥有以后就会开始要失去..
 

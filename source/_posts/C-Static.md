@@ -67,11 +67,13 @@ class Foo {
   void func() { func1(); }   // OK! 可以在非静态函数中调用静态函数，这里的 func1 并不会隐式使用 this
 
   static int val1；
-  static const int val2{0}; // 静态常量只能在类内定义
+  static const int val2{2}; // 静态常量可以在类内定义
+  static const int val3;
 };
 
 void Foo::func1() {}
-int Foo::val1 = 1;  // 静态非常量只能在类外定义
+int Foo::val1 = 1;        // 静态非常量只能在类外定义
+const int Foo::val3 = 3;  // 静态常量也能在类外定义
 
 int main() {
   Foo::func1(); // OK!
@@ -86,3 +88,8 @@ int main() {
 
 - 静态成员变量必须先初始化；
 - 构造函数与析构函数、运算符重载这类特殊函数不能用 `static` 进行修饰；
+- ⚠️如果在类内初始化静态常量，并且采用声明与实现分离的方式编码，则此时在 `.cpp` 文件中访问 `.h` 中初始化的 `static const` 变量则可能报 「undefined reference」 的链接错误。如果遇到这种情况，有两种解决方案
+  - 改为类外初始化；
+  - 改用 `constexpr` 在类内初始化；
+
+    > 之所以说「**可能**」，是因为在某些情况下编译器可能会直接进行对 `.cpp` 中的 `static const` 变量直接用值进行替换，这样就不会用到符号了，也就不会在链接器种报错。

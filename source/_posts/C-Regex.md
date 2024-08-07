@@ -76,8 +76,7 @@ C++11 为支持正则表达式新增了若干类，并将这些类封装在头�
 
 ### 代码示例
 
-```cpp
-// 完全匹配
+```cpp 完全匹配
 std::regex r("\\w+day");
 std::smatch res;
 std::string s1("Monday");
@@ -97,8 +96,7 @@ std::cout << boolalpha
 // false
 ```
 
-```cpp
-// 部分匹配
+```cpp 部分匹配
 std::regex r("\\w+day");
 std::smatch res;
 std::string s1("MondayTuesdaySunday");
@@ -112,8 +110,7 @@ std::cout << boolalpha
 // true Monday
 ```
 
-```cpp
-// 子串替换
+```cpp 子串替换
 std::regex r("\\w+day");
 std::smatch res;
 std::string s("Monday and Tuesday and Sunday");

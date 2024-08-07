@@ -148,7 +148,7 @@ R operator()( Args... args ) const;
 
 - 存储**函数**
 
-    ```cpp
+    ```cpp 函数
     void foo(int i) { std::cout << i; }
     std::function<void(int)> f(foo); // 存储 void(int) 类型的函数
 
@@ -160,7 +160,7 @@ R operator()( Args... args ) const;
 
 - 存储**模板函数**
 
-    ```cpp
+    ```cpp 模板函数
     template<typename T>
     void foo(T i) { std::cout << i; }
 
@@ -170,7 +170,7 @@ R operator()( Args... args ) const;
 
 - 存储 **lambda 表达式**
 
-    ```cpp
+    ```cpp lambda 表达式
     std::function<void(int)> f = [](int i) { std::cout << i; };
     f(3); // output: 3
 
@@ -187,7 +187,7 @@ R operator()( Args... args ) const;
 
 - 存储**函数对象**
 
-    ```cpp
+    ```cpp 函数对象
     struct foo {
       void operator()(int i) const { std::cout << i; }
     };
@@ -198,7 +198,7 @@ R operator()( Args... args ) const;
 
 - 存储**类成员函数**
 
-    ```cpp
+    ```cpp 类成员函数
     class Foo {
      public:
       Foo(int num) : num_(num) {}
@@ -223,14 +223,14 @@ R operator()( Args... args ) const;
 
 - 🎈存储**类成员变量访问器**
 
-    ```cpp
+    ```cpp 类成员变量访问器
     std::function<int(Foo const&)> g = &Foo::num_; // 理由同上
     std::cout << g(foo); // 相当于调用 foo.num_
     ```
 
 - 存储 **std::bind 表达式**
 
-    ```cpp
+    ```cpp std::bind 表达式
     using std::placeholders::_1;
     std::function<void(int)> h;
 

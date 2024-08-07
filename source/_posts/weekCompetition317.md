@@ -28,20 +28,19 @@ img:
 
 ### code
 
-```go
-// go
+```go 可被三整除的偶数的平均值
 func averageValue(nums []int) int {
-    sum, cnt := 0, 0
-    for _, n := range nums {
-        if n % 6 == 0 {
-            sum += n
-            cnt ++
-        }
+  sum, cnt := 0, 0
+  for _, n := range nums {
+    if n % 6 == 0 {
+      sum += n
+      cnt ++
     }
-    if cnt == 0 {
-        return 0
-    }
-    return sum/cnt
+  }
+  if cnt == 0 {
+    return 0
+  }
+  return sum/cnt
 }
 ```
 
@@ -62,55 +61,54 @@ func averageValue(nums []int) int {
 
 ### code
 
-```go
-// go
+```go 最流行的视频创作者
 func mostPopularCreator(creators []string, ids []string, views []int) [][]string {
-    type info struct {
-        id string
-        view int
-    }
-    popular := make(map[string]int)     // creators -> 流行度
-    works := make(map[string][]info)    // creators -> 作品集
-    maxm := 0                           // 最大流行度
+  type info struct {
+    id string
+    view int
+  }
+  popular := make(map[string]int)   // creators -> 流行度
+  works := make(map[string][]info)  // creators -> 作品集
+  maxm := 0                         // 最大流行度
 
-    for i := range creators {
-        popular[creators[i]] += views[i]
-        work, ok := works[creators[i]]
-        if !ok {
-            works[creators[i]] = []info{{ids[i], views[i]}}
-        } else {
-            works[creators[i]] = append(work, info{ids[i], views[i]})
-        }
-
-
-        if popular[creators[i]] > maxm {
-            maxm = popular[creators[i]]
-        }
+  for i := range creators {
+    popular[creators[i]] += views[i]
+    work, ok := works[creators[i]]
+    if !ok {
+      works[creators[i]] = []info{{ids[i], views[i]}}
+    } else {
+      works[creators[i]] = append(work, info{ids[i], views[i]})
     }
 
-    names := make([]string, 0)	// 所有流行度最高的创作者的名字
-    for k, v := range popular {
-        if v == maxm {
-            names = append(names, k)
-        }
-    }
 
-    res := make([][]string, 0)
-    for _, name := range names {
-        wks, _ := works[name]
-        var id string
-        maxview := -1
-        for _, work := range wks {
-            if work.view > maxview {
-                id = work.id
-                maxview = work.view
-            } else if work.view == maxview && work.id < id {
-                id = work.id
-            }
-        }
-        res = append(res, []string{name, id})
+    if popular[creators[i]] > maxm {
+      maxm = popular[creators[i]]
     }
-    return res
+  }
+
+  names := make([]string, 0)  // 所有流行度最高的创作者的名字
+  for k, v := range popular {
+    if v == maxm {
+      names = append(names, k)
+    }
+  }
+
+  res := make([][]string, 0)
+  for _, name := range names {
+    wks, _ := works[name]
+    var id string
+    maxview := -1
+    for _, work := range wks {
+      if work.view > maxview {
+        id = work.id
+        maxview = work.view
+      } else if work.view == maxview && work.id < id {
+        id = work.id
+      }
+    }
+    res = append(res, []string{name, id})
+  }
+  return res
 }
 ```
 
@@ -136,30 +134,30 @@ func mostPopularCreator(creators []string, ids []string, views []int) [][]string
 
 ### code
 
-```go
-// go
+```go 美丽整数的最小增量
 func getsum(n int64) int {
-    res := 0
-    for n > 0 {
-        res += int(n % 10)
-        n /= 10
-    }
-    return res
+  res := 0
+  for n > 0 {
+    res += int(n % 10)
+    n /= 10
+  }
+  return res
 }
-func makeIntegerBeautiful(n int64, target int) int64 {
-    sum := getsum(n)
-    if sum <= target {
-        return 0
-    }
 
-    mask := int64(1)    // 10^i
-    for {
-        if sum - getsum(n % mask) + 1 <= target {
-            return mask - n % mask
-        }
-        mask *= 10
+func makeIntegerBeautiful(n int64, target int) int64 {
+  sum := getsum(n)
+  if sum <= target {
+    return 0
+  }
+
+  mask := int64(1)  // 10^i
+  for {
+    if sum - getsum(n % mask) + 1 <= target {
+      return mask - n % mask
     }
-    return mask - n
+    mask *= 10
+  }
+  return mask - n
 }
 ```
 
@@ -189,37 +187,36 @@ func makeIntegerBeautiful(n int64, target int) int64 {
 
 ### code
 
-```go
-// go
+```go 移除子树后的二叉树高度
 func treeQueries(root *TreeNode, queries []int) []int {
-	height := map[*TreeNode]int{} // 每棵子树的高度
-	var getHeight func(*TreeNode) int
-	getHeight = func(node *TreeNode) int {
-		if node == nil {
-			return 0
-		}
-		height[node] = 1 + max(getHeight(node.Left), getHeight(node.Right))
-		return height[node]
-	}
-	getHeight(root)
+  height := map[*TreeNode]int{} // 每棵子树的高度
+  var getHeight func(*TreeNode) int
+  getHeight = func(node *TreeNode) int {
+    if node == nil {
+      return 0
+    }
+    height[node] = 1 + max(getHeight(node.Left), getHeight(node.Right))
+    return height[node]
+  }
+  getHeight(root)
 
-	res := make([]int, len(height)+1) // 每个节点的答案
-	var dfs func(*TreeNode, int, int)
-	dfs = func(node *TreeNode, depth, restH int) {
-		if node == nil {
-			return
-		}
-		depth++
-		res[node.Val] = restH
-		dfs(node.Left, depth, max(restH, depth+height[node.Right]))
-		dfs(node.Right, depth, max(restH, depth+height[node.Left]))
-	}
-	dfs(root, -1, 0)
+  res := make([]int, len(height)+1) // 每个节点的答案
+  var dfs func(*TreeNode, int, int)
+  dfs = func(node *TreeNode, depth, restH int) {
+    if node == nil {
+      return
+    }
+    depth++
+    res[node.Val] = restH
+    dfs(node.Left, depth, max(restH, depth+height[node.Right]))
+    dfs(node.Right, depth, max(restH, depth+height[node.Left]))
+  }
+  dfs(root, -1, 0)
 
-	for i, q := range queries {
-		queries[i] = res[q]
-	}
-	return queries
+  for i, q := range queries {
+    queries[i] = res[q]
+  }
+  return queries
 }
 
 func max(a, b int) int { if b > a { return b }; return a }

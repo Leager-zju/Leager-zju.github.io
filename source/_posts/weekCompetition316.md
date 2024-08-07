@@ -38,22 +38,21 @@ img:
 
 ### code
 
-```go
-// go
-func compare(a, b string) bool {    // a is earlier than b
-    h1, _ := strconv.Atoi(a[:2])
-    m1, _ := strconv.Atoi(a[3:])
-    h2, _ := strconv.Atoi(b[:2])
-    m2, _ := strconv.Atoi(b[3:])
-    if h1 == h2 {
-        return m1 < m2
-    }
-    return h1 < h2
+```go 判断两个事件是否存在冲突
+func compare(a, b string) bool {  // a is earlier than b
+  h1, _ := strconv.Atoi(a[:2])
+  m1, _ := strconv.Atoi(a[3:])
+  h2, _ := strconv.Atoi(b[:2])
+  m2, _ := strconv.Atoi(b[3:])
+  if h1 == h2 {
+    return m1 < m2
+  }
+  return h1 < h2
 }
 
 func haveConflict(e1 []string, e2 []string) bool {
-    start1, end1, start2, end2 := e1[0], e1[1], e2[0], e2[1]
-    return !(compare(end1, start2) || compare(end2, start1))
+  start1, end1, start2, end2 := e1[0], e1[1], e2[0], e2[1]
+  return !(compare(end1, start2) || compare(end2, start1))
 }
 ```
 
@@ -73,36 +72,35 @@ func haveConflict(e1 []string, e2 []string) bool {
 
 ### code
 
-```go
-// go
+```go 最大公因数等于 K 的子数组数目
 func gcd(a, b int) int {
-    if a < b {
-        return gcd(b, a)
-    }
-    if a % b == 0 {
-        return b
-    }
-    return gcd(b, a%b)
+  if a < b {
+    return gcd(b, a)
+  }
+  if a % b == 0 {
+    return b
+  }
+  return gcd(b, a%b)
 }
 func subarrayGCD(nums []int, k int) int {
-    g := make([][]int, len(nums))
-    for i := range g {
-        g[i] = make([]int, len(nums))
+  g := make([][]int, len(nums))
+  for i := range g {
+    g[i] = make([]int, len(nums))
+  }
+  cnt := 0
+  for i := range nums {
+    g[i][i] = nums[i]
+    if g[i][i] == k {
+      cnt++
     }
-    cnt := 0
-    for i := range nums {
-        g[i][i] = nums[i]
-        if g[i][i] == k {
-            cnt++
-        }
-        for j := i+1; j < len(nums); j++{
-            g[i][j] = gcd(g[i][j-1], nums[j])
-            if g[i][j] == k {
-                cnt++
-            }
-        }
+    for j := i+1; j < len(nums); j++{
+      g[i][j] = gcd(g[i][j-1], nums[j])
+      if g[i][j] == k {
+        cnt++
+      }
     }
-    return cnt
+  }
+  return cnt
 }
 ```
 
@@ -124,7 +122,7 @@ func subarrayGCD(nums []int, k int) int {
 
 ### code
 
-```go
+```go 使数组相等的最小开销
 func minCost(nums, cost []int) int64 {
 	type pair struct{ x, c int }
 	a := make([]pair, len(nums))
@@ -132,9 +130,9 @@ func minCost(nums, cost []int) int64 {
 		a[i] = pair{x, cost[i]}
 	}
 	sort.Slice(a, func(i, j int) bool {
-        a, b := a[i], a[j];
-        return a.x < b.x
-    })
+    a, b := a[i], a[j];
+    return a.x < b.x
+  })
 
 	var total, sumCost int64
 	for _, p := range a {
@@ -151,10 +149,10 @@ func minCost(nums, cost []int) int64 {
 }
 
 func min(a, b int64) int64 {
-    if a > b {
-        return b
-    }
-    return a
+  if a > b {
+    return b
+  }
+  return a
 }
 ```
 
@@ -179,43 +177,42 @@ func min(a, b int64) int64 {
 
 ### code
 
-```go
-// go
+```go 使数组相似的最少操作次数
 func makeSimilar(nums []int, target []int) int64 {
-    // 考虑奇偶
-    n1, n2, t1, t2 := make([]int, 0), make([]int, 0), make([]int, 0), make([]int, 0)
-    for _, n := range nums {
-        if n % 2 != 0 {
-            n1 = append(n1, n)
-        } else {
-            n2 = append(n2, n)
-        }
+  // 考虑奇偶
+  n1, n2, t1, t2 := make([]int, 0), make([]int, 0), make([]int, 0), make([]int, 0)
+  for _, n := range nums {
+    if n % 2 != 0 {
+      n1 = append(n1, n)
+    } else {
+      n2 = append(n2, n)
     }
-    for _, t := range target {
-        if t % 2 != 0 {
-            t1 = append(t1, t)
-        } else {
-            t2 = append(t2, t)
-        }
+  }
+  for _, t := range target {
+    if t % 2 != 0 {
+      t1 = append(t1, t)
+    } else {
+      t2 = append(t2, t)
     }
+  }
 
-    sort.Ints(n1)
-    sort.Ints(n2)
-    sort.Ints(t1)
-    sort.Ints(t2)
+  sort.Ints(n1)
+  sort.Ints(n2)
+  sort.Ints(t1)
+  sort.Ints(t2)
 
-    var d1, d2 int64 = 0, 0
-    for i := range n1 {
-        if t1[i] > n1[i] {
-            d1 += int64(t1[i]-n1[i])
-        }
+  var d1, d2 int64 = 0, 0
+  for i := range n1 {
+    if t1[i] > n1[i] {
+      d1 += int64(t1[i]-n1[i])
     }
-    for i := range n2 {
-        if t2[i] > n2[i] {
-            d2 += int64(t2[i] - n2[i])
-        }
+  }
+  for i := range n2 {
+    if t2[i] > n2[i] {
+      d2 += int64(t2[i] - n2[i])
     }
-    return (d1+d2)/2
+  }
+  return (d1+d2)/2
 }
 ```
 

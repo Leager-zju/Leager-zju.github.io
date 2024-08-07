@@ -27,10 +27,10 @@ img:
 
 Linux 中可以通过函数 `int pipe(int fd[2])` 建立匿名管道，其中 `fd[0]` 为读取端，`fd[1]` 为写入端，两个都是**文件描述符**，从而可以用 `read()/write()` 系统调用进行数据传输。比如下面这段代码：
 
-```C
-#include<stdio.h>
-#include<unistd.h>
-#include<string.h>
+```C 匿名管道
+#include <stdio.h>
+#include <unistd.h>
+#include <string.h>
 
 int main() {
   int fd[2];
@@ -54,7 +54,7 @@ int main() {
     close(fd[1]); // 关闭写入才能读取
     int i = 0;
     char msg[100];
-    while(i++ < 100) {
+    while (i++ < 100) {
       memset(msg, '\0', sizeof(msg));
       read(fd[0], msg, sizeof(msg));
       printf("%s\n", msg);
@@ -81,13 +81,12 @@ int main() {
 
 Linux 中可以通过函数 `int mkfifo(const char *path, mode_t mode)` 建立命名管道，其中 `path` 指明文件路径，`mode` 指明管道文件的存取权限。比如下面这段代码：
 
-```C
-/* server.c */
-#include<stdio.h>
-#include<unistd.h>
-#include<string.h>
+```C 命名管道 - server.c
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
 #define _PATH_NAME_ "/tmp/file.tmp"
-#define _SIZE_  100
+#define _SIZE_ 100
 
 int main() {
   int ret = mkfifo(_PATH_NAME_, S_IFIFO | 0666);
@@ -99,8 +98,8 @@ int main() {
   char buf[_SIZE_] = {0};
   int fd = open(_PATH_NAME_, O_WRONLY);
   while (true) {
-    fget(buf, sizeof(buf)-1, stdin);
-    int ret = write(fd, buf, strlen(buf)+1);
+    fget(buf, sizeof(buf) - 1, stdin);
+    int ret = write(fd, buf, strlen(buf) + 1);
     if (ret < 0) {
       printf("Write Error\n");
       break;
@@ -112,13 +111,12 @@ int main() {
 }
 ```
 
-```C
-/* client.c */
-#include<stdio.h>
-#include<unistd.h>
-#include<string.h>
+```C 命名管道 - client.c
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
 #define _PATH_NAME_ "/tmp/file.tmp"
-#define _SIZE_  100
+#define _SIZE_ 100
 
 int main() {
   int fd = open(_PATH_NAME_, O_RDONLY);
@@ -171,7 +169,7 @@ Linux 中共定义了 64 种信号，分为以下两种：
 
 Linux 在进程管理结构 `task_struct` 中定义了信号相关的变量。
 
-```C
+```C task_struct 定义
 struct task_struct {
   ...
   int sigpending; // 是否有待处理信号
@@ -183,7 +181,7 @@ struct task_struct {
 }
 ```
 
-```C
+```C 信号相关结构体定义
 #define  _NSIG  64
 
 struct signal_struct {
@@ -433,77 +431,74 @@ int do_signal(struct pt_regs *regs, sigset_t *oldset)
 
 ### 消息队列使用
 
-```C
-/* writer.c */
-#include <sys/types.h>
+```C 消息队列 - writer.c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
+#include <sys/types.h>
 
-struct msgbuf { // 待写入消息节点数据结构，必须以 long 类型变量开始
-	long mtype;
-	char mtext[255];
+struct msgbuf {  // 待写入消息节点数据结构，必须以 long 类型变量开始
+  long mtype;
+  char mtext[255];
 };
 
 int main() {
-	int mq_id = msgget(123, IPC_CREAT | 0666); // 创建一个消息队列
-	if (mq_id != -1) {
-		// 初始化要发生的消息
-		struct msgbuf mybuf;
-		mybuf.mtype = 1;
-		strcpy(mybuf.mtext, "I'm send process.\n");
+  int mq_id = msgget(123, IPC_CREAT | 0666);  // 创建一个消息队列
+  if (mq_id != -1) {
+    // 初始化要发生的消息
+    struct msgbuf mybuf;
+    mybuf.mtype = 1;
+    strcpy(mybuf.mtext, "I'm send process.\n");
 
-		// 发送消息
-		if (msgsnd(mq_id, &mybuf, sizeof(mybuf.mtext), 0)) {
-			printf("success\n");
-    }
-		else {
+    // 发送消息
+    if (msgsnd(mq_id, &mybuf, sizeof(mybuf.mtext), 0)) {
+      printf("success\n");
+    } else {
       printf("msgsnd Fail\n");
     }
-	} else {
-		printf("msgget Fail\n");
-	}
+  } else {
+    printf("msgget Fail\n");
+  }
 
-	return 0;
+  return 0;
 }
 ```
 
-```C
-/* reader.c */
-#include <sys/types.h>
+```C 消息队列 - reader.c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
+#include <sys/types.h>
 
-struct msgbuf { // 待读取消息节点数据结构，必须与消息队列节点格式一致
-	long mtype;
-	char mtext[255];
+struct msgbuf {  // 待读取消息节点数据结构，必须与消息队列节点格式一致
+  long mtype;
+  char mtext[255];
 };
 
 int main() {
-	int mq_id = msgget(123, IPC_CREAT | 0666); // 获取消息队列
-	if (mq_id != -1) {
-		struct msgbuf mybuf;
-		// 接收第一条消息，存到 mybuf 中
-		if (msgrcv(mq_id, &mybuf, sizeof(mybuf.mtext), 0, IPC_NOWAIT) != -1) {
-			printf("read success: %s\n", mybuf.mtext);
-			// 删除这个消息队列
-			if (msgctl(mq_id, IPC_RMID, 0) != -1){
-				printf("delete msg success\n");
+  int mq_id = msgget(123, IPC_CREAT | 0666);  // 获取消息队列
+  if (mq_id != -1) {
+    struct msgbuf mybuf;
+    // 接收第一条消息，存到 mybuf 中
+    if (msgrcv(mq_id, &mybuf, sizeof(mybuf.mtext), 0, IPC_NOWAIT) != -1) {
+      printf("read success: %s\n", mybuf.mtext);
+      // 删除这个消息队列
+      if (msgctl(mq_id, IPC_RMID, 0) != -1) {
+        printf("delete msg success\n");
       }
-		} else {
-			printf("msgsnd Fail\n");
-		}
+    } else {
+      printf("msgsnd Fail\n");
+    }
 
-	} else {
-		printf("msgget Fail\n");
-	}
+  } else {
+    printf("msgget Fail\n");
+  }
 
-	return 0;
+  return 0;
 }
 ```
 
@@ -525,7 +520,7 @@ int main() {
 
 mmap 本来的是存储映射功能。它可以将一个文件映射到内存中，在程序里就可以直接使用内存地址对文件内容进行访问，这可以让程序对文件访问更方便。
 
-```C
+```C mmap api
 #include <sys/mman.h>
 
 // 通过设置 fd，就可以映射到文件，返回值是相应的内存地址。
@@ -537,66 +532,65 @@ int munmap(void *addr, size_t length);
 
 由于这个系统调用的特性可以用在很多场合，所以 Linux 系统用它实现了很多功能，并不仅局限于存储映射，还可以进行共享内存，只需令 `mmap()` 中 `flags = MAP_SHARED|MAP_ANONYMOUS, fd = -1`。这样一来，配合 `fork()`，父子进程都可以获取相同的 `mmap()` 返回的共享内存地址，从而实现通信。样例代码如下：
 
-```C
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
+```C mmap.c
 #include <errno.h>
 #include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/file.h>
-#include <wait.h>
 #include <sys/mman.h>
+#include <unistd.h>
+#include <wait.h>
 
 #define COUNT 100
 
-int do_child(int *count)
-{
-	int interval;
+int do_child(int* count) {
+  int interval;
 
-	/* critical section */
-	interval = *count;
-	interval++;
-	usleep(1);
-	*count = interval;
-	/* critical section */
+  /* critical section */
+  interval = *count;
+  interval++;
+  usleep(1);
+  *count = interval;
+  /* critical section */
 
-	exit(0);
+  exit(0);
 }
 
-int main()
-{
-	pid_t pid;
-	int count;
-	int *shm_p;
+int main() {
+  pid_t pid;
+  int count;
+  int* shm_p;
 
-	shm_p = (int *)mmap(NULL, sizeof(int), PROT_WRITE|PROT_READ, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
-	if (MAP_FAILED == shm_p) {
-		perror("mmap()");
-		exit(1);
-	}
-	
-	*shm_p = 0;
+  shm_p = (int*)mmap(NULL, sizeof(int), PROT_WRITE | PROT_READ,
+                     MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+  if (MAP_FAILED == shm_p) {
+    perror("mmap()");
+    exit(1);
+  }
 
-	for (count = 0; count < COUNT; count++) {
-		pid = fork();
-		if (pid < 0) {
-			perror("fork()");
-			exit(1);
-		}
+  *shm_p = 0;
 
-		if (pid == 0) {
-			do_child(shm_p);
-		}
-	}
+  for (count = 0; count < COUNT; count++) {
+    pid = fork();
+    if (pid < 0) {
+      perror("fork()");
+      exit(1);
+    }
 
-	for (count=0;count<COUNT;count++) {
-		wait(NULL);
-	}
+    if (pid == 0) {
+      do_child(shm_p);
+    }
+  }
 
-	printf("shm_p: %d\n", *shm_p);
-	munmap(shm_p, sizeof(int));
-	exit(0);
+  for (count = 0; count < COUNT; count++) {
+    wait(NULL);
+  }
+
+  printf("shm_p: %d\n", *shm_p);
+  munmap(shm_p, sizeof(int));
+  exit(0);
 }
 ```
 
@@ -604,11 +598,10 @@ int main()
 
 mmap 实现共享内存的方式需要 `fork()` 配合，只能支持相关进程。XSI 采取更为通用的手段，能够支持无关进程。
 
-```C
+```C XSI api
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/types.h>
-#include <sys/ipc.h>
 
 // 根据指定文件的 inode 编号和文件所在设备的设备编号来生成 key
 key_t ftok(const char *pathname, int proj_id);
@@ -617,7 +610,8 @@ key_t ftok(const char *pathname, int proj_id);
 // Linux 限制了系统最大能创建的共享内存为 128 个
 int shmget(key_t key, size_t size, int shmflg);
 
-// 将 {虚拟地址: 物理地址} 的映射绑定到进程内，并令该共享内存的 `shm_nattach` 计数器加一
+// 将 {虚拟地址: 物理地址} 的映射绑定到进程内，并令该共享内存的 `shm_nattach`
+// 计数器加一
 void *shmat(int shmid, const void *shmaddr, int shmflg);
 
 // 移除映射，并令该共享内存的 `shm_nattach` 计数器减一
@@ -629,128 +623,126 @@ int shmctl(int shmid, int cmd, struct shmid_ds *buf);
 
 但根据管道的经验，无关进程之间的通信能且仅能通过文件来实现，每次根据 `path` 打开一个文件，进程内部都有一个文件描述符 `fd` 来指向该文件，从而进行操作。XSI 就是根据这个思路来设计的，`key` 对应了 `path`，`shmid` 对应了 `fd`。之所以说**对应**，是因为并不是真正的文件描述符，无法使用 `open()/write()` 这样的系统调用对其执行操作。事实上，内核里有一张名为 `shm_segs[]` 的表来存放共享内存相关信息，并根据 `shmid` 来索引。只要 `ftok` 的参数是一样的，那么生成的 `key` 也必然是一样且唯一的，根据 `shmget()` 得到的 `shmid` 也是唯一的，这就实现了任意进程能够对共享内存进行访问。样例代码如下：
 
-```C
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
+```C XSI.c
 #include <errno.h>
 #include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/file.h>
-#include <wait.h>
-#include <sys/mman.h>
 #include <sys/ipc.h>
+#include <sys/mman.h>
 #include <sys/shm.h>
 #include <sys/types.h>
+#include <unistd.h>
+#include <wait.h>
 
 #define COUNT 100
 #define PATHNAME "/etc/passwd"
 
-int do_child(int proj_id)
-{
-	int interval;
-	int *shm_p, shm_id;
-	key_t shm_key;
-	// 使用 ftok() 产生shmkey
-	if ((shm_key = ftok(PATHNAME, proj_id)) == -1) {
-		perror("ftok()");
-		exit(1);
-	}
+int do_child(int proj_id) {
+  int interval;
+  int *shm_p, shm_id;
+  key_t shm_key;
+  // 使用 ftok() 产生shmkey
+  if ((shm_key = ftok(PATHNAME, proj_id)) == -1) {
+    perror("ftok()");
+    exit(1);
+  }
 
-	// 在子进程中获取到已经在父进程中创建好的 shmid
-	shm_id = shmget(shm_key, sizeof(int), 0);
-	if (shm_id < 0) {
-		perror("shmget()");
-		exit(1);
-	}
-	
-	// 将相关共享内存段映射到本进程的内存地址
-	shm_p = (int *)shmat(shm_id, NULL, 0);
-	if ((void *)shm_p == (void *)-1) {
-		perror("shmat()");
-		exit(1);
-	}
+  // 在子进程中获取到已经在父进程中创建好的 shmid
+  shm_id = shmget(shm_key, sizeof(int), 0);
+  if (shm_id < 0) {
+    perror("shmget()");
+    exit(1);
+  }
 
-	/* critical section */
-	interval = *shm_p;
-	interval++;
-	usleep(1);
-	*shm_p = interval;
-	/* critical section */
+  // 将相关共享内存段映射到本进程的内存地址
+  shm_p = (int *)shmat(shm_id, NULL, 0);
+  if ((void *)shm_p == (void *)-1) {
+    perror("shmat()");
+    exit(1);
+  }
 
-	// 解除本进程内对共享内存的地址映射
-	if (shmdt(shm_p) < 0) {
-		perror("shmdt()");
-		exit(1);
-	}
+  /* critical section */
+  interval = *shm_p;
+  interval++;
+  usleep(1);
+  *shm_p = interval;
+  /* critical section */
 
-	exit(0);
+  // 解除本进程内对共享内存的地址映射
+  if (shmdt(shm_p) < 0) {
+    perror("shmdt()");
+    exit(1);
+  }
+
+  exit(0);
 }
 
-int main()
-{
-	pid_t pid;
-	int count;
-	int *shm_p;
-	int shm_id, proj_id;
-	key_t shm_key;
+int main() {
+  pid_t pid;
+  int count;
+  int *shm_p;
+  int shm_id, proj_id;
+  key_t shm_key;
 
-	proj_id = 1234;
-	
-	// 使用约定好的文件路径和 proj_id 产生 shm_key
-	if ((shm_key = ftok(PATHNAME, proj_id)) == -1) {
-		perror("ftok()");
-		exit(1);
-	}
+  proj_id = 1234;
 
-	// 创建一个共享内存，如果系统中已经存在此共享内存则报错退出，创建出来的共享内存权限为 0600(-rw-------)
-	shm_id = shmget(shm_key, sizeof(int), IPC_CREAT|IPC_EXCL|0600);
-	if (shm_id < 0) {
-		perror("shmget()");
-		exit(1);
-	}
+  // 使用约定好的文件路径和 proj_id 产生 shm_key
+  if ((shm_key = ftok(PATHNAME, proj_id)) == -1) {
+    perror("ftok()");
+    exit(1);
+  }
 
-	// 绑定映射
-	shm_p = (int *)shmat(shm_id, NULL, 0);
-	if ((void *)shm_p == (void *)-1) {
-		perror("shmat()");
-		exit(1);
-	}
+  // 创建一个共享内存，如果系统中已经存在此共享内存则报错退出，创建出来的共享内存权限为
+  // 0600(-rw-------)
+  shm_id = shmget(shm_key, sizeof(int), IPC_CREAT | IPC_EXCL | 0600);
+  if (shm_id < 0) {
+    perror("shmget()");
+    exit(1);
+  }
 
+  // 绑定映射
+  shm_p = (int *)shmat(shm_id, NULL, 0);
+  if ((void *)shm_p == (void *)-1) {
+    perror("shmat()");
+    exit(1);
+  }
 
-	*shm_p = 0;
+  *shm_p = 0;
 
-	// 并发读写
-	for (count = 0; count < COUNT; count++) {
-		pid = fork();
-		if (pid < 0) {
-			perror("fork()");
-			exit(1);
-		}
+  // 并发读写
+  for (count = 0; count < COUNT; count++) {
+    pid = fork();
+    if (pid < 0) {
+      perror("fork()");
+      exit(1);
+    }
 
-		if (pid == 0) {
-			do_child(proj_id);
-		}
-	}
-	
-	// 等待所有子进程执行完毕
-	for (count = 0; count < COUNT; count++) {
-		wait(NULL);
-	}
+    if (pid == 0) {
+      do_child(proj_id);
+    }
+  }
 
-	// 解除映射
-	if (shmdt(shm_p) < 0) {
-		perror("shmdt()");
-		exit(1);
-	}
+  // 等待所有子进程执行完毕
+  for (count = 0; count < COUNT; count++) {
+    wait(NULL);
+  }
 
-	// 删除共享内存
-	if (shmctl(shm_id, IPC_RMID, NULL) < 0) {
-		perror("shmctl()");
-		exit(1);
-	}
+  // 解除映射
+  if (shmdt(shm_p) < 0) {
+    perror("shmdt()");
+    exit(1);
+  }
 
-	exit(0);
+  // 删除共享内存
+  if (shmctl(shm_id, IPC_RMID, NULL) < 0) {
+    perror("shmctl()");
+    exit(1);
+  }
+
+  exit(0);
 }
 ```
 

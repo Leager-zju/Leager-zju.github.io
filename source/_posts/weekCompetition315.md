@@ -32,23 +32,22 @@ img:
 
 ### code
 
-```go
-// go
+```go 与对应负数同时存在的最大正整数
 func findMaxK(nums []int) int {
-    mp := make(map[int]struct{})
-    res := -1
-    var null struct{}
-    sort.Ints(nums)
+  mp := make(map[int]struct{})
+  res := -1
+  var null struct{}
+  sort.Ints(nums)
 
-    for _, num := range nums {
-        if num < 0 {
-            mp[num] = null
-        } else if _, ok := mp[-num]; ok && num > res {
-            res = num
-        }
+  for _, num := range nums {
+    if num < 0 {
+      mp[num] = null
+    } else if _, ok := mp[-num]; ok && num > res {
+      res = num
     }
+  }
 
-    return res
+  return res
 }
 ```
 
@@ -67,25 +66,24 @@ func findMaxK(nums []int) int {
 
 ### code
 
-```go
-// go
+```go 反转之后不同整数的数目
 func reverse(num int) int {
-    res := 0
-    for num > 0 {
-        res = res * 10 + (num % 10)
-        num /= 10
-    }
-    return res
+  res := 0
+  for num > 0 {
+    res = res * 10 + (num % 10)
+    num /= 10
+  }
+  return res
 }
 
 func countDistinctIntegers(nums []int) int {
-    mp := make(map[int]struct{})
-    var null struct{}
-    for _, num := range nums {
-        mp[num] = null
-        mp[reverse(num)] = null
-    }
-    return len(mp)
+  mp := make(map[int]struct{})
+  var null struct{}
+  for _, num := range nums {
+    mp[num] = null
+    mp[reverse(num)] = null
+  }
+  return len(mp)
 }
 ```
 
@@ -101,24 +99,23 @@ func countDistinctIntegers(nums []int) int {
 
 ### code
 
-```go
-// go
+```go 反转之后的数字和
 func reverse(num int) int {
-    res := 0
-    for num > 0 {
-        res = res * 10 + (num % 10)
-        num /= 10
-    }
-    return res
+  res := 0
+  for num > 0 {
+    res = res * 10 + (num % 10)
+    num /= 10
+  }
+  return res
 }
 
 func sumOfNumberAndReverse(num int) bool {
-    for i := 0; i <= num; i++ {
-        if i + reverse(i) == num {
-            return true
-        }
+  for i := 0; i <= num; i++ {
+    if i + reverse(i) == num {
+      return true
     }
-    return false
+  }
+  return false
 }
 ```
 
@@ -156,33 +153,33 @@ $$
 
 ### code
 
-```go
+```go 统计定界子数组的数目
 func min(a, b int) int {
-    if a < b {
-        return a
-    }
-    return b
+  if a < b {
+    return a
+  }
+  return b
 }
 func countSubarrays(nums []int, minK int, maxK int) int64 {
-    minIndex, maxIndex, errIndex := -1, -1, -1	       // -1 代表未出现
-    res := 0
-    for i, num := range nums {
-        if num == minK {
-            minIndex = i
-        }
-        if num == maxK {
-            maxIndex = i
-        }
-        if num > maxK || num < minK {
-            errIndex = i
-        }
-        leftIndex := min(minIndex, maxIndex)
-        if leftIndex > errIndex {
-            res += leftIndex - errIndex
-        }
+  minIndex, maxIndex, errIndex := -1, -1, -1	     // -1 代表未出现
+  res := 0
+  for i, num := range nums {
+    if num == minK {
+      minIndex = i
     }
+    if num == maxK {
+      maxIndex = i
+    }
+    if num > maxK || num < minK {
+      errIndex = i
+    }
+    leftIndex := min(minIndex, maxIndex)
+    if leftIndex > errIndex {
+      res += leftIndex - errIndex
+    }
+  }
 
-    return int64(res)
+  return int64(res)
 }
 ```
 

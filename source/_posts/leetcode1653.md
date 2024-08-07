@@ -35,23 +35,22 @@ img:
 
 ## 代码
 
-```cpp
-// C++
+```cpp 使字符串平衡的最少删除次数
 class Solution {
-public:
-    int minimumDeletions(string s) {
-        int numOfb = 0;
-        int result = 0;
+ public:
+  int minimumDeletions(const string& s) {
+    int numOfb = 0;
+    int result = 0;
 
-        for (auto&& c : s) {
-            if (c == 'a') {
-                result = min(numOfb, result + 1);
-            } else {
-                numOfb++;
-            }
-        }
-
-        return result;
+    for (auto&& c : s) {
+      if (c == 'a') {
+        result = min(numOfb, result + 1);
+      } else {
+        numOfb++;
+      }
     }
+
+    return result;
+  }
 };
 ```

@@ -27,24 +27,23 @@ img:
 
 ### code
 
-```cpp
-// C++
+```cpp 最长的严格递增或递减子数组
 class Solution {
-public:
-    int longestMonotonicSubarray(vector<int>& nums) {
-        int n = nums.size();
-        vector<int> inc(n, 1); // 最长严格递增子数组的长度
-        vector<int> dec(n, 1); // 最长严格递减子数组的长度
-        for (int i = 1; i < n; i++) {
-            if (nums[i] > nums[i - 1]) {
-                inc[i] = inc[i - 1] + 1;
-            } else if (nums[i] < nums[i - 1]) {
-                dec[i] = dec[i - 1] + 1;
-            }
-        }
-        return max(*max_element(inc.begin(), inc.end()),
-                   *max_element(dec.begin(), dec.end()));
+ public:
+  int longestMonotonicSubarray(vector<int>& nums) {
+    int n = nums.size();
+    vector<int> inc(n, 1);  // 最长严格递增子数组的长度
+    vector<int> dec(n, 1);  // 最长严格递减子数组的长度
+    for (int i = 1; i < n; i++) {
+      if (nums[i] > nums[i - 1]) {
+        inc[i] = inc[i - 1] + 1;
+      } else if (nums[i] < nums[i - 1]) {
+        dec[i] = dec[i - 1] + 1;
+      }
     }
+    return max(*max_element(inc.begin(), inc.end()),
+               *max_element(dec.begin(), dec.end()));
+  }
 };
 ```
 
@@ -70,27 +69,26 @@ public:
 
 ### code
 
-```cpp
-// C++
+```cpp 满足距离约束且字典序最小的字符串
 class Solution {
-public:
-    int disToA(char ch) { return min(ch - 'a', 'a' + 26 - ch); }
+ public:
+  int disToA(char ch) { return min(ch - 'a', 'a' + 26 - ch); }
 
-    string getSmallestString(string s, int k) {
-        for (int i = 0; i < s.length() && k > 0; i++) {
-            if (s[i] != 'a') { // 如果已经是 'a' 了就不操作
-                int d = disToA(s[i]);
-                if (k >= d) {
-                    s[i] = 'a';
-                    k -= d;
-                } else {
-                    s[i] -= k;
-                    k = 0;
-                }
-            }
+  string getSmallestString(string s, int k) {
+    for (int i = 0; i < s.length() && k > 0; i++) {
+      if (s[i] != 'a') {  // 如果已经是 'a' 了就不操作
+        int d = disToA(s[i]);
+        if (k >= d) {
+          s[i] = 'a';
+          k -= d;
+        } else {
+          s[i] -= k;
+          k = 0;
         }
-        return s;
+      }
     }
+    return s;
+  }
 };
 ```
 
@@ -123,36 +121,35 @@ public:
 
 ### code
 
-```cpp
-// C++
+```cpp 使数组中位数等于 K 的最少操作数
 class Solution {
-public:
-    long long minOperationsToMakeMedianK(vector<int>& nums, int k) {
-        sort(nums.begin(), nums.end());
-        int lb = nums.size(), rb = nums.size();
+ public:
+  long long minOperationsToMakeMedianK(vector<int>& nums, int k) {
+    sort(nums.begin(), nums.end());
+    int lb = nums.size(), rb = nums.size();
 
-        for (int i = 0; i < nums.size(); i++) {
-            if (nums[i] >= k) {
-                lb = i;
-                break;
-            }
-        }
-        for (int i = lb; i < nums.size(); i++) {
-            if (nums[i] > k) {
-                rb = i;
-                break;
-            }
-        }
-
-        long long res = 0;
-        while (rb < nums.size() / 2 + 1) {
-            res += nums[rb++] - k;
-        }
-        while (lb > nums.size() / 2) {
-            res += k - nums[--lb];
-        }
-        return res;
+    for (int i = 0; i < nums.size(); i++) {
+      if (nums[i] >= k) {
+        lb = i;
+        break;
+      }
     }
+    for (int i = lb; i < nums.size(); i++) {
+      if (nums[i] > k) {
+        rb = i;
+        break;
+      }
+    }
+
+    long long res = 0;
+    while (rb < nums.size() / 2 + 1) {
+      res += nums[rb++] - k;
+    }
+    while (lb > nums.size() / 2) {
+      res += k - nums[--lb];
+    }
+    return res;
+  }
 };
 ```
 
@@ -184,90 +181,89 @@ public:
 
 ### code
 
-```cpp
-// C++
+```cpp 带权图里旅途的最小代价
 class Solution {
-public:
-    vector<int> minimumCost(int n, vector<vector<int>>& edges,
-                            vector<vector<int>>& query) {
-        // 初始化并查集
-        vector<int> father(n);
-        auto findfather = [&](int x) {
-            int a = x, b = x;
-            while (x != father[x]) {
-                x = father[x];
-            }
-            while (a != x) {
-                a = father[a];
-                father[b] = x;
-                b = a;
-            }
-            return x;
-        };
-        auto merge = [&](int x, int y) {
-            int fx = findfather(x);
-            int fy = findfather(y);
-            if (fx != fy) {
-                father[fx] = fy;
-            }
-        };
-        for (int i = 0; i < n; i++) {
-            father[i] = i;
-        }
-
-        // 初始化图
-        vector<unordered_map<int, int>> g(n);
-        for (auto&& e : edges) {
-            int u = e[0];
-            int v = e[1];
-            int w = e[2];
-            if (g[u].count(v) == 0) {
-                g[u][v] = w;
-            } else {
-                g[u][v] &= w;
-            }
-            if (g[v].count(u) == 0) {
-                g[v][u] = w;
-            } else {
-                g[v][u] &= w;
-            }
-            merge(u, v);
-        }
-
-        // 预先计算连通分量的代价
-        unordered_map<int, int> cache;
-        for (int i = 0; i < n; i++) {
-            int f = findfather(i);
-
-            int tmp = -1;
-            for (auto&& next : g[i]) {
-                // 这里就算重复计算 (u, v) 和 (v, u) 也没关系，AND 结果是不变的
-                if (tmp == -1) {
-                    tmp = next.second;
-                } else {
-                    tmp &= next.second;
-                }
-            }
-
-            if (cache.count(f)) {
-                cache[f] &= tmp;
-            } else {
-                cache[f] = tmp;
-            }
-        }
-
-        // 结果查询
-        vector<int> res;
-        for (auto&& q : query) {
-            if (q[0] == q[1]) {
-                res.push_back(0); // !!! corner case
-            } else if (findfather(q[0]) != findfather(q[1])) {
-                res.push_back(-1);
-            } else {
-                res.push_back(cache[findfather(q[0])]);
-            }
-        }
-        return res;
+ public:
+  vector<int> minimumCost(int n, vector<vector<int>>& edges,
+                          vector<vector<int>>& query) {
+    // 初始化并查集
+    vector<int> father(n);
+    auto findfather = [&](int x) {
+      int a = x, b = x;
+      while (x != father[x]) {
+        x = father[x];
+      }
+      while (a != x) {
+        a = father[a];
+        father[b] = x;
+        b = a;
+      }
+      return x;
+    };
+    auto merge = [&](int x, int y) {
+      int fx = findfather(x);
+      int fy = findfather(y);
+      if (fx != fy) {
+        father[fx] = fy;
+      }
+    };
+    for (int i = 0; i < n; i++) {
+      father[i] = i;
     }
+
+    // 初始化图
+    vector<unordered_map<int, int>> g(n);
+    for (auto&& e : edges) {
+      int u = e[0];
+      int v = e[1];
+      int w = e[2];
+      if (g[u].count(v) == 0) {
+        g[u][v] = w;
+      } else {
+        g[u][v] &= w;
+      }
+      if (g[v].count(u) == 0) {
+        g[v][u] = w;
+      } else {
+        g[v][u] &= w;
+      }
+      merge(u, v);
+    }
+
+    // 预先计算连通分量的代价
+    unordered_map<int, int> cache;
+    for (int i = 0; i < n; i++) {
+      int f = findfather(i);
+
+      int tmp = -1;
+      for (auto&& next : g[i]) {
+        // 这里就算重复计算 (u, v) 和 (v, u) 也没关系，AND 结果是不变的
+        if (tmp == -1) {
+          tmp = next.second;
+        } else {
+          tmp &= next.second;
+        }
+      }
+
+      if (cache.count(f)) {
+        cache[f] &= tmp;
+      } else {
+        cache[f] = tmp;
+      }
+    }
+
+    // 结果查询
+    vector<int> res;
+    for (auto&& q : query) {
+      if (q[0] == q[1]) {
+        res.push_back(0);  // !!! corner case
+      } else if (findfather(q[0]) != findfather(q[1])) {
+        res.push_back(-1);
+      } else {
+        res.push_back(cache[findfather(q[0])]);
+      }
+    }
+    return res;
+  }
 };
 ```
