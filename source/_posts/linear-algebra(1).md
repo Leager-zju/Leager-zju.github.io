@@ -5,7 +5,8 @@ mathjax: true
 date: 2022-09-29 14:21:50
 summary:
 categories: note
-tags: math
+tags:
+  - math
 img:
 ---
 

@@ -5,7 +5,9 @@ mathjax: true
 date: 2023-01-18 14:23:28
 summary:
 categories: c++
-tags: C++11
+tags:
+  - C++11
+  - C++
 img:
 ---
 

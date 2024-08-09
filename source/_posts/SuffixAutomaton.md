@@ -5,7 +5,8 @@ mathjax: true
 date: 2024-08-05 20:10:24
 summary:
 categories: data structure
-tags: c++
+tags:
+  - C++
 img:
 ---
 

@@ -5,7 +5,8 @@ mathjax: true
 date: 2023-10-25 20:37:37
 summary:
 categories: lab
-tags: MIT 6.s081
+tags:
+  - MIT 6.s081
 img:
 ---
 
@@ -62,7 +63,7 @@ uservec:
 
 最开始，地址 `TRAPFRAME` 的值记录在寄存器 SSCRATCH 中，而 trapframe 用于保存所有的 32 个用户寄存器值，而寄存器 a0 存放了**第一个参数**。`uservec` 首先交换这两个寄存器的值，这样 a0 就指向 trapframe 了，然后再将所有寄存器依次写入页中。当然，原本的 a0，也就是现在的 SSCRATCH，也需要被保存。
 
-> 之所以交换，是因为诸如 `sd ra 40(a0)` 这些指令的操作数必须位于用户寄存器，而原本的 32 个用户寄存器都被各自的数据占用，没法存 `TRAPFRAME`，于是就用 SSCRATCH，这个寄存器的作用就是“保存其他寄存器的值”。只要将 `TRAPFRAME` 存入其中，通过交换，就可以让 `TRAPFRAME` 放到用户寄存器了，从而能够根据 a0 访存，将用户寄存器保存到内存中。
+> 之所以交换，是因为诸如 `sd ra 40(a0)` 这些指令的操作数必须位于用户寄存器，而原本的 32 个用户寄存器都被各自的数据占用，没法存 `TRAPFRAME`，于是就用 SSCRATCH，这个寄存器的作用就是「保存其他寄存器的值」。只要将 `TRAPFRAME` 存入其中，通过交换，就可以让 `TRAPFRAME` 放到用户寄存器了，从而能够根据 a0 访存，将用户寄存器保存到内存中。
 >
 > 当然，别忘了后面还要换回来。
 
@@ -88,7 +89,7 @@ uservec:
 
 > 原本 SATP 内的用户页表指针不用保存，因为它可以通过 `MAKE_SATP(p->pagetable)` 写回。
 >
-> 那么，叫 trampoline page 的原因就很好理解了——某种程度在它上面“弹跳”了一下，然后从用户空间走到了内核空间。
+> 那么，叫 trampoline page 的原因就很好理解了——某种程度在它上面「弹跳」了一下，然后从用户空间走到了内核空间。
 
 ```S kernel/trampoline.S
     # a0 is no longer valid, since the kernel page

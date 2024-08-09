@@ -5,7 +5,8 @@ mathjax: true
 date: 2023-08-14 11:49:53
 summary:
 categories: lab
-tags: lab
+tags:
+  - lab
 img:
 ---
 
@@ -195,7 +196,7 @@ if len(m.Entries) > 0 {
 2. 利用 `WriteBatch.SetMeta()` 以及 `meta.xxxKey()` 往 wb 中加入批处理日志，设置好对应的 Key/Value 条目；
 3. 最后调用 `WriteBatch.WriteToDB()` 写到 badger 中（持久化）；
 
-> 如果数据没更新就不必写到 badger 中了。所以到这为止都要有一个“数据是否更新”的判断。
+> 如果数据没更新就不必写到 badger 中了。所以到这为止都要有一个「数据是否更新」的判断。
 
 #### 2 Implement Raft ready process
 

@@ -5,7 +5,8 @@ mathjax: true
 date: 2022-10-10 11:30:00
 summary:
 categories: leetcode
-tags: daily
+tags:
+  - daily
 img:
 ---
 

@@ -5,7 +5,8 @@ mathjax: true
 date: 2022-12-17 21:49:30
 summary:
 categories: lab
-tags: CMU 15445
+tags:
+  - CMU 15445
 img:
 ---
 

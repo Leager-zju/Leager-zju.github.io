@@ -5,7 +5,8 @@ mathjax: true
 date: 2024-04-25 10:28:13
 summary:
 categories: c++
-tags: Project
+tags:
+  - Project
 img:
 ---
 

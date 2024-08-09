@@ -5,7 +5,8 @@ mathjax: true
 date: 2023-08-20 23:37:15
 summary:
 categories: lab
-tags: lab
+tags:
+  - lab
 img:
 ---
 

@@ -5,7 +5,8 @@ mathjax: true
 date: 2023-08-20 23:37:12
 summary:
 categories: lab
-tags: lab
+tags:
+  - lab
 img:
 ---
 
@@ -42,7 +43,7 @@ Raft 层首先会 `Step` 一条 `MsgTransferLeader`。由于任何节点都有�
 - 如果待增加节点未出现在 `RaftGroup` 中，则新增一个条目;
 - 如果待删除节点出现在 `RaftGroup` 中，则删除一个条目;
 
-对节点的增删会导致“大多数”发送变化：若节点增加，则新节点等待 `AppendEntries` 即可。若节点减少，则需要重新更新 `committed` 并发送;
+对节点的增删会导致「大多数」发送变化：若节点增加，则新节点等待 `AppendEntries` 即可。若节点减少，则需要重新更新 `committed` 并发送;
 
 ### Part B Implement Admin Commands
 
@@ -142,9 +143,9 @@ Raft 层首先会 `Step` 一条 `MsgTransferLeader`。由于任何节点都有�
 
 对于第二个问题，在创建 `Peer` 之前，`Raftstore`收到的消息就含有 `Region` 相关信息。
 
-第三个问题，Follwers/Candidates 在 apply conf change 时仅仅是将其加到了 `Prs` 中，如果网络一切良好，其实不用做出任何操作。而 Leader 不一样，在添加 `Prs` 时，`Match`/`Next` 字段其实都应该赋 **0**——因为该 `Peer` 尚未初始化——这样一来，一旦发送 append 消息中遍历到新 `Peer` 时，发现其 `Next=0`，无论如何都会小于 `truncatedIndex`，Leader 会立刻发送 snapshot 过去。由于是通过 `replicatePeer()` 的方式进行创建，我们会发现这种方式创建的 `Peer`，其 Raft 层的 `Prs` 最开始是空的，甚至不包含自身，在这种状态下可以认为其属于一个“**待机**”状态，只允许处理 `MsgSnapshot`，其余消息一律作废。
+第三个问题，Follwers/Candidates 在 apply conf change 时仅仅是将其加到了 `Prs` 中，如果网络一切良好，其实不用做出任何操作。而 Leader 不一样，在添加 `Prs` 时，`Match`/`Next` 字段其实都应该赋 **0**——因为该 `Peer` 尚未初始化——这样一来，一旦发送 append 消息中遍历到新 `Peer` 时，发现其 `Next=0`，无论如何都会小于 `truncatedIndex`，Leader 会立刻发送 snapshot 过去。由于是通过 `replicatePeer()` 的方式进行创建，我们会发现这种方式创建的 `Peer`，其 Raft 层的 `Prs` 最开始是空的，甚至不包含自身，在这种状态下可以认为其属于一个「**待机**」状态，只允许处理 `MsgSnapshot`，其余消息一律作废。
 
-只有收到了 snapshot 并更细状态后，`Prs` 也被正确赋值，其才知道了其他节点的存在，此时脱离“**待机**”状态。
+只有收到了 snapshot 并更细状态后，`Prs` 也被正确赋值，其才知道了其他节点的存在，此时脱离「**待机**」状态。
 
 等到 Leader 收到回复后，新 `Peer` 才算正式加入 Group。
 
@@ -266,7 +267,7 @@ func (oc *OperatorController) Dispatch(region *core.RegionInfo, source string) {
 
 上面提到的 `Operator` 是怎么来的呢？有一部分就是 `Scheduler` 产生的。
 
-`Cluster` 一经创建便持有一个 `Coordinator`，其会通过 `runScheduler()` 来调用 `scheduler.Schedule()`，定期检查是否有存储节点超载，就需要找到该节点 `src` 的一个**合适**的 `Region`，将位于 `src` 中从属于该 `Region` 的 `Peer` 转移到某个**合适**的目标节点 `dst`，从而达成负载均衡，并通过函数返回的 `MovePeerOperator` 加到该 `Region` 对应的“待执行命令”中，等待下一次该 `Region` 发来心跳信息时执行。
+`Cluster` 一经创建便持有一个 `Coordinator`，其会通过 `runScheduler()` 来调用 `scheduler.Schedule()`，定期检查是否有存储节点超载，就需要找到该节点 `src` 的一个**合适**的 `Region`，将位于 `src` 中从属于该 `Region` 的 `Peer` 转移到某个**合适**的目标节点 `dst`，从而达成负载均衡，并通过函数返回的 `MovePeerOperator` 加到该 `Region` 对应的「待执行命令」中，等待下一次该 `Region` 发来心跳信息时执行。
 
 > 一个 `MovePeerOperator` 包含以下步骤：
 >
@@ -333,7 +334,7 @@ func (oc *OperatorController) Dispatch(region *core.RegionInfo, source string) {
 ```
 > 并且由于 `RaftGroup` 随时可能变化，故对于不在组内的节点而言，任何消息都是无效的——即便收到消息，也不能做任何事。对于新加入组的节点而言，Raft 层的 `Prs` 可能未被正确初始化，所以如果收到一条 peer 的消息而该 peer 又不在 `Prs` 中时，将其加入。
 
-有一点不能理解的是，虽然任务书中表示 `RegionEpoch.ConfVer` 会在 confchange 中改变，但并没有说 `RegionEpoch.Version` 也会改，只说了在 split 中改变。然而测试用例会不通过“只修改了 confver 而不修改 version”的代码。
+有一点不能理解的是，虽然任务书中表示 `RegionEpoch.ConfVer` 会在 confchange 中改变，但并没有说 `RegionEpoch.Version` 也会改，只说了在 split 中改变。然而测试用例会不通过「只修改了 confver 而不修改 version」的代码。
 
 #### 3 RegionSplit
 
