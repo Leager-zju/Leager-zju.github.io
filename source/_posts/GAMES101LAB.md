@@ -6,7 +6,7 @@ date: 2024-04-19 17:16:19
 summary:
 categories: lab
 tags:
-  - GAMES
+  - Graphics
 img:
 ---
 

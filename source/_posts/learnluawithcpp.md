@@ -260,6 +260,8 @@ bar()            --> global
 print(type(foo)) --> function
 ```
 
+#### 多返回值
+
 和 C/C++ 不同，Lua 的函数支持**多返回值**，当然也可以利用赋值的性质，用个数不等的变量去接收值。
 
 ```lua 多返回值函数
@@ -269,6 +271,8 @@ end
 a, b, c = foo()
 print(a, b, c) --> 1       2       nil
 ```
+
+#### 参数包
 
 甚至支持参数包。
 
@@ -290,6 +294,44 @@ print(add(0, select(3, 1, 2, 3, 4, 5))) -- 相当于调用 add(0, 3, 4, 5)
 
 1. `select("#", ...)`: 获取参数包的参数个数；
 2. `select(i, ...)`: 返回参数包从第 i 个元素开始到最后一个元素的切片；
+
+事实上，当我们以参数包的形式传参时，函数内部会为我们隐式添加一个局部 table 变量 `arg = {...}`，将参数包内的所有参数都加入该 table 中，这样我们就能以数组的形式访问参数包了。同时 `arg` 还有一个名为 `n` 的 key，表示参数包的参数个数，比如下面这样。
+
+```lua arg.lua
+--[[
+    假设以 lua arg.lua 1 2 3 的方式去执行
+]]
+function aa(a)
+    print(arg.n, arg)
+end
+function bb(a, b)
+    print(arg.n, arg)
+end
+function cc(a, b, ...)
+    print(arg.n, arg, arg[1])
+end
+
+aa(1, 2, 3)                      --> nil     table: 0x6c9e50
+cc(4, 5, 6)                      --> 1       table: 0x6cae50        6
+bb(7, 8, 9)                      --> nil     table: 0x6c9e50
+cc(0, 0)                         --> 0       table: 0x6ca420        nil
+print(arg.n, arg)                --> nil     table: 0x6c9e50
+for key, value in pairs(arg) do
+    print(key, value)            --> 1       1
+                                 --> 2       2
+                                 --> 3       3
+                                 --> -1      lua
+                                 --> 0       arg.lua
+end
+```
+
+这就为我们提供了两种访问参数包的方法。
+
+同时不难发现其实也有一个全局 table 变量 `arg`，当一个函数未使用参数包时，就不会生成 `local arg`，所以引用的是全局的 `arg`。全局 `arg` 不具有成员 `n`，但是具有执行该脚本时通过命令行传递给脚本的所有参数。
+
+其中 `-1` 和 `0` 分别是 `lua` 和文件名，之后的就是用户自定义传入的参数了。
+
+#### 实现具有默认值的函数参数
 
 Lua 也可以利用一些基本性质实现 C++ 中的具有**默认值**的函数参数，当然这些参数必须在参数列表的最右侧。
 
@@ -874,10 +916,6 @@ int main() {
 }
 ```
 
-#### Lua 虚拟机
-
-TODO
-
 ### Lua 协程
 
 Lua 协程和 C++20 的协程用法基本一致，由 `coroutine` 模块提供支持。这里我们直接通过一个生产者-消费者问题来了解什么是协程。
@@ -1032,3 +1070,5 @@ print(res)  --> test.lua:2: attempt to perform arithmetic on global 'n' (a nil v
 ```
 
 > debug 库提供的 error_handler 也不止上面这两个，用到再学吧。
+
+### Lua 虚拟机

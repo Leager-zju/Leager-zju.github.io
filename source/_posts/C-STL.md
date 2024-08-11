@@ -18,7 +18,7 @@ img:
 
 ## 容器
 
-### vector
+### std::vector
 
 底层维护了一个「在**堆**上的具有连续内存的**数组**」。
 
@@ -30,7 +30,7 @@ img:
 
 > 特别的，标准库提供 `vector<bool>` 的特化，它使得每个元素占用一个单独的位，而非 `sizeof(bool)` 字节，从而对空间效率进行了优化。
 
-#### 迭代器 vector::iterator
+#### 迭代器 std::vector::iterator
 
 > vector 维护的是一个连续线性空间，所以不论其元素型别为何，普通指针都可以作为 vector 的迭代器而满足所有必要条件，因为 vector 迭代器所需要的操作行为，如 `operator*`, `operator->`, `operator++`, `operator--`, `operator+`, `operator-`, `operator+=`, `operator-=`，普通指针天生就具备。vector 支持随机存取，而普通指针正有着这样的能力。所以，vector 提供的是 Random Access Iterators。——选自《STL 源码剖析》
 
@@ -89,7 +89,7 @@ for (auto&& iter = nums.begin(); iter != nums.end(); iter++) {
 
 > 当然，如果当前 `size == capacity`，则会触发扩容。
 
-### list
+### std::list
 
 底层维护了一个「**环状双向链表**」。
 
@@ -101,7 +101,7 @@ for (auto&& iter = nums.begin(); iter != nums.end(); iter++) {
 
 > list 的**插入**和**删除**并不会出现空间装满而重新扩容的情况，也不会引起迭代器失效——它对内存的控制是十分精准的，需要多少就分配多少，也就不会出现**内部碎片**（vector 有）。从而也可以思考出，调用 `clear()` 函数就能完整释放内存。
 
-#### 迭代器 list::iterator
+#### 迭代器 std::list::iterator
 
 > 由于 STL list 是一个双向链表(double linked-list)，迭代器必须具备前移、后移的能力，所以 list 提供的是Bidirectional Iterators。——选自《STL 源码剖析》
 
@@ -111,7 +111,7 @@ list 内部只维护了一个迭代器 `node`，即一个指向尾部空白节�
 
 > 一些计算/判断方式: `begin` = node->next；`end` = node；`front` = \*(node->next)；`back` = \*(node->prev)；`empty` = node->next == node ……其余均可依次推导。
 
-### deque
+### std::deque
 
 底层维护了一个「由**分段连续空间**构成的**双向队列**」以及一个「中控器指针」。
 
@@ -127,7 +127,7 @@ list 内部只维护了一个迭代器 `node`，即一个指向尾部空白节�
 
 <img src="deque.png" style="zoom:50%"/>
 
-#### 迭代器 deque::iterator
+#### 迭代器 std::deque::iterator
 
 deque 内部维护了两个迭代器，分别是:
 - `start`: 指向第一个缓冲区的第一个元素；
@@ -152,7 +152,7 @@ deque 的扩容主要分为以下两种:
 
 虽然当某个缓冲区为空时，不一定要立刻释放，因为后面可能还会通过 `push` 使得元素加入该缓冲区，但是 STL 为了实现简单，当 `pop` 操作使得某个缓冲区变空，就立刻将其释放。
 
-### set/map
+### std::set/std::map
 
 这两位底层都是基于「**红黑树**」实现的，内部元素依照 key 值自动排序（允许自定义比较函数），不允许出现重复的 key 值（通过红黑树的 `insert_unique()` 实现）。**增删查改**的时间复杂度近似 $O(\log n)$。
 
@@ -171,11 +171,11 @@ deque 的扩容主要分为以下两种:
 
 map 仅仅比 set 多了一个 value 字段，二者都不能通过迭代器修改 key 的值。并且因为红黑树的特性，所有 key 其实都对应一个树结点，和 list 很像，当进行插入和删除时，不会出现迭代器失效的情况。
 
-### multi_set/multi_map
+### std::multi_set/std::multi_map
 
 和普通的 set/map 相比，他俩允许出现重复的 key 值（通过红黑树的 `insert_equal()` 实现）
 
-### unordered_set/unordered_map
+### std::unordered_set/std::unordered_map
 
 这两位底层都是基于「**哈希表**」实现的，是**无序**的。最优情况**增删查改**的时间复杂度是 $O(1)$，最差情况为 $O(n)$，出现这种差异是因为数据的分布是否均匀会极大影响容器的性能。
 
@@ -197,7 +197,7 @@ map 仅仅比 set 多了一个 value 字段，二者都不能通过迭代器修�
 
 ## 容器适配器
 
-### stack/queue
+### std::stack/std::queue
 
 根据这两者的逻辑特性，并不需要特地实现新的容器，只需要在原有的容器基础上进行修改即可：
 
@@ -210,7 +210,7 @@ map 仅仅比 set 多了一个 value 字段，二者都不能通过迭代器修�
 
 ⚠️需要注意的是，这两者本身不提供遍历功能，也就**都没有**实现各自的迭代器类型。
 
-### priority_queue
+### std::priority_queue
 
 默认以 vector 作为底层容器，以「**堆**」作为处理规则。与 queue 不同，它虽然也允许元素以任意顺序加入容器，但每次取出的一定是「优先级最高」的元素，而非 FIFO。
 
@@ -230,3 +230,139 @@ struct less {
 ```
 
 > 如果不想实现比较规则，也可以考虑重载对象的 `operator<` 函数，效果是一样的。
+
+## 算法
+
+### std::sort
+
+`std::sort` 考虑了不同 workload 下的排序性能，并将其结合，表现为：数据量大时，使用 Quick Sort 分段递归排序；一旦分段后的数据量小于某个阈值，改用 Insertion Sort；若递归层数过深（当数据量大且基本有序时容易发生），还会改用 Heap Sort。当然，它只接受**随机存取迭代器(RandomAccessIterators)**（通常是 `begin()` 与 `end()`），允许用户自定义比较规则，其应当是一个实现了 `bool operator()(const &a, const &b)` 的结构体/类，返回值为 true 表示 lhs 小于 rhs。默认情况下使用 `std::less<T>` 作为比较规则，所以当我们仅传入前两个参数时，函数会将容器进行递增排序。
+
+> 下面默认只传入前两个参数。
+
+#### Insertion Sort
+
+```cpp Insertion Sort
+template <class RandomAccessIterator>
+void __insertion_sort(RandomAccessIterator first,
+                      RandomAccessIterator last) {
+  if (first == last) return;
+  for (RandomAccessIterator i = first + 1; i != last; ++i)
+    __linear_insert(first, i, value_type(first)); // 将迭代器 i 指向的元素插入区间 [first, i) 中
+}
+
+template <class RandomAccessIterator, class T>
+inline void __linear_insert(RandomAccessIterator first,
+                            RandomAccessIterator last, T*) {
+  T value = *last;
+  if (value < *first) {
+    copy_back_ward(first, last, last + 1); // 直接将区间整体右移
+    *first = value; 
+  }
+  else
+    __unguarded_linear_insert(last, value); // 保证不会越界
+                                            // 否则每次循环都需要判断一下是否越界，在数据量大的情况下影响还是可观的
+}
+
+template <class RandomAccessIterator, class T>
+void __unguarded_linear_insert(RandomAccessIterator last, T value) {
+  // 这里就不断循环交换即可，直至 value >= next 指向的元素
+  RandomAccessIterator next = last;
+  --next;
+  while (value < *next) {
+    *last = *next;
+    last = next;
+    --next;
+  }
+  *last = value;
+}
+```
+
+#### Quick Sort
+
+上面是 Insertion Sort 的部分，当数据量小时性能优于 Quick Sort，但是当数据量增大时其 $O(n^2)$ 的时间复杂度还是令人摇头。这种情况下就需要 Quick Sort 来解决了。
+
+`std::sort` 对 Quick Sort 做的第一个优化是，以 Median-of-Three 的方式选出合适的 pivot，即取整个序列的头、尾、中央三个位置的元素，以其**中值(median)**作为 pivot，这样能够保证在划分时不会出现空的子区间。
+
+```cpp Median-of-Three
+template <class T>
+inline const T& __median(const T& a, const T& b, const T& c) {
+  if (a < b)
+    if (b < c)       // a < b < c
+      return b;
+    else if (a < c)  // a < c <= b
+      return c;
+    else             // c < a < b
+      return a;
+  else if (a < c)    // b <= a < c
+    return a;
+  else if (b < c)    // b < c <= a
+    return c;
+  else
+    return b;
+}
+```
+
+接下来就是**划分(partion)**了，通过线性遍历将序列中小于 pivot 的放到左侧，大于 pivot 的放到右侧，就完成了划分操作。
+
+```cpp partion
+template <class RandomAccessIterator, class T>
+RandomAccessIterator __unguarded_partion(RandomAccessIterator first,
+                                         RandomAccessIterator last, T pivot) {
+  while (true) {
+    while (*first < pivot) ++first;
+    --last;
+    while (pivot < *last) --last;
+
+    if (!(first < last)) return first; // 说明划分完毕
+    iter_swap(first, last);            // 交换元素值
+    ++first;
+  }
+}
+```
+
+第二个优化是，不会只让 Quick Sort 将数据就这么排好，而是令其某个大小的子序列达到某个「差不多排好」的状态，然后用一次 Insertion Sort 将这个子序列做一次完整的排序。原理自然是因为面对基本有序的数组，Insertion Sort 的性能远远超过 Quick Sort。
+
+接下来就是完整的 `std::sort` 实现了。
+
+```cpp sort
+const int __stl_threshold = 16;
+
+template <class RandomAccessIterator>
+inline void sort(RandomAccessIterator first, RandomAccessIterator last) {
+  if (first != last) {
+    __introsort_loop(first, last, value_type(first), __lg(last - first) * 2);
+    __final_insertion_sort(first, last);
+  }
+}
+
+template <class RandomAccessIterator, class T, class Size>
+void __introsort_loop(RandomAccessIterator first, RandomAccessIterator last, T*,
+                      Size depth_limit) {
+  // 全局定义了 const int __stl_threashold = 16;
+  while (last - first > __stl_threshold) {
+    if (depth_limit == 0) {
+      partial_sort(first, last, last);  // 改用 Heap Sort
+      return;
+    }
+    --depth_limit;
+  }
+  RandomAccessIterator cut = __unguareded_partition(
+      first, last,
+      T(__median(*first, *(first + (last - first) / 2), *(last - 1))));
+
+  __introsort_loop(cut, last, value_type(first),
+                   depth_limit);  // 先对右半部分递归排序
+  last = cut;  // 然后在下个循环对左半部分递归排序
+}
+
+template <class RandomAccessIterator>
+inline void __final_insertion_sort(RandomAccessIterator first,
+                                   RandomAccessIterator last) {
+  if (last - first > __stl_threshold) {
+    __insertion_sort(first, first + __stl_threshold);
+    __unguarded_insertion_sort(first + __stl_threshold, last);
+  } else {
+    __insertion_sort(first, last);
+  }
+}
+```

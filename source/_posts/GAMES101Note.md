@@ -6,7 +6,7 @@ date: 2024-03-31 21:10:06
 summary:
 categories: note
 tags:
-  - GAMES
+  - Graphics
 img:
 ---
 
@@ -282,21 +282,18 @@ $$
 
 $$
 \mathbf{v}_{rot\bot} = \sin{\theta}(\mathbf{k}\times\mathbf{v}) + \cos{\theta}\mathbf{v}_{\bot}
-
 $$
 
 与此同时
 
 $$
 \mathbf{k}\times\mathbf{v} = \mathbf{k}\times(\mathbf{v}_{\parallel}+\mathbf{v}_{\bot}) = \mathbf{k}\times\mathbf{v}_{\parallel}+\mathbf{k}\times\mathbf{v}_{\bot} = \mathbf{0} + \mathbf{k}\times\mathbf{v}_{\bot} = \mathbf{k}\times\mathbf{v}_{\bot}
-
 $$
 
 继而问题又转换为求 $\mathbf{v_{\bot}}$。这里有一个比较 tricky 的性质：对于单位向量 $\mathbf{k}$ 而言，$\mathbf{k}\times\mathbf{v_{\bot}}$ 仅仅是将 $\mathbf{v_{\bot}}$ 绕轴旋转 90°。易得 $\mathbf{k}\times(\mathbf{k}\times\mathbf{v_{\bot}})$ 是绕轴旋转了 180°，所以有
 
 $$
 \mathbf{v}_{\bot} = -\mathbf{k}\times(\mathbf{k}\times\mathbf{v}_\bot) = -\mathbf{k}\times(\mathbf{k}\times\mathbf{v})
-
 $$
 
 那么我们就可以得到结论了
@@ -311,7 +308,6 @@ $$
 &= \mathbf{v} + \sin{\theta}\mathbf{K}·\mathbf{v} + (1-\cos{\theta})\mathbf{K}^2\mathbf{v}\\
 &= [\mathbf{I} + \sin{\theta}\mathbf{K} + (1-\cos{\theta})\mathbf{K}^2]·\mathbf{v}
 \end{align}
-
 $$
 
 </details>
