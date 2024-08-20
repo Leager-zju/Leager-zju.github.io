@@ -211,7 +211,7 @@ $$
 
 - **缩放**: $\mathbf{S}(s_x, s_y) = \left(\begin{matrix}s_x & 0 & 0\\ 0 & s_y & 0\\0 & 0 & 1\end{matrix}\right)$
 - **旋转**: $\mathbf{R}(\alpha) = \left(\begin{matrix}\cos{\alpha} & -\sin{\alpha} & 0\\ \sin{\alpha} & \cos{\alpha} & 0\\0 & 0 & 1\end{matrix}\right)$
-- **平移**: $\mathbf{T}(t_x, t_y) = \left(\begin{matrix}s_x & 0 & 0\\ 0 & s_y & 0\\0 & 0 & 1\end{matrix}\right)$
+- **平移**: $\mathbf{T}(t_x, t_y) = \left(\begin{matrix}1 & 0 & t_x\\ 0 & 1 & t_y\\0 & 0 & 1\end{matrix}\right)$
 
 #### 逆变换(Inverse)
 
@@ -357,9 +357,9 @@ $$
 为了让任意位置的相机都能达到初始状态，需要进行一定的变换（称之为 $\mathbf{M}_{view}$）
 
 1. 将 $\vec{e}$ 移至原点；
-2. 将 $\hat{g}$ 旋转至 $-\mathbf{z}$；
-3. 将 $\hat{t}$ 旋转至 $\mathbf{y}$；
-4. 将 $\hat{g}\times\hat{t}$ 旋转至 $\mathbf{x}$；
+2. 将 $\hat{g}$ 旋转至 $-\mathbf{z} = (0, 0, -1, 0)$；
+3. 将 $\hat{t}$ 旋转至 $\mathbf{y} = (0, 1, 0, 0)$；
+4. 将 $\hat{g}\times\hat{t}$ 旋转至 $\mathbf{x} = (1, 0, 0, 0)$；
 
 不难得到 $\mathbf{M}_{view} = \mathbf{R}_{view}\mathbf{T}_{view}$（先平移后旋转）。
 
@@ -386,6 +386,8 @@ z_{\hat{g}\times\hat{t}} & z_{\hat{t}} & z_{-\hat{g}} & 0\\
 0 & 0 & 0 & 1
 \end{matrix}\right)
 $$
+
+> 矩阵分别乘 $\mathbf{x}, \mathbf{y}, \mathbf{z}$ 能得到 $\hat{g}\times\hat{t},\hat{t},-\hat{g}$
 
 之前我们讨论过，二维旋转矩阵是**正交矩阵**，其实这一性质对三维同样成立，所以有
 
@@ -711,7 +713,7 @@ $$
 
 ## 着色(Shading)
 
-在本课程中，着色的定义为：<u>对不同物体应用不同材质的过程</u>。
+在本课程中，着色的定义为：「对不同物体应用不同材质的过程」。
 
 ### 可见性(Visibility)
 

@@ -1960,12 +1960,12 @@ p.search-result-summary{
 }
 
 .img-margin {
-    margin: 25px auto 10px auto;
+    margin: 5px auto 0px auto;
 }
 
 .caption {
     text-align: center;
-    margin: 0 auto -10px auto;
+    margin: 0 auto 20px auto;
 }
 
 .center-caption {

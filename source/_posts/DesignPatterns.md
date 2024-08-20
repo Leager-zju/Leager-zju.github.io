@@ -285,3 +285,170 @@ int main() {
   return 0;
 }
 ```
+
+### 命令模式
+
+**命令模式**可将请求转换为一个包含与请求相关的所有信息的独立对象，这允许用户根据不同的请求将方法参数化、延迟请求执行或将其放入队列中，同时支持「撤销」操作。
+
+```cpp 命令模式
+#include <iostream>
+#include <queue>
+#include <string>
+
+class Dummy {
+ public:
+  void handle(const std::string &a) { std::cout << "Dummy: (" << a << ".)\n"; }
+};
+
+class Command {
+ public:
+  virtual ~Command() {}
+  virtual void execute() const = 0;
+};
+
+// 简单命令的执行不和其它对象交互
+class SimpleCommand : public Command {
+ public:
+  explicit SimpleCommand(const std::string &s) : str(s) {}
+  void execute() const override {
+    std::cout << "SimpleCommand: (" << str << ")\n";
+  }
+
+ private:
+  std::string str;
+};
+
+// 复杂命令的执行可能会需要其他对象参与
+class ComplexCommand : public Command {
+ public:
+  ComplexCommand(Dummy *d, const std::string &a, const std::string &b)
+      : dummy(d), strA(a), strB(b) {}
+  void execute() const override {
+    dummy->handle(this->strA);
+    dummy->handle(this->strB);
+  }
+
+ private:
+  Dummy *dummy;
+  std::string strA;
+  std::string strB;
+};
+
+// 请求发起者 与 命令执行者 的中间层，用于存储命令
+class Invoker {
+ public:
+  ~Invoker() {
+    while (!cmdQ.empty()) {
+      delete cmdQ.front();
+      cmdQ.pop();
+    }
+  }
+
+  void addCmd(Command *command) { cmdQ.push(command); }
+  void invoke() {
+    while (!cmdQ.empty()) {
+      cmdQ.front()->execute();
+      delete cmdQ.front();
+      cmdQ.pop();
+    }
+  }
+
+ private:
+  std::queue<Command *> cmdQ;
+};
+
+int main() {
+  Invoker *invoker = new Invoker;
+  Dummy *dummy = new Dummy;
+  invoker->addCmd(new SimpleCommand("Hi"));
+  invoker->addCmd(new ComplexCommand(dummy, "Hello", "World"));
+  invoker->invoke();
+
+  delete invoker;
+  delete dummy;
+
+  return 0;
+}
+```
+
+> 这里没有实现「撤销」操作，如果需要的话，可以将 `Invoker` 类中的命令队列改为双向链表，并用指针指向当前命令，从而支持**撤销**（当前命令执行 `cancel()`，指针前移）与**重做**（指针后移，并令当前命令执行 `execute()`）操作。
+
+不难发现，命令模式的优越性在于，将「请求进行一个操作的对象」，和「知道如何执行该操作的对象」进行解耦，同时可以很方便地对命令类型进行扩展。
+
+### 观察者模式
+
+**观察者模式**允许用户定义一种「订阅」机制，可在某一事件发生时通知多个订阅该类型事件的其他对象。拥有一些值得关注的状态的对象通常被称为「目标」，由于它要将自身的状态改变通知给其他对象，我们也将其称为**发布者(publisher)**，所有希望关注发布者状态变化的其他对象被称为**订阅者(subscriber)**。
+
+我们可以在发布者类中实现两个机制：
+
+1. 一个存储订阅者对象引用的列表成员变量 `subscribers`；
+2. 一些用于添加或删除该列表中订阅者的公有方法（如 `subscribe()` 与 `unsubscribe()`）；
+
+这样，一旦发布者类有事件发生，就可以通过遍历 `subscribers` 的方式通知所有订阅者。
+
+```cpp 观察者模式
+#include <iostream>
+#include <list>
+#include <string>
+
+class SubscriberBase {
+ public:
+  virtual ~SubscriberBase() = default;
+  virtual void update(const std::string &message_from_Publisher) = 0;
+};
+
+class PublisherBase {
+ public:
+  virtual ~PublisherBase() = default;
+  virtual void subscribe(SubscriberBase *Subscriber) = 0;
+  virtual void unsubscribe(SubscriberBase *Subscriber) = 0;
+  virtual void notify(const std::string &str) = 0;
+};
+
+class Publisher : public PublisherBase {
+ public:
+  void subscribe(SubscriberBase *Subscriber) override {
+    subscribers.push_back(Subscriber);
+  }
+
+  void unsubscribe(SubscriberBase *Subscriber) override {
+    subscribers.remove(Subscriber);
+  }
+
+  void notify(const std::string &message) override {
+    for (auto subscriber : subscribers) {
+      subscriber->update(message);
+    }
+  }
+
+ private:
+  std::list<SubscriberBase *> subscribers;
+};
+
+class Subscriber : public SubscriberBase {
+ public:
+  Subscriber(Publisher *publisher) { publisher->subscribe(this); }
+
+  void update(const std::string &message) override { std::cout << message; }
+
+  void subscribe(Publisher *publisher) { publisher->subscribe(this); }
+  void unsubscribe(Publisher *publisher) { publisher->unsubscribe(this); }
+};
+
+int main() {
+  Publisher Publisher;
+  Subscriber Subscriber1(&Publisher);
+  Subscriber Subscriber2(&Publisher);
+
+  Publisher.notify("Hello World! :D");
+  Subscriber2.unsubscribe(&Publisher);
+
+  Publisher.notify("The weather is hot today! :p");
+  Subscriber1.unsubscribe(&Publisher);
+
+  return 0;
+}
+```
+
+这种机制还可以进一步扩展。比如我们可以为事件设置不同类型，允许订阅者关注不同类型的事件，这样就可以根据事件类型通知特定的订阅者。
+
