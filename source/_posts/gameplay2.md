@@ -152,7 +152,7 @@ void ARPlayerController::SetupInputComponent()
 {
   Super::SetupInputComponent();
 
-  // 将 Move() 绑定到 Action 上，CastChecked 保证参数非空
+  // 将 Move() 绑定到 Action 上，CastChecked 保证结果非空
   UEnhancedInputComponent* EnhancedInputComp = CastChecked<UEnhancedInputComponent>(InputComponent);
   EnhancedInputComp->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ARPlayerController::Move);
 }
