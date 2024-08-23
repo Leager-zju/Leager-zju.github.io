@@ -28,10 +28,10 @@ class ACTIONRPG_API ARPlayerBase : public ARCharacterBase
   ...
 protected:
   UPROPERTY(EditDefaultsOnly, Category = "View")
-  USpringArmComponent* CameraBoom;
+  TObjectPtr<USpringArmComponent> CameraBoom;
 
   UPROPERTY(EditDefaultsOnly, Category = "View")
-  UCameraComponent* FollowCamera;
+  TObjectPtr<UCameraComponent> FollowCamera;
 };
 ```
 
