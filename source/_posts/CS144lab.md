@@ -36,10 +36,10 @@ $ git push git@github.com:your_github_name/your_repository_name.git --all
 此时课程代码及其所有分支已经移植到我们自己的仓库里了，接着 `cd .. && rm -rf sponge` 将课程仓库删除，最后把我们自己的仓库拉下来即可。
 
 ```bash
-# If you pull / push over HTTPS
+## If you pull / push over HTTPS
 $ git clone https://github.com/your_github_name/your_repository_name.git
 
-# If you pull / push over SSH
+## If you pull / push over SSH
 $ git clone git@github.com:your_github_name/your_repository_name.git
 ```
 
@@ -72,7 +72,7 @@ $ make
 
 ``` bash
 $ cd build
-$ ./apps/webget cs144.keithw.org /hello # 可执行文件, host, path
+$ ./apps/webget cs144.keithw.org /hello ## 可执行文件, host, path
 ```
 
 如果看到结果如下，则输出正确。

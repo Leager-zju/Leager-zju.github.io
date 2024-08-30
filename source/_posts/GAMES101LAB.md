@@ -25,7 +25,7 @@ img:
 ```bash
 cd /your/path/to/Eigen
 mkdir build && cd build
-cmake -G "Unix Makefiles" .. # windows 下默认生成 ninja，需要改为生成 makefile
+cmake -G "Unix Makefiles" .. ## windows 下默认生成 ninja，需要改为生成 makefile
 make install -j8
 ```
 

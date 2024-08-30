@@ -1626,13 +1626,13 @@ $$
 
 ```python
 shade(p, wo)
-  # Contribution from the light source.
+  ## Contribution from the light source.
   Uniformly sample the light at x’ (pdf_light = 1 / A)
   Shoot a ray from p to x’
   If the ray is not blocked in the middle
     L_dir = L_i * f_r * cos θ * cos θ’ / |x’ - p|^2 / pdf_light
 
-  # Contribution from other reflectors.
+  ## Contribution from other reflectors.
   L_indir = 0.0
   Test Russian Roulette with probability P_RR
   Uniformly sample the hemisphere toward wi (pdf_hemi = 1 / 2pi)

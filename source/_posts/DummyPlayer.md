@@ -67,7 +67,7 @@ $ ssh-keygen -t rsa -C "your@email.name"
 默认的源访问速度过慢，可以用国内镜像源代替加速 `apt-get install`。
 
 ```bash
-$ sudo cp /etc/apt/sources.list /etc/apt/sources.list.bak # 备份
+$ sudo cp /etc/apt/sources.list /etc/apt/sources.list.bak ## 备份
 $ sudo vim /etc/apt/sources.list
 ```
 
@@ -76,15 +76,15 @@ $ sudo vim /etc/apt/sources.list
 键入 `i` 进入编辑模式，将下面内容拷贝粘贴后，键入 `Esc` + `:wq` 保存退出。
 
 ```bash
-# 清华源
+## 清华源
 deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal main restricted universe multiverse
-# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal main restricted universe multiverse
+## deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal main restricted universe multiverse
 deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-updates main restricted universe multiverse
-# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-updates main restricted universe multiverse
+## deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-updates main restricted universe multiverse
 deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-backports main restricted universe multiverse
-# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-backports main restricted universe multiverse
+## deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-backports main restricted universe multiverse
 deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-security main restricted universe multiverse
-# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-security main restricted universe multiverse
+## deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-security main restricted universe multiverse
 ```
 
 最后更新 `apt-get`
@@ -159,8 +159,8 @@ $ code .
 此时再 `cd build && cmake ..` 会报错，这是因为 `CMakeLists.txt` 找不到相应文件了。默认生成的 `CMakeLists.txt` 长下面这样：
 
 ```bash
-cmake_minimum_required(VERSION 3.0.0)       # 指定 cmake 最低版本
-project(test VERSION 0.1.0 LANGUAGES C CXX) # 指定项目名与语言
+cmake_minimum_required(VERSION 3.0.0)       ## 指定 cmake 最低版本
+project(test VERSION 0.1.0 LANGUAGES C CXX) ## 指定项目名与语言
 
 include(CTest)
 enable_testing()
@@ -368,8 +368,8 @@ inline std::string header(const std::string& filename, int line) {
 则可以用以下 awk 脚本来处理
 
 ```awk
-$3 ~ /log-in/ {     # $3 表示对每一行用空格（也可以用 -F 指定分隔符）进行 split 后的第三列（awk 的列索引从 1 开始），~ 表示匹配，!~ 表示不匹配，模式用两个 / 包裹
-    ids[$6] += 1    # 全局有效
+$3 ~ /log-in/ {     ## $3 表示对每一行用空格（也可以用 -F 指定分隔符）进行 split 后的第三列（awk 的列索引从 1 开始），~ 表示匹配，!~ 表示不匹配，模式用两个 / 包裹
+    ids[$6] += 1    ## 全局有效
 }
 $3 ~ /add-item/ {
     count[$4] += $7
@@ -377,7 +377,7 @@ $3 ~ /add-item/ {
 $3 ~ /sub-item/ {
     count[$4] -= $7
 }
-END { # 表示将之后的命令在所有匹配项检查完后执行
+END { ## 表示将之后的命令在所有匹配项检查完后执行
     for (id in ids) {
         print "user", id, "log in", ids[id], "times"
     }
@@ -395,12 +395,12 @@ END { # 表示将之后的命令在所有匹配项检查完后执行
 执行下面语句，得到相应输出
 
 ```bash
-$ awk -f path/to/awk path/to/log # -f 指定脚本所在文件，然后单独跟待处理的文件
+$ awk -f path/to/awk path/to/log ## -f 指定脚本所在文件，然后单独跟待处理的文件
 
-# output:
-# user 123 log in 1 times
-# item 2 added 1 times
-# item 3 added 1 times
+## output:
+## user 123 log in 1 times
+## item 2 added 1 times
+## item 3 added 1 times
 ```
 
 ## 提高开发效率

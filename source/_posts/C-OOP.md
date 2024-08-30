@@ -618,13 +618,13 @@ $1 = {_vptr.Base = 0x555555557d68 <vtable for Base+16>, x = 1}
 $2 = 0x7fffffffe060
 
 (gdb) p/a *(long*)0x7fffffffe060
-$3 = 0x555555557d68 <_ZTV4Base+16>  # b 内存中前 8B 存放了一个 vptr
+$3 = 0x555555557d68 <_ZTV4Base+16>  ## b 内存中前 8B 存放了一个 vptr
 
 (gdb) p/a &b.foo
 $4 = 0x55555555527a <_ZN4Base3fooEv>
 
 (gdb) p/a *(void**)0x555555557d68@1
-$5 = {0x55555555527a <_ZN4Base3fooEv>}  # b.vptr 指向的内存的第一个元素就是 Base::foo() 的函数指针
+$5 = {0x55555555527a <_ZN4Base3fooEv>}  ## b.vptr 指向的内存的第一个元素就是 Base::foo() 的函数指针
 
 (gdb) print d1
 $6 = {<Base> = {_vptr.Base = 0x555555557d50 <vtable for Derived+16>, x = 1}, y = 2}
@@ -633,13 +633,13 @@ $6 = {<Base> = {_vptr.Base = 0x555555557d50 <vtable for Derived+16>, x = 1}, y =
 $7 = 0x7fffffffe070
 
 (gdb) p/a *(long*)0x7fffffffe070
-$8 = 0x555555557d50 <_ZTV7Derived+16>  # d1 内存中前 8B 也存放了一个 vptr，但和 b 的不同
+$8 = 0x555555557d50 <_ZTV7Derived+16>  ## d1 内存中前 8B 也存放了一个 vptr，但和 b 的不同
 
 (gdb) p/a &d1.foo
 $9 = 0x5555555552a6 <_ZN7Derived3fooEv>
 
 (gdb) p/a *(void**)0x555555557d50@1
-$10 = {0x5555555552a6 <_ZN7Derived3fooEv>}  # d1.vptr 指向的内存的第一个元素则是 Derived::foo() 的函数指针
+$10 = {0x5555555552a6 <_ZN7Derived3fooEv>}  ## d1.vptr 指向的内存的第一个元素则是 Derived::foo() 的函数指针
 
 (gdb) p/a d2
 $11 = {<Base> = {_vptr.Base = 0x555555557d50 <vtable for Derived+16>, x = 1}, y = 2}
@@ -792,22 +792,22 @@ $10 = 0x0
 
 ```bash
 (gdb) p/a *((long*)0x555555557ca0-1)
-$11 = 0x555555557d08 <_ZTI7Derived>   # 运行时信息，实际指向的对象类型
+$11 = 0x555555557d08 <_ZTI7Derived>   ## 运行时信息，实际指向的对象类型
 
 (gdb) p *((long*)0x555555557ca0-2)
-$12 = 0                               # 对象实际地址相对于该基类的偏移量，Child1 在最开始，所以 offset=0
+$12 = 0                               ## 对象实际地址相对于该基类的偏移量，Child1 在最开始，所以 offset=0
 
 (gdb) p *((long*)0x555555557ca0-3)
-$13 = 32                              # 虚基类相对于该基类的偏移量，Base 位于 0x7fffffffe070，而 Child1 位于 0x7fffffffe050，相减即得
+$13 = 32                              ## 虚基类相对于该基类的偏移量，Base 位于 0x7fffffffe070，而 Child1 位于 0x7fffffffe050，相减即得
 
 (gdb) p/a *((long*)0x555555557cb8-1)
-$14 = 0x555555557d08 <_ZTI7Derived>   # 运行时信息，实际指向的对象类型
+$14 = 0x555555557d08 <_ZTI7Derived>   ## 运行时信息，实际指向的对象类型
 
 (gdb) p *((long*)0x555555557cb8-2)
-$15 = -16                             # Child2 在 0x7fffffffe060，减 16 得到实际指向对象首地址
+$15 = -16                             ## Child2 在 0x7fffffffe060，减 16 得到实际指向对象首地址
 
 (gdb) p/a *((long*)0x555555557cb8-3)
-$16 = 16                              # 相减即得
+$16 = 16                              ## 相减即得
 ```
 
 又发现这两个虚表的地址差值为 24，刚好是 3 个 8B，说明它们俩是挨在一起的。那么可以得到虚表的内存模型如下：

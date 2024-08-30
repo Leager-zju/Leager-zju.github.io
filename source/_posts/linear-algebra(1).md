@@ -158,7 +158,7 @@ ${A}\vec{x}=\vec{0}$ 的一组特解对应于 ${A}$ 的 $n-r$ 个自由列，并
 
 则得到这样一个结论：
 $$
-rank(A) = \# C_{pivot} = dim(C(A)) = r = dim(R(A))
+rank(A) = \## C_{pivot} = dim(C(A)) = r = dim(R(A))
 $$
 同样的：
 $$

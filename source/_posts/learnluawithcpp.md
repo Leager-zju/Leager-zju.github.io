@@ -137,7 +137,7 @@ print(3 % 4, 2 ^ 2)  --> 3       4
 
 --[[
   支持 .. 进行 string 拼接操作，如果操作变量类型为 number，则会尝试将 number 转为 string
-  支持 # 取 string 的长度
+  支持 ## 取 string 的长度
 ]]
 print(#("Hello" .. "World")) --> 10
 print(114 .. 514)            --> 114514

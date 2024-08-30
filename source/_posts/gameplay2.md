@@ -127,12 +127,15 @@ void ARPlayerController::BeginPlay()
 {
   Super::BeginPlay();
 
+  // check 宏保证后面的指针非空
+  check(PlayerInputCtx);
+
   // 设置 IMC 与优先级(0)
   UEnhancedInputLocalPlayerSubsystem* SubSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
-  // check 宏保证后面的指针非空
-  check(SubSystem);
-  check(PlayerInputCtx);
-  SubSystem->AddMappingContext(PlayerInputCtx, 0);
+  if (SubSystem)
+  {
+    SubSystem->AddMappingContext(PlayerInputCtx, 0);
+  }
 
   // 显示鼠标
   bShowMouseCursor = true;

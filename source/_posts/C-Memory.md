@@ -333,7 +333,7 @@ int main() {
 ```bash
 $ gcc -fsanitize=address -g main.c -o main
 $ ./main
-# 输出错误信息
+## 输出错误信息
 ```
 
 和 Valgrind 相比，AddressSanitizer **性能更高**。

@@ -85,13 +85,13 @@ ARPlayerState::ARPlayerState()
 AREnermyBase::AREnermyBase()
 {
   ...
-  GASComponent = CreateDefaultSubobject<URGASComponent>("GAS Comp");
-  ensure(GASComponent);
-  GASAttributeSet = CreateDefaultSubobject<URGASAttributeSet>("GAS Comp");
-  ensure(GASAttributeSet);
+  AbilitySystemComponent = CreateDefaultSubobject<URGASComponent>("GAS Comp");
+  ensure(AbilitySystemComponent);
+  AttributeSet = CreateDefaultSubobject<URGASAttributeSet>("GAS Attribute Set");
+  ensure(AttributeSet);
 
-  GASComponent->SetIsReplicated(true);
-  GASComponent->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
+  AbilitySystemComponent->SetIsReplicated(true);
+  AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);
 }
 ```
 
@@ -189,6 +189,16 @@ void URGASAttributeSet::OnRep_CurHealth(const FGameplayAttributeData& OldCurHeal
 {
   GAMEPLAYATTRIBUTE_REPNOTIFY(URGASAttributeSet, CurHealth, OldCurHealth);
 }
+
+/**
+也可以用宏
+
+#define SETUP_ONREP_FUNCTION_DECLARATION(ClassName, Attr)\
+		  void ClassName::OnRep_##Attr(const FGameplayAttributeData& Old##Attr) const\
+		  {\
+			GAMEPLAYATTRIBUTE_REPNOTIFY(ClassName, Attr, Old##Attr);\
+		  }
+*/
 ```
 
 This is a helper macro that can be used in RepNotify functions to handle attributes that will be predictively modified by clients. 这句话是源码中对宏的 comment，意思是加上这个宏就可以处理将被客户端预测修改的属性。
@@ -211,11 +221,253 @@ void URGASAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 其中 `DOREPLIFETIME_CONDITION_NOTIFY` 宏的前两个参数很容易理解，分别是类名和类中的属性名，关键在于后两个参数。
 
 第三个参数指明了 server 进行复制的条件。`COND_NONE` 是默认值，即无条件复制。
-
+cod
 第四个参数指明了 client 触发 OnRep 的条件。`REPNOTIFY_Always` 是一个枚举值，表明无论什么情况都会触发 OnRep，而默认是仅当 server 下发的值和 client 不同时才触发 OnRep，如果相同（意味着进行了正确的预测）则不会触发。
 
 > `DOREPLIFETIME*` 宏实际上会调用 `DOREPLIFETIME_WITH_PARAMS` 宏，并传入一个 `FDoRepLifetimeParams` 类型的额外参数，最后调用的是 `RegisterReplicatedLifetimeProperty()` 函数，根据函数名也可以知道，是进行了**需要复制**的变量的**注册**行为。
 
 之后可以通过命令行 `showdebug abilitysystem` 来进行 GAS 的调试。
 
-## Effect
+### 订阅 Attribute 变化
+
+以玩家为例，ASC 和 AS 均放在 Player State 中，那么就由 Player State 管理 Attribute 发生变化时的行为，这在语义上也是说得通的。具体要怎么做呢？答案是用 ASC 的一个叫 `GetGameplayAttributeValueChangeDelegate()` 的函数。这个函数会获取一个**委托(Delegate)**变量。所谓委托就是允许其它类在其上订阅它们感兴趣的事件，一旦某事件 SomeEvent 发生，委托就会通过广播的行为，告知那些关注 SomeEvent 的类，这通常是以在委托类中绑定 callback 实现的。用法如下：
+
+```cpp Character/RCharacterBase.cpp
+void ARPlayerState::BeginPlay()
+{
+  Super::BeginPlay();
+
+  if (AbilitySystemComponent && AttributeSet)
+  {
+    // 就是下面这一行，返回的 Handle 可以设为成员变量。
+    // AddUObject 就是在绑定 callback
+    // 一旦 CurHealth 发生变化，就会调用 OnCurHealthChanged()
+    OnCurHealthChangedDelegateHandle = AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AttributeSet->GetCurHealthAttribute()).AddUObject(this, &ARPlayerState::OnCurHealthChanged);
+  }
+}
+```
+
+> 课程中的实现太繁琐，我直接参考了 GAS Documentation 来做的。
+
+
+
+## Gameplay Effect
+
+**Gameplay Effect(GE)** 是 Ability 修改其自身和其他 Attribute 和 GameplayTag 的容器，其可以立即修改 Attribute（比如伤害或治疗）或应用长期的状态 buff/debuff（如加速或眩晕）。`UGameplayEffect` 只是一个定义单一游戏效果的数据类，不应该在其中添加额外的逻辑。通常会创建 `UGameplayEffect` 的派生蓝图类而非 C++ 类。
+
+### 持续时间
+
+Effect 可分为三种，**即刻(Instant)**、**有持续时间(Has Duration)**和**无限(Infinite)**。其中 Instant 修改的是 BaseValue，通常用于伤害或治疗效果；其余两个修改的是 CurrentValue，通常用于 buff/debuff 之类的效果。
+
+一旦将 Effect 设置为 Has Duration 或 Infinite，就可以进而为其设置**生效周期(Period)**，并且可以指定「对应用执行周期影响」，表示是否在应用时立即生效。
+
+### 修饰符(Modifier)
+
+修饰符指明了**目标属性**、**操作类型**、**修改幅度**，以及 Gameplay Tags 的过滤。
+
+#### 操作类型
+
+- 「加」「乘」「除」: 这仨都是字面意思，多个对同一属性的操作，会通过聚合公式对属性的 CurrentValue 进行修改，结果为  `CurrentValue = (BaseValue + Add) * Mutiply / Divide`，其中 `Add` 为所有设置为「加」的 Modifier 的幅度；
+- 「重载」: 用当前值覆盖最后一个应用的修饰符的结果；
+- 「无效」: 
+
+#### 修改幅度
+
+- 「可扩展浮点」: 硬编码一个固定值；
+- 「属性基础」: 最简单来说就是允许根据 Attribute 代入某个公式进行计算求出最终结果；
+  - **支持属性**中可以指定基于 Source 还是 Target，也可以指定 Attribute，若设置为**快照**，则会捕获 Effect **创建**时刻的数据，否则捕获**施加**时刻的数据；
+  - **属性计算幅度**可以指定 `Value` 取 `BaseValue` 还是 `CurrentValue`，还是 `CurrentValue - BaseValue`；
+
+    > 可以分别用于对应**最大生命值**、**当前生命值**、**已损失生命值**。 
+
+  - 最后按照 `(Value + PreMultiplyAdditiveValue) * Coeffcient + PostMultiplyAdditiveValue` 得出最终值；
+
+#### 曲线表
+
+曲线表就是用于实现不同等级的 Effect 能施加不同程度的 Modify，并且会在「修改幅度」的基础上再乘上曲线上当前 Level 的值。
+
+#### 标签过滤
+
+根据 Source 和 Target 的标签情况，决定 Modifier 是否生效。比如可以实现类似「目标中毒时，降低 50% 防御力」的效果。
+
+### 堆叠(Stack)
+
+在英雄联盟这个游戏里，有很多技能/物品在使用后会获得一个「状态」。
+
+部分技能连续使用时或许还会叠加「状态」层数，有些可以无限叠加，如邪恶小法师的 Q 技能「黑暗祭祀」；有些有叠加上限，并且一旦持续时间消失会逐渐降低层数，如战争之影的 Q 技能「暴走」；有些一旦持续时间结束会失去所有层数，如诺克萨斯之手的被动技能「出血」；而有些并不能叠加层数，也就是最高只有一层……在 Gameplay Effect 里面，我们可以用「堆叠」功能实现同样的效果。这一功能通常搭配 `Has Duration` 的 Effect 使用。
+
+#### 堆叠样式(Stacking Type)
+
+默认是「无」，即可以无限叠加，施加的每个 GameplayEffectSpec 都视为相互**独立**；
+
+还有两种是「按源聚合」与「按目标聚合」，将样式设置为这两种才能开启完整功能，并可以设置「堆栈限制次数」。前者是每个 Source 最多施加 n 个 Effect，后者是每个 Target 最多**被**施加 n 个 Effect。
+
+#### 堆栈持续时间刷新策略(Stacking Duration Refresh Policy)
+
+- 「成功应用时刷新」: 当有新的 Effect 成功入栈时，栈中其它 Effect 会刷新自身的持续时间；
+- 「永不刷新」: 不会刷新持续时间；
+
+#### 堆栈周期重设策略(Stacking Period Refresh Policy)
+
+- 「成功应用后重设」: 当有新的 Effect 成功入栈时，栈中其它 Effect 会更新自身的周期时间，即如果设置了周期，则会将下次触发的时间修改为 `now + period`；
+- 「永不刷新」: 不会更新周期时间；
+
+#### 堆栈过期策略(Stack Expiration Policy)
+
+每当栈内的某个 Effect 持续时间到了，就会应用该策略。
+
+- 「清除整个堆栈」: 字面意思；
+- 「移除单一堆栈并刷新持续时长」: 将过期的移除，剩下的 Effect 刷新自身的持续时间；
+- 「刷新时长」: 用这个能实现 Infinite，并且可以通过 `OnStackCountChange()` 手动实现栈计数减少的行为；
+
+
+### 施加 Effect
+
+#### 生命恢复药水
+
+>「药水」本质上是一个放置在世界中的 Actor，自带碰撞范围，当角色 Overlap 时为其施加「立即恢复生命」的效果。
+
+首先可以创建一个 Actor 类 `REffectActor`，表示所有能够为具有 ASC 的角色施加 GameplayEffect 的物体的基类。这一基类实现了一个公有的方法 `ApplyEffectToTarget()`，语义为对目标施加 Effect。
+
+很多时候一个 Actor 可以施加多种效果，比如造成伤害（Instant）后施加一个持续若干秒的 debuff（Duration），所以就需要在类中定义一个 `TArray<>`，用于存放该 Actor 能够施加的所有 Effect 的类型。
+
+```cpp Actor/EffectActor.cpp
+bool AREffectActor::ApplyEffectToTarget(AActor* TargetActor, FEffectInfo& EffectInfo, bool bMayCancelLater)
+{
+  UAbilitySystemComponent* ASCOfTarget = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor);
+  if (!IsValid(ASCOfTarget) || !EffectInfo.GameplayEffectClass)
+  {
+    return false;
+  }
+
+  float EffectLevel = EffectInfo.EffectLevel;
+  TSubclassOf<UGameplayEffect> GameplayEffectClass = EffectInfo.GameplayEffectClass;
+
+  // 创建一个 Effect Context，用于后续生成 Effect
+  FGameplayEffectContextHandle EffectContextHandle = ASCOfTarget->MakeEffectContext();
+  // 设置 Effect 的施加者 Source，保存在 Effect Context 中
+  EffectContextHandle.AddSourceObject(this);
+  
+  // 根据 Effect class 和 Effect Context 生成一个 EffectSpec
+  const FGameplayEffectSpecHandle EffectSpecHandle = ASCOfTarget->MakeOutgoingSpec(GameplayEffectClass, EffectLevel, EffectContextHandle);
+
+  // 施加到 Target 的 ASC 上，并返回一个 Active Gameplay Effect Handle
+  const FActiveGameplayEffectHandle ActiveEffectHandle = ASCOfTarget->ApplyGameplayEffectSpecToSelf(*(EffectSpecHandle.Data));
+
+  return true;
+}
+```
+
+然后在编辑器中创建一个派生蓝图类 `BP_HealthPotion`，设置 Static Mesh 和 Sphere Collision 以后，在蓝图中实现碰撞球体的 `BeginOverlap` 和 `EndOverlap` 方法。
+
+此时还需要填充 `EffectInfo` 成员。需要做的就是创建一个派生自 `UGameplayEffect` 的蓝图类，命名为 `GE_HealthPotion`，进行相关设置，如「Instant」「加」「RAttributeSet.CurHealth」「某个值」。创建完毕后即可进行类型的填充。这样就实现了一个简单的药水效果。
+
+基于上面这种创建流程，还可以设计「持续恢复生命值的药水」「一旦进入其中就会持续扣血的燃烧区域」等等。
+
+#### Pre/Post 函数
+
+在施加 Effect 与实际修改 Attribute 前后，AS 分别会调用以下六个函数。
+
+```cpp
+/**
+ * PreGameplayEffectExecute -> PreAttributeBaseChange -> PreAttributeChange -> (ATTRIBUTE BE CHANGED) ->
+ * PostAttributeChange -> ON_ATTRIBUTE_CHANGED DELEGATE -> PostAttributeBaseChange -> PostGameplayEffectExecute
+ */
+
+/**
+ * Called just before any modification happens to an attribute's base value which is modified by Instant Gameplay Effects.
+ */
+void PreAttributeBaseChange(const FGameplayAttribute& Attribute, float& NewValue) const override;
+
+/**
+ * Called just after any modification happens to an attribute's base value which is modified by Instant Gameplay Effects.
+ */
+void PostAttributeBaseChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue) const override;
+
+/**
+ * Called just before any modification happens to an attribute's current value which is modified by Duration based Gameplay Effects.
+ * 
+ * This function is meant to enforce things like "Health = Clamp(Health, 0, MaxHealth)" and NOT things like "trigger this extra thing if damage is applied, etc".
+ */
+void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
+
+/**
+ * Called just after any modification happens to an attribute.'s current value which is modified by Duration based Gameplay Effects.
+ */
+void PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue) override;
+
+/**
+ * Called just before the Gameplay Effect is executed.
+ * 
+ * Return true to continue, or false to throw out the modification.
+ */
+bool PreGameplayEffectExecute(struct FGameplayEffectModCallbackData& Data) override;
+
+/**
+ * Called just after the Gameplay Effect is executed.
+ * 
+ * When PostGameplayEffectExecute() is called, changes to the Attribute have already happened,
+ * but they have not replicated back to clients yet so clamping values here will not cause two network updates to clients.
+ * Clients will only receive the update after clamping.
+ */
+void PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data) override;
+```
+
+其中主要关注 `PreAttributeChange()` 和 `PostGameplayEffectExecute()` 这两个。
+
+前者用于对 `NewValue` 进行 Clamp 操作，后者主要获取 Effect 的 Source 实现相关逻辑（比如反伤等等）。
+
+### 移除 Effect
+
+为了移除施加到 ASC Of Target 上的 Effect，需要调用的函数是 `RemoveActiveGameplayEffect()`。该函数需要两个参数：一个 `FActiveGameplayEffectHandle` 和一个浮点数。
+
+前者是通过调用 `ApplyGameplayEffectSpecToSelf()` 返回的，后者则表明了当移除该 Effect 时，要移除栈内多少个 Effect。默认为 `-1`，即全部移除。
+
+所以为了正确调用，需要由一定数据结构保存施加 Effect 时返回的那个 `FActiveGameplayEffectHandle`。常用的是 `TMap<>`，存储 Active Handle 到 ASC 的映射。
+
+
+### 监听 Effect 行为
+
+```cpp AbilitySystemComponent.h
+/** Delegate for when an effect is applied */
+DECLARE_MULTICAST_DELEGATE_ThreeParams(
+  FOnGameplayEffectAppliedDelegate,
+  UAbilitySystemComponent*,
+  const FGameplayEffectSpec&,
+  FActiveGameplayEffectHandle
+);
+
+/**
+ * Called on server whenever a GE is applied to self.
+ * This includes instant and duration based GEs.
+ */
+FOnGameplayEffectAppliedDelegate OnGameplayEffectAppliedDelegateToSelf;
+
+/**
+ * Called on server whenever a GE is applied to someone else.
+ * This includes instant and duration based GEs.
+ */
+FOnGameplayEffectAppliedDelegate OnGameplayEffectAppliedDelegateToTarget;
+
+/**
+ * Called on both client and server whenever a duration based GE is added
+ * (E.g., instant GEs do not trigger this).
+ */
+FOnGameplayEffectAppliedDelegate OnActiveGameplayEffectAddedDelegateToSelf;
+
+/**
+ * Called on server whenever a periodic GE executes on self
+ */
+FOnGameplayEffectAppliedDelegate OnPeriodicGameplayEffectExecuteDelegateOnSelf;
+
+/**
+ * Called on server whenever a periodic GE executes on target
+ */
+FOnGameplayEffectAppliedDelegate OnPeriodicGameplayEffectExecuteDelegateOnTarget;
+```
+
+
+
+## Gameplay Tags
+
+`FGameplayTag` 是由 `GameplayTagManager` 注册的形似 Parent.Child.Grandchild... 的层级 `FName`，这些标签对于分类和描述对象的状态非常有用（例如如果某个 Character 处于眩晕状态，我们可以授予其一个 State.Debuff.Stun 的 Tag）。用 GameplayTag 可以替换布尔值或枚举值，多个 GameplayTag 应被保存于一个 `FGameplayTagContainer` 中，相比 `TArray<FGameplayTag>` 做了一些很有效率的优化。可以更快地判断一个 Character 是否具有某 Tag，从而决定是否施加 Effect。

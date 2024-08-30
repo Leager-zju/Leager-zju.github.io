@@ -47,16 +47,16 @@ sleep:
 
 ```S kernel/trampoline.S
 uservec:
-    # swap a0 and sscratch
-    # so that a0 is TRAPFRAME, and sscratch is user a0
+    ## swap a0 and sscratch
+    ## so that a0 is TRAPFRAME, and sscratch is user a0
     csrrw a0, sscratch, a0
 
-    # save the user registers in TRAPFRAME
+    ## save the user registers in TRAPFRAME
     sd ra, 40(a0)
     ...
     sd t6, 280(a0)
 
-    # save the user a0 in p->trapframe->a0
+    ## save the user a0 in p->trapframe->a0
     csrr t0, sscratch
     sd t0, 112(a0)
 ```
@@ -68,20 +68,20 @@ uservec:
 > 当然，别忘了后面还要换回来。
 
 ```S kernel/trampoline.S
-    # restore kernel stack pointer from p->trapframe->kernel_sp
+    ## restore kernel stack pointer from p->trapframe->kernel_sp
     ld sp, 8(a0)
 
-    # make tp hold the current hartid, from p->trapframe->kernel_hartid
+    ## make tp hold the current hartid, from p->trapframe->kernel_hartid
     ld tp, 32(a0)
 
-    # load the address of usertrap(), p->trapframe->kernel_trap
+    ## load the address of usertrap(), p->trapframe->kernel_trap
     ld t0, 16(a0)
 
-    # restore kernel page table from p->trapframe->kernel_satp
+    ## restore kernel page table from p->trapframe->kernel_satp
     ld t1, 0(a0)
     csrw satp, t1
 
-    # clear page table cache(TLB)
+    ## clear page table cache(TLB)
     sfence.vma zero, zero
 ```
 
@@ -92,10 +92,10 @@ uservec:
 > 那么，叫 trampoline page 的原因就很好理解了——某种程度在它上面「弹跳」了一下，然后从用户空间走到了内核空间。
 
 ```S kernel/trampoline.S
-    # a0 is no longer valid, since the kernel page
-    # table does not specially map p->tf.
+    ## a0 is no longer valid, since the kernel page
+    ## table does not specially map p->tf.
 
-    # jump to usertrap(), which does not return
+    ## jump to usertrap(), which does not return
     jr t0
 ```
 
@@ -253,13 +253,13 @@ usertrapret(void)
 ```S kernel/trampoline.S
 .globl userret
 userret:
-        # userret(TRAPFRAME, pagetable)
-        # switch from kernel to user.
-        # usertrapret() calls here.
-        # a0: TRAPFRAME, in user page table.
-        # a1: user page table, for satp.
+        ## userret(TRAPFRAME, pagetable)
+        ## switch from kernel to user.
+        ## usertrapret() calls here.
+        ## a0: TRAPFRAME, in user page table.
+        ## a1: user page table, for satp.
 
-        # switch to the user page table.
+        ## switch to the user page table.
         csrw satp, a1
         sfence.vma zero, zero
 ```
@@ -267,7 +267,7 @@ userret:
 第一步是切换到用户页表。上面已经讲过，把参数传给 `userret` 时，新的 SATP 值在 a1 里，那就是要交换 a1 和 SATP。当然别忘了清楚页表缓存。
 
 ```S kernel/trampoline.S
-        # restore all but a0 from TRAPFRAME
+        ## restore all but a0 from TRAPFRAME
         ld ra, 40(a0)
         ...
         ld t6, 280(a0)
@@ -276,20 +276,20 @@ userret:
 接下来，复原所有 32 个用户寄存器。a0 已经在传参时被设为了 trapframe，所以直接用就行。
 
 ``` S kernel/trampoline.S
-        # put the saved user a0 in sscratch, so we
-        # can swap it with our a0 (TRAPFRAME) in the last step.
+        ## put the saved user a0 in sscratch, so we
+        ## can swap it with our a0 (TRAPFRAME) in the last step.
         ld t0, 112(a0)
         csrw sscratch, t0
 
-	      # restore user a0, and save TRAPFRAME in sscratch
+	      ## restore user a0, and save TRAPFRAME in sscratch
         csrrw a0, sscratch, a0
 ```
 
 而 SSCRATCH 在之前由于交换，放的**值**是 user a0，也就是系统调用传入的第一个实参（见 [uservec](#ecall-与-uservec)），并且被保存到了 trapframe->a0 中。尽管 trapframe->a0 在系统调用过程中变成了**系统调用函数返回值**，但无论如何，现在需要进行逆操作了——先从 trapframe->a0 中将返回值 载入 SSCRATCH，再和实际寄存器 a0 进行交换。于是乎，现在寄存器 a0 和 SSCRATCH 成为了我们想要的模样，前者存返回值，后者存 `TRAPFRAME`。之后 `TRAPFRAME` 会一直保存在SSCRATCH中，直到用户程序执行了另一次 trap。
 
 ```S kernel/trampoline.S
-        # return to user mode and user pc.
-        # usertrapret() set up sstatus and sepc.
+        ## return to user mode and user pc.
+        ## usertrapret() set up sstatus and sepc.
         sret
 ```
 

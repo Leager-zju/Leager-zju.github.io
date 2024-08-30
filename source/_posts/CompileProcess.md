@@ -147,11 +147,11 @@ Linux 将采用的 ELF 格式的文件分为四类，分别是：
 
 ```S
 Program Header:
-    PHDR off    0x0000000000000040 vaddr 0x0000000000000040 paddr 0x0000000000000040 align 2**3  # PHDR: 给出头部表自身的大小与位置
+    PHDR off    0x0000000000000040 vaddr 0x0000000000000040 paddr 0x0000000000000040 align 2**3  ## PHDR: 给出头部表自身的大小与位置
          filesz 0x00000000000002d8 memsz 0x00000000000002d8 flags r--
-  INTERP off    0x0000000000000318 vaddr 0x0000000000000318 paddr 0x0000000000000318 align 2**0  # INTERP: 解释器的位置
+  INTERP off    0x0000000000000318 vaddr 0x0000000000000318 paddr 0x0000000000000318 align 2**0  ## INTERP: 解释器的位置
          filesz 0x000000000000001c memsz 0x000000000000001c flags r--
-    LOAD off    0x0000000000000000 vaddr 0x0000000000000000 paddr 0x0000000000000000 align 2**12 # LOAD: 可加载到内存的段
+    LOAD off    0x0000000000000000 vaddr 0x0000000000000000 paddr 0x0000000000000000 align 2**12 ## LOAD: 可加载到内存的段
          filesz 0x00000000000005f0 memsz 0x00000000000005f0 flags r--
 ```
 
@@ -293,11 +293,11 @@ Disassembly of section .text:
    5:   48 89 e5                mov    %rsp,%rbp
    8:   48 83 ec 10             sub    $0x10,%rsp
    c:   be 02 00 00 00          mov    $0x2,%esi
-  11:   48 8d 05 00 00 00 00    lea    0x0(%rip),%rax       # %rip = &array
-                        14: R_X86_64_PC32       array-0x4   # Relocation entry
+  11:   48 8d 05 00 00 00 00    lea    0x0(%rip),%rax       ## %rip = &array
+                        14: R_X86_64_PC32       array-0x4   ## Relocation entry
   18:   48 89 c7                mov    %rax,%rdi
-  1b:   e8 00 00 00 00          call   20 <main+0x20>       # sum()
-                        1c: R_X86_64_PLT32      sum-0x4     # Relocation entry
+  1b:   e8 00 00 00 00          call   20 <main+0x20>       ## sum()
+                        1c: R_X86_64_PLT32      sum-0x4     ## Relocation entry
   20:   89 45 fc                mov    %eax,-0x4(%rbp)
   23:   b8 00 00 00 00          mov    $0x0,%eax
   28:   c9                      leave
@@ -336,7 +336,7 @@ SYMBOL TABLE:
 > 最终链接器将会以增量 `0x4010 + (-0x4) - 0x113d = 0x2ecf` 进行相对寻址。其中取 array 的指令为
 >
 > ```S
-> 113a:  48 8d 05 cf 2e 00 00 	lea    0x2ecf(%rip),%rax        # 4010 <array>
+> 113a:  48 8d 05 cf 2e 00 00 	lea    0x2ecf(%rip),%rax        ## 4010 <array>
 > ```
 >
 > PC 正好是以 CS:IP 进行确认的，其实就是这里的 `rip`，增量为 `0x2ecf`，验证成功。
@@ -374,11 +374,11 @@ SYMBOL TABLE:
 我们可以通过 `ar` 指令进行静态库的生成，比如
 
 ```bash
-$ gcc -c addvec.c multvec.c             # 这一步生成 addvec.o 和 multvec.o
-$ ar rcs libvector.a addvec.o multvec.o # 将 addvec.o multvec.o 打包成静态库 libvector.a
-# r for 写入/更新目标模块
-# c for 建立库文件
-# s for 写入/更新索引
+$ gcc -c addvec.c multvec.c             ## 这一步生成 addvec.o 和 multvec.o
+$ ar rcs libvector.a addvec.o multvec.o ## 将 addvec.o multvec.o 打包成静态库 libvector.a
+## r for 写入/更新目标模块
+## c for 建立库文件
+## s for 写入/更新索引
 ```
 
 如果我们在 `main.c` 中调用 `addvec.c` 内定义的函数，就要编译和链接输入文件 `main.o` 和 `libvector.a`。
@@ -401,10 +401,10 @@ int main() {
 ```bash
 $ gcc -c main.c
 $ gcc main.o -static ./libvector.a -o main
-# or
+## or
 $ gcc main.o -static -L. -lvector -o main
-# -L[dir] for 在目录 dir 下寻找静态库
-# -l[name] for 寻找 lib{name}.a 进行链接
+## -L[dir] for 在目录 dir 下寻找静态库
+## -l[name] for 寻找 lib{name}.a 进行链接
 ```
 
 整体流程如下图：
@@ -428,10 +428,10 @@ $ gcc main.o -static -L. -lvector -o main
 以[静态链接](#静态链接)中的两个文件为例，生成并链接共享库的命令如下：
 
 ```bash
-$ gcc addvec.c multvec.c -shared -fpic -o libvector.so # 生成共享库，fpic for 生成位置无关代码 PIC
-$ gcc main2.c ./libvector.so -o prog2l                 # 与共享库一起链接生成可执行文件 prog
-# or
-$ gcc main2.c -L. -lvector -o prog2l                   # 更常用的做法
+$ gcc addvec.c multvec.c -shared -fpic -o libvector.so ## 生成共享库，fpic for 生成位置无关代码 PIC
+$ gcc main2.c ./libvector.so -o prog2l                 ## 与共享库一起链接生成可执行文件 prog
+## or
+$ gcc main2.c -L. -lvector -o prog2l                   ## 更常用的做法
 ```
 
 此时仅仅拷贝了 `libvector.so` 的重定位表和符号表信息，使得运行时可以解析外部符号并正确寻址。当加载器(exec)加载和运行可执行文件 `prog2l` 时，它注意到 `prog2l` 包含一个 `.interp` 节，这一节包含**动态链接器**的路径名，于是它首先加载和运行动态链接器。动态链接器会将所有共享库（这里是 `libvector.so`）的代码和数据节重定位到某个内存段，并且重定位可执行文件（这里是 `prog2l`）中所有对由共享库定义的符号的引用。此时共享库在内存中的位置就确定了，这才正式开始进入 `prog2l`。
