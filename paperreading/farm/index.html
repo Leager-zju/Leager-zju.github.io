@@ -1,0 +1,1226 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="FaRM 论文阅读, 没什么看头的地方">
+    <meta name="description" content="6.824 的第十篇论文是 FaRM——一个通过为分布式事务提供序列化、高性能、持久性和高可用性的主存分布式计算平台。
+
+FaRM 利用以下两种硬件趋势做到这一点：
+
+非易失 DRAM（通过将 DRAM 写入 SSD 实现）
+快速 RDMA">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+    <title>FaRM 论文阅读 | 没什么看头的地方</title>
+    <link rel="icon" type="image/png" href="/dt.png">
+    
+    <style>
+        body{
+            background-image: url(https://cdn.jsdelivr.net/gh/Tokisaki-Galaxy/res/site/medias/background.jpg);
+            background-repeat:no-repeat;
+            background-size: 100% 100%;
+            background-attachment:fixed;
+        }
+    </style>
+
+
+
+    <!-- bg-cover style     -->
+
+
+
+<link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+<link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+<link rel="stylesheet" type="text/css" href="/css/matery.css">
+<link rel="stylesheet" type="text/css" href="/css/my.css">
+<link rel="stylesheet" type="text/css" href="/css/dark.css" media="none" onload="if(media!='all')media='all'">
+
+
+
+
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+    <link rel="stylesheet" href="/css/post.css">
+
+
+
+
+    
+
+
+
+    <script src="/libs/jquery/jquery-3.6.0.min.js"></script>
+
+<meta name="generator" content="Hexo 6.3.0">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/comment_bg.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">没什么看头的地方</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/archives" class="waves-effect waves-light">
+      
+      <i class="fas fa-archive" style="zoom: 0.6;"></i>
+      
+      <span>归档</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/contact" class="waves-effect waves-light">
+      
+      <i class="fas fa-comments" style="zoom: 0.6;"></i>
+      
+      <span>留言板</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/friends" class="waves-effect waves-light">
+      
+      <i class="fas fa-address-book" style="zoom: 0.6;"></i>
+      
+      <span>友情链接</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+  <li>
+    <a href="javascript:;" class="waves-effect waves-light" onclick="switchNightMode()" title="深色/浅色模式" >
+      <i id="sum-moon-icon" class="fas fa-sun" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/comment_bg.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">没什么看头的地方</div>
+        <div class="logo-desc">
+            
+            【数据删除】
+            
+        </div>
+    </div>
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/archives" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-archive"></i>
+			
+			归档
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/contact" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-comments"></i>
+			
+			留言板
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/friends" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-address-book"></i>
+			
+			友情链接
+		</a>
+          
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/Leager-zju" class="waves-effect waves-light" target="_blank">
+                <i class="fab fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+            <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/Leager-zju" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+   data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+        
+    </nav>
+
+</header>
+
+    
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/11.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">FaRM 论文阅读</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/MIT-6-824/">
+                                <span class="chip bg-color">MIT 6.824</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/paperReading/" class="post-category">
+                                paperReading
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2022-10-20
+                </div>
+                
+
+                
+
+                
+
+                
+
+                
+            </div>
+        </div>
+        <hr class="clearfix">
+
+        
+        <!-- 是否加载使用自带的 prismjs. -->
+        <link rel="stylesheet" href="/libs/prism/prism.min.css">
+        
+
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <p>6.824 的第十篇论文是 <strong><a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/papers/farm-2015.pdf">FaRM</a></strong>——一个通过为分布式事务提供序列化、高性能、持久性和高可用性的<strong>主存分布式计算平台</strong>。</p>
+<span id="more"></span>
+<p>FaRM 利用以下两种<strong>硬件趋势</strong>做到这一点：</p>
+<ul>
+<li>非易失 DRAM（通过将 DRAM 写入 SSD 实现）</li>
+<li>快速 RDMA</li>
+</ul>
+<p>这消除了存储和网络瓶颈，却带来了新的 CPU 瓶颈。FaRM 通过遵循以下三个原则来解决这一 bottleneck：</p>
+<ul>
+<li><p>减少消息量</p>
+<blockquote>
+<p>FaRM 允许事务与存储对象跨机器分布；</p>
+<p>使用具有 replica 的垂直 Paxos 以及直接与 Primary/Backup 通信的非复制 <strong>coordinator</strong>；</p>
+<p>使用<strong>乐观并发控制</strong>和<strong>四阶段提交协议</strong>(4PC: lock, validation, commit backup, commit primary)。</p>
+</blockquote></li>
+<li><p>使用单侧 RDMA 进行读写，而不是传递消息</p>
+<blockquote>
+<p>不使用远程 CPU，且避免了大部分 local CPU 开销。但这样一来传统的基于 CPU 的 failure-recovery 就失效了，需要考虑<strong>新的 failure-recovery protocol</strong>：</p>
+<ol type="1">
+<li><strong>precise membership</strong>：FaRM servers 不根据它们的 lease 到期而拒绝传入的请求，因为请求由不支持 lease 的网卡(<strong>NIC</strong>)提供服务；使用 precise membership 来确保机器同意当前的成员配置，并只向配置中的成员机器发送 RDMA；</li>
+<li><strong>reservations</strong>：因为事务记录被写入日志而不涉及 CPU，FaRM 使用 reservations 来确保在开始 commit 之前，日志中有足够空间用于 commit 和 truncate 事务。</li>
+</ol>
+</blockquote></li>
+<li><p>有效利用并行性</p>
+<blockquote>
+<p>它将每个状态的恢复均匀地分布在集群中，并在每台机器之间并行恢复。它使用<strong>两个优化</strong>来允许事务执行与恢复并行进行：</p>
+<ol type="1">
+<li>事务在锁定恢复阶段之后开始访问受故障影响的数据；</li>
+<li>不受故障影响的事务继续执行而不会阻塞。</li>
+</ol>
+</blockquote></li>
+</ul>
+<h2 id="硬件趋势">硬件趋势</h2>
+<h3 id="非易失-dram">非易失 DRAM</h3>
+<p>发生电源故障时，分布式不间断电源(<strong>UPS</strong>)使用电源中的能量将内存中的数据保存到 SSD，从而提高 DRAM 耐用性。</p>
+<h3 id="rdma-网络">RDMA 网络</h3>
+<p>FaRM 尽可能使用单侧 RDMA 操作，从而有效减少了 CPU 开销与需传递的消息数量——RPC 需要的消息量是单侧 RDMA 的两倍。</p>
+<h2 id="编程模型">编程模型</h2>
+<p>FaRM 提供<strong>全局地址空间</strong>的抽象，其 API 为事务提供对对象的透明访问。</p>
+<p>FaRM 事务使用<strong>乐观并发控制</strong>。对数据的修改会先在本地缓存，且只在成功提交后才对其他事务可见。</p>
+<p>FaRM 为所有成功提交的事务提供严格的<strong>可串行化</strong>：</p>
+<ul>
+<li><strong>单对象读取</strong>是原子的：只读取已提交的值，且由事务写入的对象的读取返回最新写入的值。FaRM API 还为单对象 RO 事务提供<strong>无锁读取</strong>和<strong>位置提示</strong>，使程序员能够在同一组机器上共同定位相关对象。</li>
+<li><strong>多对象读取</strong>不保证原子性：保证事务不会提交，同时确保提交的事务是严格可串行化的。这样可以将一致性检查推迟到提交时间。</li>
+</ul>
+<h2 id="整体架构">整体架构</h2>
+<p><img src="image-20221021142633067.png" alt="image-20221021142633067" style="zoom:67%;"></p>
+<h3 id="协调与配置">协调与配置</h3>
+<p>FaRM 使用 Zookeeper 作为协调服务。</p>
+<p>FaRM 实例会随着时间的推移更新<strong>配置</strong>。配置是一个元组 <code>(i, S, F, CM)</code>，其中 <code>i</code> 是<strong>配置标识符</strong>，<code>S</code> 是配置中的<strong>机器集合</strong>，<code>F</code> 是从机器到 <strong>failure region</strong> 的<strong>映射</strong>，<code>CM</code> 是<strong>配置管理器</strong>，且 CM ∈ S。</p>
+<p><strong>CM</strong>(Configuration Manager) 实现管理租约、检测故障或协调恢复。每次配置更改时，CM 都会调用 Zookeeper 来更新配置以达成共识。</p>
+<h3 id="内存管理">内存管理</h3>
+<p>FaRM 中的地址空间由多个 2GB 大小的 <strong>region</strong> 组成。每个 region 分布在一个 primary 和 <span class="math inline">\(f\)</span> 个 backup 上，对于每个机器而言，region 存储在其 DRAM 中并且可以被 RDMA 读取。</p>
+<p>所有的 read 都落到 primary 上（如果 region 在本地，则直接通过本地内存访问；反之，则使用单侧 RDMA 读取）。</p>
+<p>CM 存储 region 标识符到其 primary/backup 的映射。这些映射可被其他机器按需获取、缓存到本地并复制。</p>
+<h3 id="region-分配">region 分配</h3>
+<p>机器联系 CM 以分配新 region。CM 为 new region 分配一个标识符，并为其选择 replicas。对 replica 的选择应尽量<strong>均衡负载</strong>，并且满足：</p>
+<ul>
+<li>有足够的容量；</li>
+<li>每个 replica 位于不同的 failure region 中；</li>
+<li>当应用程序指定局部性约束时，该 region 与目标 region 位于同一位置。</li>
+</ul>
+<p>然后 CM 利用 <strong>2PC</strong> 进行 region 分配。</p>
+<h3 id="logmsg-队列">Log/Msg 队列</h3>
+<p>每台机器存储一个基于 <strong>FIFO</strong> 的环形缓冲区，用于<strong>事务日志或消息队列</strong>。每个接收者都有单独的 log queue 和 msg queue。发送者使用单侧 RDMA 将记录附加到日志尾部，写入由 NIC 发送 ack，不涉及 CPU；接收者定期轮询日志的头部以处理记录。</p>
+<h2 id="分布式事务与复制">分布式事务与复制</h2>
+<p>下图展示了 FaRM 事务提交时间线。</p>
+<p><img src="image-20221025170135679.png" alt="image-20221025170135679" style="zoom:67%;"></p>
+<h3 id="执行阶段">执行阶段</h3>
+<ul>
+<li>事务使用单侧 RDMA 读取对象并写入本地缓存。</li>
+<li>coordinator 记录所有访问对象的地址和版本号。</li>
+<li>对于与 coordinator 在同一台机器上的 primary/backup，对象对日志的读取和写入使用本地内存访问而不是 RDMA。</li>
+</ul>
+<h3 id="提交阶段">提交阶段</h3>
+<p><img src="image-20221025172808292.png" alt="image-20221025172808292" style="zoom:70%;"></p>
+<ol type="1">
+<li><p><strong>Lock</strong>：coordinator 将 LOCK 记录写入每台涉及写的 primary。primary 通过尝试使用 compare-and-swap 将对象在指定版本处 lock，并回复是否成功获取所有锁。若失败，则中止事务；</p></li>
+<li><p><strong>Validate</strong>：coordinator 通过从 primary 中读取 被事务读取但未写入的所有对象 的版本来执行 VALIDATE。如果任何对象已更改，则中止事务。</p>
+<blockquote>
+<p>默认使用单侧 RDMA 读，而对于拥有 <span class="math inline">\(t_r\)</span> 以上对象的 primary，则用 RPC（阈值 <span class="math inline">\(t_r\)</span> 反映了 RPC 相对于 RDMA 读取的 CPU 成本）。</p>
+</blockquote></li>
+<li><p><strong>Commit Backup</strong>：coordinator 将 <code>COMMIT-BACKUP</code> 记录写入所有 backup 的日志，然后等待来自 NIC 硬件的 ack，无需 CPU 干涉；</p></li>
+<li><p><strong>Commit Primary</strong>：在确认所有 <code>COMMIT-BACKUP</code> 写入后，coordinator 将 <code>COMMIT-PRIMARY</code> 记录写入每个 primary 的日志中。接下来 primary 更新对象及其版本并 unlock。coordinator 会在收到至少一个 primary 的 ack 时向应用程序报告完成；</p></li>
+<li><p><strong>Truncate</strong>：primary/backup 将记录保留在其日志中直到被截断。coordinator 在收到所有 primary 的确认后，它会在其他日志记录中捎带截断事务的标识符会从而延迟截断。backup 在截断时将更新应用于其对象副本。</p></li>
+</ol>
+<p><img src="image-20221025172832254.png" alt="image-20221025172832254" style="zoom:70%;"></p>
+<h2 id="故障恢复">故障恢复</h2>
+<h3 id="故障检测">故障检测</h3>
+<p>FaRM 使用 <strong>lease</strong> 来检测故障。每台机器都在 CM 处持有 lease，而 CM 在其他每台机器上都持有 lease。任何 lease 到期都会触发故障恢复。FaRM 使用 <strong>3 次握手</strong>授予 lease。每台机器都会向 CM 发送一个 lease 请求，CM 在授权响应中捎带 CM 的 lease 请求，最后机器回复 CM 的 lease 许可。</p>
+<blockquote>
+<p>FaRM 租期很短，以保证高可用性。</p>
+</blockquote>
+<p>FaRM 为 lease 维护一个专用消息队列，以及时处理请求。可靠传输将要求 CM 为每台机器添加一个额外的队列。</p>
+<p>默认情况下，每过租期的 1/5 会尝试更新租约，以防止消息丢失。还必须及时在 CPU 上安排续租。 FaRM 使用以最高用户空间优先级运行的专用租用管理器线程。</p>
+<h3 id="重新配置">重新配置</h3>
+<p>单侧 RDMA 要求重新配置协议使用 <strong>lease</strong> 实现一致性，服务器在回复访问对象的请求之前检查它们是否持有对象的lease。从配置中被驱逐的服务器存储的对象在 lease 到期之前不被改变。</p>
+<p>但由于 CPU 无法检查是否持有 lease，且 NIC 也不支持 lease。这一问题可用 <strong>precise membership</strong> 来解决：发生故障后，新配置中的所有机器必须在允许对象变更之前就其成员关系达成共识。配置内的机器不会发起/接受配置外机器的 RDMA 请求。</p>
+<p><img src="image-20221026112640579.png" alt="image-20221026112640579" style="zoom:80%;"></p>
+<ol type="1">
+<li><p><strong>Suspect</strong>：CM 怀疑机器 lease 到期时，会启动重新配置，并开始阻止所有外部 client 请求；机器怀疑 CM lease 到期时，它首先要求 CM backup 中的一个启动重新配置。如果超时，那么它会自己尝试成为新的 CM 并重新配置；</p></li>
+<li><p><strong>Probe</strong>：新 CM 向配置中的所有机器发出 RDMA 读取（任何读取失败的机器也被 SUSPECT），仅当新 CM 获得<strong>大多数</strong> probe 的响应时，它才会继续进行重新配置。</p>
+<blockquote>
+<p>这确保了如果网络被分区，CM 不会在较小的分区中。</p>
+</blockquote></li>
+<li><p><strong>Update Configuration</strong>：新 CM 更新 Zookeeper 中存储的配置数据。使用 znode 序列号来实现原子 <strong>compare-and-swap</strong>。</p>
+<blockquote>
+<p>这确保了即使多台机器同时尝试从具有标识符 c 的配置更改配置，也只有一台机器可以成功地将系统移动到具有标识符 c +1 的配置（并成为 CM）。</p>
+</blockquote></li>
+<li><p><strong>Remap Regions</strong>：新 CM 重新分配 region。若 primary 故障，它会将某个 backup 提升为新的 primary，以减少恢复时间；</p></li>
+<li><p><strong>Send New Configuration</strong>：CM 向所有机器发送<code>NEW-CONFIG</code> 消息。如果 CM 改变，<code>NEW-CONFIG</code> 还会重置 lease 协议；</p></li>
+<li><p><strong>Apply New Configuration</strong>：当机器接收到配置标识符大于自己的配置标识符的 <code>NEW-CONFIG</code> 时，它会应用新配置，此后拒绝任何配置外机器的请求。机器用 <code>NEW-CONFIG-ACK</code> 消息回复 CM。如果 CM 发生了变化，则会向新 CM 重新授予/请求 lease；</p></li>
+<li><p><strong>Commit New Configuration</strong>：一旦 CM 接收到所有 <code>NEW-CONFIG-ACK</code> 消息，它就会等待配置外的机器的 lease 都已过期。然后 CM 向所有配置成员发送 <code>NEW-CONFIG-COMMIT</code>（同时授予 lease）。之后所有成员都解除 <strong>Suspect</strong> 中对外部 client 请求的阻止，并启动事务恢复。</p></li>
+</ol>
+<h3 id="事务状态恢复">事务状态恢复</h3>
+<p>FaRM 在配置更改后使用日志来恢复事务状态。下图为事务恢复时间线：</p>
+<p><img src="image-20221026140042960.png" alt="image-20221026140042960" style="zoom:80%;"></p>
+<ol type="1">
+<li><p><strong>Block Access To Recovering Regions</strong>：当 region 的 primary 发生故障时，其中一个 backup 会在重新配置期间提升为新的 primary。在更新 region 的所有事务都反映在新的 primary 上之前不能允许访问该 region，直到第 4 步 Lock Recover 结束；</p></li>
+<li><p><strong>Drain Logs</strong>：所有机器在收到 <code>NEW-CONFIG-COMMIT</code> 消息时都会处理其日志中的所有记录。完成后，它们将最新配置标识符记录在变量 <code>LastDrained</code> 中。FaRM 事务具有在 commit 开始时分配的唯一标识符，配置标识符小于或等于 <code>LastDrained</code> 的事务的日志记录将被拒绝。</p>
+<blockquote>
+<p>NIC 会向 COMMIT-BACKUP/PRIMARY 发送 ack，无论它们是在何种配置中发出的。由于 coordinator 在向应用程序公开更新并报告成功之前只等待这些 ack，因此 FaRM 不能仅仅拒绝来自旧配置的消息来达到<strong>跨配置一致性</strong>。</p>
+</blockquote></li>
+<li><p><strong>Finding Recovering Transactions</strong>： recovering transaction 是指在 commit 阶段进行跨配置更改的事务。需要在 Drain Logs 期间检查所有日志记录以确定 RT 的集合。所有机器必须就给定事务是否为 RT 达成一致。CM 在 Probe Read 阶段读取每台机器上的 <code>LastDrained</code>。对于自 <code>LastDrained</code> 以来 replica 归属变化的每个 region <span class="math inline">\(r\)</span>，CM 在 <code>NEW-CONFIG</code> 消息中捎带两个配置标识符：</p>
+<ul>
+<li><code>LastPrimaryChange[r]</code>：primary 最后一个配置标识符；</li>
+<li><code>LastReplicaChange[r]</code>：所有 replica 最后一个配置标识符。</li>
+</ul>
+<p>在配置 <span class="math inline">\(c-1\)</span> 中开始提交的事务在配置 <span class="math inline">\(c\)</span> 中恢复，除非：</p>
+<ul>
+<li>包含由事务<strong>读取</strong>对象的所有 region <span class="math inline">\(r\)</span>，<code>LastPrimaryChange[r] &lt; c</code>；</li>
+<li>包含由事务<strong>修改</strong>对象的所有 region <span class="math inline">\(r'\)</span>，<code>LastReplicaChange[r'] &lt; c</code>；</li>
+<li>配置 <span class="math inline">\(c\)</span> 中 coordinator 尚未被移除。</li>
+</ul>
+<p>region 的每个 replica 都会向 primary 发送一条 <code>NEED-RECOVERY</code> 消息。</p></li>
+<li><p><strong>Lock Recover</strong>：每个 region 的 primary 一直等待，直到本地机器 Drain Log 结束并且从每个 replica 接收到 <code>NEED-RECOVERY</code> 消息，以构建影响该 region 的完整 RT 集。然后它对 RT 分片。并行地，primary 线程从 backup 中获取尚未存储在本地的事务日志记录并给相关对象上锁。当一个 region 的 Lock Recover 完成后，该 region 可访问；</p></li>
+<li><p><strong>Replicate Log Records</strong>：primary 线程通过向 backup 发送 <code>REPLICATE-TX-STATE</code> 消息来复制日志记录，以免丢失事务；</p></li>
+<li><p><strong>Vote</strong>：coordinator 根据 region 的投票决定 commit/abort 事务。投票由 primary 发起。primary 线程将 <code>RECOVERY-VOTE</code> 消息发送到 coordinator 中的对等线程。</p>
+<ul>
+<li>若 replicas 看到 <code>COMMIT-PRIMARY</code> 或 <code>COMMIT-RECOVERY</code>，则投票 <code>commit-primary</code>；</li>
+<li>否则，若 replicas 看到 <code>COMMIT-BACKUP</code> 但没看到 <code>ABORT-RECOVERY</code>，则投票 <code>commit-backup</code>；</li>
+<li>否则，若 replicas 看到 <code>LOCK</code> 记录且没有 <code>ABORT-RECOVERY</code> ，则投票 <code>lock</code>；</li>
+<li>否则，它会投票 <code>abort</code>。</li>
+</ul></li>
+<li><p><strong>Decide</strong>：</p>
+<ul>
+<li>若 coordinator 收到来自所有 region 的 <code>commit-primary</code> 投票，则提交事务；</li>
+<li>否则，等待所有 region 投票。若至少一个 region 投票 <code>commit-backup</code>，且由事务修改的所有其他 region 投票 <code>lock</code>、<code>commit-backup</code> 或 <code>truncated</code>，则提交；</li>
+<li>否则，中止。</li>
+</ul>
+<p>然后它向所有 replicas 发送 <code>COMMIT-RECOVERY</code> 或 <code>ABORT-RECOVERY</code>。在 coordinator 收到来自所有 primary/backup 的 ack 后，它会发送一条 <code>TRUNCATE-RECOVERY</code> 消息。</p></li>
+</ol>
+<h3 id="数据恢复">数据恢复</h3>
+<p>当 primary 的所有 region 可访问时，每台机器都会向 CM 发送 <code>REGIONS-ACTIVE</code> 消息。然后 CM 向配置中的所有机器发送 <code>ALL-REGIONS-ACTIVE</code> 消息，此时开始数据恢复。</p>
+<p>如果对象的版本高于本地版本，则 replicas 会通过 CAS 上锁，更新后解锁；否则，不应用恢复。</p>
+<h3 id="分配器状态恢复">分配器状态恢复</h3>
+<p>FaRM 分配器将 region 拆分为 <strong>block</strong> (1 MB)，这些 block 用作分配小对象的 <strong>slab</strong>。它保留了两个元数据：</p>
+<ul>
+<li>block header：包含对象大小；</li>
+<li>slab 空闲列表。</li>
+</ul>
+<p>分配新 block 时，BH 会复制到 replica 中。由于块头用于数据恢复，因此新 primary 在收到 <code>NEW-CONFIG-COMMIT</code> 后立即将它们发送到所有 replicas。</p>
+<p>slab 空闲列表仅保留在 primary 中，以减少对象分配的开销。</p>
+<p>每个对象的 header 中都有一个 bit 位，表示该对象已分配或被清理。这一 bit 也会在事务提交期间被复制。通过并行扫描故障 region 中的对象，在新的 primary 上恢复空闲列表。为了尽量减少对事务 lock recovery 的影响，分配器恢复在收到 <code>ALL-REGIONS-ACTIVE</code> 后开始，在 slab 空闲列表恢复后释放对象。</p>
+<h2 id="总结">总结</h2>
+<p>这是 6.824 事务与复制的最后一个系列了，用 RDMA 而不是 RPC 很有创新点。</p>
+
+                
+            </div>
+            <hr/>
+
+            
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/MIT-6-824/">
+                                    <span class="chip bg-color">MIT 6.824</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/leetcode/weekcompetition316/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/2.jpg" class="responsive-img" alt="LeetCode 周赛 316">
+                        
+                        <span class="card-title">LeetCode 周赛 316</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            第316场周赛复盘。
+排名 873 / 6387
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2022-10-23
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/leetcode/" class="post-category">
+                                    leetcode
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/weekly/">
+                        <span class="chip bg-color">weekly</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/paperreading/spanner/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/10.jpg" class="responsive-img" alt="Spanner 论文阅读">
+                        
+                        <span class="card-title">Spanner 论文阅读</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            6.824 的第九篇论文是 Spanner——Google 基于 TrueTime 的可扩展、多版本、全球分布和同步复制的数据库。它是第一个在全球范围内分发数据并支持外部一致的分布式事务的系统。
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2022-10-17
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/paperReading/" class="post-category">
+                                    paperReading
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/MIT-6-824/">
+                        <span class="chip bg-color">MIT 6.824</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+
+  <!-- 是否加载使用自带的 prismjs. -->
+  <script type="text/javascript" src="/libs/prism/prism.min.js"></script>
+
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card" style="background-color: white;">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+<script src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+    MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$', '$'], ['\\(', '\\)']]}
+    });
+</script>
+
+
+
+    <footer class="page-footer bg-color">
+    
+
+    <div class="container row center-align"
+         style="margin-bottom: 15px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            
+                <span id="year">2023-2024</span>
+            
+            <a href="/about" target="_blank">Leager</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            
+            <br>
+            
+            
+            
+                
+            
+            
+                <span id="busuanzi_container_site_pv">
+                &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
+                    <span id="busuanzi_value_site_pv" class="white-color"></span>
+            </span>
+            
+            
+                <span id="busuanzi_container_site_uv">
+                &nbsp;|&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;
+                    <span id="busuanzi_value_site_uv" class="white-color"></span>
+            </span>
+            
+            <br>
+
+            <!-- 运行天数提醒. -->
+            
+                <span id="sitetime"> Loading ...</span>
+                <script>
+                    var calcSiteTime = function () {
+                        var seconds = 1000;
+                        var minutes = seconds * 60;
+                        var hours = minutes * 60;
+                        var days = hours * 24;
+                        var years = days * 365;
+                        var today = new Date();
+                        var startYear = "2023";
+                        var startMonth = "8";
+                        var startDate = "1";
+                        var startHour = "0";
+                        var startMinute = "0";
+                        var startSecond = "0";
+                        var todayYear = today.getFullYear();
+                        var todayMonth = today.getMonth() + 1;
+                        var todayDate = today.getDate();
+                        var todayHour = today.getHours();
+                        var todayMinute = today.getMinutes();
+                        var todaySecond = today.getSeconds();
+                        var t1 = Date.UTC(startYear, startMonth, startDate, startHour, startMinute, startSecond);
+                        var t2 = Date.UTC(todayYear, todayMonth, todayDate, todayHour, todayMinute, todaySecond);
+                        var diff = t2 - t1;
+                        var diffYears = Math.floor(diff / years);
+                        var diffDays = Math.floor((diff / days) - diffYears * 365);
+
+                        // 区分是否有年份.
+                        var language = 'zh-CN';
+                        if (startYear === String(todayYear)) {
+                            document.getElementById("year").innerHTML = todayYear;
+                            var daysTip = 'This site has been running for ' + diffDays + ' days';
+                            if (language === 'zh-CN') {
+                                daysTip = '本站已运行 ' + diffDays + ' 天';
+                            } else if (language === 'zh-HK') {
+                                daysTip = '本站已運行 ' + diffDays + ' 天';
+                            }
+                            document.getElementById("sitetime").innerHTML = daysTip;
+                        } else {
+                            document.getElementById("year").innerHTML = startYear + " - " + todayYear;
+                            var yearsAndDaysTip = 'This site has been running for ' + diffYears + ' years and '
+                                + diffDays + ' days';
+                            if (language === 'zh-CN') {
+                                yearsAndDaysTip = '本站已运行 ' + diffYears + ' 年 ' + diffDays + ' 天';
+                            } else if (language === 'zh-HK') {
+                                yearsAndDaysTip = '本站已運行 ' + diffYears + ' 年 ' + diffDays + ' 天';
+                            }
+                            document.getElementById("sitetime").innerHTML = yearsAndDaysTip;
+                        }
+                    }
+
+                    calcSiteTime();
+                </script>
+            
+            <br>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link social-statis">
+    <a href="https://github.com/Leager-zju" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:1004729740@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+
+
+
+
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1004729740" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1004729740" data-position="top" data-delay="50">
+        <i class="fab fa-qq"></i>
+    </a>
+
+
+
+
+
+
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    var searchFunc = function (path, search_id, content_id) {
+        'use strict';
+        $.ajax({
+            url: path,
+            dataType: "xml",
+            success: function (xmlResponse) {
+                // get the contents from search data
+                var datas = $("entry", xmlResponse).map(function () {
+                    return {
+                        title: $("title", this).text(),
+                        content: $("content", this).text(),
+                        url: $("url", this).text()
+                    };
+                }).get();
+                var $input = document.getElementById(search_id);
+                var $resultContent = document.getElementById(content_id);
+                $input.addEventListener('input', function () {
+                    var str = '<ul class=\"search-result-list\">';
+                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                    $resultContent.innerHTML = "";
+                    if (this.value.trim().length <= 0) {
+                        return;
+                    }
+                    // perform local searching
+                    datas.forEach(function (data) {
+                        var isMatch = true;
+                        var data_title = data.title.trim().toLowerCase();
+                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
+                        var data_url = data.url;
+                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
+                        var index_title = -1;
+                        var index_content = -1;
+                        var first_occur = -1;
+                        // only match artiles with not empty titles and contents
+                        if (data_title !== '' && data_content !== '') {
+                            keywords.forEach(function (keyword, i) {
+                                index_title = data_title.indexOf(keyword);
+                                index_content = data_content.indexOf(keyword);
+                                if (index_title < 0 && index_content < 0) {
+                                    isMatch = false;
+                                } else {
+                                    if (index_content < 0) {
+                                        index_content = 0;
+                                    }
+                                    if (i === 0) {
+                                        first_occur = index_content;
+                                    }
+                                }
+                            });
+                        }
+                        // show search results
+                        if (isMatch) {
+                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
+                            var content = data.content.trim().replace(/<[^>]+>/g, "");
+                            if (first_occur >= 0) {
+                                // cut out 100 characters
+                                var start = first_occur - 20;
+                                var end = first_occur + 80;
+                                if (start < 0) {
+                                    start = 0;
+                                }
+                                if (start === 0) {
+                                    end = 100;
+                                }
+                                if (end > content.length) {
+                                    end = content.length;
+                                }
+                                var match_content = content.substr(start, end);
+                                // highlight all keywords
+                                keywords.forEach(function (keyword) {
+                                    var regS = new RegExp(keyword, "gi");
+                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
+                                });
+
+                                str += "<p class=\"search-result\">" + match_content + "...</p>"
+                            }
+                            str += "</li>";
+                        }
+                    });
+                    str += "</ul>";
+                    $resultContent.innerHTML = str;
+                });
+            }
+        });
+    };
+
+    searchFunc('/search.xml', 'searchInput', 'searchResult');
+});
+</script>
+
+    <!-- 白天和黑夜主题 -->
+<div class="stars-con">
+    <div id="stars"></div>
+    <div id="stars2"></div>
+    <div id="stars3"></div>  
+</div>
+
+<script>
+    function switchNightMode() {
+        $('<div class="Cuteen_DarkSky"><div class="Cuteen_DarkPlanet"></div></div>').appendTo($('body')),
+        setTimeout(function () {
+            $('body').hasClass('DarkMode') 
+            ? ($('body').removeClass('DarkMode'), localStorage.setItem('isDark', '0'), $('#sum-moon-icon').removeClass("fa-sun").addClass('fa-moon')) 
+            : ($('body').addClass('DarkMode'), localStorage.setItem('isDark', '1'), $('#sum-moon-icon').addClass("fa-sun").removeClass('fa-moon')),
+            
+            setTimeout(function () {
+            $('.Cuteen_DarkSky').fadeOut(1e3, function () {
+                $(this).remove()
+            })
+            }, 2e3)
+        })
+    }
+</script>
+
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    
+
+    
+    
+    
+        
+        <script type="text/javascript">
+            // 只在桌面版网页启用特效
+            var windowWidth = $(window).width();
+            if (windowWidth > 768) {
+                document.write('<script type="text/javascript" src="/libs/others/sakura.js"><\/script>');
+            }
+        </script>
+    
+
+    <!-- 雪花特效 -->
+    
+
+    <!-- 鼠标星星特效 -->
+    
+
+     
+        <script src="https://ssl.captcha.qq.com/TCaptcha.js"></script>
+        <script src="/libs/others/TencentCaptcha.js"></script>
+        <button id="TencentCaptcha" data-appid="xxxxxxxxxx" data-cbfn="callback" type="button" hidden></button>
+    
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    <script src="/libs/others/clicklove.js" async="async"></script>
+    
+    
+    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
+    
+
+    
+
+    
+
+    <!--腾讯兔小巢-->
+    
+    
+
+    
+
+    
+
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+    <script type="text/javascript">
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden) {
+                document.title = '你会有一天后悔';
+            } else {
+                document.title = '欢迎来到 G8 北海道 洞爷湖 高峰会 博物馆';
+            }
+        });
+    </script>
+
+</body>
+
+</html>
