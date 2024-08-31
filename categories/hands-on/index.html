@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="keywords" content="分类: c++, 没什么看头的地方">
+    <meta name="keywords" content="分类: hands-on, 没什么看头的地方">
     <meta name="description" content="【数据删除】">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -17,7 +17,7 @@
     <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
-    <title>分类: c++ | 没什么看头的地方</title>
+    <title>分类: hands-on | 没什么看头的地方</title>
     <link rel="icon" type="image/png" href="/dt.png">
     
     <style>
@@ -426,7 +426,7 @@
                 
                 <a href="/categories/c/" title="c++: 25">
                     <span class="chip center-align waves-effect waves-light
-                             chip-active "
+                             chip-default "
                             style="background-color: #D5F5E3;">c++
                         <span class="tag-length">25</span>
                     </span>
@@ -570,7 +570,7 @@
                 
                 <a href="/categories/hands-on/" title="hands-on: 1">
                     <span class="chip center-align waves-effect waves-light
-                             chip-default "
+                             chip-active "
                             style="background-color: #F8F9F9;">hands-on
                         <span class="tag-length">1</span>
                     </span>
@@ -590,334 +590,37 @@
             
             <div class="article tag-post col s12 m6 l4" data-aos="zoom-in">
                 <div class="card">
-                    <a href="/c/c-value/">
+                    <a href="/hands-on/makehexo/">
                         <div class="card-image tag-image">
                             
                             
-                            <img src="/medias/featureimages/3.jpg" class="responsive-img" alt="C++11 の 左值与右值(Lvalue &amp; Rvalue)">
+                            <img src="/medias/featureimages/15.jpg" class="responsive-img" alt="Build Hexo in WSL">
                             
-                            <span class="card-title">C++11 の 左值与右值(Lvalue &amp; Rvalue)</span>
+                            <span class="card-title">Build Hexo in WSL</span>
                         </div>
                     </a>
                     <div class="card-content article-content">
                         <div class="summary block-with-text">
                             
-                                早年的 C++ 中已经出现了左值与右值这两个基本概念，但并不重要，平时也不怎么会用到。直到 C++11 引入了右值引用等新特性，这俩概念终于翻身做起了主人——它们是理解移动与转发语义的重要基础。
+                                配了台新机子，不想用 Windows 管理这些东西，遂使用更贴近使用习惯的 WSL。
 
-值
-所有值类别可用以下韦恩图描述：
+WSL 安装
+wsl --install
+然后要求重启，重启后设置 user 和 passwd。
 
-左值
+现在每次进去都是 root 身份，可以通过 wsl 
                             
                         </div>
                         <div class="publish-info">
                             <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2023-01-20
+                                <i class="far fa-clock fa-fw icon-date"></i>2024-08-31
                             </span>
                             <span class="publish-author">
                                 
                                 <i class="fas fa-bookmark fa-fw icon-category"></i>
                                 
-                                <a href="/categories/c/" class="post-category">
-                                    c++
-                                </a>
-                                
-                                
-                            </span>
-                        </div>
-                    </div>
-
-                    
-                    <div class="card-action article-tags">
-                        
-                        <a href="/tags/C-11/">
-                            <span class="chip bg-color">C++11</span>
-                        </a>
-                        
-                        <a href="/tags/C/">
-                            <span class="chip bg-color">C++</span>
-                        </a>
-                        
-                    </div>
-                    
-                </div>
-            </div>
-            
-            <div class="article tag-post col s12 m6 l4" data-aos="zoom-in">
-                <div class="card">
-                    <a href="/c/c-function/">
-                        <div class="card-image tag-image">
-                            
-                            
-                            <img src="/medias/featureimages/20.jpg" class="responsive-img" alt="C++11 の 函数调用(Function Call)">
-                            
-                            <span class="card-title">C++11 の 函数调用(Function Call)</span>
-                        </div>
-                    </a>
-                    <div class="card-content article-content">
-                        <div class="summary block-with-text">
-                            
-                                C++11 新增了若干使函数调用更加方便的特性。
-
-lambda 表达式
-lambda 表达式是闭包类型的纯右值变量，也可以称之为匿名函数。其基本用法为：
-auto func = [ 捕获 ] ( 参数列表 ) 可选说明符 -&gt; 返回
-                            
-                        </div>
-                        <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2023-01-18
-                            </span>
-                            <span class="publish-author">
-                                
-                                <i class="fas fa-bookmark fa-fw icon-category"></i>
-                                
-                                <a href="/categories/c/" class="post-category">
-                                    c++
-                                </a>
-                                
-                                
-                            </span>
-                        </div>
-                    </div>
-
-                    
-                    <div class="card-action article-tags">
-                        
-                        <a href="/tags/C-11/">
-                            <span class="chip bg-color">C++11</span>
-                        </a>
-                        
-                        <a href="/tags/C/">
-                            <span class="chip bg-color">C++</span>
-                        </a>
-                        
-                    </div>
-                    
-                </div>
-            </div>
-            
-            <div class="article tag-post col s12 m6 l4" data-aos="zoom-in">
-                <div class="card">
-                    <a href="/c/c-alias/">
-                        <div class="card-image tag-image">
-                            
-                            
-                            <img src="/medias/featureimages/0.jpg" class="responsive-img" alt="C++11 の 别名(Alias)">
-                            
-                            <span class="card-title">C++11 の 别名(Alias)</span>
-                        </div>
-                    </a>
-                    <div class="card-content article-content">
-                        <div class="summary block-with-text">
-                            
-                                虽然使用 auto 可以大大简化代码，但对于一些使用 dynamic_cast 的结果不能用 auto 作为占位符。将冗长的变量类型简化仍然是很头疼的一个问题，幸好 C++11 提供了用关键字 using 给类型起别名的特性，既能有效简化代
-                            
-                        </div>
-                        <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2023-01-17
-                            </span>
-                            <span class="publish-author">
-                                
-                                <i class="fas fa-bookmark fa-fw icon-category"></i>
-                                
-                                <a href="/categories/c/" class="post-category">
-                                    c++
-                                </a>
-                                
-                                
-                            </span>
-                        </div>
-                    </div>
-
-                    
-                    <div class="card-action article-tags">
-                        
-                        <a href="/tags/C-11/">
-                            <span class="chip bg-color">C++11</span>
-                        </a>
-                        
-                        <a href="/tags/C/">
-                            <span class="chip bg-color">C++</span>
-                        </a>
-                        
-                    </div>
-                    
-                </div>
-            </div>
-            
-            <div class="article tag-post col s12 m6 l4" data-aos="zoom-in">
-                <div class="card">
-                    <a href="/c/c-autodecltype/">
-                        <div class="card-image tag-image">
-                            
-                            
-                            <img src="/medias/featureimages/7.jpg" class="responsive-img" alt="C++11 の 类型推导(Auto &amp; Decltype)">
-                            
-                            <span class="card-title">C++11 の 类型推导(Auto &amp; Decltype)</span>
-                        </div>
-                    </a>
-                    <div class="card-content article-content">
-                        <div class="summary block-with-text">
-                            
-                                C++11引入了 auto 和 decltype 这两个关键字，从而可以在编译期就推导出变量或者表达式的类型，方便开发者编码也简化了代码。
-
-auto
-关键字 auto 的作用便是自动推导变量/函数(C++14起)/模板(C++20起)的类
-                            
-                        </div>
-                        <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2023-01-16
-                            </span>
-                            <span class="publish-author">
-                                
-                                <i class="fas fa-bookmark fa-fw icon-category"></i>
-                                
-                                <a href="/categories/c/" class="post-category">
-                                    c++
-                                </a>
-                                
-                                
-                            </span>
-                        </div>
-                    </div>
-
-                    
-                    <div class="card-action article-tags">
-                        
-                        <a href="/tags/C-11/">
-                            <span class="chip bg-color">C++11</span>
-                        </a>
-                        
-                        <a href="/tags/C/">
-                            <span class="chip bg-color">C++</span>
-                        </a>
-                        
-                    </div>
-                    
-                </div>
-            </div>
-            
-            <div class="article tag-post col s12 m6 l4" data-aos="zoom-in">
-                <div class="card">
-                    <a href="/c/c-stream/">
-                        <div class="card-image tag-image">
-                            
-                            
-                            <img src="/medias/featureimages/5.jpg" class="responsive-img" alt="C++ の 流(Stream)">
-                            
-                            <span class="card-title">C++ の 流(Stream)</span>
-                        </div>
-                    </a>
-                    <div class="card-content article-content">
-                        <div class="summary block-with-text">
-                            
-                                C++ 程序常用 cin ， cout 进行标准 I/O（从键盘读取数据，或输出数据到屏幕），当然也可以进行文件 I/O （基于文件的数据读写）。这些行为本质上都是进行数据传输——数据向水流一样从一个地方流到另一个地方。C++11 中，将这
-                            
-                        </div>
-                        <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2023-01-14
-                            </span>
-                            <span class="publish-author">
-                                
-                                <i class="fas fa-bookmark fa-fw icon-category"></i>
-                                
-                                <a href="/categories/c/" class="post-category">
-                                    c++
-                                </a>
-                                
-                                
-                            </span>
-                        </div>
-                    </div>
-
-                    
-                    <div class="card-action article-tags">
-                        
-                        <a href="/tags/C/">
-                            <span class="chip bg-color">C++</span>
-                        </a>
-                        
-                    </div>
-                    
-                </div>
-            </div>
-            
-            <div class="article tag-post col s12 m6 l4" data-aos="zoom-in">
-                <div class="card">
-                    <a href="/c/devc-shi-yong-zhi-nan/">
-                        <div class="card-image tag-image">
-                            
-                            
-                            <img src="/medias/featureimages/9.jpg" class="responsive-img" alt="Dev C++ 使用指南">
-                            
-                            <span class="card-title">Dev C++ 使用指南</span>
-                        </div>
-                    </a>
-                    <div class="card-content article-content">
-                        <div class="summary block-with-text">
-                            
-                                作为一款免费、开源的 C/C++ IDE，Dev C++ 内嵌 GCC 编译器和 GDB 调试器，既能编译、运行程序，也能调试程序。本次 C 程序设计基础我们建议初学者采用 Dev C++ 5.11 版本（点击即可跳转到下载页面）
-
-Dev
-                            
-                        </div>
-                        <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2022-11-27
-                            </span>
-                            <span class="publish-author">
-                                
-                                <i class="fas fa-bookmark fa-fw icon-category"></i>
-                                
-                                <a href="/categories/c/" class="post-category">
-                                    c++
-                                </a>
-                                
-                                
-                            </span>
-                        </div>
-                    </div>
-
-                    
-                </div>
-            </div>
-            
-            <div class="article tag-post col s12 m6 l4" data-aos="zoom-in">
-                <div class="card">
-                    <a href="/c/cprogramguide/">
-                        <div class="card-image tag-image">
-                            
-                            
-                            <img src="/medias/featureimages/5.jpg" class="responsive-img" alt="C Program Guide">
-                            
-                            <span class="card-title">C Program Guide</span>
-                        </div>
-                    </a>
-                    <div class="card-content article-content">
-                        <div class="summary block-with-text">
-                            
-                                一份面向所有初学/入门 C 语言学生的指南。本文旨在帮助读者快速降低编(zuo)程(ti)难度，而不会涉及过多 C 语言语法知识。
-
-上课可不会讲
-
-
-如果你还不知道在哪里可以编写代码并运行，那么请参考我的另一篇文章：DevC++ 使用指南
-                            
-                        </div>
-                        <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2022-11-18
-                            </span>
-                            <span class="publish-author">
-                                
-                                <i class="fas fa-bookmark fa-fw icon-category"></i>
-                                
-                                <a href="/categories/c/" class="post-category">
-                                    c++
+                                <a href="/categories/hands-on/" class="post-category">
+                                    hands-on
                                 </a>
                                 
                                 
@@ -932,30 +635,6 @@ Dev
         </div>
     </article>
 </main>
-
-
-<div class="container paging">
-    <div class="row">
-        <div class="col s6 m4 l4">
-            
-            <a href="/categories/c/"
-               class="left btn-floating btn-large waves-effect waves-light bg-color">
-                <i class="fas fa-angle-left"></i>
-            </a>
-            
-        </div>
-        <div class="page-info col m4 l4 hide-on-small-only">
-            <div class="center-align b-text-gray">2 / 2</div>
-        </div>
-        <div class="col s6 m4 l4">
-            
-            <a class="right btn-floating btn-large disabled">
-                <i class="fas fa-angle-right"></i>
-            </a>
-            
-        </div>
-    </div>
-</div>
 
 
 

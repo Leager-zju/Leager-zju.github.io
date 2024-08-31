@@ -25442,4 +25442,96 @@ FName res2 <span class="token operator">=</span> <span class="token function">FN
         <category>interview</category>
       </categories>
   </entry>
+  <entry>
+    <title>Build Hexo in WSL</title>
+    <url>/hands-on/makehexo/</url>
+    <content><![CDATA[<p>配了台新机子，不想用 Windows 管理这些东西，遂使用更贴近使用习惯的 WSL。</p>
+<span id="more"></span>
+<h2 id="wsl-安装">WSL 安装</h2>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">wsl <span class="token parameter variable">--install</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>然后要求重启，重启后设置 <code>user</code> 和 <code>passwd</code>。</p>
+<blockquote>
+<p>现在每次进去都是 root 身份，可以通过 <code>wsl config --default-user &lt;username&gt;</code> 设置默认用户。</p>
+</blockquote>
+<h3 id="修改默认安装目录到其他盘optional">😏修改默认安装目录到其他盘(Optional)</h3>
+<p>因为默认装在 C 盘，希望 C 盘纯净一点的可以这么干。</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 获取 Name 列的值，比如我这里是 "Ubuntu"</span>
+wsl <span class="token parameter variable">-l</span> <span class="token parameter variable">--all</span> <span class="token parameter variable">-v</span>
+
+<span class="token comment"># 导出到 D 盘                     </span>
+wsl <span class="token parameter variable">--export</span> Ubuntu D:/ubuntu.tar
+
+<span class="token comment"># 注销原来的发行版</span>
+wsl <span class="token parameter variable">--unregister</span> Ubuntu
+
+<span class="token comment"># 将之前导出的 ubuntu.tar 导入到目录 D:/Ubuntu 下</span>
+wsl <span class="token parameter variable">--import</span> Ubuntu D:/Ubuntu D:/ubuntu.tar <span class="token parameter variable">--version</span> <span class="token number">2</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>然后用 Vscode 直连即可。</p>
+<h2 id="相关工具安装">相关工具安装</h2>
+<h3 id="git">Git</h3>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">apt-get</span> <span class="token function">install</span> <span class="token function">git</span>
+
+<span class="token function">git</span> config <span class="token parameter variable">--global</span> user.name <span class="token string">"your_github_name"</span>
+
+<span class="token function">git</span> config <span class="token parameter variable">--global</span> user.email <span class="token string">"your_github_email"</span>
+
+ssh-keygen <span class="token parameter variable">-t</span> rsa <span class="token parameter variable">-C</span> <span class="token string">"your_github_email"</span>
+
+<span class="token comment"># 然后将 ~/.ssh/id_rsa.pub 的内容全部拷贝到 Github 中</span>
+<span class="token comment"># 用 ssh -T git@github.com 验证</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="node.js-npm">Node.js &amp; npm</h3>
+<p>如果直接 <code>sudo apt install nodejs npm</code> 的话是无法正常进行后续工作的，因为版本太老了。正确做法是用 <code>nvm</code> 这个版本管理器。</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">apt</span> <span class="token function">install</span> <span class="token function">curl</span>
+
+<span class="token comment"># 这一步如果超时也可以直接进链接把内容拷贝过来运行</span>
+<span class="token function">curl</span> -o- https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh <span class="token operator">|</span> <span class="token function">bash</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>如果用的是 zsh，则在 <code>~/.zshrc</code> 中加入下面这段。</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">export</span> <span class="token assign-left variable">NVM_DIR</span><span class="token operator">=</span><span class="token string">"<span class="token environment constant">$HOME</span>/.nvm"</span>
+<span class="token punctuation">[</span> <span class="token parameter variable">-s</span> <span class="token string">"<span class="token variable">$NVM_DIR</span>/nvm.sh"</span> <span class="token punctuation">]</span> <span class="token operator">&amp;&amp;</span> <span class="token punctuation">\</span>. <span class="token string">"<span class="token variable">$NVM_DIR</span>/nvm.sh"</span>  <span class="token comment"># This loads nvm</span>
+<span class="token punctuation">[</span> <span class="token parameter variable">-s</span> <span class="token string">"<span class="token variable">$NVM_DIR</span>/bash_completion"</span> <span class="token punctuation">]</span> <span class="token operator">&amp;&amp;</span> <span class="token punctuation">\</span>. <span class="token string">"<span class="token variable">$NVM_DIR</span>/bash_completion"</span>  <span class="token comment"># This loads nvm bash_completion</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p>之后用 <code>nvm -v</code> 验证是否安装成功。</p>
+<p>若安装成功，则用 <code>nvm install node</code> 安装最新的 NodeJS 发行版本。</p>
+<p>为了防止这一步很慢，可以在 <code>~/.zshrc</code> 中加入下面这段，以修改 nvm 源。</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">export</span> <span class="token assign-left variable">NVM_NODEJS_ORG_MIRROR</span><span class="token operator">=</span>https://npmmirror.com/mirrors/node
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">NVM_IOJS_ORG_MIRROR</span><span class="token operator">=</span>https://npmmirror.com/mirrors/iojs<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>最后用 <code>node -v</code> 和 <code>npm -v</code> 验证结果。</p>
+<h3 id="hexo">hexo</h3>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">npm</span> <span class="token function">install</span> hexo-cli <span class="token parameter variable">-g</span>
+<span class="token function">sudo</span> <span class="token function">npm</span> <span class="token function">install</span> hexo-deployer-git <span class="token parameter variable">--save</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>如果很慢，则可以用 <code>npm config set registry http://mirrors.cloud.tencent.com/npm/</code> 修改镜像源</p>
+]]></content>
+      <categories>
+        <category>hands-on</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>使用 Oh-My-Zsh 美化终端</title>
+    <url>/uncategorized/ohmyzsh/</url>
+    <content><![CDATA[<p>比 bash 好看太多</p>
+<span id="more"></span>
+<blockquote>
+<p>这里使用的是 Ubuntu</p>
+</blockquote>
+<h2 id="安装-zsh">安装 zsh</h2>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">apt-get</span> update <span class="token operator">&amp;&amp;</span> <span class="token function">sudo</span> <span class="token function">apt-get</span> upgrade <span class="token parameter variable">-y</span>
+<span class="token function">sudo</span> <span class="token function">apt-get</span> <span class="token function">install</span> <span class="token function">zsh</span> <span class="token function">git</span> <span class="token function">curl</span> <span class="token parameter variable">-y</span>
+<span class="token function">sudo</span> chsh <span class="token parameter variable">-s</span> <span class="token variable">${which zsh}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<h2 id="安装-oh-my-zsh">安装 oh-my-zsh</h2>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 国内镜像</span>
+<span class="token function">sh</span> <span class="token parameter variable">-c</span> <span class="token string">"<span class="token variable"><span class="token variable">$(</span><span class="token function">curl</span> <span class="token parameter variable">-fsSL</span> https://gitee.com/pocmon/ohmyzsh/raw/master/tools/install.sh<span class="token variable">)</span></span>"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<h2 id="安装-powerlevel10k-主题">安装 powerlevel10k 主题</h2>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 安装主题与 自动补全、语法高亮 两大插件</span>
+<span class="token function">git</span> clone <span class="token parameter variable">--depth</span><span class="token operator">=</span><span class="token number">1</span> https://gitee.com/romkatv/powerlevel10k.git <span class="token variable">${ZSH_CUSTOM<span class="token operator">:-</span>$HOME<span class="token operator">/</span>.oh-my-zsh<span class="token operator">/</span>custom}</span>/themes/powerlevel10k
+<span class="token function">git</span> clone https://github.com/zsh-users/zsh-autosuggestions <span class="token variable">${ZSH_CUSTOM<span class="token operator">:-</span>~<span class="token operator">/</span>.oh-my-zsh<span class="token operator">/</span>custom}</span>/plugins/zsh-autosuggestions
+<span class="token function">git</span> clone https://github.com/zsh-users/zsh-syntax-highlighting.git <span class="token variable">${ZSH_CUSTOM<span class="token operator">:-</span>~<span class="token operator">/</span>.oh-my-zsh<span class="token operator">/</span>custom}</span>/plugins/zsh-syntax-highlighting<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>在 <code>~/.zshrc</code> 如下设置。</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token assign-left variable">ZSH_THEME</span><span class="token operator">=</span><span class="token string">"powerlevel10k/powerlevel10k"</span>
+<span class="token punctuation">..</span>.
+<span class="token assign-left variable">plugins</span><span class="token operator">=</span><span class="token punctuation">(</span>git zsh-autosuggestions zsh-syntax-highlighting<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p>接着 <code>source ~/.zsh</code>，进入自定义主题配置阶段。</p>
+<blockquote>
+<p>后续也可以通过 <code>p10k configure</code> 重新配置。</p>
+</blockquote>
+]]></content>
+  </entry>
 </search>
