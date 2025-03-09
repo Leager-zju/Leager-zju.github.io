@@ -280,7 +280,7 @@ Effect 可分为三种，**即刻(Instant)**、**有持续时间(Has Duration)**
 
     > 可以分别用于对应**最大生命值**、**当前生命值**、**已损失生命值**。 
 
-  - 最后按照 `(Value + PreMultiplyAdditiveValue) * Coeffcient + PostMultiplyAdditiveValue` 得出最终值；
+  - 最后按照 `(Value + PreMultiplyAdditiveValue) * Coeffcient + PostMultiplyAdditiveValue` 得出最终修改值；
 
 #### 曲线表
 
@@ -425,7 +425,6 @@ void PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data
 
 所以为了正确调用，需要由一定数据结构保存施加 Effect 时返回的那个 `FActiveGameplayEffectHandle`。常用的是 `TMap<>`，存储 Active Handle 到 ASC 的映射。
 
-
 ### 监听 Effect 行为
 
 ```cpp AbilitySystemComponent.h
@@ -466,8 +465,28 @@ FOnGameplayEffectAppliedDelegate OnPeriodicGameplayEffectExecuteDelegateOnSelf;
 FOnGameplayEffectAppliedDelegate OnPeriodicGameplayEffectExecuteDelegateOnTarget;
 ```
 
+上面这些就是当 Effect 施加时可能进行广播的委托对象，在类 `UAbilitySystemComponent` 中定义。当我们要实现一些诸如「受到某些技能效果时触发某些事件」的功能，就需要用到这些了。
 
+可以在 `RGASComponent` 类的 `BeginPlay()` 函数中执行 callback 的注册。
+
+```cpp Components/GAS/RGASComponent.cpp
+void URGASComponent::BeginPlay()
+{
+  Super::BeginPlay();
+
+  OnGameplayEffectAppliedDelegateToSelf.AddUObject(this,
+                                                   &URGASComponent::OnEffectApplied);
+}
+
+void URGASComponent::OnEffectApplied(UAbilitySystemComponent* AbilitySystemComponent,
+                                     const FGameplayEffectSpec& EffectSpec,
+                                     FActiveGameplayEffectHandle EffectHandle)
+{
+  ...
+}
+```
 
 ## Gameplay Tags
 
 `FGameplayTag` 是由 `GameplayTagManager` 注册的形似 Parent.Child.Grandchild... 的层级 `FName`，这些标签对于分类和描述对象的状态非常有用（例如如果某个 Character 处于眩晕状态，我们可以授予其一个 State.Debuff.Stun 的 Tag）。用 GameplayTag 可以替换布尔值或枚举值，多个 GameplayTag 应被保存于一个 `FGameplayTagContainer` 中，相比 `TArray<FGameplayTag>` 做了一些很有效率的优化。可以更快地判断一个 Character 是否具有某 Tag，从而决定是否施加 Effect。
+
