@@ -1,7 +1,8 @@
 ---
 title: Effective C++ の Note
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2023-03-01 16:55:34
 summary:
 categories: note

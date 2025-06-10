@@ -1,7 +1,8 @@
 ---
 title: C++11 の 列表初始化(List Initialize)
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2023-01-28 19:52:46
 summary:
 categories: c++

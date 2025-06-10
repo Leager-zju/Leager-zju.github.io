@@ -1,7 +1,8 @@
 ---
 title: TinyKV-Project2 RaftKV
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2023-08-14 11:49:53
 summary:
 categories: lab

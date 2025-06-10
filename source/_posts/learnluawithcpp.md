@@ -1,7 +1,8 @@
 ---
 title: 用 C++ 的方式学习 Lua
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2024-08-07 21:47:26
 summary:
 categories: lua

@@ -1,7 +1,8 @@
 ---
 title: Gameplay Study(5)：Gameplay Ability System(GAS)
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2024-08-23 12:00:00
 summary:
 categories:

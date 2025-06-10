@@ -1,7 +1,8 @@
 ---
 title: Gameplay Study(4)：Highlight & Interface
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2024-08-22 12:00:00
 summary:
 categories:

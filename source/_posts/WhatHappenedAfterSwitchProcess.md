@@ -1,7 +1,8 @@
 ---
 title: 切换进程/线程前后发生了什么？
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2023-10-09 20:04:44
 summary:
 categories: operating system

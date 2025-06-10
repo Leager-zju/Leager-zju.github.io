@@ -1,7 +1,8 @@
 ---
 title: Spark 论文阅读
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2022-10-29 18:35:14
 summary:
 categories: paperReading

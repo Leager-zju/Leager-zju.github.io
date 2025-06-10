@@ -1,7 +1,8 @@
 ---
 title: LeetCode 1653. 使字符串平衡的最少删除次数
 author: Leager
-mathjax: true
+mathjax:
+  - true
 date: 2023-03-06 11:59:32
 summary:
 categories: leetcode

@@ -1,7 +1,8 @@
 ---
 title: 使用 oh-my-zsh 美化终端
 author: Leager
-mathjax: true
+mathjax:
+  - true
 date: 2024-09-01 00:00:00
 summary:
 categories:

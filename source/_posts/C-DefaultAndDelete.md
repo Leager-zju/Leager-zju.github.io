@@ -1,7 +1,8 @@
 ---
 title: C++11 の 预置与弃置(Default & Delete)
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2023-02-04 12:15:21
 summary:
 categories: c++

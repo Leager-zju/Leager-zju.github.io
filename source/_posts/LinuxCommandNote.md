@@ -1,7 +1,8 @@
 ---
 title: Linux 常用命令 の Note
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2023-09-23 18:23:04
 summary:
 categories: linux

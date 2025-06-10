@@ -1,7 +1,8 @@
 ---
 title: Gameplay Study(2)：Inhanced Input
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2024-08-20 12:00:00
 summary:
 categories:

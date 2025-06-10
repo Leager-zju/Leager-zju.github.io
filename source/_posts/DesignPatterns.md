@@ -1,7 +1,8 @@
 ---
 title: 设计模式
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2023-11-08 15:37:11
 summary:
 categories: 编程思想

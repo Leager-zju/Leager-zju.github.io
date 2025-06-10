@@ -1,7 +1,8 @@
 ---
 title: C++ の 静态修饰符(Static)
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2023-02-13 17:02:49
 summary:
 categories: c++

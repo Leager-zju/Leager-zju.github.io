@@ -1,7 +1,8 @@
 ---
 title: Dev C++ 使用指南
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2022-11-27 13:28:34
 summary:
 categories: c++

@@ -1,7 +1,8 @@
 ---
 title: C++ の 面向对象(OOP)
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2023-02-14 11:13:46
 summary:
 categories: c++

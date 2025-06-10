@@ -1,7 +1,8 @@
 ---
 title: C++ の 流(Stream)
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2023-01-14 15:21:59
 summary:
 categories: c++

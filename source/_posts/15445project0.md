@@ -1,7 +1,8 @@
 ---
 title: CMU15445 Project#0 C++ Primer
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2022-12-06 10:16:12
 summary:
 categories: lab

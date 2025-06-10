@@ -1,7 +1,8 @@
 ---
 title: Unreal Engine の 委托
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2024-09-01 12:00:00
 summary:
 categories:

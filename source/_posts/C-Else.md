@@ -1,7 +1,8 @@
 ---
 title: C++11 の 其它特性(Else)
 author: Leager
-mathjax: true
+mathjax:
+  - true
 date: 2023-02-06 23:02:41
 summary:
 categories: c++

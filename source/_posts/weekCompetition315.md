@@ -1,7 +1,8 @@
 ---
 title: LeetCode 周赛 315
 author: Leager
-mathjax: true
+mathjax:
+  - true
 date: 2022-10-16 12:50:37
 summary:
 categories: leetcode

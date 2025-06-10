@@ -1,7 +1,8 @@
 ---
 title: Unreal Engine の Gameplay 框架
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2024-08-29 12:00:00
 summary:
 categories:

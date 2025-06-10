@@ -1,7 +1,8 @@
 ---
 title: 实时渲染管线(Real-time rendering pipeline)
 author: Leager
-mathjax: true
+mathjax:
+  - true
 date: 2024-08-12 12:03:45
 summary:
 categories:

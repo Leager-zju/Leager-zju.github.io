@@ -1,7 +1,8 @@
 ---
 title: C++ の 异常处理(Exception)
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2023-03-01 11:31:18
 summary:
 categories: c++

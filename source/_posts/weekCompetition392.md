@@ -1,7 +1,8 @@
 ---
 title: weekCompetition392
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2024-04-07 11:28:36
 summary:
 categories: leetcode

@@ -1,7 +1,8 @@
 ---
 title: C++ の 泛型编程(Generics)
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2023-02-28 11:11:02
 summary:
 categories: c++

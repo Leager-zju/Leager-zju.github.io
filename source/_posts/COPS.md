@@ -1,7 +1,8 @@
 ---
 title: COPS 论文阅读
 author: Leager
-mathjax: true
+mathjax:
+  - true
 date: 2022-11-23 13:45:49
 summary:
 categories: paperReading

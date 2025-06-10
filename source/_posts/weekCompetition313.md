@@ -1,7 +1,8 @@
 ---
 title: LeetCode 周赛 313
 author: Leager
-mathjax: true
+mathjax:
+  - true
 date: 2022-10-02 18:43:30
 summary:
 categories: leetcode

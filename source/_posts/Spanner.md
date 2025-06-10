@@ -1,7 +1,8 @@
 ---
 title: Spanner 论文阅读
 author: Leager
-mathjax: true
+mathjax:
+  - true
 date: 2022-10-17 16:52:40
 summary:
 categories: paperReading

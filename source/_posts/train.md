@@ -1,7 +1,8 @@
 ---
 title: 训练安排
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2023-07-01 00:00:00
 summary:
 categories:

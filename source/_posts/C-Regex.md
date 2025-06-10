@@ -1,7 +1,8 @@
 ---
 title: C++11 の 正则表达式(Regex)
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2023-02-05 12:20:37
 summary:
 categories: c++

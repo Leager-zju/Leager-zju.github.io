@@ -1,7 +1,8 @@
 ---
 title: C++11 の 函数调用(Function Call)
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2023-01-18 14:23:28
 summary:
 categories: c++

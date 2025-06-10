@@ -1,7 +1,8 @@
 ---
 title: C++ の 内存分配(Memory Allocation)
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2023-02-19 14:07:28
 summary:
 categories: c++

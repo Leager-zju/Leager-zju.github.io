@@ -1,7 +1,8 @@
 ---
 title: Raft 论文阅读
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2022-10-04 00:59:29
 summary:
 categories: paperReading

@@ -1,7 +1,8 @@
 ---
 title: FaRM 论文阅读
 author: Leager
-mathjax: true
+mathjax:
+  - true
 date: 2022-10-20 18:57:46
 summary:
 categories: paperReading

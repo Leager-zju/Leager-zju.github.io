@@ -1,7 +1,8 @@
 ---
 title: C++ の 常量(Const)
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2023-02-13 12:30:00
 summary:
 categories: c++

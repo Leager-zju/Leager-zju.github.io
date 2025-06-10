@@ -1,7 +1,8 @@
 ---
 title: CMU15445 project#4 Concurrency Control
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2023-01-12 11:56:16
 summary:
 categories: lab

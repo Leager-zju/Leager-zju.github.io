@@ -1,7 +1,8 @@
 ---
 title: 点击 url 到显示网页之间发生了什么？
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2023-10-07 11:23:53
 summary:
 categories: Computer Network

@@ -1,7 +1,8 @@
 ---
 title: 线段树
 author: Leager
-mathjax: true
+mathjax:
+  - true
 date: 2024-08-11 12:13:26
 summary:
 categories:

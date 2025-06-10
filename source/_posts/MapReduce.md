@@ -1,7 +1,8 @@
 ---
 title: MapReduce 论文阅读
 author: Leager
-mathjax: true
+mathjax:
+  - true
 date: 2022-09-22 00:50:26
 summary:
 categories: paperReading

@@ -1,7 +1,8 @@
 ---
 title: TinyKV-Project4 Transaction
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2023-08-20 23:37:15
 summary:
 categories: lab

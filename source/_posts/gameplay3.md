@@ -1,7 +1,8 @@
 ---
 title: Gameplay Study(3)：View Control
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2024-08-21 12:00:00
 summary:
 categories:

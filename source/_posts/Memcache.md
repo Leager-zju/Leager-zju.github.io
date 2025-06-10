@@ -1,7 +1,8 @@
 ---
 title: Memcache 论文阅读
 author: Leager
-mathjax: true
+mathjax:
+  - true
 date: 2022-11-15 17:05:59
 summary:
 categories: paperReading

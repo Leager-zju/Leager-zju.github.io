@@ -1,7 +1,8 @@
 ---
 title: CS144 lab Note
 author: Leager
-mathjax: true
+mathjax:
+  - true
 date: 2023-03-21 18:28:52
 summary:
 categories: lab

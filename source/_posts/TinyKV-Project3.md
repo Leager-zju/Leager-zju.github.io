@@ -1,7 +1,8 @@
 ---
 title: TinyKV-Project3 Multi-Raft
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2023-08-20 23:37:12
 summary:
 categories: lab

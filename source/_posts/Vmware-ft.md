@@ -1,7 +1,8 @@
 ---
 title: VMware-FT 论文阅读
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2022-10-03 15:31:03
 summary:
 categories: paperReading

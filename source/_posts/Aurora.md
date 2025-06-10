@@ -1,7 +1,8 @@
 ---
 title: Aurora 论文阅读
 author: Leager
-mathjax: true
+mathjax:
+  - true
 date: 2022-10-09 19:46:40
 summary:
 categories: paperReading

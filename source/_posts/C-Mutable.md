@@ -1,7 +1,8 @@
 ---
 title: C++ の 可变说明符(Mutable)
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2023-03-02 14:29:34
 summary:
 categories: c++

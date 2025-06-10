@@ -1,7 +1,8 @@
 ---
 title: C++11 の 左值与右值(Lvalue & Rvalue)
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2023-01-20 15:10:57
 summary:
 categories: c++

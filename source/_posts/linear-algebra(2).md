@@ -1,7 +1,8 @@
 ---
 title: linear-algebra(2)
 author: Leager
-mathjax: true
+mathjax:
+  - true
 date: 2022-09-29 21:42:11
 summary:
 categories: note

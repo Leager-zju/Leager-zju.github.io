@@ -1,7 +1,8 @@
 ---
 title: CMU15445 project#1 Buffer Pool
 author: Leager
-mathjax: true
+mathjax:
+  - true
 date: 2022-12-17 21:49:30
 summary:
 categories: lab

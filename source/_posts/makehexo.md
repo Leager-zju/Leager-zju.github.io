@@ -1,7 +1,8 @@
 ---
 title: Build Hexo in WSL
 author: Leager
-mathjax: true
+mathjax:
+  - true
 date: 2024-08-31 23:00:00
 summary:
 categories:

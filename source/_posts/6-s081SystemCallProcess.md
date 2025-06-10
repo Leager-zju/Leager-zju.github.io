@@ -1,7 +1,8 @@
 ---
 title: 6.s081 系统调用流程
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2023-10-25 20:37:37
 summary:
 categories: lab

@@ -1,7 +1,8 @@
 ---
 title: GAMES101（现代图形学入门）の 笔记
 author: Leager
-mathjax: true
+mathjax:
+  - true
 date: 2024-03-31 21:10:06
 summary:
 categories: note

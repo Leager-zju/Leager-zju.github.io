@@ -6,5 +6,6 @@ summary:
 categories:
 tags:
 img:
-mathjax: true
+mathjax:
+  - false
 ---

@@ -1,7 +1,8 @@
 ---
 title: C++ の 标准模板库(STL)
 author: Leager
-mathjax: true
+mathjax:
+  - true
 date: 2023-11-09 00:23:58
 summary:
 categories: c++

@@ -1,7 +1,8 @@
 ---
 title: 碰撞检测の分离轴定理(SAT)
 author: Leager
-mathjax: true
+mathjax:
+  - true
 date: 2024-08-11 19:28:17
 summary:
 categories:

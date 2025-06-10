@@ -1,7 +1,8 @@
 ---
 title: CRAQ 论文阅读
 author: Leager
-mathjax: true
+mathjax:
+  - true
 date: 2022-10-08 14:52:16
 summary:
 categories: paperReading

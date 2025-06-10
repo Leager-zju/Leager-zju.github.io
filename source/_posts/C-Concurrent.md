@@ -1,7 +1,8 @@
 ---
 title: C++11 の 并发支持(Concurrency)
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2023-01-29 22:44:35
 summary:
 categories: c++

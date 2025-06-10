@@ -1,7 +1,8 @@
 ---
 title: LeetCode 801. 使序列递增的最小操作次数
 author: Leager
-mathjax: true
+mathjax:
+  - true
 date: 2022-10-10 11:30:00
 summary:
 categories: leetcode

@@ -1,7 +1,8 @@
 ---
 title: C Program Guide
 author: Leager
-mathjax: true
+mathjax:
+  - true
 date: 2022-11-18 23:29:03
 summary:
 categories: c++

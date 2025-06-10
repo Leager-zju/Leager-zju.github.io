@@ -1,7 +1,8 @@
 ---
 title: C++11 の 智能指针(Smart Pointer)
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2023-02-02 17:19:10
 summary:
 categories: c++

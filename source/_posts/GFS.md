@@ -1,7 +1,8 @@
 ---
 title: GFS 论文阅读
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2022-09-25 12:22:42
 summary:
 categories: paperReading

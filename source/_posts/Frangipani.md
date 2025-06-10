@@ -1,7 +1,8 @@
 ---
 title: Frangipani 论文阅读
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2022-10-10 13:25:38
 summary:
 categories: paperReading

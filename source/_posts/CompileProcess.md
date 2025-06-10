@@ -1,7 +1,8 @@
 ---
 title: .c 文件の编译过程(Compile Process)
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2023-11-13 19:11:09
 summary:
 categories: what happened

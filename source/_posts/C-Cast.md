@@ -1,7 +1,8 @@
 ---
 title: C++ の 类型转换(Type&Cast)
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2023-02-27 10:04:11
 summary:
 categories: c++

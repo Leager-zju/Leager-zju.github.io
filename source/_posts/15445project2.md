@@ -1,7 +1,8 @@
 ---
 title: CMU15445 project#2 B+ Tree
 author: Leager
-mathjax: true
+mathjax:
+  - true
 date: 2023-01-10 21:42:57
 summary:
 categories: lab

@@ -1,7 +1,8 @@
 ---
 title: 从零开始 の 练手项目
 author: Leager
-mathjax: true
+mathjax:
+  - true
 date: 2024-04-25 10:28:13
 summary:
 categories: c++

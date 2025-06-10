@@ -1,7 +1,8 @@
 ---
 title: C++11 の 类型推导(auto & decltype)
 author: Leager
-mathjax: true
+mathjax:
+  - false
 date: 2023-01-16 12:37:37
 summary:
 categories: c++

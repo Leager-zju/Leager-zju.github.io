@@ -1,7 +1,8 @@
 ---
 title: 后缀自动机(Suffix Automaton)
 author: Leager
-mathjax: true
+mathjax:
+  - true
 date: 2024-08-05 20:10:24
 summary:
 categories: data structure
