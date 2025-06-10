@@ -22890,8 +22890,7 @@ n &amp; 0 &amp; 0 &amp; 0\\
 <p>「<strong>动画系统</strong>」由多个动画工具和编辑器构成，其将基于骨架的变形与基于变形的顶点变形相结合，从而构建出复杂的动画。该系统可以用于播放和混合预先准备好的动画序列让基本玩家运动显得更加真实，创建自定义特殊动作，如伸缩台阶和墙壁（使用动画蒙太奇），通过变形目标应用伤害效果或面部表情，使用骨架控制直接控制骨骼变形，或创建基于逻辑的 状态机 来确定角色在指定情境下应该使用哪个动画。——<a href="https://dev.epicgames.com/documentation/zh-cn/unreal-engine/animation-system-overview?application_version=4.27">虚幻官方文档</a></p>
 </blockquote>
 <span id="more"></span>
-<h2 id="骨架网格体">骨架网格体</h2>
-<h3 id="骨骼与骨架">骨骼与骨架</h3>
+<h2 id="骨骼与骨架">骨骼与骨架</h2>
 <p>在虚幻引擎中，<strong>骨架</strong>用于定义角色中的<strong>骨骼</strong>，同时关联动画数据，从而驱动动画。</p>
 <p>骨骼是骨架的基本组成单元，并在骨架中以树状结构组织。<strong>根骨骼</strong>是骨架层级结构的根节点。除了根骨骼外，每个骨骼都有一个<strong>父骨骼</strong>。此外，每个骨骼还有用于唯一标识符的<strong>名称</strong>以及用于确定在空间中状态的<strong>变换信息</strong>。</p>
 <blockquote>
@@ -22928,18 +22927,18 @@ n &amp; 0 &amp; 0 &amp; 0\\
   <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>每个骨骼的信息用 <code>FMeshBoneInfo</code> 结构体描述，有名称以及父骨骼在 TArray 中的索引。此外 <code>FReferenceSkeleton</code> 中还有骨骼的变换信息以及名称到数组索引的映射。</p>
-<h3 id="骨架网格体-1">骨架网格体</h3>
+<h2 id="骨架网格体">骨架网格体</h2>
 <p><strong>骨架网格体</strong>是设置了骨架的模型资源，本质上是将<strong>几何数据</strong>、<strong>骨架信息</strong>、<strong>蒙皮权重</strong>进行结合得到的产物。其中，几何数据指的是模型<strong>顶点</strong>、三角形表面、UV 坐标、法线、切线等用于图像渲染的数据。在这里，我们只关注顶点这一概念。</p>
 <p>而蒙皮权重是骨架网格体中最重要的概念之一。在骨架网格体中，每根骨骼都与骨架网格体的一部分顶点相关联。当骨骼移动或旋转时，与其关联的顶点也会随之移动，从而实现模型的变形。其中，蒙皮权重定义了每个骨骼应用变换时对每个顶点的影响程度。权重越高，顶点受该骨骼的影响越大。</p>
-<h2 id="动画">动画</h2>
+<h2 id="动画模式">动画模式</h2>
 <p>每个 Character 是默认带有 <code>SkeletalMeshComponent</code> 的 Pawn，其中 <code>SkeletalMeshComponent</code> 下面有一个名为「<strong>Animation Mode</strong>」的设置，其中比较主流的是「<strong>Use Animation Asset</strong>」和「<strong>Use Animation Blueprint</strong>」两种选项。</p>
 <p><img src="animmode.png" style="zoom:100%;"></p>
-<h3 id="动画序列">动画序列</h3>
+<h2 id="动画序列">动画序列</h2>
 <p><strong>动画序列</strong>是最简单的 Animation Asset。在任一时间点，一个骨架网格体中所有骨骼变换信息的集合又被称为<strong>姿势</strong>。动画序列包含了一系列带有姿势信息的关键帧，通过播放序列中的这些关键帧，并再将它们互相混合（比如插值混合），使得骨架网格体可以产生平滑的动画效果。</p>
 <blockquote>
 <p>每个动画序列专门针对一个特定骨架，且只能在该骨架上播放。换言之，对于不同的骨架网格体，只要使用的骨架相同，那么就可以共享动画序列。</p>
 </blockquote>
-<h3 id="动画蓝图">动画蓝图</h3>
+<h2 id="动画蓝图">动画蓝图</h2>
 <p><strong>动画蓝图</strong>用于管理和控制 Character 的动画行为，包含以下两个主要部分。</p>
 <p><strong>事件图表</strong>可以构建基于蓝图的逻辑，用于定义节点的属性和包含其他图表区域信息的变量。</p>
 <p><img src="event.png" style="zoom:80%;"></p>
@@ -22948,10 +22947,10 @@ n &amp; 0 &amp; 0 &amp; 0\\
 <p>在动画图表中还可以利用<strong>状态机</strong>输出最终姿势。其功能是将不同的动画作为一系列状态，然后按照转换规则管理这些状态，转换规则可控制从一个状态混合到另一个状态，通常用于角色的移动逻辑。</p>
 <p><img src="sm1.png" style="zoom:80%;"></p>
 <p><img src="state.png" style="zoom:80%;"></p>
-<h3 id="动画混合">动画混合</h3>
+<h2 id="动画混合">动画混合</h2>
 <p><strong>混合</strong>是指将两个或多个值或状态组合在一起的过程，以产生一个平滑的过渡或最终结果。而<strong>动画混合</strong>，指的就是多个动画序列里的每一条变换信息相互之间基于权重的运算过程，本质上是对每个时间点的姿势进行混合。</p>
 <p>通过动画混合，我们能够平滑地过渡和组合不同的动画姿势，从而创造出更自然的角色动画。比如根据角色的速度和方向，动态地在行走和跑步之间平滑过渡；或者将换弹与跑步相混合，得到一个奔跑时换弹的融合动作。</p>
-<h4 id="变换信息运算方式">变换信息运算方式</h4>
+<h3 id="变换信息运算方式">变换信息运算方式</h3>
 <p>变换信息的运算有以下两种方式：<strong>覆写</strong>和<strong>叠加</strong>。</p>
 <p>覆写是直接将目标变换设置为<code>源变换 * 权重</code>。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>Overrite Transform</span></div><code class="language-cpp"><span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token operator">&gt;</span>
@@ -22971,7 +22970,7 @@ FORCEINLINE <span class="token keyword">void</span> <span class="token generic-f
   <span class="token keyword">const</span> ScalarRegister <span class="token function">VBlendWeight</span><span class="token punctuation">(</span>BlendWeight<span class="token punctuation">)</span><span class="token punctuation">;</span>
   Dest<span class="token punctuation">.</span><span class="token function">AccumulateWithShortestRotation</span><span class="token punctuation">(</span>Source<span class="token punctuation">,</span> VBlendWeight<span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h4 id="姿势混合">姿势混合</h4>
+<h3 id="姿势混合">姿势混合</h3>
 <p>姿势混合将两个或多个动画的姿势组合在一起，以创建新的姿势，从而得到混合后的新的动画。</p>
 <p>虚幻引擎中的动画蓝图提供了以下几种基于混合节点的姿势混合方式：</p>
 <ol type="1">
@@ -22999,7 +22998,7 @@ FORCEINLINE <span class="token keyword">void</span> <span class="token generic-f
 <li><strong>Blend Mask</strong>。可以在骨骼网格体的「<strong>骨骼树</strong>」-&gt;「<strong>选项</strong>」-&gt;「<strong>Add Blend Mask</strong>」自定义一个「<strong>Blend Mask Profile</strong>」配置项，该配置为每个骨骼单独定义「<strong>Bone Blend Weights</strong>」，从而精确控制哪些骨骼参与混合，哪些骨骼不参与混合。</li>
 </ul></li>
 </ol>
-<h4 id="混合空间">混合空间</h4>
+<h3 id="混合空间">混合空间</h3>
 <p><strong>混合空间</strong>能够通过一个或多个输入参数在多个动画序列之间平滑地混合。这些参数通常是角色的属性，例如速度、方向、攻击角度等。</p>
 <p>混合空间由一系列采样点组成。每个采样点对应于一个特定的输入参数值，并指定要播放的动画序列。当输入参数的值发生变化时，混合空间会根据当前输入参数值，在<strong>相邻</strong>的采样点之间进行混合。</p>
 <blockquote>
@@ -23008,15 +23007,15 @@ FORCEINLINE <span class="token keyword">void</span> <span class="token generic-f
 <p>而在混合空间 2D 中，则会采用<strong>双线性插值</strong>的方式来混合。</p>
 </blockquote>
 <p>虽然都是进行「混合」，但与混合节点不同，混合空间更像是“参数驱动的过渡工具”，确保动画连续性，</p>
-<h3 id="动画蒙太奇">动画蒙太奇</h3>
-<h4 id="实现原理">实现原理</h4>
+<h2 id="动画蒙太奇">动画蒙太奇</h2>
+<h3 id="实现原理">实现原理</h3>
 <p>状态机将循环播放角色当前所处状态的动画序列，是持续性的，但这些动画序列必须预先静态绑定到每个状态中，无法在运行时通过参数动态指定不同的动画。当我们想实现「<strong>触发某些条件播放一次动画</strong>」这一功能时，如果使用状态机，则必须设置一个新状态，随着动画逻辑的增加，状态网络复杂性提升，得不偿失。</p>
 <p><strong>蒙太奇</strong>。所有 Slot 由一个全局变量「<strong>Anim Slot Manager</strong>」管理。下面的例子中，Slot 名为「<strong>DefaultGroup.UpperBody</strong>」，其中「<strong>DefaultGroup</strong>」是<strong>插槽组</strong>，一个蒙太奇中所有的 Slot 必须是同一组的。</p>
 <p><img src="slot.png" style="zoom:80%;"></p>
 <p>我们可以利用动画图表表中的同名<strong>插槽节点</strong>，便可在播放蒙太奇时覆盖之前节点的输出姿势。在下面的例子中，「<strong>FullBody</strong>」节点置于状态机后，以覆盖的形式插入动画，用于全身的互动动作或者表情动作；「<strong>UpperBody</strong>」搭配「<strong>Layered blend per bone</strong>」节点，实现按上半身骨骼的姿势混合。</p>
 <p><img src="slotnode.png" style="zoom:80%;"></p>
 <p>Slot Node 相当于一个过滤器，当且仅当执行 Play Montage 操作时，对应的 Slot Node 会被激活，从而覆盖前面的输出；反之，Slot Node 会直接将 Source 设置为 Output。</p>
-<h4 id="源码剖析">源码剖析</h4>
+<h3 id="源码剖析">源码剖析</h3>
 <p>在 C++ 中，Play Montage 操作实际上会调用 <code>UAnimInstance::Montage_Play()</code> 方法，并进一步走到 <code>UAnimInstance::Montage_PlayInternal()</code> 中。如果传入参数 <code>bStopAllMontages</code> 为 true（默认值），那么会终止第一个 Slot 所在 Group 内的其他蒙太奇。接下来，将执行以下几个比较重要的步骤：</p>
 <ol type="1">
 <li><p>首先是创建了一个 <code>FAnimMontageInstance</code> 类型的蒙太奇实例；</p></li>
@@ -23064,65 +23063,61 @@ FORCEINLINE <span class="token keyword">void</span> <span class="token generic-f
 <blockquote>
 <p>播放/结束蒙太奇时，前后一帧不可能与状态机的输出完全一致，如果直接修改则会很突兀，所以需要用 BlendIn 和 BlendOut 作首尾的混合，因此需要计算权重。</p>
 </blockquote>
-<h3 id="动画曲线">动画曲线</h3>
+<h2 id="动画曲线">动画曲线</h2>
 <p><strong>动画曲线</strong>是一种基于时间轴的关键帧动画控制机制，本质上是 float 曲线，x 轴为时间轴，与对应的动画序列等长；y 轴为自定义参数，每一帧都有对应的数值。在动画蓝图中，可以通过「<strong>Get Curve Value</strong>」节点获取当前时间帧对应的曲线值，默认为 0（即使该动画序列中没有同名曲线，也返回 0）。</p>
-<h4 id="曲线混合">曲线混合</h4>
-<p>当对多个动画序列进行混合时，会对同名曲线也进行混合，同时「<strong>Get Curve Value</strong>」获取的曲线值一定是最终 Pose 对应的曲线值。</p>
+<h3 id="曲线混合">曲线混合</h3>
+<p>当对多个动画序列进行混合时，会对同名曲线也进行混合，同时「<strong>Get Curve Value</strong>」获取的曲线值一定是若干曲线的混合结果值。</p>
 <p>使用「<strong>Blend</strong>」节点进行混合时，「<strong>Get Curve Value</strong>」得到的曲线值的计算逻辑为 <code>CurveA * (1-Alpha) + CurveB * Alpha</code>，这与 Pose 的混合逻辑完全一致。</p>
-<p>使用「<strong>Layered blend per bone</strong>」节点进行混合时，则因「<strong>曲线混合选项</strong>」而异，具体如下表所示，假设输入姿势「<strong>Blend Poses i</strong>」对应的曲线为 <span class="math inline">\(curve_i\)</span>。</p>
+<p>使用「<strong>Layered blend per bone</strong>」节点进行混合时，则因「<strong>曲线混合选项</strong>」而异，具体如下表所示，假设输入姿势「<strong>Blend Poses i</strong>」对应的曲线为 <span class="math inline">\(Curve_i\)</span>。</p>
 <table>
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
 <thead>
 <tr class="header">
 <th style="text-align: center;">选项</th>
 <th style="text-align: center;">计算逻辑</th>
-<th style="text-align: center;">备注</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td style="text-align: center;">Override</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
+<td style="text-align: center;">同名曲线中取最后一次出现的，即 <span class="math inline">\(i\)</span> 最大的</td>
 </tr>
 <tr class="even">
 <td style="text-align: center;">Do Not Override</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
+<td style="text-align: center;">同名曲线中取第一次出现的，即 <span class="math inline">\(i\)</span> 最小的</td>
 </tr>
 <tr class="odd">
-<td style="text-align: center;">Normalize by Weight</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
+<td style="text-align: center;">Blend by Weight</td>
+<td style="text-align: center;"><span class="math inline">\(Curve = BaseCurve + \sum\limits_0^n BlendWeights_i*Curve_i\)</span></td>
 </tr>
 <tr class="even">
-<td style="text-align: center;">Blend by Weight</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
+<td style="text-align: center;">Normalize by Weight</td>
+<td style="text-align: center;"><span class="math inline">\(\displaystyle{Curve = \frac{BaseCurve + \sum\limits_0^n BlendWeights_i*Curve_i}{1+\sum\limits_0^n BlendWeights_i}}\)</span></td>
 </tr>
 <tr class="odd">
 <td style="text-align: center;">Use Base Pose</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
+<td style="text-align: center;">取 Base Pose 对应曲线值</td>
 </tr>
 <tr class="even">
 <td style="text-align: center;">Use Max Value</td>
-<td style="text-align: center;"><span class="math inline">\(\max{curve_1, curve_2, ...}\)</span></td>
-<td style="text-align: center;">取所有 Blend pose 对应曲线的最大值</td>
+<td style="text-align: center;">取所有 Poses 对应曲线的最大值（不考虑不存在）</td>
 </tr>
 <tr class="odd">
 <td style="text-align: center;">Use Min Value</td>
-<td style="text-align: center;"><span class="math inline">\(\min{curve_1, curve_2, ...}\)</span></td>
-<td style="text-align: center;">取所有 Blend pose 对应曲线的最大值</td>
+<td style="text-align: center;">取所有 Poses 对应曲线的最小值（不考虑不存在）</td>
 </tr>
 </tbody>
 </table>
-<h4 id="使用场景">使用场景</h4>
-<ul>
-<li><p><strong>Attribute</strong>。最基础的用法，用于动画蓝图属性变化。</p></li>
-<li><p><strong>Morph Target</strong>。通过曲线调整角色面部表情或身体形变。例如，导入的变形目标动画（如眨眼、微笑）可通过曲线在动画播放时激活，实现细腻的表情过渡。</p></li>
-<li><p><strong>Material</strong>。材质中的标量参数（如颜色强度、纹理混合度）可通过曲线实时调整。例如，在角色受伤时，通过曲线动态增加皮肤表面的血迹贴图透明度。</p></li>
-</ul>
-<h3 id="动画通知">动画通知</h3>
+<blockquote>
+<p>上述 BlendWeights 会被 clamp 到 (0, 1) 间。</p>
+</blockquote>
+<h3 id="变形目标-morph-targets">变形目标 Morph Targets</h3>
+<p><strong>Morph Targets</strong> 本质上是一个变量，通过修改该变量的值，能够改变模型的顶点位置，从而实现形状的动态变化，常用于角色面部表情、物体形变等场景。这玩意一般是美术创建好，和 SkeletalMesh 一起导入 UE 中的，可以在骨骼网格体页面的「<strong>变形目标预览器</strong>」处查看。此时，应用于该骨骼网格体的动画序列可以直接创建已知变形目标变量的曲线。</p>
+<h2 id="动画通知">动画通知</h2>
+<p><strong>动画通知</strong>可以在动画播放到某个时间点的时候发送一次通知（Anim Notify），或持续发送通知直到结束点（Anim Notify State）。本质上是绑定了<strong>动画通知类（Anim Notify Class）</strong>的 callback，当触发通知后会调用类内部的 <code>Notify()</code> 函数。</p>
 ]]></content>
       <categories>
         <category>unreal</category>
