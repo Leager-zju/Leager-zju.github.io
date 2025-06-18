@@ -1,5 +1,5 @@
 ---
-title: TinyKV-Project3 Multi-Raft
+title: TinyKV Project3 Multi-Raft
 author: Leager
 mathjax:
   - false

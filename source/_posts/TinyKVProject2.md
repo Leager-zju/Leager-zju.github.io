@@ -1,5 +1,5 @@
 ---
-title: TinyKV-Project2 RaftKV
+title: TinyKV Project2 RaftKV
 author: Leager
 mathjax:
   - false

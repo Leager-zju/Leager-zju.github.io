@@ -151,7 +151,7 @@ FORCEINLINE void BlendTransform<ETransformBlendMode::Accumulate>(
 	<img src="blend.png" style="zoom:100%;" />
 
 3. **骨骼分层混合**。对应于动画蓝图中的「**Layered blend per bone**」节点，仅针对选中的骨骼将 Base 与 Blend 进行线性插值混合。这些骨骼都有单独的「**Bone Blend Weights**」，并乘上「**Blend Weights**」作为最终权重。
-   
+
 	<img src="layeredblend.png" style="zoom:100%;" />
 
    节点有以下两种混合模式：
@@ -197,9 +197,9 @@ Slot Node 相当于一个过滤器，当且仅当执行 Play Montage 操作时�
 在 C++ 中，Play Montage 操作实际上会调用 `UAnimInstance::Montage_Play()` 方法，并进一步走到 `UAnimInstance::Montage_PlayInternal()` 中。如果传入参数 `bStopAllMontages` 为 true（默认值），那么会终止第一个 Slot 所在 Group 内的其他蒙太奇。接下来，将执行以下几个比较重要的步骤：
 
 1. 首先是创建了一个 `FAnimMontageInstance` 类型的蒙太奇实例；
-   
+
 2. 然后根据 `BlendInSettings` 设置蒙太奇混入的权重以及时间等配置数据；
-   
+
 3. 并将该蒙太奇实例加入 `MontageInstances` 变量中，表示当前活跃的蒙太奇。
 
 ```cpp

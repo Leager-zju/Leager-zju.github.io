@@ -1,5 +1,5 @@
 ---
-title: TinyKV-Project1 StandaloneKV
+title: TinyKV Project1 StandaloneKV
 author: Leager
 mathjax:
   - false

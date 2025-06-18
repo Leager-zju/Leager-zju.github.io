@@ -1,5 +1,5 @@
 ---
-title: TinyKV-Project4 Transaction
+title: TinyKV Project4 Transaction
 author: Leager
 mathjax:
   - false
