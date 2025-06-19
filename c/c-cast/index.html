@@ -1,0 +1,1451 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="C++ の 类型转换(Type&amp;Cast), 没什么看头的地方">
+    <meta name="description" content="当表达式期望为 T 类型，而我们只能产生 S
+类型的表达式时，就需要利用类型转换功能来满足需求。
+
+传统的转换总结来说分为隐式与显式两种。
+隐式转换
+凡是在语境中使用了某种表达式类型
+T1，但语境不接受该类型，而接受另一类型 T2
+的时候，">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+    <title>C++ の 类型转换(Type&amp;Cast) | 没什么看头的地方</title>
+    <link rel="icon" type="image/png" href="/dt.png">
+    
+    <style>
+        body{
+            background-image: url(https://cdn.jsdelivr.net/gh/Tokisaki-Galaxy/res/site/medias/background.jpg);
+            background-repeat:no-repeat;
+            background-size: 100% 100%;
+            background-attachment:fixed;
+        }
+    </style>
+
+
+
+    <!-- bg-cover style     -->
+
+
+
+<link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+<link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+<link rel="stylesheet" type="text/css" href="/css/matery.css">
+<link rel="stylesheet" type="text/css" href="/css/my.css">
+<link rel="stylesheet" type="text/css" href="/css/dark.css" media="none" onload="if(media!='all')media='all'">
+
+
+
+
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+    <link rel="stylesheet" href="/css/post.css">
+
+
+
+
+    
+
+
+
+    <script src="/libs/jquery/jquery-3.6.0.min.js"></script>
+
+<meta name="generator" content="Hexo 6.3.0">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/comment_bg.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">没什么看头的地方</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/archives" class="waves-effect waves-light">
+      
+      <i class="fas fa-archive" style="zoom: 0.6;"></i>
+      
+      <span>归档</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/contact" class="waves-effect waves-light">
+      
+      <i class="fas fa-comments" style="zoom: 0.6;"></i>
+      
+      <span>留言板</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/friends" class="waves-effect waves-light">
+      
+      <i class="fas fa-address-book" style="zoom: 0.6;"></i>
+      
+      <span>友情链接</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+  <li>
+    <a href="javascript:;" class="waves-effect waves-light" onclick="switchNightMode()" title="深色/浅色模式" >
+      <i id="sum-moon-icon" class="fas fa-sun" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/comment_bg.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">没什么看头的地方</div>
+        <div class="logo-desc">
+            
+            【数据删除】
+            
+        </div>
+    </div>
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/archives" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-archive"></i>
+			
+			归档
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/contact" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-comments"></i>
+			
+			留言板
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/friends" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-address-book"></i>
+			
+			友情链接
+		</a>
+          
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/Leager-zju" class="waves-effect waves-light" target="_blank">
+                <i class="fab fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+            <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/Leager-zju" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+   data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+        
+    </nav>
+
+</header>
+
+    
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/9.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">C++ の 类型转换(Type&amp;Cast)</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                          <div class="article-tag">
+                            <span class="chip bg-color">无标签</span>
+                          </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/C/" class="post-category">
+                                C++
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2023-02-27
+                </div>
+                
+
+                
+
+                
+
+                
+
+                
+            </div>
+        </div>
+        <hr class="clearfix">
+
+        
+        <!-- 是否加载使用自带的 prismjs. -->
+        <link rel="stylesheet" href="/libs/prism/prism.min.css">
+        
+
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <p>当表达式期望为 <code>T</code> 类型，而我们只能产生 <code>S</code>
+类型的表达式时，就需要利用<strong>类型转换</strong>功能来满足需求。</p>
+<span id="more"></span>
+<p>传统的转换总结来说分为<strong>隐式</strong>与<strong>显式</strong>两种。</p>
+<h2 id="隐式转换">隐式转换</h2>
+<p>凡是在语境中使用了某种表达式类型
+<code>T1</code>，但语境不接受该类型，而接受另一类型 <code>T2</code>
+的时候，会进行<strong>隐式转换</strong>。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>隐式转换</span></div><code class="language-cpp"><span class="token keyword">int</span> a <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+<span class="token keyword">long</span> <span class="token keyword">long</span> b <span class="token operator">=</span> a <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">;</span> <span class="token comment">// int -&gt; long long</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span>a<span class="token punctuation">)</span> <span class="token punctuation">{</span>             <span class="token comment">// int -&gt; bool</span>
+  <span class="token keyword">char</span> c <span class="token operator">=</span> a<span class="token punctuation">;</span>        <span class="token comment">// int -&gt; char</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">const</span> <span class="token keyword">int</span> d <span class="token operator">=</span> a<span class="token punctuation">;</span>     <span class="token comment">// int -&gt; const int</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>事实上，C++ 的任何的<strong>隐式转换</strong>都是使用
+<code>static_cast</code> 来实现，所以讲 <code>static_cast</code>
+的时候已经提了一部分内容。</p>
+<blockquote>
+<p>这里有个比较有有意思的例子：<strong>生成了几个 string？</strong>
+</p><pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp">std<span class="token double-colon punctuation">::</span>string s <span class="token operator">=</span> <span class="token string">"hi"</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre><p></p>
+<p>首先，<code>"hi"</code> 会被编译器认为是 <code>const char*</code>
+型字面量。</p>
+<ul>
+<li>在 C++11 之前，会首先调用
+<code>std::string::string(const char *)</code>
+的初始化构造函数，进行隐式转换生成一个临时变量，再调用拷贝构造函数生成
+<code>s</code>；</li>
+<li>引入移动语义的 C++11
+之后，依然会隐式转换生成临时变量，但此时由于该变量为右值，于是调用了移动构造函数将临时变量保有的资源
+<code>"hi"</code> 移至 <code>s</code> 中；</li>
+<li>而到了 C++17，引入了一个叫<a target="_blank" rel="noopener" href="https://zh.cppreference.com/w/cpp/language/copy_elision"><strong>复制消除</strong></a>的规则，要求在满足一定的条件下避免对象的复制，于是这里的临时变量不会生成，直接调用
+<code>std::string::string(const char *)</code>
+构造对象。这可比移动构造高效多了；</li>
+</ul>
+<p>综上所述，在不同编译器标准下，答案分别为 2 2 1。</p>
+</blockquote>
+<h2 id="显式转换">显式转换</h2>
+<p>显式转换就是在表达式之前加上想要转换的目标类型。</p>
+<h3 id="cast-in-c">Cast in C</h3>
+<p>C 中的类型转换语法非常简单粗暴，直接在表达式前加上
+<code>(Target_Type)</code> 即可，如：</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>显式转换</span></div><code class="language-cpp"><span class="token keyword">double</span> pi <span class="token operator">=</span> <span class="token number">3.14</span><span class="token punctuation">;</span>
+<span class="token keyword">int</span> p <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">)</span>pi<span class="token punctuation">;</span>
+std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> p<span class="token punctuation">;</span> <span class="token comment">// output: 3</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p>但这种粗暴的强转会带来许多难以察觉的安全性问题。于是，C++
+提供了许多应用场景更广泛的转换算子，用于删除 C
+语言转换中的一些多义性和危险继承。</p>
+<h3 id="cast-in-c-1">Cast in C++</h3>
+<h4 id="static_cast">static_cast</h4>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token generic-function"><span class="token function">static_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span>new_type<span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span>expr<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>该算子实现的效果与 C
+中的强转差不多，但由于<strong>没有</strong>在运行时进行类型检查来确保安全性，故跟
+<strong>Cast in C</strong>
+一样存在隐患，用于<strong>非多态对象</strong>的转换。</p>
+<blockquote>
+<p>所谓<strong>多态对象</strong>，就是声明或继承了至少一个虚函数的<strong>类类型</strong>的对象。每个多态对象中，实现都会储存额外的信息，它被用于进行虚函数的调用，<strong>RTTI</strong>
+功能特性也用它在运行时确定对象创建时所用的类型，而不管使用它的表达式是什么类型。</p>
+<p>对于<strong>非多态对象</strong>，值的解释方式由使用对象的表达式所确定，这在编译期就已经决定了。</p>
+</blockquote>
+<p>通常用于数值类型的相互转换，比如浮点型到整型（如 <code>double</code>
+到 <code>int</code>），整型到字符型（如 <code>int</code> -&gt;
+<code>char</code>）等。</p>
+<blockquote>
+<p>得到的 <code>char</code> 可能没有足够的位来保存整个 <code>int</code>
+值，故需要程序员来验证转换的结果是否安全。</p>
+</blockquote>
+<p>但在类的层次结构之间进行转换时，比如将基类指针<strong>向下转换</strong>为派生类指针这一操作，由于派生类可能有自己新定义的字段或信息，故<strong>向下转换是不安全</strong>的。但<strong>向上转换一定是安全</strong>的，因为派生类一定包含基类的所有信息。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>static_cast</span></div><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">B</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token keyword">class</span> <span class="token class-name">D</span><span class="token operator">:</span> <span class="token base-clause"><span class="token keyword">public</span> <span class="token class-name">B</span></span> <span class="token punctuation">{</span>
+ <span class="token keyword">public</span><span class="token operator">:</span>
+  <span class="token keyword">int</span> val<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token function">Foo</span><span class="token punctuation">(</span>B<span class="token operator">*</span> pb<span class="token punctuation">,</span> D<span class="token operator">*</span> pd<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  D<span class="token operator">*</span> pd1 <span class="token operator">=</span> <span class="token generic-function"><span class="token function">static_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span>D<span class="token operator">*</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span>pb<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// not safe! D::val 不在 B 中。</span>
+                                <span class="token comment">// 如果此时 pb 指向一个非 D 类对象，则调用 pd1-&gt;val 出错。</span>
+  B<span class="token operator">*</span> pb1 <span class="token operator">=</span> <span class="token generic-function"><span class="token function">static_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span>B<span class="token operator">*</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span>pd<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// safe! 基类指针一定能指向所有派生类</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h4 id="dynamic_cast">dynamic_cast</h4>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token generic-function"><span class="token function">dynamic_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span>new_type<span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span>expr<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 其中 new_type/expr 必须为指针或引用。若 new_type 为指针，则 expr 必须为指针；如为引用，则 expr 为左值</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>与 <code>static_cast</code> 相对，<code>dynamic_cast</code>
+在运行时执行类型检查，故用于<strong>多态对象</strong>的<strong>向上</strong>转换，且更加安全。具体表现为：</p>
+<ul>
+<li>如果转型成功，那么 <code>dynamic_cast</code>
+就会正确返回转换后的值；</li>
+<li>如果转型失败且 <code>new_type</code> 是指针类型，那么它会返回
+<code>nullptr</code>；</li>
+<li>如果转型失败且 <code>new_type</code> 是引用类型，那么它会抛出
+<code>std::bad_cast</code> 异常。</li>
+</ul>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>dynamic_cast</span></div><code class="language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;iostream&gt;</span></span>
+
+<span class="token keyword">class</span> <span class="token class-name">A</span> <span class="token punctuation">{</span>
+ <span class="token keyword">public</span><span class="token operator">:</span>
+  <span class="token keyword">virtual</span> <span class="token keyword">void</span> <span class="token function">foo</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"A foo()\n"</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+  <span class="token keyword">virtual</span> <span class="token operator">~</span><span class="token function">A</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token keyword">default</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">class</span> <span class="token class-name">B</span> <span class="token operator">:</span> <span class="token base-clause"><span class="token keyword">public</span> <span class="token class-name">A</span></span> <span class="token punctuation">{</span>
+ <span class="token keyword">public</span><span class="token operator">:</span>
+  <span class="token keyword">virtual</span> <span class="token keyword">void</span> <span class="token function">foo</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">override</span> <span class="token punctuation">{</span> std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"B foo()\n"</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+  <span class="token keyword">void</span> <span class="token function">bar</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"B bar()\n"</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+  <span class="token keyword">virtual</span> <span class="token operator">~</span><span class="token function">B</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token keyword">default</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">class</span> <span class="token class-name">C</span> <span class="token operator">:</span> <span class="token base-clause"><span class="token keyword">public</span> <span class="token class-name">B</span></span> <span class="token punctuation">{</span>
+ <span class="token keyword">public</span><span class="token operator">:</span>
+  <span class="token keyword">virtual</span> <span class="token keyword">void</span> <span class="token function">foo</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"C foo()\n"</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+  <span class="token keyword">void</span> <span class="token function">bar</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"C bar()\n"</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+  <span class="token keyword">virtual</span> <span class="token operator">~</span><span class="token function">C</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token keyword">default</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token function">Foo</span><span class="token punctuation">(</span>A<span class="token operator">&amp;</span> a<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">try</span> <span class="token punctuation">{</span>
+    <span class="token punctuation">[</span><span class="token punctuation">[</span>__maybe_unused__<span class="token punctuation">]</span><span class="token punctuation">]</span> C <span class="token operator">&amp;</span>c <span class="token operator">=</span> <span class="token generic-function"><span class="token function">dynamic_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span>C<span class="token operator">&amp;</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span>a<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Cast to C SUCCESS!\n"</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span> <span class="token keyword">catch</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span>bad_cast<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Cast to C ERROR!\n"</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  A<span class="token operator">*</span> pa1 <span class="token operator">=</span> <span class="token keyword">new</span> C<span class="token punctuation">;</span>
+  A<span class="token operator">*</span> pa2 <span class="token operator">=</span> <span class="token keyword">new</span> B<span class="token punctuation">;</span>
+
+  pa1<span class="token operator">-&gt;</span><span class="token function">foo</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  B<span class="token operator">*</span> pb <span class="token operator">=</span> <span class="token generic-function"><span class="token function">dynamic_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span>B<span class="token operator">*</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span>pa1<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Try to cast A* pa1 to B* pb ...\n"</span><span class="token punctuation">;</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>pb<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Cast success\n"</span><span class="token punctuation">;</span>
+    pb<span class="token operator">-&gt;</span><span class="token function">foo</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    pb<span class="token operator">-&gt;</span><span class="token function">bar</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Cast failed\n"</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  C<span class="token operator">*</span> pc <span class="token operator">=</span> <span class="token generic-function"><span class="token function">dynamic_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span>C<span class="token operator">*</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span>pa2<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Try to cast A* pa2 to C* pc ...\n"</span><span class="token punctuation">;</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>pc<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Cast success\n"</span><span class="token punctuation">;</span>
+    pc<span class="token operator">-&gt;</span><span class="token function">foo</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    pc<span class="token operator">-&gt;</span><span class="token function">bar</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Cast failed\n"</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  C c<span class="token punctuation">;</span>
+  <span class="token function">Foo</span><span class="token punctuation">(</span>c<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  B b<span class="token punctuation">;</span>
+  <span class="token function">Foo</span><span class="token punctuation">(</span>b<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token comment">// output:</span>
+<span class="token comment">// C foo()</span>
+
+<span class="token comment">// Try to cast A* pa1 to B* pb ...</span>
+<span class="token comment">// Cast success</span>
+<span class="token comment">// C foo()</span>
+<span class="token comment">// B bar()</span>
+
+<span class="token comment">// Try to cast A* pa2 to C* pc ...</span>
+<span class="token comment">// cast failed</span>
+
+<span class="token comment">// Cast to C SUCCESS!</span>
+
+<span class="token comment">// Cast to C ERROR!</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>整体类层次结构为
+<code>A -&gt; B -&gt; C</code>。从上述结果中不难发现：</p>
+<ul>
+<li><code>A* pa1</code> 指向 <code>C</code> 类对象，调用虚函数
+<code>foo()</code> 时实现了多态的效果；</li>
+<li><code>A* pa1</code> 指向 <code>C</code> 类对象，转换为
+<code>B*</code> 指针时成功，因为 <code>C</code> 是 <code>B</code>
+的派生类，拥有基类的所有信息；</li>
+<li><code>A* pa2</code> 指向 <code>B</code> 类对象，转换为
+<code>C*</code> 指针时失败，并返回空指针；</li>
+<li><code>A&amp; a</code> 绑定到 <code>C</code> 类对象时，能够转换到
+<code>C&amp;</code> 型；</li>
+<li><code>A&amp; a</code> 绑定到 <code>B</code> 类对象时，无法转换到
+<code>C&amp;</code> 型，并抛出异常；</li>
+</ul>
+<p>总结出，<code>dynamic_cast&lt;new_type&gt;(expr)</code>
+转换成功与否，关键看指针/引用 <code>expr</code> 指向/绑定的对象是否为
+<code>new_type</code>
+的相同类型或派生类，而不用关心指针/引用类型本身。</p>
+<p>再来看另一种情况。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>复杂继承关系</span></div><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">A</span> <span class="token punctuation">{</span> <span class="token keyword">virtual</span> <span class="token function">f</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token keyword">class</span> <span class="token class-name">B</span> <span class="token operator">:</span> <span class="token base-clause"><span class="token keyword">virtual</span> <span class="token keyword">public</span> <span class="token class-name">A</span></span> <span class="token punctuation">{</span> <span class="token keyword">virtual</span> <span class="token function">f</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token keyword">class</span> <span class="token class-name">C</span> <span class="token operator">:</span> <span class="token base-clause"><span class="token keyword">virtual</span> <span class="token keyword">public</span> <span class="token class-name">A</span></span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token keyword">class</span> <span class="token class-name">D</span> <span class="token punctuation">{</span> <span class="token keyword">virtual</span> <span class="token function">f</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token keyword">class</span> <span class="token class-name">E</span> <span class="token operator">:</span> <span class="token base-clause"><span class="token keyword">public</span> <span class="token class-name">B</span><span class="token punctuation">,</span> <span class="token keyword">public</span> <span class="token class-name">C</span><span class="token punctuation">,</span> <span class="token keyword">public</span> <span class="token class-name">D</span></span> <span class="token punctuation">{</span> <span class="token keyword">virtual</span> <span class="token function">f</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token comment">/********
+   A  
+  / \
+ B   C   D
+ |___|___|
+     |
+     E
+********/</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>如果我们拥有一个 <code>D* pd = new E;</code> 的指针，希望将其转换为
+<code>A*</code>，一种可行的思路是先转到 <code>E*</code> 再转到
+<code>B*</code> 最后转到 <code>A*</code>，就像这样进行"crabbing"：</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp">E<span class="token operator">*</span> pe <span class="token operator">=</span> <span class="token generic-function"><span class="token function">dynamic_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span>E<span class="token operator">*</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span>pd<span class="token punctuation">)</span><span class="token punctuation">;</span>
+B<span class="token operator">*</span> pb <span class="token operator">=</span> pe<span class="token punctuation">;</span>
+A<span class="token operator">*</span> pa <span class="token operator">=</span> pb<span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p>事实上，如果 <code>new_type</code> 与 <code>expr</code>
+所指代的指针/引用类型处于同一层次（比如这里的 <code>D</code> 与
+<code>B</code>），并且 <code>expr</code>
+所指向/绑定的对象为它俩的共同派生类，则可以进行<strong>横向转换</strong>，比如：</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp">B<span class="token operator">*</span> pb <span class="token operator">=</span> <span class="token generic-function"><span class="token function">dynamic_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span>B<span class="token operator">*</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span>pd<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>在一些更复杂的类层次结构中，<strong>横向转换</strong>可以极大地提高
+coding 效率。</p>
+<h4 id="reinterpret_cast">reinterpret_cast</h4>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token generic-function"><span class="token function">reinterpret_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span>new_type<span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span>expr<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><code>reinterpret_cast</code>
+通过对底层比特位重新解读来进行类型间的转换。当然，这也是不安全的，需要程序员手动检查。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>reinterpret_cast</span></div><code class="language-cpp"><span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">int</span> a<span class="token punctuation">;</span>
+  std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token operator">&amp;</span>a <span class="token operator">&lt;&lt;</span> <span class="token char">'\n'</span>
+            <span class="token operator">&lt;&lt;</span> <span class="token generic-function"><span class="token function">reinterpret_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token keyword">unsigned</span> <span class="token keyword">long</span> <span class="token keyword">long</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span><span class="token operator">&amp;</span>a<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 将 64 位指针类型的 &amp;a 重新解读为 64 位 unsigned long long 类型。</span>
+<span class="token punctuation">}</span>
+<span class="token comment">// output:</span>
+<span class="token comment">// 0000000169AFFD5C</span>
+<span class="token comment">// 6068108636</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h4 id="const_cast">const_cast</h4>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token generic-function"><span class="token function">const_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span>new_type<span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span>expr<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><code>const_cast</code> 最大特点就在于它可以移除 <code>expr</code> 的
+cv 限定，这是其余几个算子都做不到的。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>const_cast</span></div><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">A</span> <span class="token punctuation">{</span>
+  <span class="token keyword">int</span> val<span class="token punctuation">;</span>
+ <span class="token keyword">public</span><span class="token operator">:</span>
+  <span class="token function">A</span><span class="token punctuation">(</span><span class="token keyword">int</span> val_<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token function">val</span><span class="token punctuation">(</span>val_<span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+  <span class="token keyword">void</span> <span class="token function">show</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> val <span class="token operator">&lt;&lt;</span> <span class="token char">'\n'</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+  <span class="token keyword">void</span> <span class="token function">foo</span><span class="token punctuation">(</span><span class="token keyword">int</span> i<span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token punctuation">{</span>
+    <span class="token comment">// val = i;                    // ERROR! A::foo() is const</span>
+    <span class="token generic-function"><span class="token function">const_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span>A<span class="token operator">*</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span><span class="token operator">-&gt;</span>val <span class="token operator">=</span> i<span class="token punctuation">;</span> <span class="token comment">// A::foo() const 中，this 为 const A* 型，使用 const_cast 去限定后允许修改成员变量</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  A <span class="token function">a</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  a<span class="token punctuation">.</span><span class="token function">show</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  a<span class="token punctuation">.</span><span class="token function">foo</span><span class="token punctuation">(</span><span class="token number">6</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  a<span class="token punctuation">.</span><span class="token function">show</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token comment">// output: 6</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><code>const_cast</code> 使得到非 <code>const</code> / 非
+<code>volatile</code> 类型的指针/引用能够实际指向/绑定到
+<code>const</code> / <code>volatile</code> 对象。通过非
+<code>const</code> 访问路径修改 <code>const</code> 对象和通过非
+<code>volatile</code> 泛左值指代 <code>volatile</code> 对象是 UB。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> <span class="token keyword">int</span> a <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+  <span class="token keyword">int</span><span class="token operator">*</span> pa <span class="token operator">=</span> <span class="token generic-function"><span class="token function">const_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">*</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span><span class="token operator">&amp;</span>a<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">int</span><span class="token operator">&amp;</span> ra <span class="token operator">=</span> <span class="token generic-function"><span class="token function">const_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&amp;</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span>a<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token operator">*</span>pa <span class="token operator">=</span> <span class="token number">2</span><span class="token punctuation">;</span>
+  std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"a = "</span> <span class="token operator">&lt;&lt;</span> a <span class="token operator">&lt;&lt;</span> <span class="token string">" *pa = "</span> <span class="token operator">&lt;&lt;</span> <span class="token operator">*</span>pa <span class="token operator">&lt;&lt;</span> <span class="token string">" ra = "</span> <span class="token operator">&lt;&lt;</span> ra <span class="token operator">&lt;&lt;</span> <span class="token char">'\n'</span><span class="token punctuation">;</span>
+
+  ra <span class="token operator">=</span> <span class="token number">3</span><span class="token punctuation">;</span>
+  std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"a = "</span> <span class="token operator">&lt;&lt;</span> a <span class="token operator">&lt;&lt;</span> <span class="token string">" *pa = "</span> <span class="token operator">&lt;&lt;</span> <span class="token operator">*</span>pa <span class="token operator">&lt;&lt;</span> <span class="token string">" ra = "</span> <span class="token operator">&lt;&lt;</span> ra <span class="token operator">&lt;&lt;</span> <span class="token char">'\n'</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token comment">// output:</span>
+<span class="token comment">// a = 1 *pa = 2 ra = 2</span>
+<span class="token comment">// a = 1 *pa = 3 ra = 3</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="用户定义转换">用户定义转换</h2>
+<p>在现代 C++
+中，传统转换已然无法轻易满足日益增长的应用需求，需要用户自己制定转换规则，来提高代码效率。</p>
+<p>但用户能修改的只有两种，初始化构造函数与用户定义转换函数。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>User Defined Cast</span></div><code class="language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;iostream&gt;</span></span>
+
+<span class="token keyword">class</span> <span class="token class-name">Foo</span> <span class="token punctuation">{</span>
+  <span class="token keyword">int</span> val<span class="token punctuation">;</span>
+ <span class="token keyword">public</span><span class="token operator">:</span>
+  <span class="token comment">// 初始化构造函数</span>
+  <span class="token comment">// 其他类型 -&gt; Foo</span>
+  <span class="token function">Foo</span><span class="token punctuation">(</span><span class="token keyword">int</span> v<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token function">val</span><span class="token punctuation">(</span>v<span class="token punctuation">)</span> <span class="token punctuation">{</span> std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"call Foo(int)\n"</span> <span class="token punctuation">}</span>
+
+  <span class="token comment">// 用户定义转换函数，不需要显式指定返回值</span>
+  <span class="token comment">// Foo -&gt; 其他类型</span>
+  <span class="token keyword">operator</span> <span class="token keyword">int</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> val<span class="token punctuation">;</span> <span class="token punctuation">}</span>               <span class="token comment">// 可隐式自定义转换</span>
+  <span class="token keyword">explicit</span> <span class="token keyword">operator</span> <span class="token keyword">int</span><span class="token operator">*</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> <span class="token keyword">nullptr</span><span class="token punctuation">;</span> <span class="token punctuation">}</span> <span class="token comment">// 强制显式自定义转换</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  Foo <span class="token function">f</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>f <span class="token operator">&gt;</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"call operator int()\n"</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token generic-function"><span class="token function">static_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">*</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span>f<span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token keyword">nullptr</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"call explicit operator int* ()\n"</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+  <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token comment">// output:</span>
+<span class="token comment">// call Foo(int)</span>
+<span class="token comment">// call operator int()</span>
+<span class="token comment">// call explicit operator int* ()</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>有了这一功能，我们就能轻易地使用 <code>operator bool()</code>
+来将某些类对象直接嵌到条件判断表达式中——直接通过自定义规则隐式转换为可被接收的
+<code>bool</code> 类型。</p>
+<h2 id="运行时类型信息rtti">运行时类型信息(RTTI)</h2>
+<h3 id="typeid-算子">typeid 算子</h3>
+<blockquote>
+<p>定义于头文件 <code>&lt;typeinfo&gt;</code></p>
+</blockquote>
+<p><code>typeid</code> 用于获取当前对象的类型信息，返回一个
+<code>type_info</code> 类，可以通过调用 <code>type_info</code> 的
+<code>name()</code> 方法来获取相应的字符串型名称。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>typeid</span></div><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">A</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token keyword">class</span> <span class="token class-name">B</span> <span class="token operator">:</span> <span class="token base-clause"><span class="token keyword">public</span> <span class="token class-name">A</span></span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">bool</span> b<span class="token punctuation">;</span>
+  <span class="token keyword">char</span> c<span class="token punctuation">;</span>
+  <span class="token keyword">int</span> i<span class="token punctuation">;</span>
+  <span class="token keyword">double</span> d<span class="token punctuation">;</span>
+
+  A<span class="token operator">*</span> foo <span class="token operator">=</span> <span class="token keyword">new</span> B<span class="token punctuation">;</span>
+  B bar<span class="token punctuation">;</span>
+
+  std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token keyword">typeid</span><span class="token punctuation">(</span>b<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">name</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;&lt;</span> <span class="token char">'\n'</span>
+            <span class="token operator">&lt;&lt;</span> <span class="token keyword">typeid</span><span class="token punctuation">(</span>c<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">name</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;&lt;</span> <span class="token char">'\n'</span>
+            <span class="token operator">&lt;&lt;</span> <span class="token keyword">typeid</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">name</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;&lt;</span> <span class="token char">'\n'</span>
+            <span class="token operator">&lt;&lt;</span> <span class="token keyword">typeid</span><span class="token punctuation">(</span>d<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">name</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;&lt;</span> <span class="token char">'\n'</span>
+            <span class="token operator">&lt;&lt;</span> <span class="token keyword">typeid</span><span class="token punctuation">(</span>foo<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">name</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;&lt;</span> <span class="token char">'\n'</span>
+            <span class="token operator">&lt;&lt;</span> <span class="token keyword">typeid</span><span class="token punctuation">(</span><span class="token operator">*</span>foo<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">name</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;&lt;</span> <span class="token char">'\n'</span>
+            <span class="token operator">&lt;&lt;</span> <span class="token keyword">typeid</span><span class="token punctuation">(</span>bar<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">name</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token comment">// output:</span>
+<span class="token comment">// b</span>
+<span class="token comment">// c</span>
+<span class="token comment">// i</span>
+<span class="token comment">// d</span>
+<span class="token comment">// P1A</span>
+<span class="token comment">// 1A</span>
+<span class="token comment">// 1B</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>不难发现，<code>typeid</code>
+不仅支持内置类型，还允许获取用户自定义类型的信息。但上面只描述了静态类型的情况，在编译期就能确定类型，下面看看涉及多态的
+RTTI 情况。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>RTTI</span></div><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Base</span> <span class="token punctuation">{</span>
+ <span class="token keyword">public</span><span class="token operator">:</span>
+  <span class="token keyword">virtual</span> <span class="token operator">~</span><span class="token function">Base</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token keyword">default</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">class</span> <span class="token class-name">Derived</span> <span class="token operator">:</span> <span class="token base-clause"><span class="token keyword">public</span> <span class="token class-name">Base</span></span> <span class="token punctuation">{</span>
+ <span class="token keyword">public</span><span class="token operator">:</span>
+  <span class="token keyword">virtual</span> <span class="token operator">~</span><span class="token function">Derived</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token keyword">default</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  Base<span class="token operator">*</span> pb <span class="token operator">=</span> <span class="token keyword">new</span> Derived<span class="token punctuation">;</span>
+  Derived d<span class="token punctuation">;</span>
+  Base<span class="token operator">&amp;</span> rb <span class="token operator">=</span> d<span class="token punctuation">;</span>
+  std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token keyword">typeid</span><span class="token punctuation">(</span>pb<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">name</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;&lt;</span> <span class="token char">'\n'</span>
+            <span class="token operator">&lt;&lt;</span> <span class="token keyword">typeid</span><span class="token punctuation">(</span><span class="token operator">*</span>pb<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">name</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;&lt;</span> <span class="token char">'\n'</span>
+            <span class="token operator">&lt;&lt;</span> <span class="token keyword">typeid</span><span class="token punctuation">(</span>rb<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">name</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token comment">// output:</span>
+<span class="token comment">// P4Base</span>
+<span class="token comment">// 7Derive</span>
+<span class="token comment">// 7Derive</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>发现无论是否为多态场景，指针的类型依然为其静态类型，但其解引用后的类型却存在差异，即虽然
+<code>pb</code> 的类型为 <code>Base*</code>，但其指向的对象被识别为
+<code>Derived</code> 类型，这与之前 <code>A* foo = new B</code>
+的表现大相径庭。</p>
+<p>这是因为这里的 <code>Base</code>
+为多态对象，当应用于多态类型的表达式时，<code>typeid</code>
+的求值会对表达式求值，并指代表示该表达式动态类型的对象，这涉及运行时开销（虚表查找）。这里如果表达式是通过对一个指针解引用所得，且该指针是空指针值，那么就会抛出
+<code>std::bad_typeid</code> 异常。</p>
+<p>而其他情况下 <code>typeid</code>
+表达式都在编译时解决，不会对表达式求值。</p>
+<p>了解了这一点，也就基本知道 <code>dynamic_cast</code>
+的原理了——其实它就是利用 <strong>RTTI</strong>
+去判断一个指针实际所指的对象类型，这依赖于虚函数表，故仅用于多态类型的转换，无法对非多态对象执行
+<code>dynamic_cast</code>。</p>
+<h3 id="type_info">type_info</h3>
+<p>上面说到 <code>typeid</code> 会返回一个 <code>type_info</code>
+类，实际上它保有一个类型的实现指定信息，包括类型的名称和比较二个类型相等的方法或相对顺序。定义如下：</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">type_info</span> <span class="token punctuation">{</span>
+<span class="token keyword">public</span><span class="token operator">:</span>
+  <span class="token keyword">virtual</span> <span class="token operator">~</span><span class="token function">type_info</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">bool</span> <span class="token keyword">operator</span><span class="token operator">==</span><span class="token punctuation">(</span><span class="token keyword">const</span> type_info<span class="token operator">&amp;</span> rhs<span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token keyword">noexcept</span><span class="token punctuation">;</span>
+  <span class="token keyword">bool</span> <span class="token keyword">operator</span><span class="token operator">!=</span><span class="token punctuation">(</span><span class="token keyword">const</span> type_info<span class="token operator">&amp;</span> rhs<span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token keyword">noexcept</span><span class="token punctuation">;</span> <span class="token comment">// C++20 移除</span>
+
+  <span class="token keyword">bool</span> <span class="token function">before</span><span class="token punctuation">(</span><span class="token keyword">const</span> type_info<span class="token operator">&amp;</span> rhs<span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token keyword">noexcept</span><span class="token punctuation">;</span>
+  size_t <span class="token function">hash_code</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token keyword">noexcept</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> <span class="token keyword">char</span><span class="token operator">*</span> <span class="token function">name</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token keyword">noexcept</span><span class="token punctuation">;</span>
+
+  <span class="token function">type_info</span><span class="token punctuation">(</span><span class="token keyword">const</span> type_info<span class="token operator">&amp;</span> rhs<span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token keyword">delete</span><span class="token punctuation">;</span>
+  type_info<span class="token operator">&amp;</span> <span class="token keyword">operator</span><span class="token operator">=</span><span class="token punctuation">(</span><span class="token keyword">const</span> type_info<span class="token operator">&amp;</span> rhs<span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token keyword">delete</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>每个类型的 <code>type_info</code>
+是独一无二的，故禁止了拷贝。除了之前提过的 <code>name()</code>
+方法，在这里我仅关注 <code>operator=</code> 算子，另外两个不作深究。而
+<code>operator=</code>
+主要是检查对象是否指代相同类型，这个会经常用到，通常用于比较两个带有虚函数的类的对象是否相等。</p>
+<h3 id="rtti-底层原理">RTTI 底层原理</h3>
+<p>在一个多态对象的内存模型中，最开始就会放一个指向虚表的虚表指针
+<code>vptr</code>，而在虚表的 <strong><code>-1</code></strong>
+索引处保有一个 <code>type_info*</code> 条目，其指向的
+<code>type_info</code> 保存着该多态对象的类型信息。<code>typeid</code>
+会判断出表达式是否为一个多态对象，若是，则不断地深入内存，进行虚表指针
+-&gt; 类型信息指针 -&gt; 类型信息层层递进，最后找到
+<code>type_info</code>
+并返回；而非多态对象则没有虚表这一概念，直接在编译期求得静态类型即可。</p>
+
+                
+            </div>
+            <hr/>
+
+            
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            <span class="chip bg-color">无标签</span>
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/c/c-generics/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/9.jpg" class="responsive-img" alt="C++ の 泛型编程(Generics)">
+                        
+                        <span class="card-title">C++ の 泛型编程(Generics)</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            泛型编程是程序设计语言的一种风格或范式，允许程序员在编写代码时使用一些以后才指定的类型，在实例化时作为参数指明这些类型。在
+C++ 里，这是与 OOP 并列的一大分支，通过模板来实现。
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2023-02-28
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/C/" class="post-category">
+                                    C++
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/c/c-memory/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/9.jpg" class="responsive-img" alt="C++ の 内存分配(Memory Allocation)">
+                        
+                        <span class="card-title">C++ の 内存分配(Memory Allocation)</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            众所周知，C++ 是一门与内存紧密相关的语言，本文就来聊聊 C++
+眼中的内存分配。
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2023-02-19
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/C/" class="post-category">
+                                    C++
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+
+  <!-- 是否加载使用自带的 prismjs. -->
+  <script type="text/javascript" src="/libs/prism/prism.min.js"></script>
+
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card" style="background-color: white;">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+<script src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+    MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$', '$'], ['\\(', '\\)']]}
+    });
+</script>
+
+
+
+    <footer class="page-footer bg-color">
+    
+
+    <div class="container row center-align"
+         style="margin-bottom: 15px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            
+                <span id="year">2023-2025</span>
+            
+            <a href="/about" target="_blank">Leager</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            
+            <br>
+            
+            
+            
+                
+            
+            
+                <span id="busuanzi_container_site_pv">
+                &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
+                    <span id="busuanzi_value_site_pv" class="white-color"></span>
+            </span>
+            
+            
+                <span id="busuanzi_container_site_uv">
+                &nbsp;|&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;
+                    <span id="busuanzi_value_site_uv" class="white-color"></span>
+            </span>
+            
+            <br>
+
+            <!-- 运行天数提醒. -->
+            
+                <span id="sitetime"> Loading ...</span>
+                <script>
+                    var calcSiteTime = function () {
+                        var seconds = 1000;
+                        var minutes = seconds * 60;
+                        var hours = minutes * 60;
+                        var days = hours * 24;
+                        var years = days * 365;
+                        var today = new Date();
+                        var startYear = "2023";
+                        var startMonth = "8";
+                        var startDate = "1";
+                        var startHour = "0";
+                        var startMinute = "0";
+                        var startSecond = "0";
+                        var todayYear = today.getFullYear();
+                        var todayMonth = today.getMonth() + 1;
+                        var todayDate = today.getDate();
+                        var todayHour = today.getHours();
+                        var todayMinute = today.getMinutes();
+                        var todaySecond = today.getSeconds();
+                        var t1 = Date.UTC(startYear, startMonth, startDate, startHour, startMinute, startSecond);
+                        var t2 = Date.UTC(todayYear, todayMonth, todayDate, todayHour, todayMinute, todaySecond);
+                        var diff = t2 - t1;
+                        var diffYears = Math.floor(diff / years);
+                        var diffDays = Math.floor((diff / days) - diffYears * 365);
+
+                        // 区分是否有年份.
+                        var language = 'zh-CN';
+                        if (startYear === String(todayYear)) {
+                            document.getElementById("year").innerHTML = todayYear;
+                            var daysTip = 'This site has been running for ' + diffDays + ' days';
+                            if (language === 'zh-CN') {
+                                daysTip = '本站已运行 ' + diffDays + ' 天';
+                            } else if (language === 'zh-HK') {
+                                daysTip = '本站已運行 ' + diffDays + ' 天';
+                            }
+                            document.getElementById("sitetime").innerHTML = daysTip;
+                        } else {
+                            document.getElementById("year").innerHTML = startYear + " - " + todayYear;
+                            var yearsAndDaysTip = 'This site has been running for ' + diffYears + ' years and '
+                                + diffDays + ' days';
+                            if (language === 'zh-CN') {
+                                yearsAndDaysTip = '本站已运行 ' + diffYears + ' 年 ' + diffDays + ' 天';
+                            } else if (language === 'zh-HK') {
+                                yearsAndDaysTip = '本站已運行 ' + diffYears + ' 年 ' + diffDays + ' 天';
+                            }
+                            document.getElementById("sitetime").innerHTML = yearsAndDaysTip;
+                        }
+                    }
+
+                    calcSiteTime();
+                </script>
+            
+            <br>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link social-statis">
+    <a href="https://github.com/Leager-zju" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:1004729740@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+
+
+
+
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1004729740" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1004729740" data-position="top" data-delay="50">
+        <i class="fab fa-qq"></i>
+    </a>
+
+
+
+
+
+
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    var searchFunc = function (path, search_id, content_id) {
+        'use strict';
+        $.ajax({
+            url: path,
+            dataType: "xml",
+            success: function (xmlResponse) {
+                // get the contents from search data
+                var datas = $("entry", xmlResponse).map(function () {
+                    return {
+                        title: $("title", this).text(),
+                        content: $("content", this).text(),
+                        url: $("url", this).text()
+                    };
+                }).get();
+                var $input = document.getElementById(search_id);
+                var $resultContent = document.getElementById(content_id);
+                $input.addEventListener('input', function () {
+                    var str = '<ul class=\"search-result-list\">';
+                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                    $resultContent.innerHTML = "";
+                    if (this.value.trim().length <= 0) {
+                        return;
+                    }
+                    // perform local searching
+                    datas.forEach(function (data) {
+                        var isMatch = true;
+                        var data_title = data.title.trim().toLowerCase();
+                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
+                        var data_url = data.url;
+                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
+                        var index_title = -1;
+                        var index_content = -1;
+                        var first_occur = -1;
+                        // only match artiles with not empty titles and contents
+                        if (data_title !== '' && data_content !== '') {
+                            keywords.forEach(function (keyword, i) {
+                                index_title = data_title.indexOf(keyword);
+                                index_content = data_content.indexOf(keyword);
+                                if (index_title < 0 && index_content < 0) {
+                                    isMatch = false;
+                                } else {
+                                    if (index_content < 0) {
+                                        index_content = 0;
+                                    }
+                                    if (i === 0) {
+                                        first_occur = index_content;
+                                    }
+                                }
+                            });
+                        }
+                        // show search results
+                        if (isMatch) {
+                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
+                            var content = data.content.trim().replace(/<[^>]+>/g, "");
+                            if (first_occur >= 0) {
+                                // cut out 100 characters
+                                var start = first_occur - 20;
+                                var end = first_occur + 80;
+                                if (start < 0) {
+                                    start = 0;
+                                }
+                                if (start === 0) {
+                                    end = 100;
+                                }
+                                if (end > content.length) {
+                                    end = content.length;
+                                }
+                                var match_content = content.substr(start, end);
+                                // highlight all keywords
+                                keywords.forEach(function (keyword) {
+                                    var regS = new RegExp(keyword, "gi");
+                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
+                                });
+
+                                str += "<p class=\"search-result\">" + match_content + "...</p>"
+                            }
+                            str += "</li>";
+                        }
+                    });
+                    str += "</ul>";
+                    $resultContent.innerHTML = str;
+                });
+            }
+        });
+    };
+
+    searchFunc('/search.xml', 'searchInput', 'searchResult');
+});
+</script>
+
+    <!-- 白天和黑夜主题 -->
+<div class="stars-con">
+    <div id="stars"></div>
+    <div id="stars2"></div>
+    <div id="stars3"></div>  
+</div>
+
+<script>
+    function switchNightMode() {
+        $('<div class="Cuteen_DarkSky"><div class="Cuteen_DarkPlanet"></div></div>').appendTo($('body')),
+        setTimeout(function () {
+            $('body').hasClass('DarkMode') 
+            ? ($('body').removeClass('DarkMode'), localStorage.setItem('isDark', '0'), $('#sum-moon-icon').removeClass("fa-sun").addClass('fa-moon')) 
+            : ($('body').addClass('DarkMode'), localStorage.setItem('isDark', '1'), $('#sum-moon-icon').addClass("fa-sun").removeClass('fa-moon')),
+            
+            setTimeout(function () {
+            $('.Cuteen_DarkSky').fadeOut(1e3, function () {
+                $(this).remove()
+            })
+            }, 2e3)
+        })
+    }
+</script>
+
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    
+
+    
+    
+    
+        
+        <script type="text/javascript">
+            // 只在桌面版网页启用特效
+            var windowWidth = $(window).width();
+            if (windowWidth > 768) {
+                document.write('<script type="text/javascript" src="/libs/others/sakura.js"><\/script>');
+            }
+        </script>
+    
+
+    <!-- 雪花特效 -->
+    
+
+    <!-- 鼠标星星特效 -->
+    
+
+     
+        <script src="https://ssl.captcha.qq.com/TCaptcha.js"></script>
+        <script src="/libs/others/TencentCaptcha.js"></script>
+        <button id="TencentCaptcha" data-appid="xxxxxxxxxx" data-cbfn="callback" type="button" hidden></button>
+    
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    <script src="/libs/others/clicklove.js" async="async"></script>
+    
+    
+    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
+    
+
+    
+
+    
+
+    <!--腾讯兔小巢-->
+    
+    
+
+    
+
+    
+
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+    <script type="text/javascript">
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden) {
+                document.title = '你会有一天后悔';
+            } else {
+                document.title = '欢迎来到 G8 北海道 洞爷湖 高峰会 博物馆';
+            }
+        });
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,1938 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="CS144 Lab Note, 没什么看头的地方">
+    <meta name="description" content="CS144 lab 记录过程。
+
+环境配置
+本课程所有 lab 均需要在 Linux 环境下运行，课程组提供了 4
+种运行方式，直接照着 Instructions
+来就好了。我这里因为实验室自带 Ubuntu
+工作站，所以用了第三种方式，按">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+    <title>CS144 Lab Note | 没什么看头的地方</title>
+    <link rel="icon" type="image/png" href="/dt.png">
+    
+    <style>
+        body{
+            background-image: url(https://cdn.jsdelivr.net/gh/Tokisaki-Galaxy/res/site/medias/background.jpg);
+            background-repeat:no-repeat;
+            background-size: 100% 100%;
+            background-attachment:fixed;
+        }
+    </style>
+
+
+
+    <!-- bg-cover style     -->
+
+
+
+<link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+<link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+<link rel="stylesheet" type="text/css" href="/css/matery.css">
+<link rel="stylesheet" type="text/css" href="/css/my.css">
+<link rel="stylesheet" type="text/css" href="/css/dark.css" media="none" onload="if(media!='all')media='all'">
+
+
+
+
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+    <link rel="stylesheet" href="/css/post.css">
+
+
+
+
+    
+
+
+
+    <script src="/libs/jquery/jquery-3.6.0.min.js"></script>
+
+<meta name="generator" content="Hexo 6.3.0">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/comment_bg.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">没什么看头的地方</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/archives" class="waves-effect waves-light">
+      
+      <i class="fas fa-archive" style="zoom: 0.6;"></i>
+      
+      <span>归档</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/contact" class="waves-effect waves-light">
+      
+      <i class="fas fa-comments" style="zoom: 0.6;"></i>
+      
+      <span>留言板</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/friends" class="waves-effect waves-light">
+      
+      <i class="fas fa-address-book" style="zoom: 0.6;"></i>
+      
+      <span>友情链接</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+  <li>
+    <a href="javascript:;" class="waves-effect waves-light" onclick="switchNightMode()" title="深色/浅色模式" >
+      <i id="sum-moon-icon" class="fas fa-sun" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/comment_bg.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">没什么看头的地方</div>
+        <div class="logo-desc">
+            
+            【数据删除】
+            
+        </div>
+    </div>
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/archives" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-archive"></i>
+			
+			归档
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/contact" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-comments"></i>
+			
+			留言板
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/friends" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-address-book"></i>
+			
+			友情链接
+		</a>
+          
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/Leager-zju" class="waves-effect waves-light" target="_blank">
+                <i class="fab fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+            <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/Leager-zju" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+   data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+        
+    </nav>
+
+</header>
+
+    
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/20.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">CS144 Lab Note</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                          <div class="article-tag">
+                            <span class="chip bg-color">无标签</span>
+                          </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/Lab/" class="post-category">
+                                Lab
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2023-03-21
+                </div>
+                
+
+                
+
+                
+
+                
+
+                
+            </div>
+        </div>
+        <hr class="clearfix">
+
+        
+        <!-- 是否加载使用自带的 prismjs. -->
+        <link rel="stylesheet" href="/libs/prism/prism.min.css">
+        
+
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <p>CS144 lab 记录过程。</p>
+<span id="more"></span>
+<h2 id="环境配置">环境配置</h2>
+<p>本课程所有 lab 均需要在 Linux 环境下运行，课程组提供了 4
+种运行方式，直接照着 <a target="_blank" rel="noopener" href="https://stanford.edu/class/cs144/vm_howto/">Instructions</a>
+来就好了。我这里因为实验室自带 Ubuntu
+工作站，所以用了第三种方式，按照清单一个个
+<code>sudo apt-get install</code> 下来就完事了。</p>
+<h2 id="lab0-networking-warmup">lab0 Networking Warmup</h2>
+<p>之前有用 http 访问某网站并获取文本、用 smtp
+发邮件的一些小操作，跟着走一遍基本没啥问题，就是熟悉一下基本的命令。现在要真正上手敲
+C++ 了。</p>
+<h3 id="准备工作">准备工作</h3>
+<p>首先是把代码拉下来，我先在自己的 github 下<a target="_blank" rel="noopener" href="https://github.com/new">新建</a>了一个仓库，命名为
+<strong>CS144</strong>，为了尊重课程协议，我设为了
+<code>private</code>。拉代码就直接
+<code>git clone --bare https://github.com/CS144/sponge.git</code>，后面所有的
+lab 都是在这一套文件下实现的。</p>
+<p>随后，执行</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token builtin class-name">cd</span> your_repository_name
+$ <span class="token function">git</span> push git@github.com:your_github_name/your_repository_name.git <span class="token parameter variable">--all</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>此时课程代码及其所有分支已经移植到我们自己的仓库里了，接着
+<code>cd .. &amp;&amp; rm -rf sponge</code>
+将课程仓库删除，最后把我们自己的仓库拉下来即可。</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment">## If you pull / push over HTTPS</span>
+$ <span class="token function">git</span> clone https://github.com/your_github_name/your_repository_name.git
+
+<span class="token comment">## If you pull / push over SSH</span>
+$ <span class="token function">git</span> clone git@github.com:your_github_name/your_repository_name.git<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>可以输入 <code>git remote -v</code>
+查看本地与远程是否对应。ok，现在可以将所有更改 push
+到自己的代码仓库里了。</p>
+<h3 id="coding">coding</h3>
+<blockquote>
+<p>课程 lab 代码仓库一共有 8 个分支，每个 lab 前都需要
+<code>git merge lab?-startercode</code> 来合并分支。</p>
+</blockquote>
+<p>执行如下命令构建项目</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">mkdir</span> build
+$ <span class="token builtin class-name">cd</span> build
+$ cmake <span class="token punctuation">..</span>
+$ <span class="token function">make</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>我们的代码要写在 <code>/apps/webget.cc</code> 里的
+<code>Your code here</code> 处。写之前要认真看看
+<code>socket.hh</code>，<code>address.hh</code>，<code>file_descriptor.hh</code>
+这三个头文件，尽管本 lab 要用到的类只有 <code>TCPSocket</code> 和
+<code>Address</code> 这俩。</p>
+<p><code>Address</code> 类决定了连接的目标 host 以及协议类型，这里应为
+<code>Address(host, "http")</code>。</p>
+<p><code>TCPSocket</code> 提供了 <code>write(string)</code>
+方法，等效于在 terminal 输入相应的命令；<code>read()</code>
+方法则返回获取到的字节流；<code>eof()</code>
+方法判断是否抵达字节流末尾。</p>
+<blockquote>
+<p>注意，每一行末尾都要加上 <code>'\r\n'</code>，最后的
+<code>Connection: close</code> 后要加两个这玩意。</p>
+<p>注意，请用 while(!socket.eof()) 来循环读字节流，而非 single call to
+read。</p>
+</blockquote>
+<p>写完代码后，可以执行如下命令来检查输出结果：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token builtin class-name">cd</span> build
+$ ./apps/webget cs144.keithw.org /hello <span class="token comment">## 可执行文件, host, path</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>如果看到结果如下，则输出正确。</p>
+<pre class="line-numbers language-none"><code class="language-none">HTTP/1.1 200 OK
+Date: Tue, 21 Mar 2023 10:16:57 GMT
+Server: Apache
+Last-Modified: Thu, 13 Dec 2018 15:45:29 GMT
+ETag: "e-57ce93446cb64"
+Accept-Ranges: bytes
+Content-Length: 14
+Connection: close
+Content-Type: text/plain
+
+Hello, CS144!<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>最后用课程组给的测试代码进行跑分:</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token builtin class-name">cd</span> build
+$ <span class="token function">make</span> check_webget<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>看到如下输出，则通过。</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span><span class="token number">100</span>%<span class="token punctuation">]</span> Testing webget<span class="token punctuation">..</span>.
+Test project <span class="token punctuation">..</span>./CS144/build
+    Start <span class="token number">31</span>: t_webget
+<span class="token number">1</span>/1 Test <span class="token comment">#31: t_webget .........................   Passed    6.05 sec</span>
+
+<span class="token number">100</span>% tests passed, <span class="token number">0</span> tests failed out of <span class="token number">1</span>
+
+Total Test <span class="token function">time</span> <span class="token punctuation">(</span>real<span class="token punctuation">)</span> <span class="token operator">=</span>   <span class="token number">6.05</span> sec
+<span class="token punctuation">[</span><span class="token number">100</span>%<span class="token punctuation">]</span> Built target check_webget<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="an-in-memory-reliable-byte-stream">An in-memory reliable byte
+stream</h3>
+<p>lab0 的最后一个任务是实现一个处理字节流的有限容量 buffer，writer
+负责将字节流写入 buffer 中，reader 从中读取。文件位于
+<code>libsponge/byte_stream.cc</code> 以及
+<code>libsponge/byte_stream.hh</code>。</p>
+<p>writer 的工作很简单，写数据(write)、终止写入(end_input)以及获取
+buffer
+剩余容量(remaining_capacity)，需要注意的是如果写入的数据大小超过了剩余容量，则应尽可能写入，比如剩余容量
+3 的情况下要写 <code>"abcdefg"</code>，则只写入 <code>"abc"</code>。</p>
+<p>reader
+有三种输出方式，只读(peek_output)，只写(pop_output)以及读写(read_output)，注意后两种方法都意味着增加<strong>已读取的字节数</strong>。</p>
+<p>以及一些通用的接口，这些接口的实现需要我们额外添加一些 private
+成员变量，不再赘述。这里课程组已经为我们提供了一个名为
+<code>BufferList</code> 的数据结构</p>
+<p>执行以下命令进行测试：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token builtin class-name">cd</span> build
+$ <span class="token function">make</span> <span class="token function">format</span>
+$ <span class="token function">make</span>
+$ <span class="token function">make</span> check_lab0<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>测试结果如下。</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span><span class="token number">100</span>%<span class="token punctuation">]</span> Testing Lab <span class="token number">0</span><span class="token punctuation">..</span>.
+Test project <span class="token punctuation">..</span>./CS144/build
+    Start <span class="token number">26</span>: t_byte_stream_construction
+<span class="token number">1</span>/9 Test <span class="token comment">#26: t_byte_stream_construction .......   Passed    0.00 sec</span>
+    Start <span class="token number">27</span>: t_byte_stream_one_write
+<span class="token number">2</span>/9 Test <span class="token comment">#27: t_byte_stream_one_write ..........   Passed    0.00 sec</span>
+    Start <span class="token number">28</span>: t_byte_stream_two_writes
+<span class="token number">3</span>/9 Test <span class="token comment">#28: t_byte_stream_two_writes .........   Passed    0.00 sec</span>
+    Start <span class="token number">29</span>: t_byte_stream_capacity
+<span class="token number">4</span>/9 Test <span class="token comment">#29: t_byte_stream_capacity ...........   Passed    0.36 sec</span>
+    Start <span class="token number">30</span>: t_byte_stream_many_writes
+<span class="token number">5</span>/9 Test <span class="token comment">#30: t_byte_stream_many_writes ........   Passed    0.02 sec</span>
+    Start <span class="token number">31</span>: t_webget
+<span class="token number">6</span>/9 Test <span class="token comment">#31: t_webget .........................   Passed    3.45 sec</span>
+    Start <span class="token number">53</span>: t_address_dt
+<span class="token number">7</span>/9 Test <span class="token comment">#53: t_address_dt .....................   Passed    0.01 sec</span>
+    Start <span class="token number">54</span>: t_parser_dt
+<span class="token number">8</span>/9 Test <span class="token comment">#54: t_parser_dt ......................   Passed    0.00 sec</span>
+    Start <span class="token number">55</span>: t_socket_dt
+<span class="token number">9</span>/9 Test <span class="token comment">#55: t_socket_dt ......................   Passed    0.01 sec</span>
+
+<span class="token number">100</span>% tests passed, <span class="token number">0</span> tests failed out of <span class="token number">9</span>
+
+Total Test <span class="token function">time</span> <span class="token punctuation">(</span>real<span class="token punctuation">)</span> <span class="token operator">=</span>   <span class="token number">3.86</span> sec
+<span class="token punctuation">[</span><span class="token number">100</span>%<span class="token punctuation">]</span> Built target check_lab0<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="lab1-stream-reassembler">lab1 Stream Reassembler</h2>
+<p>本 lab 要求在 lab0 的基础上实现一个字节流整合器。</p>
+<p><img src="1.png" style="zoom:67%;"></p>
+<p>lab1 ~ lab4 均围绕此图进行。在 lab0
+中，我们实现了有序字节流，而事实上真实的网络并不会按顺序向我们发送数据包，我们需要利用一个整合器将收到的无序字节流片段以正确顺序拼接并写到
+<code>ByteStream</code> 中。数据包以 <code>{data, index}</code>
+的形式被接收，其中 <code>data</code> 为
+<code>std::string</code>，<code>index</code> 为 <code>data</code>
+作为子串在原始字节流中的下标，如</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp">                     <span class="token number">1</span>         <span class="token number">2</span>
+           <span class="token number">01234567890123456789012345</span>
+原始字符串<span class="token operator">:</span> abcdefghijklmnopqrstuvwxyz<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+
+收到的数据包可能为 <span class="token punctuation">{</span><span class="token string">"abc"</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token punctuation">{</span><span class="token string">"efghij"</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">}</span> 等<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>一旦整合器收到了正确的数据包（需要我们维护一个
+<code>next_index</code>），它就会将其写入
+<code>ByteStream</code>；而那些顺序错乱的，整合器会将其缓存，但丢弃那些超过
+<code>capacity</code> 的部分。关于 <code>capacity</code>，guide
+里有了一个比较明确的介绍：</p>
+<p><img src="2.png" style="zoom:67%;"></p>
+<blockquote>
+<p>即 <code>ByteStream</code> 中未读取的部分加上
+<code>Reassembler</code> 中无序的部分大小不能超过
+<code>capacity</code>。</p>
+</blockquote>
+<p>一些注意事项都写在 FAQ 里了：</p>
+<h3 id="数据结构设计">数据结构设计</h3>
+<p>本来想用 <code>std::vector&lt;char&gt;</code>
+模拟循环队列的，但实际操作起来发现开销奇高，后来决定用
+<code>std::map&lt;uint32_t, std::string&gt;</code>
+的索引表的方式，记录每个字符串及其索引，并做好去重工作。每次收到一个
+<code>{index, data}</code> 对时，遍历索引表，如果有重复的部分，则修改
+<code>data</code>
+的有效字节区间，并进行适当插入。完成插入操作后，不断判断
+<code>table.find(next_index)</code>
+是否有效，若有效则删除条目并将对应字符串拼接至返回结果末尾。</p>
+<blockquote>
+<p>有点像 <code>map reduce</code>，然后我的函数签名就是 map 和 reduce
+了。</p>
+</blockquote>
+<p>需要注意的是，收到的子串并非每个字符都要写入，我们要写入的部分应为</p>
+<p><code>[max(index, next_index), min(next_index + capacity - ByteStream.buffer_size(), index + data.length())]</code></p>
+<p>这样就能忽略已写入 <code>ByteStream</code> 的部分以及超出
+<code>capacity</code> 的部分。</p>
+<blockquote>
+<p>上面的索引为流索引，还需要转换为数组下标。</p>
+</blockquote>
+<p>需要注意的是，当收到一个 <code>eof = true</code> 的
+<code>{index, data}</code> 对时，可能并不会立刻
+<code>end_input</code>，而是在后续的 reduce 阶段收集到所有字节流再
+<code>end_input</code>，这就需要我们存一个 <code>eof_index</code>
+变量，当 <code>next_index == eof_index</code> 时进行
+<code>end_input</code>。</p>
+<p>部分代码如下所示：</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>libsponge/stream_reassembler.cc</span></div><code class="language-cpp"><span class="token keyword">void</span> <span class="token class-name">StreamReassembler</span><span class="token double-colon punctuation">::</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token keyword">const</span> std<span class="token double-colon punctuation">::</span>string <span class="token operator">&amp;</span>data<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">uint64_t</span> index<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>data<span class="token punctuation">.</span><span class="token function">empty</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+  <span class="token comment">// 只取 data 的 [start_index, last_index) 区间</span>
+  size_t start_index <span class="token operator">=</span> <span class="token function">max</span><span class="token punctuation">(</span>index<span class="token punctuation">,</span> _next_index<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  size_t last_index <span class="token operator">=</span> <span class="token function">min</span><span class="token punctuation">(</span>_next_index <span class="token operator">+</span> _capacity <span class="token operator">-</span> _output<span class="token punctuation">.</span><span class="token function">buffer_size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> index <span class="token operator">+</span> data<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">auto</span> <span class="token operator">&amp;&amp;</span>entry <span class="token operator">:</span> _buffer<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>start_index <span class="token operator">&gt;=</span> last_index<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token keyword">return</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    size_t end_index <span class="token operator">=</span> entry<span class="token punctuation">.</span>first <span class="token operator">+</span> entry<span class="token punctuation">.</span>second<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>entry<span class="token punctuation">.</span>first <span class="token operator">&gt;</span> start_index<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span>last_index <span class="token operator">&lt;=</span> entry<span class="token punctuation">.</span>first<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        _buffer<span class="token punctuation">.</span><span class="token function">emplace</span><span class="token punctuation">(</span><span class="token function">make_pair</span><span class="token punctuation">(</span>start_index<span class="token punctuation">,</span> data<span class="token punctuation">.</span><span class="token function">substr</span><span class="token punctuation">(</span>start_index <span class="token operator">-</span> index<span class="token punctuation">,</span> last_index <span class="token operator">-</span> start_index<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        start_index <span class="token operator">=</span> last_index<span class="token punctuation">;</span>
+        <span class="token keyword">break</span><span class="token punctuation">;</span>
+      <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+        _buffer<span class="token punctuation">.</span><span class="token function">emplace</span><span class="token punctuation">(</span><span class="token function">make_pair</span><span class="token punctuation">(</span>start_index<span class="token punctuation">,</span> data<span class="token punctuation">.</span><span class="token function">substr</span><span class="token punctuation">(</span>start_index <span class="token operator">-</span> index<span class="token punctuation">,</span> entry<span class="token punctuation">.</span>first <span class="token operator">-</span> start_index<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        start_index <span class="token operator">=</span> end_index<span class="token punctuation">;</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+      start_index <span class="token operator">=</span> <span class="token function">max</span><span class="token punctuation">(</span>start_index<span class="token punctuation">,</span> end_index<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+  <span class="token comment">// 仍有有效部分</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>start_index <span class="token operator">&lt;</span> last_index<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    _buffer<span class="token punctuation">.</span><span class="token function">emplace</span><span class="token punctuation">(</span><span class="token function">make_pair</span><span class="token punctuation">(</span>start_index<span class="token punctuation">,</span> data<span class="token punctuation">.</span><span class="token function">substr</span><span class="token punctuation">(</span>start_index <span class="token operator">-</span> index<span class="token punctuation">,</span> last_index <span class="token operator">-</span> start_index<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">void</span> <span class="token class-name">StreamReassembler</span><span class="token double-colon punctuation">::</span><span class="token function">reduce</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  std<span class="token double-colon punctuation">::</span>string res<span class="token punctuation">;</span>
+  <span class="token keyword">while</span> <span class="token punctuation">(</span>_buffer<span class="token punctuation">.</span><span class="token function">count</span><span class="token punctuation">(</span>_next_index<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">auto</span> entry <span class="token operator">=</span> _buffer<span class="token punctuation">.</span><span class="token function">find</span><span class="token punctuation">(</span>_next_index<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    res<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span>entry<span class="token operator">-&gt;</span>second<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    _next_index <span class="token operator">+=</span> entry<span class="token operator">-&gt;</span>second<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    _size <span class="token operator">-=</span> entry<span class="token operator">-&gt;</span>second<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    _buffer<span class="token punctuation">.</span><span class="token function">erase</span><span class="token punctuation">(</span>entry<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>res<span class="token punctuation">.</span><span class="token function">empty</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    _output<span class="token punctuation">.</span><span class="token function">write</span><span class="token punctuation">(</span>res<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>_next_index <span class="token operator">==</span> _eof_index<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    _output<span class="token punctuation">.</span><span class="token function">end_input</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>测试结果如下。</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span><span class="token number">100</span>%<span class="token punctuation">]</span> Testing the stream reassembler<span class="token punctuation">..</span>.
+Test project <span class="token punctuation">..</span>./CS144/build
+      Start <span class="token number">18</span>: t_strm_reassem_single
+ <span class="token number">1</span>/16 Test <span class="token comment">#18: t_strm_reassem_single ............   Passed    0.00 sec</span>
+      Start <span class="token number">19</span>: t_strm_reassem_seq
+ <span class="token number">2</span>/16 Test <span class="token comment">#19: t_strm_reassem_seq ...............   Passed    0.00 sec</span>
+      Start <span class="token number">20</span>: t_strm_reassem_dup
+ <span class="token number">3</span>/16 Test <span class="token comment">#20: t_strm_reassem_dup ...............   Passed    0.01 sec</span>
+      Start <span class="token number">21</span>: t_strm_reassem_holes
+ <span class="token number">4</span>/16 Test <span class="token comment">#21: t_strm_reassem_holes .............   Passed    0.00 sec</span>
+      Start <span class="token number">22</span>: t_strm_reassem_many
+ <span class="token number">5</span>/16 Test <span class="token comment">#22: t_strm_reassem_many ..............   Passed    0.20 sec</span>
+      Start <span class="token number">23</span>: t_strm_reassem_overlapping
+ <span class="token number">6</span>/16 Test <span class="token comment">#23: t_strm_reassem_overlapping .......   Passed    0.00 sec</span>
+      Start <span class="token number">24</span>: t_strm_reassem_win
+ <span class="token number">7</span>/16 Test <span class="token comment">#24: t_strm_reassem_win ...............   Passed    0.20 sec</span>
+      Start <span class="token number">25</span>: t_strm_reassem_cap
+ <span class="token number">8</span>/16 Test <span class="token comment">#25: t_strm_reassem_cap ...............   Passed    0.08 sec</span>
+
+<span class="token punctuation">..</span>.
+
+<span class="token number">100</span>% tests passed, <span class="token number">0</span> tests failed out of <span class="token number">16</span>
+
+Total Test <span class="token function">time</span> <span class="token punctuation">(</span>real<span class="token punctuation">)</span> <span class="token operator">=</span>   <span class="token number">1.77</span> sec
+<span class="token punctuation">[</span><span class="token number">100</span>%<span class="token punctuation">]</span> Built target check_lab1<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="lab2-tcp-receiver">lab2 TCP Receiver</h2>
+<p>本 lab 需要实现 TCP 协议的接收端。</p>
+<p>此时接受端收到的就是 <code>{TCP Header, IP Datagram}</code>
+组成的报文段(TCP segment)了，该数据结构定义在
+<code>/libsponge/tcp_helpers/tcp_segment.hh</code> 中，其中首部(TCP
+header)字段定义在 <code>/libsponge/tcp_helpers/tcp_header.hh</code>
+中。</p>
+<h3 id="task-1-translate-between-64-bit-indexes-and-32-bit-seqnos">Task
+1: Translate between 64-bit indexes and 32-bit seqnos</h3>
+<p>第一个任务是编写用于 <code>seqno</code> 与
+<code>absolute seqno</code> 互相转换的 <code>wrap()</code> 与
+<code>unwrap()</code> 函数。guide 中其实已经说的比较详细了。</p>
+<p><img src="3.png" style="zoom:67%;"></p>
+<h4 id="wrapn-isn">wrap(n, isn)</h4>
+<p>给定 <code>isn</code> 和绝对序列号
+<code>n</code>，求相应的序列号，易得</p>
+<p><span class="math display">\[
+seqno = (isn + n\ \&amp;\ \text{uint32_max})\ \%\ \text{uint32_max}
+\]</span></p>
+<h4 id="unwrapn-isn-checkpoint">unwrap(n, isn, checkpoint)</h4>
+<p>给定序列号 <code>n</code> 和
+<code>isn</code>，以及用于消除多义性的检查点
+<code>checkpoint</code>，求距离 <code>checkpoint</code>
+最近的绝对序列号。显然，最后的结果应该为</p>
+<p><span class="math display">\[
+abs\_seqno = n - isn + i\times offset,\quad offset = 2^{32}, \ i \in [0,
+2^{32}-1]
+\]</span></p>
+<p>如果将 <code>checkpoint</code> 分为高 32 位与低 32 位，那么
+<code>checkpoint</code> 必然能表示为 <span class="math inline">\(\text{high32}\times offset +
+\text{low32}\)</span></p>
+<p>从而存在三种绝对序列号可能，分别为
+<code>i = high32-1, high32, high32+1</code></p>
+<ol type="1">
+<li>如果 <code>n-isn &lt; low32</code>，则 <code>i</code> 取
+<code>high32-1, high32</code>；</li>
+<li>如果 <code>n-isn == low32</code>，则 <code>i</code> 取
+<code>high32</code>；</li>
+<li>如果 <code>n-isn &gt; low32</code>，则 <code>i</code> 取
+<code>high32, high32+1</code>；</li>
+</ol>
+<p>不难发现，令 <code>i = high32</code>
+一定是可能的选择之一，但还有一些边界条件需要考虑：</p>
+<ol type="1">
+<li>如果 <code>high32 == 0</code>，那么 case1 下 <code>high32-1</code>
+无法取得；</li>
+<li>如果 <code>high32 == 11..11</code>，那么 case3 下
+<code>high32+1</code> 无法取得；</li>
+</ol>
+<p>故得到</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>libsponge/wrapping_integers.cc</span></div><code class="language-cpp"><span class="token keyword">uint64_t</span> <span class="token function">unwrap</span><span class="token punctuation">(</span>WrappingInt32 n<span class="token punctuation">,</span> WrappingInt32 isn<span class="token punctuation">,</span> <span class="token keyword">uint64_t</span> checkpoint<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">uint64_t</span> c_high32 <span class="token operator">=</span> checkpoint <span class="token operator">&gt;&gt;</span> <span class="token number">32</span><span class="token punctuation">;</span>
+  <span class="token keyword">uint64_t</span> offset <span class="token operator">=</span> <span class="token number">1ul</span> <span class="token operator">&lt;&lt;</span> <span class="token number">32</span><span class="token punctuation">;</span>
+  <span class="token keyword">uint64_t</span> lower_bound <span class="token operator">=</span> <span class="token number">1ul</span> <span class="token operator">&lt;&lt;</span> <span class="token number">32</span><span class="token punctuation">;</span>
+  <span class="token keyword">uint64_t</span> upper_bound <span class="token operator">=</span> <span class="token punctuation">(</span>lower_bound<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">&lt;&lt;</span> <span class="token number">32</span><span class="token punctuation">;</span>
+  <span class="token keyword">uint64_t</span> res <span class="token operator">=</span> <span class="token generic-function"><span class="token function">static_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token keyword">uint64_t</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span>n <span class="token operator">-</span> isn<span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token punctuation">(</span>c_high32 <span class="token operator">&lt;&lt;</span> <span class="token number">32</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>res <span class="token operator">&gt;</span> checkpoint<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>res <span class="token operator">&gt;</span> lower_bound <span class="token operator">&amp;&amp;</span> res <span class="token operator">-</span> checkpoint <span class="token operator">&gt;=</span> offset <span class="token operator">&gt;&gt;</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      res <span class="token operator">-=</span> offset<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>res <span class="token operator">&lt;</span> checkpoint<span class="token punctuation">)</span><span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>res <span class="token operator">&lt;</span> upper_bound <span class="token operator">&amp;&amp;</span> checkpoint <span class="token operator">-</span> res <span class="token operator">&gt;=</span> offset <span class="token operator">&gt;&gt;</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      res <span class="token operator">+=</span> offset<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">return</span> res<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<blockquote>
+<p>有一个坑点在于，头文件中对 <code>WrappintInt32 - WrappingInt32</code>
+的重载返回值为 <code>int64_t</code> 而非
+<code>uint_64t</code>，这就导致上面的 <code>res</code> 在
+<code>n = UINT32_MAX, isn = 0</code>
+的时候出现计算错误，需要修改头文件。</p>
+</blockquote>
+<h3 id="task-2-implenting-the-tcp-receiver">Task 2: Implenting the TCP
+receiver</h3>
+<p>该 task 主要完成三件事</p>
+<ol type="1">
+<li>从其对等方接收 TCPsegment；</li>
+<li>使用 <code>StreamReassembler</code> 重新整合字节流；</li>
+<li>计算确认号(ackno)和窗口大小，ackno 和窗口大小最终将在 TCPsegment
+中传回对等方；</li>
+</ol>
+<p>窗口大小很好理解，就是 lab1 中的
+<code>capacity - ByteStream.buffer_size()</code>。</p>
+<p>对于确认号而言，则对应的是"下一个希望接收到的 seqno"。已知标志位
+<code>SYN</code> 和 <code>FIN</code> 也各占一个
+seqno，则根据下面那张转换图，不难发现有</p>
+<p><span class="math display">\[
+\text{ackno} = wrap(\text{next\_index},\ \text{isn}) + 1 +
+\text{ByteStream.input\_ended()}
+\]</span></p>
+<p><img src="3.png" style="zoom:67%;"></p>
+<p>其中，<code>ByteStream.input_ended()</code> 表示 <code>FIN=1</code>
+的 segment 已完全写入 <code>ByteStream</code>。</p>
+<blockquote>
+<p>需要注意的是，在收到第一个 <code>SYN=1</code> 的 segment 之前，ackno
+应返回空值，表现为
+<code>return std::optional&lt;WrappintInt32&gt;{}</code>。由于 isn 仅在
+<code>SYN=1</code> 的 segment
+到来时才会被正确初始化，故需要一个变量来表示 isn 是否被赋值。</p>
+</blockquote>
+<p>最后就是接收 segment 的 api <code>segment_received(TCPsegment)</code>
+了，该 api 主要工作就是将 segment 中的 IP 层数据包写入 Reassembler
+中，难点在于流索引的计算。根据转换图可以得知</p>
+<p><span class="math display">\[
+\text{stream\_index} =
+\begin{cases}
+\qquad\qquad\qquad\qquad 0 \qquad\qquad\qquad\qquad \text{SYN}=1
+\\[2ex]
+unwrap(\text{seqno}, \text{isn}, \text{next\_index}) - 1 \qquad
+\text{else}
+\end{cases}
+\]</span></p>
+<p>而写入的子串可通过 <code>segment.payload().copy()</code> 获取。其中
+<code>payload()</code> 其实就是 IP 层数据包部分。</p>
+<blockquote>
+<p>需要考虑的 corner case 比较多，比如仅仅 <code>SYN=1</code> /
+<code>FIN=1</code> 或两个标志位同时为 <code>1</code>
+但无数据的情况。</p>
+</blockquote>
+<p>测试结果如下。</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span><span class="token number">100</span>%<span class="token punctuation">]</span> Testing the TCP receiver<span class="token punctuation">..</span>.
+Test project <span class="token punctuation">..</span>./CS144/build
+      Start  <span class="token number">1</span>: t_wrapping_ints_cmp
+ <span class="token number">1</span>/26 Test  <span class="token comment">#1: t_wrapping_ints_cmp ..............   Passed    0.00 sec</span>
+      Start  <span class="token number">2</span>: t_wrapping_ints_unwrap
+ <span class="token number">2</span>/26 Test  <span class="token comment">#2: t_wrapping_ints_unwrap ...........   Passed    0.00 sec</span>
+      Start  <span class="token number">3</span>: t_wrapping_ints_wrap
+ <span class="token number">3</span>/26 Test  <span class="token comment">#3: t_wrapping_ints_wrap .............   Passed    0.00 sec</span>
+      Start  <span class="token number">4</span>: t_wrapping_ints_roundtrip
+ <span class="token number">4</span>/26 Test  <span class="token comment">#4: t_wrapping_ints_roundtrip ........   Passed    0.15 sec</span>
+      Start  <span class="token number">5</span>: t_recv_connect
+ <span class="token number">5</span>/26 Test  <span class="token comment">#5: t_recv_connect ...................   Passed    0.00 sec</span>
+      Start  <span class="token number">6</span>: t_recv_transmit
+ <span class="token number">6</span>/26 Test  <span class="token comment">#6: t_recv_transmit ..................   Passed    0.05 sec</span>
+      Start  <span class="token number">7</span>: t_recv_window
+ <span class="token number">7</span>/26 Test  <span class="token comment">#7: t_recv_window ....................   Passed    0.00 sec</span>
+      Start  <span class="token number">8</span>: t_recv_reorder
+ <span class="token number">8</span>/26 Test  <span class="token comment">#8: t_recv_reorder ...................   Passed    0.00 sec</span>
+      Start  <span class="token number">9</span>: t_recv_close
+ <span class="token number">9</span>/26 Test  <span class="token comment">#9: t_recv_close .....................   Passed    0.00 sec</span>
+      Start <span class="token number">10</span>: t_recv_special
+<span class="token number">10</span>/26 Test <span class="token comment">#10: t_recv_special ...................   Passed    0.00 sec</span>
+
+<span class="token punctuation">..</span>.
+
+<span class="token number">100</span>% tests passed, <span class="token number">0</span> tests failed out of <span class="token number">26</span>
+
+Total Test <span class="token function">time</span> <span class="token punctuation">(</span>real<span class="token punctuation">)</span> <span class="token operator">=</span>   <span class="token number">1.18</span> sec
+<span class="token punctuation">[</span><span class="token number">100</span>%<span class="token punctuation">]</span> Built target check_lab2<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="lab3-tcp-sender">lab3 TCP Sender</h2>
+<p>本 lab 需要实现 TCP 协议的发送端。</p>
+<h3 id="数据结构">数据结构</h3>
+<p>一个 TCPSender 应该完成以下事情：</p>
+<ol type="1">
+<li>跟踪接收方的窗口（处理传入的 ackno 和窗口大小）；</li>
+<li>尽可能填充窗口，方法是从 ByteStream 读取，创建新的 TCP
+段（如果需要，包括 SYN 和 FIN
+标志），然后发送它们。发送方应继续发送段，直到窗口已满或 ByteStream
+为空；</li>
+<li>跟踪哪些段已发送但尚未被接收方确认——我们称这些为"未完成"的段；</li>
+<li>如果自发送以来经过了足够长的时间且尚未确认，则重新发送最早未完成的段；</li>
+</ol>
+<p>这就需要我们添加一系列成员变量，我的数据结构设计如下：</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>libsponge/tcp_sender.cc</span></div><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">TCPSender</span> <span class="token punctuation">{</span>
+ <span class="token keyword">private</span><span class="token operator">:</span>
+  <span class="token comment">// (new!) 定时器</span>
+  Timer _timer<span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+  <span class="token comment">//! our initial sequence number, the number for our SYN.</span>
+  WrappingInt32 _isn<span class="token punctuation">;</span>
+  <span class="token comment">//! outbound queue of segments that the TCPSender wants sent</span>
+  std<span class="token double-colon punctuation">::</span>queue<span class="token operator">&lt;</span>TCPSegment<span class="token operator">&gt;</span> _segments_out<span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+  <span class="token comment">// (new!) 发送但尚未被确认的段队列，每发送一个段，都会将其副本添加到该队列中</span>
+  <span class="token comment">// 每收到一个正确的确认，都会将队首弹出</span>
+  std<span class="token double-colon punctuation">::</span>queue<span class="token operator">&lt;</span>TCPSegment<span class="token operator">&gt;</span> _outstanding_segments<span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+  <span class="token comment">//! retransmission timer for the connection</span>
+  <span class="token keyword">unsigned</span> <span class="token keyword">int</span> _initial_retransmission_timeout<span class="token punctuation">;</span>
+  <span class="token comment">// (new!) 重传时限</span>
+  <span class="token keyword">unsigned</span> <span class="token keyword">int</span> _rto<span class="token punctuation">;</span>
+  <span class="token comment">// (new!) 重传次数</span>
+  <span class="token keyword">uint16_t</span> _retransmission_times<span class="token punctuation">{</span><span class="token number">0</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+  <span class="token comment">//! outgoing stream of bytes that have not yet been sent</span>
+  ByteStream _stream<span class="token punctuation">;</span>
+  <span class="token comment">//! the (absolute) sequence number for the next byte to be sent</span>
+  <span class="token keyword">uint64_t</span> _next_seqno<span class="token punctuation">{</span><span class="token number">0</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+  <span class="token comment">// (new!) 确认号(绝对序列号)</span>
+  <span class="token keyword">uint64_t</span> _ackno<span class="token punctuation">{</span><span class="token number">0</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+  <span class="token comment">// (new!) 接收侧的窗口大小</span>
+  <span class="token keyword">uint64_t</span> _rws<span class="token punctuation">{</span><span class="token number">1</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+  <span class="token comment">// (new!) 是否已发送 FIN=1 的段</span>
+  <span class="token keyword">bool</span> closed<span class="token punctuation">{</span><span class="token boolean">false</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="定时功能">定时功能</h3>
+<p>这是本 lab
+的第一个任务。随着时间流逝，如果最早发送的段在一定时间内未得到确认，则需要进行<strong>超时重传</strong>，而定时器的作用就是告诉
+sender "超时了"，它应该有以下功能：</p>
+<ol type="1">
+<li><code>start()</code>，包括设置 rto 以及重置时间进度为
+0，并将定时器状态设为 <code>WORK</code>；</li>
+</ol>
+<p></p><pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>libsponge/tcp_sender.cc</span></div><code class="language-cpp"><span class="token keyword">void</span> <span class="token class-name">Timer</span><span class="token double-colon punctuation">::</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token keyword">unsigned</span> <span class="token keyword">int</span> rto<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  _rto <span class="token operator">=</span> rto<span class="token punctuation">;</span>
+  _current_time <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+  _state <span class="token operator">=</span> TimerState<span class="token double-colon punctuation">::</span>WORK<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre><p></p>
+<ol start="2" type="1">
+<li><code>stop()</code>，将定时器状态设为 <code>IDLE</code>；</li>
+</ol>
+<p></p><pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>libsponge/tcp_sender.cc</span></div><code class="language-cpp"><span class="token keyword">void</span> <span class="token class-name">Timer</span><span class="token double-colon punctuation">::</span><span class="token function">stop</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  _state <span class="token operator">=</span> TimerState<span class="token double-colon punctuation">::</span>IDLE<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre><p></p>
+<ol start="3" type="1">
+<li><code>tick()</code>，增加时间进度，并在超过 rto
+时向调用者传递信息(true/false)；</li>
+</ol>
+<p></p><pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>libsponge/tcp_sender.cc</span></div><code class="language-cpp"><span class="token keyword">bool</span> <span class="token class-name">Timer</span><span class="token double-colon punctuation">::</span><span class="token function">tick</span><span class="token punctuation">(</span><span class="token keyword">unsigned</span> <span class="token keyword">int</span> interval<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment">// true for timeout, false else</span>
+  _current_time <span class="token operator">+=</span> interval<span class="token punctuation">;</span>
+  <span class="token keyword">return</span> _current_time <span class="token operator">&gt;=</span> _rto<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre><p></p>
+<p>根据 guide，<code>TCPSender::tick()</code>
+会被自动调用，其传入参数为距离上一次调用该方法经过的时长，那么在
+<code>TCPSender::tick()</code> 中，我们就需要调用
+<code>Timer::tick()</code>
+并根据返回值判断是否需要重传。重传时需要做的事有：</p>
+<ol type="1">
+<li>重传尚未被 TCP
+接收方<strong>完全确认</strong>的最早的段（如果没有的话后面啥也不用做）；</li>
+<li>如果窗口大小不为零：
+<ul>
+<li><strong>增加连续重传的次数</strong>：因为重传次数对应的就是最早未确认的段，故无需建立
+<code>序列号-&gt;重传次数</code> 的映射;</li>
+<li><strong>指数退避</strong>：将 RTO
+翻倍，从而减慢糟糕网络上的重传速度，以避免进一步破坏工作；</li>
+</ul></li>
+<li>重启定时器，使其在 RTO 后到期；</li>
+</ol>
+<p>故 <code>TCPSender::tick()</code> 部分代码很容易能写出来</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>libsponge/tcp_sender.cc</span></div><code class="language-cpp"><span class="token keyword">void</span> <span class="token class-name">TCPSender</span><span class="token double-colon punctuation">::</span><span class="token function">tick</span><span class="token punctuation">(</span><span class="token keyword">const</span> size_t ms_since_last_tick<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>_outstanding_segments<span class="token punctuation">.</span><span class="token function">empty</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> _timer<span class="token punctuation">.</span><span class="token function">tick</span><span class="token punctuation">(</span>ms_since_last_tick<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>_rws <span class="token operator">!=</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      _retransmission_times<span class="token operator">++</span><span class="token punctuation">;</span>
+      _rto <span class="token operator">*=</span> <span class="token number">2</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>_retransmission_times <span class="token operator">&lt;=</span> TCPConfig<span class="token double-colon punctuation">::</span>MAX_RETX_ATTEMPTS<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token function">segments_out</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>_outstanding_segments<span class="token punctuation">.</span><span class="token function">front</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      _timer<span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span>_rto<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="收到确认后要做什么">收到确认后要做什么</h3>
+<p>当收到一个正确的 ackno 时：</p>
+<ol type="1">
+<li>将 RTO 设置回其"初始值"（即
+<code>_initial_retransmission_timeout</code>）；</li>
+<li>如果发送方有任何未完成的数据，重启定时器，使其在 RTO 毫秒（对于 RTO
+的当前值）后到期；</li>
+<li>反之，如果所有未完成的数据都被确认，停止定时器；</li>
+<li>将重传次数重置为零；</li>
+</ol>
+<p>怎样算正确的 ackno
+呢？对于一个段而言，当且仅当下式满足时，该段被成功确认。</p>
+<p><span class="math display">\[
+\text{abs_ackno} \geq \text{abs_seqno} + \text{length_in_sequence_space}
+\]</span></p>
+<blockquote>
+<p>也就是说，只有部分确认的段依然被认为是"完全未确认"。</p>
+</blockquote>
+<p>与此同时，还应满足 <span class="math inline">\(\text{abs_ackno}\leq
+\text{abs_next_seqno}\)</span>，否则会被认为是无效确认号。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>libsponge/tcp_sender.cc</span></div><code class="language-cpp"><span class="token keyword">bool</span> <span class="token class-name">TCPSender</span><span class="token double-colon punctuation">::</span><span class="token function">ack_received</span><span class="token punctuation">(</span><span class="token keyword">const</span> WrappingInt32 ackno<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">uint16_t</span> window_size<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">uint64_t</span> abs_ackno <span class="token operator">=</span> <span class="token function">unwrap</span><span class="token punctuation">(</span>ackno<span class="token punctuation">,</span> _isn<span class="token punctuation">,</span> _next_seqno<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>abs_ackno <span class="token operator">&gt;</span> _next_seqno <span class="token operator">||</span> abs_ackno <span class="token operator">&lt;</span> _ackno<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+  <span class="token keyword">bool</span> flag<span class="token punctuation">{</span><span class="token boolean">false</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+  _ackno <span class="token operator">=</span> abs_ackno<span class="token punctuation">;</span>  <span class="token comment">// abs ackno</span>
+  _rws <span class="token operator">=</span> window_size<span class="token punctuation">;</span>
+  <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token operator">!</span>_outstanding_segments<span class="token punctuation">.</span><span class="token function">empty</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    TCPSegment <span class="token operator">&amp;</span>seg <span class="token operator">=</span> _outstanding_segments<span class="token punctuation">.</span><span class="token function">front</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    size_t seq_length <span class="token operator">=</span> seg<span class="token punctuation">.</span><span class="token function">length_in_sequence_space</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>seg<span class="token punctuation">.</span><span class="token function">header</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>seqno <span class="token operator">+</span> seq_length <span class="token operator">&gt;</span> ackno<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token keyword">break</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    flag <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+    _outstanding_segments<span class="token punctuation">.</span><span class="token function">pop</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>flag<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    _rto <span class="token operator">=</span> _initial_retransmission_timeout<span class="token punctuation">;</span>
+    _outstanding_segments<span class="token punctuation">.</span><span class="token function">empty</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">?</span> _timer<span class="token punctuation">.</span><span class="token function">stop</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">:</span> _timer<span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span>_rto<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    _retransmission_times <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">return</span> flag<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="如何发送段">如何发送段</h3>
+<p>可以简单地认为，将 segment 插入 <code>_segments_out</code>
+队列中就算将它发出去了。</p>
+<p>但事实上，原始代码里并没有修改 segment 首部和负载字段的
+api，需要修改头文件，加上几个
+<code>set_syn()</code>，<code>set_fin()</code>
+之类的，方便正确创建段。</p>
+<p>最开始(abs_next_seqno=0)的时候，由于尚未建立连接，<code>_rws</code>
+字段会被初始化为 1 而非 0，此时要发送的段仅仅为
+<code>{SYN=1, data=""}</code>
+的同步请求段。在收到确认之后，<code>_rws</code>
+字段会被重置，我们就需要发送数据以尽可能填满该窗口，同时数据大小又不能超过
+<code>TCPConfig::MAX_PAYLOAD_SIZE</code>。</p>
+<p>已经发过的数据部分在未超时的情况下不用重复发送，那么理论上
+<code>ackno</code> 会小于等于
+<code>next_seqno</code>，而我们之后要发的数据部分应从
+<code>next_seqno</code>
+部分开始，于是乎这里就有了<strong>发送窗口</strong>的概念，即</p>
+<p><span class="math display">\[
+\text{send_window_size} = \text{abs_ackno} + \text{_rws} -
+\text{abs_next_seqno}
+\]</span></p>
+<p>这里需要注意的点是，<code>send_window_size</code>
+指的是还可以发送多少序列号，而 <code>TCPConfig::MAX_PAYLOAD_SIZE</code>
+指明了数据部分的字符数量，这两者的区别影响了是否需要在发送端的
+<code>ByteStream</code> 数据读完后将 <code>FIN</code> 设置为
+<code>1</code>。</p>
+<blockquote>
+<p>如果 <code>ByteStream</code> 已经 eof 且
+<code>data.length() &lt; send_window_size</code>，说明还能容纳一个
+<code>FIN</code> 的序列号，此时应当将 <code>FIN</code> 设为
+<code>1</code>。很可能的一个情况是剩下的数据刚好有
+<code>TCPConfig::MAX_PAYLOAD_SIZE</code> 这么多，而
+<code>send_window_size</code> 恰好为
+<code>TCPConfig::MAX_PAYLOAD_SIZE+1</code> 甚至更多，那么不加
+<code>FIN</code>
+是不合适的，违背了<strong>尽可能填满</strong>的规则。</p>
+</blockquote>
+<p>关于 <code>FIN</code> 还有个坑点，就是收到对 <code>{FIN=1}</code>
+段的确认后，很可能依然满足发 <code>FIN</code>
+段的要求，从而源源不断地发送，这就需要有一个变量来记录是否已经发过
+<code>FIN</code> 段了，也就是上文中提到的 <code>TCPSender::close</code>
+变量。</p>
+<p>由于数据有大小上限，那么极有可能出现 <code>ByteStream</code>
+还有大量数据，<code>_rws</code> 也还很大的情况，单独发一个
+<code>TCPConfig::MAX_PAYLOAD_SIZE</code>
+的段远远不够"填满"，此时要利用循环来不断尝试直至只能生成空段。</p>
+<p>最后实现如下：</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>libsponge/tcp_sender.cc</span></div><code class="language-cpp"><span class="token keyword">void</span> <span class="token class-name">TCPSender</span><span class="token double-colon punctuation">::</span><span class="token function">fill_window</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>_timer<span class="token punctuation">.</span><span class="token function">state</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> TimerState<span class="token double-colon punctuation">::</span>IDLE<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    _timer<span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span>_rto<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">bool</span> syn<span class="token punctuation">{</span><span class="token boolean">false</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+    <span class="token keyword">bool</span> fin<span class="token punctuation">{</span><span class="token boolean">false</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+    std<span class="token double-colon punctuation">::</span>string data<span class="token punctuation">;</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">in_closed</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment">// 尚未发过 seg</span>
+      syn <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+      size_t read_size <span class="token operator">=</span> <span class="token function">min</span><span class="token punctuation">(</span><span class="token function">send_window_size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> TCPConfig<span class="token double-colon punctuation">::</span>MAX_PAYLOAD_SIZE<span class="token punctuation">)</span><span class="token punctuation">;</span>
+      data <span class="token operator">=</span> <span class="token function">stream_in</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">read</span><span class="token punctuation">(</span>read_size<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+      <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>fin_sent <span class="token operator">&amp;&amp;</span> <span class="token function">stream_in</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">eof</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> data<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;</span> <span class="token function">send_window_size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        fin <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+        fin_sent <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+
+    TCPSegment seg <span class="token operator">=</span> TCPSegment<span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">.</span><span class="token function">with_syn</span><span class="token punctuation">(</span>syn<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">with_fin</span><span class="token punctuation">(</span>fin<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">with_data</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span><span class="token function">move</span><span class="token punctuation">(</span>data<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">with_seqno</span><span class="token punctuation">(</span><span class="token function">next_seqno</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    size_t seq_length <span class="token operator">=</span> seg<span class="token punctuation">.</span><span class="token function">length_in_sequence_space</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>seq_length <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token keyword">break</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    _segments_out<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>seg<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    _outstanding_segments<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>seg<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    _next_seqno <span class="token operator">+=</span> seq_length<span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>测试结果如下。</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span><span class="token number">100</span>%<span class="token punctuation">]</span> Testing the TCP sender<span class="token punctuation">..</span>.
+Test project <span class="token punctuation">..</span>./CS144/build
+
+<span class="token punctuation">..</span>.
+
+      Start <span class="token number">11</span>: t_send_connect
+<span class="token number">11</span>/33 Test <span class="token comment">#11: t_send_connect ...................   Passed    0.00 sec</span>
+      Start <span class="token number">12</span>: t_send_transmit
+<span class="token number">12</span>/33 Test <span class="token comment">#12: t_send_transmit ..................   Passed    0.09 sec</span>
+      Start <span class="token number">13</span>: t_send_retx
+<span class="token number">13</span>/33 Test <span class="token comment">#13: t_send_retx ......................   Passed    0.00 sec</span>
+      Start <span class="token number">14</span>: t_send_window
+<span class="token number">14</span>/33 Test <span class="token comment">#14: t_send_window ....................   Passed    0.06 sec</span>
+      Start <span class="token number">15</span>: t_send_ack
+<span class="token number">15</span>/33 Test <span class="token comment">#15: t_send_ack .......................   Passed    0.00 sec</span>
+      Start <span class="token number">16</span>: t_send_close
+<span class="token number">16</span>/33 Test <span class="token comment">#16: t_send_close .....................   Passed    0.00 sec</span>
+      Start <span class="token number">17</span>: t_send_extra
+<span class="token number">17</span>/33 Test <span class="token comment">#17: t_send_extra .....................   Passed    0.00 sec</span>
+
+<span class="token punctuation">..</span>.
+
+<span class="token number">100</span>% tests passed, <span class="token number">0</span> tests failed out of <span class="token number">33</span>
+
+Total Test <span class="token function">time</span> <span class="token punctuation">(</span>real<span class="token punctuation">)</span> <span class="token operator">=</span>   <span class="token number">1.30</span> sec
+<span class="token punctuation">[</span><span class="token number">100</span>%<span class="token punctuation">]</span> Built target check_lab3<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="lab4-tcp-connection">lab4 TCP Connection</h2>
+<p>本 lab 可以说是最难搞的一个了，我们需要结合 lab2 和 lab3
+来实现一个真实的 TCP 协议，协调 sender 和 receiver
+的所有操作，并完成三次握手和四次挥手。</p>
+<h2 id="发送">发送</h2>
+<p>什么时候要发送报文段？这是值得思考的一个问题，总的来说有以下几种情况是需要发送的：</p>
+<ol type="1">
+<li>主动向服务器发起连接请求。此时会发送一个 <code>SYN=1</code>
+的段；</li>
+<li>收到一个至少占据一个序列号的段。此时我们<strong>应尽可能</strong>发送一个
+ack 段，即便是不占序列号的空段；</li>
+<li>调用 <code>tick()</code>
+引发超时重传。此时如果超过最大重传次数，则转而发送一个
+<code>RST=1</code> 的段；</li>
+<li>上层写入字节流。此时接收窗口可能足够大，只是没数据，一旦数据到了，就应立即调用
+<code>sender.fill_window()</code> 并发送段；</li>
+<li>上层停止写入，即调用
+<code>end_input_stream()</code>。此时可能还有空闲窗口让我们能够发送
+<code>FIN=1</code> 的段，毕竟结束符也占一个序列号；</li>
+<li>对象调用析构函数，但连接仍未终止。此时也需要发送一个
+<code>RST=1</code> 的段；</li>
+</ol>
+<p>发送操作很简单，<code>sender</code> 调用相应函数然后从
+<code>segment_out</code> 中取出来再插到发送队列即可。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>libsponge/tcp_connection.cc</span></div><code class="language-cpp"><span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token operator">!</span>_sender<span class="token punctuation">.</span><span class="token function">segments_out</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">empty</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  TCPSegment <span class="token operator">&amp;</span>seg <span class="token operator">=</span> _sender<span class="token punctuation">.</span><span class="token function">segments_out</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">front</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">auto</span> ackno <span class="token operator">=</span> _receiver<span class="token punctuation">.</span><span class="token function">ackno</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>ackno<span class="token punctuation">.</span><span class="token function">has_value</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment">// 说明 receiver 至少进入了 SYN_RECV 阶段</span>
+    seg<span class="token punctuation">.</span><span class="token function">with_ack</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">with_ackno</span><span class="token punctuation">(</span>ackno<span class="token punctuation">.</span><span class="token function">value</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+  seg<span class="token punctuation">.</span><span class="token function">with_win</span><span class="token punctuation">(</span>_receiver<span class="token punctuation">.</span><span class="token function">window_size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>seg<span class="token punctuation">.</span><span class="token function">header</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>ack <span class="token operator">||</span> seg<span class="token punctuation">.</span><span class="token function">length_in_sequence_space</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token function">segments_out</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>seg<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+  _sender<span class="token punctuation">.</span><span class="token function">segments_out</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">pop</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="接收">接收</h2>
+<p>接收是一个比较麻烦的事情，有一个细节是连接处于 <code>LISTEN</code>
+阶段时只处理 <code>SYN=1</code> 的段，也就是会忽略 <code>RST=1</code>
+段。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>libsponge/tcp_connection.cc</span></div><code class="language-cpp"><span class="token keyword">if</span> <span class="token punctuation">(</span>_receiver<span class="token punctuation">.</span><span class="token function">in_listen</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> _sender<span class="token punctuation">.</span><span class="token function">in_closed</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>seg<span class="token punctuation">.</span><span class="token function">header</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>syn<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+  _receiver<span class="token punctuation">.</span><span class="token function">segment_received</span><span class="token punctuation">(</span>seg<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token function">connect</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">return</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>其他时候，如果收到（或发送） <code>RST=1</code> 段后，会引发
+<code>unclean_shutdown</code>。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>libsponge/tcp_connection.cc</span></div><code class="language-cpp"><span class="token keyword">void</span> <span class="token class-name">TCPConnection</span><span class="token double-colon punctuation">::</span><span class="token function">unclean_shutdown</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>_active<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// cerr &lt;&lt; "[unclean_shutdown]\n\n";</span>
+    _sender<span class="token punctuation">.</span><span class="token function">stream_in</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">set_error</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    _receiver<span class="token punctuation">.</span><span class="token function">stream_out</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">set_error</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    _active <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>除了上面这两种情况，剩下的时候都是正常对段进行接收处理，如果是 ack
+段（事实上大部分都是 ack 段）还需要更新 sender。receiver
+在收到段后，状态很有可能发生改变，一旦输入流结束，但是输出流尚未到达
+eof，说明这一方是被动关闭，后续输出流结束，发出 <code>FIN=1</code>
+并收到 ack 后可以直接关闭，因为这必然能确保另一方已经收到了
+<code>FIN=1</code>（但不能保证对方知道自己收到了 ack）。</p>
+<p>反之，说明输出流先结束，是主动结束连接的一方，此时在后续收到对方的
+<code>FIN=1</code> 并发出 ack 后，不能立刻关闭连接，而是需要等待 10
+倍的重传时限后才关闭连接，因为一旦对方没收到 ack，会对
+<code>FIN=1</code> 进行重传，如果 <code>10*timeout</code> 内再也没收到
+<code>FIN=1</code>，则可以视为对方收到，此时才能进行关闭。</p>
+<p>变量 <code>_linger_after_streams_finish</code>
+就是用于标识哪一方需要等待 <code>10*timeout</code> 才关闭。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>libsponge/tcp_connection.cc</span></div><code class="language-cpp"><span class="token comment">// after receive a segment</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span>_receiver<span class="token punctuation">.</span><span class="token function">stream_out</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">input_ended</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span>_sender<span class="token punctuation">.</span><span class="token function">stream_in</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">eof</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  _linger_after_streams_finish <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+<span class="token comment">// anytime need check if shutdown</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span>_receiver<span class="token punctuation">.</span><span class="token function">in_fin_recv</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> _sender<span class="token punctuation">.</span><span class="token function">in_fin_acked</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span>
+  <span class="token punctuation">(</span><span class="token operator">!</span>_linger_after_streams_finish <span class="token operator">||</span> _time_since_last_segment_received <span class="token operator">&gt;=</span> <span class="token number">10</span> <span class="token operator">*</span> _cfg<span class="token punctuation">.</span>rt_timeout<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token function">clean_shutdown</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>总的来说难度在于许多测试并没有给出具体的测试样例，而是模拟了真实的网络环境。唯一一个让我
+de 了好多天 bug 的是 timeout 我一开始写成了默认时限，也就是
+1s，而测试的时限是 10s，就导致了绝大多数测试
+<strong>TimeOut</strong>，后来改成 <code>cfg.rt_timeout</code>
+才过。</p>
+<p>另外不知道什么原因，在到 <code>t_ipv4_client_send</code>
+这样的测试之后都因为服务器网络不可达的原因收不到任何回复，所以后面基本都
+Failed 了，这也是一个比较遗憾的地方。</p>
+<blockquote>
+<p>如果遇到像 <code>... neq ... or ...</code> 这样的报错，需要把所有
+<code>cerr</code>
+注释掉才正常通过。因为这里是将输出结果写到文件里，然后和标准结果文件进行哈希值比较。</p>
+</blockquote>
+<h2 id="lab5-network-interface">lab5 Network Interface</h2>
+<p>本 lab 要求我们实现路由器的接口部分，负责维护目的 IP 地址到 MAC
+地址的映射，并将 IP 层数据包转发到下一跳。</p>
+<blockquote>
+<p>lab5 lab6 都很简单，一下午就都搞定了。</p>
+</blockquote>
+<h3 id="发送-1">发送</h3>
+<p>当转发数据包时，目的 IP
+地址是已知的（就是<strong>下一跳</strong>），但对于链路层的 MAC
+地址则可能未知，这就需要我们广播一个目的 MAC 地址为
+<code>ff:ff:ff:ff:ff:ff</code> 的 ARP 请求来获取位于目的 IP 地址的设备的
+MAC 地址。发送后，<code>{datagram, next_hop}</code> 会被缓存直至收到 ARP
+答复。如果对目的 IP 地址的请求在 5s
+内已经被发过一次，则只需等待答复即可，不用再发一遍。如果目的 MAC
+地址已知，那事情就简单很多，直接将数据包包装成链路层帧发送即可。复杂点在于各个字段要完全设置好。</p>
+<blockquote>
+<p>包装操作应使用 <code>serialize()</code> 方法转换为
+<code>string</code>，再隐式转换为 <code>Buffer</code>。</p>
+</blockquote>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>libsponge/network_interface.cc</span></div><code class="language-cpp"><span class="token keyword">void</span> <span class="token class-name">NetworkInterface</span><span class="token double-colon punctuation">::</span><span class="token function">send_datagram</span><span class="token punctuation">(</span><span class="token keyword">const</span> InternetDatagram <span class="token operator">&amp;</span>dgram<span class="token punctuation">,</span> <span class="token keyword">const</span> Address <span class="token operator">&amp;</span>next_hop<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> <span class="token keyword">uint32_t</span> next_hop_ip <span class="token operator">=</span> next_hop<span class="token punctuation">.</span><span class="token function">ipv4_numeric</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">uint32_t</span> next_ipv4_addr <span class="token operator">=</span> next_hop<span class="token punctuation">.</span><span class="token function">ipv4_numeric</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  EthernetFrame frame<span class="token punctuation">;</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>_mp<span class="token punctuation">.</span><span class="token function">count</span><span class="token punctuation">(</span>next_ipv4_addr<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment">// 目的 MAC 地址已知</span>
+    EthernetAddress next_ethernet_addr <span class="token operator">=</span> _mp<span class="token punctuation">[</span>next_ipv4_addr<span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token comment">// make frame</span>
+  <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+    <span class="token comment">// 广播 ARP</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>_time_since_last_send<span class="token punctuation">.</span><span class="token function">count</span><span class="token punctuation">(</span>next_hop_ip<span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> _time_since_last_send<span class="token punctuation">[</span>next_hop_ip<span class="token punctuation">]</span> <span class="token operator">&lt;=</span> <span class="token number">5000</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token keyword">return</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    _time_since_last_send<span class="token punctuation">[</span>next_hop_ip<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token comment">// make frame</span>
+    <span class="token comment">// 这里有一个坑点，ARPMessage 的目的 MAC 地址为空，因为帧头处已经设置为广播地址 ff:ff:ff:ff:ff:ff</span>
+
+    _waiting_for_arp_reply<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span><span class="token function">make_pair</span><span class="token punctuation">(</span>dgram<span class="token punctuation">,</span> next_hop<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  _frames_out<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>frame<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="接收-1">接收</h3>
+<p>当收到帧时，首先判断这是否为正常的数据交互，若是，则将其有效负载解析为数据包，作为返回值交付给调用者。</p>
+<p>反之，检查这是一个 ARP 请求还是 ARP 答复。如果是前者，并其目的 IP
+地址是否与自身一致，则发回一个 ARP
+答复；反之，发送等待答复的数据包。同时，还要根据发送方的信息更新 IP/MAC
+映射表，对应条目保持 30s，时间到后删除条目。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>libsponge/network_interface.cc</span></div><code class="language-cpp">optional<span class="token operator">&lt;</span>InternetDatagram<span class="token operator">&gt;</span> <span class="token class-name">NetworkInterface</span><span class="token double-colon punctuation">::</span><span class="token function">recv_frame</span><span class="token punctuation">(</span><span class="token keyword">const</span> EthernetFrame <span class="token operator">&amp;</span>frame<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> EthernetHeader <span class="token operator">&amp;</span>f_header <span class="token operator">=</span> frame<span class="token punctuation">.</span><span class="token function">header</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>f_header<span class="token punctuation">.</span>dst <span class="token operator">!=</span> _ethernet_address <span class="token operator">&amp;&amp;</span> f_header<span class="token punctuation">.</span>dst <span class="token operator">!=</span> ETHERNET_BROADCAST<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// 说明发错人了，直接不处理</span>
+  <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>f_header<span class="token punctuation">.</span>type <span class="token operator">==</span> EthernetHeader<span class="token double-colon punctuation">::</span>TYPE_IPv4<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    InternetDatagram dgram<span class="token punctuation">;</span>
+    ParseResult parse_res <span class="token operator">=</span> dgram<span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>frame<span class="token punctuation">.</span><span class="token function">payload</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>parse_res <span class="token operator">==</span> ParseResult<span class="token double-colon punctuation">::</span>NoError<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token comment">// 成功解析则返回，否则丢弃</span>
+      <span class="token keyword">return</span> optional<span class="token operator">&lt;</span>InternetDatagram<span class="token operator">&gt;</span><span class="token punctuation">{</span>dgram<span class="token punctuation">}</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>f_header<span class="token punctuation">.</span>type <span class="token operator">==</span> EthernetHeader<span class="token double-colon punctuation">::</span>TYPE_ARP<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    ARPMessage msg<span class="token punctuation">;</span>
+    ParseResult parse_res <span class="token operator">=</span> msg<span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>frame<span class="token punctuation">.</span><span class="token function">payload</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>parse_res <span class="token operator">==</span> ParseResult<span class="token double-colon punctuation">::</span>NoError<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      _mp<span class="token punctuation">.</span><span class="token function">emplace</span><span class="token punctuation">(</span><span class="token function">make_pair</span><span class="token punctuation">(</span>msg<span class="token punctuation">.</span>sender_ip_address<span class="token punctuation">,</span> msg<span class="token punctuation">.</span>sender_ethernet_address<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      _holding_time<span class="token punctuation">.</span><span class="token function">emplace</span><span class="token punctuation">(</span><span class="token function">make_pair</span><span class="token punctuation">(</span>msg<span class="token punctuation">.</span>sender_ip_address<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+      <span class="token keyword">if</span> <span class="token punctuation">(</span>msg<span class="token punctuation">.</span>target_ip_address <span class="token operator">==</span> _ip_address<span class="token punctuation">.</span><span class="token function">ipv4_numeric</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>msg<span class="token punctuation">.</span>opcode <span class="token operator">==</span> ARPMessage<span class="token double-colon punctuation">::</span>OPCODE_REQUEST<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+          EthernetFrame reply<span class="token punctuation">;</span>
+          <span class="token comment">// make reply</span>
+          _frames_out<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>reply<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>msg<span class="token punctuation">.</span>opcode <span class="token operator">==</span> ARPMessage<span class="token double-colon punctuation">::</span>OPCODE_REPLY<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+          <span class="token function">send_datagram</span><span class="token punctuation">(</span>_waiting_for_arp_reply<span class="token punctuation">.</span><span class="token function">front</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>first<span class="token punctuation">,</span> _waiting_for_arp_reply<span class="token punctuation">.</span><span class="token function">front</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>second<span class="token punctuation">)</span><span class="token punctuation">;</span>
+          _waiting_for_arp_reply<span class="token punctuation">.</span><span class="token function">pop</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">return</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>测试结果如下。</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">Testing Lab <span class="token number">5</span><span class="token punctuation">..</span>.
+Test project <span class="token punctuation">..</span>./CS144/build
+    Start <span class="token number">31</span>: t_webget
+<span class="token number">1</span>/2 Test <span class="token comment">#31: t_webget .........................   Passed    1.22 sec</span>
+    Start <span class="token number">32</span>: arp_network_interface
+<span class="token number">2</span>/2 Test <span class="token comment">#32: arp_network_interface ............   Passed    0.01 sec</span>
+
+<span class="token number">100</span>% tests passed, <span class="token number">0</span> tests failed out of <span class="token number">2</span>
+
+Total Test <span class="token function">time</span> <span class="token punctuation">(</span>real<span class="token punctuation">)</span> <span class="token operator">=</span>   <span class="token number">1.24</span> sec
+Built target check_lab5<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="lab6-router">lab6 Router</h2>
+<p>本 lab 要求我们实现路由表中的最长前缀匹配。路由表我采用的是
+<code>std::unordered_map&lt;uint32_t, std::tuple&lt;uint8_t, std::optional&lt;Address&gt;, size_t&gt;&gt;</code>，存储
+<code>route_prefix -&gt; {prefix_length, next_hop, interface_num}</code>
+的映射对。</p>
+<p>有以下注意点：</p>
+<ol type="1">
+<li>当需要转发的数据包的 <code>ttl &lt;= 1</code>
+时，丢弃，反之，将其减一；</li>
+<li>一般有一个默认网关为 <code>0.0.0.0/0</code>，如果将一个 32
+位整数移位 32 位是未定义行为，需要考虑到这种情况；</li>
+<li>数据包必然是能发出去的，实在没有匹配到的也会发至默认网关，如果有其他匹配的网段可能是
+direct 直达的，此时 <code>next_hop</code>
+不一定有值，此时将发送的下一跳设置为数据包的 <code>dst ip_addr</code>
+即可；</li>
+</ol>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>libsponge/router.cc</span></div><code class="language-cpp"><span class="token keyword">void</span> <span class="token class-name">Router</span><span class="token double-colon punctuation">::</span><span class="token function">route_one_datagram</span><span class="token punctuation">(</span>InternetDatagram <span class="token operator">&amp;</span>dgram<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>dgram<span class="token punctuation">.</span><span class="token function">header</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>ttl<span class="token operator">--</span> <span class="token operator">&lt;=</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">uint8_t</span> longest_match_length<span class="token punctuation">{</span><span class="token number">0</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+  <span class="token keyword">uint32_t</span> ipv4_addr <span class="token operator">=</span> dgram<span class="token punctuation">.</span><span class="token function">header</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>dst<span class="token punctuation">;</span>
+  optional<span class="token operator">&lt;</span>Address<span class="token operator">&gt;</span> next_hop<span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+  size_t interface_num<span class="token punctuation">{</span><span class="token number">0</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">auto</span> <span class="token operator">&amp;&amp;</span>entry <span class="token operator">:</span> _route_table<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// find Longest-Match Prefix</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>next_hop<span class="token punctuation">.</span><span class="token function">has_value</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    _interfaces<span class="token punctuation">[</span>interface_num<span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">send_datagram</span><span class="token punctuation">(</span>dgram<span class="token punctuation">,</span> next_hop<span class="token punctuation">.</span><span class="token function">value</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+    <span class="token comment">// 可直接发送至目的 IP 地址</span>
+    _interfaces<span class="token punctuation">[</span>interface_num<span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">send_datagram</span><span class="token punctuation">(</span>dgram<span class="token punctuation">,</span> <span class="token class-name">Address</span><span class="token double-colon punctuation">::</span><span class="token function">from_ipv4_numeric</span><span class="token punctuation">(</span>ipv4_addr<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>测试结果如下。</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span><span class="token number">100</span>%<span class="token punctuation">]</span> Testing Lab <span class="token number">6</span><span class="token punctuation">..</span>.
+Test project <span class="token punctuation">..</span>./CS144/build
+    Start <span class="token number">32</span>: arp_network_interface
+<span class="token number">1</span>/2 Test <span class="token comment">#32: arp_network_interface ............   Passed    0.00 sec</span>
+    Start <span class="token number">33</span>: router_test
+<span class="token number">2</span>/2 Test <span class="token comment">#33: router_test ......................   Passed    0.02 sec</span>
+
+<span class="token number">100</span>% tests passed, <span class="token number">0</span> tests failed out of <span class="token number">2</span>
+
+Total Test <span class="token function">time</span> <span class="token punctuation">(</span>real<span class="token punctuation">)</span> <span class="token operator">=</span>   <span class="token number">0.03</span> sec
+<span class="token punctuation">[</span><span class="token number">100</span>%<span class="token punctuation">]</span> Built target check_lab6<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+                
+            </div>
+            <hr/>
+
+            
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            <span class="chip bg-color">无标签</span>
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/life/train/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/23.jpg" class="responsive-img" alt="训练安排">
+                        
+                        <span class="card-title">训练安排</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            三分化，双循环。
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2023-07-01
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/life/" class="post-category">
+                                    life
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/c/c-mutable/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/23.jpg" class="responsive-img" alt="C++ の 可变说明符(Mutable)">
+                        
+                        <span class="card-title">C++ の 可变说明符(Mutable)</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            mutable
+意为可变的，可以在非引用非常量非静态数据成员的声明中出现，允许被常量类对象修改。
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2023-03-02
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/C/" class="post-category">
+                                    C++
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+
+  <!-- 是否加载使用自带的 prismjs. -->
+  <script type="text/javascript" src="/libs/prism/prism.min.js"></script>
+
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card" style="background-color: white;">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+<script src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+    MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$', '$'], ['\\(', '\\)']]}
+    });
+</script>
+
+
+
+    <footer class="page-footer bg-color">
+    
+
+    <div class="container row center-align"
+         style="margin-bottom: 15px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            
+                <span id="year">2023-2025</span>
+            
+            <a href="/about" target="_blank">Leager</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            
+            <br>
+            
+            
+            
+                
+            
+            
+                <span id="busuanzi_container_site_pv">
+                &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
+                    <span id="busuanzi_value_site_pv" class="white-color"></span>
+            </span>
+            
+            
+                <span id="busuanzi_container_site_uv">
+                &nbsp;|&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;
+                    <span id="busuanzi_value_site_uv" class="white-color"></span>
+            </span>
+            
+            <br>
+
+            <!-- 运行天数提醒. -->
+            
+                <span id="sitetime"> Loading ...</span>
+                <script>
+                    var calcSiteTime = function () {
+                        var seconds = 1000;
+                        var minutes = seconds * 60;
+                        var hours = minutes * 60;
+                        var days = hours * 24;
+                        var years = days * 365;
+                        var today = new Date();
+                        var startYear = "2023";
+                        var startMonth = "8";
+                        var startDate = "1";
+                        var startHour = "0";
+                        var startMinute = "0";
+                        var startSecond = "0";
+                        var todayYear = today.getFullYear();
+                        var todayMonth = today.getMonth() + 1;
+                        var todayDate = today.getDate();
+                        var todayHour = today.getHours();
+                        var todayMinute = today.getMinutes();
+                        var todaySecond = today.getSeconds();
+                        var t1 = Date.UTC(startYear, startMonth, startDate, startHour, startMinute, startSecond);
+                        var t2 = Date.UTC(todayYear, todayMonth, todayDate, todayHour, todayMinute, todaySecond);
+                        var diff = t2 - t1;
+                        var diffYears = Math.floor(diff / years);
+                        var diffDays = Math.floor((diff / days) - diffYears * 365);
+
+                        // 区分是否有年份.
+                        var language = 'zh-CN';
+                        if (startYear === String(todayYear)) {
+                            document.getElementById("year").innerHTML = todayYear;
+                            var daysTip = 'This site has been running for ' + diffDays + ' days';
+                            if (language === 'zh-CN') {
+                                daysTip = '本站已运行 ' + diffDays + ' 天';
+                            } else if (language === 'zh-HK') {
+                                daysTip = '本站已運行 ' + diffDays + ' 天';
+                            }
+                            document.getElementById("sitetime").innerHTML = daysTip;
+                        } else {
+                            document.getElementById("year").innerHTML = startYear + " - " + todayYear;
+                            var yearsAndDaysTip = 'This site has been running for ' + diffYears + ' years and '
+                                + diffDays + ' days';
+                            if (language === 'zh-CN') {
+                                yearsAndDaysTip = '本站已运行 ' + diffYears + ' 年 ' + diffDays + ' 天';
+                            } else if (language === 'zh-HK') {
+                                yearsAndDaysTip = '本站已運行 ' + diffYears + ' 年 ' + diffDays + ' 天';
+                            }
+                            document.getElementById("sitetime").innerHTML = yearsAndDaysTip;
+                        }
+                    }
+
+                    calcSiteTime();
+                </script>
+            
+            <br>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link social-statis">
+    <a href="https://github.com/Leager-zju" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:1004729740@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+
+
+
+
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1004729740" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1004729740" data-position="top" data-delay="50">
+        <i class="fab fa-qq"></i>
+    </a>
+
+
+
+
+
+
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    var searchFunc = function (path, search_id, content_id) {
+        'use strict';
+        $.ajax({
+            url: path,
+            dataType: "xml",
+            success: function (xmlResponse) {
+                // get the contents from search data
+                var datas = $("entry", xmlResponse).map(function () {
+                    return {
+                        title: $("title", this).text(),
+                        content: $("content", this).text(),
+                        url: $("url", this).text()
+                    };
+                }).get();
+                var $input = document.getElementById(search_id);
+                var $resultContent = document.getElementById(content_id);
+                $input.addEventListener('input', function () {
+                    var str = '<ul class=\"search-result-list\">';
+                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                    $resultContent.innerHTML = "";
+                    if (this.value.trim().length <= 0) {
+                        return;
+                    }
+                    // perform local searching
+                    datas.forEach(function (data) {
+                        var isMatch = true;
+                        var data_title = data.title.trim().toLowerCase();
+                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
+                        var data_url = data.url;
+                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
+                        var index_title = -1;
+                        var index_content = -1;
+                        var first_occur = -1;
+                        // only match artiles with not empty titles and contents
+                        if (data_title !== '' && data_content !== '') {
+                            keywords.forEach(function (keyword, i) {
+                                index_title = data_title.indexOf(keyword);
+                                index_content = data_content.indexOf(keyword);
+                                if (index_title < 0 && index_content < 0) {
+                                    isMatch = false;
+                                } else {
+                                    if (index_content < 0) {
+                                        index_content = 0;
+                                    }
+                                    if (i === 0) {
+                                        first_occur = index_content;
+                                    }
+                                }
+                            });
+                        }
+                        // show search results
+                        if (isMatch) {
+                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
+                            var content = data.content.trim().replace(/<[^>]+>/g, "");
+                            if (first_occur >= 0) {
+                                // cut out 100 characters
+                                var start = first_occur - 20;
+                                var end = first_occur + 80;
+                                if (start < 0) {
+                                    start = 0;
+                                }
+                                if (start === 0) {
+                                    end = 100;
+                                }
+                                if (end > content.length) {
+                                    end = content.length;
+                                }
+                                var match_content = content.substr(start, end);
+                                // highlight all keywords
+                                keywords.forEach(function (keyword) {
+                                    var regS = new RegExp(keyword, "gi");
+                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
+                                });
+
+                                str += "<p class=\"search-result\">" + match_content + "...</p>"
+                            }
+                            str += "</li>";
+                        }
+                    });
+                    str += "</ul>";
+                    $resultContent.innerHTML = str;
+                });
+            }
+        });
+    };
+
+    searchFunc('/search.xml', 'searchInput', 'searchResult');
+});
+</script>
+
+    <!-- 白天和黑夜主题 -->
+<div class="stars-con">
+    <div id="stars"></div>
+    <div id="stars2"></div>
+    <div id="stars3"></div>  
+</div>
+
+<script>
+    function switchNightMode() {
+        $('<div class="Cuteen_DarkSky"><div class="Cuteen_DarkPlanet"></div></div>').appendTo($('body')),
+        setTimeout(function () {
+            $('body').hasClass('DarkMode') 
+            ? ($('body').removeClass('DarkMode'), localStorage.setItem('isDark', '0'), $('#sum-moon-icon').removeClass("fa-sun").addClass('fa-moon')) 
+            : ($('body').addClass('DarkMode'), localStorage.setItem('isDark', '1'), $('#sum-moon-icon').addClass("fa-sun").removeClass('fa-moon')),
+            
+            setTimeout(function () {
+            $('.Cuteen_DarkSky').fadeOut(1e3, function () {
+                $(this).remove()
+            })
+            }, 2e3)
+        })
+    }
+</script>
+
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    
+
+    
+    
+    
+        
+        <script type="text/javascript">
+            // 只在桌面版网页启用特效
+            var windowWidth = $(window).width();
+            if (windowWidth > 768) {
+                document.write('<script type="text/javascript" src="/libs/others/sakura.js"><\/script>');
+            }
+        </script>
+    
+
+    <!-- 雪花特效 -->
+    
+
+    <!-- 鼠标星星特效 -->
+    
+
+     
+        <script src="https://ssl.captcha.qq.com/TCaptcha.js"></script>
+        <script src="/libs/others/TencentCaptcha.js"></script>
+        <button id="TencentCaptcha" data-appid="xxxxxxxxxx" data-cbfn="callback" type="button" hidden></button>
+    
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    <script src="/libs/others/clicklove.js" async="async"></script>
+    
+    
+    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
+    
+
+    
+
+    
+
+    <!--腾讯兔小巢-->
+    
+    
+
+    
+
+    
+
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+    <script type="text/javascript">
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden) {
+                document.title = '你会有一天后悔';
+            } else {
+                document.title = '欢迎来到 G8 北海道 洞爷湖 高峰会 博物馆';
+            }
+        });
+    </script>
+
+</body>
+
+</html>

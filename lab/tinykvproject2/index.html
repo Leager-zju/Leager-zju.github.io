@@ -1,0 +1,1444 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="TinyKV Project2 RaftKV, 没什么看头的地方">
+    <meta name="description" content="本 Project 需要我们实现基础 Raft 算法。
+
+思路
+Part A Raft
+需要实现的代码在整个 raft 文件夹下。
+这一 part 我们要实现三个模块，分别为
+
+Leader election =&amp;gt; 领导选举
+Log ">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+    <title>TinyKV Project2 RaftKV | 没什么看头的地方</title>
+    <link rel="icon" type="image/png" href="/dt.png">
+    
+    <style>
+        body{
+            background-image: url(https://cdn.jsdelivr.net/gh/Tokisaki-Galaxy/res/site/medias/background.jpg);
+            background-repeat:no-repeat;
+            background-size: 100% 100%;
+            background-attachment:fixed;
+        }
+    </style>
+
+
+
+    <!-- bg-cover style     -->
+
+
+
+<link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+<link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+<link rel="stylesheet" type="text/css" href="/css/matery.css">
+<link rel="stylesheet" type="text/css" href="/css/my.css">
+<link rel="stylesheet" type="text/css" href="/css/dark.css" media="none" onload="if(media!='all')media='all'">
+
+
+
+
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+    <link rel="stylesheet" href="/css/post.css">
+
+
+
+
+    
+
+
+
+    <script src="/libs/jquery/jquery-3.6.0.min.js"></script>
+
+<meta name="generator" content="Hexo 6.3.0">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/comment_bg.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">没什么看头的地方</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/archives" class="waves-effect waves-light">
+      
+      <i class="fas fa-archive" style="zoom: 0.6;"></i>
+      
+      <span>归档</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/contact" class="waves-effect waves-light">
+      
+      <i class="fas fa-comments" style="zoom: 0.6;"></i>
+      
+      <span>留言板</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/friends" class="waves-effect waves-light">
+      
+      <i class="fas fa-address-book" style="zoom: 0.6;"></i>
+      
+      <span>友情链接</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+  <li>
+    <a href="javascript:;" class="waves-effect waves-light" onclick="switchNightMode()" title="深色/浅色模式" >
+      <i id="sum-moon-icon" class="fas fa-sun" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/comment_bg.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">没什么看头的地方</div>
+        <div class="logo-desc">
+            
+            【数据删除】
+            
+        </div>
+    </div>
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/archives" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-archive"></i>
+			
+			归档
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/contact" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-comments"></i>
+			
+			留言板
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/friends" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-address-book"></i>
+			
+			友情链接
+		</a>
+          
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/Leager-zju" class="waves-effect waves-light" target="_blank">
+                <i class="fab fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+            <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/Leager-zju" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+   data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+        
+    </nav>
+
+</header>
+
+    
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/18.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">TinyKV Project2 RaftKV</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                          <div class="article-tag">
+                            <span class="chip bg-color">无标签</span>
+                          </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/Lab/" class="post-category">
+                                Lab
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2023-08-14
+                </div>
+                
+
+                
+
+                
+
+                
+
+                
+            </div>
+        </div>
+        <hr class="clearfix">
+
+        
+        <!-- 是否加载使用自带的 prismjs. -->
+        <link rel="stylesheet" href="/libs/prism/prism.min.css">
+        
+
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <p>本 Project 需要我们实现基础 Raft 算法。</p>
+<span id="more"></span>
+<h2 id="思路">思路</h2>
+<h3 id="part-a-raft">Part A Raft</h3>
+<p>需要实现的代码在整个 <code>raft</code> 文件夹下。</p>
+<p>这一 part 我们要实现三个模块，分别为</p>
+<ul>
+<li>Leader election =&gt; 领导选举</li>
+<li>Log replication =&gt; 日志复制</li>
+<li>Raw node interface =&gt; 上层接口</li>
+</ul>
+<p>有了之前 <a href="../../mit6.824/6-824学习总结">MIT6.824</a>
+的经验，做这部分其实没啥压力，最大的困难点在于熟悉整个代码框架。</p>
+<p>跟 6.824 不同之处在于，TinyKV 的 Raft
+模块进行同步采用的消息队列的形式，由上层定时收取然后传输给其他存储节点的
+Peer，上层收到消息后 push 到下层驱动 Raft 模块接收信息。</p>
+<h4 id="leader-election">1 Leader Election</h4>
+<p>领导选举的基本流程如下：</p>
+<p>对于发起者：</p>
+<ul>
+<li><p>上层调用 <code>Tick()</code>；</p></li>
+<li><p>Raft 层检查是否满足发起选举条件，即
+<code>electionElapsed &gt;= electionTimeout</code> 且不是
+Leader；</p></li>
+<li><p>若超时，则视为收到收到一条本地 <code>MsgHup</code>
+消息，对该消息的处理就是正式进入开始选举事件，即 </p><pre class="line-numbers language-go" data-language="go"><div class="caption"><span>raft/raft.go</span></div><code class="language-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>r <span class="token operator">*</span>Raft<span class="token punctuation">)</span> <span class="token function">Step</span><span class="token punctuation">(</span>m pb<span class="token punctuation">.</span>Message<span class="token punctuation">)</span> <span class="token builtin">error</span> <span class="token punctuation">{</span>
+  <span class="token keyword">switch</span> m<span class="token punctuation">.</span>MsgType <span class="token punctuation">{</span>
+    <span class="token operator">...</span>
+    <span class="token keyword">case</span> pb<span class="token punctuation">.</span>MessageType_MsgHup<span class="token punctuation">:</span>
+      <span class="token comment">// 开始选举</span>
+    <span class="token operator">...</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><p></p></li>
+<li><p>如果不是 Leader（防止恶趣味测试给 Leader 发一条
+MsgHup），则成为候选人
+<code>Candidate</code>（进入下一任期，投自己一票），并向其他 Peer
+（如果有）发送 <code>MsgRequestVote</code>。请求中除了自身
+<code>CurrentTerm</code>，还需包含自己最后一个日志条目的
+<code>LogTerm</code> 与 <code>LogIndex</code>；</p>
+<blockquote>
+<p><strong>存在只有自己一个 Peer 的情况，那就直接成为 Leader
+不用发请求了</strong>；</p>
+</blockquote></li>
+<li><p>对于收到的每一张票，首先检查发送方的
+<code>Term</code>，判断是需要切换到 <code>Follower</code>
+并更新任期。然后检查是同意还是拒绝，如果同意票过半则成为
+Leader，如果反对票过半则退至 <code>Follower</code>，等待其他 Leader
+发来消息或者下一次开始选举。</p></li>
+</ul>
+<p>对于接收者：</p>
+<ul>
+<li>上层调用 <code>Step()</code>；</li>
+<li>检查发送方的 <code>Term</code>，判断是需要切换到
+<code>Follower</code> 并更新任期，还是返回一个拒绝；</li>
+<li>检查当前任期是否给发送方投过票，如果投给别人了那也拒绝，讲究一个先来后到；</li>
+<li>检查发送方最后一个日志条目的信息是否比自己更旧，如果是就拒绝，他不配当
+Leader；</li>
+<li>返回一个同意票，并修改自身投票记录；</li>
+</ul>
+<p>需要注意的是，<code>electionTimeout</code>
+应返回一个随机数，防止出现多个 Peer
+不断同时发起选举的死局。这里我用一个函数代替，随机返回 1~3
+倍的给定超时值。</p>
+<pre class="line-numbers language-go" data-language="go"><div class="caption"><span>raft/common.go</span></div><code class="language-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>r <span class="token operator">*</span>Raft<span class="token punctuation">)</span> <span class="token function">getElectionTimeout</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token builtin">int</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> rand<span class="token punctuation">.</span><span class="token function">Intn</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token operator">*</span>r<span class="token punctuation">.</span>electionTimeout<span class="token punctuation">)</span> <span class="token operator">+</span> r<span class="token punctuation">.</span>electionTimeout
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<blockquote>
+<p>由于这里完全采用了同步的方案，故不需要用到 Goroutine
+与并发相关代码。</p>
+</blockquote>
+<h4 id="log-replication">2 Log replication</h4>
+<p><strong>MsgAppend</strong>：</p>
+<p>选举成功成为 Leader
+后，需要立刻在自己的日志中增添一条空的日志条目，以快速提交旧日志（根据
+raft paper 中的 figure 8，只能 commit 当前 Term
+的日志）。一旦有任何日志被添加（成为 Leader 或收到
+<code>MsgPropose</code> 消息），都会触发 Raft 的日志复制机制——向所有
+Peer 发送 <code>MsgAppend</code>。</p>
+<p>关于日志复制其实论文里讲的很清楚了。Raft 层维护所有 Peer
+的两个变量：<code>Match</code> 和
+<code>Next</code>。前者表示目前能够确定的其他 Peer
+与自身一致的最后一个日志条目 <code>Index</code>，后者表示下一次
+<code>MsgAppend</code> 要从哪个日志开始发。</p>
+<blockquote>
+<p>这两个字段都会在新建 Raft 节点时初始化为 0 和 LastLogIndex+1。</p>
+</blockquote>
+<blockquote>
+<p><code>MsgAppend</code> 需要包含 <code>PrevLogTerm</code> 与
+<code>PrevLogIndex</code> 以便接收方进行日志匹配。</p>
+</blockquote>
+<p>同时，消息还要附带一个 <code>Commit</code> 字段，让其他 Peer
+知道哪些日志是已经拷贝到多数 Peer，并更新自己的
+<code>Committed</code>，以便 Apply 到上层。</p>
+<p>接收方收到 <code>MsgAppend</code> 并检查完发送方 <code>Term</code>
+后，便开始进行匹配，如果<code>PrevLogTerm</code> 与
+<code>PrevLogIndex</code> 不匹配，则拒绝该条消息。</p>
+<p>反之遍历
+<code>Entries</code>，直到第一条不匹配的为止，后续的都删掉，然后将新来的条目加到自己的日志中，即</p>
+<pre class="line-numbers language-go" data-language="go"><div class="caption"><span>raft/heartbeat.go</span></div><code class="language-go"><span class="token keyword">if</span> <span class="token function">len</span><span class="token punctuation">(</span>m<span class="token punctuation">.</span>Entries<span class="token punctuation">)</span> <span class="token operator">&gt;</span> <span class="token number">0</span> <span class="token punctuation">{</span>
+  firstNewLogIndex <span class="token operator">:=</span> m<span class="token punctuation">.</span>Entries<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">GetIndex</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  newLogIndex <span class="token operator">:=</span> firstNewLogIndex
+  <span class="token keyword">for</span> <span class="token punctuation">;</span> newLogIndex <span class="token operator">&lt;=</span> <span class="token function">min</span><span class="token punctuation">(</span>r<span class="token punctuation">.</span>RaftLog<span class="token punctuation">.</span><span class="token function">LastIndex</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> lastNewLogIndex<span class="token punctuation">)</span><span class="token punctuation">;</span> newLogIndex<span class="token operator">++</span> <span class="token punctuation">{</span>
+    newLogTerm<span class="token punctuation">,</span> <span class="token boolean">_</span> <span class="token operator">:=</span> r<span class="token punctuation">.</span>RaftLog<span class="token punctuation">.</span><span class="token function">Term</span><span class="token punctuation">(</span>newLogIndex<span class="token punctuation">)</span>
+    <span class="token keyword">if</span> newLogTerm <span class="token operator">!=</span> m<span class="token punctuation">.</span>Entries<span class="token punctuation">[</span>newLogIndex <span class="token operator">-</span> firstNewLogIndex<span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">GetTerm</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token comment">// If an existing entry conflicts with a new one (same index but different terms)</span>
+      <span class="token comment">// Delete the existing entry and all that follow it</span>
+      <span class="token keyword">break</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+  <span class="token keyword">for</span> <span class="token punctuation">;</span> newLogIndex <span class="token operator">&lt;=</span> lastNewLogIndex<span class="token punctuation">;</span> newLogIndex<span class="token operator">++</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Append any new entries not already in the log</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>最后，根据消息中的 <code>Commit</code>
+字段更新结构体字段，并发送同意回复，包含自身最后一条日志的
+<code>Index</code>，让 Leader 更新 <code>Match/Next</code> 字段。</p>
+<blockquote>
+<p>如果消息中的 <code>Entries</code> 长度为 0，则至少可以确定 Leader
+含有相同的日志
+<code>{Term: PrevLogTerm, Index: PrevLogIndex}</code>，那么论文中提到的
+"index of last new entry" 就是 <code>PrevLogIndex</code> 了。</p>
+</blockquote>
+<p>要注意，如果不同意该条 <code>MsgAppend</code>，则无需更新
+<code>electionElapsed</code>，因为该 Leader
+可能刚从分区的网络中放出来，马上要下台了。反之要重置一下自身选举相关的状态。</p>
+<p>发送方收到 <code>MsgAppendResponse</code> 后，看看是不是要切到
+<code>Follower</code>，然后看看是否为同意，是则更新
+<code>Match = response.Index, Next = Match + 1</code>，然后根据所有 Peer
+的 <code>Match</code> 更新自身的 <code>Commit</code>；反之令
+<code>Next--</code>，重新发 <code>MsgAppend</code>。</p>
+<p><strong>Heartbeat</strong>：</p>
+<p>与 6.824 不同，TinyKV
+将日志复制和心跳分开，算两种不同的消息。前者上文已经提过，后者则是在
+Tick() 驱动至心跳超时或收到 <code>MsgBeat</code> 消息后，向所有 Peer
+发送 <code>MsgHeartbeat</code>。心跳的作用不仅仅是巩固 Leader
+地位，还要向 Peers 广播自己的 <code>Commit</code>，接收方如果发现 Leader
+的 <code>Commit</code> 比自己最后一个日志的 <code>LastLogIndex</code>
+还大，则需要告诉发送方这一信息，表明自己落后了，<strong>并拒绝该条消息</strong>；反之更新自身的
+<code>Commit</code>。</p>
+<p>发送方检查回复，如果 Peer 落后了，立刻发一条 <code>MsgAppend</code>
+过去让它赶紧进入到最新的状态。</p>
+<h4 id="implement-the-raw-node-interface">3 Implement the raw node
+interface</h4>
+<p><code>RawNode</code> 包裹了 Raft 层，其作用就是定期检查 Raft
+的状态（日志、消息队列等）是否有更新，如果有则发送给上层进行处理，同时获取处理结果进行状态更新。</p>
+<p>主要是实现 <code>raft/rawnode.go</code> 中的
+<code>Ready()</code>，<code>HasReady()</code>，<code>Advance()</code>
+三个函数。</p>
+<blockquote>
+<p>首先要明确的一点是，一个 Raft 日志会长成以下这个样子：</p>
+<p>RaftLog manage the log entries, its struct look like:</p>
+<p>snapshot/first.....applied....committed....stabled.....last</p>
+<p>-------------|-------------------------------------------|</p>
+<p>分别代表了快照截断、已被上层应用、Raft
+层多数持有、已被持久化、最后一个日志的 Index。</p>
+<p>因为存在快照截断点，故 <code>Index</code>
+到切片下标需进行转换。这里我顺着 6.824 的习惯将 <code>entries[0]</code>
+设置为截断点，于是有</p>
+<p><code>idx = Index2idx(Index) = Index - entries[0].Index</code>。</p>
+<p>于是可以实现 <code>raft/log.go</code> 中 <code>RaftLog</code>
+的相关函数。实际上就是根据那些 point 返回对应范围的切片。 -
+<code>allEntries() =&gt; entries[1:]</code> -
+<code>unstableEntries() =&gt; entries[Index2idx(stabled):]</code> -
+<code>nextEnts() =&gt; entries[Index2idx(applied):Index2idx(committed)]</code></p>
+</blockquote>
+<p><code>Ready()</code> 函数是获取 Raft
+层的（自上次调用以来）所有发生变化的字段。其中
+<code>Ready.Entries</code>
+字段表示未被持久化的日志条目，<code>Ready.CommittedEntries</code>
+表示已被 Commit 但未被 Apply 的日志条目，<code>Ready.Snapshot</code>
+表示未被上层应用的快照。</p>
+<p>由于 <code>SoftState</code> 和 <code>HardState</code>
+这两个字段无法直接看出变化，故要在 RawNode 中加上
+<code>PrevSoftState</code> 与 <code>PrevHardState</code> 两个变量，通过
+<code>isxxxEqual()</code> 判断是否有更新。</p>
+<p><strong>注意</strong>：如果消息队列为空，则
+<code>Ready.Messages</code> 应为 nil 而不是长度为 0 的切片。</p>
+<p><code>HasReady()</code> 函数用于判断是否存在
+<code>Ready</code>，即所需状态是否可以被收集——<code>SoftState/HardState</code>
+是否有变、是否有 <code>unstableEntries/nextEnts</code>、是否有等待应用的
+<code>snapshot</code>、以及消息队列是否为空。</p>
+<blockquote>
+<p>一旦下层状态发生变化，就需要马上收集并持久化。</p>
+</blockquote>
+<p><code>Advance()</code> 函数会在上层处理完 <code>Ready</code>
+并持久化后调用（其实就是之前调用 <code>Ready()</code>
+获取到的那个），旨在通知 Raft 层推进相关状态，比如 <code>RaftLog</code>
+的 <code>stabled</code>、<code>applied</code> 这些。</p>
+<blockquote>
+<p>也很好理解，之前收集到的 <code>Entries</code> 就是 unstabled
+的，现在处理完了那就有 <code>stabled = Entries.LastLogIndex</code>
+了。其他也同理。</p>
+</blockquote>
+<h3 id="part-b-ft-kv-server">Part B FT KV server</h3>
+<p>需要实现的代码在 <code>kv/raftstore</code> 文件夹下。</p>
+<p>这一 part 我们要实现两个模块，分别为</p>
+<ul>
+<li>peer storage =&gt; 实现持久化</li>
+<li>Raft ready process =&gt; 实现客户端请求与答复</li>
+</ul>
+<blockquote>
+<p>首先要明确的是，整个系统划分为若干逻辑上的 Cluster，每个 Cluster
+又包含了若干物理 Storage
+节点，分布在不同物理位置。节点内部的物理存储空间又划分为不同
+Region，每个 Region 表示某一段连续的 Key。不同 Storage 节点上相同的
+Region 由同个 RaftGroup 管理，这部分抽象为 RaftStore，应用同一套 Raft
+和日志机制。下图就是一个典型的 Cluster：</p>
+<p><img src="keyspace.png" style="zoom:30%;"></p>
+</blockquote>
+<h4 id="implement-peer-storage">1 Implement peer storage</h4>
+<p><code>PeerStorage</code> 主要负责记录存储状态并执行持久化。TinyKV
+使用两个 badger 来存放不同状态：raftDB 存日志条目和 Raft 层信息，kvDB
+存状态机数据。</p>
+<blockquote>
+<p>我感觉这部分还是有点混乱的，还是得多看看文档&gt;_&lt;</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Key</th>
+<th style="text-align: center;">KeyFormat</th>
+<th style="text-align: center;">Value</th>
+<th style="text-align: center;">DB</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">raft_log_key</td>
+<td style="text-align: center;">0x01 0x02 region_id 0x01 log_idx</td>
+<td style="text-align: center;">Entry</td>
+<td style="text-align: center;">raft</td>
+</tr>
+<tr>
+<td style="text-align: center;">raft_state_key</td>
+<td style="text-align: center;">0x01 0x02 region_id 0x02</td>
+<td style="text-align: center;">RaftLocalState</td>
+<td style="text-align: center;">raft</td>
+</tr>
+<tr>
+<td style="text-align: center;">apply_state_key</td>
+<td style="text-align: center;">0x01 0x02 region_id 0x03</td>
+<td style="text-align: center;">RaftApplyState</td>
+<td style="text-align: center;">kv</td>
+</tr>
+<tr>
+<td style="text-align: center;">region_state_key</td>
+<td style="text-align: center;">0x01 0x03 region_id 0x01</td>
+<td style="text-align: center;">RegionLocalState</td>
+<td style="text-align: center;">kv</td>
+</tr>
+</tbody>
+</table>
+</blockquote>
+<p>这个模块只需要实现一个函数，即
+<code>SaveReadyState()</code>——将上层从 <code>RawNode</code> 那收到的
+<code>Ready</code> 进行持久化。主要流程为：</p>
+<ol type="1">
+<li>根据 <code>Ready</code> 修改内存数据
+<code>raftState</code>/<code>applyState</code>；</li>
+<li>利用 <code>WriteBatch.SetMeta()</code> 以及
+<code>meta.xxxKey()</code> 往 wb 中加入批处理日志，设置好对应的
+Key/Value 条目；</li>
+<li>最后调用 <code>WriteBatch.WriteToDB()</code> 写到 badger
+中（持久化）；</li>
+</ol>
+<blockquote>
+<p>如果数据没更新就不必写到 badger
+中了。所以到这为止都要有一个「数据是否更新」的判断。</p>
+</blockquote>
+<h4 id="implement-raft-ready-process">2 Implement Raft ready
+process</h4>
+<p>现在我们终于要实现上层怎么处理 Client 发来的请求，以及驱动下层获取
+Ready 并持久化了。</p>
+<blockquote>
+<p>RaftStore 在启动时会新建一个含有消息管道 <code>CloseCh</code> 的
+<code>RaftWorker</code>，然后创建一个 GoRoutine 不断从
+<code>CloseCh</code> 中获取 Client
+发来的消息。每收到一条消息，都会新建一个 <code>PeerMsgHandler</code>
+处理该信息。handler 拥有相关的 <code>Peer</code> 以及上下文.</p>
+</blockquote>
+<p>整套流程应该是这样的：</p>
+<ol type="1">
+<li>Client 发一个包含 Request 的 Message 过来；</li>
+<li><code>RaftWorker</code> 调用 <code>PeerMsgHandler.HandleMsg()</code>
+处理 Message，即检查其消息类型，然后调用相关的处理函数；</li>
+<li>目前语境下，消息类型为 <code>MsgRaftCmd</code>，那么会调用
+<code>PeerMsgHandler.proposeRaftCommand()</code> 驱动下层（如果是
+Leader） Propose 一条包含该命令的日志
+L。与此同时，消息中还带有一个可以让我们发回复的管道，如果不是
+Leader，就发个 <code>ErrNotLeader</code>
+回去。反之，由于要等到很久以后应用日志才能回复，故需记录 L 的
+<code>Index</code>/<code>Term</code> 在
+<code>PeerMsgHandler.Proposals</code> 中以便后续应用 L 时回复；</li>
+<li>随后调用 <code>PeerMsgHandler.HandleRaftReady()</code>
+收集新增的日志以及要向 Peers 发送 <code>MsgAppend</code> 消息；</li>
+<li>Peers 收到消息后也会发一个 <code>MsgAppendResponse</code>
+回来；</li>
+<li>等待同个 RaftGroup 的大多数都持有该日志后，下次
+<code>PeerMsgHandler.HandleRaftReady()</code>
+的调用就会收集已提交但未应用的日志，并将命令应用到 badger 中；</li>
+<li>然后如果是 Leader，还要发个回复给当前日志对应的
+<code>Proposal</code>，系统会收取 Response 发给 Client；</li>
+<li>日志应用完毕后通知 <code>PeerStorage</code>
+进行相关数据的持久化，以及 <code>RawNode</code> 推进状态；</li>
+</ol>
+<blockquote>
+<p>任务书给的伪代码是在应用日志前持久化，但我觉得应用日志完 applied
+会发生变化，后面照样还要落盘，就干脆把持久化放在最后了。</p>
+<p>要注意的是，在应用日志时似乎不能把 <code>WriteToDB()</code>
+放在最后，防止出现 Read After Write 但由于未写入出现 Stale Read
+的情况。我这里就这样设置了：</p>
+<pre class="line-numbers language-go" data-language="go"><div class="caption"><span>kv/raftstore/peer_msg_handler.go</span></div><code class="language-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>d <span class="token operator">*</span>peerMsgHandler<span class="token punctuation">)</span> <span class="token function">HandleRaftReady</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token operator">...</span>
+  <span class="token keyword">for</span> <span class="token boolean">_</span><span class="token punctuation">,</span> entry <span class="token operator">:=</span> <span class="token keyword">range</span> ready<span class="token punctuation">.</span>CommittedEntries <span class="token punctuation">{</span>
+    kvWB <span class="token operator">:=</span> <span class="token function">new</span><span class="token punctuation">(</span>engine_util<span class="token punctuation">.</span>WriteBatch<span class="token punctuation">)</span>
+    d<span class="token punctuation">.</span><span class="token function">applyCommittedEntry</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>entry<span class="token punctuation">,</span> kvWB<span class="token punctuation">)</span>
+    kvWB<span class="token punctuation">.</span><span class="token function">MustWriteToDB</span><span class="token punctuation">(</span>d<span class="token punctuation">.</span>ctx<span class="token punctuation">.</span>engine<span class="token punctuation">.</span>Kv<span class="token punctuation">)</span>
+  <span class="token punctuation">}</span>
+  <span class="token operator">...</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>发送回复时，遍历 Proposals 发现 <code>Index</code> 相同但
+<code>Term</code> 不同，则发个 <code>ErrStaleCommand</code>。</p>
+</blockquote>
+<h3 id="part-c-snapshot">Part C Snapshot</h3>
+<p>需要对前两个 Part 所涉及的文件进行修改。</p>
+<p>这一 part 我们要实现快照。snapshot
+有两条路线能走，上层<strong>主动</strong>截断并向下通知，或是<strong>被动</strong>接受
+Peers 传来的 snapshot 并在 Ready 中告知上层。</p>
+<p>在有快照的情况下，我们需要修改以下数据：</p>
+<ol type="1">
+<li>删除 badger 中的遗留日志；</li>
+<li>修改 PeerStorage 中的 applyState 并持久化；</li>
+<li>修改 RaftLog 的相关数据；</li>
+</ol>
+<h4 id="主动快照">1 主动快照</h4>
+<p>系统定时 Tick，向 handler 发送 <code>MsgTypeTick</code> 消息，触发
+<code>PeerMsgHandler.OnTick()</code> =&gt;
+<code>PeerMsgHandler.onRaftGCLogTick()</code>，检查已应用日志大小是否超过
+<code>RaftLogGcCountLimit</code>，如果超过了，就生成一条类型为
+<code>CompactLog</code> 的 adminRequest 并向下 propose。</p>
+<p>等到该日志被 Ready 捕获时，上层就知道可以安全截断日志了，即调用
+<code>PeerMsgHandler.ScheduleCompactLog()</code> 删除冗余日志。由于
+<code>PeerStorage</code> 没法通过 Ready 修改 <code>applyState</code>
+中的 <code>TruncatedState</code>，那就在 apply 里头改了。</p>
+<pre class="line-numbers language-go" data-language="go"><div class="caption"><span>kv/raftstore/peer_msg_handler.go</span></div><code class="language-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>d <span class="token operator">*</span>peerMsgHandler<span class="token punctuation">)</span> <span class="token function">applyAdminRequest</span><span class="token punctuation">(</span>adminReq <span class="token operator">*</span>AdminRequest<span class="token punctuation">,</span> entry <span class="token operator">*</span>Entry<span class="token punctuation">,</span> wb <span class="token operator">*</span>WriteBatch<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">switch</span> adminReq<span class="token punctuation">.</span>CmdType <span class="token punctuation">{</span>
+    <span class="token operator">...</span>
+    <span class="token keyword">case</span> raft_cmdpb<span class="token punctuation">.</span>AdminCmdType_CompactLog<span class="token punctuation">:</span>
+      <span class="token comment">// 1. do the actual log deletion work</span>
+      d<span class="token punctuation">.</span><span class="token function">ScheduleCompactLog</span><span class="token punctuation">(</span>compactLogIndex<span class="token punctuation">)</span>
+
+      <span class="token keyword">if</span> d<span class="token punctuation">.</span>peer<span class="token punctuation">.</span>peerStorage<span class="token punctuation">.</span>applyState<span class="token punctuation">.</span>TruncatedState<span class="token punctuation">.</span><span class="token function">GetIndex</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;</span> compactLogIndex <span class="token punctuation">{</span>
+        <span class="token comment">// 2. update applystate</span>
+      <span class="token punctuation">}</span>
+    <span class="token operator">...</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>这样一来，后续对 <code>RawNode</code> 的 Advance
+就需要加上一点修改。如果 <code>Ready.CommittedEntries</code>
+非空，说明存在应用了 <code>CompactLog</code> 的可能，需要调用
+<code>RaftLog</code> 中预先为我们声明好的 <code>maybeCompact()</code>
+函数。接下来需要做的就是实现它。由于先前已经修改了
+<code>PeerStorage</code>，那么可以直接通过 <code>Storage</code> 的接口
+<code>FirstIndex()</code>
+来获取日志截断点，从而进一步判断是否需要对日志进行压缩。</p>
+<p>到此，所有需要修改的数据均已修改完毕。</p>
+<h4 id="被动快照">2 被动快照</h4>
+<p>Leader 一定是最先主动快照的那个，之后在需要发送
+<code>MsgAppend</code> 的时候会检查 Peer 的 <code>Next</code> 字段。有些
+Peer 可能由于网络断开或宕机重启等原因，没有对之前的
+<code>MsgAppend</code> 进行回复去更新 <code>Next</code>，或没收到之前的
+<code>CompactLog</code> 日志，这样就导致后续 Leader 对日志截断后，这些
+Peer 的 <code>Next</code> 甚至比截断点 <code>truncatedIndex</code>
+还小，那么此时 Leader 就需要发 <code>MsgSnapshot</code> 给他们了。</p>
+<p>发送该消息的话，需要把本地数据库的快照数据也一并发过去，这样 Peer
+才能尽快赶上进度。通过调用 <code>Storage.Snapshot()</code>
+可以产生快照数据，但了解了 <code>PeerStorage</code>
+的该函数执行流程后发现，首次调用只会发条消息给
+Worker，叫他去干活，把数据处理好后通过管道发回来，在后续的调用才会拿到这部分数据，于是有</p>
+<pre class="line-numbers language-go" data-language="go"><code class="language-go">newSnapshot<span class="token punctuation">,</span> err <span class="token operator">:=</span> r<span class="token punctuation">.</span>RaftLog<span class="token punctuation">.</span>storage<span class="token punctuation">.</span><span class="token function">Snapshot</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">if</span> err <span class="token operator">==</span> ErrSnapshotTemporarilyUnavailable <span class="token punctuation">{</span>
+  <span class="token keyword">return</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>通过 <code>HandleRaftReady</code> 收集消息队列并发送，Peer 收到了
+<code>MsgSnapshot</code>，触发
+<code>Raft.handleSnapshot()</code>，还是一样的先判断发送方的
+Term，接着如果发送方的截断点
+<code>truncatedIndex &lt; CommittedIndex</code>，是没有应用这个快照的必要的，因为之前的日志会不断被
+apply，那么 <code>CompactLog</code> 必然会被上层捕获从而主动截断。</p>
+<blockquote>
+<p>这里还需要发一个 <code>MsgAppendResponse</code> 回去，以便 Leader
+收到拒绝后修改 <code>Next</code> 字段。</p>
+<p>最后才修改 Raft 层与 RaftLog 的相关数据，并令
+<code>RaftLog.pendingSnapshot = msg.snapshot</code>（可以认为该数据一定不是
+nil），这样下次收集 Ready 的时候会拿到待应用的快照数据，在
+<code>SaveReadyState</code> 中调用
+<code>PeerStorage.ApplySnapshot()</code> 将快照落实到 badger 中并修改
+<code>ApplyState</code>。</p>
+</blockquote>
+<p>到此，所有需要修改的数据均已修改完毕。</p>
+<h2 id="一些坑">一些坑</h2>
+<ol type="1">
+<li><code>newRaft</code> 时传入的 <code>peers</code> 切片只在 2A
+的测试中用到，实际上 peers 信息是通过
+<code>Storage.InitialState()</code> 返回的 <code>confState.Nodes</code>
+给出；</li>
+</ol>
+
+                
+            </div>
+            <hr/>
+
+            
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            <span class="chip bg-color">无标签</span>
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/lab/tinykvproject3/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/22.jpg" class="responsive-img" alt="TinyKV Project3 Multi-Raft">
+                        
+                        <span class="card-title">TinyKV Project3 Multi-Raft</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            本 Project 需要我们实现多个存储节点之间的管理。
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2023-08-20
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Lab/" class="post-category">
+                                    Lab
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/lab/tinykvproject1/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/11.jpg" class="responsive-img" alt="TinyKV Project1 StandaloneKV">
+                        
+                        <span class="card-title">TinyKV Project1 StandaloneKV</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            本 Project 需要我们基于 badger 实现一个独立存储引擎。
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2023-08-13
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Lab/" class="post-category">
+                                    Lab
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+
+  <!-- 是否加载使用自带的 prismjs. -->
+  <script type="text/javascript" src="/libs/prism/prism.min.js"></script>
+
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card" style="background-color: white;">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+<script src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+    MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$', '$'], ['\\(', '\\)']]}
+    });
+</script>
+
+
+
+    <footer class="page-footer bg-color">
+    
+
+    <div class="container row center-align"
+         style="margin-bottom: 15px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            
+                <span id="year">2023-2025</span>
+            
+            <a href="/about" target="_blank">Leager</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            
+            <br>
+            
+            
+            
+                
+            
+            
+                <span id="busuanzi_container_site_pv">
+                &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
+                    <span id="busuanzi_value_site_pv" class="white-color"></span>
+            </span>
+            
+            
+                <span id="busuanzi_container_site_uv">
+                &nbsp;|&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;
+                    <span id="busuanzi_value_site_uv" class="white-color"></span>
+            </span>
+            
+            <br>
+
+            <!-- 运行天数提醒. -->
+            
+                <span id="sitetime"> Loading ...</span>
+                <script>
+                    var calcSiteTime = function () {
+                        var seconds = 1000;
+                        var minutes = seconds * 60;
+                        var hours = minutes * 60;
+                        var days = hours * 24;
+                        var years = days * 365;
+                        var today = new Date();
+                        var startYear = "2023";
+                        var startMonth = "8";
+                        var startDate = "1";
+                        var startHour = "0";
+                        var startMinute = "0";
+                        var startSecond = "0";
+                        var todayYear = today.getFullYear();
+                        var todayMonth = today.getMonth() + 1;
+                        var todayDate = today.getDate();
+                        var todayHour = today.getHours();
+                        var todayMinute = today.getMinutes();
+                        var todaySecond = today.getSeconds();
+                        var t1 = Date.UTC(startYear, startMonth, startDate, startHour, startMinute, startSecond);
+                        var t2 = Date.UTC(todayYear, todayMonth, todayDate, todayHour, todayMinute, todaySecond);
+                        var diff = t2 - t1;
+                        var diffYears = Math.floor(diff / years);
+                        var diffDays = Math.floor((diff / days) - diffYears * 365);
+
+                        // 区分是否有年份.
+                        var language = 'zh-CN';
+                        if (startYear === String(todayYear)) {
+                            document.getElementById("year").innerHTML = todayYear;
+                            var daysTip = 'This site has been running for ' + diffDays + ' days';
+                            if (language === 'zh-CN') {
+                                daysTip = '本站已运行 ' + diffDays + ' 天';
+                            } else if (language === 'zh-HK') {
+                                daysTip = '本站已運行 ' + diffDays + ' 天';
+                            }
+                            document.getElementById("sitetime").innerHTML = daysTip;
+                        } else {
+                            document.getElementById("year").innerHTML = startYear + " - " + todayYear;
+                            var yearsAndDaysTip = 'This site has been running for ' + diffYears + ' years and '
+                                + diffDays + ' days';
+                            if (language === 'zh-CN') {
+                                yearsAndDaysTip = '本站已运行 ' + diffYears + ' 年 ' + diffDays + ' 天';
+                            } else if (language === 'zh-HK') {
+                                yearsAndDaysTip = '本站已運行 ' + diffYears + ' 年 ' + diffDays + ' 天';
+                            }
+                            document.getElementById("sitetime").innerHTML = yearsAndDaysTip;
+                        }
+                    }
+
+                    calcSiteTime();
+                </script>
+            
+            <br>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link social-statis">
+    <a href="https://github.com/Leager-zju" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:1004729740@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+
+
+
+
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1004729740" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1004729740" data-position="top" data-delay="50">
+        <i class="fab fa-qq"></i>
+    </a>
+
+
+
+
+
+
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    var searchFunc = function (path, search_id, content_id) {
+        'use strict';
+        $.ajax({
+            url: path,
+            dataType: "xml",
+            success: function (xmlResponse) {
+                // get the contents from search data
+                var datas = $("entry", xmlResponse).map(function () {
+                    return {
+                        title: $("title", this).text(),
+                        content: $("content", this).text(),
+                        url: $("url", this).text()
+                    };
+                }).get();
+                var $input = document.getElementById(search_id);
+                var $resultContent = document.getElementById(content_id);
+                $input.addEventListener('input', function () {
+                    var str = '<ul class=\"search-result-list\">';
+                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                    $resultContent.innerHTML = "";
+                    if (this.value.trim().length <= 0) {
+                        return;
+                    }
+                    // perform local searching
+                    datas.forEach(function (data) {
+                        var isMatch = true;
+                        var data_title = data.title.trim().toLowerCase();
+                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
+                        var data_url = data.url;
+                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
+                        var index_title = -1;
+                        var index_content = -1;
+                        var first_occur = -1;
+                        // only match artiles with not empty titles and contents
+                        if (data_title !== '' && data_content !== '') {
+                            keywords.forEach(function (keyword, i) {
+                                index_title = data_title.indexOf(keyword);
+                                index_content = data_content.indexOf(keyword);
+                                if (index_title < 0 && index_content < 0) {
+                                    isMatch = false;
+                                } else {
+                                    if (index_content < 0) {
+                                        index_content = 0;
+                                    }
+                                    if (i === 0) {
+                                        first_occur = index_content;
+                                    }
+                                }
+                            });
+                        }
+                        // show search results
+                        if (isMatch) {
+                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
+                            var content = data.content.trim().replace(/<[^>]+>/g, "");
+                            if (first_occur >= 0) {
+                                // cut out 100 characters
+                                var start = first_occur - 20;
+                                var end = first_occur + 80;
+                                if (start < 0) {
+                                    start = 0;
+                                }
+                                if (start === 0) {
+                                    end = 100;
+                                }
+                                if (end > content.length) {
+                                    end = content.length;
+                                }
+                                var match_content = content.substr(start, end);
+                                // highlight all keywords
+                                keywords.forEach(function (keyword) {
+                                    var regS = new RegExp(keyword, "gi");
+                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
+                                });
+
+                                str += "<p class=\"search-result\">" + match_content + "...</p>"
+                            }
+                            str += "</li>";
+                        }
+                    });
+                    str += "</ul>";
+                    $resultContent.innerHTML = str;
+                });
+            }
+        });
+    };
+
+    searchFunc('/search.xml', 'searchInput', 'searchResult');
+});
+</script>
+
+    <!-- 白天和黑夜主题 -->
+<div class="stars-con">
+    <div id="stars"></div>
+    <div id="stars2"></div>
+    <div id="stars3"></div>  
+</div>
+
+<script>
+    function switchNightMode() {
+        $('<div class="Cuteen_DarkSky"><div class="Cuteen_DarkPlanet"></div></div>').appendTo($('body')),
+        setTimeout(function () {
+            $('body').hasClass('DarkMode') 
+            ? ($('body').removeClass('DarkMode'), localStorage.setItem('isDark', '0'), $('#sum-moon-icon').removeClass("fa-sun").addClass('fa-moon')) 
+            : ($('body').addClass('DarkMode'), localStorage.setItem('isDark', '1'), $('#sum-moon-icon').addClass("fa-sun").removeClass('fa-moon')),
+            
+            setTimeout(function () {
+            $('.Cuteen_DarkSky').fadeOut(1e3, function () {
+                $(this).remove()
+            })
+            }, 2e3)
+        })
+    }
+</script>
+
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    
+
+    
+    
+    
+        
+        <script type="text/javascript">
+            // 只在桌面版网页启用特效
+            var windowWidth = $(window).width();
+            if (windowWidth > 768) {
+                document.write('<script type="text/javascript" src="/libs/others/sakura.js"><\/script>');
+            }
+        </script>
+    
+
+    <!-- 雪花特效 -->
+    
+
+    <!-- 鼠标星星特效 -->
+    
+
+     
+        <script src="https://ssl.captcha.qq.com/TCaptcha.js"></script>
+        <script src="/libs/others/TencentCaptcha.js"></script>
+        <button id="TencentCaptcha" data-appid="xxxxxxxxxx" data-cbfn="callback" type="button" hidden></button>
+    
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    <script src="/libs/others/clicklove.js" async="async"></script>
+    
+    
+    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
+    
+
+    
+
+    
+
+    <!--腾讯兔小巢-->
+    
+    
+
+    
+
+    
+
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+    <script type="text/javascript">
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden) {
+                document.title = '你会有一天后悔';
+            } else {
+                document.title = '欢迎来到 G8 北海道 洞爷湖 高峰会 博物馆';
+            }
+        });
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,1225 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="Unreal Engine の 委托, 没什么看头的地方">
+    <meta name="description" content="
+「委托」是一种泛型但类型安全的方式，可在 C++
+对象上调用成员函数。可使用委托动态绑定到任意对象的成员函数，之后在该对象上调用函数，即使调用程序不知对象类型也可进行操作。——虚幻官方文档
+
+
+委托本质上是基于「观察者模式」的，也就是有「">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+    <title>Unreal Engine の 委托 | 没什么看头的地方</title>
+    <link rel="icon" type="image/png" href="/dt.png">
+    
+    <style>
+        body{
+            background-image: url(https://cdn.jsdelivr.net/gh/Tokisaki-Galaxy/res/site/medias/background.jpg);
+            background-repeat:no-repeat;
+            background-size: 100% 100%;
+            background-attachment:fixed;
+        }
+    </style>
+
+
+
+    <!-- bg-cover style     -->
+
+
+
+<link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+<link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+<link rel="stylesheet" type="text/css" href="/css/matery.css">
+<link rel="stylesheet" type="text/css" href="/css/my.css">
+<link rel="stylesheet" type="text/css" href="/css/dark.css" media="none" onload="if(media!='all')media='all'">
+
+
+
+
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+    <link rel="stylesheet" href="/css/post.css">
+
+
+
+
+    
+
+
+
+    <script src="/libs/jquery/jquery-3.6.0.min.js"></script>
+
+<meta name="generator" content="Hexo 6.3.0">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/comment_bg.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">没什么看头的地方</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/archives" class="waves-effect waves-light">
+      
+      <i class="fas fa-archive" style="zoom: 0.6;"></i>
+      
+      <span>归档</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/contact" class="waves-effect waves-light">
+      
+      <i class="fas fa-comments" style="zoom: 0.6;"></i>
+      
+      <span>留言板</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/friends" class="waves-effect waves-light">
+      
+      <i class="fas fa-address-book" style="zoom: 0.6;"></i>
+      
+      <span>友情链接</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+  <li>
+    <a href="javascript:;" class="waves-effect waves-light" onclick="switchNightMode()" title="深色/浅色模式" >
+      <i id="sum-moon-icon" class="fas fa-sun" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/comment_bg.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">没什么看头的地方</div>
+        <div class="logo-desc">
+            
+            【数据删除】
+            
+        </div>
+    </div>
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/archives" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-archive"></i>
+			
+			归档
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/contact" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-comments"></i>
+			
+			留言板
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/friends" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-address-book"></i>
+			
+			友情链接
+		</a>
+          
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/Leager-zju" class="waves-effect waves-light" target="_blank">
+                <i class="fab fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+            <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/Leager-zju" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+   data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+        
+    </nav>
+
+</header>
+
+    
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/21.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">Unreal Engine の 委托</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                          <div class="article-tag">
+                            <span class="chip bg-color">无标签</span>
+                          </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/Unreal/" class="post-category">
+                                Unreal
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2024-09-01
+                </div>
+                
+
+                
+
+                
+
+                
+
+                
+            </div>
+        </div>
+        <hr class="clearfix">
+
+        
+        <!-- 是否加载使用自带的 prismjs. -->
+        <link rel="stylesheet" href="/libs/prism/prism.min.css">
+        
+
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <blockquote>
+<p>「<strong>委托</strong>」是一种泛型但类型安全的方式，可在 C++
+对象上调用成员函数。可使用委托动态绑定到任意对象的成员函数，之后在该对象上调用函数，即使调用程序不知对象类型也可进行操作。——<a target="_blank" rel="noopener" href="https://dev.epicgames.com/documentation/zh-cn/unreal-engine/delegates-and-lamba-functions-in-unreal-engine">虚幻官方文档</a></p>
+</blockquote>
+<span id="more"></span>
+<p>委托本质上是基于「<strong>观察者模式</strong>」的，也就是有「<strong>订阅</strong>」的行为，在委托中称为「<strong>绑定</strong>」。</p>
+<p>要使用委托，首先要用 <code>DECLARE*</code>
+宏进行特定委托的类型声明，之后才允许用
+<code>Bind*()</code>/<code>Add*()</code>
+函数将「<strong>订阅者</strong>」（一个可调用对象）绑定到委托对象上。这样一旦某些事件触发，就可以通过
+<code>Execute()</code>/<code>BroadCast()</code> 通知这些订阅者。</p>
+<p>委托的基本类型有三种。</p>
+<ol type="1">
+<li>单播委托</li>
+<li>多播委托</li>
+<li>动态委托</li>
+</ol>
+<h2 id="单播委托-动态单播委托">单播委托 &amp; 动态单播委托</h2>
+<p>单播，顾名思义就是最多只能绑定<strong>一个</strong>可调用对象，并且不支持反射和序列化。优点是支持返回值。</p>
+<p>而「动态」的意思是会在执行时实时根据给定的「函数名」去查找对应的函数（需要用
+<code>UFUNCTION()</code>
+修饰），因此执行速度很慢。此外，动态单播并不支持反射和序列化。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>单播委托</span></div><code class="language-cpp"><span class="token comment">/**
+ * 声明一个名为 DelegateType 的委托类型
+ * 允许绑定的函数类型为 void(*)(ParamType1, ParamType2, ...)
+ * 相当于 using DelegateType = TDelegate&lt;void(ParamType1, ParamType2, ...)&gt;;
+ * 无返回值
+ */</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">DECLARE_DELEGATE</span><span class="token expression"><span class="token operator">*</span><span class="token punctuation">(</span>DelegateType<span class="token punctuation">,</span> ParamType1<span class="token punctuation">,</span> ParamType2<span class="token punctuation">,</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span></span></span>
+
+<span class="token comment">/**
+ * 声明动态委托类型
+ * 允许绑定的函数类型为 void(*)(ParamType1 ParamName1, ...)
+ * 相当于定义了一个继承自 TBaseDynamicDelegate 的类
+ * 无返回值
+ */</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">DECLARE_DYNAMIC_DELEGATE</span><span class="token expression"><span class="token operator">*</span><span class="token punctuation">(</span>DelegateType<span class="token punctuation">,</span> ParamType1<span class="token punctuation">,</span> ParamName1<span class="token punctuation">,</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span></span></span>
+
+<span class="token comment">/**
+ * 允许绑定的函数类型为 RetValType(*)(ParamType1, ParamType2, ...)
+ * 相当于 using DelegateType = TDelegate&lt;RetValType(ParamType1, ParamType2, ...)&gt;;
+ * 有返回值
+ */</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">DECLARE_DELEGATE_RetVal</span><span class="token expression"><span class="token operator">*</span><span class="token punctuation">(</span>RetValType<span class="token punctuation">,</span> DelegateType<span class="token punctuation">,</span> ParamType1<span class="token punctuation">,</span> ParamType2<span class="token punctuation">,</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span></span></span>
+
+<span class="token comment">/**
+ * 允许绑定的函数类型为 RetValType(*)(ParamType1 ParamName1, ...)
+ * 有返回值
+ */</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">DECLARE_DYNAMIC_DELEGATE_RetVal</span><span class="token expression"><span class="token operator">*</span><span class="token punctuation">(</span>DelegateType<span class="token punctuation">,</span> ParamType1<span class="token punctuation">,</span> ParamName1<span class="token punctuation">,</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="多播委托-动态多播委托">多播委托 &amp; 动态多播委托</h2>
+<p>多播则是允许绑定多个可调用对象，但不支持返回值和反射。</p>
+<p>动态多播同样需要用 <code>UFUNCTION()</code>
+修饰，但支持反射以及序列化，也就是可以在蓝图中进行绑定，此时需要使用
+<code>BlueprintAssignable</code> 修饰符。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>多播委托</span></div><code class="language-cpp"><span class="token comment">/**
+ * 多播委托类型
+ * 相当于 using DelegateType = TMulticastDelegate&lt;void(ParamType1, ParamType2, ...)&gt;;
+ */</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">DECLARE_MULTICAST_DELEGATE</span><span class="token expression"><span class="token operator">*</span><span class="token punctuation">(</span>DelegateType<span class="token punctuation">,</span> ParamType1<span class="token punctuation">,</span> ParamType2<span class="token punctuation">,</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span></span></span>
+
+<span class="token comment">/**
+ * 线程安全多播类型
+ * 相当于 using DelegateType = TMulticastDelegate&lt;RetValType(ParamType1, ParamType2, ...)， FDefaultTSDelegateUserPolicy&gt;;
+ */</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">DECLARE_TS_MULTICAST_DELEGATE</span><span class="token expression"><span class="token operator">*</span><span class="token punctuation">(</span>DelegateType<span class="token punctuation">,</span> ParamType1<span class="token punctuation">,</span> ParamType2<span class="token punctuation">,</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span></span></span>
+
+<span class="token comment">/**
+ * 动态多播类型
+ * 相当于定义了一个继承自 TBaseDynamicMulticastDelegate 的类
+ */</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">DECLARE_DYNAMIC_MULTICAST_DELEGATE</span><span class="token expression"><span class="token operator">*</span><span class="token punctuation">(</span>DelegateType<span class="token punctuation">,</span> ParamType1<span class="token punctuation">,</span> ParamName1<span class="token punctuation">,</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="事件">事件</h2>
+<p>除了上面 7 个宏族，UE 里还有一种声明方式是
+<code>DECLARE_EVENT*()</code>。它和多播很像，但指定了 Owner，即只能在
+Owner 类的成员函数中调用 <code>BroadCast()</code>。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>EVENT 委托源码</span></div><code class="language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name function">FUNC_DECLARE_EVENT</span><span class="token expression"><span class="token punctuation">(</span> OwningType<span class="token punctuation">,</span> EventName<span class="token punctuation">,</span> ReturnType<span class="token punctuation">,</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token punctuation">)</span> </span><span class="token punctuation">\</span>
+  <span class="token expression"><span class="token keyword">class</span> <span class="token class-name">EventName</span> <span class="token operator">:</span> <span class="token keyword">public</span> TMulticastDelegate<span class="token operator">&lt;</span><span class="token function">ReturnType</span><span class="token punctuation">(</span>__VA_ARGS__<span class="token punctuation">)</span><span class="token operator">&gt;</span> </span><span class="token punctuation">\</span>
+  <span class="token expression"><span class="token punctuation">{</span> </span><span class="token punctuation">\</span>
+    <span class="token expression"><span class="token keyword">friend</span> <span class="token keyword">class</span> <span class="token class-name">OwningType</span><span class="token punctuation">;</span> </span><span class="token punctuation">\</span>
+  <span class="token expression"><span class="token punctuation">}</span><span class="token punctuation">;</span></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>可以看到用了友元类来进行访问权限的控制。</p>
+<h2 id="绑定-解绑">绑定 &amp; 解绑</h2>
+<h3 id="非动态委托">非动态委托</h3>
+<p><code>Bind*()</code> 系用于单播绑定，<code>Add*()</code>
+系用于多播绑定。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>非动态委托</span></div><code class="language-cpp"><span class="token comment">/* 绑定类的静态函数 */</span>
+MyUnicastDelegate<span class="token punctuation">.</span><span class="token function">BindStatic</span><span class="token punctuation">(</span><span class="token comment">/* A static function pointer */</span><span class="token punctuation">,</span> <span class="token comment">/* Parameters */</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+MyMulticastDelegate<span class="token punctuation">.</span><span class="token function">AddStatic</span><span class="token punctuation">(</span><span class="token comment">/* &amp;MyClass::MyStaticFunc */</span><span class="token punctuation">,</span> <span class="token comment">/* ... */</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+
+<span class="token comment">/* 绑定 lambda 函数，可能出现悬垂引用的问题 */</span>
+<span class="token function">BindLambda</span><span class="token punctuation">(</span><span class="token comment">/* Lambda */</span><span class="token punctuation">,</span> <span class="token comment">/* Parameters */</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token function">AddLambda</span><span class="token punctuation">(</span><span class="token comment">/* [this](...) {...} */</span><span class="token punctuation">,</span> <span class="token comment">/* ... */</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+
+<span class="token comment">/* 绑定 Weak lambda 函数，区别在于如果 this 无效不会执行 lambda */</span>
+<span class="token function">BindWeakLambda</span><span class="token punctuation">(</span><span class="token comment">/* User Object */</span><span class="token punctuation">,</span> <span class="token comment">/* Lambda */</span><span class="token punctuation">,</span> <span class="token comment">/* Parameters */</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token function">AddWeakLambda</span><span class="token punctuation">(</span><span class="token comment">/* this */</span><span class="token punctuation">,</span> <span class="token comment">/* [this](...) {...} */</span><span class="token punctuation">,</span> <span class="token comment">/* ... */</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+
+<span class="token comment">/* 绑定到继承自 UObject 对象上的某个函数 */</span>
+<span class="token function">BindUObject</span><span class="token punctuation">(</span><span class="token comment">/* UObject* */</span><span class="token punctuation">,</span> <span class="token comment">/* A function pointer */</span><span class="token punctuation">,</span> <span class="token comment">/* Parameters */</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token function">AddUObject</span><span class="token punctuation">(</span><span class="token comment">/* this */</span><span class="token punctuation">,</span> <span class="token comment">/* &amp;MyClass::MyFunc */</span><span class="token punctuation">,</span> <span class="token comment">/* ... */</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+
+<span class="token comment">/* 绑定到不继承自 UObject 的对象上的函数，同样可能出现悬垂引用的问题 */</span>
+<span class="token function">BindRaw</span><span class="token punctuation">(</span><span class="token comment">/* Raw Pointer */</span><span class="token punctuation">,</span> <span class="token comment">/* A function pointer */</span><span class="token punctuation">,</span> <span class="token comment">/* Parameters */</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token function">AddRaw</span><span class="token punctuation">(</span><span class="token comment">/* Other */</span><span class="token punctuation">,</span> <span class="token comment">/* &amp;OtherClass::OtherFunc */</span><span class="token punctuation">,</span> <span class="token comment">/* ... */</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+
+<span class="token comment">/* 在上面的基础上，传入对象为 Shared Pointer */</span>
+<span class="token function">BindSP</span><span class="token punctuation">(</span><span class="token comment">/* Shared Pointer */</span><span class="token punctuation">,</span> <span class="token comment">/* A function pointer */</span><span class="token punctuation">,</span> <span class="token comment">/* Parameters */</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token function">AddSP</span><span class="token punctuation">(</span><span class="token comment">/* Other.ToSharedRef() */</span><span class="token punctuation">,</span> <span class="token comment">/* &amp;OtherClass::OtherFunc */</span><span class="token punctuation">,</span> <span class="token comment">/* ... */</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+
+<span class="token comment">/* 上面的线程安全版本 */</span>
+<span class="token function">BindThreadSafeSP</span><span class="token punctuation">(</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token function">AddThreadSafeSP</span><span class="token punctuation">(</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+
+<span class="token comment">/* 基于函数名进行绑定，需要用 UFUNCTION() 修饰 !!开销很大!! */</span>
+<span class="token function">BindUFunction</span><span class="token punctuation">(</span><span class="token comment">/* User Object */</span><span class="token punctuation">,</span> <span class="token comment">/* Function name */</span><span class="token punctuation">,</span> <span class="token comment">/* Parameters */</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token function">AddUFunction</span><span class="token punctuation">(</span><span class="token comment">/* this */</span><span class="token punctuation">,</span> <span class="token comment">/* "MyFunction" */</span><span class="token punctuation">,</span> <span class="token comment">/* ... */</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+
+<span class="token comment">/* 单播/动态单播 解除绑定 */</span>
+<span class="token function">UnBind</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+
+<span class="token comment">/* 多播/动态多播 解除某个绑定 */</span>
+<span class="token function">Remove</span><span class="token punctuation">(</span><span class="token comment">/* this */</span><span class="token punctuation">,</span> <span class="token comment">/* &amp;MyClass::MyFunc */</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token function">Remove</span><span class="token punctuation">(</span><span class="token comment">/* Delegate Handle */</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+
+<span class="token comment">/* 多播/动态多播 解除所有绑定 */</span>
+<span class="token function">RemoveAll</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token function">Clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<blockquote>
+<p>对于单播而言，后续的绑定会覆盖之前的。</p>
+</blockquote>
+<h3 id="动态委托">动态委托</h3>
+<p>动态委托绑定的函数必须用 <code>UFUNCTION()</code>
+修饰，否则无效。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>动态委托</span></div><code class="language-cpp"><span class="token comment">/* 动态单播 */</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name function">BindDynamic</span><span class="token expression"><span class="token punctuation">(</span> UserObject<span class="token punctuation">,</span> FuncName <span class="token punctuation">)</span> </span><span class="token punctuation">\</span>
+        <span class="token expression"><span class="token function">__Internal_BindDynamic</span><span class="token punctuation">(</span> UserObject<span class="token punctuation">,</span> FuncName<span class="token punctuation">,</span> </span><span class="token punctuation">\</span>
+                                <span class="token expression"><span class="token function">STATIC_FUNCTION_FNAME</span><span class="token punctuation">(</span> <span class="token function">TEXT</span><span class="token punctuation">(</span> #FuncName <span class="token punctuation">)</span> <span class="token punctuation">)</span> <span class="token punctuation">)</span></span></span>
+
+<span class="token function">BindDynamic</span><span class="token punctuation">(</span><span class="token comment">/* User Object */</span><span class="token punctuation">,</span> <span class="token comment">/* A function poiter */</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+
+<span class="token comment">/* 动态多播 */</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name function">AddDynamic</span><span class="token expression"><span class="token punctuation">(</span> UserObject<span class="token punctuation">,</span> FuncName <span class="token punctuation">)</span> </span><span class="token punctuation">\</span>
+        <span class="token expression"><span class="token function">__Internal_AddDynamic</span><span class="token punctuation">(</span> UserObject<span class="token punctuation">,</span> FuncName<span class="token punctuation">,</span> </span><span class="token punctuation">\</span>
+                               <span class="token expression"><span class="token function">STATIC_FUNCTION_FNAME</span><span class="token punctuation">(</span> <span class="token function">TEXT</span><span class="token punctuation">(</span> #FuncName <span class="token punctuation">)</span> <span class="token punctuation">)</span> <span class="token punctuation">)</span></span></span>
+
+<span class="token function">AddDynamic</span><span class="token punctuation">(</span><span class="token comment">/* this */</span><span class="token punctuation">,</span> <span class="token comment">/* &amp;MyClass::MyFunc */</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+
+<span class="token comment">/* 动态多播 且去重 */</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name function">AddUniqueDynamic</span><span class="token expression"><span class="token punctuation">(</span> UserObject<span class="token punctuation">,</span> FuncName <span class="token punctuation">)</span> </span><span class="token punctuation">\</span>
+        <span class="token expression"><span class="token function">__Internal_AddUniqueDynamic</span><span class="token punctuation">(</span> UserObject<span class="token punctuation">,</span> FuncName<span class="token punctuation">,</span> </span><span class="token punctuation">\</span>
+                                     <span class="token expression"><span class="token function">STATIC_FUNCTION_FNAME</span><span class="token punctuation">(</span> <span class="token function">TEXT</span><span class="token punctuation">(</span> #FuncName <span class="token punctuation">)</span> <span class="token punctuation">)</span> <span class="token punctuation">)</span></span></span>
+
+<span class="token function">AddUniqueDynamic</span><span class="token punctuation">(</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+
+<span class="token comment">/* 移除 */</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name function">RemoveDynamic</span><span class="token expression"><span class="token punctuation">(</span> UserObject<span class="token punctuation">,</span> FuncName <span class="token punctuation">)</span> </span><span class="token punctuation">\</span>
+        <span class="token expression"><span class="token function">__Internal_RemoveDynamic</span><span class="token punctuation">(</span> UserObject<span class="token punctuation">,</span> FuncName<span class="token punctuation">,</span> </span><span class="token punctuation">\</span>
+                                  <span class="token expression"><span class="token function">STATIC_FUNCTION_FNAME</span><span class="token punctuation">(</span> <span class="token function">TEXT</span><span class="token punctuation">(</span> #FuncName <span class="token punctuation">)</span> <span class="token punctuation">)</span> <span class="token punctuation">)</span></span></span>
+
+<span class="token function">RemoveDynamic</span><span class="token punctuation">(</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>这几个其实都是宏定义，而不是类的成员函数（所以 intellisense
+没法识别）。</p>
+<h2 id="通知">通知</h2>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>通知</span></div><code class="language-cpp"><span class="token comment">/* 单播/动态单播 通知，可能存在函数指针无效的问题，此时会报错 */</span>
+<span class="token function">Execute</span><span class="token punctuation">(</span><span class="token comment">/* Parameters */</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+
+<span class="token comment">/* 上面的安全版本，如果函数指针无效则不执行 */</span>
+<span class="token function">ExecuteIfBound</span><span class="token punctuation">(</span><span class="token comment">/* Parameters */</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+
+<span class="token comment">/* 多播/动态多播 通知所有订阅者 */</span>
+<span class="token function">BroadCast</span><span class="token punctuation">(</span><span class="token comment">/* Parameters */</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>注意 <code>Execute*()</code> 都可以有返回值，但
+<code>BroadCast()</code> 不行。</p>
+
+                
+            </div>
+            <hr/>
+
+            
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            <span class="chip bg-color">无标签</span>
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/unreal/ueanimsystem/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/6.jpg" class="responsive-img" alt="Unreal Engine の 动画系统">
+                        
+                        <span class="card-title">Unreal Engine の 动画系统</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            
+「动画系统」由多个动画工具和编辑器构成，其将基于骨架的变形与基于变形的顶点变形相结合，从而构建出复杂的动画。该系统可以用于播放和混合预先准备好的动画序列让基本玩家运动显得更加真实，创建自定义特殊动作，如伸缩台阶和墙壁（使用动画蒙太奇），通
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2025-03-06
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Unreal/" class="post-category">
+                                    Unreal
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/guide/ohmyzsh/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/4.jpg" class="responsive-img" alt="使用 Oh-My-Zsh 美化终端">
+                        
+                        <span class="card-title">使用 Oh-My-Zsh 美化终端</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            比 bash 好看太多
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2024-09-01
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Guide/" class="post-category">
+                                    Guide
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+
+  <!-- 是否加载使用自带的 prismjs. -->
+  <script type="text/javascript" src="/libs/prism/prism.min.js"></script>
+
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card" style="background-color: white;">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+<script src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+    MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$', '$'], ['\\(', '\\)']]}
+    });
+</script>
+
+
+
+    <footer class="page-footer bg-color">
+    
+
+    <div class="container row center-align"
+         style="margin-bottom: 15px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            
+                <span id="year">2023-2025</span>
+            
+            <a href="/about" target="_blank">Leager</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            
+            <br>
+            
+            
+            
+                
+            
+            
+                <span id="busuanzi_container_site_pv">
+                &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
+                    <span id="busuanzi_value_site_pv" class="white-color"></span>
+            </span>
+            
+            
+                <span id="busuanzi_container_site_uv">
+                &nbsp;|&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;
+                    <span id="busuanzi_value_site_uv" class="white-color"></span>
+            </span>
+            
+            <br>
+
+            <!-- 运行天数提醒. -->
+            
+                <span id="sitetime"> Loading ...</span>
+                <script>
+                    var calcSiteTime = function () {
+                        var seconds = 1000;
+                        var minutes = seconds * 60;
+                        var hours = minutes * 60;
+                        var days = hours * 24;
+                        var years = days * 365;
+                        var today = new Date();
+                        var startYear = "2023";
+                        var startMonth = "8";
+                        var startDate = "1";
+                        var startHour = "0";
+                        var startMinute = "0";
+                        var startSecond = "0";
+                        var todayYear = today.getFullYear();
+                        var todayMonth = today.getMonth() + 1;
+                        var todayDate = today.getDate();
+                        var todayHour = today.getHours();
+                        var todayMinute = today.getMinutes();
+                        var todaySecond = today.getSeconds();
+                        var t1 = Date.UTC(startYear, startMonth, startDate, startHour, startMinute, startSecond);
+                        var t2 = Date.UTC(todayYear, todayMonth, todayDate, todayHour, todayMinute, todaySecond);
+                        var diff = t2 - t1;
+                        var diffYears = Math.floor(diff / years);
+                        var diffDays = Math.floor((diff / days) - diffYears * 365);
+
+                        // 区分是否有年份.
+                        var language = 'zh-CN';
+                        if (startYear === String(todayYear)) {
+                            document.getElementById("year").innerHTML = todayYear;
+                            var daysTip = 'This site has been running for ' + diffDays + ' days';
+                            if (language === 'zh-CN') {
+                                daysTip = '本站已运行 ' + diffDays + ' 天';
+                            } else if (language === 'zh-HK') {
+                                daysTip = '本站已運行 ' + diffDays + ' 天';
+                            }
+                            document.getElementById("sitetime").innerHTML = daysTip;
+                        } else {
+                            document.getElementById("year").innerHTML = startYear + " - " + todayYear;
+                            var yearsAndDaysTip = 'This site has been running for ' + diffYears + ' years and '
+                                + diffDays + ' days';
+                            if (language === 'zh-CN') {
+                                yearsAndDaysTip = '本站已运行 ' + diffYears + ' 年 ' + diffDays + ' 天';
+                            } else if (language === 'zh-HK') {
+                                yearsAndDaysTip = '本站已運行 ' + diffYears + ' 年 ' + diffDays + ' 天';
+                            }
+                            document.getElementById("sitetime").innerHTML = yearsAndDaysTip;
+                        }
+                    }
+
+                    calcSiteTime();
+                </script>
+            
+            <br>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link social-statis">
+    <a href="https://github.com/Leager-zju" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:1004729740@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+
+
+
+
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1004729740" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1004729740" data-position="top" data-delay="50">
+        <i class="fab fa-qq"></i>
+    </a>
+
+
+
+
+
+
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    var searchFunc = function (path, search_id, content_id) {
+        'use strict';
+        $.ajax({
+            url: path,
+            dataType: "xml",
+            success: function (xmlResponse) {
+                // get the contents from search data
+                var datas = $("entry", xmlResponse).map(function () {
+                    return {
+                        title: $("title", this).text(),
+                        content: $("content", this).text(),
+                        url: $("url", this).text()
+                    };
+                }).get();
+                var $input = document.getElementById(search_id);
+                var $resultContent = document.getElementById(content_id);
+                $input.addEventListener('input', function () {
+                    var str = '<ul class=\"search-result-list\">';
+                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                    $resultContent.innerHTML = "";
+                    if (this.value.trim().length <= 0) {
+                        return;
+                    }
+                    // perform local searching
+                    datas.forEach(function (data) {
+                        var isMatch = true;
+                        var data_title = data.title.trim().toLowerCase();
+                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
+                        var data_url = data.url;
+                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
+                        var index_title = -1;
+                        var index_content = -1;
+                        var first_occur = -1;
+                        // only match artiles with not empty titles and contents
+                        if (data_title !== '' && data_content !== '') {
+                            keywords.forEach(function (keyword, i) {
+                                index_title = data_title.indexOf(keyword);
+                                index_content = data_content.indexOf(keyword);
+                                if (index_title < 0 && index_content < 0) {
+                                    isMatch = false;
+                                } else {
+                                    if (index_content < 0) {
+                                        index_content = 0;
+                                    }
+                                    if (i === 0) {
+                                        first_occur = index_content;
+                                    }
+                                }
+                            });
+                        }
+                        // show search results
+                        if (isMatch) {
+                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
+                            var content = data.content.trim().replace(/<[^>]+>/g, "");
+                            if (first_occur >= 0) {
+                                // cut out 100 characters
+                                var start = first_occur - 20;
+                                var end = first_occur + 80;
+                                if (start < 0) {
+                                    start = 0;
+                                }
+                                if (start === 0) {
+                                    end = 100;
+                                }
+                                if (end > content.length) {
+                                    end = content.length;
+                                }
+                                var match_content = content.substr(start, end);
+                                // highlight all keywords
+                                keywords.forEach(function (keyword) {
+                                    var regS = new RegExp(keyword, "gi");
+                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
+                                });
+
+                                str += "<p class=\"search-result\">" + match_content + "...</p>"
+                            }
+                            str += "</li>";
+                        }
+                    });
+                    str += "</ul>";
+                    $resultContent.innerHTML = str;
+                });
+            }
+        });
+    };
+
+    searchFunc('/search.xml', 'searchInput', 'searchResult');
+});
+</script>
+
+    <!-- 白天和黑夜主题 -->
+<div class="stars-con">
+    <div id="stars"></div>
+    <div id="stars2"></div>
+    <div id="stars3"></div>  
+</div>
+
+<script>
+    function switchNightMode() {
+        $('<div class="Cuteen_DarkSky"><div class="Cuteen_DarkPlanet"></div></div>').appendTo($('body')),
+        setTimeout(function () {
+            $('body').hasClass('DarkMode') 
+            ? ($('body').removeClass('DarkMode'), localStorage.setItem('isDark', '0'), $('#sum-moon-icon').removeClass("fa-sun").addClass('fa-moon')) 
+            : ($('body').addClass('DarkMode'), localStorage.setItem('isDark', '1'), $('#sum-moon-icon').addClass("fa-sun").removeClass('fa-moon')),
+            
+            setTimeout(function () {
+            $('.Cuteen_DarkSky').fadeOut(1e3, function () {
+                $(this).remove()
+            })
+            }, 2e3)
+        })
+    }
+</script>
+
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    
+
+    
+    
+    
+        
+        <script type="text/javascript">
+            // 只在桌面版网页启用特效
+            var windowWidth = $(window).width();
+            if (windowWidth > 768) {
+                document.write('<script type="text/javascript" src="/libs/others/sakura.js"><\/script>');
+            }
+        </script>
+    
+
+    <!-- 雪花特效 -->
+    
+
+    <!-- 鼠标星星特效 -->
+    
+
+     
+        <script src="https://ssl.captcha.qq.com/TCaptcha.js"></script>
+        <script src="/libs/others/TencentCaptcha.js"></script>
+        <button id="TencentCaptcha" data-appid="xxxxxxxxxx" data-cbfn="callback" type="button" hidden></button>
+    
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    <script src="/libs/others/clicklove.js" async="async"></script>
+    
+    
+    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
+    
+
+    
+
+    
+
+    <!--腾讯兔小巢-->
+    
+    
+
+    
+
+    
+
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+    <script type="text/javascript">
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden) {
+                document.title = '你会有一天后悔';
+            } else {
+                document.title = '欢迎来到 G8 北海道 洞爷湖 高峰会 博物馆';
+            }
+        });
+    </script>
+
+</body>
+
+</html>
