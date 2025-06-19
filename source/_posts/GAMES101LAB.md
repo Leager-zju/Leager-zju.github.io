@@ -1,13 +1,13 @@
 ---
-title: GAMES101（现代图形学入门）の 作业记录
+title: 现代图形学入门（GAMES101）の 作业记录
 author: Leager
 mathjax:
   - true
 date: 2024-04-19 17:16:19
 summary:
-categories: lab
+categories:
+    - Lab
 tags:
-  - Graphics
 img:
 ---
 

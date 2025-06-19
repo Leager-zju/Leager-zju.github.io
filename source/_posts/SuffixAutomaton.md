@@ -5,9 +5,9 @@ mathjax:
   - true
 date: 2024-08-05 20:10:24
 summary:
-categories: data structure
+categories:
+  - Data Structure
 tags:
-  - C++
 img:
 ---
 

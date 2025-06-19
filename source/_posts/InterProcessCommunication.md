@@ -5,7 +5,8 @@ mathjax:
   - false
 date: 2023-10-11 11:46:29
 summary:
-categories: operating system
+categories:
+  - Operating System
 tags:
 img:
 ---

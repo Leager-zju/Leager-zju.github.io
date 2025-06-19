@@ -6,10 +6,8 @@ mathjax:
 date: 2025-03-06 13:02:50
 summary:
 categories:
-  - unreal
+  - Unreal
 tags:
-  - unreal
-  - gameplay
 img:
 ---
 

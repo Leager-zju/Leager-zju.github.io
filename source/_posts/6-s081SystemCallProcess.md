@@ -5,9 +5,9 @@ mathjax:
   - false
 date: 2023-10-25 20:37:37
 summary:
-categories: lab
+categories:
+  - Lab
 tags:
-  - MIT 6.s081
 img:
 ---
 

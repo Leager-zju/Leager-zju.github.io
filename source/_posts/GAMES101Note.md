@@ -1,13 +1,13 @@
 ---
-title: GAMES101（现代图形学入门）の 笔记
+title: 现代图形学入门（GAMES101）の 笔记
 author: Leager
 mathjax:
   - true
 date: 2024-03-31 21:10:06
 summary:
-categories: note
+categories:
+  - Note
 tags:
-  - Graphics
 img:
 ---
 
@@ -73,7 +73,7 @@ $$
 
 <img src="rotate.png" style="zoom:70%"/>
 
-我们可以采用特值法，$(1, 0)\rightarrow(\cos{\alpha}, \sin{\alpha})\quad(0, 1)\rightarrow(-\sin{\alpha}, \cos{\alpha})$，代入 $\vec{a'}=\mathbf{M}\vec{a}$ 求解，从而得到：
+我们可以采用特值法，$(1, 0)\rightarrow(\cos{\alpha}, \sin{\alpha})\quad(0, 1)\rightarrow(-\sin{\alpha}, \cos{\alpha})$，代入 $\mathbf{a'}=\mathbf{M}\mathbf{a}$ 求解，从而得到：
 
 $$
 \left(\begin{matrix}
@@ -127,11 +127,11 @@ $$
 
 #### 齐次坐标与平移(Translation)
 
-上面这些都属于线性变换，都可以通过 $\vec{a} = \mathbf{M}\vec{a}$ 的方式来表示，但这并不适用于「平移」操作，比如下面这张图：
+上面这些都属于线性变换，都可以通过 $\mathbf{a} = \mathbf{M}\mathbf{a}$ 的方式来表示，但这并不适用于「平移」操作，比如下面这张图：
 
 <img src="translation.png" style="zoom:50%"/>
 
-我们之前讨论的变换，不难发现图像在变换前后，$(0, 0)$ 处的点是不动的，但平移不然。我们似乎不能通过 $\vec{a} = \mathbf{M}\vec{a}$ 使得 $(x', y') = (x+t_x, y+t_y)$。换句话说，平移并非线性变换，其需要的「变换」应当为
+我们之前讨论的变换，不难发现图像在变换前后，$(0, 0)$ 处的点是不动的，但平移不然。我们似乎不能通过 $\mathbf{a} = \mathbf{M}\mathbf{a}$ 使得 $(x', y') = (x+t_x, y+t_y)$。换句话说，平移并非线性变换，其需要的「变换」应当为
 
 $$
 \left(\begin{matrix}
@@ -273,63 +273,7 @@ $$
 
 #### 罗德里格斯旋转公式(Rodrigues' Rotation Formula)
 
-<details><summary>👈推导过程自行点击查看</summary>
-
-设向量 $\mathbf{v}$ 绕**单位向量** $\mathbf{k}$ 旋转角度 $\theta$ 得到新向量 $\mathbf{v}_{rot}$
-
-<img src="rodrigues.png"/>
-
-如果将向量 $\mathbf{v}$ 分解为平行和垂直轴 $\mathbf{k}$ 的两个分量 $\mathbf{v_{\parallel}}$ 和 $\mathbf{v_{\bot}}$，不难发现只是对 $\mathbf{v_{\bot}}$ 作绕轴旋转，而 $\mathbf{v_{\parallel}}$ 不变，所以问题转换为求 $\mathbf{v}_{rot}$ 的垂直分量，记为 $\mathbf{v}_{rot\bot}$。可以很容易得到
-
-$$
-\mathbf{v}_{rot\bot} = \sin{\theta}(\mathbf{k}\times\mathbf{v}) + \cos{\theta}\mathbf{v}_{\bot}
-$$
-
-与此同时
-
-$$
-\mathbf{k}\times\mathbf{v} = \mathbf{k}\times(\mathbf{v}_{\parallel}+\mathbf{v}_{\bot}) = \mathbf{k}\times\mathbf{v}_{\parallel}+\mathbf{k}\times\mathbf{v}_{\bot} = \mathbf{0} + \mathbf{k}\times\mathbf{v}_{\bot} = \mathbf{k}\times\mathbf{v}_{\bot}
-$$
-
-继而问题又转换为求 $\mathbf{v_{\bot}}$。这里有一个比较 tricky 的性质：对于单位向量 $\mathbf{k}$ 而言，$\mathbf{k}\times\mathbf{v_{\bot}}$ 仅仅是将 $\mathbf{v_{\bot}}$ 绕轴旋转 90°。易得 $\mathbf{k}\times(\mathbf{k}\times\mathbf{v_{\bot}})$ 是绕轴旋转了 180°，所以有
-
-$$
-\mathbf{v}_{\bot} = -\mathbf{k}\times(\mathbf{k}\times\mathbf{v}_\bot) = -\mathbf{k}\times(\mathbf{k}\times\mathbf{v})
-$$
-
-那么我们就可以得到结论了
-
-$$
-\begin{align}
-\mathbf{v}_{rot}
-&= \mathbf{v}_{\parallel} + \mathbf{v}_{rot\bot}\\
-&= \mathbf{v}-\mathbf{v}_{\bot} + \sin{\theta}(\mathbf{k}\times\mathbf{v}) + \cos{\theta}\mathbf{v}_{\bot}\\
-&= \mathbf{v} + \sin{\theta}(\mathbf{k}\times\mathbf{v}) - (\cos{\theta}-1)\mathbf{k}\times(\mathbf{k}\times\mathbf{v})\\
-&= \mathbf{v} + \sin{\theta}(\mathbf{k}\times\mathbf{v}) + (1-\cos{\theta})\mathbf{k}\times(\mathbf{k}\times\mathbf{v})\\
-&= \mathbf{v} + \sin{\theta}\mathbf{K}·\mathbf{v} + (1-\cos{\theta})\mathbf{K}^2\mathbf{v}\\
-&= [\mathbf{I} + \sin{\theta}\mathbf{K} + (1-\cos{\theta})\mathbf{K}^2]·\mathbf{v}
-\end{align}
-$$
-
-</details>
-
-最终得到绕单位向量 $\mathbf{k}$ 旋转角度 $\theta$ 对应的变换矩阵为
-
-$$
-\mathbf{R}(\mathbf{k}, \theta) = \mathbf{I} + \sin{\theta}\mathbf{K} + (1-\cos{\theta})\mathbf{K}^2
-$$
-
-其中 $\mathbf{K}$ 为由单位向量 $\mathbf{k}$ 生成的反对称矩阵，三维坐标下表示为
-
-$$
-\left(
-    \begin{matrix}
-    0 & -k_z & k_y \\
-    k_z & 0 & -k_x \\
-    -k_y & k_x & 0
-    \end{matrix}
-\right)
-$$
+参考[罗德里格斯旋转公式](../basicmathingame/#罗德里格斯旋转公式rodrigues-rotation-formula)。
 
 ### 观测变换(View)
 
@@ -337,7 +281,7 @@ $$
 
 要做观测变换，首先要解决「**如何放置相机**」这一问题。一般由以下三个属性在空间中唯一确定一个相机：
 
-1. **位置**(position)：$\vec{e}$；
+1. **位置**(position)：$\mathbf{e}$；
 2. **朝向**(gaze direction)：$\hat{g}$；
 3. **上方**(up direction)：$\hat{t}$；
 
@@ -345,7 +289,7 @@ $$
 
 $$
 \begin{aligned}
-\vec{e} &= (0, 0, 0)\\
+\mathbf{e} &= (0, 0, 0)\\
 \hat{g} &= -\mathbf{z}\\
 \hat{t} &= \mathbf{y}
 \end{aligned}
@@ -357,7 +301,7 @@ $$
 
 为了让任意位置的相机都能达到初始状态，需要进行一定的变换（称之为 $\mathbf{M}_{view}$）
 
-1. 将 $\vec{e}$ 移至原点；
+1. 将 $\mathbf{e}$ 移至原点；
 2. 将 $\hat{g}$ 旋转至 $-\mathbf{z} = (0, 0, -1, 0)$；
 3. 将 $\hat{t}$ 旋转至 $\mathbf{y} = (0, 1, 0, 0)$；
 4. 将 $\hat{g}\times\hat{t}$ 旋转至 $\mathbf{x} = (1, 0, 0, 0)$；
@@ -458,122 +402,122 @@ $$
 
 <details><summary>👈推导过程自行点击查看</summary>
 
-对于视锥范围内的任意一点 $A(x, y, z)$，从原点作一条直线经过该点的直线（即视线），与近裁切面相交于点 $A'(x', y', z'=n)$。基于正交投影的性质，我们希望点 $A$ 在经过 squish 后的点 $B$ 满足 $x_B=x', y_B=y'$。
-
-<img src="similarTriangle.png" style="zoom:60%"/>
-
-根据相似三角形，不难得到
-
-$$
-\begin{aligned}
-x'&=\frac{n}{z}x\\[2em]
-y'&=\frac{n}{z}y
-\end{aligned}
-$$
-
-在齐次坐标下，我们得到这样一个变换关系：
-
-$$
-\mathbf{M}_{squish}
-\left(
-\begin{matrix}
-x \\ y \\ z \\ 1
-\end{matrix}
-\right)
-=
-\left(
-\begin{matrix}
-nx/z \\ ny/z \\ ? \\ 1
-\end{matrix}
-\right)
-\overset{\times z}{\Longleftrightarrow}
-\left(
-\begin{matrix}
-nx \\ ny \\ ? \\ z
-\end{matrix}
-\right)
-$$
-
-从而有
-
-$$
-\mathbf{M}_{squish}
-=
-\left(
-\begin{matrix}
-n & 0 & 0 & 0\\
-0 & n & 0 & 0\\
-? & ? & ? & ?\\
-0 & 0 & 1 & 0
-\end{matrix}
-\right)
-\overset{不妨设为}{==}
-\left(
-\begin{matrix}
-n & 0 & 0 & 0\\
-0 & n & 0 & 0\\
-A & B & C & D\\
-0 & 0 & 1 & 0
-\end{matrix}
-\right)
-$$
-
-接下来就是求 squish 矩阵的第三行元素。由于在 squish 前后，近裁切面和远裁切面上的所有点保持不变，所以我们可以代入两个特殊点进行求解，一个是近裁切面上的点 $(x, y, n)$，一个是远裁切面上的点 $(x, y, f)$，从而得到
-
-$$
-\left(
-\begin{matrix}
-n & 0 & 0 & 0\\
-0 & n & 0 & 0\\
-A & B & C & D\\
-0 & 0 & 1 & 0
-\end{matrix}
-\right)
-\left(
-\begin{matrix}
-x \\ y \\ n \\ 1
-\end{matrix}
-\right)
-=
-\left(
-\begin{matrix}
-nx \\ ny \\ Ax+By+Cn+D \\ n
-\end{matrix}
-\right)
-=
-\left(
-\begin{matrix}
-nx \\ ny \\ n^2 \\ n
-\end{matrix}
-\right)
-\Leftrightarrow
-\left(
-\begin{matrix}
-x \\ y \\ n \\ 1
-\end{matrix}
-\right)
-$$
-
-得到 $Cn+D = n^2$，同理 $Cf+D = f^2$，最终解得
-
-$$
-A=B=0,\ C=n+f,\ D=-nf
-$$
-
-即
-
-$$
-\mathbf{M}_{squish}
-=
-\left(
-\begin{matrix}
-n & 0 & 0 & 0\\
-0 & n & 0 & 0\\
-0 & 0 & n+f & -nf\\
-0 & 0 & 1 & 0
-\end{matrix}
-\right)
-$$
+> 对于视锥范围内的任意一点 $A(x, y, z)$，从原点作一条直线经过该点的直线（即视线），与近裁切面相交于点 $A'(x', y', z'=n)$。基于正交投影的性质，我们希望点 $A$ 在经过 squish 后的点 $B$ 满足 $x_B=x', y_B=y'$。
+> 
+> <img src="similarTriangle.png" style="zoom:60%"/>
+> 
+> 根据相似三角形，不难得到
+> 
+> $$
+> \begin{aligned}
+> x'&=\frac{n}{z}x\\[2em]
+> y'&=\frac{n}{z}y
+> \end{aligned}
+> $$
+> 
+> 在齐次坐标下，我们得到这样一个变换关系：
+> 
+> $$
+> \mathbf{M}_{squish}
+> \left(
+> \begin{matrix}
+> x \\ y \\ z \\ 1
+> \end{matrix}
+> \right)
+> =
+> \left(
+> \begin{matrix}
+> nx/z \\ ny/z \\ ? \\ 1
+> \end{matrix}
+> \right)
+> \overset{\times z}{\Longleftrightarrow}
+> \left(
+> \begin{matrix}
+> nx \\ ny \\ ? \\ z
+> \end{matrix}
+> \right)
+> $$
+> 
+> 从而有
+> 
+> $$
+> \mathbf{M}_{squish}
+> =
+> \left(
+> \begin{matrix}
+> n & 0 & 0 & 0\\
+> 0 & n & 0 & 0\\
+> ? & ? & ? & ?\\
+> 0 & 0 & 1 & 0
+> \end{matrix}
+> \right)
+> \overset{不妨设为}{==}
+> \left(
+> \begin{matrix}
+> n & 0 & 0 & 0\\
+> 0 & n & 0 & 0\\
+> A & B & C & D\\
+> 0 & 0 & 1 & 0
+> \end{matrix}
+> \right)
+> $$
+> 
+> 接下来就是求 squish 矩阵的第三行元素。由于在 squish 前后，近裁切面和远裁切面上的所有点保持不变，所以我们可以代入两个特殊点进行求解，一个是近裁切面上的点 $(x, y, n)$，一个是远裁切面上的点 $(x, y, f)$，从而得到
+> 
+> $$
+> \left(
+> \begin{matrix}
+> n & 0 & 0 & 0\\
+> 0 & n & 0 & 0\\
+> A & B & C & D\\
+> 0 & 0 & 1 & 0
+> \end{matrix}
+> \right)
+> \left(
+> \begin{matrix}
+> x \\ y \\ n \\ 1
+> \end{matrix}
+> \right)
+> =
+> \left(
+> \begin{matrix}
+> nx \\ ny \\ Ax+By+Cn+D \\ n
+> \end{matrix}
+> \right)
+> =
+> \left(
+> \begin{matrix}
+> nx \\ ny \\ n^2 \\ n
+> \end{matrix}
+> \right)
+> \Leftrightarrow
+> \left(
+> \begin{matrix}
+> x \\ y \\ n \\ 1
+> \end{matrix}
+> \right)
+> $$
+> 
+> 得到 $Cn+D = n^2$，同理 $Cf+D = f^2$，最终解得
+> 
+> $$
+> A=B=0,\ C=n+f,\ D=-nf
+> $$
+> 
+> 即
+> 
+> $$
+> \mathbf{M}_{squish}
+> =
+> \left(
+> \begin{matrix}
+> n & 0 & 0 & 0\\
+> 0 & n & 0 & 0\\
+> 0 & 0 & n+f & -nf\\
+> 0 & 0 & 1 & 0
+> \end{matrix}
+> \right)
+> $$
 
 </details>
 
@@ -672,7 +616,7 @@ $$
 
 <img src="sample.png" style="zoom:70%">
 
-> 判断一个点 $O$ 是否落在三角形 $P_0P_1P_2$ 内很简单，只需要**三次叉乘**，如果 $\vec{OP_0}\times\vec{P_0P_1}, \vec{OP_1}\times\vec{P_1P_2}, \vec{OP_2}\times\vec{P_2P_0}$ 同号，则认为在内部，反之在外部。
+> 判断一个点 $O$ 是否落在三角形 $P_0P_1P_2$ 内很简单，只需要**三次叉乘**，如果 $\mathbf{OP_0}\times\mathbf{P_0P_1}, \mathbf{OP_1}\times\mathbf{P_1P_2}, \mathbf{OP_2}\times\mathbf{P_2P_0}$ 同号，则认为在内部，反之在外部。
 
 > 实际上去遍历屏幕上的所有像素是没必要的，像上图左边的白色区域是肯定不会碰到三角形的，三角形肯定不会填充到这些像素上，只要考虑蓝色区域即可。蓝色区域就叫三角形的**轴对齐包围盒**，简称 **AABB(Axis-aligned bounding box)**。
 

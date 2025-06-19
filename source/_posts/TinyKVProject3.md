@@ -5,9 +5,9 @@ mathjax:
   - false
 date: 2023-08-20 23:37:12
 summary:
-categories: lab
+categories:
+  - Lab
 tags:
-  - lab
 img:
 ---
 

@@ -5,9 +5,9 @@ mathjax:
   - false
 date: 2024-08-07 21:47:26
 summary:
-categories: lua
+categories:
+  - Lua
 tags:
-  - lua
 img:
 ---
 

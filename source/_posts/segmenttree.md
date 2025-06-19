@@ -8,7 +8,6 @@ summary:
 categories:
   - data structure
 tags:
-  - 
 img:
 ---
 

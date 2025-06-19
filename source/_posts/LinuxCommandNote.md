@@ -5,9 +5,9 @@ mathjax:
   - false
 date: 2023-09-23 18:23:04
 summary:
-categories: linux
+categories:
+  - Linux
 tags:
-  - command
 img:
 ---
 

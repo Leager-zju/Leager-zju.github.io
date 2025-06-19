@@ -5,10 +5,9 @@ mathjax:
   - false
 date: 2023-01-17 20:55:25
 summary:
-categories: c++
-tags:
-  - C++11
+categories:
   - C++
+tags:
 img:
 ---
 

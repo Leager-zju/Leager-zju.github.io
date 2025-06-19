@@ -5,9 +5,9 @@ mathjax:
   - true
 date: 2023-03-21 18:28:52
 summary:
-categories: lab
+categories:
+  - Lab
 tags:
-  - CS144
 img:
 ---
 

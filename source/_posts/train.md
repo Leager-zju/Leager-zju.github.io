@@ -8,7 +8,6 @@ summary:
 categories:
   - life
 tags:
-  - health
 img:
 top: true
 ---

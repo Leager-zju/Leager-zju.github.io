@@ -5,9 +5,9 @@ mathjax:
   - false
 date: 2023-10-09 20:04:44
 summary:
-categories: operating system
+categories:
+  - Operating System
 tags:
-  - What Happened
 img:
 ---
 

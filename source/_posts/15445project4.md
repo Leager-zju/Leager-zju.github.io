@@ -5,9 +5,9 @@ mathjax:
   - false
 date: 2023-01-12 11:56:16
 summary:
-categories: lab
+categories:
+  - Lab
 tags:
-  - CMU 15445
 img:
 ---
 

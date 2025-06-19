@@ -5,7 +5,8 @@ mathjax:
   - true
 date: 2023-10-19 12:40:05
 summary:
-categories: interview
+categories:
+  - Interview
 tags:
 img:
 ---

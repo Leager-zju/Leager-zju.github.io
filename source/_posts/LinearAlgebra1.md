@@ -1,13 +1,13 @@
 ---
-title: linear-algebra(1)
+title: Linear Algebra 1
 author: Leager
 mathjax:
   - true
 date: 2022-09-29 14:21:50
 summary:
-categories: note
+categories:
+  - Note
 tags:
-  - math
 img:
 ---
 
@@ -36,22 +36,22 @@ $$
     >
     > 拓展到多元方程组也是同理。
 
-我们构造一个系数矩阵 ${A} = \left[\begin{matrix}2 & -1 \\ -1 & 2\end{matrix}\right]$，令 $\vec{x} = \left[\begin{matrix}x \\ y\end{matrix}\right], \vec{b} = \left[\begin{matrix}0 \\ 3\end{matrix}\right]$，然后方程组可以写成这样子：
+我们构造一个系数矩阵 ${A} = \left[\begin{matrix}2 & -1 \\ -1 & 2\end{matrix}\right]$，令 $\mathbf{x} = \left[\begin{matrix}x \\ y\end{matrix}\right], \mathbf{b} = \left[\begin{matrix}0 \\ 3\end{matrix}\right]$，然后方程组可以写成这样子：
 $$
-A\vec{x} = \vec{b}
+A\mathbf{x} = \mathbf{b}
 $$
 
 ### 是否有解？
 
-这时要考虑一个问题：是否任意 $\vec{b}$ 都能让上面那个方程有解呢？
+这时要考虑一个问题：是否任意 $\mathbf{b}$ 都能让上面那个方程有解呢？
 
-从**行图像**的角度来讲，如果方程组有解，则所有方程在坐标系上对应的图像（直线、平面、体积）存在交集。如果某一个 $\vec{b}$ 不能满足上面条件，则无解（反之有解）。
+从**行图像**的角度来讲，如果方程组有解，则所有方程在坐标系上对应的图像（直线、平面、体积）存在交集。如果某一个 $\mathbf{b}$ 不能满足上面条件，则无解（反之有解）。
 
-从**列图像**的角度来讲，如果某一个 $\vec{b}$ 不能成为 ${A}$ 列向量的线性组合，则无解（反之有解）。
+从**列图像**的角度来讲，如果某一个 $\mathbf{b}$ 不能成为 ${A}$ 列向量的线性组合，则无解（反之有解）。
 
 ### 如何求解？
 
-计算机软件（以及人类）计算时最常用的方法是**高斯消元法**，将原方程 ${A}\vec{x} = \vec{b}$ 转换为新的方程 ${U}\vec{x}=\vec{c}$。
+计算机软件（以及人类）计算时最常用的方法是**高斯消元法**，将原方程 ${A}\mathbf{x} = \mathbf{b}$ 转换为新的方程 ${U}\mathbf{x}=\mathbf{c}$。
 
 > 其中 ${U}$ 为行阶梯最简型矩阵。
 
@@ -75,7 +75,7 @@ $$
 
 ### 向量空间
 
-一个向量空间应该满足这样一个**封闭性**条件：对于空间中的任意向量 $\vec{u}, \vec{v}$，其任意线性组合 $a\vec{u}+b\vec{v}(a, b\in R)$ 必然存在于空间中。显然，所有向量空间必须包括零向量。
+一个向量空间应该满足这样一个**封闭性**条件：对于空间中的任意向量 $\mathbf{u}, \mathbf{v}$，其任意线性组合 $a\mathbf{u}+b\mathbf{v}(a, b\in R)$ 必然存在于空间中。显然，所有向量空间必须包括零向量。
 
 ### 子空间
 
@@ -94,11 +94,11 @@ $$
 
 ### 零空间
 
-所有满足方程 ${A}\vec{x} = \vec{0}$ 的解的集合称为矩阵 ${A}_{m\times n}$ 的零空间，以 $N({A})$ 表示。$N({A})\subset R^n$
+所有满足方程 ${A}\mathbf{x} = \mathbf{0}$ 的解的集合称为矩阵 ${A}_{m\times n}$ 的零空间，以 $N({A})$ 表示。$N({A})\subset R^n$
 
 ### 计算零空间
 
-相当于求方程 ${A}\vec{x} = \vec{0}$ 的所有解。通过**消元法与列交换**构造出新的方程 ${U}\vec{x}=\vec{0}$，其中 ${U}$ 是由 $r$ 个**主元列**与 $n-r$ 个**自由列**组成的形如下式的行阶梯型矩阵：
+相当于求方程 ${A}\mathbf{x} = \mathbf{0}$ 的所有解。通过**消元法与列交换**构造出新的方程 ${U}\mathbf{x}=\mathbf{0}$，其中 ${U}$ 是由 $r$ 个**主元列**与 $n-r$ 个**自由列**组成的形如下式的行阶梯型矩阵：
 $$
 U =
 \left[
@@ -112,16 +112,16 @@ $$
 
 > 自由列可以表示为其左侧主元列的线性组合。
 
-原方程变为 ${U}$ 的主元行乘以 $\vec{x}$，即 $\left[\begin{matrix}\ {I}\ |\ {F}\ \end{matrix}\right] \left[\begin{matrix}\  \vec x_{pivot} \\ \  \vec x_{free} \ \end{matrix}\right] =  0$。如果对 $\vec x_{free}$ 中 $n-r$ 的变量自由取值，我们能得到 $n-r$ 个线性无关的特解，$N({A})$ 则是由这些特解张成的向量空间（**维度**为 $n-r$）。若把这些特解作为列向量写到一个矩阵 ${N}$ 中，则有 ${U}{N} = {0}$，易得：
+原方程变为 ${U}$ 的主元行乘以 $\mathbf{x}$，即 $\left[\begin{matrix}\ {I}\ |\ {F}\ \end{matrix}\right] \left[\begin{matrix}\  \mathbf x_{pivot} \\ \  \mathbf x_{free} \ \end{matrix}\right] =  0$。如果对 $\mathbf x_{free}$ 中 $n-r$ 的变量自由取值，我们能得到 $n-r$ 个线性无关的特解，$N({A})$ 则是由这些特解张成的向量空间（**维度**为 $n-r$）。若把这些特解作为列向量写到一个矩阵 ${N}$ 中，则有 ${U}{N} = {0}$，易得：
 $$
 N =
 \left[\begin{matrix}\ {-F}_{r\times n-r} \ \\ \ I_{n-r\times n-r} \ \end{matrix}\right]
 $$
-其中 ${-F}$ 对应 $\vec{x}_{pivot}$，${I}$ 对应 $\vec{x}_{free}$
+其中 ${-F}$ 对应 $\mathbf{x}_{pivot}$，${I}$ 对应 $\mathbf{x}_{free}$
 
 ### 如果方程右侧不为零向量
 
-首先抛出结论：若 $\vec{b} \in C({A})$，则方程 ${A}\vec{x} = \vec{b}$ 有解。
+首先抛出结论：若 $\mathbf{b} \in C({A})$，则方程 ${A}\mathbf{x} = \mathbf{b}$ 有解。
 
 当方程有解时，可以先找到方程一个特解，再与 $N({A})$ 进行线性组合，即可得到最后的解。
 
@@ -129,10 +129,10 @@ $$
 
 矩阵的**秩**等于矩阵的主元数。若 $rank({A}_{m\times n}) = r$，则必有 $r\leq m, r\leq n$ 。
 
-1. **列满秩**：即 $r=n<m$，每一列都是主元列，矩阵没有自由列，$N({A})$ 中只有零向量，方程 ${A}\vec{x} = \vec{b}$ 要么无解，要么有唯一解。
-2. **行满秩**：即 $r=m\leq n$，方程 ${A}\vec{x} = \vec{b}$ 有无穷多解。
-3. **方阵满秩**：即 $r=m=n$，方程 ${A}\vec{x} = \vec{b}$ 总有唯一解。
-4. **行列均不满秩**：即 $r<m, r<n$，方程 ${A}\vec{x} = \vec{b}$ 要么无解，要么有无穷多解。
+1. **列满秩**：即 $r=n<m$，每一列都是主元列，矩阵没有自由列，$N({A})$ 中只有零向量，方程 ${A}\mathbf{x} = \mathbf{b}$ 要么无解，要么有唯一解。
+2. **行满秩**：即 $r=m\leq n$，方程 ${A}\mathbf{x} = \mathbf{b}$ 有无穷多解。
+3. **方阵满秩**：即 $r=m=n$，方程 ${A}\mathbf{x} = \mathbf{b}$ 总有唯一解。
+4. **行列均不满秩**：即 $r<m, r<n$，方程 ${A}\mathbf{x} = \mathbf{b}$ 要么无解，要么有无穷多解。
 
 ### 线性相关性
 
@@ -155,7 +155,7 @@ $$
 
 ${A}$ 的 $r$ 个主元列构成了 $C({A})$ 的一组基。
 
-${A}\vec{x}=\vec{0}$ 的一组特解对应于 ${A}$ 的 $n-r$ 个自由列，并构成了 $N({A})$ 的一组基。
+${A}\mathbf{x}=\mathbf{0}$ 的一组特解对应于 ${A}$ 的 $n-r$ 个自由列，并构成了 $N({A})$ 的一组基。
 
 则得到这样一个结论：
 $$

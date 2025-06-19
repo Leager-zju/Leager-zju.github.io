@@ -1,13 +1,13 @@
 ---
-title: linear-algebra(2)
+title: Linear Algebra 2
 author: Leager
 mathjax:
   - true
 date: 2022-09-29 21:42:11
 summary:
-categories: note
+categories:
+  - Note
 tags:
-  - math
 img:
 ---
 
@@ -21,7 +21,7 @@ img:
 
 ### 正交向量
 
-若两向量 $\vec{a}, \vec{b}$ 正交，则必然有 $\vec{a}^T\vec{b} = \vec{b}^T\vec{a} = 0$
+若两向量 $\mathbf{a}, \mathbf{b}$ 正交，则必然有 $\mathbf{a}^T\mathbf{b} = \mathbf{b}^T\mathbf{a} = 0$
 
 ### 正交子空间
 
@@ -37,66 +37,66 @@ img:
 
 ### 投影问题
 
-这一问题的几何解释为：如何在向量 $\vec{a}$ 的方向上寻找与向量 $\vec{b}$ 距离最近的一点。假设这一点对应的向量为 $\vec{p}$，则 $\vec{e}=\vec{b}-\vec{p}$ 就是这一近似的误差。如图所示：
+这一问题的几何解释为：如何在向量 $\mathbf{a}$ 的方向上寻找与向量 $\mathbf{b}$ 距离最近的一点。假设这一点对应的向量为 $\mathbf{p}$，则 $\mathbf{e}=\mathbf{b}-\mathbf{p}$ 就是这一近似的误差。如图所示：
 
 <img src="image-20220929215857174.png" alt="image-20220929215857174" style="zoom:100%;" />
 
-若令 $\vec{p} = \hat{x}\vec{a}$，因 $\vec{e}$ 与 $\vec{a}$ 正交，则有 $\vec{a}^T(\vec{b}-\hat{x}\vec{a}) = 0$，解得
+若令 $\mathbf{p} = \hat{x}\mathbf{a}$，因 $\mathbf{e}$ 与 $\mathbf{a}$ 正交，则有 $\mathbf{a}^T(\mathbf{b}-\hat{x}\mathbf{a}) = 0$，解得
 
 $$
-\hat{x} = \frac{\vec{a}^T\vec{b}}{\vec{a}^T\vec{a}}
+\hat{x} = \frac{\mathbf{a}^T\mathbf{b}}{\mathbf{a}^T\mathbf{a}}
 \\[2ex]
-\vec{p} = \vec{a}\frac{\vec{a}^T\vec{b}}{\vec{a}^T\vec{a}}
+\mathbf{p} = \mathbf{a}\frac{\mathbf{a}^T\mathbf{b}}{\mathbf{a}^T\mathbf{a}}
 $$
 
-相当于把 $\vec{b}$ 以某种操作投影到了 $\vec{p}$ 上。若用**投影矩阵** $P$ 来描述这一操作，则有 $\vec{p} = P\vec{b}$，得
+相当于把 $\mathbf{b}$ 以某种操作投影到了 $\mathbf{p}$ 上。若用**投影矩阵** $P$ 来描述这一操作，则有 $\mathbf{p} = P\mathbf{b}$，得
 
 $$
-P = \frac{\vec{a}\vec{a}^T}{\vec{a}^T\vec{a}}
+P = \frac{\mathbf{a}\mathbf{a}^T}{\mathbf{a}^T\mathbf{a}}
 $$
 
 这是一个**对称矩阵**（$P^T=P$），而且是**幂等矩阵**（$P^2 = P$）
 
 ### 如果考虑该问题在高维空间的版本
 
-有一个向量空间 $V$ 与一个不在该空间上的向量 $\vec{b}$，如果把 $V$ 视为某一矩阵的列空间，且该空间的基为 $\vec{a_1}, \vec{a_2},\dots, \vec{a_n}$，则该矩阵可以用 $A = \begin{bmatrix}\vec{a_1} & \vec{a_2} & \cdots & \vec{a_n} \end{bmatrix}$ 来描述。
+有一个向量空间 $V$ 与一个不在该空间上的向量 $\mathbf{b}$，如果把 $V$ 视为某一矩阵的列空间，且该空间的基为 $\mathbf{a_1}, \mathbf{a_2},\dots, \mathbf{a_n}$，则该矩阵可以用 $A = \begin{bmatrix}\mathbf{a_1} & \mathbf{a_2} & \cdots & \mathbf{a_n} \end{bmatrix}$ 来描述。
 
-令 $\vec{p}$ 为 $\vec{b}$ 在该向量空间上的投影，则 $\vec{p}$ 可以用 $\vec{p} = x_1\vec{a_1} + x_2\vec{a_2} + \dots + x_n\vec{a_n} = A\vec{\hat{x}}$ 来表示。
+令 $\mathbf{p}$ 为 $\mathbf{b}$ 在该向量空间上的投影，则 $\mathbf{p}$ 可以用 $\mathbf{p} = x_1\mathbf{a_1} + x_2\mathbf{a_2} + \dots + x_n\mathbf{a_n} = A\mathbf{\hat{x}}$ 来表示。
 
-显然误差 $\vec{e}$ 与整个向量空间正交，则有 $\vec{a_1}^T\vec{e} = 0, \vec{a_2}^T\vec{e} = 0, \dots, \vec{a_n}^T\vec{e} = 0$
+显然误差 $\mathbf{e}$ 与整个向量空间正交，则有 $\mathbf{a_1}^T\mathbf{e} = 0, \mathbf{a_2}^T\mathbf{e} = 0, \dots, \mathbf{a_n}^T\mathbf{e} = 0$
 
-上式可以写为 $A^T\vec{e} = 0$
+上式可以写为 $A^T\mathbf{e} = 0$
 
 从而得到
 $$
-A^T(\vec{b} - A\vec{\hat{x}}) = 0 \quad \Rightarrow \quad \vec{\hat{x}} = (A^TA)^{-1}A^T\vec{b}
+A^T(\mathbf{b} - A\mathbf{\hat{x}}) = 0 \quad \Rightarrow \quad \mathbf{\hat{x}} = (A^TA)^{-1}A^T\mathbf{b}
 $$
 那么得到一个**非常优美的结论**：
 $$
-\vec{p} = A(A^TA)^{-1}A^T\vec{b}
+\mathbf{p} = A(A^TA)^{-1}A^T\mathbf{b}
 \\[2ex]
 P = A(A^TA)^{-1}A^T
 $$
 这里的 $P$ 同样满足对称性和幂等性。
 
-这里 $\vec{p} \in C(A)$，同时惊喜的发现 $\vec{e}\in L(A)$，说明 $\vec{b} = \vec{p} + \vec{e}$ 由两部分组成，一部分（$\vec{p}$）投影到了 $C(A)$ 上，另一部分（$\vec{e}$）投影到了 $L(A)$ 上。对于 $\vec{e}$，我们发现可以通过 $\vec{e} = \vec{b} - \vec{p} = \vec{b} - P\vec{b} = (I-P)\vec{b}$ 表示，所以 $I-P$ 也是个投影矩阵，也具有和 $P$ 同样的性质。
+这里 $\mathbf{p} \in C(A)$，同时惊喜的发现 $\mathbf{e}\in L(A)$，说明 $\mathbf{b} = \mathbf{p} + \mathbf{e}$ 由两部分组成，一部分（$\mathbf{p}$）投影到了 $C(A)$ 上，另一部分（$\mathbf{e}$）投影到了 $L(A)$ 上。对于 $\mathbf{e}$，我们发现可以通过 $\mathbf{e} = \mathbf{b} - \mathbf{p} = \mathbf{b} - P\mathbf{b} = (I-P)\mathbf{b}$ 表示，所以 $I-P$ 也是个投影矩阵，也具有和 $P$ 同样的性质。
 
-当 $A$ 的列向量线性无关时，说明 $C(A)$ 就是 $R^n$，此时任意 $\vec{b}\in R^n$ 都必然在 $C(A)$ 中，投影矩阵就是 $I$。
+当 $A$ 的列向量线性无关时，说明 $C(A)$ 就是 $R^n$，此时任意 $\mathbf{b}\in R^n$ 都必然在 $C(A)$ 中，投影矩阵就是 $I$。
 
 对于 $A^TA$ 而言，其零空间与 $A$ 是一致的
 
-1. 对于 $A^TA\vec{x}=\vec{0}$，必然满足 $\vec{x}^TA^TA\vec{x} = (A\vec{x})^T A\vec{x} = \vec{0}$，从而 $A\vec{x}$ 与自身正交，那么 $A\vec{x} = \vec{0}$。
-2. 对于 $A\vec{x}=\vec{0}$，必然满足 $A^TA\vec{x}=\vec{0}$
+1. 对于 $A^TA\mathbf{x}=\mathbf{0}$，必然满足 $\mathbf{x}^TA^TA\mathbf{x} = (A\mathbf{x})^T A\mathbf{x} = \mathbf{0}$，从而 $A\mathbf{x}$ 与自身正交，那么 $A\mathbf{x} = \mathbf{0}$。
+2. 对于 $A\mathbf{x}=\mathbf{0}$，必然满足 $A^TA\mathbf{x}=\mathbf{0}$
 
-因此当 $A$ 的列向量线性无关时，$A\vec{x}=\vec{0}$ 只有零解，$A^TA\vec{x}=\vec{0}$ 也只有零解。且 $A^TA$ 为方阵，行列满秩，必然可逆。
+因此当 $A$ 的列向量线性无关时，$A\mathbf{x}=\mathbf{0}$ 只有零解，$A^TA\mathbf{x}=\mathbf{0}$ 也只有零解。且 $A^TA$ 为方阵，行列满秩，必然可逆。
 
 ### 回到最开始的问题：如何求解无解方程组？
 
-这个问题看似很离谱，实则我们可以用一个最优解 $\vec{\hat{x}}$ 去近似。对于方程 $A\vec{x} = \vec{b}$，如果其无解，说明 $\vec{b}$ 不在 $A$ 的列空间中。我们可以将 $\vec{b}$ 投影到 $C(A)$，将问题转换为求解方程 $A\vec{\hat{x}} = \vec{p}$，这个解就是我们想求的近似最优解。
+这个问题看似很离谱，实则我们可以用一个最优解 $\mathbf{\hat{x}}$ 去近似。对于方程 $A\mathbf{x} = \mathbf{b}$，如果其无解，说明 $\mathbf{b}$ 不在 $A$ 的列空间中。我们可以将 $\mathbf{b}$ 投影到 $C(A)$，将问题转换为求解方程 $A\mathbf{\hat{x}} = \mathbf{p}$，这个解就是我们想求的近似最优解。
 
 根据上面描述的，我们能够很轻易地得到该解，即
 $$
-\vec{\hat{x}} = (A^TA)^{-1}A^T\vec{b}
+\mathbf{\hat{x}} = (A^TA)^{-1}A^T\mathbf{b}
 $$
 
 ### 最小二乘法
@@ -109,18 +109,18 @@ $$
 
 有一个思路是：这些数据点大概率不会共线，也就是说，将这些数据点代入直线方程利用待定系数法求其参数时，组成的线性方程组大多数情况下是无解的，此时就要用到上面的"求无解方程组最优解"的思路。
 
-还有一个思路是，我们希望误差 $\vec{e}$ 尽可能小，也就是 $||\vec{e}||^2=||A\vec{\hat{x}}-\vec{b}||^2$ 尽可能小。这一等式可以写成一个 $n$ 元的方程，对该方程的所有变量求偏导并令偏导数为 0，则可以得到上面那个思路一样的结果。
+还有一个思路是，我们希望误差 $\mathbf{e}$ 尽可能小，也就是 $||\mathbf{e}||^2=||A\mathbf{\hat{x}}-\mathbf{b}||^2$ 尽可能小。这一等式可以写成一个 $n$ 元的方程，对该方程的所有变量求偏导并令偏导数为 0，则可以得到上面那个思路一样的结果。
 
 ### 再回到正交向量
 
 现在说正交向量的升级版——**标准正交向量**，即满足以下条件的一组向量：
 $$
-\vec{q}_i^T\vec{q}_j = \begin{cases}1 \quad i = j\\[2ex] 0 \quad i \neq j\end{cases}
+\mathbf{q}_i^T\mathbf{q}_j = \begin{cases}1 \quad i = j\\[2ex] 0 \quad i \neq j\end{cases}
 $$
 
 ### 正交矩阵
 
-若令 $Q = \begin{bmatrix}\vec{q}_1 & \vec{q}_2 & \cdots & \vec{q}_n \end{bmatrix} $，易得
+若令 $Q = \begin{bmatrix}\mathbf{q}_1 & \mathbf{q}_2 & \cdots & \mathbf{q}_n \end{bmatrix} $，易得
 $$
 Q^TQ = I
 $$
@@ -128,69 +128,69 @@ $$
 
 对于正交矩阵来说，在其列空间内关于投影问题的**投影矩阵**也可以**简化为** $P=Q(Q^TQ)^{-1}Q^T = QQ^T$。若 $Q$ 为方阵，还可以进一步得到 $P=I$，因为此时其列空间已经张成 $R^n$，投影操作不会对向量有任何改变。
 
-对应的 $\vec{p} = P\vec{b} = QQ^T\vec{b} = Q\vec{\hat{x}}$
+对应的 $\mathbf{p} = P\mathbf{b} = QQ^T\mathbf{b} = Q\mathbf{\hat{x}}$
 
 ### 施密特正交化
 
-对于一组线性无关的向量 $\vec{a}_1, \vec{a}_2,\dots,\vec{a}_n$，若其能够张成空间 $V$，我们希望能找到该空间的**正交矩阵**表示——即找到一组**标准正交向量** $\vec{e}_1, \vec{e}_2, \dots, \vec{e}_n$，其恰好能张成同样的空间，也就是找到该空间的一组**标准正交基**。
+对于一组线性无关的向量 $\mathbf{a}_1, \mathbf{a}_2,\dots,\mathbf{a}_n$，若其能够张成空间 $V$，我们希望能找到该空间的**正交矩阵**表示——即找到一组**标准正交向量** $\mathbf{e}_1, \mathbf{e}_2, \dots, \mathbf{e}_n$，其恰好能张成同样的空间，也就是找到该空间的一组**标准正交基**。
 
 > 对一个向量的**标准化**过程就是令其除以其模长。
 
 我们不妨逐一分析：
 
-1. 第一个向量不作变动，即 $\displaystyle \vec{e}_1 = \frac{\vec{a}_1}{||\vec{a}_1||}$
+1. 第一个向量不作变动，即 $\displaystyle \mathbf{e}_1 = \frac{\mathbf{a}_1}{||\mathbf{a}_1||}$
 
-2. 对于之后的所有向量 $\vec{a}_i$，由于我们已经求得一组标准正交向量 $\vec{e}_1, \dots, \vec{e}_{i-1}$，设求其施密特正交化后的向量为 $\vec{e}_i$，易得 $\vec{e}_i$ 垂直于 $\vec{e}_1, \dots, \vec{e}_{i-1}$，从而有$\vec{e}_i$ 垂直于 $\vec{e}_1, \dots, \vec{e}_{i-1}$ 张成的向量空间。此时可以把问题转换为**投影问题**，只不过我们这里需要求投影问题中的**误差**，也就是原向量 $\vec{a}_i$ 减去它在投影到所有基 $\vec{e}_k$ 上的分量 $\vec{p}_k$：
+2. 对于之后的所有向量 $\mathbf{a}_i$，由于我们已经求得一组标准正交向量 $\mathbf{e}_1, \dots, \mathbf{e}_{i-1}$，设求其施密特正交化后的向量为 $\mathbf{e}_i$，易得 $\mathbf{e}_i$ 垂直于 $\mathbf{e}_1, \dots, \mathbf{e}_{i-1}$，从而有$\mathbf{e}_i$ 垂直于 $\mathbf{e}_1, \dots, \mathbf{e}_{i-1}$ 张成的向量空间。此时可以把问题转换为**投影问题**，只不过我们这里需要求投影问题中的**误差**，也就是原向量 $\mathbf{a}_i$ 减去它在投影到所有基 $\mathbf{e}_k$ 上的分量 $\mathbf{p}_k$：
 
     $$
-    \vec{e}_i = \vec{a}_i - \sum\limits_{k=1}^{i-1}\vec{p}_k
+    \mathbf{e}_i = \mathbf{a}_i - \sum\limits_{k=1}^{i-1}\mathbf{p}_k
     \\[2ex]
-    \vec{p}_k = \frac{\vec{e}_k^T\vec{a}_i}{\vec{e}_k^T\vec{e}_k}\vec{e}_k
+    \mathbf{p}_k = \frac{\mathbf{e}_k^T\mathbf{a}_i}{\mathbf{e}_k^T\mathbf{e}_k}\mathbf{e}_k
     $$
 
-3. 最后还需要对 $\vec{e}_i$ 进行标准化。
+3. 最后还需要对 $\mathbf{e}_i$ 进行标准化。
 
 ### QR分解
 
-我们把得到的标准正交基写成矩阵的形式 $Q = \begin{bmatrix}\vec{e}_1 & \vec{e}_2 & \cdots & \vec{e}_n \end{bmatrix}$，若令 $A = \begin{bmatrix}\vec{a}_1 & \vec{a}_2 & \cdots & \vec{a}_n \end{bmatrix}$，则 $C(Q)$ 与 $C(A)$ 是同一个向量空间。
+我们把得到的标准正交基写成矩阵的形式 $Q = \begin{bmatrix}\mathbf{e}_1 & \mathbf{e}_2 & \cdots & \mathbf{e}_n \end{bmatrix}$，若令 $A = \begin{bmatrix}\mathbf{a}_1 & \mathbf{a}_2 & \cdots & \mathbf{a}_n \end{bmatrix}$，则 $C(Q)$ 与 $C(A)$ 是同一个向量空间。
 
 由于 $Q$ 的列向量是 $C(Q)$ 空间中的标准正交基，则 $A$ 的列向量必能由 $Q$ 的列向量线性表示。前文提到，列变换相当于右乘一个置换矩阵，所以我们可以通过 $A=QR$ 得到如下等式：
 $$
 \begin{bmatrix}
-\vec{a}_1 & \vec{a}_2 & \cdots & \vec{a}_n
+\mathbf{a}_1 & \mathbf{a}_2 & \cdots & \mathbf{a}_n
 \end{bmatrix}
 =
 \begin{bmatrix}
-\vec{e}_1 & \vec{e}_2 & \cdots & \vec{e}_n
+\mathbf{e}_1 & \mathbf{e}_2 & \cdots & \mathbf{e}_n
 \end{bmatrix}
 ·
 \begin{bmatrix}
-\vec{a}_1^T\vec{e}_1 & \vec{a}_2^T\vec{e}_1 & \cdots & \vec{a}_n^T\vec{e}_1
+\mathbf{a}_1^T\mathbf{e}_1 & \mathbf{a}_2^T\mathbf{e}_1 & \cdots & \mathbf{a}_n^T\mathbf{e}_1
 \\
-\vec{a}_1^T\vec{e}_2 & \vec{a}_2^T\vec{e}_2 & \cdots & \vec{a}_n^T\vec{e}_2
+\mathbf{a}_1^T\mathbf{e}_2 & \mathbf{a}_2^T\mathbf{e}_2 & \cdots & \mathbf{a}_n^T\mathbf{e}_2
 \\
 \vdots & \vdots & & \vdots
 \\
-\vec{a}_1^T\vec{e}_n & \vec{a}_2^T\vec{e}_n & \cdots & \vec{a}_n^T\vec{e}_n
+\mathbf{a}_1^T\mathbf{e}_n & \mathbf{a}_2^T\mathbf{e}_n & \cdots & \mathbf{a}_n^T\mathbf{e}_n
 \end{bmatrix}
 $$
 其中矩阵 $R$ 为列变换的置换矩阵。
 
-根据我们求正交基的步骤，每一个 $\vec{e}_i$ 都正交于 $\vec{a}_j\ (j < i)$，因为 $\vec{a}_j$ 属于 $\vec{e}_1, \vec{e}_2,\dots,\vec{e}_{i-1}$ 张成的向量空间，而 $\vec{e}_i$ 与该向量空间正交。从而当 $j < i$ 时，有 $\vec{a}_j^T\vec{e}_i = 0$，得到 $R$ 为上三角矩阵。
+根据我们求正交基的步骤，每一个 $\mathbf{e}_i$ 都正交于 $\mathbf{a}_j\ (j < i)$，因为 $\mathbf{a}_j$ 属于 $\mathbf{e}_1, \mathbf{e}_2,\dots,\mathbf{e}_{i-1}$ 张成的向量空间，而 $\mathbf{e}_i$ 与该向量空间正交。从而当 $j < i$ 时，有 $\mathbf{a}_j^T\mathbf{e}_i = 0$，得到 $R$ 为上三角矩阵。
 
 更清楚的表示为：
 $$
 R =
 \begin{bmatrix}
-\vec{a}_1^T\vec{e}_1 & \vec{a}_2^T\vec{e}_1 & \cdots & \vec{a}_{n-1}^T\vec{e}_1 & \vec{a}_n^T\vec{e}_1
+\mathbf{a}_1^T\mathbf{e}_1 & \mathbf{a}_2^T\mathbf{e}_1 & \cdots & \mathbf{a}_{n-1}^T\mathbf{e}_1 & \mathbf{a}_n^T\mathbf{e}_1
 \\
-0 & \vec{a}_2^T\vec{e}_2 & \cdots & \vec{a}_{n-1}^T\vec{e}_2 & \vec{a}_n^T\vec{e}_2
+0 & \mathbf{a}_2^T\mathbf{e}_2 & \cdots & \mathbf{a}_{n-1}^T\mathbf{e}_2 & \mathbf{a}_n^T\mathbf{e}_2
 \\
 \vdots & \vdots & \ddots & \vdots & \vdots
 \\
-0 & 0 & \cdots &  \vec{a}_{n-1}^T\vec{e}_{n-1} & \vec{a}_n^T\vec{e}_{n-1}
+0 & 0 & \cdots &  \mathbf{a}_{n-1}^T\mathbf{e}_{n-1} & \mathbf{a}_n^T\mathbf{e}_{n-1}
 \\
-0 & 0 & \cdots & 0 & \vec{a}_n^T\vec{e}_n
+0 & 0 & \cdots & 0 & \mathbf{a}_n^T\mathbf{e}_n
 \end{bmatrix}
 $$
 
@@ -330,7 +330,7 @@ $$
 
 ### 克拉默法则
 
-对于可逆矩阵 $A$，方程 $A\vec{x} = \vec{b}$ 必有形如下式的解：$\vec{x} = A^{-1}\vec{b}$
+对于可逆矩阵 $A$，方程 $A\mathbf{x} = \mathbf{b}$ 必有形如下式的解：$\mathbf{x} = A^{-1}\mathbf{b}$
 
 代入上面得到的逆矩阵公式，有
 $$
@@ -343,7 +343,7 @@ x_2
 \\
 x_n
 \end{bmatrix}
-= \vec{x} = \frac{1}{det(A)}C^T\vec{b} = \frac{1}{det(A)}
+= \mathbf{x} = \frac{1}{det(A)}C^T\mathbf{b} = \frac{1}{det(A)}
 \begin{bmatrix}
 C_{11} & C_{21} & \cdots & C_{n1}
 \\
@@ -363,7 +363,7 @@ b_2
 b_n
 \end{bmatrix}
 $$
-根据之前得到的结论，$\sum\limits_{i=1}^nb_kC_{ik}$ 可以视为将 $A$ 的第 $k$ 列用 $\vec{b}$ 替换后得到的新矩阵 $B_k$ 的行列式值，从而得到
+根据之前得到的结论，$\sum\limits_{i=1}^nb_kC_{ik}$ 可以视为将 $A$ 的第 $k$ 列用 $\mathbf{b}$ 替换后得到的新矩阵 $B_k$ 的行列式值，从而得到
 $$
 x_k = \frac{det(B_k)}{det(A)}
 $$
@@ -377,11 +377,11 @@ $$
 
 ## 进入下一个议题：特征向量与特征值
 
-将矩阵 $A$ 与向量 $\vec{x}$ 相乘当做是对向量的一种操作或者函数，输入 $\vec{x}$ 而输出 $A\vec{x}$ 。**特征向量**即在特定的向量 $\vec{x}$ 方向上输出的 $A \vec{x}$ 平行于 $\vec{x}$ ，即为：
+将矩阵 $A$ 与向量 $\mathbf{x}$ 相乘当做是对向量的一种操作或者函数，输入 $\mathbf{x}$ 而输出 $A\mathbf{x}$ 。**特征向量**即在特定的向量 $\mathbf{x}$ 方向上输出的 $A \mathbf{x}$ 平行于 $\mathbf{x}$ ，即为：
 $$
-A\vec{x} = \lambda\vec{x}
+A\mathbf{x} = \lambda\mathbf{x}
 $$
-其中 $\vec{x}$ 为 $A$ 的**特征向量**，$\lambda$ 为 $A$ 的**特征值**。
+其中 $\mathbf{x}$ 为 $A$ 的**特征向量**，$\lambda$ 为 $A$ 的**特征值**。
 
 ### 如何求解特征值与特征向量？
 
@@ -393,36 +393,36 @@ $$
 
 2. 对称矩阵的特征向量**正交**。
 
-    > 设 $\vec{x}_1, \vec{x}_2$ 分别是 $A$ 对应特征值 $\lambda_1, \lambda_2$ 的特征向量，有
+    > 设 $\mathbf{x}_1, \mathbf{x}_2$ 分别是 $A$ 对应特征值 $\lambda_1, \lambda_2$ 的特征向量，有
     > $$
     > \begin{align}
-    > A\vec{x}_1 &= \lambda_1\vec{x}_1
+    > A\mathbf{x}_1 &= \lambda_1\mathbf{x}_1
     > \\[2ex]
-    > \vec{x}_2^TA\vec{x}_1 &= \lambda_1\vec{x}_2^T\vec{x}_1
+    > \mathbf{x}_2^TA\mathbf{x}_1 &= \lambda_1\mathbf{x}_2^T\mathbf{x}_1
     > \\[2ex]
-    > (A^T\vec{x}_2)^T\vec{x}_1 &= \lambda_2\vec{x}_2^T\vec{x}_1
+    > (A^T\mathbf{x}_2)^T\mathbf{x}_1 &= \lambda_2\mathbf{x}_2^T\mathbf{x}_1
     > \\[2ex]
-    > (\lambda_1 - \lambda_2)\vec{x}_2^T\vec{x}_1 &= 0
+    > (\lambda_1 - \lambda_2)\mathbf{x}_2^T\mathbf{x}_1 &= 0
     > \end{align}
     > $$
     >
-	>由于 $\lambda_1 \neq \lambda_2$，所以 $\vec{x}_2^T\vec{x}_1 = 0$，故其正交。
+	>由于 $\lambda_1 \neq \lambda_2$，所以 $\mathbf{x}_2^T\mathbf{x}_1 = 0$，故其正交。
 
 ### 对角化
 
-如果矩阵 $A$ 有 $n$ 个线性无关的特征向量 $\vec{x_i}$ ，将其作为矩阵 $S$ 的列向量，则
+如果矩阵 $A$ 有 $n$ 个线性无关的特征向量 $\mathbf{x_i}$ ，将其作为矩阵 $S$ 的列向量，则
 $$
 AS = A
 \begin{bmatrix}
-\vec{x_1} & \vec{x_2} & \cdots & \vec{x_n}
+\mathbf{x_1} & \mathbf{x_2} & \cdots & \mathbf{x_n}
 \end{bmatrix}
 =
 \begin{bmatrix}
-\lambda_1\vec{x_1} & \lambda_2\vec{x_2} & \cdots & \lambda_n\vec{x_n}
+\lambda_1\mathbf{x_1} & \lambda_2\mathbf{x_2} & \cdots & \lambda_n\mathbf{x_n}
 \end{bmatrix}
 =
 \begin{bmatrix}
-\vec{x_1} & \vec{x_2} & \cdots & \vec{x_n}
+\mathbf{x_1} & \mathbf{x_2} & \cdots & \mathbf{x_n}
 \end{bmatrix}
 ·
 \begin{bmatrix}
@@ -439,7 +439,7 @@ S\Lambda
 $$
 我们得到 $S^{-1}AS = \Lambda$，其中 $\Lambda$ 为对角矩阵，其对角线上所有元素都是 $A$ 的特征值，而且这些特征值的排布与 $S$ 中特征向量的排布是一致的。同时我们可以得到这样一个**新的分解方式**：$A = S\Lambda S^{-1}$。
 
-如果 $A\vec{x} = \lambda\vec{x}$，则有 $A^2\vec{x} = A ·\lambda\vec{x} = \lambda^2\vec{x}$，所以 $A^2$ 有着和 $A$ 同样的特征向量，且对应的特征值为 $\lambda^2$。
+如果 $A\mathbf{x} = \lambda\mathbf{x}$，则有 $A^2\mathbf{x} = A ·\lambda\mathbf{x} = \lambda^2\mathbf{x}$，所以 $A^2$ 有着和 $A$ 同样的特征向量，且对应的特征值为 $\lambda^2$。
 
 我们甚至能进一步推测出，如果 $A\sim\lambda$，则 $A^k\sim\lambda^k$，且有 $A^k = S\Lambda^k S^{-1}$。
 

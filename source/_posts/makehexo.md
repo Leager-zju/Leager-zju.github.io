@@ -6,7 +6,7 @@ mathjax:
 date: 2024-08-31 23:00:00
 summary:
 categories:
-  - hands-on
+  - Guide
 tags:
 img:
 ---

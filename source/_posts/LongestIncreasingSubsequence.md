@@ -5,7 +5,8 @@ mathjax:
   - true
 date: 2023-09-06 14:23:27
 summary:
-categories: algorithm
+categories:
+  - Algorithm
 tags:
 img:
 ---
