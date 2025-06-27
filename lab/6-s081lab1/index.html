@@ -331,7 +331,7 @@ $ make clean
             <div id="articleContent">
                 <p>本 lab 要求我们进行系统调用代码的编写。</p>
 <span id="more"></span>
-<h2 id="preparation" tabindex="-1"><a class="header-anchor" href="#Preparation">#</a>Preparation</h2>
+<h2 id="Preparation"><a class="header-anchor" href="#Preparation">#</a>Preparation</h2>
 <p>切换到对应分支</p>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">git</span> fetch
 $ <span class="token function">git</span> checkout syscall
@@ -340,8 +340,8 @@ $ <span class="token function">make</span> clean<span aria-hidden="true" class="
 <p>可以看到 <code>Makefile</code> 里内容都重置了，且测试脚本名也变成了 <code>grade-lab-syscall</code></p>
 </blockquote>
 <p>在做实验之前，可以先了解一下<a href="../6-s081systemcallprocess">整个系统调用流程</a>。</p>
-<h2 id="task1%3A-system-call-tracing" tabindex="-1"><a class="header-anchor" href="#Task1-System-call-tracing">#</a>Task1: System call tracing</h2>
-<h3 id="%E5%AE%9E%E7%8E%B0%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8" tabindex="-1"><a class="header-anchor" href="#实现系统调用">#</a>实现系统调用</h3>
+<h2 id="Task1-System-call-tracing"><a class="header-anchor" href="#Task1-System-call-tracing">#</a>Task1: System call tracing</h2>
+<h3 id="实现系统调用"><a class="header-anchor" href="#实现系统调用">#</a>实现系统调用</h3>
 <p>该任务要求我们实现 <code>trace</code> 命令，用于追踪特定命令的相应系统调用，并为其在 <code>kernel/</code> 文件夹下实现相应的系统调用。lab 已经为我们准备好了 <code>user/trace.c</code>。根据上面知识，我们修改完 <code>user/user.h</code>，<code>user/usys.pl</code>，<code>Makefile</code>，<code>kernel/syscall.h</code>，<code>kernel/syscall.c</code>，就可以正式编译了。</p>
 <blockquote>
 <p><code>user/user.h</code>: int trace(int);<br>
@@ -363,7 +363,7 @@ sys_trace(void)
 <p>因为 exec 只会改变执行的代码段，进程还是同一个，<code>trace_mask</code> 变量并不会被修改，所以无需担心。</p>
 </blockquote>
 <p>为了令 <code>trace</code> 在 <code>fork</code> 场景下也支持追踪功能，需要在 <code>fork()</code> 系统调用中追加子进程拷贝父进程的 <code>trace_mask</code>，实现略。</p>
-<h3 id="%E6%89%93%E5%8D%B0%E4%BF%A1%E6%81%AF" tabindex="-1"><a class="header-anchor" href="#打印信息">#</a>打印信息</h3>
+<h3 id="打印信息"><a class="header-anchor" href="#打印信息">#</a>打印信息</h3>
 <p>现在我们已经让当前进程记住了 trace mask，接下来需要在执行命令时根据 mask 打印信息，格式为：</p>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token operator">&lt;</span>pid<span class="token operator">&gt;</span>: syscall <span class="token operator">&lt;</span>syscall name<span class="token operator">&gt;</span> -<span class="token operator">&gt;</span> <span class="token operator">&lt;</span>return value<span class="token operator">&gt;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>我们需要每遇到一个<strong>被跟踪的</strong>系统调用都打印一遍信息，这就要在 <code>kernel/syscall.c</code> 中的 <code>syscall()</code> 函数中实现了，判断条件就是 <code>(trace_mask &gt;&gt; num) &amp; 1</code> 非零.</p>
@@ -382,7 +382,7 @@ syscall(void)
   }
   ...
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="task2%3A-sysinfo" tabindex="-1"><a class="header-anchor" href="#Task2-Sysinfo">#</a>Task2: Sysinfo</h2>
+<h2 id="Task2-Sysinfo"><a class="header-anchor" href="#Task2-Sysinfo">#</a>Task2: Sysinfo</h2>
 <p>该任务要求我们实现 <code>sysinfo(sysinfo*)</code> 函数，并为传入的结构体填充字段，分别为：</p>
 <ol>
 <li class="lvl-3">
@@ -401,7 +401,7 @@ syscall(void)
 <code>kernel/syscall.c</code>: [SYS_sysinfo] sys_sysinfo</p>
 </blockquote>
 <p>然而，lab 并没有为我们提供现成的「获取空闲字节数」与「获取当前进程数」的 API，需要我们自己实现。这两个 API 可以分别在 <code>kernel/kalloc.c</code> 与 <code>kernel/proc.c</code> 中实现（需要在 <code>kernel/defs.h</code> 中添加声明）。</p>
-<h3 id="%E8%8E%B7%E5%8F%96%E7%A9%BA%E9%97%B2%E5%86%85%E5%AD%98%E5%AD%97%E8%8A%82%E6%95%B0" tabindex="-1"><a class="header-anchor" href="#获取空闲内存字节数">#</a>获取空闲内存字节数</h3>
+<h3 id="获取空闲内存字节数"><a class="header-anchor" href="#获取空闲内存字节数">#</a>获取空闲内存字节数</h3>
 <p><code>kernel/kalloc.c</code> 中有一个名为 <code>kmem</code> 的数据结构，它维护了一个空闲链表。</p>
 <p>事实上，所有内存中未分配的页面都有一个 header，大小为 64 位（一个指针那么大），指向（逻辑上的）下一个未分配的页面，这个指针在软件层面用数据结构 <code>struct run</code> 表示。一旦有一个空闲页面 <code>page</code> 被分配，那么（逻辑上的）上一个页面 <code>prev</code> 的 <code>run</code> 就会指向 <code>page</code> 的（逻辑上的）下一个空闲页面 <code>next</code>；而有个物理页被 free 了，就让它成为空闲链表的表头。</p>
 <blockquote>
@@ -421,7 +421,7 @@ kfreemem(void)
   release(&amp;kmem.lock);
   return npage * PGSIZE;
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="%E8%8E%B7%E5%8F%96%E5%BD%93%E5%89%8D%E8%BF%9B%E7%A8%8B%E6%95%B0" tabindex="-1"><a class="header-anchor" href="#获取当前进程数">#</a>获取当前进程数</h3>
+<h3 id="获取当前进程数"><a class="header-anchor" href="#获取当前进程数">#</a>获取当前进程数</h3>
 <p><code>kernel/proc.c</code> 中为我们定义了一个名为 <code>proc</code> 的进程表（对的，和结构体 <code>struct proc</code> 同名），我们只需要遍历该表，检查进程状态即可。</p>
 <pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/proc.c</span></div><code class="language-C">int
 nproc(void)
@@ -434,7 +434,7 @@ nproc(void)
   }
   return cnt;
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="%E5%AE%9E%E7%8E%B0-sys_sysinfo()" tabindex="-1"><a class="header-anchor" href="#实现-sys-sysinfo">#</a>实现 sys_sysinfo()</h3>
+<h3 id="实现-sys-sysinfo"><a class="header-anchor" href="#实现-sys-sysinfo">#</a>实现 sys_sysinfo()</h3>
 <p>接下来就是实现系统函数了。由于我们在用户层调用 <code>sysinfo()</code> 时传入的是一个指针，所以在读取该参数时不能用 <code>argint()</code>，而是 <code>argaddr()</code>。</p>
 <p>值得注意的是，读取到的参数是一个用户态的虚拟地址，如果我们创建一个 <code>struct sysinfo*</code> 变量用于接收指针，然后再赋值，像下面这样：</p>
 <pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/sysproc.c</span></div><code class="language-C">uint64 va;
@@ -459,7 +459,7 @@ sys_sysinfo(void)
   // copy info to *va
   return copyout(myproc()-&gt;pagetable, va, (char*)&amp;info, sizeof(info));
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9E%9C" tabindex="-1"><a class="header-anchor" href="#测试结果">#</a>测试结果</h2>
+<h2 id="测试结果"><a class="header-anchor" href="#测试结果">#</a>测试结果</h2>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">make</span> grade
 <span class="token punctuation">..</span>.
 <span class="token operator">==</span> Test trace <span class="token number">32</span> <span class="token function">grep</span> <span class="token operator">==</span>
@@ -480,7 +480,7 @@ sysinfotest: OK <span class="token punctuation">(</span><span class="token numbe
 <span class="token operator">==</span> Test <span class="token function">time</span> <span class="token operator">==</span>
 time: OK
 Score: <span class="token number">35</span>/35<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E6%9C%80%E5%90%8E%E7%9A%84%E5%B7%A5%E4%BD%9C" tabindex="-1"><a class="header-anchor" href="#最后的工作">#</a>最后的工作</h2>
+<h2 id="最后的工作"><a class="header-anchor" href="#最后的工作">#</a>最后的工作</h2>
 <ol>
 <li class="lvl-3">
 <p><code>git commit -am ""</code> 将所有修改提交到本地;</p>
@@ -669,12 +669,6 @@ Score: <span class="token number">35</span>/35<span aria-hidden="true" class="li
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -683,8 +677,8 @@ Score: <span class="token number">35</span>/35<span aria-hidden="true" class="li
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -700,41 +694,6 @@ Score: <span class="token number">35</span>/35<span aria-hidden="true" class="li
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

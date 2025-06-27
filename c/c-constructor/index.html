@@ -326,7 +326,7 @@
             <div id="articleContent">
                 <p><strong>委托构造函数</strong>与<strong>继承构造函数</strong>并非独立的新构造函数，而是 C++11 新增的用于提高编码效率的特性。</p>
 <span id="more"></span>
-<h2 id="%E5%A7%94%E6%89%98%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0" tabindex="-1"><a class="header-anchor" href="#委托构造函数">#</a>委托构造函数</h2>
+<h2 id="委托构造函数"><a class="header-anchor" href="#委托构造函数">#</a>委托构造函数</h2>
 <p><strong>委托构造函数</strong>允许构造函数通过初始化列表调用同一个类的其他构造函数，相当于将自己的构造职责<strong>委托</strong>给了其它构造函数。目的是简化构造函数的书写，提高代码的可维护性，避免代码冗余膨胀。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token comment">// 不使用委托，显得十分臃肿且冗余</span>
 <span class="token keyword">class</span> <span class="token class-name">A</span> <span class="token punctuation">{</span>
@@ -359,7 +359,7 @@
   <span class="token keyword">void</span> <span class="token function">display</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>一个委托构造函数也有一个成员初始化列表和一个函数体，成员初始化列表只能包含一个其它构造函数，且参数列表必须与已有的构造函数匹配。初始化列表里<strong>不能</strong>再包含其它成员变量的初始化，只能在函数体中对变量进行赋值。</p>
-<h3 id="%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9" tabindex="-1"><a class="header-anchor" href="#注意事项">#</a>注意事项</h3>
+<h3 id="注意事项"><a class="header-anchor" href="#注意事项">#</a>注意事项</h3>
 <p>委托构造不能形成循环，比如下面这种代码：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">A</span> <span class="token punctuation">{</span>
  <span class="token keyword">public</span><span class="token operator">:</span>
@@ -370,7 +370,7 @@
   <span class="token keyword">int</span> j<span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p><code>A(int i_)</code> 与 <code>A(int i_, char j_)</code> 反复调用对方形成循环，这样会导致编译错误。</p>
-<h2 id="%E7%BB%A7%E6%89%BF%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0" tabindex="-1"><a class="header-anchor" href="#继承构造函数">#</a>继承构造函数</h2>
+<h2 id="继承构造函数"><a class="header-anchor" href="#继承构造函数">#</a>继承构造函数</h2>
 <p>子类为完成基类初始化，在 C++11 之前，需要须要在构造函数中<strong>显式</strong>声明，即在初始化列表调用基类的构造函数，从而完成构造函数的传递。如果基类拥有多个构造函数，那么子类也需要实现多个与基类构造函数对应的构造函数，比如：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Base</span> <span class="token punctuation">{</span>
  <span class="token keyword">public</span><span class="token operator">:</span>
@@ -406,7 +406,7 @@
   <span class="token keyword">using</span> Base<span class="token double-colon punctuation">::</span>Base<span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>和上面那种写法是等价的，比如使用 <code>char</code> 变量去初始化 <code>Derived</code> 类变量时，会调用 <code>Base(char)</code> 去初始化基类，然后调用 <code>display()</code> 打印输出。更巧妙的是，这是<strong>隐式</strong>声明继承的，即假设一个继承来的构造函数不被相关的代码使用，编译器不会为之产生真正的函数代码，这样比显式书写各种构造函数更加节省代码量。</p>
-<h3 id="%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9-1" tabindex="-1"><a class="header-anchor" href="#注意事项-2">#</a>注意事项</h3>
+<h3 id="注意事项-2"><a class="header-anchor" href="#注意事项-2">#</a>注意事项</h3>
 <p><strong>继承构造函数</strong>的注意事项较多，一一说明。</p>
 <ol>
 <li class="lvl-3">
@@ -667,12 +667,6 @@ B <span class="token function">q</span><span class="token punctuation">(</span><
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -681,8 +675,8 @@ B <span class="token function">q</span><span class="token punctuation">(</span><
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -698,41 +692,6 @@ B <span class="token function">q</span><span class="token punctuation">(</span><
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

@@ -326,13 +326,13 @@
             <div id="articleContent">
                 <p>现在我们已经有了动画蓝图，并且根据玩家速度输出不同的动画效果，那么接下来就要实现<strong>通过输入控制玩家移动</strong>。</p>
 <span id="more"></span>
-<h2 id="%E5%A2%9E%E5%BC%BA%E8%BE%93%E5%85%A5" tabindex="-1"><a class="header-anchor" href="#增强输入">#</a>增强输入</h2>
+<h2 id="增强输入"><a class="header-anchor" href="#增强输入">#</a>增强输入</h2>
 <p>这里用<strong>增强输入</strong>来实现按键控制。**增强输入系统(Enhanced Input System)**是 UE5 用于处理输入的功能框架，旨在提供比传统输入系统更强大、更灵活的功能。它引入了一些新特性和改进，使得输入管理变得更加高效和可扩展。</p>
-<h3 id="%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8" tabindex="-1"><a class="header-anchor" href="#如何使用">#</a>如何使用</h3>
+<h3 id="如何使用"><a class="header-anchor" href="#如何使用">#</a>如何使用</h3>
 <p>我用的是 UE5.4，直接内置了增强输入。之前使用输入绑定需要在「项目设置」「输入」进行设置，但是也仅仅是绑定，一些额外的设置如长按、连续按下还是需要用户自己实现，而且不同行为模式下的输入可能绑定到不同事件，总而言之就是很不方便。</p>
 <p>但是现在点开显示<em>轴和操作映射现已废弃，请改用增强输入操作和输入映射上下文</em>。这里提到两个概念，分别是「输入操作」和「输入映射上下文」。前者其实就是一个事件，用于绑定到 C++ 中的 callback，后者则是将一组按键与输入操作绑定，并且能够在运行时动态装卸，从而达到在不同场景中同一按键对应不同行为的效果。</p>
 <p>在「内容浏览器」中，可以通过「输入」「输入操作」创建一个 Input Action，并命名为 <code>IA_Move</code>，同时通过「输入」「输入映射情景」创建一个 Input Mapping Context，并命名为 <code>IMC_PlayerCtx</code>。</p>
-<h3 id="input-action" tabindex="-1"><a class="header-anchor" href="#Input-Action">#</a>Input Action</h3>
+<h3 id="Input-Action"><a class="header-anchor" href="#Input-Action">#</a>Input Action</h3>
 <p>打开 <code>IA_Move</code>，这里值得关注的是「值类型」和「修改器」。</p>
 <p>值类型有 4 个选项，分别是</p>
 <ul class="lvl-0">
@@ -352,15 +352,15 @@
 <img src="ia.png">
 <p>修改器则是对输入的值执行一定的 Filter，它是一个数组类型，前一个 Modifier 的输出会作为后一个 Modifier 的输入，可以类比 Shell 中的管道操作符 <code>|</code>。比如有个 Modifier 的类型是「否定」（中文翻译问题，其实就是取反），那么只用这一个 Modifier 就是将输入值取反，如果在后面再加一个「否定」，那结果就是原来的数不变。</p>
 <p>因为本项目中角色移动是在二维平面上，所以值类型选择 Axis2D，角色的左右移动和前后移动分别从输出值(Vector2D)的 X 和 Y 轴上取值。</p>
-<h3 id="input-mapping-context" tabindex="-1"><a class="header-anchor" href="#Input-Mapping-Context">#</a>Input Mapping Context</h3>
+<h3 id="Input-Mapping-Context"><a class="header-anchor" href="#Input-Mapping-Context">#</a>Input Mapping Context</h3>
 <p>打开 <code>IMC_PlayerCtx</code>，在这里可以创建映射。我们将 <code>WASD</code> 四个键绑定到 <code>IA_Move</code> 中。因为 IA_Move 的输出值类型是 Axis2D，并且所有值默认输入到 X 轴上，为了能使 A/D 输入值应用到 Y 轴上，需要用到名为「拌合输入轴值」的 Modifier，它其实就是交换两个轴，这里选「YXZ」，即交换 X 轴和 Y 轴，这样原本应用到 X 轴上的变化，经过 Modifier 以后就会转而应用到 Y 轴上。</p>
 <p>那么同一轴上的两个想反的方向就可以用「否定」解决，也就是取反。</p>
 <p>最后结果如下所示。</p>
 <img src="imc.png">
-<h3 id="%E6%80%BB%E7%BB%93" tabindex="-1"><a class="header-anchor" href="#总结">#</a>总结</h3>
+<h3 id="总结"><a class="header-anchor" href="#总结">#</a>总结</h3>
 <p>当按下按键 <code>Input</code> 时，首先会检测当前 IMC，假设该按键存在绑定且绑定到操作 <code>Action</code>，那么首先应用 IMC 中的 {Input, Action} 的 Modifier，将输出值送给 Action 自身的修改器，再做一次 Action_Modifier，两轮 Modifier 后的值才送到 callback 的入参。可以简单地用下图表示：</p>
 <img src="datastream.png">
-<h2 id="%E8%A1%8C%E4%B8%BA%E7%BB%91%E5%AE%9A" tabindex="-1"><a class="header-anchor" href="#行为绑定">#</a>行为绑定</h2>
+<h2 id="行为绑定"><a class="header-anchor" href="#行为绑定">#</a>行为绑定</h2>
 <p>这里我们需要新建一个派生自 <code>PlayerController</code> 的类 <code>RPlayerController</code>，用于实现控制玩家的逻辑。</p>
 <blockquote>
 <p>关于 <strong>Controller</strong>、<strong>Pawn</strong> 和 <strong>Character</strong> 的关系：</p>
@@ -463,7 +463,7 @@
   <span class="token punctuation">}</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>为什么上面 40 行，怎么保证 <code>InputComponent</code> 的类型转换成功呢？需要将「项目设置」「输入」「默认类」中的「默认玩家输入类」设置为 <code>EnhancedPlayerInput</code>，同理「默认输入组件类」设置为 <code>EnhancedInputComponent</code>。这样在生成时就会用这两个类型。</p>
-<h2 id="%E5%BA%94%E7%94%A8%E5%88%B0%E6%B8%B8%E6%88%8F%E4%B8%AD" tabindex="-1"><a class="header-anchor" href="#应用到游戏中">#</a>应用到游戏中</h2>
+<h2 id="应用到游戏中"><a class="header-anchor" href="#应用到游戏中">#</a>应用到游戏中</h2>
 <p>我们已经实现了一个自定义的 Player Controller，接下来要做的事就是在游戏中使用它。在「项目设置」「地图和模式」中，我们可以看到在「选中的游戏模式」下面，有很多类，其中默认的「玩家控制器类」是 PlayerController。那么目的很明确了，我们还需要新建一个自定义的 Game Mode，覆盖「默认的游戏模式」，就能设置默认的「玩家控制器类」为 <code>RPlayerController</code> 了。</p>
 <p>所谓 Game Mode，顾名思义就是游戏模式，也可以理解为游戏规则。一个游戏可以有任意数量的 Game Mode，但是在一个时间点，只能使用一个 Game Mode。毕竟规则只能有一个。</p>
 <p>接下去就是新建一个派生自 <code>GameModeBase</code> 的类，命名为 <code>RGameModeBase</code>。然后创建对应的蓝图类，命名为 <code>BP_RGameModeBase</code>。在蓝图类中，先进行如下设置</p>
@@ -648,12 +648,6 @@
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -662,8 +656,8 @@
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -679,41 +673,6 @@
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

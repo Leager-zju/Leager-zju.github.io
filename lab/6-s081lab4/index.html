@@ -328,13 +328,13 @@ The fork() system call in xv6 copies all of the pa">
             <div id="articleContent">
                 <p>课上谈了个 COW 优化策略，这里就要具体实现了。</p>
 <span id="more"></span>
-<h2 id="%E5%85%B3%E4%BA%8E-cow(copy-on-write%2C-%E5%86%99%E6%97%B6%E6%8B%B7%E8%B4%9D)" tabindex="-1"><a class="header-anchor" href="#关于-COW-Copy-On-Write-写时拷贝">#</a>关于 COW(Copy-On-Write, 写时拷贝)</h2>
-<h3 id="the-problem" tabindex="-1"><a class="header-anchor" href="#The-Problem">#</a>The Problem</h3>
+<h2 id="关于-COW-Copy-On-Write-写时拷贝"><a class="header-anchor" href="#关于-COW-Copy-On-Write-写时拷贝">#</a>关于 COW(Copy-On-Write, 写时拷贝)</h2>
+<h3 id="The-Problem"><a class="header-anchor" href="#The-Problem">#</a>The Problem</h3>
 <blockquote>
 <p>The fork() system call in xv6 copies all of the parent process’s user-space memory into the child. If the parent is large, copying can take a long time. Worse, the work is often largely wasted; for example, a fork() followed by exec() in the child will cause the child to discard the copied memory, probably without ever using most of it. On the other hand, if both parent and child use a page, and one or both writes it, a copy is truly needed.</p>
 </blockquote>
 <p>在 xv6 中，系统调用 <code>fork()</code> 会将父进程页表中所有指向的数据页拷贝到子进程中。有些页不一定用到，用到也不一定写，那就先浅拷贝，等到要写的时候再深拷贝。</p>
-<h3 id="the-solution" tabindex="-1"><a class="header-anchor" href="#The-Solution">#</a>The Solution</h3>
+<h3 id="The-Solution"><a class="header-anchor" href="#The-Solution">#</a>The Solution</h3>
 <blockquote>
 <p>The goal of copy-on-write (COW) fork() is to defer allocating and copying physical memory pages for the child until the copies are actually needed, if ever.</p>
 <p>COW fork() creates just a pagetable for the child, with PTEs for user memory pointing to the parent’s physical pages. COW fork() marks all the user PTEs in both parent and child as not writable. When either process tries to write one of these COW pages, the CPU will force a page fault. The kernel page-fault handler detects this case, allocates a page of physical memory for the faulting process, copies the original page into the new page, and modifies the relevant PTE in the faulting process to refer to the new page, this time with the PTE marked writeable. When the page fault handler returns, the user process will be able to write its copy of the page.</p>
@@ -356,13 +356,13 @@ The fork() system call in xv6 copies all of the pa">
 <p>lab 手册提示我们可以将引用计数实现为一个数组，定义在 <code>kernel/kalloc.c</code> 中。那么数组有多大呢？毕竟我们是通过页号进行索引的，那么数组大小就是可用页数，通过查看 <code>kernel/riscv.h</code> 我们发现了两个宏，<code>KERNBASE</code> 与 <code>PHYSTOP</code>，这两值之差便是整个可用内存空间大小，再除以 <code>PGSIZE</code> 那就是可用页数了。</p>
 <p>数组大小确定了，那么索引方式也很快能想到，直接 <code>(pa - KERNBASE) &gt;&gt; 12</code> 即可。虽然前面可能有部分页会被浪费，但胜在简单可靠。</p>
 <p>思路捋清了，那代码就很好写了。</p>
-<h2 id="preparation" tabindex="-1"><a class="header-anchor" href="#Preparation">#</a>Preparation</h2>
+<h2 id="Preparation"><a class="header-anchor" href="#Preparation">#</a>Preparation</h2>
 <p>切换到对应分支</p>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">git</span> fetch
 $ <span class="token function">git</span> checkout cow
 $ <span class="token function">make</span> clean<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
-<h2 id="task%3A-implement-copy-on-write" tabindex="-1"><a class="header-anchor" href="#Task-Implement-copy-on-write">#</a>Task: Implement copy-on write</h2>
-<h3 id="%E5%BC%95%E7%94%A8%E8%AE%A1%E6%95%B0" tabindex="-1"><a class="header-anchor" href="#引用计数">#</a>引用计数</h3>
+<h2 id="Task-Implement-copy-on-write"><a class="header-anchor" href="#Task-Implement-copy-on-write">#</a>Task: Implement copy-on write</h2>
+<h3 id="引用计数"><a class="header-anchor" href="#引用计数">#</a>引用计数</h3>
 <p>首先实现引用计数。</p>
 <pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/kalloc.c</span></div><code class="language-C">#define NPAGES (PHYSTOP-KERNBASE)/PGSIZE
 
@@ -460,7 +460,7 @@ kalloc(void)
   return (void*)r;
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>为了在其他文件中调用，部分函数需要在 <code>def.h</code> 中添加声明。</p>
-<h3 id="uvmcopy()" tabindex="-1"><a class="header-anchor" href="#uvmcopy">#</a>uvmcopy()</h3>
+<h3 id="uvmcopy"><a class="header-anchor" href="#uvmcopy">#</a>uvmcopy()</h3>
 <pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/vm.c</span></div><code class="language-C">int
 uvmcopy(pagetable_t old, pagetable_t new, uint64 sz)
 {
@@ -488,7 +488,7 @@ uvmcopy(pagetable_t old, pagetable_t new, uint64 sz)
   }
   return 0;
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="usertrap()" tabindex="-1"><a class="header-anchor" href="#usertrap">#</a>usertrap()</h3>
+<h3 id="usertrap"><a class="header-anchor" href="#usertrap">#</a>usertrap()</h3>
 <pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/trap.c</span></div><code class="language-C">void
 usertrap(void)
 {
@@ -531,7 +531,7 @@ usertrap(void)
   }
   ...
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="copyout()" tabindex="-1"><a class="header-anchor" href="#copyout">#</a>copyout()</h3>
+<h3 id="copyout"><a class="header-anchor" href="#copyout">#</a>copyout()</h3>
 <pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/vm.c</span></div><code class="language-C">int
 copyout(pagetable_t pagetable, uint64 dstva, char *src, uint64 len)
 {
@@ -573,7 +573,7 @@ copyout(pagetable_t pagetable, uint64 dstva, char *src, uint64 len)
   }
   return 0;
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9E%9C" tabindex="-1"><a class="header-anchor" href="#测试结果">#</a>测试结果</h2>
+<h2 id="测试结果"><a class="header-anchor" href="#测试结果">#</a>测试结果</h2>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">make</span> grade
 <span class="token punctuation">..</span>.
 <span class="token operator">==</span> Test running cowtest <span class="token operator">==</span>
@@ -597,7 +597,7 @@ $ <span class="token function">make</span> qemu-gdb
 <span class="token operator">==</span> Test <span class="token function">time</span> <span class="token operator">==</span>
 time: OK
 Score: <span class="token number">110</span>/110<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E6%9C%80%E5%90%8E%E7%9A%84%E5%B7%A5%E4%BD%9C" tabindex="-1"><a class="header-anchor" href="#最后的工作">#</a>最后的工作</h2>
+<h2 id="最后的工作"><a class="header-anchor" href="#最后的工作">#</a>最后的工作</h2>
 <ol>
 <li class="lvl-3">
 <p><code>git commit -am ""</code> 将所有修改提交到本地;</p>
@@ -786,12 +786,6 @@ Score: <span class="token number">110</span>/110<span aria-hidden="true" class="
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -800,8 +794,8 @@ Score: <span class="token number">110</span>/110<span aria-hidden="true" class="
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -817,41 +811,6 @@ Score: <span class="token number">110</span>/110<span aria-hidden="true" class="
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

@@ -351,7 +351,7 @@ OI Wiki
 </ul>
 </blockquote>
 <span id="more"></span>
-<h2 id="%E6%80%A7%E8%B4%A8" tabindex="-1"><a class="header-anchor" href="#性质">#</a>性质</h2>
+<h2 id="性质"><a class="header-anchor" href="#性质">#</a>性质</h2>
 <p>关于**后缀自动机(SAM)**的所有概念，其实网上说的都已经差不多了。个人总结出以下几个关键的性质：</p>
 <ol>
 <li class="lvl-3">
@@ -382,7 +382,7 @@ OI Wiki
 </blockquote>
 </li>
 </ol>
-<h2 id="%E6%9E%84%E5%BB%BA" tabindex="-1"><a class="header-anchor" href="#构建">#</a>构建</h2>
+<h2 id="构建"><a class="header-anchor" href="#构建">#</a>构建</h2>
 <p>基于以上性质，其实不难理解 SAM 的构建代码了。因为这是一个 online 结构，我们可以随时添加新字符/字符串以更新自动机。每次新增一个字符 <code>ch</code>，相当于建立了一个新的 State <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mi>e</mi><mi>w</mi></mrow><annotation encoding="application/x-tex">New</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="mord mathnormal">e</span><span class="mord mathnormal" style="margin-right:0.02691em;">w</span></span></span></span>（此刻仅表示添加了 <code>ch</code> 后的新串 <code>newStr</code>，对应 endpos 为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>l</mi><mi>e</mi><mi>n</mi><mo stretchy="false">(</mo><mi>n</mi><mi>e</mi><mi>w</mi><mi>S</mi><mi>t</mi><mi>r</mi><mo stretchy="false">)</mo><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">len(newStr)-1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal">e</span><span class="mord mathnormal">n</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mord mathnormal">e</span><span class="mord mathnormal">wSt</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span>）。</p>
 <p>接下去这句个人理解我认为很关键：<strong>添加 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mi>e</mi><mi>w</mi></mrow><annotation encoding="application/x-tex">New</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="mord mathnormal">e</span><span class="mord mathnormal" style="margin-right:0.02691em;">w</span></span></span></span> 后重构 SAM 的过程，本质上就是找一个合适的 State 作为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mi>e</mi><mi>w</mi></mrow><annotation encoding="application/x-tex">New</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="mord mathnormal">e</span><span class="mord mathnormal" style="margin-right:0.02691em;">w</span></span></span></span> 的 parent 的过程</strong>。</p>
 <p>根据性质 4，这个所谓的合适的 State，其表示的所有字符串必须能作为 <code>newStr</code> 的后缀，且最长串应尽可能长。</p>
@@ -480,7 +480,7 @@ stateIndex p<span class="token punctuation">;</span>
 
   last_ <span class="token operator">=</span> newStateIdx<span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E5%BA%94%E7%94%A8" tabindex="-1"><a class="header-anchor" href="#应用">#</a>应用</h2>
+<h2 id="应用"><a class="header-anchor" href="#应用">#</a>应用</h2>
 <p>SAM 是处理字符串问题的利器，根据前文提到的几条性质，其实可以实现包括但不限于以下功能：</p>
 <ol>
 <li class="lvl-3">
@@ -682,12 +682,6 @@ stateIndex p<span class="token punctuation">;</span>
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -696,8 +690,8 @@ stateIndex p<span class="token punctuation">;</span>
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -713,41 +707,6 @@ stateIndex p<span class="token punctuation">;</span>
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

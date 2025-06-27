@@ -331,32 +331,32 @@
 <blockquote>
 <p>无特殊说明，本文所有数组下标均从 <strong>1</strong> 开始。</p>
 </blockquote>
-<h2 id="%E5%89%8D%E7%BC%80%E5%92%8C" tabindex="-1"><a class="header-anchor" href="#前缀和">#</a>前缀和</h2>
+<h2 id="前缀和"><a class="header-anchor" href="#前缀和">#</a>前缀和</h2>
 <p>初学者最先接触到的支持<strong>区间查询</strong>的数据结构就是前缀和数组了，对于原始数组 <code>nums</code> 而言，对应的前缀和数组 <code>prefixSum</code> 满足：</p>
 <p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>prefixSum</mtext><mo stretchy="false">[</mo><mi>i</mi><mo stretchy="false">]</mo><mo>=</mo><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>i</mi></munderover><mtext>nums</mtext><mo stretchy="false">[</mo><mi>j</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">\text{prefixSum}[i] = \sum\limits_{j=1}^{i}\text{nums}[j]
 </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">prefixSum</span></span><span class="mopen">[</span><span class="mord mathnormal">i</span><span class="mclose">]</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:3.2254em;vertical-align:-1.4138em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.8117em;"><span style="top:-1.8723em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span><span class="mrel mtight">=</span><span class="mord mtight">1</span></span></span></span><span style="top:-3.05em;"><span class="pstrut" style="height:3.05em;"></span><span><span class="mop op-symbol large-op">∑</span></span></span><span style="top:-4.3em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.4138em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord text"><span class="mord">nums</span></span><span class="mopen">[</span><span class="mord mathnormal" style="margin-right:0.05724em;">j</span><span class="mclose">]</span></span></span></span></span></p>
-<h3 id="%E5%8C%BA%E9%97%B4%E6%9F%A5%E8%AF%A2" tabindex="-1"><a class="header-anchor" href="#区间查询">#</a>区间查询</h3>
+<h3 id="区间查询"><a class="header-anchor" href="#区间查询">#</a>区间查询</h3>
 <p>如果想求区间 <code>nums[a:b]</code> 之和，只需简单的进行 <code>prefixSum[b]-prefixSum[a-1]</code> 即可。对于一个已经构建好的 <code>prefixSum</code> 而言，其<strong>区间查询</strong>时间复杂度为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span>。</p>
-<h3 id="%E5%8D%95%E7%82%B9%E4%BF%AE%E6%94%B9" tabindex="-1"><a class="header-anchor" href="#单点修改">#</a>单点修改</h3>
+<h3 id="单点修改"><a class="header-anchor" href="#单点修改">#</a>单点修改</h3>
 <p>然而，<code>prefixSum</code> 的<strong>单点修改</strong>却不如人意，如果修改了 <code>nums[i]</code>，需要将 <code>prefixSum</code> 中区间 <code>[i:n]</code> 的所有值均修改一遍，这样子时间复杂度为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span>。</p>
 <blockquote>
 <p>现实场景下的操作往往是动态的，特别是某些数据库中需要进行大量的写操作。如果该<strong>写频繁</strong>数据库中维护区间和采用的是前缀和的做法，那么它一定活不过压测😒。</p>
 </blockquote>
-<h3 id="%E6%80%9D%E8%80%83" tabindex="-1"><a class="header-anchor" href="#思考">#</a>思考</h3>
+<h3 id="思考"><a class="header-anchor" href="#思考">#</a>思考</h3>
 <p>根据上文可知，<strong>写</strong>是前缀和的根本劣势，一旦写操作极度频繁，对于海量数据而言，时间开销将会非常大。究其原因，还是在于 <code>prefixSum</code> 中的每个元素都出现了冲突的管辖范围，负载并不均衡，最极端的，第一个元素 <code>nums[1]</code> 几乎被所有的 <code>prefixSum[i]</code> 计算了一遍，而最后一个元素 <code>nums[n]</code> 却仅仅参与了一次计算。</p>
 <p>如果能将这一冗余计算进行减负，说不定能提高一点性能？</p>
-<h2 id="%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84" tabindex="-1"><a class="header-anchor" href="#树状数组">#</a>树状数组</h2>
+<h2 id="树状数组"><a class="header-anchor" href="#树状数组">#</a>树状数组</h2>
 <p>树状数组的本质思想在于<strong>分治</strong>，即将原始数组不断划分为等长的区间 <code>nums[1 : n/2]</code> 与 <code>nums[n/2+1 : n]</code>，分别由 <code>biTree[n/2]</code> 与 <code>biTree[n]</code> 去管辖这两个区间。这样一来，每个子区间中进行的<strong>写</strong>并不会给其他区间增加负载，而求前缀和只需将多个区间和相加即可。</p>
 <p>「既然最后整个区间和就是 <code>biTree[n/2] + biTree[n]</code>，那不如让 <code>biTree[n]</code> 干脆管整个区间好了！」</p>
 <p>于是，整个区间的管辖级别就浮现出来了，以 <code>n=8</code> 为例：</p>
 <img src="1.png" style="zoom:80%;">
 <p>由于这种管辖级别像树一样，所以就叫树状数组了，而每个树状数组中的元素对应着的就是其管辖区间内原数组的所有元素之和。</p>
-<h3 id="%E5%8C%BA%E9%97%B4%E6%9F%A5%E8%AF%A2-1" tabindex="-1"><a class="header-anchor" href="#区间查询-2">#</a>区间查询</h3>
+<h3 id="区间查询-2"><a class="header-anchor" href="#区间查询-2">#</a>区间查询</h3>
 <p>先来看看树状数组的<strong>读</strong>性能如何。对于原始数组 <code>nums</code>，为了求 <code>sum(i)</code>（即 <code>nums[1:i]</code> 之和），则要考虑怎么取树状数组中的区间。</p>
 <p>以 <code>sum(6)</code> 为例，根据上图，我们很容易能得到最后的结果是 <code>biTree[6] + biTree[4]</code>；同样的，<code>sum(7)</code> 对应 <code>biTree[7] + biTree[6] + biTree[4]</code>；……</p>
 <p>如果仅考虑上图，不难发现 <code>sum(i)</code> 其实就是以 <code>biTree[i]</code> 为起点，一直往左上方遍历求和即可（<code>biTree[6]</code> 的左上方只有 <code>biTree[4]</code>）。那么问题就转化为：如何遍历到下一个，也就是左上方的树状数组元素？</p>
 <p>这里就有一个 trick：只需要将 <code>i</code> 对应二进制最后一个 <code>1</code> 移除，就能得到下一个要遍历的元素下标，直到 <code>i</code> 返回到 0；</p>
-<h4 id="lowbit(x)" tabindex="-1"><a class="header-anchor" href="#lowbit-x">#</a>lowbit(x)</h4>
+<h4 id="lowbit-x"><a class="header-anchor" href="#lowbit-x">#</a>lowbit(x)</h4>
 <p><code>lowbit(x)</code> 是一种用于快速找出数 <code>x</code> 对应二进制最后一个 <code>1</code> 的位置的方法，其表达式为：</p>
 <p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>lowbit</mtext><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><mi>x</mi><mtext>&nbsp;</mtext><mi mathvariant="normal">&amp;</mi><mtext>&nbsp;</mtext><mo stretchy="false">(</mo><mo>−</mo><mi>x</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\text{lowbit}(x) = x\ \&amp;\ (-x)
 </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">lowbit</span></span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">x</span><span class="mspace">&nbsp;</span><span class="mord">&amp;</span><span class="mspace">&nbsp;</span><span class="mopen">(</span><span class="mord">−</span><span class="mord mathnormal">x</span><span class="mclose">)</span></span></span></span></span></p>
@@ -364,7 +364,7 @@
 <blockquote>
 <p>毕竟补码是取反码然后 +1，对于 <code>...100...000</code> 而言，其反码为 <code>...011...111</code>，再加一得到 <code>...100...000</code>，而高位全部取反，那么进行按位与后只有最后一个 <code>1</code> 会剩下。</p>
 </blockquote>
-<h4 id="%E7%BB%93%E8%AE%BA" tabindex="-1"><a class="header-anchor" href="#结论">#</a>结论</h4>
+<h4 id="结论"><a class="header-anchor" href="#结论">#</a>结论</h4>
 <p>根据上面的理论，只要不断把最后一个 <code>1</code> 去掉就行，那么可以得到这样一个实现区间查询的函数：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>区间查询</span></div><code class="language-cpp"><span class="token comment">// rangeQuery returns the sum of nums[1:n]</span>
 <span class="token keyword">int</span> <span class="token function">rangeQuery</span><span class="token punctuation">(</span><span class="token keyword">int</span> n<span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -376,7 +376,7 @@
   <span class="token keyword">return</span> res<span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>时间复杂度为 <code>n</code> 对应二进制中 <code>1</code> 的个数，最坏情况下为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>log</mi><mo>⁡</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(\log n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span></p>
-<h3 id="%E5%8D%95%E7%82%B9%E4%BF%AE%E6%94%B9-1" tabindex="-1"><a class="header-anchor" href="#单点修改-2">#</a>单点修改</h3>
+<h3 id="单点修改-2"><a class="header-anchor" href="#单点修改-2">#</a>单点修改</h3>
 <p>如果对某个 <code>nums[i]</code> 进行了修改，则需要将所有管辖该元素的 <code>biTree[j]</code>——即<strong>数组树</strong>中的父节点——也进行修改，这样才能保证一致性。</p>
 <p>从子节点定位到直接父节点的方法与上面的恰好相反，证明略。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>单点修改</span></div><code class="language-cpp"><span class="token keyword">void</span> <span class="token function">update</span><span class="token punctuation">(</span><span class="token keyword">int</span> n<span class="token punctuation">,</span> <span class="token keyword">int</span> delta<span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -392,7 +392,7 @@
     <span class="token function">update</span><span class="token punctuation">(</span>i<span class="token punctuation">,</span> nums<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">}</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E5%BA%94%E7%94%A8" tabindex="-1"><a class="header-anchor" href="#应用">#</a>应用</h2>
+<h2 id="应用"><a class="header-anchor" href="#应用">#</a>应用</h2>
 <ol>
 <li class="lvl-3">
 <p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/count-of-smaller-numbers-after-self/">&gt;&gt;&gt; LeetCode 315 计算右侧小于当前元素的个数(Hard) &lt;&lt;&lt;</a></p>
@@ -577,12 +577,6 @@
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -591,8 +585,8 @@
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -608,41 +602,6 @@
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

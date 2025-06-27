@@ -328,8 +328,8 @@
             <div id="articleContent">
                 <p>个人的 面试经验整理。</p>
 <span id="more"></span>
-<h2 id="c%2B%2B" tabindex="-1"><a class="header-anchor" href="#C">#</a>C++</h2>
-<h3 id="c-%E5%92%8C-c%2B%2B-%E7%9A%84%E5%8C%BA%E5%88%AB" tabindex="-1"><a class="header-anchor" href="#C-和-C-的区别">#</a>C 和 C++ 的区别</h3>
+<h2 id="C"><a class="header-anchor" href="#C">#</a>C++</h2>
+<h3 id="C-和-C-的区别"><a class="header-anchor" href="#C-和-C-的区别">#</a>C 和 C++ 的区别</h3>
 <blockquote>
 <p>说实话这是个比较宏大的问题。要考虑这个问题，首先得明白什么才算「区别」。就面向对象而言，C 中也可以实现封装（成员函数可以用函数指针代替，构造/析构函数可以用工厂函数代替）、继承（在结构体的最开始直接定义一个基类对象）、多态（可以自定义虚函数表），无非看着别扭了点就是了，所以这算不上「区别」。</p>
 <p>我认为，只用 C 语言无法模拟出，或者人工模拟代价很大的 C++ 的特性，这才是能称之为「<strong>区别</strong>」。</p>
@@ -348,7 +348,7 @@
 <p>…</p>
 </li>
 </ol>
-<h3 id="%E8%AF%B4%E4%B8%8B-c%2B%2B-%E5%86%85%E5%AD%98%E5%B8%83%E5%B1%80%EF%BC%9F%E4%BB%A5%E5%8F%8A%E5%A0%86%E5%92%8C%E6%A0%88%E7%9A%84%E5%8C%BA%E5%88%AB%EF%BC%9F%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E8%83%BD%E5%8F%AA%E7%94%A8%E5%85%B6%E4%B8%AD%E4%B8%80%E4%B8%AA%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#说下-C-内存布局？以及堆和栈的区别？为什么不能只用其中一个？">#</a>说下 C++ 内存布局？以及堆和栈的区别？为什么不能只用其中一个？</h3>
+<h3 id="说下-C-内存布局？以及堆和栈的区别？为什么不能只用其中一个？"><a class="header-anchor" href="#说下-C-内存布局？以及堆和栈的区别？为什么不能只用其中一个？">#</a>说下 C++ 内存布局？以及堆和栈的区别？为什么不能只用其中一个？</h3>
 <blockquote>
 <p>具体可参考 <a href="../../c/c-memory">C++ の 内存分配</a></p>
 </blockquote>
@@ -357,38 +357,38 @@
 <p>栈的地址从高到低增长，由编译器<strong>自动</strong>管理分配，以**栈帧(Frame)**为单位，存放函数局部变量、函数参数值等。一旦函数结束，对应的栈帧也就被 pop，里面的变量生命周期也就结束了。</p>
 <p>栈的优势在于将变量的管理交付给编译器，不需要麻烦程序员了；并且在栈上分配变量开销低——直接移动栈顶指针就好了。相比而言，在堆上分配内存还要涉及到不同的内存分配策略，开销就会很高。</p>
 <p>而堆的优势在于延长变量的生命周期。试想一下如果只用栈，该如何实现树、链表这样的需要动态维护的数据结构？</p>
-<h3 id="%E6%95%B4%E6%95%B0%E9%99%A4%E4%BB%A5-0-%E4%BC%9A%E5%8F%91%E7%94%9F%E4%BB%80%E4%B9%88%EF%BC%9F%E6%B5%AE%E7%82%B9%E6%95%B0%E5%91%A2%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#整数除以-0-会发生什么？浮点数呢？">#</a>整数除以 0 会发生什么？浮点数呢？</h3>
+<h3 id="整数除以-0-会发生什么？浮点数呢？"><a class="header-anchor" href="#整数除以-0-会发生什么？浮点数呢？">#</a>整数除以 0 会发生什么？浮点数呢？</h3>
 <p>如果是直接以比如 <code>1/0;</code> 进行编码会报编译错误。</p>
 <p>如果是将 <code>0</code> 存到变量中除以一个变量，那么通常会触发运行时错误。</p>
 <p>如果是浮点数之间除以 <code>0</code>，则会生成一个 <code>NAN</code>。</p>
-<h3 id="struct-%E5%92%8C-class-%E7%9A%84%E5%8C%BA%E5%88%AB" tabindex="-1"><a class="header-anchor" href="#struct-和-class-的区别">#</a>struct 和 class 的区别</h3>
+<h3 id="struct-和-class-的区别"><a class="header-anchor" href="#struct-和-class-的区别">#</a>struct 和 class 的区别</h3>
 <blockquote>
 <p>具体可参考 <a href="../../c/c-oop/#%E4%B8%8E-struct-%E7%9A%84%E5%BC%82%E5%90%8C">C++ の OOP</a></p>
 </blockquote>
 <p>主要区别在于默认访问权限、继承方式，以及 struct 不能用模板。</p>
-<h3 id="%E5%9C%A8%E7%B1%BB%E7%9A%84%E4%B8%8D%E5%90%8C%E5%87%BD%E6%95%B0%E4%B8%AD%E6%89%A7%E8%A1%8C-delete-this%3B-%E8%AF%AD%E5%8F%A5%E4%BC%9A%E5%8F%91%E7%94%9F%E4%BB%80%E4%B9%88%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#在类的不同函数中执行-delete-this-语句会发生什么？">#</a>在类的不同函数中执行 delete this; 语句会发生什么？</h3>
+<h3 id="在类的不同函数中执行-delete-this-语句会发生什么？"><a class="header-anchor" href="#在类的不同函数中执行-delete-this-语句会发生什么？">#</a>在类的不同函数中执行 delete this; 语句会发生什么？</h3>
 <p><code>delete this</code> 除了释放<strong>堆</strong>上的内存，还会调用析构函数。</p>
 <p>如果是在栈上分配的对象，调用相关函数会 crash。</p>
 <p>如果是在析构函数中执行，则会导致<strong>栈溢出</strong>。</p>
 <p>而如果在成员函数中执行，则需要保证后续不会访问类的成员变量以及虚函数表，否则会导致<strong>段错误</strong>。</p>
 <p>如果是在构造函数中执行，则会导致<strong>未定义行为</strong>。因为此时对象未完全构造，可能导致资源泄漏或数据损坏，同时构造函数后续的任何访问将导致访问违规。</p>
-<h3 id="%E5%B7%A6%E5%80%BC%E5%92%8C%E5%8F%B3%E5%80%BC%E7%9A%84%E5%8C%BA%E5%88%AB%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#左值和右值的区别？">#</a>左值和右值的区别？</h3>
+<h3 id="左值和右值的区别？"><a class="header-anchor" href="#左值和右值的区别？">#</a>左值和右值的区别？</h3>
 <p>左值可以取地址并具有变量名。</p>
 <p>剩下的都是右值，又称<strong>匿名对象</strong>，只存在于寄存器中，无法在内存中寻址，不具有持久性。</p>
-<h3 id="%E4%BB%80%E4%B9%88%E6%98%AF%E5%8F%B3%E5%80%BC%E5%BC%95%E7%94%A8(t%26%26)%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#什么是右值引用-T-？">#</a>什么是右值引用(T&amp;&amp;)？</h3>
+<h3 id="什么是右值引用-T-？"><a class="header-anchor" href="#什么是右值引用-T-？">#</a>什么是右值引用(T&amp;&amp;)？</h3>
 <p>左值引用 <code>T&amp;</code> 可以修改形参但无法用右值传值。</p>
 <p>常量左值引用 <code>const T&amp;</code> 可以用右值传值但无法在函数内部对形参进行修改。</p>
 <p>可以选择在栈上开一个左值的内存然后赋予右值，再用前者，也就是 <code>T&amp;</code> 传值，但存在拷贝开销。右值引用 <code>T&amp;&amp;</code> 能够解决这一问题——既可以传入右值，又可以修改形参。并在此基础上支持类的移动构造函数，以实现移动语义（转移所有权）。</p>
 <blockquote>
 <p>右值引用绑定的对象为右值，其具有变量名，所以是左值。</p>
 </blockquote>
-<h3 id="%E6%8B%B7%E8%B4%9D%E6%9E%84%E9%80%A0%E5%92%8C%E7%A7%BB%E5%8A%A8%E6%9E%84%E9%80%A0%E7%9A%84%E5%8C%BA%E5%88%AB%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#拷贝构造和移动构造的区别？">#</a>拷贝构造和移动构造的区别？</h3>
+<h3 id="拷贝构造和移动构造的区别？"><a class="header-anchor" href="#拷贝构造和移动构造的区别？">#</a>拷贝构造和移动构造的区别？</h3>
 <p>前者相当于在内存中创建一个副本</p>
 <blockquote>
 <p>如果成员对象中有指针，则存在潜在的<strong>浅拷贝</strong>的问题。</p>
 </blockquote>
 <p>后者是在内存中转移数据所有权（被移动的对象失去底层数据，如指针置空），基于 <code>std::move</code> 和右值引用。</p>
-<h3 id="std%3A%3Amove-%E5%92%8C-std%3A%3Aforward-%E7%9A%84%E5%8C%BA%E5%88%AB%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#std-move-和-std-forward-的区别？">#</a>std::move 和 std::forward 的区别？</h3>
+<h3 id="std-move-和-std-forward-的区别？"><a class="header-anchor" href="#std-move-和-std-forward-的区别？">#</a>std::move 和 std::forward 的区别？</h3>
 <blockquote>
 <p>具体可参考 <a target="_blank" rel="noopener" href="https://cntransgroup.github.io/EffectiveModernCppChinese/5.RRefMovSemPerfForw/item23.html#%E6%9D%A1%E6%AC%BE%E4%BA%8C%E5%8D%81%E4%B8%89%E7%90%86%E8%A7%A3stdmove%E5%92%8Cstdforward">Effective Modern C++ Item23</a></p>
 </blockquote>
@@ -398,9 +398,9 @@
   <span class="token keyword">return</span> <span class="token generic-function"><span class="token function">static_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span>remove_reference<span class="token operator">&lt;</span>T<span class="token operator">&gt;</span><span class="token double-colon punctuation">::</span>type<span class="token operator">&amp;&amp;</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span>param<span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 <p><code>std::forward</code> 仅仅是将实参转为对应的引用版本，适用于万能引用下类型不明确的情况。</p>
-<h3 id="std%3A%3Amove-%E4%B8%AD%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E4%BD%BF%E7%94%A8-remove_reference" tabindex="-1"><a class="header-anchor" href="#std-move-中为什么要使用-remove-reference">#</a>std::move 中为什么要使用 remove_reference</h3>
+<h3 id="std-move-中为什么要使用-remove-reference"><a class="header-anchor" href="#std-move-中为什么要使用-remove-reference">#</a>std::move 中为什么要使用 remove_reference</h3>
 <p>为了防止「引用折叠」，导致传入左值时返回值被折叠为左值引用。</p>
-<h3 id="std%3A%3Ashared_ptr-%E5%92%8C-std%3A%3Aunique_ptr-%E7%9A%84%E5%BC%82%E5%90%8C%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#std-shared-ptr-和-std-unique-ptr-的异同？">#</a>std::shared_ptr 和 std::unique_ptr 的异同？</h3>
+<h3 id="std-shared-ptr-和-std-unique-ptr-的异同？"><a class="header-anchor" href="#std-shared-ptr-和-std-unique-ptr-的异同？">#</a>std::shared_ptr 和 std::unique_ptr 的异同？</h3>
 <blockquote>
 <p>具体可参考 <a href="../../c/c-smartptr">C++11 の 智能指针</a></p>
 </blockquote>
@@ -410,7 +410,7 @@
 <p>可以通过 <code>use_count()</code> 函数获取引用计数值。</p>
 </blockquote>
 <p>unique ptr 为<strong>独占</strong>指针，不允许拷贝构造，同时只能有一个 unique ptr 指向某块内存，只能通过移动语义来进行更改所有权。</p>
-<h3 id="std%3A%3Ashared_ptr-%E6%9C%89%E4%BB%80%E4%B9%88%E7%BC%BA%E9%99%B7%EF%BC%9F%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#std-shared-ptr-有什么缺陷？如何解决？">#</a>std::shared_ptr 有什么缺陷？如何解决？</h3>
+<h3 id="std-shared-ptr-有什么缺陷？如何解决？"><a class="header-anchor" href="#std-shared-ptr-有什么缺陷？如何解决？">#</a>std::shared_ptr 有什么缺陷？如何解决？</h3>
 <p>shared ptr 存在「<strong>循环引用</strong>」的问题，可以用 <code>std::weak_ptr</code> 解决。比如下面这段代码，分别有两个 shared ptr 指向 a 和 b 所在的内存空间，outPa/inPa 与 outPb/inPb 的计数器均为 <strong>2</strong>。</p>
 <p>当 <code>func()</code> 退出时，栈变量 outPa 和 outPb 结束生命周期，调用析构函数，分别使得 outPa/inPa 和 outPb/inPb 的计数值 <strong>-1</strong>。然而，类成员变量 inPa/inPb （的所有数据）还位于 a/b 所在的堆空间中，它们的计数器并没有归零，而是 <strong>1</strong>。那么永远得不到释放，这就造成了<strong>内存泄漏</strong>。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>循环引用</span></div><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">B</span><span class="token punctuation">;</span>
@@ -454,54 +454,54 @@
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>如果同时使用 p1 和 p2，则 p2 先析构，计数器归零，释放 a 指向的内存，然后 p1 析构，计数器归零，又释放 a 指向的内存，造成 double free 的错误。</p>
 <p>如果仅使用 p1，则 p1 析构后释放 a 的内存，后续解引用 a 时出现 Undefined Behavior，输出可能是任意数。</p>
-<h3 id="int*-%E5%92%8C-void*-%E7%9A%84%E5%8C%BA%E5%88%AB%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#int-和-void-的区别？">#</a>int* 和 void* 的区别？</h3>
+<h3 id="int-和-void-的区别？"><a class="header-anchor" href="#int-和-void-的区别？">#</a>int* 和 void* 的区别？</h3>
 <p><code>int*</code> 类型的变量会有类型信息，告诉编译器「我指向的这块内存是个 <code>int</code> 变量，如果你要读取就只能一次性读 4 字节」。其他的 <code>double*</code>、<code>long long*</code> 同理。</p>
 <p><code>void*</code> 意为无类型指针，可以指向任意类型的数据，但赋值给 <code>int*</code> 这种的就要配合类型转换了。直接读取是读 1 字节，毕竟也是指向了一个内存地址。</p>
-<h3 id="%E8%8B%A5%E5%B9%B2-stl-%E5%AE%B9%E5%99%A8%E7%9A%84%E5%8C%BA%E5%88%AB%E4%B8%8E%E7%89%B9%E7%82%B9%E3%80%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E3%80%81%E8%BF%AD%E4%BB%A3%E5%99%A8%E5%A4%B1%E6%95%88%E9%97%AE%E9%A2%98%E7%AD%89" tabindex="-1"><a class="header-anchor" href="#若干-STL-容器的区别与特点、使用场景、迭代器失效问题等">#</a>若干 STL 容器的区别与特点、使用场景、迭代器失效问题等</h3>
+<h3 id="若干-STL-容器的区别与特点、使用场景、迭代器失效问题等"><a class="header-anchor" href="#若干-STL-容器的区别与特点、使用场景、迭代器失效问题等">#</a>若干 STL 容器的区别与特点、使用场景、迭代器失效问题等</h3>
 <blockquote>
 <p>具体可参考 <a href="../../c/c-stl">C++ の STL</a></p>
 </blockquote>
-<h3 id="map-%E4%B8%AD%E4%BD%BF%E7%94%A8-at()-%E5%92%8C%E7%94%A8-operator%5B%5D-%E6%9C%89%E4%BB%80%E4%B9%88%E5%BC%82%E5%90%8C%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#map-中使用-at-和用-operator-有什么异同？">#</a>map 中使用 at() 和用 operator[] 有什么异同？</h3>
+<h3 id="map-中使用-at-和用-operator-有什么异同？"><a class="header-anchor" href="#map-中使用-at-和用-operator-有什么异同？">#</a>map 中使用 at() 和用 operator[] 有什么异同？</h3>
 <p>两者都是基于 key 去索引 value。区别在于，如果 key 不存在，前者会抛异常，后者不会，并且还会插入一个 item，以及调用 value 的默认构造函数。</p>
-<h3 id="static-%E5%85%B3%E9%94%AE%E5%AD%97%E7%9A%84%E7%94%A8%E6%B3%95%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#static-关键字的用法？">#</a>static 关键字的用法？</h3>
+<h3 id="static-关键字的用法？"><a class="header-anchor" href="#static-关键字的用法？">#</a>static 关键字的用法？</h3>
 <blockquote>
 <p>具体可参考 <a href="../../c/c-static">C++ の static</a></p>
 </blockquote>
-<h3 id="extern-%E5%85%B3%E9%94%AE%E5%AD%97%E7%9A%84%E7%94%A8%E6%B3%95%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#extern-关键字的用法？">#</a>extern 关键字的用法？</h3>
+<h3 id="extern-关键字的用法？"><a class="header-anchor" href="#extern-关键字的用法？">#</a>extern 关键字的用法？</h3>
 <p>第一种用法是为一个全局变量、函数或模板赋予**外部链接(external linkage)**属性，即编译器在某个 <code>.cpp</code> 文件中遇到一个声明为 <code>extern</code> 的变量或函数，就会试图去其他文件中寻找该符号的定义。</p>
 <p>第二种用法是以指定编译器(C or C++)来处理接下来这部分内容。因为 C++ 为了处理函数重载，会以与 C 函数不同的方式（函数名+参数名）进行符号命名，而 C 不会，因此会造成链接时无法找到对应函数的情况。所以如果要对编译器提示使用C的方式来处理函数的话，那么就要使用 <code>extern "C"</code> 来说明。</p>
-<h3 id="volatile-%E5%85%B3%E9%94%AE%E5%AD%97%E7%9A%84%E7%94%A8%E6%B3%95%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#volatile-关键字的用法？">#</a>volatile 关键字的用法？</h3>
+<h3 id="volatile-关键字的用法？"><a class="header-anchor" href="#volatile-关键字的用法？">#</a>volatile 关键字的用法？</h3>
 <p>用 <code>volatile</code> 声明的类型变量表示可以被某些编译器未知的因素更改，此时编译器就不会对其进行优化，从而总是从它所在的内存读取数据。</p>
 <blockquote>
 <p>一些可能的优化策略有：如果发现两次读变量（比如 <code>i</code>）的代码之间，没有对 <code>i</code> 进行过操作，那就会自动把第一次读的 <code>i</code> 值交给第二次的读取。尽管，在这期间内存中变量的值发生了变化。</p>
 <p>感觉有点像数据库的可重复读？而 volitale 反而是禁止了可重复读。</p>
 </blockquote>
-<h3 id="new-%E5%92%8C-malloc-%E7%9A%84%E5%8C%BA%E5%88%AB%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#new-和-malloc-的区别？">#</a>new 和 malloc 的区别？</h3>
+<h3 id="new-和-malloc-的区别？"><a class="header-anchor" href="#new-和-malloc-的区别？">#</a>new 和 malloc 的区别？</h3>
 <blockquote>
 <p>具体可参考 <a href="../../c/c-memory">C++11 の 内存分配</a></p>
 </blockquote>
 <p><code>new</code>: 操作符；支持传入类型/构造函数参数；会调用构造函数；直接返回对应类型的指针；用 <code>delete</code> 释放；分配失败时抛异常；</p>
 <p><code>malloc</code>: 函数；只能传入需要分配的字节数；不会调用构造函数；以 <code>void*</code> 形式返回已分配内存的首地址；用 <code>free</code> 释放；分配失败时返回空指针；</p>
-<h3 id="%E4%BF%A1%E5%8F%B7%E9%87%8F%E5%92%8C%E9%94%81%E7%9A%84%E5%8C%BA%E5%88%AB%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#信号量和锁的区别？">#</a>信号量和锁的区别？</h3>
+<h3 id="信号量和锁的区别？"><a class="header-anchor" href="#信号量和锁的区别？">#</a>信号量和锁的区别？</h3>
 <p>两者都用于多线程并发场景。</p>
 <p>锁通常用于互斥场景，即多个线程同时访问某一共享变量。</p>
 <p>信号量既可以用于互斥，也可以用于同步（生产者 &amp; 消费者问题）。可以认为锁是信号量计数值为 1 时候的特例。</p>
-<h3 id="%E4%BD%BF%E7%94%A8%E6%A8%A1%E6%9D%BF(template)%E7%9A%84%E4%BC%98%E7%BC%BA%E7%82%B9%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#使用模板-template-的优缺点？">#</a>使用模板(template)的优缺点？</h3>
+<h3 id="使用模板-template-的优缺点？"><a class="header-anchor" href="#使用模板-template-的优缺点？">#</a>使用模板(template)的优缺点？</h3>
 <p><strong>优点</strong>: 提升开发效率；减少编码时间。</p>
 <p><strong>缺点</strong>: 难以调试；声明和实现必须都放在同一个文件里，否则报 <code>undefined reference</code> 编译错误；拖慢编译时间。</p>
-<h3 id="%E5%86%85%E8%81%94%E5%87%BD%E6%95%B0%E5%92%8C%E6%99%AE%E9%80%9A%E5%87%BD%E6%95%B0%E7%9A%84%E5%8C%BA%E5%88%AB%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#内联函数和普通函数的区别？">#</a>内联函数和普通函数的区别？</h3>
+<h3 id="内联函数和普通函数的区别？"><a class="header-anchor" href="#内联函数和普通函数的区别？">#</a>内联函数和普通函数的区别？</h3>
 <blockquote>
 <p>具体可参考 <a href="../../c/c-inline">C++11 の 内联函数</a></p>
 </blockquote>
 <p>内联函数在编译期会被直接展开，减少了函数调用开销（参数压栈、地址跳转等）。</p>
-<h3 id="%E8%99%9A%E5%87%BD%E6%95%B0%E7%9A%84%E6%9C%BA%E5%88%B6%EF%BC%9F%E4%B8%80%E4%B8%AA%E7%B1%BB%E4%B8%AD%E5%8F%AF%E4%BB%A5%E6%8A%8A%E6%89%80%E6%9C%89%E5%87%BD%E6%95%B0%E8%AE%BE%E4%B8%BA%E8%99%9A%E5%87%BD%E6%95%B0%E5%90%97%EF%BC%9F%E5%A6%82%E6%9E%9C%E6%8A%8A%E9%99%A4%E4%BA%86%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E4%BB%A5%E5%A4%96%E7%9A%84%E5%87%BD%E6%95%B0%E8%AE%BE%E4%B8%BA%E8%99%9A%E5%87%BD%E6%95%B0%E4%BC%9A%E6%9C%89%E4%BB%80%E4%B9%88%E9%97%AE%E9%A2%98%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#虚函数的机制？一个类中可以把所有函数设为虚函数吗？如果把除了构造函数以外的函数设为虚函数会有什么问题？">#</a>虚函数的机制？一个类中可以把所有函数设为虚函数吗？如果把除了构造函数以外的函数设为虚函数会有什么问题？</h3>
+<h3 id="虚函数的机制？一个类中可以把所有函数设为虚函数吗？如果把除了构造函数以外的函数设为虚函数会有什么问题？"><a class="header-anchor" href="#虚函数的机制？一个类中可以把所有函数设为虚函数吗？如果把除了构造函数以外的函数设为虚函数会有什么问题？">#</a>虚函数的机制？一个类中可以把所有函数设为虚函数吗？如果把除了构造函数以外的函数设为虚函数会有什么问题？</h3>
 <blockquote>
 <p>具体可参考 <a href="../../c/c-oop">C++11 の 面向对象</a></p>
 </blockquote>
 <p>如果本类或父类中有虚函数，内存最开始就会有一个虚表指针，指向一个存放<strong>所有声明为虚函数的函数指针</strong>的数组。如果用基类指向派生类，并调用虚函数，就会去虚表中查，取出相应的函数指针并调用，从而实现多态。</p>
 <p>除了构造函数，其它的函数都能设为虚函数，并且析构函数必须设为虚函数。</p>
 <p>有些函数不需要实现多态特性，那么就没必要声明为虚函数。即便没有在子类中重写，也需要去虚表中查询，多了一次访存开销。</p>
-<h3 id="%E6%9E%90%E6%9E%84%E5%87%BD%E6%95%B0%E4%B8%AD%E8%83%BD%E8%B0%83%E7%94%A8%E8%99%9A%E5%87%BD%E6%95%B0%E5%90%97%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#析构函数中能调用虚函数吗？">#</a>析构函数中能调用虚函数吗？</h3>
+<h3 id="析构函数中能调用虚函数吗？"><a class="header-anchor" href="#析构函数中能调用虚函数吗？">#</a>析构函数中能调用虚函数吗？</h3>
 <blockquote>
 <p>具体可参考 <a href="../../note/effectivec-Note/%E7%BB%9D%E4%B8%8D%E5%9C%A8%E6%9E%84%E9%80%A0%E5%92%8C%E6%9E%90%E6%9E%84%E8%BF%87%E7%A8%8B%E4%B8%AD%E8%B0%83%E7%94%A8-virtual-%E5%87%BD%E6%95%B0">条款 9. 绝不在构造和析构过程中调用 virtual 函数</a></p>
 </blockquote>
@@ -513,28 +513,28 @@
 <p>对于第一种情况，在运行上由于虚函数表仍存在，自身的成员变量并没有释放，所以是没有问题的，调用的虚函数将会是派生类的版本。</p>
 <p>对于第二种情况，由于在调用基类的析构函数时，派生类已经析构，内存中只剩下基类部分，此时将<strong>不使用动态联编</strong>，也就是将当前对象视为基类对象，调用的虚函数将会是基类的版本而非派生类。不难发现，此时对虚函数的调用已经失去了多态性。</p>
 <p>总结来说就是语法和运行上都不会报错，只不过在基类的析构函数中中调用虚函数不会起到我们想要的效果。</p>
-<h3 id="rtti-%E4%BF%9D%E5%AD%98%E5%9C%A8%E5%93%AA%E9%87%8C%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#RTTI-保存在哪里？">#</a>RTTI 保存在哪里？</h3>
+<h3 id="RTTI-保存在哪里？"><a class="header-anchor" href="#RTTI-保存在哪里？">#</a>RTTI 保存在哪里？</h3>
 <blockquote>
 <p>具体可参考 <a href="../../c/c-oop/#%E8%99%9A%E7%BB%A7%E6%89%BF-1">C++11 の 面向对象</a></p>
 </blockquote>
 <p>在虚函数表的负值索引处，除了 <code>runtime typeinfo</code>，其实还会存虚继承的虚基类 <code>offset</code>。</p>
-<h3 id="%E7%AE%80%E5%8D%95%E4%BB%8B%E7%BB%8D%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88" tabindex="-1"><a class="header-anchor" href="#简单介绍智能指针">#</a>简单介绍智能指针</h3>
+<h3 id="简单介绍智能指针"><a class="header-anchor" href="#简单介绍智能指针">#</a>简单介绍智能指针</h3>
 <blockquote>
 <p>具体可参考 <a href="../../c/c-smartptr/">C++ の 智能指针</a></p>
 </blockquote>
-<h3 id="%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AA%E6%94%AF%E6%8C%81%E5%BC%95%E7%94%A8%E8%AE%A1%E6%95%B0%E7%9A%84%E7%B1%BB%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#如何实现一个支持引用计数的类？">#</a>如何实现一个支持引用计数的类？</h3>
+<h3 id="如何实现一个支持引用计数的类？"><a class="header-anchor" href="#如何实现一个支持引用计数的类？">#</a>如何实现一个支持引用计数的类？</h3>
 <blockquote>
 <p>具体可参考 <a href="../../c/c-smartptr#%E5%A6%82%E4%BD%95%E6%89%8B%E6%92%95%E4%B8%80%E4%B8%AA-shared-ptr">如何手撕智能指针</a></p>
 </blockquote>
 <p>基本思想是类内有一个 <code>Counter*</code> 指针指向计数器，每次拷贝时 <code>Counter</code> 内部计数值增加，析构时减少，为 0 时才释放资源。计数值可以采用 <code>std::atomic</code> 来实现无锁版本。</p>
-<h3 id="%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88%E7%9A%84%E4%BC%98%E7%BC%BA%E7%82%B9%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F%E6%88%96%E8%80%85%E8%AF%B4%E5%93%AA%E4%BA%9B%E6%83%85%E5%86%B5%E4%B8%8B%E9%9D%9E%E5%BE%97%E7%94%A8%E8%A3%B8%E6%8C%87%E9%92%88%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#智能指针的优缺点是什么？或者说哪些情况下非得用裸指针？">#</a>智能指针的优缺点是什么？或者说哪些情况下非得用裸指针？</h3>
+<h3 id="智能指针的优缺点是什么？或者说哪些情况下非得用裸指针？"><a class="header-anchor" href="#智能指针的优缺点是什么？或者说哪些情况下非得用裸指针？">#</a>智能指针的优缺点是什么？或者说哪些情况下非得用裸指针？</h3>
 <p>优点自然是利用 RAII 思想自动进行内存分配与释放，降低内存泄漏的可能性。</p>
 <p>（缺点我也是临时想的）在用 <code>dynamic_cast</code> 的时候不得不用裸指针了。</p>
 <blockquote>
 <p>但是也可以用 <code>dynamic_pointer_cast</code> 来解决，面试官没反驳我倒是。</p>
 <p>或者可以说 <code>shared_ptr</code> 存在循环引用问题，但可以用 <code>weak_ptr</code> 解决。暂时没想到好的回答，感觉像是上压力看看应对能力。</p>
 </blockquote>
-<h3 id="%E5%AF%B9%E4%B8%89%E7%A7%8D%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88%E5%88%86%E5%88%AB%E5%BA%94%E7%94%A8-sizeof%EF%BC%8C%E8%BE%93%E5%87%BA%E5%80%BC%E6%98%AF%E5%A4%9A%E5%B0%91%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#对三种智能指针分别应用-sizeof，输出值是多少？">#</a>对三种智能指针分别应用 sizeof，输出值是多少？</h3>
+<h3 id="对三种智能指针分别应用-sizeof，输出值是多少？"><a class="header-anchor" href="#对三种智能指针分别应用-sizeof，输出值是多少？">#</a>对三种智能指针分别应用 sizeof，输出值是多少？</h3>
 <p>直接上代码：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>sizeof(三种智能指针)</span></div><code class="language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;iostream&gt;</span></span>
 <span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;memory&gt;</span></span>
@@ -549,20 +549,20 @@
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>64 位机器下，上面的代码输出结果为 <code>8 16 16</code>，即 8B、16B、16B。</p>
 <p>分析：<code>unique_ptr</code> 只保有一个对象指针；<code>shared_ptr</code> 和 <code>weak_ptr</code> 都是除了对象指针还保有一个计数器指针（两者的计数器类型不同）。</p>
-<h3 id="%E9%87%8D%E8%BD%BD%E3%80%81%E9%87%8D%E5%86%99%E3%80%81%E8%A6%86%E7%9B%96%E4%B8%89%E8%80%85%E7%9A%84%E5%8C%BA%E5%88%AB%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#重载、重写、覆盖三者的区别？">#</a>重载、重写、覆盖三者的区别？</h3>
+<h3 id="重载、重写、覆盖三者的区别？"><a class="header-anchor" href="#重载、重写、覆盖三者的区别？">#</a>重载、重写、覆盖三者的区别？</h3>
 <p><strong>重载</strong>：在同一个作用域内，函数名相同但参数列表不同的多个函数，包括函数的参数类型、参数个数或参数顺序的不同。即<strong>静态多态</strong>。</p>
 <p><strong>重写</strong>：派生类重新定义基类中的虚函数，以便在运行时动态调用派生类的函数。即<strong>动态多态</strong>。</p>
 <p><strong>覆盖</strong>：派生类中声明了与基类相同名称的成员变量或方法，使得基类中的同名成员在子类中不可见。如果此时需要调用基类的同名方法，则需要使用 <code>Base::func()</code> 的形式（假设基类为 <code>Base</code>）。</p>
-<h3 id="%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AA%E7%BA%BF%E7%A8%8B%E6%B1%A0%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#如何实现一个线程池？">#</a>如何实现一个线程池？</h3>
+<h3 id="如何实现一个线程池？"><a class="header-anchor" href="#如何实现一个线程池？">#</a>如何实现一个线程池？</h3>
 <blockquote>
 <p>具体可参考 <a href="../../c/c-concurrent/#%E7%BA%BF%E7%A8%8B%E6%B1%A0thread-pool">并发应用 —— 线程池</a></p>
 </blockquote>
-<h2 id="%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F" tabindex="-1"><a class="header-anchor" href="#操作系统">#</a>操作系统</h2>
-<h3 id="%E8%BF%9B%E7%A8%8B%E5%92%8C%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%8C%BA%E5%88%AB%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#进程和线程的区别？">#</a>进程和线程的区别？</h3>
+<h2 id="操作系统"><a class="header-anchor" href="#操作系统">#</a>操作系统</h2>
+<h3 id="进程和线程的区别？"><a class="header-anchor" href="#进程和线程的区别？">#</a>进程和线程的区别？</h3>
 <p>进程: 资源分配的单位，拥有独立地址空间，切换时需修改页表基地址寄存器，清空 TLB 以及 CS、IP 等寄存器。新进程一开始访页时大概率会 cache miss，从而开销大。</p>
 <p>线程: 调度的单位，同一进程下所有线程共享地址空间，但线程之间拥有独立的程序计数器与栈空间，切换时仅需修改相关寄存器，无需修改页表，故开销小。另外，不同进程之间的线程切换也会涉及到进程切换，开销变大。</p>
 <p>本质区别在于<strong>是否和其它单位共享页表</strong>。</p>
-<h3 id="%E5%93%AA%E4%BA%9B%E6%83%85%E5%86%B5%E4%BC%9A%E5%AF%BC%E8%87%B4%E8%BF%9B%E7%A8%8B-crash%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#哪些情况会导致进程-crash？">#</a>哪些情况会导致进程 crash？</h3>
+<h3 id="哪些情况会导致进程-crash？"><a class="header-anchor" href="#哪些情况会导致进程-crash？">#</a>哪些情况会导致进程 crash？</h3>
 <p>主要是<strong>段错误</strong>，比如</p>
 <ol>
 <li class="lvl-3">
@@ -578,19 +578,19 @@
 <p>内存耗尽，比如栈溢出、内存泄漏等；</p>
 </li>
 </ol>
-<h3 id="%E7%94%A8%E6%88%B7%E7%BA%A7%E7%BA%BF%E7%A8%8B%E5%92%8C%E5%86%85%E6%A0%B8%E7%BA%A7%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%8C%BA%E5%88%AB%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#用户级线程和内核级线程的区别？">#</a>用户级线程和内核级线程的区别？</h3>
+<h3 id="用户级线程和内核级线程的区别？"><a class="header-anchor" href="#用户级线程和内核级线程的区别？">#</a>用户级线程和内核级线程的区别？</h3>
 <p>用户级线程，或者说协程，如 coroutine，由应用程序实现，调度在用户态完成，不需要内核介入，所以开销较小。缺点在于一旦一个用户及线程阻塞，那整个进程都将被阻塞。</p>
 <p>内核级线程，如 thread，由操作系统实现，调度也由操作系统完成，意味着对内核级线程的调度要从用户态陷入内核，开销较大。优点在于即使自我阻塞，整个进程也能正常运转。</p>
-<h3 id="%E5%88%87%E6%8D%A2%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4%E6%98%AF%E6%80%8E%E6%A0%B7%E5%AE%9E%E7%8E%B0%E7%9A%84%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#切换地址空间是怎样实现的？">#</a>切换地址空间是怎样实现的？</h3>
+<h3 id="切换地址空间是怎样实现的？"><a class="header-anchor" href="#切换地址空间是怎样实现的？">#</a>切换地址空间是怎样实现的？</h3>
 <p>修改页表基地址寄存器，以访问正确的页表；以及清空 TLB，防止进行错误的地址转换。当然如果 TLB 支持 ASID 就不用清空了。</p>
-<h3 id="%E8%99%9A%E6%8B%9F%E5%9C%B0%E5%9D%80%E5%92%8C%E7%89%A9%E7%90%86%E5%9C%B0%E5%9D%80%E5%8C%BA%E5%88%AB%EF%BC%9F%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E7%94%A8%E8%99%9A%E6%8B%9F%E5%9C%B0%E5%9D%80%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#虚拟地址和物理地址区别？为什么要用虚拟地址？">#</a>虚拟地址和物理地址区别？为什么要用虚拟地址？</h3>
+<h3 id="虚拟地址和物理地址区别？为什么要用虚拟地址？"><a class="header-anchor" href="#虚拟地址和物理地址区别？为什么要用虚拟地址？">#</a>虚拟地址和物理地址区别？为什么要用虚拟地址？</h3>
 <blockquote>
 <p>具体可参考 <a target="_blank" rel="noopener" href="https://www.xiaolincoding.com/os/3_memory/vmem.html#%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98">这篇文章</a>。</p>
 </blockquote>
 <p>物理地址是指实际存储在内存中的地址，它可以直接被硬件访问。物理地址是固定的，并且受到物理内存大小的限制。</p>
 <p>虚拟地址是指软件视图中的内存地址，它是逻辑地址，不受物理内存大小的限制。通常是连续的，因此程序员可以使用连续的虚拟地址，而不必考虑实际内存中的分布情况。</p>
 <p>如果只有物理地址，那么程序员编程时必须足够小心，以防使用了其它程序的地址，更不能访问内核空间。在页面置换时，也必须将其放到固定的位置。而引入了虚拟地址，就可以将编程与访存分离，将内存访问交给操作系统去实现（页表），进而实现进程空间隔离，保证了安全性。</p>
-<h3 id="%E8%BF%9B%E7%A8%8B%E8%AE%BF%E9%A1%B5%E8%BF%87%E7%A8%8B%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#进程访页过程？">#</a>进程访页过程？</h3>
+<h3 id="进程访页过程？"><a class="header-anchor" href="#进程访页过程？">#</a>进程访页过程？</h3>
 <p>以<strong>在支持二级页表的 32 位机器中取指令</strong>为例。</p>
 <p>首先进程根据当前 CS:IP 寄存器，进行指令地址的计算（CS&lt;&lt;4 + IP），从而获得相应代码段中的指令地址。注意这是一个虚拟地址，需要根据硬件转换为物理地址。</p>
 <p><strong>注意</strong>: 假设该虚拟地址的前 10 位 <code>PD_Index</code> 是页目录条目的索引，中间 10 位 <code>PT_Index</code> 是页表条目的索引，后 12 位是页内偏移 <code>Offset</code>。</p>
@@ -599,16 +599,16 @@
 <p>这里假设页目录项有效，那么我们得到了页表，用同样的方法，我们访问地址 <code>PT_Addr + 4*PT_Index</code> 可以得到 <code>PFN</code>，假设页表项仍然有效，那就赶紧更新 TLB 然后重新访问一遍。</p>
 <p>由于上次的插入，这次必定能获得物理地址，那么就可以愉快地访存了。</p>
 <p>如果页目录项/页表项无效，说明我们要访问的物理页帧并没有存放我们想要的数据（页表也占据了一整个物理页帧），那么此时此刻就要去磁盘上获取数据，然后根据一定的置换规则（如 LRU）进行换页。</p>
-<h3 id="%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E7%94%A8%E5%A4%9A%E7%BA%A7%E9%A1%B5%E8%A1%A8%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#为什么要用多级页表？">#</a>为什么要用多级页表？</h3>
+<h3 id="为什么要用多级页表？"><a class="header-anchor" href="#为什么要用多级页表？">#</a>为什么要用多级页表？</h3>
 <p>32 位机器下，如果一个页面为 4KB 并且采用单级页表，那就要整整 4MB 的连续空间，而且不一定这 2^20 个页面都得到分配，会有很大一部分页表项是浪费的。</p>
 <p>二级页表就不会有这种情况。假设前 10 位为页目录索引，中间 10 位为页表索引，如果某个页表所指向的 2^10 个页面都没得到分配，那么就不会为这个页表分配物理页帧，页目录中会将该页表的有效位设为 0。这样就大大节省了空间，还防止了无法分配过大连续内存的问题。</p>
-<h3 id="%E7%94%A8%E6%88%B7%E6%80%81%E5%92%8C%E5%86%85%E6%A0%B8%E6%80%81%E7%9A%84%E5%8C%BA%E5%88%AB%EF%BC%9F%E6%80%8E%E4%B9%88%E5%88%87%E6%8D%A2%EF%BC%9F%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E5%8C%BA%E5%88%86%E8%BF%99%E4%B8%A4%E4%B8%AA%E7%BA%A7%E5%88%AB%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#用户态和内核态的区别？怎么切换？为什么要区分这两个级别？">#</a>用户态和内核态的区别？怎么切换？为什么要区分这两个级别？</h3>
+<h3 id="用户态和内核态的区别？怎么切换？为什么要区分这两个级别？"><a class="header-anchor" href="#用户态和内核态的区别？怎么切换？为什么要区分这两个级别？">#</a>用户态和内核态的区别？怎么切换？为什么要区分这两个级别？</h3>
 <p>用户态和内核态是操作系统的两种运行级别，两者最大的区别就是特权级不同。用户态拥有最低的特权级，内核态拥有最高的特权级。运行在用户态的程序不能直接访问内核，例如不能使用系统调用。Due to the complexity of developing and maintaining the kernel, only the most essential and performance-critical code are placed in the kernel. Other things, such as GUI, management and control code, typically are programmed as user-space applications. This practice of splitting the implementation of certain features between kernel and user space is quite common in Linux.（引用自 <a target="_blank" rel="noopener" href="https://www.linuxjournal.com/article/7356">Linux Journal</a>）</p>
 <p>处于用户态的进程可以通过 1.请求系统调用 2.硬件中断 3.软件异常 等方式陷入内核态，然后再利用 ret 指令返回用户态。</p>
 <p>如果只有用户态，那就完全没法利用操作系统的内核功能；如果只有内核态，那所有进程都可以访问内核数据，甚至修改内核，不安全。</p>
-<h3 id="%E8%BF%9B%E7%A8%8B%E6%9C%89%E5%87%A0%E4%B8%AA%E6%A0%88%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#进程有几个栈？">#</a>进程有几个栈？</h3>
+<h3 id="进程有几个栈？"><a class="header-anchor" href="#进程有几个栈？">#</a>进程有几个栈？</h3>
 <p>两个。用户态一个，内核态一个。两个栈的数据不互通，也是为了安全性考虑。</p>
-<h3 id="%E6%89%A7%E8%A1%8C%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E7%9A%84%E8%BF%87%E7%A8%8B%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#执行系统调用的过程？">#</a>执行系统调用的过程？</h3>
+<h3 id="执行系统调用的过程？"><a class="header-anchor" href="#执行系统调用的过程？">#</a>执行系统调用的过程？</h3>
 <ol>
 <li class="lvl-3">
 <p>将系统调用号放到寄存器 EAX 中，执行 <code>int 0x80</code> 指令发出中断；</p>
@@ -629,20 +629,20 @@
 <p>执行 <code>itret</code> 指令返回用户态，取出内核栈中保存的用户进程信息，重新赋值给相关寄存器，至此系统调用完成；</p>
 </li>
 </ol>
-<h3 id="%E5%A0%86%E5%92%8C%E6%A0%88%E7%9A%84%E5%8C%BA%E5%88%AB%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#堆和栈的区别？">#</a>堆和栈的区别？</h3>
+<h3 id="堆和栈的区别？"><a class="header-anchor" href="#堆和栈的区别？">#</a>堆和栈的区别？</h3>
 <p>堆和栈是内存模型中的两片不同区域。</p>
 <p>堆存放程序员动态分配的数据，同时需要程序员手动释放，由低向高增长，空间较大。</p>
 <p>栈存放一般函数局部变量，一个函数调用对应一个栈帧，由操作系统自动管理栈空间的分配与释放，由高向低增长，空间较小，需要预防栈溢出的异常。</p>
-<h3 id="%E8%B0%83%E7%94%A8-malloc-%E5%88%86%E9%85%8D%E4%B8%80%E4%B8%AA-100b-%E5%A4%A7%E5%B0%8F%E7%9A%84%E7%A9%BA%E9%97%B4%EF%BC%8C%E5%86%85%E5%AD%98%E4%BC%9A%E5%8F%91%E7%94%9F%E6%80%8E%E6%A0%B7%E7%9A%84%E5%8F%98%E5%8C%96%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#调用-malloc-分配一个-100B-大小的空间，内存会发生怎样的变化？">#</a>调用 malloc 分配一个 100B 大小的空间，内存会发生怎样的变化？</h3>
+<h3 id="调用-malloc-分配一个-100B-大小的空间，内存会发生怎样的变化？"><a class="header-anchor" href="#调用-malloc-分配一个-100B-大小的空间，内存会发生怎样的变化？">#</a>调用 malloc 分配一个 100B 大小的空间，内存会发生怎样的变化？</h3>
 <p>事实上内存并不会发生变化。</p>
 <p>如果只调用了 <code>malloc()</code>，那么只会在该进程的虚拟地址空间中划分出 100B，新增一个页表项，设置 flag=0，表明未分配物理地址。</p>
 <p>等到实际访问这个虚拟地址时，会发现对应的物理地址并不存在，触发缺页中断，这个时候才会在堆上进行实际的内存分配(brk)，并再次修改那个页表项。后续的访问就能正常进行。</p>
-<h3 id="mmap-%E7%9A%84%E6%B5%81%E7%A8%8B%EF%BC%9F%E5%92%8C-read-%E7%9A%84%E5%8C%BA%E5%88%AB%EF%BC%9F%E6%98%AF%E9%9B%B6%E6%8B%B7%E8%B4%9D%E5%90%97%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#mmap-的流程？和-read-的区别？是零拷贝吗？">#</a>mmap 的流程？和 read 的区别？是零拷贝吗？</h3>
+<h3 id="mmap-的流程？和-read-的区别？是零拷贝吗？"><a class="header-anchor" href="#mmap-的流程？和-read-的区别？是零拷贝吗？">#</a>mmap 的流程？和 read 的区别？是零拷贝吗？</h3>
 <p>调用 <code>mmap()</code> 时，首先分配一片相应大小的虚拟地址，并在页表中添加相应页表项。</p>
 <p>当第一次访问该虚拟地址时，产生缺页中断，陷入内核，根据 <code>inode</code> 号将相应文件中的某一段通过 I/O 读入内核的 <strong>Page Cache</strong> 中（虽然叫 cache 但其实是在内存里的），然后通过修改用户态进程中页表的方式赋予用户态进程读写这段内存的权利。</p>
 <p>回到用户态后，此时进程就可以通过该页表项直接对文件内容进行读写了（如果是脏写还需要将 Page Cache 的内容刷回磁盘），而无需进行额外的内核态与用户态的数据拷贝操作，所以<strong>是</strong>零拷贝。</p>
 <p><code>read()</code> 则在 I/O 到内核缓冲区后还要拷贝到用户空间，写回时亦然。相比而言 <code>mmap()</code> 省去了不必要的拷贝操作，效率更高。</p>
-<h3 id="%E5%83%B5%E5%B0%B8%E8%BF%9B%E7%A8%8B%E3%80%81%E5%AD%A4%E5%84%BF%E8%BF%9B%E7%A8%8B%E5%88%86%E5%88%AB%E6%8C%87%E4%BB%80%E4%B9%88%EF%BC%9F%E5%A6%82%E4%BD%95%E5%A4%84%E7%90%86%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#僵尸进程、孤儿进程分别指什么？如何处理？">#</a>僵尸进程、孤儿进程分别指什么？如何处理？</h3>
+<h3 id="僵尸进程、孤儿进程分别指什么？如何处理？"><a class="header-anchor" href="#僵尸进程、孤儿进程分别指什么？如何处理？">#</a>僵尸进程、孤儿进程分别指什么？如何处理？</h3>
 <p>进程终止执行时，进程表中还会保留一段时间其进程控制块(PCB)，直至父进程执行 <code>wait()</code> 或 <code>waitpid()</code> 系统调用，这会<strong>阻塞</strong>父进程直至子进程结束，其间操作系统会释放子进程的 PCB。这是正常的父子进程管理流程。</p>
 <p>如果子进程比父进程先结束，父进程又没有执行 <code>wait()</code>/<code>waitpid()</code> 时，子进程的 PCB 将滞留在进程表中，无法得到释放，直至父进程结束。这就成了「<strong>僵尸进程</strong>」。</p>
 <p>而当父进程比子进程先结束时（意味着并没有执行 <code>wait()</code>/<code>waitpid()</code>），此时子进程会成为「<strong>孤儿进程</strong>」，并由 init 进程(pid=1)收养，管理子进程的结束行为。</p>
@@ -694,8 +694,8 @@
   <span class="token function">sleep</span><span class="token punctuation">(</span><span class="token number">5</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C" tabindex="-1"><a class="header-anchor" href="#计算机网络">#</a>计算机网络</h2>
-<h3 id="%E5%A6%82%E4%BD%95%E5%88%A4%E6%96%AD%E4%B8%80%E5%8F%B0%E6%9C%BA%E5%99%A8%E6%98%AF%E5%A4%A7%E7%AB%AF%E5%BA%8F%E8%BF%98%E6%98%AF%E5%B0%8F%E7%AB%AF%E5%BA%8F%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#如何判断一台机器是大端序还是小端序？">#</a>如何判断一台机器是大端序还是小端序？</h3>
+<h2 id="计算机网络"><a class="header-anchor" href="#计算机网络">#</a>计算机网络</h2>
+<h3 id="如何判断一台机器是大端序还是小端序？"><a class="header-anchor" href="#如何判断一台机器是大端序还是小端序？">#</a>如何判断一台机器是大端序还是小端序？</h3>
 <p>简单的代码示例</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>判断是否为小端序</span></div><code class="language-cpp"><span class="token keyword">bool</span> <span class="token function">isSmallEndian</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
   <span class="token keyword">int</span> num <span class="token operator">=</span> <span class="token number">0x1234</span><span class="token punctuation">;</span>
@@ -705,9 +705,9 @@
 <blockquote>
 <p>如果内存中第一个字节是 0x12 则说明是大端序</p>
 </blockquote>
-<h3 id="%E8%AF%B4%E4%B8%80%E4%B8%8B%E4%BA%94%E5%B1%82%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%EF%BC%8C%E5%B9%B6%E4%B8%94%E6%8C%87%E5%87%BA-tcp-%E5%A4%84%E4%BA%8E%E5%93%AA%E4%B8%80%E5%B1%82%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#说一下五层网络模型，并且指出-TCP-处于哪一层？">#</a>说一下五层网络模型，并且指出 TCP 处于哪一层？</h3>
+<h3 id="说一下五层网络模型，并且指出-TCP-处于哪一层？"><a class="header-anchor" href="#说一下五层网络模型，并且指出-TCP-处于哪一层？">#</a>说一下五层网络模型，并且指出 TCP 处于哪一层？</h3>
 <p>应用层，传输层，网络层，数据链路层，物理层。TCP 位于传输层。</p>
-<h3 id="tcp-%E5%92%8C-udp-%E7%9A%84%E5%8C%BA%E5%88%AB%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#TCP-和-UDP-的区别？">#</a>TCP 和 UDP 的区别？</h3>
+<h3 id="TCP-和-UDP-的区别？"><a class="header-anchor" href="#TCP-和-UDP-的区别？">#</a>TCP 和 UDP 的区别？</h3>
 <p><strong>TCP</strong></p>
 <ul class="lvl-0">
 <li class="lvl-2">
@@ -735,16 +735,16 @@
 <p>一个 UDP 对应一个用户消息，即便乱序到达，接收方也可以区分消息边界；</p>
 </li>
 </ul>
-<h3 id="%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A7%86%E9%A2%91%E5%8F%AF%E4%BB%A5%E7%94%A8-udp%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#为什么视频可以用-UDP？">#</a>为什么视频可以用 UDP？</h3>
+<h3 id="为什么视频可以用-UDP？"><a class="header-anchor" href="#为什么视频可以用-UDP？">#</a>为什么视频可以用 UDP？</h3>
 <p>因为即使丢包也可以用<strong>插值算法补帧</strong>，允许这种不可靠，同时更要追求视频的实时性。</p>
-<h3 id="%E7%82%B9%E5%87%BB-url-%E5%88%B0%E6%98%BE%E7%A4%BA%E7%BD%91%E9%A1%B5%E4%B9%8B%E9%97%B4%E5%8F%91%E7%94%9F%E4%BA%86%E4%BB%80%E4%B9%88%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#点击-url-到显示网页之间发生了什么？">#</a>点击 url 到显示网页之间发生了什么？</h3>
+<h3 id="点击-url-到显示网页之间发生了什么？"><a class="header-anchor" href="#点击-url-到显示网页之间发生了什么？">#</a>点击 url 到显示网页之间发生了什么？</h3>
 <blockquote>
 <p>具体可参考 <a href="../../computer-network/whathappenedafterclickurl">点击 Url 到显示网页之间发生了什么？</a></p>
 </blockquote>
-<h3 id="tcp-%E5%92%8C-udp-%E9%83%BD%E6%98%AF%E6%80%8E%E4%B9%88%E5%A4%84%E7%90%86%E6%95%B0%E6%8D%AE%E9%87%8F%E8%BE%83%E5%A4%A7%E7%9A%84%E5%8C%85%E7%9A%84%EF%BC%88%E5%A6%82-5kb%EF%BC%89%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#TCP-和-UDP-都是怎么处理数据量较大的包的（如-5KB）？">#</a>TCP 和 UDP 都是怎么处理数据量较大的包的（如 5KB）？</h3>
+<h3 id="TCP-和-UDP-都是怎么处理数据量较大的包的（如-5KB）？"><a class="header-anchor" href="#TCP-和-UDP-都是怎么处理数据量较大的包的（如-5KB）？">#</a>TCP 和 UDP 都是怎么处理数据量较大的包的（如 5KB）？</h3>
 <p>因为以太网 MTU=1500MB 的缘故，IP 层会将过大的包进行分片，处理方式为在头部设置<strong>标识位</strong>与<strong>片偏移</strong>。TCP 和 UDP 都不负责分片工作，而是将其交付给下一层去做。</p>
 <p>特别的，IP 首部的长度字段为 16 位，意味着同一个分片组最大可以容纳 64KB 的 TCP/UDP 数据，那对 TCP/UDP 而言 5KB 简直是小意思，不会分片。而如果超过 64 KB，那就要分成多个 TCP/UDP 包发送了。</p>
-<h3 id="%E5%A6%82%E6%9E%9C%E5%BA%94%E7%94%A8%E5%B1%82%E5%9F%BA%E4%BA%8E-tcp-%E5%8F%91%E9%80%81%E4%BA%86%E4%B8%A4%E4%B8%AA%E5%88%86%E5%88%AB%E4%B8%BA-100b-%E5%92%8C-200b-%E5%A4%A7%E5%B0%8F%E7%9A%84%E6%95%B0%E6%8D%AE%E5%8C%85%EF%BC%8C%E6%8E%A5%E6%94%B6%E6%96%B9%E5%8F%AF%E8%83%BD%E7%9A%84%E6%83%85%E5%86%B5%E6%9C%89%E5%93%AA%E4%BA%9B%EF%BC%9F%E6%8D%A2%E6%88%90-udp-%E5%91%A2%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#如果应用层基于-TCP-发送了两个分别为-100B-和-200B-大小的数据包，接收方可能的情况有哪些？换成-UDP-呢？">#</a>如果应用层基于 TCP 发送了两个分别为 100B 和 200B 大小的数据包，接收方可能的情况有哪些？换成 UDP 呢？</h3>
+<h3 id="如果应用层基于-TCP-发送了两个分别为-100B-和-200B-大小的数据包，接收方可能的情况有哪些？换成-UDP-呢？"><a class="header-anchor" href="#如果应用层基于-TCP-发送了两个分别为-100B-和-200B-大小的数据包，接收方可能的情况有哪些？换成-UDP-呢？">#</a>如果应用层基于 TCP 发送了两个分别为 100B 和 200B 大小的数据包，接收方可能的情况有哪些？换成 UDP 呢？</h3>
 <p>理想情况下，接收方会先收到 100B 的包（记为 <strong>「包1」</strong>），再收到 200B 的包（记为 <strong>「包2」</strong>）。</p>
 <p>非理想情况下:</p>
 <ol>
@@ -764,14 +764,14 @@
 <p>对于粘包情况，UDP Header 指明了数据长度，一个 UDP 包就是一个用户消息，所以即便「包1」和「包2」同时到达，UDP 也能正确分清数据的边界，不会产生粘包现象；</p>
 </li>
 </ol>
-<h3 id="select%2Fpoll%2Fepoll-%E7%9A%84%E5%8C%BA%E5%88%AB" tabindex="-1"><a class="header-anchor" href="#select-poll-epoll-的区别">#</a>select/poll/epoll 的区别</h3>
+<h3 id="select-poll-epoll-的区别"><a class="header-anchor" href="#select-poll-epoll-的区别">#</a>select/poll/epoll 的区别</h3>
 <blockquote>
 <p>具体可参考 <a target="_blank" rel="noopener" href="https://www.xiaolincoding.com/os/8_network_system/selete_poll_epoll.html#_9-2-i-o-%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8-select-poll-epoll">这篇文章</a>。</p>
 </blockquote>
-<h3 id="%E7%BD%91%E7%BB%9C%E5%B1%82%E5%A6%82%E4%BD%95%E8%BD%AC%E5%8F%91%E6%95%B0%E6%8D%AE%E5%8C%85%EF%BC%9F%E8%B7%AF%E7%94%B1%E5%99%A8%E6%98%AF%E5%A6%82%E4%BD%95%E8%BF%9B%E8%A1%8C%E8%87%AA%E5%AD%A6%E4%B9%A0%E7%9A%84%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#网络层如何转发数据包？路由器是如何进行自学习的？">#</a>网络层如何转发数据包？路由器是如何进行自学习的？</h3>
+<h3 id="网络层如何转发数据包？路由器是如何进行自学习的？"><a class="header-anchor" href="#网络层如何转发数据包？路由器是如何进行自学习的？">#</a>网络层如何转发数据包？路由器是如何进行自学习的？</h3>
 <p>交换机根据源 MAC 地址建立转发表，根据目的 MAC 地址转发，如果目的 MAC 地址不在，就发一个 ARP 广播请求来获取。</p>
 <p>路由器根据目的 IP 地址进行将数据包由特定端口发出。对于静态路由而言，转发表需管理员手动配置；而动态路由则会根据路由协议（如 RIP）定时与其他路由器交换路由信息，从而建立转发表。</p>
-<h3 id="http-%E5%92%8C-https-%E7%9A%84%E5%8C%BA%E5%88%AB" tabindex="-1"><a class="header-anchor" href="#HTTP-和-HTTPS-的区别">#</a>HTTP 和 HTTPS 的区别</h3>
+<h3 id="HTTP-和-HTTPS-的区别"><a class="header-anchor" href="#HTTP-和-HTTPS-的区别">#</a>HTTP 和 HTTPS 的区别</h3>
 <ol>
 <li class="lvl-3">
 <p>HTTP 协议的数据传输是<strong>明文</strong>的，是不安全的；HTTPS 是 HTTP 协议的安全版本，使用了 SSL/TLS 协议进行了加密处理，相对更安全；</p>
@@ -786,7 +786,7 @@
 </blockquote>
 </li>
 </ol>
-<h3 id="%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E4%BD%BF%E7%94%A8%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#为什么要使用三次握手？">#</a>为什么要使用三次握手？</h3>
+<h3 id="为什么要使用三次握手？"><a class="header-anchor" href="#为什么要使用三次握手？">#</a>为什么要使用三次握手？</h3>
 <blockquote>
 <p>具体可参考 <a href="../../computer-network/tcpthings/#%E4%B8%BA%E4%BB%80%E4%B9%88%E6%8F%A1%E6%89%8B%E6%98%AF%E4%B8%89%E6%AC%A1%E8%80%8C%E4%B8%8D%E6%98%AF%E4%B8%A4%E6%AC%A1%E5%9B%9B%E6%AC%A1">TCP Things</a>，其实还有一些其他的作用。</p>
 </blockquote>
@@ -798,27 +798,27 @@
 <p>使发送方确认拥塞窗口，控制发送速率；</p>
 </li>
 </ol>
-<h3 id="%E4%B8%BA%E4%BB%80%E4%B9%88-timewait-%E8%A6%81%E7%AD%89-2msl" tabindex="-1"><a class="header-anchor" href="#为什么-TIMEWAIT-要等-2MSL">#</a>为什么 TIMEWAIT 要等 2MSL</h3>
+<h3 id="为什么-TIMEWAIT-要等-2MSL"><a class="header-anchor" href="#为什么-TIMEWAIT-要等-2MSL">#</a>为什么 TIMEWAIT 要等 2MSL</h3>
 <blockquote>
 <p>具体可参考 <a href="../../computer-network/tcpthings/#%E4%B8%BA%E4%BB%80%E4%B9%88-time-wait-%E8%A6%81%E7%AD%89-2msl">TCP Things</a>。</p>
 </blockquote>
-<h2 id="%E6%95%B0%E6%8D%AE%E5%BA%93%E7%B3%BB%E7%BB%9F" tabindex="-1"><a class="header-anchor" href="#数据库系统">#</a>数据库系统</h2>
-<h3 id="%E8%AF%B4%E4%B8%8B-acid-%E5%88%86%E5%88%AB%E4%BB%A3%E8%A1%A8%E4%BB%80%E4%B9%88%E6%84%8F%E6%80%9D%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#说下-ACID-分别代表什么意思？">#</a>说下 ACID 分别代表什么意思？</h3>
+<h2 id="数据库系统"><a class="header-anchor" href="#数据库系统">#</a>数据库系统</h2>
+<h3 id="说下-ACID-分别代表什么意思？"><a class="header-anchor" href="#说下-ACID-分别代表什么意思？">#</a>说下 ACID 分别代表什么意思？</h3>
 <p>A: Atomic 原子性</p>
 <p>C: Consistency 一致性</p>
 <p>I: Isolation 隔离性</p>
 <p>D: Durability 持久性</p>
-<h3 id="%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB%E5%88%86%E5%88%AB%E6%9C%89%E5%93%AA%E4%BA%9B%EF%BC%9F%E5%88%86%E5%88%AB%E8%A7%A3%E5%86%B3%E4%BA%86%E4%BB%80%E4%B9%88%E9%97%AE%E9%A2%98%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#事务隔离级别分别有哪些？分别解决了什么问题？">#</a>事务隔离级别分别有哪些？分别解决了什么问题？</h3>
+<h3 id="事务隔离级别分别有哪些？分别解决了什么问题？"><a class="header-anchor" href="#事务隔离级别分别有哪些？分别解决了什么问题？">#</a>事务隔离级别分别有哪些？分别解决了什么问题？</h3>
 <p><strong>读未提交</strong>: 这种隔离级别不加任何锁，有可能读事务 reader 读取到了写事务 writer 写入数据库但未提交的数据。这就是<strong>脏读</strong>。</p>
 <p><strong>读提交</strong>: 这种隔离级别上了写锁，但同一事务 reader 对同一个键的前后两次读取之间可能会因为穿插了另一事务 writer 的写入，从而读取到了不一样的数据。这就是<strong>不可重复读</strong>。</p>
 <p><strong>可重复读</strong>: 这种隔离级别下，对某个键的读取开始后不再允许任何写入，因而不会出现不可重复读，前后两次读结果必定相同。但在某些场景比如 <code>select * from table; insert values {k1, v1} into table;</code> 中，两个语句之间由于另一事务也插入了 <code>{k1, v1}</code> 这一键值对，导致 <code>insert</code> 失败，原因是键冲突，但 <code>select</code> 时并没有看到这一条数据。这就是<strong>幻读</strong>。</p>
 <p><strong>可序列化</strong>: 这种隔离级别下，事务串行化顺序执行，可以避免脏读、不可重复读与幻读。但是这种事务隔离级别效率低下，比较耗数据库性能，一般不使用。</p>
-<h3 id="b-%E6%A0%91%E3%80%81b%2B-%E6%A0%91%E3%80%81%E7%BA%A2%E9%BB%91%E6%A0%91%E7%9A%84%E5%8C%BA%E5%88%AB%EF%BC%9F%E4%B8%BA%E4%BB%80%E4%B9%88%E7%B4%A2%E5%BC%95%E4%B8%AD%E4%BD%BF%E7%94%A8-b%2B-%E6%A0%91%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#B-树、B-树、红黑树的区别？为什么索引中使用-B-树？">#</a>B 树、B+ 树、红黑树的区别？为什么索引中使用 B+ 树？</h3>
+<h3 id="B-树、B-树、红黑树的区别？为什么索引中使用-B-树？"><a class="header-anchor" href="#B-树、B-树、红黑树的区别？为什么索引中使用-B-树？">#</a>B 树、B+ 树、红黑树的区别？为什么索引中使用 B+ 树？</h3>
 <p><strong>B Tree</strong>: 内部节点存数据，从而可存储的用于索引子节点的指针数变少，整棵树趋于高瘦；查询效率不稳定（时快时慢），并且不支持范围查询。</p>
 <p><strong>B+ Tree</strong>: 内部节点仅存索引指针，数据仅由叶子节点存放，整棵树趋于矮胖，能够减少 I/O 次数，有利于提高查找性能；查询效率稳定（都去叶子节点上查），并且支持范围查询（叶子节点之间之间相当于双向链表）。</p>
 <p><strong>红黑树</strong>: 属于平衡二叉树，节点分红/黑两种，保证不存在任意两个红色节点相邻，并且根到叶的最长路径不超过最短路径的两倍，查找为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>log</mi><mo>⁡</mo><mi>N</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(\log N)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="mclose">)</span></span></span></span>，增删都只需要常数次自旋。</p>
 <p>索引用 B+ 树主要还是因为其能够大幅减少磁盘 I/O 次数，并且支持范围查询。</p>
-<h3 id="%E9%99%A4%E4%BA%86-b%2B-%E6%A0%91%EF%BC%8C%E8%BF%98%E6%9C%89%E5%93%AA%E4%BA%9B%E7%94%A8%E4%BA%8E%E7%B4%A2%E5%BC%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#除了-B-树，还有哪些用于索引的数据结构？">#</a>除了 B+ 树，还有哪些用于索引的数据结构？</h3>
+<h3 id="除了-B-树，还有哪些用于索引的数据结构？"><a class="header-anchor" href="#除了-B-树，还有哪些用于索引的数据结构？">#</a>除了 B+ 树，还有哪些用于索引的数据结构？</h3>
 <ol>
 <li class="lvl-3">
 <p><strong>Hash 索引</strong>：使用哈希函数将索引键映射到实际数据的存储位置。这种索引结构通常能够提供非常快速的数据查找，特别是对于等值查询（即精确匹配）而言。缺点是<strong>不</strong>支持范围查询，且存在潜在的<strong>哈希冲突</strong>；</p>
@@ -830,15 +830,15 @@
 <p>…</p>
 </li>
 </ol>
-<h3 id="%E6%97%B6%E5%BA%8F%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E7%89%B9%E7%82%B9%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F%E5%92%8C%E5%9C%A8%E5%85%B3%E7%B3%BB%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%AD%E6%8A%8A-timestamp-%E4%BD%9C%E4%B8%BA%E4%B8%BB%E9%94%AE%E6%9C%89%E4%BB%80%E4%B9%88%E5%8C%BA%E5%88%AB%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#时序数据库的特点是什么？和在关系型数据库中把-Timestamp-作为主键有什么区别？">#</a>时序数据库的特点是什么？和在关系型数据库中把 Timestamp 作为主键有什么区别？</h3>
+<h3 id="时序数据库的特点是什么？和在关系型数据库中把-Timestamp-作为主键有什么区别？"><a class="header-anchor" href="#时序数据库的特点是什么？和在关系型数据库中把-Timestamp-作为主键有什么区别？">#</a>时序数据库的特点是什么？和在关系型数据库中把 Timestamp 作为主键有什么区别？</h3>
 <p>时序数据库(TSDB)的关键特点在于<strong>数据按时间顺序到达</strong>和<strong>时间戳为主键</strong>，专注于时间序列数据的存储和管理，支持按时间范围处理数据。由于数据更新频繁，TSDB 需要更高的性能，处理引擎必须是 Online 的，常用于实时监控与报警场景。可以认为时序数据库是为特定 Workload 做出的定向优化。</p>
 <p>而普通的关系型数据库则更偏向对数据进行离线分析，无法满足 TSDB 的使用场景。</p>
-<h2 id="%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F" tabindex="-1"><a class="header-anchor" href="#分布式系统">#</a>分布式系统</h2>
-<h3 id="%E7%AE%80%E5%8D%95%E4%BB%8B%E7%BB%8D%E4%B8%80%E4%B8%8B-raft-%E7%AE%97%E6%B3%95%E7%9A%84%E5%AE%9E%E7%8E%B0" tabindex="-1"><a class="header-anchor" href="#简单介绍一下-Raft-算法的实现">#</a>简单介绍一下 Raft 算法的实现</h3>
+<h2 id="分布式系统"><a class="header-anchor" href="#分布式系统">#</a>分布式系统</h2>
+<h3 id="简单介绍一下-Raft-算法的实现"><a class="header-anchor" href="#简单介绍一下-Raft-算法的实现">#</a>简单介绍一下 Raft 算法的实现</h3>
 <p>主要是基于「<strong>过半原则</strong>」的「<strong>选举</strong>」和「<strong>日志</strong>」两大模块。</p>
 <p><strong>选举</strong>：每个节点有选举定时器，仅当收到 <code>Leader</code> 的 heartbeat/appendEntry 请求，或满足条件（当前 Term 没给其它成员投过票，且投票请求中包含的日志更新）的投票请求时重置。一旦超时，则增加 Term，成为 <code>Candidate</code> 并发起选举，向其他成员发送投票请求。如果超过半数成员（包括自己）同意投票，则当选 <code>Leader</code>，反之退为 <code>Follower</code>。</p>
 <p><strong>日志</strong>：上层会给 <code>Leader</code> 推送请求，打包为日志后检查是否有其他成员需要发送日志（通过 next 变量），如果有就从 <code>Index=next[peer]</code> 处开始发送，其间会有冲突检查，一旦对方接收成功就更新 match 变量。当某一 Index 的日志被超过半数成员持有（通过 match 变量），则认为这条日志的状态是 <code>COMMITTED</code>，<code>Leader</code> 需要在与 <code>Follower</code> 的交互中告知有哪些日志是 <code>COMMITTED</code>。所有成员定期将所有 <code>COMMITTED</code> 的日志推给上层，然后将这些日志的状态改为 <code>APPLIED</code>。在这基础上还引入了 snapshot，用于内存优化。</p>
-<h3 id="%E5%A6%82%E4%BD%95%E6%8F%90%E9%AB%98%E4%B8%80%E4%B8%AA%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%86%99%E6%80%A7%E8%83%BD" tabindex="-1"><a class="header-anchor" href="#如何提高一个分布式系统的写性能">#</a>如何提高一个分布式系统的写性能</h3>
+<h3 id="如何提高一个分布式系统的写性能"><a class="header-anchor" href="#如何提高一个分布式系统的写性能">#</a>如何提高一个分布式系统的写性能</h3>
 <blockquote>
 <p>算是一个开放性问题，可以从多种角度去回答</p>
 </blockquote>
@@ -856,17 +856,17 @@
 <p>…</p>
 </li>
 </ol>
-<h2 id="%E6%B8%B8%E6%88%8F%E5%9C%BA%E6%99%AF" tabindex="-1"><a class="header-anchor" href="#游戏场景">#</a>游戏场景</h2>
-<h3 id="%E7%8E%A9%E5%AE%B6%E6%94%BB%E5%87%BB%EF%BC%8C%E5%A6%82%E4%BD%95%E5%88%A4%E6%96%AD%E6%AD%A6%E5%99%A8%E6%89%93%E5%88%B0%E6%80%AA%E7%89%A9%EF%BC%9F%E5%A6%82%E6%9E%9C%E6%AD%A6%E5%99%A8%E9%80%9F%E5%BA%A6%E8%BF%87%E5%BF%AB%EF%BC%8C%E5%89%8D%E5%90%8E%E4%B8%A4%E5%B8%A7%E6%81%B0%E5%A5%BD%E5%9C%A8%E6%80%AA%E7%89%A9%E4%B8%A4%E4%BE%A7%EF%BC%8C%E5%A6%82%E4%BD%95%E5%A4%84%E7%90%86%E8%BF%99%E7%A7%8D%E5%BC%82%E5%B8%B8%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#玩家攻击，如何判断武器打到怪物？如果武器速度过快，前后两帧恰好在怪物两侧，如何处理这种异常？">#</a>玩家攻击，如何判断武器打到怪物？如果武器速度过快，前后两帧恰好在怪物两侧，如何处理这种异常？</h3>
+<h2 id="游戏场景"><a class="header-anchor" href="#游戏场景">#</a>游戏场景</h2>
+<h3 id="玩家攻击，如何判断武器打到怪物？如果武器速度过快，前后两帧恰好在怪物两侧，如何处理这种异常？"><a class="header-anchor" href="#玩家攻击，如何判断武器打到怪物？如果武器速度过快，前后两帧恰好在怪物两侧，如何处理这种异常？">#</a>玩家攻击，如何判断武器打到怪物？如果武器速度过快，前后两帧恰好在怪物两侧，如何处理这种异常？</h3>
 <p>第一个问题是<a target="_blank" rel="noopener" href="https://www.cnblogs.com/xiangshancuizhu/p/3679004.html"><strong>三维空间碰撞检测</strong></a>。</p>
 <p>第二个问题涉及到<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/380532960"><strong>连续碰撞检测</strong></a>。</p>
-<h3 id="%E7%BB%99%E5%AE%9A%E8%8B%A5%E5%B9%B2%E6%80%AA%E7%89%A9%E7%9A%84%E4%BA%8C%E7%BB%B4%E5%9D%90%E6%A0%87-(x%2C-y)%EF%BC%8C%E5%A6%82%E4%BD%95%E7%A1%AE%E5%AE%9A%E7%A6%BB%E7%8E%A9%E5%AE%B6%E6%9C%80%E8%BF%91%E7%9A%84%E9%82%A3%E4%B8%AA%E6%80%AA%E7%89%A9%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#给定若干怪物的二维坐标-x-y-，如何确定离玩家最近的那个怪物？">#</a>给定若干怪物的二维坐标 (x, y)，如何确定离玩家最近的那个怪物？</h3>
+<h3 id="给定若干怪物的二维坐标-x-y-，如何确定离玩家最近的那个怪物？"><a class="header-anchor" href="#给定若干怪物的二维坐标-x-y-，如何确定离玩家最近的那个怪物？">#</a>给定若干怪物的二维坐标 (x, y)，如何确定离玩家最近的那个怪物？</h3>
 <p>用到了<a target="_blank" rel="noopener" href="https://songlinlife.github.io/2022/%E6%95%B0%E6%8D%AE%E5%BA%93/%E6%A0%91%E6%9F%A5%E8%AF%A2%E7%AE%97%E6%B3%95/"><strong>最近邻检索算法</strong></a>。</p>
-<h3 id="%E7%BB%99%E5%AE%9A%E8%8B%A5%E5%B9%B2%E6%80%AA%E7%89%A9%E7%9A%84%E4%BA%8C%E7%BB%B4%E5%9D%90%E6%A0%87-(x%2C-y)%EF%BC%8C%E9%80%89%E6%8B%A9%E5%93%AA%E4%B8%AA%E5%9D%90%E6%A0%87%E9%87%8A%E6%94%BE%E5%8D%8A%E5%BE%84%E4%B8%BA-r-%E7%9A%84%E5%9C%86%E5%BD%A2%E8%8C%83%E5%9B%B4-aoe%EF%BC%8C%E4%BD%BF%E5%BE%97%E6%94%BB%E5%87%BB%E5%88%B0%E7%9A%84%E6%80%AA%E7%89%A9%E6%9C%80%E5%A4%9A%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#给定若干怪物的二维坐标-x-y-，选择哪个坐标释放半径为-r-的圆形范围-aoe，使得攻击到的怪物最多？">#</a>给定若干怪物的二维坐标 (x, y)，选择哪个坐标释放半径为 r 的圆形范围 aoe，使得攻击到的怪物最多？</h3>
+<h3 id="给定若干怪物的二维坐标-x-y-，选择哪个坐标释放半径为-r-的圆形范围-aoe，使得攻击到的怪物最多？"><a class="header-anchor" href="#给定若干怪物的二维坐标-x-y-，选择哪个坐标释放半径为-r-的圆形范围-aoe，使得攻击到的怪物最多？">#</a>给定若干怪物的二维坐标 (x, y)，选择哪个坐标释放半径为 r 的圆形范围 aoe，使得攻击到的怪物最多？</h3>
 <p>是<a target="_blank" rel="noopener" href="https://www.cnblogs.com/zExNocs/p/16995282.html"><strong>固定半径圆最大覆盖问题</strong></a>。</p>
-<h3 id="%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AA%E9%AB%98%E6%95%88%E7%9A%84-timer-manager" tabindex="-1"><a class="header-anchor" href="#如何实现一个高效的-Timer-Manager">#</a>如何实现一个高效的 Timer Manager</h3>
+<h3 id="如何实现一个高效的-Timer-Manager"><a class="header-anchor" href="#如何实现一个高效的-Timer-Manager">#</a>如何实现一个高效的 Timer Manager</h3>
 <p>参考<a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/2356003"><strong>时间轮算法</strong></a></p>
-<h3 id="%E7%8E%B0%E5%9C%A8%E8%A6%81%E8%AE%BE%E8%AE%A1%E4%B8%80%E4%B8%AA%E6%96%B0%E6%89%8B%E5%BC%95%E5%AF%BC%E5%85%B3%EF%BC%8C%E6%9C%89%E8%8B%A5%E5%B9%B2%E6%96%B0%E6%89%8B%E5%BC%95%E5%AF%BC%E7%82%B9%EF%BC%8C%E5%A6%82%E4%BD%95%E5%AF%B9%E3%80%8C%E6%9F%90%E4%B8%AA%E7%8E%A9%E5%AE%B6%E6%98%AF%E5%90%A6%E5%AE%8C%E6%88%90%E6%9F%90%E4%B8%AA%E5%BC%95%E5%AF%BC%E7%82%B9%E3%80%8D%E8%BF%9B%E8%A1%8C%E5%BF%AB%E9%80%9F%E5%AD%98%E5%8F%96%EF%BC%9F%E8%A6%81%E6%B1%82%E5%B0%BD%E5%8F%AF%E8%83%BD%E7%B2%BE%E7%AE%80%E5%86%85%E5%AD%98%EF%BC%8C%E5%B9%B6%E5%8F%AF%E4%BB%A5%E8%AE%A4%E4%B8%BA%E3%80%8C%E5%BC%95%E5%AF%BC%E7%82%B9%E3%80%8D%E7%94%B1%E4%B8%80%E4%B8%AA%E6%95%B4%E6%95%B0-id-%E8%A1%A8%E7%A4%BA%E3%80%82" tabindex="-1"><a class="header-anchor" href="#现在要设计一个新手引导关，有若干新手引导点，如何对「某个玩家是否完成某个引导点」进行快速存取？要求尽可能精简内存，并可以认为「引导点」由一个整数-id-表示。">#</a>现在要设计一个新手引导关，有若干新手引导点，如何对「某个玩家是否完成某个引导点」进行快速存取？要求尽可能精简内存，并可以认为「引导点」由一个整数 id 表示。</h3>
+<h3 id="现在要设计一个新手引导关，有若干新手引导点，如何对「某个玩家是否完成某个引导点」进行快速存取？要求尽可能精简内存，并可以认为「引导点」由一个整数-id-表示。"><a class="header-anchor" href="#现在要设计一个新手引导关，有若干新手引导点，如何对「某个玩家是否完成某个引导点」进行快速存取？要求尽可能精简内存，并可以认为「引导点」由一个整数-id-表示。">#</a>现在要设计一个新手引导关，有若干新手引导点，如何对「某个玩家是否完成某个引导点」进行快速存取？要求尽可能精简内存，并可以认为「引导点」由一个整数 id 表示。</h3>
 <p>第一步是引导点 id 的设计。</p>
 <p>一开始说认为新手引导是单线的，可以直接用一个从 0 开始递增的无符号数来表示，面试官提出可能有多条线，因为不同功能模块可能都需要设计引导。</p>
 <p>然后说可以将 id 划分为高低位，高位表示模块类型，低位表示该模块的引导点序号，但是考虑到最后是用数组做的，可以在从 0 开始递增的基础上，为不同模块设置一个 BEGIN 和 END（比如战斗模块的 BEGIN 和 END 分别是 3 和 7，那么 id 3~7 就对应战斗模块的引导点 1~5）。</p>
@@ -876,8 +876,8 @@
 <blockquote>
 <p>但是后面要求不能用<strong>循环、迭代、递归、模板元编程、额外成员变量</strong>，就没回答上了。</p>
 </blockquote>
-<h2 id="ue" tabindex="-1"><a class="header-anchor" href="#UE">#</a>UE</h2>
-<h3 id="aactor-%2F-apawn-%2F-acharacter-%E4%B8%89%E8%80%85%E7%9A%84%E5%8C%BA%E5%88%AB%E4%B8%8E%E8%81%94%E7%B3%BB%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#AActor-APawn-ACharacter-三者的区别与联系？">#</a>AActor / APawn / ACharacter 三者的区别与联系？</h3>
+<h2 id="UE"><a class="header-anchor" href="#UE">#</a>UE</h2>
+<h3 id="AActor-APawn-ACharacter-三者的区别与联系？"><a class="header-anchor" href="#AActor-APawn-ACharacter-三者的区别与联系？">#</a>AActor / APawn / ACharacter 三者的区别与联系？</h3>
 <blockquote>
 <p>类派生关系为 AActor -&gt; APawn -&gt; ACharacter</p>
 </blockquote>
@@ -887,7 +887,7 @@
 <blockquote>
 <p>那么，当对象逻辑简单、不需要过多的逻辑动作（比如方块、飞船）那么可以选择继承 Pawn 而不是继承 Character 类。</p>
 </blockquote>
-<h3 id="ucharactermovementcomponent-%E5%81%9A%E4%BA%86%E5%93%AA%E4%BA%9B%E4%BA%8B%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#UCharacterMovementComponent-做了哪些事？">#</a>UCharacterMovementComponent 做了哪些事？</h3>
+<h3 id="UCharacterMovementComponent-做了哪些事？"><a class="header-anchor" href="#UCharacterMovementComponent-做了哪些事？">#</a>UCharacterMovementComponent 做了哪些事？</h3>
 <p>先看官方注释：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token comment">/**
  * CharacterMovementComponent handles movement logic for the associated Character owner.
@@ -898,15 +898,15 @@
  *
  * Networking is fully implemented, with server-client correction and prediction included.
  */</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="fname-%2F-ftext-%2F-fstring-%E7%9A%84%E5%8C%BA%E5%88%AB%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#FName-FText-FString-的区别？">#</a>FName / FText / FString 的区别？</h3>
+<h3 id="FName-FText-FString-的区别？"><a class="header-anchor" href="#FName-FText-FString-的区别？">#</a>FName / FText / FString 的区别？</h3>
 <p>见 <a href="../../unreal/uetext">UE 字符串处理</a></p>
-<h3 id="uskeletalmesh-%2F-uskeletalmeshcomponent-%2F-askeletalmeshactor-%E4%B8%89%E8%80%85%E7%9A%84%E5%8C%BA%E5%88%AB%E4%B8%8E%E8%81%94%E7%B3%BB%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#USkeletalMesh-USkeletalMeshComponent-ASkeletalMeshActor-三者的区别与联系？">#</a>USkeletalMesh / USkeletalMeshComponent / ASkeletalMeshActor 三者的区别与联系？</h3>
-<h3 id="ue-%E7%9A%84%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#UE-的垃圾回收机制？">#</a>UE 的垃圾回收机制？</h3>
-<h2 id="lua" tabindex="-1"><a class="header-anchor" href="#Lua">#</a>Lua</h2>
-<h3 id="lua-%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%EF%BC%9F%E4%B8%8D%E7%94%A8-metatable-%E5%91%A2%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#Lua-如何实现面向对象？不用-metatable-呢？">#</a>Lua 如何实现面向对象？不用 metatable 呢？</h3>
-<h3 id="lua-%E7%9A%84%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6%EF%BC%9F%E4%B8%BA%E4%BB%80%E4%B9%88%E5%81%9A%E5%90%8E%E7%BB%AD%E4%BC%98%E5%8C%96%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#Lua-的垃圾回收机制？为什么做后续优化？">#</a>Lua 的垃圾回收机制？为什么做后续优化？</h3>
-<h3 id="lua-%E8%99%9A%E6%8B%9F%E6%A0%88%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#Lua-虚拟栈是什么？">#</a>Lua 虚拟栈是什么？</h3>
-<h3 id="lua-%E5%92%8C-c-%E4%B9%8B%E9%97%B4%E5%A6%82%E4%BD%95%E4%BA%92%E7%9B%B8%E8%B0%83%E7%94%A8%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#Lua-和-C-之间如何互相调用？">#</a>Lua 和 C 之间如何互相调用？</h3>
+<h3 id="USkeletalMesh-USkeletalMeshComponent-ASkeletalMeshActor-三者的区别与联系？"><a class="header-anchor" href="#USkeletalMesh-USkeletalMeshComponent-ASkeletalMeshActor-三者的区别与联系？">#</a>USkeletalMesh / USkeletalMeshComponent / ASkeletalMeshActor 三者的区别与联系？</h3>
+<h3 id="UE-的垃圾回收机制？"><a class="header-anchor" href="#UE-的垃圾回收机制？">#</a>UE 的垃圾回收机制？</h3>
+<h2 id="Lua"><a class="header-anchor" href="#Lua">#</a>Lua</h2>
+<h3 id="Lua-如何实现面向对象？不用-metatable-呢？"><a class="header-anchor" href="#Lua-如何实现面向对象？不用-metatable-呢？">#</a>Lua 如何实现面向对象？不用 metatable 呢？</h3>
+<h3 id="Lua-的垃圾回收机制？为什么做后续优化？"><a class="header-anchor" href="#Lua-的垃圾回收机制？为什么做后续优化？">#</a>Lua 的垃圾回收机制？为什么做后续优化？</h3>
+<h3 id="Lua-虚拟栈是什么？"><a class="header-anchor" href="#Lua-虚拟栈是什么？">#</a>Lua 虚拟栈是什么？</h3>
+<h3 id="Lua-和-C-之间如何互相调用？"><a class="header-anchor" href="#Lua-和-C-之间如何互相调用？">#</a>Lua 和 C 之间如何互相调用？</h3>
 
                 
             </div>
@@ -1086,12 +1086,6 @@
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -1100,8 +1094,8 @@
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -1117,41 +1111,6 @@
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

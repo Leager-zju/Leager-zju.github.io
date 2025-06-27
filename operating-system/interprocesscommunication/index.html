@@ -325,7 +325,7 @@
             <div id="articleContent">
                 <p>为了保护操作系统中进程互不干扰，需要使用进程隔离技术，以防不同进程能够修改其他进程数据。但进程之间又不能完全隔离，需要一定的通信手段，于是开发出了**进程间通信(IPC, InterProcess Communication)**技术。</p>
 <span id="more"></span>
-<h2 id="%E7%AE%A1%E9%81%93(pipe)" tabindex="-1"><a class="header-anchor" href="#管道-Pipe">#</a>管道(Pipe)</h2>
+<h2 id="管道-Pipe"><a class="header-anchor" href="#管道-Pipe">#</a>管道(Pipe)</h2>
 <p>管道是最基本的通信机制，实质是一个半双工的通信方式，即数据只能单向流通，每次从头读取，向尾写入，并且遵循 <strong>FIFO(First In First Out)</strong> 原则，以<strong>字节流</strong>的方式进行传输，就仿佛一个单向队列。并且管道双方必须均处于「在线」状态，一旦一方退出，另一方也自动断开。</p>
 <blockquote>
 <p>如果双方相互通信时，则需要建立两个管道。</p>
@@ -334,7 +334,7 @@
 <blockquote>
 <p>「<strong>名</strong>」指的就是路径名啦。</p>
 </blockquote>
-<h3 id="%E5%8C%BF%E5%90%8D%E7%AE%A1%E9%81%93" tabindex="-1"><a class="header-anchor" href="#匿名管道">#</a>匿名管道</h3>
+<h3 id="匿名管道"><a class="header-anchor" href="#匿名管道">#</a>匿名管道</h3>
 <p>Linux 中可以通过函数 <code>int pipe(int fd[2])</code> 建立匿名管道，其中 <code>fd[0]</code> 为读取端，<code>fd[1]</code> 为写入端，两个都是<strong>文件描述符</strong>，从而可以用 <code>read()/write()</code> 系统调用进行数据传输。比如下面这段代码：</p>
 <pre class="line-numbers language-C" data-language="C"><div class="caption"><span>匿名管道</span></div><code class="language-C">#include &lt;stdio.h&gt;
 #include &lt;unistd.h&gt;
@@ -378,7 +378,7 @@ int main() {
 <p>毕竟调用 <code>fork()</code> 会进行一次完整的拷贝操作，也就会复制该 <code>fd[]</code>。</p>
 </blockquote>
 <p>同样，一旦进程销毁，该管道也随之被销毁。也就是说，匿名管道的<strong>生命周期完全由进程决定</strong>。</p>
-<h3 id="%E5%91%BD%E5%90%8D%E7%AE%A1%E9%81%93" tabindex="-1"><a class="header-anchor" href="#命名管道">#</a>命名管道</h3>
+<h3 id="命名管道"><a class="header-anchor" href="#命名管道">#</a>命名管道</h3>
 <p>那么为了实现跨进程通信，不如就把上文中的缓冲区改为实际的文件，令其位于文件系统中，这样一来只要知道该<strong>管道文件</strong>的路径，就可以在任何进程之间进行通信了。</p>
 <p>Linux 中可以通过函数 <code>int mkfifo(const char *path, mode_t mode)</code> 建立命名管道，其中 <code>path</code> 指明文件路径，<code>mode</code> 指明管道文件的存取权限。比如下面这段代码：</p>
 <pre class="line-numbers language-C" data-language="C"><div class="caption"><span>命名管道 - server.c</span></div><code class="language-C">#include &lt;stdio.h&gt;
@@ -435,7 +435,7 @@ int main() {
   return 0;
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>服务端利用系统函数 <code>mkfifo()</code> 创建一个名为 <code>file.tmp</code> 的文件作为管道并写入。客户端同样也能打开该文件进行读取。而它们却是无关进程。</p>
-<h2 id="%E4%BF%A1%E5%8F%B7(signal)" tabindex="-1"><a class="header-anchor" href="#信号-Signal">#</a>信号(Signal)</h2>
+<h2 id="信号-Signal"><a class="header-anchor" href="#信号-Signal">#</a>信号(Signal)</h2>
 <p>信号是一种软中断，采用异步通信方式，内核可以利用信号来通知用户进程发生了哪些系统事件，一般源于<strong>硬件方式</strong>（用户按下 <code>Ctrl+C</code> 键）或<strong>软件方式</strong>（系统调用产生信号）</p>
 <p>Linux 中共定义了 64 种信号，分为以下两种：</p>
 <ol>
@@ -446,7 +446,7 @@ int main() {
 <p><strong>可靠信号</strong>：支持排队，信号不会丢失，发多少次，就可以收到多少次，信号值取值区间为 32~64；</p>
 </li>
 </ol>
-<h3 id="%E5%B8%B8%E8%A7%81%E4%BF%A1%E5%8F%B7" tabindex="-1"><a class="header-anchor" href="#常见信号">#</a>常见信号</h3>
+<h3 id="常见信号"><a class="header-anchor" href="#常见信号">#</a>常见信号</h3>
 <table>
 <thead>
 <tr>
@@ -493,7 +493,7 @@ int main() {
 </tr>
 </tbody>
 </table>
-<h3 id="linux-%E4%BF%A1%E5%8F%B7%E7%9B%B8%E5%85%B3%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84" tabindex="-1"><a class="header-anchor" href="#Linux-信号相关数据结构">#</a>Linux 信号相关数据结构</h3>
+<h3 id="Linux-信号相关数据结构"><a class="header-anchor" href="#Linux-信号相关数据结构">#</a>Linux 信号相关数据结构</h3>
 <p>Linux 在进程管理结构 <code>task_struct</code> 中定义了信号相关的变量。</p>
 <pre class="line-numbers language-C" data-language="C"><div class="caption"><span>task_struct 定义</span></div><code class="language-C">struct task_struct {
   ...
@@ -534,7 +534,7 @@ struct sigpending {
   struct sigqueue *head, **tail;
   sigset_t signal;
 };<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="%E4%BF%A1%E5%8F%B7%E5%8F%91%E9%80%81%E6%B5%81%E7%A8%8B" tabindex="-1"><a class="header-anchor" href="#信号发送流程">#</a>信号发送流程</h3>
+<h3 id="信号发送流程"><a class="header-anchor" href="#信号发送流程">#</a>信号发送流程</h3>
 <p>以 <code>kill()</code> 为例，其函数原型为 <code>int kill(pid_t pid, int sig)</code>。</p>
 <p>当源进程(src)调用 <code>kill()</code> 打算将目标进程(dst)给杀掉时，该系统调用会进一步调用内核函数 <code>sys_kill()</code>：</p>
 <pre class="line-numbers language-C" data-language="C"><code class="language-C">asmlinkage long
@@ -644,7 +644,7 @@ out_nolock:
   return ret;
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>至此，发送信号的流程已完成。</p>
-<h3 id="%E4%BF%A1%E5%8F%B7%E5%A4%84%E7%90%86%E6%B5%81%E7%A8%8B" tabindex="-1"><a class="header-anchor" href="#信号处理流程">#</a>信号处理流程</h3>
+<h3 id="信号处理流程"><a class="header-anchor" href="#信号处理流程">#</a>信号处理流程</h3>
 <p>此时此刻信号已经发送给目标进程，为了尽快让信号得到处理，Linux 把信号处理过程放置在进程<strong>从内核态返回到用户态前</strong>，也就是操作系统决定调度目标进程的时候，然后检查 <code>sigpending</code> 是否为 1，若是，就调用 <code>do_signal()</code> 函数进行处理。</p>
 <pre class="line-numbers language-C" data-language="C"><code class="language-C">int do_signal(struct pt_regs *regs, sigset_t *oldset)
 {
@@ -728,14 +728,14 @@ out_nolock:
 <blockquote>
 <p>值得注意的是，用户定义的处理方法代码位于用户态，而在运行这段系统函数期间 CPU 还处于内核态，只能先返回用户态执行用户态代码，再回到内核态做后续工作。所以信号处理的开销还是蛮大的。</p>
 </blockquote>
-<h3 id="%E6%80%BB%E7%BB%93" tabindex="-1"><a class="header-anchor" href="#总结">#</a>总结</h3>
+<h3 id="总结"><a class="header-anchor" href="#总结">#</a>总结</h3>
 <p>发送进程通过 <code>sys_*()</code> 系统调用，将信号信息打包放到目标进程的 <code>task_struct</code> 中，下次操作系统调度进程时，检查这个进程是否有待处理的信号，如果有则先进行信号处理，之后在回到用户态继续执行之前的指令。</p>
-<h2 id="%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97(msg-queue)" tabindex="-1"><a class="header-anchor" href="#消息队列-Msg-Queue">#</a>消息队列(Msg Queue)</h2>
+<h2 id="消息队列-Msg-Queue"><a class="header-anchor" href="#消息队列-Msg-Queue">#</a>消息队列(Msg Queue)</h2>
 <p>管道的一个劣势在于，数据都是以字节流进行传输，没有格式一说，这就要求管道的读取方和写入方必须事先约定好数据的格式与长度，比如多少字节算作一个消息/命令/记录等等。</p>
 <p>为了打破这一限制，诞生了消息队列。其本质上是内核中的链表，每个节点是一个具有<strong>特定格式</strong>的消息，和 C++ 中的 <code>std::list&lt;Message&gt;</code> 很像。不同的队列以不同的**队列标识符(qid)**来区分，只有内核重启或显式删除后相关队列才会被移除。</p>
 <p>和管道相同之处在于，如果管道/队列存放的数据/消息满了，写会被阻塞，读同理。</p>
 <p>不同之处在于，虽然写都是写到末尾，但是消息队列可以根据消息字段<strong>随机读取</strong>，而不一定要从队首。并且，消息队列允许多个进程对其读写。</p>
-<h3 id="%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%BD%BF%E7%94%A8" tabindex="-1"><a class="header-anchor" href="#消息队列使用">#</a>消息队列使用</h3>
+<h3 id="消息队列使用"><a class="header-anchor" href="#消息队列使用">#</a>消息队列使用</h3>
 <pre class="line-numbers language-C" data-language="C"><div class="caption"><span>消息队列 - writer.c</span></div><code class="language-C">#include &lt;stdio.h&gt;
 #include &lt;stdlib.h&gt;
 #include &lt;string.h&gt;
@@ -801,7 +801,7 @@ int main() {
 
   return 0;
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98(shared-memory)" tabindex="-1"><a class="header-anchor" href="#共享内存-Shared-Memory">#</a>共享内存(Shared Memory)</h2>
+<h2 id="共享内存-Shared-Memory"><a class="header-anchor" href="#共享内存-Shared-Memory">#</a>共享内存(Shared Memory)</h2>
 <p>共享内存是指将同一片内存映射到多个进程的虚拟地址空间，进程就可以直接读写这一块内存而不需要进行数据的拷贝，从而大大提高效率。</p>
 <p>当然，建立共享内存的过程无需进行数据复制，直接在内存中操作，是最快的可用通信机制。然而还需要一些信号量提供同步/互斥手段，否则会出现一致性的问题。</p>
 <blockquote>
@@ -819,7 +819,7 @@ int main() {
 <p>POSIX 共享内存；</p>
 </li>
 </ol>
-<h3 id="mmap-%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98" tabindex="-1"><a class="header-anchor" href="#mmap-共享内存">#</a>mmap 共享内存</h3>
+<h3 id="mmap-共享内存"><a class="header-anchor" href="#mmap-共享内存">#</a>mmap 共享内存</h3>
 <p>mmap 本来的是存储映射功能。它可以将一个文件映射到内存中，在程序里就可以直接使用内存地址对文件内容进行访问，这可以让程序对文件访问更方便。</p>
 <pre class="line-numbers language-C" data-language="C"><div class="caption"><span>mmap api</span></div><code class="language-C">#include &lt;sys/mman.h&gt;
 
@@ -888,7 +888,7 @@ int main() {
   munmap(shm_p, sizeof(int));
   exit(0);
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="xsi-%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98" tabindex="-1"><a class="header-anchor" href="#XSI-共享内存">#</a>XSI 共享内存</h3>
+<h3 id="XSI-共享内存"><a class="header-anchor" href="#XSI-共享内存">#</a>XSI 共享内存</h3>
 <p>mmap 实现共享内存的方式需要 <code>fork()</code> 配合，只能支持相关进程。XSI 采取更为通用的手段，能够支持无关进程。</p>
 <pre class="line-numbers language-C" data-language="C"><div class="caption"><span>XSI api</span></div><code class="language-C">#include &lt;sys/ipc.h&gt;
 #include &lt;sys/shm.h&gt;
@@ -1031,9 +1031,9 @@ int main() {
 
   exit(0);
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="posix-%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98" tabindex="-1"><a class="header-anchor" href="#POSIX-共享内存">#</a>POSIX 共享内存</h3>
+<h3 id="POSIX-共享内存"><a class="header-anchor" href="#POSIX-共享内存">#</a>POSIX 共享内存</h3>
 <p>POSIX 共享内存本质上就是在 <code>/dev/shm</code> 上创建一个文件，并将其 mmap 之后映射其内存地址。</p>
-<h2 id="%E5%A5%97%E6%8E%A5%E5%AD%97(socket)" tabindex="-1"><a class="header-anchor" href="#套接字-Socket">#</a>套接字(Socket)</h2>
+<h2 id="套接字-Socket"><a class="header-anchor" href="#套接字-Socket">#</a>套接字(Socket)</h2>
 
                 
             </div>
@@ -1213,12 +1213,6 @@ int main() {
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -1227,8 +1221,8 @@ int main() {
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -1244,41 +1238,6 @@ int main() {
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

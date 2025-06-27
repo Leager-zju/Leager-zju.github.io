@@ -326,11 +326,11 @@
             <div id="articleContent">
                 <p>CS144 lab 记录过程。</p>
 <span id="more"></span>
-<h2 id="%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE" tabindex="-1"><a class="header-anchor" href="#环境配置">#</a>环境配置</h2>
+<h2 id="环境配置"><a class="header-anchor" href="#环境配置">#</a>环境配置</h2>
 <p>本课程所有 lab 均需要在 Linux 环境下运行，课程组提供了 4 种运行方式，直接照着 <a target="_blank" rel="noopener" href="https://stanford.edu/class/cs144/vm_howto/">Instructions</a> 来就好了。我这里因为实验室自带 Ubuntu 工作站，所以用了第三种方式，按照清单一个个 <code>sudo apt-get install</code> 下来就完事了。</p>
-<h2 id="lab0-networking-warmup" tabindex="-1"><a class="header-anchor" href="#lab0-Networking-Warmup">#</a>lab0 Networking Warmup</h2>
+<h2 id="lab0-Networking-Warmup"><a class="header-anchor" href="#lab0-Networking-Warmup">#</a>lab0 Networking Warmup</h2>
 <p>之前有用 http 访问某网站并获取文本、用 smtp 发邮件的一些小操作，跟着走一遍基本没啥问题，就是熟悉一下基本的命令。现在要真正上手敲 C++ 了。</p>
-<h3 id="%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C" tabindex="-1"><a class="header-anchor" href="#准备工作">#</a>准备工作</h3>
+<h3 id="准备工作"><a class="header-anchor" href="#准备工作">#</a>准备工作</h3>
 <p>首先是把代码拉下来，我先在自己的 github 下<a target="_blank" rel="noopener" href="https://github.com/new">新建</a>了一个仓库，命名为 <strong>CS144</strong>，为了尊重课程协议，我设为了 <code>private</code>。拉代码就直接 <code>git clone --bare https://github.com/CS144/sponge.git</code>，后面所有的 lab 都是在这一套文件下实现的。</p>
 <p>随后，执行</p>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token builtin class-name">cd</span> your_repository_name
@@ -342,7 +342,7 @@ $ <span class="token function">git</span> clone https://github.com/your_github_n
 <span class="token comment">## If you pull / push over SSH</span>
 $ <span class="token function">git</span> clone git@github.com:your_github_name/your_repository_name.git<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>可以输入 <code>git remote -v</code> 查看本地与远程是否对应。ok，现在可以将所有更改 push 到自己的代码仓库里了。</p>
-<h3 id="coding" tabindex="-1"><a class="header-anchor" href="#coding">#</a>coding</h3>
+<h3 id="coding"><a class="header-anchor" href="#coding">#</a>coding</h3>
 <blockquote>
 <p>课程 lab 代码仓库一共有 8 个分支，每个 lab 前都需要 <code>git merge lab?-startercode</code> 来合并分支。</p>
 </blockquote>
@@ -386,7 +386,7 @@ Test project <span class="token punctuation">..</span>./CS144/build
 
 Total Test <span class="token function">time</span> <span class="token punctuation">(</span>real<span class="token punctuation">)</span> <span class="token operator">=</span>   <span class="token number">6.05</span> sec
 <span class="token punctuation">[</span><span class="token number">100</span>%<span class="token punctuation">]</span> Built target check_webget<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="an-in-memory-reliable-byte-stream" tabindex="-1"><a class="header-anchor" href="#An-in-memory-reliable-byte-stream">#</a>An in-memory reliable byte stream</h3>
+<h3 id="An-in-memory-reliable-byte-stream"><a class="header-anchor" href="#An-in-memory-reliable-byte-stream">#</a>An in-memory reliable byte stream</h3>
 <p>lab0 的最后一个任务是实现一个处理字节流的有限容量 buffer，writer 负责将字节流写入 buffer 中，reader 从中读取。文件位于 <code>libsponge/byte_stream.cc</code> 以及 <code>libsponge/byte_stream.hh</code>。</p>
 <p>writer 的工作很简单，写数据(write)、终止写入(end_input)以及获取 buffer 剩余容量(remaining_capacity)，需要注意的是如果写入的数据大小超过了剩余容量，则应尽可能写入，比如剩余容量 3 的情况下要写 <code>"abcdefg"</code>，则只写入 <code>"abc"</code>。</p>
 <p>reader 有三种输出方式，只读(peek_output)，只写(pop_output)以及读写(read_output)，注意后两种方法都意味着增加<strong>已读取的字节数</strong>。</p>
@@ -422,7 +422,7 @@ Test project <span class="token punctuation">..</span>./CS144/build
 
 Total Test <span class="token function">time</span> <span class="token punctuation">(</span>real<span class="token punctuation">)</span> <span class="token operator">=</span>   <span class="token number">3.86</span> sec
 <span class="token punctuation">[</span><span class="token number">100</span>%<span class="token punctuation">]</span> Built target check_lab0<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="lab1-stream-reassembler" tabindex="-1"><a class="header-anchor" href="#lab1-Stream-Reassembler">#</a>lab1 Stream Reassembler</h2>
+<h2 id="lab1-Stream-Reassembler"><a class="header-anchor" href="#lab1-Stream-Reassembler">#</a>lab1 Stream Reassembler</h2>
 <p>本 lab 要求在 lab0 的基础上实现一个字节流整合器。</p>
 <img src="1.png" style="zoom:67%;">
 <p>lab1 ~ lab4 均围绕此图进行。在 lab0 中，我们实现了有序字节流，而事实上真实的网络并不会按顺序向我们发送数据包，我们需要利用一个整合器将收到的无序字节流片段以正确顺序拼接并写到 <code>ByteStream</code> 中。数据包以 <code>{data, index}</code> 的形式被接收，其中 <code>data</code> 为 <code>std::string</code>，<code>index</code> 为 <code>data</code> 作为子串在原始字节流中的下标，如</p>
@@ -437,7 +437,7 @@ Total Test <span class="token function">time</span> <span class="token punctuati
 <p>即 <code>ByteStream</code> 中未读取的部分加上 <code>Reassembler</code> 中无序的部分大小不能超过 <code>capacity</code>。</p>
 </blockquote>
 <p>一些注意事项都写在 FAQ 里了：</p>
-<h3 id="%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E8%AE%BE%E8%AE%A1" tabindex="-1"><a class="header-anchor" href="#数据结构设计">#</a>数据结构设计</h3>
+<h3 id="数据结构设计"><a class="header-anchor" href="#数据结构设计">#</a>数据结构设计</h3>
 <p>本来想用 <code>std::vector&lt;char&gt;</code> 模拟循环队列的，但实际操作起来发现开销奇高，后来决定用 <code>std::map&lt;uint32_t, std::string&gt;</code> 的索引表的方式，记录每个字符串及其索引，并做好去重工作。每次收到一个 <code>{index, data}</code> 对时，遍历索引表，如果有重复的部分，则修改 <code>data</code> 的有效字节区间，并进行适当插入。完成插入操作后，不断判断 <code>table.find(next_index)</code> 是否有效，若有效则删除条目并将对应字符串拼接至返回结果末尾。</p>
 <blockquote>
 <p>有点像 <code>map reduce</code>，然后我的函数签名就是 map 和 reduce 了。</p>
@@ -524,17 +524,17 @@ Test project <span class="token punctuation">..</span>./CS144/build
 
 Total Test <span class="token function">time</span> <span class="token punctuation">(</span>real<span class="token punctuation">)</span> <span class="token operator">=</span>   <span class="token number">1.77</span> sec
 <span class="token punctuation">[</span><span class="token number">100</span>%<span class="token punctuation">]</span> Built target check_lab1<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="lab2-tcp-receiver" tabindex="-1"><a class="header-anchor" href="#lab2-TCP-Receiver">#</a>lab2 TCP Receiver</h2>
+<h2 id="lab2-TCP-Receiver"><a class="header-anchor" href="#lab2-TCP-Receiver">#</a>lab2 TCP Receiver</h2>
 <p>本 lab 需要实现 TCP 协议的接收端。</p>
 <p>此时接受端收到的就是 <code>{TCP Header, IP Datagram}</code> 组成的报文段(TCP segment)了，该数据结构定义在 <code>/libsponge/tcp_helpers/tcp_segment.hh</code> 中，其中首部(TCP header)字段定义在 <code>/libsponge/tcp_helpers/tcp_header.hh</code> 中。</p>
-<h3 id="task-1%3A-translate-between-64-bit-indexes-and-32-bit-seqnos" tabindex="-1"><a class="header-anchor" href="#Task-1-Translate-between-64-bit-indexes-and-32-bit-seqnos">#</a>Task 1: Translate between 64-bit indexes and 32-bit seqnos</h3>
+<h3 id="Task-1-Translate-between-64-bit-indexes-and-32-bit-seqnos"><a class="header-anchor" href="#Task-1-Translate-between-64-bit-indexes-and-32-bit-seqnos">#</a>Task 1: Translate between 64-bit indexes and 32-bit seqnos</h3>
 <p>第一个任务是编写用于 <code>seqno</code> 与 <code>absolute seqno</code> 互相转换的 <code>wrap()</code> 与 <code>unwrap()</code> 函数。guide 中其实已经说的比较详细了。</p>
 <img src="3.png" style="zoom:67%;">
-<h4 id="wrap(n%2C-isn)" tabindex="-1"><a class="header-anchor" href="#wrap-n-isn">#</a>wrap(n, isn)</h4>
+<h4 id="wrap-n-isn"><a class="header-anchor" href="#wrap-n-isn">#</a>wrap(n, isn)</h4>
 <p>给定 <code>isn</code> 和绝对序列号 <code>n</code>，求相应的序列号，易得</p>
 <p>seqno = (isn + n\ \&amp;\ \text{uint32_max})\ \%\ \text{uint32_max}
 </p>
-<h4 id="unwrap(n%2C-isn%2C-checkpoint)" tabindex="-1"><a class="header-anchor" href="#unwrap-n-isn-checkpoint">#</a>unwrap(n, isn, checkpoint)</h4>
+<h4 id="unwrap-n-isn-checkpoint"><a class="header-anchor" href="#unwrap-n-isn-checkpoint">#</a>unwrap(n, isn, checkpoint)</h4>
 <p>给定序列号 <code>n</code> 和 <code>isn</code>，以及用于消除多义性的检查点 <code>checkpoint</code>，求距离 <code>checkpoint</code> 最近的绝对序列号。显然，最后的结果应该为</p>
 <p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>a</mi><mi>b</mi><mi>s</mi><mi mathvariant="normal">_</mi><mi>s</mi><mi>e</mi><mi>q</mi><mi>n</mi><mi>o</mi><mo>=</mo><mi>n</mi><mo>−</mo><mi>i</mi><mi>s</mi><mi>n</mi><mo>+</mo><mi>i</mi><mo>×</mo><mi>o</mi><mi>f</mi><mi>f</mi><mi>s</mi><mi>e</mi><mi>t</mi><mo separator="true">,</mo><mspace width="1em"></mspace><mi>o</mi><mi>f</mi><mi>f</mi><mi>s</mi><mi>e</mi><mi>t</mi><mo>=</mo><msup><mn>2</mn><mn>32</mn></msup><mo separator="true">,</mo><mtext>&nbsp;</mtext><mi>i</mi><mo>∈</mo><mo stretchy="false">[</mo><mn>0</mn><mo separator="true">,</mo><msup><mn>2</mn><mn>32</mn></msup><mo>−</mo><mn>1</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">abs\_seqno = n - isn + i\times offset,\quad offset = 2^{32}, \ i \in [0, 2^{32}-1]
 </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0044em;vertical-align:-0.31em;"></span><span class="mord mathnormal">ab</span><span class="mord mathnormal">s</span><span class="mord" style="margin-right:0.02778em;">_</span><span class="mord mathnormal">se</span><span class="mord mathnormal" style="margin-right:0.03588em;">q</span><span class="mord mathnormal">n</span><span class="mord mathnormal">o</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.7429em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">i</span><span class="mord mathnormal">s</span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.7429em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">i</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">o</span><span class="mord mathnormal" style="margin-right:0.10764em;">ff</span><span class="mord mathnormal">se</span><span class="mord mathnormal">t</span><span class="mpunct">,</span><span class="mspace" style="margin-right:1em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">o</span><span class="mord mathnormal" style="margin-right:0.10764em;">ff</span><span class="mord mathnormal">se</span><span class="mord mathnormal">t</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.0585em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8641em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">32</span></span></span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace">&nbsp;</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">i</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.1141em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8641em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">32</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">]</span></span></span></span></span></p>
@@ -583,7 +583,7 @@ Total Test <span class="token function">time</span> <span class="token punctuati
 <blockquote>
 <p>有一个坑点在于，头文件中对 <code>WrappintInt32 - WrappingInt32</code> 的重载返回值为 <code>int64_t</code> 而非 <code>uint_64t</code>，这就导致上面的 <code>res</code> 在 <code>n = UINT32_MAX, isn = 0</code> 的时候出现计算错误，需要修改头文件。</p>
 </blockquote>
-<h3 id="task-2%3A-implenting-the-tcp-receiver" tabindex="-1"><a class="header-anchor" href="#Task-2-Implenting-the-TCP-receiver">#</a>Task 2:  Implenting the TCP receiver</h3>
+<h3 id="Task-2-Implenting-the-TCP-receiver"><a class="header-anchor" href="#Task-2-Implenting-the-TCP-receiver">#</a>Task 2:  Implenting the TCP receiver</h3>
 <p>该 task 主要完成三件事</p>
 <ol>
 <li class="lvl-3">
@@ -647,9 +647,9 @@ Test project <span class="token punctuation">..</span>./CS144/build
 
 Total Test <span class="token function">time</span> <span class="token punctuation">(</span>real<span class="token punctuation">)</span> <span class="token operator">=</span>   <span class="token number">1.18</span> sec
 <span class="token punctuation">[</span><span class="token number">100</span>%<span class="token punctuation">]</span> Built target check_lab2<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="lab3-tcp-sender" tabindex="-1"><a class="header-anchor" href="#lab3-TCP-Sender">#</a>lab3 TCP Sender</h2>
+<h2 id="lab3-TCP-Sender"><a class="header-anchor" href="#lab3-TCP-Sender">#</a>lab3 TCP Sender</h2>
 <p>本 lab 需要实现 TCP 协议的发送端。</p>
-<h3 id="%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84" tabindex="-1"><a class="header-anchor" href="#数据结构">#</a>数据结构</h3>
+<h3 id="数据结构"><a class="header-anchor" href="#数据结构">#</a>数据结构</h3>
 <p>一个 TCPSender 应该完成以下事情：</p>
 <ol>
 <li class="lvl-3">
@@ -694,7 +694,7 @@ Total Test <span class="token function">time</span> <span class="token punctuati
   <span class="token comment">// (new!) 是否已发送 FIN=1 的段</span>
   <span class="token keyword">bool</span> closed<span class="token punctuation">{</span><span class="token boolean">false</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="%E5%AE%9A%E6%97%B6%E5%8A%9F%E8%83%BD" tabindex="-1"><a class="header-anchor" href="#定时功能">#</a>定时功能</h3>
+<h3 id="定时功能"><a class="header-anchor" href="#定时功能">#</a>定时功能</h3>
 <p>这是本 lab 的第一个任务。随着时间流逝，如果最早发送的段在一定时间内未得到确认，则需要进行<strong>超时重传</strong>，而定时器的作用就是告诉 sender “超时了”，它应该有以下功能：</p>
 <ol>
 <li class="lvl-3">
@@ -752,7 +752,7 @@ Total Test <span class="token function">time</span> <span class="token punctuati
     <span class="token punctuation">}</span>
   <span class="token punctuation">}</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="%E6%94%B6%E5%88%B0%E7%A1%AE%E8%AE%A4%E5%90%8E%E8%A6%81%E5%81%9A%E4%BB%80%E4%B9%88" tabindex="-1"><a class="header-anchor" href="#收到确认后要做什么">#</a>收到确认后要做什么</h3>
+<h3 id="收到确认后要做什么"><a class="header-anchor" href="#收到确认后要做什么">#</a>收到确认后要做什么</h3>
 <p>当收到一个正确的 ackno 时：</p>
 <ol>
 <li class="lvl-3">
@@ -801,7 +801,7 @@ Total Test <span class="token function">time</span> <span class="token punctuati
 
   <span class="token keyword">return</span> flag<span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="%E5%A6%82%E4%BD%95%E5%8F%91%E9%80%81%E6%AE%B5" tabindex="-1"><a class="header-anchor" href="#如何发送段">#</a>如何发送段</h3>
+<h3 id="如何发送段"><a class="header-anchor" href="#如何发送段">#</a>如何发送段</h3>
 <p>可以简单地认为，将 segment 插入 <code>_segments_out</code> 队列中就算将它发出去了。</p>
 <p>但事实上，原始代码里并没有修改 segment 首部和负载字段的 api，需要修改头文件，加上几个 <code>set_syn()</code>，<code>set_fin()</code> 之类的，方便正确创建段。</p>
 <p>最开始(abs_next_seqno=0)的时候，由于尚未建立连接，<code>_rws</code> 字段会被初始化为 1 而非 0，此时要发送的段仅仅为 <code>{SYN=1, data=""}</code> 的同步请求段。在收到确认之后，<code>_rws</code> 字段会被重置，我们就需要发送数据以尽可能填满该窗口，同时数据大小又不能超过 <code>TCPConfig::MAX_PAYLOAD_SIZE</code>。</p>
@@ -874,9 +874,9 @@ Test project <span class="token punctuation">..</span>./CS144/build
 
 Total Test <span class="token function">time</span> <span class="token punctuation">(</span>real<span class="token punctuation">)</span> <span class="token operator">=</span>   <span class="token number">1.30</span> sec
 <span class="token punctuation">[</span><span class="token number">100</span>%<span class="token punctuation">]</span> Built target check_lab3<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="lab4-tcp-connection" tabindex="-1"><a class="header-anchor" href="#lab4-TCP-Connection">#</a>lab4 TCP Connection</h2>
+<h2 id="lab4-TCP-Connection"><a class="header-anchor" href="#lab4-TCP-Connection">#</a>lab4 TCP Connection</h2>
 <p>本 lab 可以说是最难搞的一个了，我们需要结合 lab2 和 lab3 来实现一个真实的 TCP 协议，协调 sender 和 receiver 的所有操作，并完成三次握手和四次挥手。</p>
-<h2 id="%E5%8F%91%E9%80%81" tabindex="-1"><a class="header-anchor" href="#发送">#</a>发送</h2>
+<h2 id="发送"><a class="header-anchor" href="#发送">#</a>发送</h2>
 <p>什么时候要发送报文段？这是值得思考的一个问题，总的来说有以下几种情况是需要发送的：</p>
 <ol>
 <li class="lvl-3">
@@ -911,7 +911,7 @@ Total Test <span class="token function">time</span> <span class="token punctuati
   <span class="token punctuation">}</span>
   _sender<span class="token punctuation">.</span><span class="token function">segments_out</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">pop</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E6%8E%A5%E6%94%B6" tabindex="-1"><a class="header-anchor" href="#接收">#</a>接收</h2>
+<h2 id="接收"><a class="header-anchor" href="#接收">#</a>接收</h2>
 <p>接收是一个比较麻烦的事情，有一个细节是连接处于 <code>LISTEN</code> 阶段时只处理 <code>SYN=1</code> 的段，也就是会忽略 <code>RST=1</code> 段。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>libsponge/tcp_connection.cc</span></div><code class="language-cpp"><span class="token keyword">if</span> <span class="token punctuation">(</span>_receiver<span class="token punctuation">.</span><span class="token function">in_listen</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> _sender<span class="token punctuation">.</span><span class="token function">in_closed</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
   <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>seg<span class="token punctuation">.</span><span class="token function">header</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>syn<span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -948,12 +948,12 @@ Total Test <span class="token function">time</span> <span class="token punctuati
 <blockquote>
 <p>如果遇到像 <code>... neq ... or ...</code> 这样的报错，需要把所有 <code>cerr</code> 注释掉才正常通过。因为这里是将输出结果写到文件里，然后和标准结果文件进行哈希值比较。</p>
 </blockquote>
-<h2 id="lab5-network-interface" tabindex="-1"><a class="header-anchor" href="#lab5-Network-Interface">#</a>lab5 Network Interface</h2>
+<h2 id="lab5-Network-Interface"><a class="header-anchor" href="#lab5-Network-Interface">#</a>lab5 Network Interface</h2>
 <p>本 lab 要求我们实现路由器的接口部分，负责维护目的 IP 地址到 MAC 地址的映射，并将 IP 层数据包转发到下一跳。</p>
 <blockquote>
 <p>lab5 lab6 都很简单，一下午就都搞定了。</p>
 </blockquote>
-<h3 id="%E5%8F%91%E9%80%81-1" tabindex="-1"><a class="header-anchor" href="#发送-2">#</a>发送</h3>
+<h3 id="发送-2"><a class="header-anchor" href="#发送-2">#</a>发送</h3>
 <p>当转发数据包时，目的 IP 地址是已知的（就是<strong>下一跳</strong>），但对于链路层的 MAC 地址则可能未知，这就需要我们广播一个目的 MAC 地址为 <code>ff:ff:ff:ff:ff:ff</code> 的 ARP 请求来获取位于目的 IP 地址的设备的 MAC 地址。发送后，<code>{datagram, next_hop}</code> 会被缓存直至收到 ARP 答复。如果对目的 IP 地址的请求在 5s 内已经被发过一次，则只需等待答复即可，不用再发一遍。如果目的 MAC 地址已知，那事情就简单很多，直接将数据包包装成链路层帧发送即可。复杂点在于各个字段要完全设置好。</p>
 <blockquote>
 <p>包装操作应使用 <code>serialize()</code> 方法转换为 <code>string</code>，再隐式转换为 <code>Buffer</code>。</p>
@@ -980,7 +980,7 @@ Total Test <span class="token function">time</span> <span class="token punctuati
 
   _frames_out<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>frame<span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="%E6%8E%A5%E6%94%B6-1" tabindex="-1"><a class="header-anchor" href="#接收-2">#</a>接收</h3>
+<h3 id="接收-2"><a class="header-anchor" href="#接收-2">#</a>接收</h3>
 <p>当收到帧时，首先判断这是否为正常的数据交互，若是，则将其有效负载解析为数据包，作为返回值交付给调用者。</p>
 <p>反之，检查这是一个 ARP 请求还是 ARP 答复。如果是前者，并其目的 IP 地址是否与自身一致，则发回一个 ARP 答复；反之，发送等待答复的数据包。同时，还要根据发送方的信息更新 IP/MAC 映射表，对应条目保持 30s，时间到后删除条目。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>libsponge/network_interface.cc</span></div><code class="language-cpp">optional<span class="token operator">&lt;</span>InternetDatagram<span class="token operator">&gt;</span> <span class="token class-name">NetworkInterface</span><span class="token double-colon punctuation">::</span><span class="token function">recv_frame</span><span class="token punctuation">(</span><span class="token keyword">const</span> EthernetFrame <span class="token operator">&amp;</span>frame<span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -1028,7 +1028,7 @@ Test project <span class="token punctuation">..</span>./CS144/build
 
 Total Test <span class="token function">time</span> <span class="token punctuation">(</span>real<span class="token punctuation">)</span> <span class="token operator">=</span>   <span class="token number">1.24</span> sec
 Built target check_lab5<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="lab6-router" tabindex="-1"><a class="header-anchor" href="#lab6-Router">#</a>lab6 Router</h2>
+<h2 id="lab6-Router"><a class="header-anchor" href="#lab6-Router">#</a>lab6 Router</h2>
 <p>本 lab 要求我们实现路由表中的最长前缀匹配。路由表我采用的是 <code>std::unordered_map&lt;uint32_t, std::tuple&lt;uint8_t, std::optional&lt;Address&gt;, size_t&gt;&gt;</code>，存储 <code>route_prefix -&gt; {prefix_length, next_hop, interface_num}</code> 的映射对。</p>
 <p>有以下注意点：</p>
 <ol>
@@ -1253,12 +1253,6 @@ Total Test <span class="token function">time</span> <span class="token punctuati
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -1267,8 +1261,8 @@ Total Test <span class="token function">time</span> <span class="token punctuati
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -1284,41 +1278,6 @@ Total Test <span class="token function">time</span> <span class="token punctuati
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

@@ -207,12 +207,12 @@ document.addEventListener('DOMContentLoaded', function() {
       console.log('Target ID:', targetId, 'Target Element:', targetElement);
 
       if (targetElement) {
-        console.log('Scrolling to:', targetId, targetElement.offsetTop);
+        console.log('Scrolling to:', targetId, targetElement.offsetTop+200);
         // 如果目标元素存在，滚动到目标元素的顶部，并留出20px
         // 的间距以避免被导航栏遮挡。
         // 使用 window.scrollTo 方法来平滑滚动到目标元素。
         window.scrollTo(
-            {top: targetElement.offsetTop, behavior: 'smooth'});
+            {top: targetElement.offsetTop+200, behavior: 'smooth'});
 
         history.pushState(null, null, targetId);
       }

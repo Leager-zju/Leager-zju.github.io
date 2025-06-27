@@ -328,7 +328,7 @@ $ tool --version
             <div id="articleContent">
                 <p>热身运动，实现一些 shell 命令。</p>
 <span id="more"></span>
-<h2 id="boot-xv6" tabindex="-1"><a class="header-anchor" href="#Boot-xv6">#</a>Boot xv6</h2>
+<h2 id="Boot-xv6"><a class="header-anchor" href="#Boot-xv6">#</a>Boot xv6</h2>
 <p>首先去 <a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.828/2021/tools.html">lab tool page</a> 把实验所需工具都给装上，然后查看一下各个工具的版本，检查是否安装成功。</p>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ tool <span class="token parameter variable">--version</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>获取代码，切换到实验对应分支，准备开撸。</p>
@@ -338,7 +338,7 @@ $ <span class="token function">git</span> checkout util<span aria-hidden="true" 
 <blockquote>
 <p>输入 <code>make qemu</code> 可以编译所有代码并模拟内核环境，输入 <code>ctrl+a x</code> 以退出环境。</p>
 </blockquote>
-<h2 id="task1%3A-sleep" tabindex="-1"><a class="header-anchor" href="#Task1-sleep">#</a>Task1: sleep</h2>
+<h2 id="Task1-sleep"><a class="header-anchor" href="#Task1-sleep">#</a>Task1: sleep</h2>
 <p>该任务要求实现 <code>sleep</code> 命令，模式为</p>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">sleep</span> 时间值<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>这个任务就是帮助我们熟悉整个代码框架，以及一些头文件。</p>
@@ -369,7 +369,7 @@ $ <span class="token function">sleep</span> <span class="token number">10</span>
 <span class="token operator">==</span> Test sleep, no arguments <span class="token operator">==</span> sleep, no arguments: OK <span class="token punctuation">(</span><span class="token number">3</span>.6s<span class="token punctuation">)</span>
 <span class="token operator">==</span> Test sleep, returns <span class="token operator">==</span> sleep, returns: OK <span class="token punctuation">(</span><span class="token number">0</span>.6s<span class="token punctuation">)</span>
 <span class="token operator">==</span> Test sleep, makes syscall <span class="token operator">==</span> sleep, makes syscall: OK <span class="token punctuation">(</span><span class="token number">1</span>.0s<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="task2%3A-pingpong" tabindex="-1"><a class="header-anchor" href="#Task2-pingpong">#</a>Task2: pingpong</h2>
+<h2 id="Task2-pingpong"><a class="header-anchor" href="#Task2-pingpong">#</a>Task2: pingpong</h2>
 <p>该任务要求我们利用 <code>pipe()</code> 和 <code>fork()</code> 两大系统调用进行父子进程间的同步：</p>
 <ol>
 <li class="lvl-3">
@@ -450,7 +450,7 @@ main(int argc, char *argv[])
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ ./grade-lab-util pingpong
 <span class="token punctuation">..</span>.
 <span class="token operator">==</span> Test pingpong <span class="token operator">==</span> pingpong: OK <span class="token punctuation">(</span><span class="token number">1</span>.3s<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
-<h2 id="task3%3A-primes" tabindex="-1"><a class="header-anchor" href="#Task3-primes">#</a>Task3: primes</h2>
+<h2 id="Task3-primes"><a class="header-anchor" href="#Task3-primes">#</a>Task3: primes</h2>
 <p>该任务是上一个任务的 plus 版本，编写一个并发输出 2~35 之间所有素数的程序，算法思想见<a target="_blank" rel="noopener" href="http://swtch.com/~rsc/thread/">这个网页</a>。</p>
 <p>在这里，就是对于每一个进程 <code>p</code>，不断接收其父进程 <code>parent</code> 写入管道的数据。对于第一个收到的数据 <code>n</code>，直接打印，对于后续的数据 <code>data</code>，如果满足 <code>data % p != 0</code>，说明该数可能是个素数，通过管道交给子进程 <code>child</code>。</p>
 <p>由于所有的管道都是单向的，即从 <code>parent</code> 流向 <code>child</code>，故每个进程需关闭左侧（与 <code>parent</code> 交互）管道的写端与右侧（与 <code>child</code> 交互）的读端，防止文件描述符不够用的情况。</p>
@@ -536,7 +536,7 @@ main(int argc, char *argv[])
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ ./grade-lab-util primes
 <span class="token punctuation">..</span>.
 <span class="token operator">==</span> Test primes <span class="token operator">==</span> primes: OK <span class="token punctuation">(</span><span class="token number">0</span>.7s<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
-<h2 id="task4%3A-find" tabindex="-1"><a class="header-anchor" href="#Task4-find">#</a>Task4: find</h2>
+<h2 id="Task4-find"><a class="header-anchor" href="#Task4-find">#</a>Task4: find</h2>
 <p>该任务要求我们实现一个简单版本的 <code>find</code> 命令。其模式为</p>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">find</span> 目录 文件名<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p><code>user/ls.c</code> 里有读取目录的样例实现。熟悉文件系统的应该知道，目录也是「文件」，也具有 <code>inode</code> 号和相应的磁盘空间，只不过其磁盘块上的内容是若干文件条目，在 lab 中用数据结构 <code>dirent</code> 表示，其内容为 <code>{inode, name}</code>，其中 <code>name</code> 既可以是文件名，也可以是目录名。</p>
@@ -628,7 +628,7 @@ main(int argc, char *argv[])
 <span class="token punctuation">..</span>.
 <span class="token operator">==</span> Test find, <span class="token keyword">in</span> current directory <span class="token operator">==</span> find, <span class="token keyword">in</span> current directory: OK <span class="token punctuation">(</span><span class="token number">0</span>.8s<span class="token punctuation">)</span>
 <span class="token operator">==</span> Test find, recursive <span class="token operator">==</span> find, recursive: OK <span class="token punctuation">(</span><span class="token number">1</span>.1s<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="task5%3A-xargs" tabindex="-1"><a class="header-anchor" href="#Task5-xargs">#</a>Task5: xargs</h2>
+<h2 id="Task5-xargs"><a class="header-anchor" href="#Task5-xargs">#</a>Task5: xargs</h2>
 <p>最后一个任务是实现 <code>xargs</code> 命令。该命令一般配合管道使用，将前一个命令输出，作为后面命令的额外参数，比如</p>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token builtin class-name">echo</span> hello too <span class="token operator">|</span> <span class="token function">xargs</span> <span class="token builtin class-name">echo</span> bye
 bye hello too<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
@@ -696,7 +696,7 @@ main(int argc, char *argv[])
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ ./grade-lab-util <span class="token function">xargs</span>
 <span class="token punctuation">..</span>.
 <span class="token operator">==</span> Test <span class="token function">xargs</span> <span class="token operator">==</span> xargs: OK <span class="token punctuation">(</span><span class="token number">1</span>.9s<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E6%9C%80%E5%90%8E%E7%9A%84%E5%B7%A5%E4%BD%9C" tabindex="-1"><a class="header-anchor" href="#最后的工作">#</a>最后的工作</h2>
+<h2 id="最后的工作"><a class="header-anchor" href="#最后的工作">#</a>最后的工作</h2>
 <ol>
 <li class="lvl-3">
 <p>新建一个 <code>time.txt</code> 文件，写上总共花了多少小时，然后 <code>git commit -am ""</code> 将所有修改提交到本地。</p>
@@ -888,12 +888,6 @@ main(int argc, char *argv[])
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -902,8 +896,8 @@ main(int argc, char *argv[])
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -919,41 +913,6 @@ main(int argc, char *argv[])
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

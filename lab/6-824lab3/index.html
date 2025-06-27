@@ -344,8 +344,8 @@ client 寻找对应 ">
 </li>
 </ol>
 <span id="more"></span>
-<h2 id="part-a-key%2Fvalue-service-without-snapshots" tabindex="-1"><a class="header-anchor" href="#PART-A-Key-value-service-without-snapshots">#</a>PART A-Key/value service without snapshots</h2>
-<h3 id="%E5%8F%91%E9%80%81%E8%AF%B7%E6%B1%82" tabindex="-1"><a class="header-anchor" href="#发送请求">#</a>发送请求</h3>
+<h2 id="PART-A-Key-value-service-without-snapshots"><a class="header-anchor" href="#PART-A-Key-value-service-without-snapshots">#</a>PART A-Key/value service without snapshots</h2>
+<h3 id="发送请求"><a class="header-anchor" href="#发送请求">#</a>发送请求</h3>
 <p>由于 <code>Start()</code> 函数会立即返回 isleader 信息，所以如果一个 server 节点调用了 Start() 后发现不是 Leader，则返回一个 <strong>ErrWrongLeader</strong></p>
 <p>当且仅当 client RPC 发送给正确的 Leader 后，才算成功；否则：</p>
 <ol>
@@ -356,7 +356,7 @@ client 寻找对应 ">
 <p>If the operation failed to commit (for example, if the Leader was replaced), the server reports an error, and the Clerk retries with a different server.</p>
 </li>
 </ol>
-<h3 id="server-%E5%90%91%E4%B8%8B%E8%B0%83%E7%94%A8" tabindex="-1"><a class="header-anchor" href="#server-向下调用">#</a>server 向下调用</h3>
+<h3 id="server-向下调用"><a class="header-anchor" href="#server-向下调用">#</a>server 向下调用</h3>
 <p>首先是根据 <code>Start()</code> 返回的 isleader 来确定是否需要返回 ErrWrongLeader 错误。若成功，则等待流程 4。</p>
 <p>注意到，在等待的过程中 server 是上了锁的，那必然被阻塞，此时就需要在 startKVserver 的时候额外开启一个叫 Applier() 的 goroutine 来进行 applyChannel 的读取。</p>
 <pre class="line-numbers language-go" data-language="go"><code class="language-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>kv <span class="token operator">*</span>KVServer<span class="token punctuation">)</span> <span class="token function">Applier</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -377,13 +377,13 @@ client 寻找对应 ">
     ch <span class="token operator">&lt;-</span> reply_
   <span class="token punctuation">}</span><span class="token punctuation">(</span>reply<span class="token punctuation">)</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="%E5%BA%94%E7%94%A8%E5%88%B0%E7%8A%B6%E6%80%81%E6%9C%BA" tabindex="-1"><a class="header-anchor" href="#应用到状态机">#</a>应用到状态机</h3>
+<h3 id="应用到状态机"><a class="header-anchor" href="#应用到状态机">#</a>应用到状态机</h3>
 <p>Applier() 对 applyChannel 进行一个 for 的等待，收到消息后，根据收到消息的命令类型的不同，执行不同的应用操作。</p>
 <blockquote>
 <p>Put(key, value) replaces the value for a particular key in the database, Append(key, arg) appends arg to key’s value, and Get(key) fetches the current value for the key. A Get for a non-existent key should return an empty string. An Append to a non-existent key should act like Put.</p>
 </blockquote>
 <p>执行完后，返回消息到 <code>waitchannel[Index]</code>，唤醒 server。</p>
-<h3 id="other" tabindex="-1"><a class="header-anchor" href="#Other">#</a>Other</h3>
+<h3 id="Other"><a class="header-anchor" href="#Other">#</a>Other</h3>
 <ol>
 <li class="lvl-3">
 <p>刚开始想到和 Raft 里发送请求投票一样的手段，为每一个 server 开一个 goroutine 去发送 RPC，后来发现最后成功发送的只有一个，其它 goroutine 都是在占 cpu，遂放弃，直接用单个 for 循环。另外，有时候 Leader 会在相当一段时间内保持不变，我们可以 cache 上一次发送请求成功时的 serverId，认为这是 Leader，每次发请求时都可以利用这一信息，避免了不必要的 RPC，加快速度。当 RPC 失败，或发生了 ErrWrongLeader，只需要简单的令 Leader 切换到下一个即可（0-&gt;1-&gt;…-&gt;n-1-&gt;0-&gt;…）</p>
@@ -410,7 +410,7 @@ client 寻找对应 ">
 </li>
 </ol>
 <p>总体代码量比 Raft 少太多，但因为论文中并没有给出很详细的指示，就走了很多弯路，以至于绝大多数时间都在 debug…</p>
-<h2 id="part-b-key%2Fvalue-service-with-snapshots" tabindex="-1"><a class="header-anchor" href="#PART-B-Key-value-service-with-snapshots">#</a>PART B-Key/value service with snapshots</h2>
+<h2 id="PART-B-Key-value-service-with-snapshots"><a class="header-anchor" href="#PART-B-Key-value-service-with-snapshots">#</a>PART B-Key/value service with snapshots</h2>
 <p>本实验要求在 3A 的基础上加上 snapshot 功能。</p>
 <blockquote>
 <p>虽然标的是hard，但代码量更少了</p>
@@ -608,12 +608,6 @@ client 寻找对应 ">
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -622,8 +616,8 @@ client 寻找对应 ">
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -639,41 +633,6 @@ client 寻找对应 ">
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

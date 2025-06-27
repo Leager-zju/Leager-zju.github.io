@@ -329,7 +329,7 @@ C++ 程序的内存分为 5 大区域，分别为代码区、常量存储区、�
             <div id="articleContent">
                 <p>众所周知，C++ 是一门与内存紧密相关的语言，本文就来聊聊 C++ 眼中的<strong>内存分配</strong>。</p>
 <span id="more"></span>
-<h2 id="%E5%86%85%E5%AD%98%E5%B8%83%E5%B1%80" tabindex="-1"><a class="header-anchor" href="#内存布局">#</a>内存布局</h2>
+<h2 id="内存布局"><a class="header-anchor" href="#内存布局">#</a>内存布局</h2>
 <p>C++ 程序的内存分为 5 大区域，分别为<strong>代码区</strong>、<strong>常量存储区</strong>、<strong>全局/静态存储区</strong>、<strong>堆区</strong>、<strong>栈区</strong>，每个区域存放不同类型的数据：</p>
 <ul class="lvl-0">
 <li class="lvl-2">
@@ -355,9 +355,9 @@ C++ 程序的内存分为 5 大区域，分别为代码区、常量存储区、�
 <p><strong>栈区(stack)</strong>：程序局部变量、函数参数值、函数返回值所在处，由编译器自动管理分配，地址从高向低增长；</p>
 </li>
 </ul>
-<h2 id="%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D-in-c" tabindex="-1"><a class="header-anchor" href="#内存分配-in-C">#</a>内存分配 in C</h2>
+<h2 id="内存分配-in-C"><a class="header-anchor" href="#内存分配-in-C">#</a>内存分配 in C</h2>
 <p>在 C 中，使用 <code>alloc()</code> 系库函数来进行内存的动态分配。</p>
-<h3 id="malloc()" tabindex="-1"><a class="header-anchor" href="#malloc">#</a>malloc()</h3>
+<h3 id="malloc"><a class="header-anchor" href="#malloc">#</a>malloc()</h3>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">void</span><span class="token operator">*</span> <span class="token function">malloc</span><span class="token punctuation">(</span> std<span class="token double-colon punctuation">::</span>size_t size <span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>分配一片连续的 <code>size</code> 个字节的<strong>未初始化</strong>存储。成功时，返回指向分配的适合对任何标量类型对齐的内存块中，最低（首）字节的指针；反之，返回空指针。</p>
 <blockquote>
@@ -372,19 +372,19 @@ C++ 程序的内存分为 5 大区域，分别为代码区、常量存储区、�
 <p>大于某个阈值时，使用 <code>mmap()</code> 系统调用在文件映射区上分配内存；</p>
 </li>
 </ol>
-<h3 id="calloc()" tabindex="-1"><a class="header-anchor" href="#calloc">#</a>calloc()</h3>
+<h3 id="calloc"><a class="header-anchor" href="#calloc">#</a>calloc()</h3>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">void</span><span class="token operator">*</span> <span class="token function">calloc</span><span class="token punctuation">(</span> std<span class="token double-colon punctuation">::</span>size_t num<span class="token punctuation">,</span> std<span class="token double-colon punctuation">::</span>size_t size <span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>分配 <code>num</code> 个大小为 <code>size</code> 的对象的数组，并<strong>初始化</strong>所有 bit 为零。成功时，返回指向为任何对象类型适当对齐的，被分配内存块最低（首）字节的指针；反之，返回空指针。</p>
 <blockquote>
 <p>相当于初始化 + <code>malloc(num * size);</code></p>
 </blockquote>
-<h3 id="realloc()" tabindex="-1"><a class="header-anchor" href="#realloc">#</a>realloc()</h3>
+<h3 id="realloc"><a class="header-anchor" href="#realloc">#</a>realloc()</h3>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">void</span><span class="token operator">*</span> <span class="token function">realloc</span><span class="token punctuation">(</span> <span class="token keyword">void</span><span class="token operator">*</span> ptr<span class="token punctuation">,</span> std<span class="token double-colon punctuation">::</span>size_t new_size <span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>重分配（扩张或收缩）给定的内存区域 <code>ptr</code> 大小至 <code>new_size</code>。注意这里的再分配不一定在原区域的基础上，而有可能重新分配一片新空间。成功时，返回指向新分配内存起始的指针；反之，返回空指针，且原指针保留。</p>
 <blockquote>
 <p>它必须是 <code>malloc()</code>、 <code>calloc()</code> 或 <code>realloc()</code> 先前分配的，且仍未被 <code>free()</code> 释放，否则 UB。</p>
 </blockquote>
-<h3 id="free()" tabindex="-1"><a class="header-anchor" href="#free">#</a>free()</h3>
+<h3 id="free"><a class="header-anchor" href="#free">#</a>free()</h3>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">void</span> <span class="token function">free</span><span class="token punctuation">(</span> <span class="token keyword">void</span><span class="token operator">*</span> ptr <span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>与 <code>alloc</code> 系搭配使用，用于手动释放动态分配的堆内存空间。</p>
 <ul class="lvl-0">
@@ -413,9 +413,9 @@ ptr <span class="token operator">=</span> <span class="token constant">NULL</spa
 <span class="token comment">// output:</span>
 <span class="token comment">// before free: 000001EF641FCFB0</span>
 <span class="token comment">// after free: 000001EF641FCFB0</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D-in-c%2B%2B" tabindex="-1"><a class="header-anchor" href="#内存分配-in-C-2">#</a>内存分配 in C++</h2>
+<h2 id="内存分配-in-C-2"><a class="header-anchor" href="#内存分配-in-C-2">#</a>内存分配 in C++</h2>
 <p>而在 C++ 中，由于引入了<strong>类</strong>这一概念，<code>alloc</code> / <code>free</code> 这种只能分配/释放内存的函数并不足以满足需求——<code>alloc</code> 分配内存时并不会调用构造函数，并且如果 <code>free</code> 简单地释放了一个类对象的内存，那么其析构函数不会被调用，这搞不好会引发大灾难。于是，它俩被功能更强大的 <code>new</code> / <code>delete</code> 所取代。</p>
-<h3 id="new-%2F-delete" tabindex="-1"><a class="header-anchor" href="#new-delete">#</a>new / delete</h3>
+<h3 id="new-delete"><a class="header-anchor" href="#new-delete">#</a>new / delete</h3>
 <blockquote>
 <p>定义于头文件 <code>&lt;new&gt;</code></p>
 </blockquote>
@@ -451,7 +451,7 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 <p>底层 <code>operator delete()</code> 释放内存；</p>
 </li>
 </ol>
-<h3 id="%E5%AE%9A%E4%BD%8D-new(placement-new)" tabindex="-1"><a class="header-anchor" href="#定位-new-placement-new">#</a>定位 new(placement new)</h3>
+<h3 id="定位-new-placement-new"><a class="header-anchor" href="#定位-new-placement-new">#</a>定位 new(placement new)</h3>
 <p>上面的代码提到了一种叫<strong>定位 new</strong> 的操作，它的意义在于将内存的<strong>分配和构造分离</strong>。</p>
 <blockquote>
 <p>如果内存分配与构造不分离，则存在以下弊端：</p>
@@ -475,7 +475,7 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 <blockquote>
 <p>使用此法，则不一定会在<strong>堆</strong>上分配内存，而是在对应地址处直接构造。</p>
 </blockquote>
-<h3 id="%E9%87%8D%E8%BD%BD-operator-new()" tabindex="-1"><a class="header-anchor" href="#重载-operator-new">#</a>重载 operator new()</h3>
+<h3 id="重载-operator-new"><a class="header-anchor" href="#重载-operator-new">#</a>重载 operator new()</h3>
 <p><code>new</code> / <code>delete</code> 是关键字，我们无法修改其功能本身，但其底层所使用的运算符 <code>operator new()</code> / <code>operator delete()</code> 则能为我们根据需要所重载使用。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Foo</span> <span class="token punctuation">{</span>
  <span class="token keyword">public</span><span class="token operator">:</span>
@@ -509,10 +509,10 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 <span class="token comment">// output: placement new override</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>相当于底层调用了  <code>Foo::operator new() (sizeof(Foo), temp);</code>。此时就不用再 <code>delete f</code> 了，懂得都懂。</p>
 <p>当然也可以加别的形参，比如 <code>void* operator new(size_t, int);</code>，使用时直接 <code>new(100) type;</code> 即可（圆括号里就是从除了 <code>size_t</code> 以外的实参列表）。之前提到的加上 <code>std::nothrow</code> 不会抛出异常则是使用了 <code>void* opertor new(size_t, nothrow_t&amp;)</code> 的重载形式。</p>
-<h3 id="%E9%87%8D%E8%BD%BD-operator-delete()" tabindex="-1"><a class="header-anchor" href="#重载-operator-delete">#</a>重载 operator delete()</h3>
+<h3 id="重载-operator-delete"><a class="header-anchor" href="#重载-operator-delete">#</a>重载 operator delete()</h3>
 <p>重载 <code>operator delete()</code> 时需注意第一个参数必须为 <code>void*</code>，且返回值必须为 <code>void</code>。但并没有重载的必要，因为我们无法手动调用。但设置这个的意义在于与 <code>operator new()</code> 配套使用，只有 <code>operator new</code> 抛异常了，才会调用对应的 <code>operator delete</code>。若没有对应的 <code>operator delete</code>，则无法释放内存。</p>
-<h3 id="%E5%85%B6%E4%BB%96" tabindex="-1"><a class="header-anchor" href="#其他">#</a>其他</h3>
-<h4 id="delete-this-%E5%90%88%E6%B3%95%E5%90%97%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#delete-this-合法吗？">#</a>delete this 合法吗？</h4>
+<h3 id="其他"><a class="header-anchor" href="#其他">#</a>其他</h3>
+<h4 id="delete-this-合法吗？"><a class="header-anchor" href="#delete-this-合法吗？">#</a>delete this 合法吗？</h4>
 <p>合法，但必须保证：</p>
 <ol>
 <li class="lvl-3">
@@ -525,7 +525,7 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 </blockquote>
 </li>
 </ol>
-<h4 id="%E5%A6%82%E4%BD%95%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AA%E5%8F%AA%E8%83%BD%E5%9C%A8%E5%A0%86%2F%E6%A0%88%E4%B8%8A%E7%94%9F%E6%88%90%E5%AF%B9%E8%B1%A1%E7%9A%84%E7%B1%BB%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#如何定义一个只能在堆-栈上生成对象的类？">#</a>如何定义一个只能在堆/栈上生成对象的类？</h4>
+<h4 id="如何定义一个只能在堆-栈上生成对象的类？"><a class="header-anchor" href="#如何定义一个只能在堆-栈上生成对象的类？">#</a>如何定义一个只能在堆/栈上生成对象的类？</h4>
 <ul class="lvl-0">
 <li class="lvl-2">
 <p><strong>只能在堆上</strong>：将析构函数设置为<strong>非公有</strong>。C++ 是静态绑定语言，编译器管理栈上对象的生命周期，编译器在为类对象分配栈空间时，会先检查类的析构函数的访问性。若析构函数不可访问，则不能在栈上创建对象。</p>
@@ -558,9 +558,9 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 <p><strong>只能在栈上</strong>：将 <code>operator new()</code> 和 <code>operator delete()</code> 设置为<strong>私有</strong>。此时 <code>new</code> 的第一步操作（上面讲过）无法执行，进而无法在堆上生成。</p>
 </li>
 </ul>
-<h4 id="%E4%B8%BA%E4%BB%80%E4%B9%88%E8%AF%B4-new-%E6%95%88%E7%8E%87%E4%BD%8E" tabindex="-1"><a class="header-anchor" href="#为什么说-new-效率低">#</a>为什么说 new 效率低</h4>
+<h4 id="为什么说-new-效率低"><a class="header-anchor" href="#为什么说-new-效率低">#</a>为什么说 new 效率低</h4>
 <p><code>new</code> 的动态分配内存涉及到内核级行为，并且存在上锁的可能，会产生一定开销。进行分配时，如果不是定位 new，则会在任意位置进行分配，不易管理。</p>
-<h2 id="%E5%88%86%E9%85%8D%E5%99%A8-allocator" tabindex="-1"><a class="header-anchor" href="#分配器-Allocator">#</a>分配器 Allocator</h2>
+<h2 id="分配器-Allocator"><a class="header-anchor" href="#分配器-Allocator">#</a>分配器 Allocator</h2>
 <blockquote>
 <p>定义于头文件 <code>&lt;memory&gt;</code></p>
 </blockquote>
@@ -592,7 +592,7 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 <blockquote>
 <p>如果希望自定义分配器，可以直接继承自 <code>std::allocator</code>，然后重写分配/解分配策略。</p>
 </blockquote>
-<h2 id="%E6%9C%AA%E5%88%9D%E5%A7%8B%E5%8C%96%E5%86%85%E5%AD%98%E7%AE%97%E6%B3%95" tabindex="-1"><a class="header-anchor" href="#未初始化内存算法">#</a>未初始化内存算法</h2>
+<h2 id="未初始化内存算法"><a class="header-anchor" href="#未初始化内存算法">#</a>未初始化内存算法</h2>
 <blockquote>
 <p>定义于头文件 <code>&lt;memory&gt;</code></p>
 </blockquote>
@@ -610,14 +610,14 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 <p><code>constexpr T* construct_at( T* p, Args&amp;&amp;... args )</code>：在给定地址创建对象；</p>
 </li>
 </ul>
-<h2 id="%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88" tabindex="-1"><a class="header-anchor" href="#智能指针">#</a>智能指针</h2>
+<h2 id="智能指针"><a class="header-anchor" href="#智能指针">#</a>智能指针</h2>
 <p>智能指针是针对裸指针进行封装的类，它能够更安全、更方便地使用动态内存。具体见 <a href="../../c/c-smartptr">C++11 の 智能指针</a>。</p>
-<h2 id="%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F%E5%8F%8A%E5%85%B6%E5%B8%B8%E7%94%A8%E5%B7%A5%E5%85%B7" tabindex="-1"><a class="header-anchor" href="#内存泄漏及其常用工具">#</a>内存泄漏及其常用工具</h2>
+<h2 id="内存泄漏及其常用工具"><a class="header-anchor" href="#内存泄漏及其常用工具">#</a>内存泄漏及其常用工具</h2>
 <p>如果使用了 <code>malloc()/new</code> 分配内存却未调用 <code>free()/delete</code> 释放，那么指向该内存区域的指针（通常分配在栈上）将会因为生命周期结束而被释放，从而永远无法访问那片内存。在操作系统视角下，程序员没释放，那就是有可能使用，这块内存将被一直保留。一旦这种情况越来越多，那么后续再进行内存分配时，将会没有内存可用，这就是<strong>内存泄漏</strong>。</p>
-<h3 id="valgrind" tabindex="-1"><a class="header-anchor" href="#Valgrind">#</a>Valgrind</h3>
+<h3 id="Valgrind"><a class="header-anchor" href="#Valgrind">#</a>Valgrind</h3>
 <p>Valgrind 可以用来检测程序是否有非法使用内存的问题，例如访问未初始化的内存、访问数组时越界、忘记释放动态内存等问题。</p>
 <p>构建项目时加上编译选项 <code>-g</code>，之后调用 <code>valgrind --tool=memcheck --leak-check=full  {可执行文件}</code> 即可进行内存问题检测。</p>
-<h3 id="address-sanitizer" tabindex="-1"><a class="header-anchor" href="#Address-Sanitizer">#</a>Address Sanitizer</h3>
+<h3 id="Address-Sanitizer"><a class="header-anchor" href="#Address-Sanitizer">#</a>Address Sanitizer</h3>
 <p>AddressSanitizer 是 Google 开发的一款用于检测内存访问错误的工具。它内置在 GCC 版本 &gt;= 4.8 中，适用于 C 和 C++ 代码。它能够检测：</p>
 <ul class="lvl-0">
 <li class="lvl-2">
@@ -834,12 +834,6 @@ $ ./main
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -848,8 +842,8 @@ $ ./main
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -865,41 +859,6 @@ $ ./main
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

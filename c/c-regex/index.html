@@ -323,8 +323,8 @@
             <div id="articleContent">
                 <p><strong>正则表达式</strong>，又称规则表达式（Regular Expression，常简写为 regex、regexp 或 RE），是一种<strong>文本模式/规则</strong>，包括普通字符和特殊字符（<strong>元字符</strong>）。通常使用单个字符串来表示正则表达式 <code>pattern</code>，并<strong>匹配</strong>一系列符合模式 <code>pattern</code> 的字符串。</p>
 <span id="more"></span>
-<h2 id="%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86" tabindex="-1"><a class="header-anchor" href="#正则表达式基本知识">#</a>正则表达式基本知识</h2>
-<h3 id="%E6%A8%A1%E7%B3%8A%E5%8C%B9%E9%85%8D" tabindex="-1"><a class="header-anchor" href="#模糊匹配">#</a>模糊匹配</h3>
+<h2 id="正则表达式基本知识"><a class="header-anchor" href="#正则表达式基本知识">#</a>正则表达式基本知识</h2>
+<h3 id="模糊匹配"><a class="header-anchor" href="#模糊匹配">#</a>模糊匹配</h3>
 <table>
 <thead>
 <tr>
@@ -399,7 +399,7 @@
 <blockquote>
 <p>字符集可以只输入确定的几个字符，也可以用 <code>-</code> 表示范围</p>
 </blockquote>
-<h3 id="%E7%89%B9%E6%AE%8A%E5%BA%8F%E5%88%97" tabindex="-1"><a class="header-anchor" href="#特殊序列">#</a>特殊序列</h3>
+<h3 id="特殊序列"><a class="header-anchor" href="#特殊序列">#</a>特殊序列</h3>
 <table>
 <thead>
 <tr>
@@ -458,7 +458,7 @@
 </tr>
 </tbody>
 </table>
-<h3 id="%E4%BD%8D%E7%BD%AE%E6%A0%87%E8%AE%B0" tabindex="-1"><a class="header-anchor" href="#位置标记">#</a>位置标记</h3>
+<h3 id="位置标记"><a class="header-anchor" href="#位置标记">#</a>位置标记</h3>
 <table>
 <thead>
 <tr>
@@ -480,9 +480,9 @@
 </tr>
 </tbody>
 </table>
-<h2 id="c%2B%2B-%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E6%94%AF%E6%8C%81" tabindex="-1"><a class="header-anchor" href="#C-正则表达式支持">#</a>C++ 正则表达式支持</h2>
+<h2 id="C-正则表达式支持"><a class="header-anchor" href="#C-正则表达式支持">#</a>C++ 正则表达式支持</h2>
 <p>C++11 为支持正则表达式新增了若干类，并将这些类封装在头文件 <code>&lt;regex</code> 中。</p>
-<h3 id="%E4%B8%BB%E8%A6%81%E6%A8%A1%E6%9D%BF%E7%B1%BB" tabindex="-1"><a class="header-anchor" href="#主要模板类">#</a>主要模板类</h3>
+<h3 id="主要模板类"><a class="header-anchor" href="#主要模板类">#</a>主要模板类</h3>
 <ul class="lvl-0">
 <li class="lvl-2">
 <p><code>basic_regex</code>：正则表达式对象，为基类，可以直接通过字符串或初始化列表进行构造，支持拷贝与移动；</p>
@@ -494,7 +494,7 @@
 <p><code>match_results</code>：维护表示正则表达式匹配结果的字符序列集合，可以通过 <code>str(int n = 0)</code> 返回第 n 个子匹配结果的字符序列 ；</p>
 </li>
 </ul>
-<h3 id="%E5%8C%B9%E9%85%8D%E7%AE%97%E6%B3%95" tabindex="-1"><a class="header-anchor" href="#匹配算法">#</a>匹配算法</h3>
+<h3 id="匹配算法"><a class="header-anchor" href="#匹配算法">#</a>匹配算法</h3>
 <ul class="lvl-0">
 <li class="lvl-2">
 <p><code>regex_match</code>：检查字符串是否完全匹配；</p>
@@ -506,7 +506,7 @@
 <p><code>regex_replace</code>：以新字符串替换所有匹配的子字符串；</p>
 </li>
 </ul>
-<h3 id="%E4%BB%A3%E7%A0%81%E7%A4%BA%E4%BE%8B" tabindex="-1"><a class="header-anchor" href="#代码示例">#</a>代码示例</h3>
+<h3 id="代码示例"><a class="header-anchor" href="#代码示例">#</a>代码示例</h3>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>完全匹配</span></div><code class="language-cpp">std<span class="token double-colon punctuation">::</span>regex <span class="token function">r</span><span class="token punctuation">(</span><span class="token string">"\\w+day"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 std<span class="token double-colon punctuation">::</span>smatch res<span class="token punctuation">;</span>
 std<span class="token double-colon punctuation">::</span>string <span class="token function">s1</span><span class="token punctuation">(</span><span class="token string">"Monday"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -721,12 +721,6 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -735,8 +729,8 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -752,41 +746,6 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

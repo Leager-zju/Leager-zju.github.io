@@ -326,7 +326,7 @@ const 全称 constant，其指定一个约束，告知编译器该变量无法�
                 <p>const 与 volatile 一起并称 <strong>CV 限定符</strong>，用于指定被声明对象或被命名类型的常量性或易变性。</p>
 <span id="more"></span>
 <p>const 全称 <strong>constant</strong>，其指定一个约束，告知编译器该变量无法被修改。对于那些明确不发生改变的变量，应尽可能使用 <code>const</code>，以获得编译器的帮助。</p>
-<h2 id="const-%E6%99%AE%E9%80%9A%E5%8F%98%E9%87%8F" tabindex="-1"><a class="header-anchor" href="#const-普通变量">#</a>const 普通变量</h2>
+<h2 id="const-普通变量"><a class="header-anchor" href="#const-普通变量">#</a>const 普通变量</h2>
 <p>声明时，<code>const</code> 与 <code>typename</code> 顺序可以互换，并且可以直接初始化常量，之后就不能对常量进行修改了。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">const</span> <span class="token keyword">int</span> a<span class="token punctuation">;</span>         <span class="token comment">// OK!</span>
 <span class="token keyword">int</span> <span class="token keyword">const</span> b <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>     <span class="token comment">// OK!</span>
@@ -336,7 +336,7 @@ a <span class="token operator">=</span> c<span class="token punctuation">;</span
 c <span class="token operator">=</span> a<span class="token punctuation">;</span>               <span class="token comment">// OK!</span>
 
 <span class="token keyword">int</span> <span class="token keyword">const</span> nums<span class="token punctuation">[</span><span class="token number">10</span><span class="token punctuation">]</span><span class="token punctuation">;</span>  <span class="token comment">// OK!</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="const-%E6%8C%87%E9%92%88" tabindex="-1"><a class="header-anchor" href="#const-指针">#</a>const 指针</h2>
+<h2 id="const-指针"><a class="header-anchor" href="#const-指针">#</a>const 指针</h2>
 <p>const 搭配指针使用时，也会出现不同的顺序：</p>
 <ol>
 <li class="lvl-3">
@@ -404,7 +404,7 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
   <span class="token keyword">int</span> <span class="token operator">*</span>p <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">int</span><span class="token operator">*</span><span class="token punctuation">)</span><span class="token operator">&amp;</span>a<span class="token punctuation">;</span>
   <span class="token punctuation">(</span><span class="token operator">*</span>p<span class="token punctuation">)</span><span class="token operator">++</span><span class="token punctuation">;</span> <span class="token comment">// ERROR!</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="const-%E5%BC%95%E7%94%A8" tabindex="-1"><a class="header-anchor" href="#const-引用">#</a>const 引用</h2>
+<h2 id="const-引用"><a class="header-anchor" href="#const-引用">#</a>const 引用</h2>
 <p>修饰引用时，<code>const</code> 只能位于 <code>&amp;</code> 左侧，毕竟引用变量本身一经初始化就无法更改，自带 const 语义。这种情况下，const + 引用均视为<strong>常量引用</strong>，即引用的变量为常量，无法修改。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">const</span> <span class="token keyword">int</span> foo <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
 <span class="token keyword">int</span> bar <span class="token operator">=</span> <span class="token number">2</span><span class="token punctuation">;</span>
@@ -415,7 +415,7 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 <span class="token keyword">int</span><span class="token operator">&amp;</span> <span class="token keyword">const</span> d <span class="token operator">=</span> foo<span class="token punctuation">;</span> <span class="token comment">// ERROR!</span>
 
 <span class="token comment">// a = 1 编译报错</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="const-%E5%87%BD%E6%95%B0" tabindex="-1"><a class="header-anchor" href="#const-函数">#</a>const 函数</h2>
+<h2 id="const-函数"><a class="header-anchor" href="#const-函数">#</a>const 函数</h2>
 <p>const 与函数搭配只有两种情况：</p>
 <ol>
 <li class="lvl-3">
@@ -425,7 +425,7 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 <p><strong>修饰函数返回值</strong>。</p>
 </li>
 </ol>
-<h2 id="const-%E7%B1%BB%E6%88%90%E5%91%98%E5%8F%98%E9%87%8F" tabindex="-1"><a class="header-anchor" href="#const-类成员变量">#</a>const 类成员变量</h2>
+<h2 id="const-类成员变量"><a class="header-anchor" href="#const-类成员变量">#</a>const 类成员变量</h2>
 <p>类中定义常量主要有以下实现方式：</p>
 <ol>
 <li class="lvl-3">
@@ -451,7 +451,7 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 <span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 </li>
 </ol>
-<h2 id="const-%E7%B1%BB%E6%88%90%E5%91%98%E5%87%BD%E6%95%B0" tabindex="-1"><a class="header-anchor" href="#const-类成员函数">#</a>const 类成员函数</h2>
+<h2 id="const-类成员函数"><a class="header-anchor" href="#const-类成员函数">#</a>const 类成员函数</h2>
 <p>除了普通函数的用法外，类成员函数还可以在函数体前加上 <code>const</code> 修饰符，表明该成员函数不会修改任何非 <a href="../C-Mutable">mutable</a> 关键字修饰的成员变量。此时 this 隐式为 <code>const *</code>（更严谨地说应该为 <code>const *const</code>，因为 this 不可修改指向），表明在该函数体内，编译器将该对象视为 const 对象。对于 const 对象，只能调用 const 成员函数，因为非 const 函数无法保证不会修改成员变量。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Foo</span> <span class="token punctuation">{</span>
  <span class="token keyword">public</span><span class="token operator">:</span>
@@ -485,7 +485,7 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 <span class="token comment">// non-const</span>
 <span class="token comment">// const</span>
 <span class="token comment">// const</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E4%B8%8E%E5%AE%8F%E5%AE%9A%E4%B9%89%E7%9A%84%E5%8C%BA%E5%88%AB" tabindex="-1"><a class="header-anchor" href="#与宏定义的区别">#</a>与宏定义的区别</h2>
+<h2 id="与宏定义的区别"><a class="header-anchor" href="#与宏定义的区别">#</a>与宏定义的区别</h2>
 <table>
 <thead>
 <tr>
@@ -699,12 +699,6 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -713,8 +707,8 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -730,41 +724,6 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

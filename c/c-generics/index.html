@@ -326,10 +326,10 @@
             <div id="articleContent">
                 <p><strong>泛型编程</strong>是程序设计语言的一种风格或范式，允许程序员在编写代码时使用一些以后才指定的类型，在实例化时作为参数指明这些类型。在 C++ 里，这是与 OOP 并列的一大分支，通过<strong>模板</strong>来实现。</p>
 <span id="more"></span>
-<h2 id="why-%E6%A8%A1%E6%9D%BF%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#Why-模板？">#</a>Why 模板？</h2>
+<h2 id="Why-模板？"><a class="header-anchor" href="#Why-模板？">#</a>Why 模板？</h2>
 <p>现在有一个需求，就是写一个简单的 <code>swap</code> 函数，要求支持所有内置类型。在模板出来以前，C++ 允许同名函数重载，于是我们可以针对不同类型分别定义。<code>int</code>、<code>double</code>、<code>char</code>、……写着写着发现，我们最后需要实现的函数的数量是所有内置类型总数的平方！并且一旦后续添加了更多类型，我们又要编写更多函数！（不失为一个提高代码量的好方法，但毫无意义）并且维护代码的成本变得极高，一旦某一个 <code>swap</code> 函数出了问题，我们需要在巨大的头文件中找到那个出错的函数，仿佛大海捞针一般。</p>
 <p>针对这些缺点，C++ 提出了<strong>泛型编程</strong>，也就是写一种与类型无关的代码，或者说是提供一个模板，提高代码的复用性。所谓<strong>模板</strong>，便是给定一套规范以及一定的占位符，根据用户后续对占位符进行不同形式的填充来产生不同的效果。C++ 里可以通过模板来定义一族函数、一族类，甚至是一族变量。</p>
-<h2 id="%E5%87%BD%E6%95%B0%E6%A8%A1%E6%9D%BF" tabindex="-1"><a class="header-anchor" href="#函数模板">#</a>函数模板</h2>
+<h2 id="函数模板"><a class="header-anchor" href="#函数模板">#</a>函数模板</h2>
 <p><strong>函数模板</strong>定义一族函数。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">template</span><span class="token operator">&lt;</span>模板形参列表<span class="token operator">&gt;</span> 函数声明<span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p><strong>模板形参</strong>可以是以下项的任意排列组合：</p>
@@ -383,7 +383,7 @@
 <blockquote>
 <p>实际上，调用顺序为<strong>普通函数 &gt; 模板特化函数 &gt; 模板函数</strong>。</p>
 </blockquote>
-<h2 id="%E7%B1%BB%E6%A8%A1%E6%9D%BF" tabindex="-1"><a class="header-anchor" href="#类模板">#</a>类模板</h2>
+<h2 id="类模板"><a class="header-anchor" href="#类模板">#</a>类模板</h2>
 <p>与函数模板一样，<strong>类模板</strong>定义一族类。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">template</span><span class="token operator">&lt;</span>模板形参列表<span class="token operator">&gt;</span> 类声明<span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>模板形参列表与函数模板完全一致。<strong>注意</strong>，类模板自身并不是类型、对象或任何其他实体，不会从只包含模板定义的源文件生成任何代码。类模板同样只有<strong>实例化</strong>后才会有代码出现，并且也支持<strong>类模板实参推导</strong>，即尽可能从类构造函数实参推导缺失的模板实参。此外，类模板的<strong>特化</strong>还进一步分为了<strong>全特化</strong>与<strong>偏特化</strong>。</p>
@@ -455,7 +455,7 @@
 <span class="token comment">// specialization &lt;First, char&gt;: 2.7 a</span>
 <span class="token comment">// specialization &lt;int, char&gt;: 1 b</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>与函数模板不同的是，类模板不能与普通同名类共存，即若上述代码中又定义了一个 <code>class MyPair</code>，则编译报错。</p>
-<h2 id="%E6%B4%BE%E7%94%9F" tabindex="-1"><a class="header-anchor" href="#派生">#</a>派生</h2>
+<h2 id="派生"><a class="header-anchor" href="#派生">#</a>派生</h2>
 <p>类模板、模板类和普通类之间可以互相派生。它们之间的派生关系有以下几种情况。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>模板类派生</span></div><code class="language-cpp"><span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">T</span><span class="token operator">&gt;</span>
 <span class="token keyword">class</span> <span class="token class-name">Base1</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
@@ -479,7 +479,7 @@
 <span class="token keyword">class</span> <span class="token class-name">Derive31</span><span class="token operator">:</span> <span class="token base-clause"><span class="token class-name">Base3</span></span> <span class="token punctuation">{</span> T val<span class="token punctuation">;</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
 
 <span class="token comment">// case 3.2: 普通类派生普通类，略</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E5%A4%9A%E6%80%81" tabindex="-1"><a class="header-anchor" href="#多态">#</a>多态</h2>
+<h2 id="多态"><a class="header-anchor" href="#多态">#</a>多态</h2>
 <p>子类和父类的模板参数列表可以不一样，但必须一一对应。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>模板中的多态</span></div><code class="language-cpp"><span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">T</span><span class="token punctuation">,</span> <span class="token keyword">class</span> <span class="token class-name">U</span><span class="token operator">&gt;</span>
 <span class="token keyword">class</span> <span class="token class-name">Base</span> <span class="token punctuation">{</span>
@@ -515,7 +515,7 @@
 <blockquote>
 <p>上面代码写的不规范，按道理有虚函数的类应该为其设置一个虚析构函数，上面分别有两个特化的基类 <code>Base&lt;int, char&gt;</code> 与 <code>Base&lt;int, double</code>，就需要分别定义两个特化类并设置虚析构函数。</p>
 </blockquote>
-<h2 id="%E6%88%90%E5%91%98%E6%A8%A1%E6%9D%BF" tabindex="-1"><a class="header-anchor" href="#成员模板">#</a>成员模板</h2>
+<h2 id="成员模板"><a class="header-anchor" href="#成员模板">#</a>成员模板</h2>
 <p>任意类都可以在体内嵌套声明类模板/函数模板。规则：</p>
 <ol>
 <li class="lvl-3">
@@ -528,7 +528,7 @@
 <p>可以声明具有相同名字的非模板成员函数和模板成员函数。在冲突的情况下，执行效果如同之前讨论的函数模板那样；</p>
 </li>
 </ol>
-<h2 id="%E5%BD%A2%E5%8F%82%E5%8C%85" tabindex="-1"><a class="header-anchor" href="#形参包">#</a>形参包</h2>
+<h2 id="形参包"><a class="header-anchor" href="#形参包">#</a>形参包</h2>
 <p>形参包分为两种：</p>
 <ol>
 <li class="lvl-3">
@@ -554,8 +554,8 @@ std<span class="token double-colon punctuation">::</span>tuple<span class="token
 <span class="token function">f</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>       <span class="token comment">// OK：args 不包含实参</span>
 <span class="token function">f</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>      <span class="token comment">// OK：args 包含一个实参：int</span>
 <span class="token function">f</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// OK：args 包含两个实参：int 与 double</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E4%B8%80%E4%BA%9B%E7%96%91%E9%97%AE" tabindex="-1"><a class="header-anchor" href="#一些疑问">#</a>一些疑问</h2>
-<h3 id="why-%E9%9D%9E%E7%B1%BB%E5%9E%8B%E6%A8%A1%E6%9D%BF%E5%BD%A2%E5%8F%82%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#Why-非类型模板形参？">#</a>Why 非类型模板形参？</h3>
+<h2 id="一些疑问"><a class="header-anchor" href="#一些疑问">#</a>一些疑问</h2>
+<h3 id="Why-非类型模板形参？"><a class="header-anchor" href="#Why-非类型模板形参？">#</a>Why 非类型模板形参？</h3>
 <blockquote>
 <p>把非类型模板形参放到函数参数列表里，或者类的构造函数里，不是效果也差不多吗，为什么要多此一举设置一个非类型模板形参呢？</p>
 </blockquote>
@@ -564,7 +564,7 @@ std<span class="token double-colon punctuation">::</span>tuple<span class="token
 <blockquote>
 <p>本质上相当于是编译器为 <code>tuple</code> 里的每个元素都生成一个对应的获取函数。</p>
 </blockquote>
-<h3 id="%E7%B1%BB%E6%A8%A1%E6%9D%BF%E7%9A%84%E5%A3%B0%E6%98%8E%E5%92%8C%E5%AE%9E%E7%8E%B0%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E8%83%BD%E6%94%BE%E5%9C%A8%E4%B8%8D%E5%90%8C%E7%9A%84%E6%96%87%E4%BB%B6%E9%87%8C%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#类模板的声明和实现为什么不能放在不同的文件里？">#</a>类模板的声明和实现为什么不能放在不同的文件里？</h3>
+<h3 id="类模板的声明和实现为什么不能放在不同的文件里？"><a class="header-anchor" href="#类模板的声明和实现为什么不能放在不同的文件里？">#</a>类模板的声明和实现为什么不能放在不同的文件里？</h3>
 <p>对于普通类而言，声明可以放在 <code>.h</code> 文件中，而成员函数的实现可以写在 <code>.cpp</code> 里。这是因为多个 <code>.cpp</code> 会先被编译成若干目标代码文件 <code>.obj</code>，最后链接到一起形成可执行文件。在编译的过程中，编译器能够知道足够信息，比如形参类型，从而根据 <code>.cpp</code> 里的成员函数实现生成目标代码。</p>
 <blockquote>
 <p>这也有利于对外隐藏实现，直接将实现文件打包成库，和头文件一起发布。</p>
@@ -792,12 +792,6 @@ T test<span class="token double-colon punctuation">::</span><span class="token f
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -806,8 +800,8 @@ T test<span class="token double-colon punctuation">::</span><span class="token f
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -823,41 +817,6 @@ T test<span class="token double-colon punctuation">::</span><span class="token f
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

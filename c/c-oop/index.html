@@ -328,11 +328,11 @@ C++11 引">
             <div id="articleContent">
                 <p><strong>面向对象程序设计</strong>（Object-oriented programming, OOP）是种具有对象概念的程序编程典范，同时也是一种程序开发的抽象方针。</p>
 <span id="more"></span>
-<h2 id="%E5%B0%81%E8%A3%85" tabindex="-1"><a class="header-anchor" href="#封装">#</a>封装</h2>
-<h3 id="%E8%A3%85" tabindex="-1"><a class="header-anchor" href="#装">#</a>装</h3>
+<h2 id="封装"><a class="header-anchor" href="#封装">#</a>封装</h2>
+<h3 id="装"><a class="header-anchor" href="#装">#</a>装</h3>
 <p><strong>装</strong>是指把数据与操作这些数据的函数绑定到一块，抽象成一个<strong>类</strong>。</p>
 <p>C++11 引入移动语义之后，对于一个<strong>空类</strong>，编译器将为其默认生成以下 6 种特殊成员函数，且访问级别默认为 <code>public</code>（见下文）：<strong>默认构造函数</strong>、<strong>析构函数</strong>、<strong>拷贝构造函数</strong>、<strong>拷贝赋值运算符</strong>、<strong>移动构造函数</strong>、<strong>移动赋值运算符</strong>。</p>
-<h4 id="%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0" tabindex="-1"><a class="header-anchor" href="#构造函数">#</a>构造函数</h4>
+<h4 id="构造函数"><a class="header-anchor" href="#构造函数">#</a>构造函数</h4>
 <p>所谓<strong>构造函数</strong>，便是以类名为函数名的一种特殊函数，无返回值，任意一个对象在<strong>创建</strong>时都会自动调用（在成员变量初始化之后），完成类成员变量的初始化以及基类（见下文）的初始化等工作。</p>
 <p>其中，<strong>默认构造函数</strong>是初始化构造函数的一种特殊（无参）形式。所谓初始化构造函数，就是<strong>不以其他同类对象引用为参数</strong>的构造函数，即：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Foo</span> <span class="token punctuation">{</span>
@@ -366,7 +366,7 @@ C++11 引">
 <p>关于<strong>移动语义</strong>，请参见<a href="../../c/c-value">此文</a>。</p>
 </blockquote>
 <p><strong>注意</strong>：想要用到的构造函数需声明为 <code>public</code>，否则创建对象时将报错，下面也是一样的~</p>
-<h4 id="%E8%B5%8B%E5%80%BC%E8%BF%90%E7%AE%97%E7%AC%A6" tabindex="-1"><a class="header-anchor" href="#赋值运算符">#</a>赋值运算符</h4>
+<h4 id="赋值运算符"><a class="header-anchor" href="#赋值运算符">#</a>赋值运算符</h4>
 <p>与构造函数不同，赋值运算符仅在<strong>对象创建完毕</strong>后才能调用，拷贝语义/移动语义与前面提到的类似。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Foo</span> <span class="token punctuation">{</span>
  <span class="token keyword">public</span><span class="token operator">:</span>
@@ -378,7 +378,7 @@ C++11 引">
 </blockquote>
 <p>那么下面这段代码，执行的是哪个函数呢？【<font color="white">拷贝构造函数</font>】</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp">Foo foo1 <span class="token operator">=</span> foo2<span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<h4 id="%E6%9E%90%E6%9E%84%E5%87%BD%E6%95%B0" tabindex="-1"><a class="header-anchor" href="#析构函数">#</a>析构函数</h4>
+<h4 id="析构函数"><a class="header-anchor" href="#析构函数">#</a>析构函数</h4>
 <p>析构函数以类名为函数名，需额外在前面加一个<code>~</code>，没有返回值，无需显式调用，一个对象的生命周期结束时，就会自动调用析构函数。析构函数主要完成释放对象内存的工作，但编译器默认生成析构函数只是尸位素餐，实际上什么都不干，真想利用析构函数做点什么的话，则需要自定义析构函数。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Foo</span> <span class="token punctuation">{</span>
  <span class="token keyword">public</span><span class="token operator">:</span>
@@ -390,7 +390,7 @@ C++11 引">
 <blockquote>
 <p>析构函数如果声明为 <code>private</code>，则<strong>无法在栈上创建对象</strong>。一般情况下都是要声明为 <code>public</code> 的。</p>
 </blockquote>
-<h3 id="%E5%B0%81" tabindex="-1"><a class="header-anchor" href="#封">#</a>封</h3>
+<h3 id="封"><a class="header-anchor" href="#封">#</a>封</h3>
 <p><strong>封</strong>是指将这些数据与函数对外部隐藏，避免干扰与误用，从而确保安全。C++ 通过三大<strong>访问修饰符</strong>支持这一特性，可访问级别默认为 <code>private</code>。</p>
 <table>
 <thead>
@@ -438,7 +438,7 @@ C++11 引">
   std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"value is "</span> <span class="token operator">&lt;&lt;</span> foo<span class="token punctuation">.</span>value<span class="token punctuation">;</span>      <span class="token comment">// ERROR! Foo::value is private</span>
   std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"value is "</span> <span class="token operator">&lt;&lt;</span> foo<span class="token punctuation">.</span><span class="token function">getValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// OK! Foo::getValue() is public</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E7%BB%A7%E6%89%BF" tabindex="-1"><a class="header-anchor" href="#继承">#</a>继承</h2>
+<h2 id="继承"><a class="header-anchor" href="#继承">#</a>继承</h2>
 <p><strong>继承</strong>允许一个类（<strong>派生类</strong>）在另一个类（<strong>基类</strong>）的基础上进行设计，这使得创建和维护一个应用程序变得更容易，也达到了重用代码功能和提高执行效率的效果。</p>
 <p>同样的，继承方式也有<strong>公有继承</strong>(public)，<strong>保护继承</strong>(protected)，<strong>私有继承</strong>(private)三种，如果未显式声明继承方式，则默认为私有继承。</p>
 <ul class="lvl-0">
@@ -479,7 +479,7 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 <span class="token comment">// 0x78fe10 1 2</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>可以看到，<code>Derived</code> 和 <code>Base</code> 的类大小分别为 4 和 8，恰好是 1 个 int 和 2 个 int 的大小，并且将 <code>Derived</code> 对象地址重新解读为 <code>int*</code> 时，发现有连续的一片内存分别存储了两个 int 值 1 与 2——这恰好是 <code>Base</code> 和 <code>Derived</code> 两个类对 <code>value</code> 初始化的值。这样一来就明朗许多——<code>Derived</code> 类对象的内存里最开始那一部分（4B）是专门分配给基类 <code>Base</code> 的，并且其内存布局为：</p>
 <img src="image-20230215125309320.png" alt="image-20230215125309320" style="zoom:50%;">
-<h3 id="%E8%99%9A%E7%BB%A7%E6%89%BF" tabindex="-1"><a class="header-anchor" href="#虚继承">#</a>虚继承</h3>
+<h3 id="虚继承"><a class="header-anchor" href="#虚继承">#</a>虚继承</h3>
 <p>再来点更复杂的情况：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>菱形继承</span></div><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Base</span> <span class="token punctuation">{</span>
  <span class="token keyword">public</span><span class="token operator">:</span>
@@ -551,7 +551,7 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 <blockquote>
 <p>多继承在现实应用场景中容易出问题，尽量避免使用多继承。</p>
 </blockquote>
-<h3 id="%E6%B4%BE%E7%94%9F%E7%B1%BB%E6%9E%84%E9%80%A0%E9%A1%BA%E5%BA%8F" tabindex="-1"><a class="header-anchor" href="#派生类构造顺序">#</a>派生类构造顺序</h3>
+<h3 id="派生类构造顺序"><a class="header-anchor" href="#派生类构造顺序">#</a>派生类构造顺序</h3>
 <p>直接贴代码，有助于理解。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>派生类构造顺序</span></div><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">B1</span> <span class="token punctuation">{</span>
  <span class="token keyword">public</span><span class="token operator">:</span>
@@ -615,10 +615,10 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 <p>步骤 1, 2 中的类仍按同样的顺序递归构造。</p>
 </blockquote>
 <p><strong>析构顺序</strong>与构造顺序恰好相反。</p>
-<h2 id="%E5%A4%9A%E6%80%81" tabindex="-1"><a class="header-anchor" href="#多态">#</a>多态</h2>
+<h2 id="多态"><a class="header-anchor" href="#多态">#</a>多态</h2>
 <p><strong>多态</strong>，即多种形态，能够使得不同的对象去完成同一件事时，产生不同的动作和结果。最常见的多态有<strong>静态多态</strong>与<strong>动态多态</strong>两种，</p>
-<h3 id="%E9%9D%99%E6%80%81%E5%A4%9A%E6%80%81" tabindex="-1"><a class="header-anchor" href="#静态多态">#</a>静态多态</h3>
-<h4 id="%E9%87%8D%E8%BD%BD" tabindex="-1"><a class="header-anchor" href="#重载">#</a>重载</h4>
+<h3 id="静态多态"><a class="header-anchor" href="#静态多态">#</a>静态多态</h3>
+<h4 id="重载"><a class="header-anchor" href="#重载">#</a>重载</h4>
 <p><strong>重载</strong>可以实现<strong>静态多态</strong>。编译器编译的过程中，首先遇到函数的声明，此时会将函数的参数类型也加到函数符号中，而不仅仅是函数名，比如编译 <code>int foo(int a, char b)</code> 最后得到的符号可能类似于 <code>foo_int_char</code> 这样。编译器后续遇到函数调用时，根据传入实参类型，去符号表里找调用的是哪个函数。</p>
 <blockquote>
 <p>所以仅有返回值不一样的两个同名同参数列表函数并不构成重载。</p>
@@ -639,7 +639,7 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 <span class="token comment">// char 2</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>而 C 语言并不支持函数重载，因此编译 .c 的函数时不会带上函数的参数类型，一般只包括函数名。根据这一结论，如果想在 C++ 中调用 C 版本的函数，就需要用 <code>extern "C"</code> 进行修饰，来告诉编译器不要修改该函数名。</p>
 <p>否则，它会按照重整后的名字去目标文件（.obj）中去寻找对应的函数，而目标文件中存放的却是不带参数类型的 C 版本的函数，名字对不上，就找不到。</p>
-<h4 id="%E5%A5%87%E5%BC%82%E8%BF%94%E5%9B%9E%E6%A8%A1%E6%9D%BF%E6%A8%A1%E5%BC%8F(curiously-recurring-template-pattern%2C-crtp)" tabindex="-1"><a class="header-anchor" href="#奇异返回模板模式-curiously-recurring-template-pattern-CRTP">#</a>奇异返回模板模式(curiously recurring template pattern, CRTP)</h4>
+<h4 id="奇异返回模板模式-curiously-recurring-template-pattern-CRTP"><a class="header-anchor" href="#奇异返回模板模式-curiously-recurring-template-pattern-CRTP">#</a>奇异返回模板模式(curiously recurring template pattern, CRTP)</h4>
 <p>CRTP 是一种 C++ 的设计模式，精巧地结合了继承和模板编程的技术，也可以用于实现静态多态。其原理可以由以下代码简述：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>CRTP</span></div><code class="language-cpp"><span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">T</span><span class="token operator">&gt;</span>
 <span class="token keyword">class</span> <span class="token class-name">Base</span> <span class="token punctuation">{</span>
@@ -672,7 +672,7 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 <p>一个很经典的例子就是：一个类可以从 <code>std::enable_shared_from_this&lt;&gt;</code> 中派生，继而获得了调用 <code>shared_from_this()</code> 的能力。即若一个类对象已经被若干 shared pointer 指向，那么调用该函数可以返回一个与这些 shared pointer 共享计数器的新 sp，而不是用 <code>std::make_shared(this)</code> 返回一个计数器为 1 的 sp，防止 double free。</p>
 </blockquote>
 <p>🔔 但不足之处在于，因为没有虚函数，就不会进行运行时动态绑定，也就无法生成虚函数表与获取 RTTI。</p>
-<h3 id="%E5%8A%A8%E6%80%81%E5%A4%9A%E6%80%81" tabindex="-1"><a class="header-anchor" href="#动态多态">#</a>动态多态</h3>
+<h3 id="动态多态"><a class="header-anchor" href="#动态多态">#</a>动态多态</h3>
 <p><strong>动态多态</strong>依靠类的<strong>虚函数</strong>实现，在运行时完成绑定，编译器根据对象类型执行相应函数。</p>
 <p>先来说说什么是虚函数。前面提到了虚继承，用到 <code>virtual</code> 关键字，事实上，如果一个函数被 <code>virtual</code> 修饰，那么这个函数就成为了<strong>虚函数</strong>。正常情况下，虚函数表现的和普通函数一样，而一旦通过<strong>基类指针</strong>或<strong>引用</strong>调用虚函数，多态发生了。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>动态多态</span></div><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Base</span> <span class="token punctuation">{</span>
@@ -770,7 +770,7 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 <span class="token comment">// Final foo</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>继承族谱分别为 A-&gt;B-&gt;C 与 Base-&gt;Derived-&gt;Final，并且均为公有继承，于是<strong>协变</strong>成立。</p>
 </blockquote>
-<h3 id="%E7%BA%AF%E8%99%9A%E5%87%BD%E6%95%B0" tabindex="-1"><a class="header-anchor" href="#纯虚函数">#</a>纯虚函数</h3>
+<h3 id="纯虚函数"><a class="header-anchor" href="#纯虚函数">#</a>纯虚函数</h3>
 <p>说了那么多，虚函数到底有啥用？</p>
 <p>我们目前已经掌握的知识有，可以通过基类指针或引用绑定派生类，并在调用虚函数时实现多态，根据这一特性，如果希望一个函数形参面向目标为所有族谱成员的话，就不需要对所有成员挨个实现，直接将形参设为基类指针，在需要实现多态的功能处设为虚函数即可。这和 <code>std::function</code> 一样，都起到<strong>类型擦除</strong>的作用。</p>
 <blockquote>
@@ -778,7 +778,7 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 </blockquote>
 <p>以及，还有一个特殊的虚函数，称为<strong>纯虚函数</strong>，声明为 <code>virtual type funcname() = 0;</code>。</p>
 <p>拥有纯虚函数的类称为<strong>抽象类</strong>，无法实例化，而仅拥有纯虚函数的类称为<strong>接口类</strong>。纯虚函数只是一个接口（interface），是一个函数的声明而已，需要留给派生类去进行实现。只有实现了该接口的派生类才能进行实例化，否则依然是抽象类，无法实例化。</p>
-<h3 id="%E6%B3%A8%E6%84%8F" tabindex="-1"><a class="header-anchor" href="#注意">#</a>注意</h3>
+<h3 id="注意"><a class="header-anchor" href="#注意">#</a>注意</h3>
 <p>功能如此强大的特性，必然涉及到一些<strong>限制 or 注意事项</strong>，总的来说有以下几点：</p>
 <ol>
 <li class="lvl-3">
@@ -797,7 +797,7 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 <p>当可能用到基类指针/引用绑定派生类时，基类的析构函数必须为虚函数。这是因为当出现 <code>Base* ptr = new Derived</code> 这样的代码时，虽然 <code>ptr</code> 是 <code>Base</code> 类的指针，但我们实际上还分配了一个 <code>Derived</code> 类的空间，如果析构函数非虚，则会执行 <code>Base</code> 类的析构函数，而属于 <code>Derived</code> 的那一部分并没有被析构。为了程序安全运行，我们应该要调用派生类的析构函数，也就是通过将基类析构函数设为虚函数来实现；</p>
 </li>
 </ol>
-<h3 id="%E8%AF%AF%E5%8C%BA" tabindex="-1"><a class="header-anchor" href="#误区">#</a>误区</h3>
+<h3 id="误区"><a class="header-anchor" href="#误区">#</a>误区</h3>
 <p>之所以说动态多态是在运行时绑定，是因为编译器<strong>可能</strong>无法在编译时期确定指针指向的到底是哪个类型的对象，只有在运行时才能去对应的虚函数表中找到对应虚函数并执行，比如将指针或引用作为函数入参的情况。</p>
 <p>但「虚函数一定是运行期间绑定」这一说法是<strong>错误</strong>的，如果基类 <code>B</code> 的指针 <code>B* foo</code> 指向的某个对象类型，其派生序列中某个祖先 <code>D</code>（同样为 <code>B</code> 的派生类）对虚函数 <code>func()</code> 增加了 <strong><code>final</code></strong> 关键字，那么调用 <code>Foo-&gt;func()</code> 时，编译器会在<strong>编译时期</strong>直接生成 <code>D</code> 类型的 <code>func()</code> 版本，而不是在运行时去查虚函数表。毕竟后面没法重写了，那只能看作调用 <code>D::func()</code> 了。直接用 <code>final</code> 关键字修饰类型 <code>D</code> 也是一样的。</p>
 <p>同样的，如果<strong>指定了调用版本</strong>，如 <code>Foo-&gt;B::func()</code>，也会在<strong>编译时期</strong>生成 <code>B</code> 类型的 <code>func()</code> 版本。</p>
@@ -806,8 +806,8 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 Base <span class="token operator">*</span>b <span class="token operator">=</span> <span class="token operator">&amp;</span>d<span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 <p>此时还要傻乎乎地等到运行时才去查表，而不做任何优化，这样的编译器我认为是没有市场可言的。</p>
 <p>具体见<a target="_blank" rel="noopener" href="https://www.zhihu.com/question/491602524/answer/2165605549">此文</a>。</p>
-<h2 id="%E4%B8%8E-struct-%E7%9A%84%E5%BC%82%E5%90%8C" tabindex="-1"><a class="header-anchor" href="#与-struct-的异同">#</a>与 struct 的异同</h2>
-<h3 id="%E7%9B%B8%E5%90%8C%E4%B9%8B%E5%A4%84" tabindex="-1"><a class="header-anchor" href="#相同之处">#</a>相同之处</h3>
+<h2 id="与-struct-的异同"><a class="header-anchor" href="#与-struct-的异同">#</a>与 struct 的异同</h2>
+<h3 id="相同之处"><a class="header-anchor" href="#相同之处">#</a>相同之处</h3>
 <ol>
 <li class="lvl-3">
 <p>都能在体内定义成员变量、成员函数，以及六大特殊成员函数；</p>
@@ -819,7 +819,7 @@ Base <span class="token operator">*</span>b <span class="token operator">=</span
 <p>都能实现三大访问级别控制；</p>
 </li>
 </ol>
-<h3 id="%E4%B8%8D%E5%90%8C%E4%B9%8B%E5%A4%84" tabindex="-1"><a class="header-anchor" href="#不同之处">#</a>不同之处</h3>
+<h3 id="不同之处"><a class="header-anchor" href="#不同之处">#</a>不同之处</h3>
 <ol>
 <li class="lvl-3">
 <p><code>struct</code> 默认 public，而 <code>class</code> 默认 private；</p>
@@ -832,8 +832,8 @@ Base <span class="token operator">*</span>b <span class="token operator">=</span
 </li>
 </ol>
 <p><code>struct</code> 是不同数据类型的集合体，更多被认为是一种自定义复合数据类型，从而更注重数据整合与使用；而 <code>class</code> 则是一个对象的方法与属性的集合，更注重数据安全性。</p>
-<h2 id="%E8%99%9A%E7%BB%A7%E6%89%BF%E3%80%81%E8%99%9A%E5%87%BD%E6%95%B0%E7%9A%84%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B" tabindex="-1"><a class="header-anchor" href="#虚继承、虚函数的内存模型">#</a>虚继承、虚函数的内存模型</h2>
-<h3 id="%E8%99%9A%E5%87%BD%E6%95%B0%E8%A1%A8" tabindex="-1"><a class="header-anchor" href="#虚函数表">#</a>虚函数表</h3>
+<h2 id="虚继承、虚函数的内存模型"><a class="header-anchor" href="#虚继承、虚函数的内存模型">#</a>虚继承、虚函数的内存模型</h2>
+<h3 id="虚函数表"><a class="header-anchor" href="#虚函数表">#</a>虚函数表</h3>
 <p>现在有个很大的问题：C++ 是如何实现多态的？</p>
 <p>先看下面这段代码。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>main.cpp</span></div><code class="language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;iostream&gt;</span></span>
@@ -950,10 +950,10 @@ $ gdb m
 <blockquote>
 <p>更详细的关于虚函数内存模型的机制可以看<a target="_blank" rel="noopener" href="https://blog.twofei.com/496/">这篇文章</a>。</p>
 </blockquote>
-<h3 id="%E8%BF%90%E8%A1%8C%E6%97%B6%E5%86%B3%E8%AE%AE" tabindex="-1"><a class="header-anchor" href="#运行时决议">#</a>运行时决议</h3>
+<h3 id="运行时决议"><a class="header-anchor" href="#运行时决议">#</a>运行时决议</h3>
 <p>我们现在知道，每个（派生关系中有虚函数的）类对象在实例化时都会有若干张虚函数表，当使用基类指针指向派生类对象并调用虚函数时，通过虚函数表可以查到对应的函数指针。那么问题来了，虚函数表的表项是通过何种方式进行索引的？或者说，调用 <code>base_ptr-&gt;foo()</code> 是怎么索引到虚函数表中正确的那一项呢？</p>
 <p>那么需要引入一个概念，叫<strong>运行时决议</strong>，即运行时确定调用函数的地址。在多态场景下，就是编译完后通过指令，去对象中的虚表里找到相应虚函数并运行。这一决议是在汇编级别实现的，暂时只学到这。</p>
-<h3 id="%E8%99%9A%E7%BB%A7%E6%89%BF-1" tabindex="-1"><a class="header-anchor" href="#虚继承-2">#</a>虚继承</h3>
+<h3 id="虚继承-2"><a class="header-anchor" href="#虚继承-2">#</a>虚继承</h3>
 <p>虚继承是用于解决菱形继承问题的，通过共享虚基类来消除歧义。那么<strong>共享</strong>这一功能是如何实现的？且看代码。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>main.cpp</span></div><code class="language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;iostream&gt;</span></span>
 
@@ -1234,12 +1234,6 @@ vptr_Child2 --&gt;  +------------------+        0x555555557cb8<span aria-hidden=
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -1248,8 +1242,8 @@ vptr_Child2 --&gt;  +------------------+        0x555555557cb8<span aria-hidden=
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -1265,41 +1259,6 @@ vptr_Child2 --&gt;  +------------------+        0x555555557cb8<span aria-hidden=
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

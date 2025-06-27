@@ -328,8 +328,8 @@
             <div id="articleContent">
                 <p>本 Project 需要我们实现基于 MVCC 的事务模块。</p>
 <span id="more"></span>
-<h2 id="%E6%80%9D%E8%B7%AF" tabindex="-1"><a class="header-anchor" href="#思路">#</a>思路</h2>
-<h3 id="part-a-mvcc-txn" tabindex="-1"><a class="header-anchor" href="#Part-A-Mvcc-Txn">#</a>Part A Mvcc Txn</h3>
+<h2 id="思路"><a class="header-anchor" href="#思路">#</a>思路</h2>
+<h3 id="Part-A-Mvcc-Txn"><a class="header-anchor" href="#Part-A-Mvcc-Txn">#</a>Part A Mvcc Txn</h3>
 <p>需要实现的代码在文件夹 <code>kv/transaction/mvcc</code> 下。</p>
 <p>这一 part 需要我们实现支持 MVCC(多版本并发控制, Multiversion Concurrency Control) 的事务 api。</p>
 <p>一个事务在时间点 <code>t</code> 处新建时，会被赋予当前存储的 <code>Reader</code> 以及时间戳 <code>StartTS = t</code>。所有的 api 相关操作都是基于时间线来进行处理。</p>
@@ -366,9 +366,9 @@
 <blockquote>
 <p>存储按 key 字母序递增排序。同个 key 按存储时间戳降序排序，即越新的在越前面。</p>
 </blockquote>
-<h4 id="1-put%2Fdelete" tabindex="-1"><a class="header-anchor" href="#1-Put-Delete">#</a>1 Put/Delete</h4>
+<h4 id="1-Put-Delete"><a class="header-anchor" href="#1-Put-Delete">#</a>1 Put/Delete</h4>
 <p>所有写操作都只需要为事务的 <code>writes</code> 切片添加新的 <code>Modify</code> 即可。注意使用实现好的 <code>EncodeKey()</code> 函数将 Key 重新编码为正确格式，以及使用 <code>engine_util</code> 包下的三个 CF 常量: <code>CfDefault</code>, <code>CfLock</code>, <code>CfWrite</code>。</p>
-<h4 id="2-get" tabindex="-1"><a class="header-anchor" href="#2-Get">#</a>2 Get</h4>
+<h4 id="2-Get"><a class="header-anchor" href="#2-Get">#</a>2 Get</h4>
 <p>对于 <code>Lock</code> 的读取是简单的，因为任意一个 <code>UserKey</code> 只会对于一个 <code>Lock</code> 变量，调用 <code>txn.Reader.GetCF()</code> 后进行 <code>ParseLock()</code> 即可。</p>
 <p>对于 <code>Value</code> 的读取返回在当前时间戳<strong>有效</strong>的值，则需要考虑在当前事务之前最后一个提交的 <code>Write</code>：</p>
 <ul class="lvl-0">
@@ -397,10 +397,10 @@
 <blockquote>
 <p>用 <code>IterCF()</code> 获取迭代器，因为排序方法的限制，不能用 <code>iter.Seek()</code>，这只会得到 <code>commit &lt;= txn.StartTs</code> 的 <code>Write</code>（即前文提到的 <code>LastCommitWrite</code>）。需要遍历 <code>CfWrite</code> 下的所有 K/V。</p>
 </blockquote>
-<h3 id="part-b-tinykv-server-1" tabindex="-1"><a class="header-anchor" href="#Part-B-TinyKV-Server-1">#</a>Part B TinyKV Server 1</h3>
+<h3 id="Part-B-TinyKV-Server-1"><a class="header-anchor" href="#Part-B-TinyKV-Server-1">#</a>Part B TinyKV Server 1</h3>
 <p>需要实现的代码在文件夹 <code>kv/server</code> 下。</p>
 <p>这一 Part 需要我们实现 TinyKV Server 的三大基本 RPC api。</p>
-<h4 id="1-kvget" tabindex="-1"><a class="header-anchor" href="#1-KvGet">#</a>1 KvGet</h4>
+<h4 id="1-KvGet"><a class="header-anchor" href="#1-KvGet">#</a>1 KvGet</h4>
 <p><code>KvGet</code> 实现单键读取。对于一个给定的 <code>Key</code> 以及当前时间戳 <code>Version</code>，首先需要检查当前是否被上锁，如果是，则说明必然有某个事务正在对其进行写操作，需要向客户端报告错误。</p>
 <blockquote>
 <p>一把锁的有效时间范围在 <code>[lock.Ts, lock.Ts + lock.Ttl]</code> 中（如果 <code>lock.Ttl = 0</code> 则表明永久有效，直到被删除）。</p>
@@ -414,7 +414,7 @@
   <span class="token keyword">return</span> response<span class="token punctuation">,</span> <span class="token boolean">nil</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>如果未上锁，则正式读取，调用 <code>txn.GetValue()</code> 即可。如果返回值为 <code>nil</code> 则修改 <code>response.NotFound = true</code>。</p>
-<h4 id="2-kvprewrite" tabindex="-1"><a class="header-anchor" href="#2-KvPreWrite">#</a>2 KvPreWrite</h4>
+<h4 id="2-KvPreWrite"><a class="header-anchor" href="#2-KvPreWrite">#</a>2 KvPreWrite</h4>
 <p><code>kvPreWrite</code> 对应 2PC 的上升阶段。</p>
 <p>在执行过程中首先需要对每个 Key 判断是否被上锁，如果上锁了就跟 <code>KvGet</code> 一样报告错误。</p>
 <p>其次检查该 Key 的最后一次修改是否与当前事务冲突，即获取 <code>MostRecentWrite</code> 并检查区间 <code>[StartTs, CommitTs]</code> 是否与当前请求时间戳重合，若是则说明存在其他客户端已经发起请求并对数据进行了修改，报告错误。（要保证对同一个 Key 所有修改的时间区间 <code>[StartTs, CommitTs]</code> 不发生重叠）</p>
@@ -430,7 +430,7 @@
 <blockquote>
 <p>如果中途报错，会直接返回，也就不会走到 server.storage.Write 这一步，更不会对数据库进行修改。</p>
 </blockquote>
-<h4 id="3-kvcommit" tabindex="-1"><a class="header-anchor" href="#3-KvCommit">#</a>3 KvCommit</h4>
+<h4 id="3-KvCommit"><a class="header-anchor" href="#3-KvCommit">#</a>3 KvCommit</h4>
 <p><code>KvCommit</code> 对应 2PC 的下降阶段。提交操作并不修改 <code>CfDefault</code> 中的数据，而是通过修改 <code>CfLock</code> 与 <code>CfWrite</code> 来标志该数据已提交。</p>
 <p>对于每个 Key，首先检查是否重复 commit，即是否存在 <code>CurrentWrite</code>，若有则说明后续所有 Key 都确定被提交，直接返回即可。当然如果这个 <code>Write</code> 是 <code>Rollback</code>，那么还需要修改 <code>Retryable</code> 并报错。</p>
 <p>再检查是否由<strong>当前事务上锁</strong>，即</p>
@@ -448,8 +448,8 @@
   <span class="token keyword">return</span> response<span class="token punctuation">,</span> <span class="token boolean">nil</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>如果能够安全提交，则删除之前上的锁，并在 <code>CfWrite</code> 下添加相应条目。最后调用 <code>server.storage.Write()</code> 将修改落实到数据库中。</p>
-<h3 id="part-c-tinykv-server-2" tabindex="-1"><a class="header-anchor" href="#Part-C-TinyKV-Server-2">#</a>Part C TinyKV Server 2</h3>
-<h4 id="1-kvscan" tabindex="-1"><a class="header-anchor" href="#1-KvScan">#</a>1 KvScan</h4>
+<h3 id="Part-C-TinyKV-Server-2"><a class="header-anchor" href="#Part-C-TinyKV-Server-2">#</a>Part C TinyKV Server 2</h3>
+<h4 id="1-KvScan"><a class="header-anchor" href="#1-KvScan">#</a>1 KvScan</h4>
 <p><code>KvScan</code> 获取当前时间戳下所有有效的值。任务书建议我们用 <code>Scanner</code> 来包装操作，相关文件为 <code>kv/transaction/mvcc/scan.go</code>。</p>
 <p><code>Scanner</code> 应内置一个迭代器，并在创建时初始化至给定的<code>StartKey</code> 位置处。执行时不断遍历 <code>CfDefault</code> 并检查当前值是否有效。由于排列方式，我们对同一个 Key 最早遍历到的肯定是最新的版本，并且同一个 Key 一定会连续出现，如果</p>
 <ol>
@@ -464,7 +464,7 @@
 </li>
 </ol>
 <p>则跳到下一个，否则返回当前 K/V。</p>
-<h4 id="2-kvchecktxnstatus" tabindex="-1"><a class="header-anchor" href="#2-KvCheckTxnStatus">#</a>2 KvCheckTxnStatus</h4>
+<h4 id="2-KvCheckTxnStatus"><a class="header-anchor" href="#2-KvCheckTxnStatus">#</a>2 KvCheckTxnStatus</h4>
 <p><code>KvCheckTxnStatus</code> 检查给定 PrimaryKey 的当前状态，并执行可能的改动。</p>
 <ol>
 <li class="lvl-3">
@@ -487,7 +487,7 @@
   txn<span class="token punctuation">.</span><span class="token function">DeleteLock</span><span class="token punctuation">(</span>PrimaryKey<span class="token punctuation">)</span>
   txn<span class="token punctuation">.</span><span class="token function">PutWrite</span><span class="token punctuation">(</span>PrimaryKey<span class="token punctuation">,</span> LockTs<span class="token punctuation">,</span> <span class="token operator">&amp;</span>mvcc<span class="token punctuation">.</span>Write<span class="token punctuation">{</span><span class="token operator">...</span><span class="token punctuation">}</span><span class="token punctuation">)</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h4 id="3-kvbatchrollback" tabindex="-1"><a class="header-anchor" href="#3-KvBatchRollback">#</a>3 KvBatchRollback</h4>
+<h4 id="3-KvBatchRollback"><a class="header-anchor" href="#3-KvBatchRollback">#</a>3 KvBatchRollback</h4>
 <p><code>KvBatchRollback</code> 实现多键批量回滚操作。</p>
 <ol>
 <li class="lvl-3">
@@ -506,7 +506,7 @@
 <p>最后调用 <code>server.storage.Write()</code> 将修改落实到数据库中。</p>
 </li>
 </ol>
-<h4 id="4-kvresolvelock" tabindex="-1"><a class="header-anchor" href="#4-KvResolveLock">#</a>4 KvResolveLock</h4>
+<h4 id="4-KvResolveLock"><a class="header-anchor" href="#4-KvResolveLock">#</a>4 KvResolveLock</h4>
 <p><code>KvResolveLock</code> 需收集由本事务上锁的所有 Key，并根据请求中的 <code>CommitVersion</code> 字段执行不同操作。</p>
 <ol>
 <li class="lvl-3">
@@ -707,12 +707,6 @@
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -721,8 +715,8 @@
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -738,41 +732,6 @@
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

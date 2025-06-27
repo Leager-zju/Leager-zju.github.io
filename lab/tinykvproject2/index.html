@@ -333,8 +333,8 @@ Leader election =&amp;gt; 领导选举
             <div id="articleContent">
                 <p>本 Project 需要我们实现基础 Raft 算法。</p>
 <span id="more"></span>
-<h2 id="%E6%80%9D%E8%B7%AF" tabindex="-1"><a class="header-anchor" href="#思路">#</a>思路</h2>
-<h3 id="part-a-raft" tabindex="-1"><a class="header-anchor" href="#Part-A-Raft">#</a>Part A Raft</h3>
+<h2 id="思路"><a class="header-anchor" href="#思路">#</a>思路</h2>
+<h3 id="Part-A-Raft"><a class="header-anchor" href="#Part-A-Raft">#</a>Part A Raft</h3>
 <p>需要实现的代码在整个 <code>raft</code> 文件夹下。</p>
 <p>这一 part 我们要实现三个模块，分别为</p>
 <ul class="lvl-0">
@@ -350,7 +350,7 @@ Leader election =&amp;gt; 领导选举
 </ul>
 <p>有了之前 <a href="../../mit6.824/6-824%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93">MIT6.824</a> 的经验，做这部分其实没啥压力，最大的困难点在于熟悉整个代码框架。</p>
 <p>跟 6.824 不同之处在于，TinyKV 的 Raft 模块进行同步采用的消息队列的形式，由上层定时收取然后传输给其他存储节点的 Peer，上层收到消息后 push 到下层驱动 Raft 模块接收信息。</p>
-<h4 id="1-leader-election" tabindex="-1"><a class="header-anchor" href="#1-Leader-Election">#</a>1 Leader Election</h4>
+<h4 id="1-Leader-Election"><a class="header-anchor" href="#1-Leader-Election">#</a>1 Leader Election</h4>
 <p>领导选举的基本流程如下：</p>
 <p>对于发起者：</p>
 <ul class="lvl-0">
@@ -406,7 +406,7 @@ Leader election =&amp;gt; 领导选举
 <blockquote>
 <p>由于这里完全采用了同步的方案，故不需要用到 Goroutine 与并发相关代码。</p>
 </blockquote>
-<h4 id="2-log-replication" tabindex="-1"><a class="header-anchor" href="#2-Log-replication">#</a>2 Log replication</h4>
+<h4 id="2-Log-replication"><a class="header-anchor" href="#2-Log-replication">#</a>2 Log replication</h4>
 <p><strong>MsgAppend</strong>：</p>
 <p>选举成功成为 Leader 后，需要立刻在自己的日志中增添一条空的日志条目，以快速提交旧日志（根据 raft paper 中的 figure 8，只能 commit 当前 Term 的日志）。一旦有任何日志被添加（成为 Leader 或收到 <code>MsgPropose</code> 消息），都会触发 Raft 的日志复制机制——向所有 Peer 发送 <code>MsgAppend</code>。</p>
 <p>关于日志复制其实论文里讲的很清楚了。Raft 层维护所有 Peer 的两个变量：<code>Match</code> 和 <code>Next</code>。前者表示目前能够确定的其他 Peer 与自身一致的最后一个日志条目 <code>Index</code>，后者表示下一次 <code>MsgAppend</code> 要从哪个日志开始发。</p>
@@ -443,7 +443,7 @@ Leader election =&amp;gt; 领导选举
 <p><strong>Heartbeat</strong>：</p>
 <p>与 6.824 不同，TinyKV 将日志复制和心跳分开，算两种不同的消息。前者上文已经提过，后者则是在 Tick() 驱动至心跳超时或收到 <code>MsgBeat</code> 消息后，向所有 Peer 发送 <code>MsgHeartbeat</code>。心跳的作用不仅仅是巩固 Leader 地位，还要向 Peers 广播自己的 <code>Commit</code>，接收方如果发现 Leader 的 <code>Commit</code> 比自己最后一个日志的 <code>LastLogIndex</code> 还大，则需要告诉发送方这一信息，表明自己落后了，<strong>并拒绝该条消息</strong>；反之更新自身的 <code>Commit</code>。</p>
 <p>发送方检查回复，如果 Peer 落后了，立刻发一条 <code>MsgAppend</code> 过去让它赶紧进入到最新的状态。</p>
-<h4 id="3-implement-the-raw-node-interface" tabindex="-1"><a class="header-anchor" href="#3-Implement-the-raw-node-interface">#</a>3 Implement the raw node interface</h4>
+<h4 id="3-Implement-the-raw-node-interface"><a class="header-anchor" href="#3-Implement-the-raw-node-interface">#</a>3 Implement the raw node interface</h4>
 <p><code>RawNode</code> 包裹了 Raft 层，其作用就是定期检查 Raft 的状态（日志、消息队列等）是否有更新，如果有则发送给上层进行处理，同时获取处理结果进行状态更新。</p>
 <p>主要是实现 <code>raft/rawnode.go</code> 中的 <code>Ready()</code>，<code>HasReady()</code>，<code>Advance()</code> 三个函数。</p>
 <blockquote>
@@ -478,7 +478,7 @@ Leader election =&amp;gt; 领导选举
 <blockquote>
 <p>也很好理解，之前收集到的 <code>Entries</code> 就是 unstabled 的，现在处理完了那就有 <code>stabled = Entries.LastLogIndex</code> 了。其他也同理。</p>
 </blockquote>
-<h3 id="part-b-ft-kv-server" tabindex="-1"><a class="header-anchor" href="#Part-B-FT-KV-server">#</a>Part B FT KV server</h3>
+<h3 id="Part-B-FT-KV-server"><a class="header-anchor" href="#Part-B-FT-KV-server">#</a>Part B FT KV server</h3>
 <p>需要实现的代码在 <code>kv/raftstore</code> 文件夹下。</p>
 <p>这一 part 我们要实现两个模块，分别为</p>
 <ul class="lvl-0">
@@ -493,7 +493,7 @@ Leader election =&amp;gt; 领导选举
 <p>首先要明确的是，整个系统划分为若干逻辑上的 Cluster，每个 Cluster 又包含了若干物理 Storage 节点，分布在不同物理位置。节点内部的物理存储空间又划分为不同 Region，每个 Region 表示某一段连续的 Key。不同 Storage 节点上相同的 Region 由同个 RaftGroup 管理，这部分抽象为 RaftStore，应用同一套 Raft 和日志机制。下图就是一个典型的 Cluster：</p>
 <img src="keyspace.png" style="zoom:30%;">
 </blockquote>
-<h4 id="1-implement-peer-storage" tabindex="-1"><a class="header-anchor" href="#1-Implement-peer-storage">#</a>1 Implement peer storage</h4>
+<h4 id="1-Implement-peer-storage"><a class="header-anchor" href="#1-Implement-peer-storage">#</a>1 Implement peer storage</h4>
 <p><code>PeerStorage</code> 主要负责记录存储状态并执行持久化。TinyKV 使用两个 badger 来存放不同状态：raftDB 存日志条目和 Raft 层信息，kvDB 存状态机数据。</p>
 <blockquote>
 <p>我感觉这部分还是有点混乱的，还是得多看看文档&gt;_&lt;</p>
@@ -549,7 +549,7 @@ Leader election =&amp;gt; 领导选举
 <blockquote>
 <p>如果数据没更新就不必写到 badger 中了。所以到这为止都要有一个「数据是否更新」的判断。</p>
 </blockquote>
-<h4 id="2-implement-raft-ready-process" tabindex="-1"><a class="header-anchor" href="#2-Implement-Raft-ready-process">#</a>2 Implement Raft ready process</h4>
+<h4 id="2-Implement-Raft-ready-process"><a class="header-anchor" href="#2-Implement-Raft-ready-process">#</a>2 Implement Raft ready process</h4>
 <p>现在我们终于要实现上层怎么处理 Client 发来的请求，以及驱动下层获取 Ready 并持久化了。</p>
 <blockquote>
 <p>RaftStore 在启动时会新建一个含有消息管道 <code>CloseCh</code> 的 <code>RaftWorker</code>，然后创建一个 GoRoutine 不断从 <code>CloseCh</code> 中获取 Client 发来的消息。每收到一条消息，都会新建一个 <code>PeerMsgHandler</code> 处理该信息。handler 拥有相关的 <code>Peer</code> 以及上下文.</p>
@@ -595,7 +595,7 @@ Leader election =&amp;gt; 领导选举
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>发送回复时，遍历 Proposals 发现 <code>Index</code> 相同但 <code>Term</code> 不同，则发个 <code>ErrStaleCommand</code>。</p>
 </blockquote>
-<h3 id="part-c-snapshot" tabindex="-1"><a class="header-anchor" href="#Part-C-Snapshot">#</a>Part C Snapshot</h3>
+<h3 id="Part-C-Snapshot"><a class="header-anchor" href="#Part-C-Snapshot">#</a>Part C Snapshot</h3>
 <p>需要对前两个 Part 所涉及的文件进行修改。</p>
 <p>这一 part 我们要实现快照。snapshot 有两条路线能走，上层<strong>主动</strong>截断并向下通知，或是<strong>被动</strong>接受 Peers 传来的 snapshot 并在 Ready 中告知上层。</p>
 <p>在有快照的情况下，我们需要修改以下数据：</p>
@@ -610,7 +610,7 @@ Leader election =&amp;gt; 领导选举
 <p>修改 RaftLog 的相关数据；</p>
 </li>
 </ol>
-<h4 id="1-%E4%B8%BB%E5%8A%A8%E5%BF%AB%E7%85%A7" tabindex="-1"><a class="header-anchor" href="#1-主动快照">#</a>1 主动快照</h4>
+<h4 id="1-主动快照"><a class="header-anchor" href="#1-主动快照">#</a>1 主动快照</h4>
 <p>系统定时 Tick，向 handler 发送 <code>MsgTypeTick</code> 消息，触发 <code>PeerMsgHandler.OnTick()</code> =&gt; <code>PeerMsgHandler.onRaftGCLogTick()</code>，检查已应用日志大小是否超过 <code>RaftLogGcCountLimit</code>，如果超过了，就生成一条类型为 <code>CompactLog</code> 的 adminRequest 并向下 propose。</p>
 <p>等到该日志被 Ready 捕获时，上层就知道可以安全截断日志了，即调用 <code>PeerMsgHandler.ScheduleCompactLog()</code> 删除冗余日志。由于 <code>PeerStorage</code> 没法通过 Ready 修改 <code>applyState</code> 中的 <code>TruncatedState</code>，那就在 apply 里头改了。</p>
 <pre class="line-numbers language-go" data-language="go"><div class="caption"><span>kv/raftstore/peer_msg_handler.go</span></div><code class="language-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>d <span class="token operator">*</span>peerMsgHandler<span class="token punctuation">)</span> <span class="token function">applyAdminRequest</span><span class="token punctuation">(</span>adminReq <span class="token operator">*</span>AdminRequest<span class="token punctuation">,</span> entry <span class="token operator">*</span>Entry<span class="token punctuation">,</span> wb <span class="token operator">*</span>WriteBatch<span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -628,7 +628,7 @@ Leader election =&amp;gt; 领导选举
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>这样一来，后续对 <code>RawNode</code> 的 Advance 就需要加上一点修改。如果 <code>Ready.CommittedEntries</code> 非空，说明存在应用了 <code>CompactLog</code> 的可能，需要调用 <code>RaftLog</code> 中预先为我们声明好的 <code>maybeCompact()</code> 函数。接下来需要做的就是实现它。由于先前已经修改了 <code>PeerStorage</code>，那么可以直接通过 <code>Storage</code> 的接口 <code>FirstIndex()</code> 来获取日志截断点，从而进一步判断是否需要对日志进行压缩。</p>
 <p>到此，所有需要修改的数据均已修改完毕。</p>
-<h4 id="2-%E8%A2%AB%E5%8A%A8%E5%BF%AB%E7%85%A7" tabindex="-1"><a class="header-anchor" href="#2-被动快照">#</a>2 被动快照</h4>
+<h4 id="2-被动快照"><a class="header-anchor" href="#2-被动快照">#</a>2 被动快照</h4>
 <p>Leader 一定是最先主动快照的那个，之后在需要发送 <code>MsgAppend</code> 的时候会检查 Peer 的 <code>Next</code> 字段。有些 Peer 可能由于网络断开或宕机重启等原因，没有对之前的 <code>MsgAppend</code> 进行回复去更新 <code>Next</code>，或没收到之前的 <code>CompactLog</code> 日志，这样就导致后续 Leader 对日志截断后，这些 Peer 的 <code>Next</code> 甚至比截断点 <code>truncatedIndex</code> 还小，那么此时 Leader 就需要发 <code>MsgSnapshot</code> 给他们了。</p>
 <p>发送该消息的话，需要把本地数据库的快照数据也一并发过去，这样 Peer 才能尽快赶上进度。通过调用 <code>Storage.Snapshot()</code> 可以产生快照数据，但了解了 <code>PeerStorage</code> 的该函数执行流程后发现，首次调用只会发条消息给 Worker，叫他去干活，把数据处理好后通过管道发回来，在后续的调用才会拿到这部分数据，于是有</p>
 <pre class="line-numbers language-go" data-language="go"><code class="language-go">newSnapshot<span class="token punctuation">,</span> err <span class="token operator">:=</span> r<span class="token punctuation">.</span>RaftLog<span class="token punctuation">.</span>storage<span class="token punctuation">.</span><span class="token function">Snapshot</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
@@ -641,7 +641,7 @@ Leader election =&amp;gt; 领导选举
 </blockquote>
 <p>最后才修改 Raft 层与 RaftLog 的相关数据，并令 <code>RaftLog.pendingSnapshot = msg.snapshot</code>（可以认为该数据一定不是 nil），这样下次收集 Ready 的时候会拿到待应用的快照数据，在 <code>SaveReadyState</code> 中调用 <code>PeerStorage.ApplySnapshot()</code> 将快照落实到 badger 中并修改 <code>ApplyState</code>。</p>
 <p>到此，所有需要修改的数据均已修改完毕。</p>
-<h2 id="%E4%B8%80%E4%BA%9B%E5%9D%91" tabindex="-1"><a class="header-anchor" href="#一些坑">#</a>一些坑</h2>
+<h2 id="一些坑"><a class="header-anchor" href="#一些坑">#</a>一些坑</h2>
 <ol>
 <li class="lvl-3">
 <p><code>newRaft</code> 时传入的 <code>peers</code> 切片只在 2A 的测试中用到，实际上 peers 信息是通过 <code>Storage.InitialState()</code> 返回的 <code>confState.Nodes</code> 给出；</p>
@@ -826,12 +826,6 @@ Leader election =&amp;gt; 领导选举
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -840,8 +834,8 @@ Leader election =&amp;gt; 领导选举
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -857,41 +851,6 @@ Leader election =&amp;gt; 领导选举
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

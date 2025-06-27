@@ -328,10 +328,10 @@
             <div id="articleContent">
                 <p>早年的 C++ 中已经出现了<strong>左值</strong>与<strong>右值</strong>这两个基本概念，但并不重要，平时也不怎么会用到。直到 C++11 引入了<strong>右值引用</strong>等新特性，这俩概念终于翻身做起了主人——它们是理解<strong>移动</strong>与<strong>转发</strong>语义的重要基础。</p>
 <span id="more"></span>
-<h2 id="%E5%80%BC" tabindex="-1"><a class="header-anchor" href="#值">#</a>值</h2>
+<h2 id="值"><a class="header-anchor" href="#值">#</a>值</h2>
 <p>所有<strong>值类别</strong>可用以下韦恩图描述：</p>
 <img src="image-20230120230912975.png" style="zoom:50%;">
-<h3 id="%E5%B7%A6%E5%80%BC(lvalue)%EF%BC%8C%E5%8F%B3%E5%80%BC(rvalue)" tabindex="-1"><a class="header-anchor" href="#左值-Lvalue-，右值-Rvalue">#</a>左值(Lvalue)，右值(Rvalue)</h3>
+<h3 id="左值-Lvalue-，右值-Rvalue"><a class="header-anchor" href="#左值-Lvalue-，右值-Rvalue">#</a>左值(Lvalue)，右值(Rvalue)</h3>
 <p>先来谈谈什么是<strong>左值</strong>与<strong>右值</strong>。</p>
 <p>一般来说，可以放在等号左边的就是左值，只能放在等号右边的就是右值。</p>
 <p>更准确的说，可以取地址并具有变量名的是左值，左值 <strong>L-value</strong> 中的 <strong>L</strong> 既可以认为是 <strong>Left</strong>，也可以理解为 <strong>Location</strong>，即<strong>地址</strong>，换句话说就是其在内存中有<strong>可访问</strong>的地址。</p>
@@ -345,7 +345,7 @@ a<span class="token operator">++</span><span class="token punctuation">;</span> 
 
 <span class="token number">3</span> <span class="token operator">=</span> a<span class="token punctuation">;</span>              <span class="token comment">// ERROR! 3 是右值，不能放在等号左边</span>
 b <span class="token operator">+</span> c <span class="token operator">=</span> <span class="token operator">&amp;</span><span class="token number">3</span><span class="token punctuation">;</span>         <span class="token comment">// ERROR! 右值不能放左边，且不能取地址</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="%E4%BA%A1%E5%80%BC(xvalue)%EF%BC%8C%E7%BA%AF%E5%8F%B3%E5%80%BC(prvalue)%EF%BC%8C%E6%B3%9B%E5%B7%A6%E5%80%BC(glvalue)" tabindex="-1"><a class="header-anchor" href="#亡值-Xvalue-，纯右值-PRvalue-，泛左值-GLvalue">#</a>亡值(Xvalue)，纯右值(PRvalue)，泛左值(GLvalue)</h3>
+<h3 id="亡值-Xvalue-，纯右值-PRvalue-，泛左值-GLvalue"><a class="header-anchor" href="#亡值-Xvalue-，纯右值-PRvalue-，泛左值-GLvalue">#</a>亡值(Xvalue)，纯右值(PRvalue)，泛左值(GLvalue)</h3>
 <p>右值又分为<strong>亡值</strong>与<strong>纯右值</strong>。</p>
 <p>在 C<ins>11 之前，右值与纯右值就是同个概念，<strong>亡值</strong>是随着 C</ins>11 的<strong>右值引用</strong>概念引入的。如果用左值初始化对象，则会调用<strong>复制构造函数</strong>或 <code>operator=(const type &amp;)</code> 来进行一次数据的拷贝；而如果用右值初始化，则会调用<strong>移动构造函数</strong>或 <code>operator=(const type &amp;&amp;)</code> 来移动数据，避免了拷贝，提高了效率。当数据移动完成后，用于初始化的右值已经完成了任务，马上消亡，故称其为<strong>亡值</strong>。亡值常见的有以下两种：</p>
 <ul class="lvl-0">
@@ -358,8 +358,8 @@ b <span class="token operator">+</span> c <span class="token operator">=</span> 
 </ul>
 <p><strong>纯右值</strong>就是右值中不属于亡值的那一部分值，也就是常见的（除字符串外的）字面量、运算表达式、<strong>lambda 表达式</strong>、非引用类型的函数返回值等无法在内存中占据存储空间的值。</p>
 <p><strong>泛左值</strong>就是<strong>亡值</strong>+<strong>左值</strong>。</p>
-<h2 id="%E5%B7%A6%E5%80%BC%E5%BC%95%E7%94%A8%EF%BC%8C%E5%8F%B3%E5%80%BC%E5%BC%95%E7%94%A8" tabindex="-1"><a class="header-anchor" href="#左值引用，右值引用">#</a>左值引用，右值引用</h2>
-<h3 id="%E5%B7%A6%E5%80%BC%E5%BC%95%E7%94%A8" tabindex="-1"><a class="header-anchor" href="#左值引用">#</a>左值引用</h3>
+<h2 id="左值引用，右值引用"><a class="header-anchor" href="#左值引用，右值引用">#</a>左值引用，右值引用</h2>
+<h3 id="左值引用"><a class="header-anchor" href="#左值引用">#</a>左值引用</h3>
 <p>C++11 以前，所有的引用都是<strong>左值引用</strong>，用 <code>Type&amp;</code> 表示，只能用左值进行初始化，初始化时即绑定，不能更改绑定对象，其效果相当于为指定变量起"别名"，对引用变量的所有操作都会等效地施加在原变量上（对应内存中的实际数据是一致的），例如：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">int</span> x <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
 <span class="token keyword">const</span> <span class="token keyword">int</span> y <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
@@ -381,7 +381,7 @@ ref_a<span class="token operator">++</span><span class="token punctuation">;</sp
 <blockquote>
 <p>另一个很相似的概念是<strong>指针</strong>，它也可以提供修改原变量的另一种途径，但引用的优势在于更安全，引用变量必须被初始化，故不像指针会出现 <code>nullptr</code> 或野指针的情况。</p>
 </blockquote>
-<h3 id="%E5%8F%B3%E5%80%BC%E5%BC%95%E7%94%A8" tabindex="-1"><a class="header-anchor" href="#右值引用">#</a>右值引用</h3>
+<h3 id="右值引用"><a class="header-anchor" href="#右值引用">#</a>右值引用</h3>
 <p>上面说到常量左值引用可以被右值初始化，但无法修改变量；非常量左值引用可以修改，但无法被右值初始化。如果我们在写某个函数时出现了实参为右值，并且函数体内还需要对该参数进行一定修改的情况，现有的工具无法满足可行性，如果在传参前将右值赋给左值后再传入左值，则增加了内存开销。C++ 作为一门对内存开销非常敏感的语言，在这一点上提出了优化，那就是<strong>右值引用</strong>。</p>
 <p>右值引用类型用 <code>Type&amp;&amp;</code> 表示，与左值引用相反，其只能用<strong>右值</strong>进行初始化，即便是常量右值引用也不例外。在引入了右值引用后，函数就可以写为：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">void</span> <span class="token function">func</span><span class="token punctuation">(</span> <span class="token keyword">int</span><span class="token operator">&amp;&amp;</span> num <span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -394,7 +394,7 @@ ref_a<span class="token operator">++</span><span class="token punctuation">;</sp
 <blockquote>
 <p>以右值参数调用函数时优先选择接收右值引用参数的重载版本。</p>
 </blockquote>
-<h3 id="%E5%BC%95%E7%94%A8%E6%8A%98%E5%8F%A0" tabindex="-1"><a class="header-anchor" href="#引用折叠">#</a>引用折叠</h3>
+<h3 id="引用折叠"><a class="header-anchor" href="#引用折叠">#</a>引用折叠</h3>
 <p>通过模板或 <code>typedef</code> / <code>using</code> 中的类型操作可以构成引用的引用，即右值引用的右值引用折叠成右值引用，其余组合均折叠成左值引用：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">using</span> lref <span class="token operator">=</span> <span class="token keyword">int</span><span class="token operator">&amp;</span><span class="token punctuation">;</span>
 <span class="token keyword">using</span> rref <span class="token operator">=</span> <span class="token keyword">int</span><span class="token operator">&amp;&amp;</span><span class="token punctuation">;</span>
@@ -404,7 +404,7 @@ lref<span class="token operator">&amp;</span>  r1 <span class="token operator">=
 lref<span class="token operator">&amp;&amp;</span> r2 <span class="token operator">=</span> n<span class="token punctuation">;</span> <span class="token comment">// r2 的类型是 int&amp;</span>
 rref<span class="token operator">&amp;</span>  r3 <span class="token operator">=</span> n<span class="token punctuation">;</span> <span class="token comment">// r3 的类型是 int&amp;</span>
 rref<span class="token operator">&amp;&amp;</span> r4 <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span> <span class="token comment">// r4 的类型是 int&amp;&amp;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="%E4%B8%87%E8%83%BD%E5%BC%95%E7%94%A8" tabindex="-1"><a class="header-anchor" href="#万能引用">#</a>万能引用</h3>
+<h3 id="万能引用"><a class="header-anchor" href="#万能引用">#</a>万能引用</h3>
 <p>对于模板函数，希望传入的参数类型既能是左值，又能是右值，对于初学者而言，或许会通过以下代码实现：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">template</span><span class="token operator">&lt;</span> <span class="token keyword">class</span> <span class="token class-name">T</span> <span class="token operator">&gt;</span>
 <span class="token keyword">void</span> <span class="token function">func</span><span class="token punctuation">(</span> T<span class="token operator">&amp;</span> t <span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>  <span class="token comment">// 接受左值</span>
@@ -418,14 +418,14 @@ rref<span class="token operator">&amp;&amp;</span> r4 <span class="token operato
 <blockquote>
 <p>虽然为初学者加大了代码理解的难度</p>
 </blockquote>
-<h2 id="%E7%A7%BB%E5%8A%A8%E8%AF%AD%E4%B9%89" tabindex="-1"><a class="header-anchor" href="#移动语义">#</a>移动语义</h2>
-<h3 id="%E6%B7%B1%E6%B5%85%E6%8B%B7%E8%B4%9D" tabindex="-1"><a class="header-anchor" href="#深浅拷贝">#</a>深浅拷贝</h3>
+<h2 id="移动语义"><a class="header-anchor" href="#移动语义">#</a>移动语义</h2>
+<h3 id="深浅拷贝"><a class="header-anchor" href="#深浅拷贝">#</a>深浅拷贝</h3>
 <p>谈移动语义，就绕不开先谈<strong>深浅拷贝</strong>。C++11 之前，当我们要进行字符数组 <code>char*</code> 的拷贝操作时，只有这两种拷贝方式。</p>
 <p><strong>浅拷贝</strong>是指，将新字符数组 <code>char* dst</code> 指针指向原字符数组 <code>char* src</code> 所在地址，开销低，但容易产生<strong>重复释放同一片内存</strong>的糟糕情况，不安全。</p>
 <p><strong>深拷贝</strong>是指，为新字符数组 <code>char* dst</code> 分配一片新的等大内存，然后将原字符数组 <code>char* src</code> 的所有字符依次拷贝，缺点是时间开销大，并且存在原字符数组。</p>
-<h3 id="%E7%A7%BB%E5%8A%A8%E6%8B%B7%E8%B4%9D" tabindex="-1"><a class="header-anchor" href="#移动拷贝">#</a>移动拷贝</h3>
+<h3 id="移动拷贝"><a class="header-anchor" href="#移动拷贝">#</a>移动拷贝</h3>
 <p>C++11 引入了移动语义，旨在进行一些<strong>转移所有权</strong>的操作，顾名思义就是资源转为己有，而另一方则失去资源所有权，采用 <code>std::move()</code> 函数实现。</p>
-<h3 id="std%3A%3Amove" tabindex="-1"><a class="header-anchor" href="#std-move">#</a>std::move</h3>
+<h3 id="std-move"><a class="header-anchor" href="#std-move">#</a>std::move</h3>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token comment">// 一个示例实现</span>
 <span class="token keyword">template</span><span class="token operator">&lt;</span> <span class="token keyword">class</span> <span class="token class-name">T</span> <span class="token operator">&gt;</span>
 <span class="token keyword">typename</span> <span class="token class-name">std</span><span class="token double-colon punctuation">::</span>remove_reference<span class="token operator">&lt;</span>T<span class="token operator">&gt;</span><span class="token double-colon punctuation">::</span>type<span class="token operator">&amp;&amp;</span> <span class="token function">move</span><span class="token punctuation">(</span> T<span class="token operator">&amp;&amp;</span> t <span class="token punctuation">)</span> <span class="token keyword">noexcept</span> <span class="token punctuation">{</span>
@@ -433,12 +433,12 @@ rref<span class="token operator">&amp;&amp;</span> r4 <span class="token operato
   <span class="token keyword">return</span> <span class="token generic-function"><span class="token function">static_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span>ReturnType<span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span>param<span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>它仅仅做了一件事，那就是<strong>将实参转换为右值引用</strong>，其中 <code>std::remove_reference</code> 相当于是做了一个去除引用保留原始数据类型的操作。</p>
-<h3 id="%E7%A7%BB%E5%8A%A8%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0" tabindex="-1"><a class="header-anchor" href="#移动构造函数">#</a>移动构造函数</h3>
+<h3 id="移动构造函数"><a class="header-anchor" href="#移动构造函数">#</a>移动构造函数</h3>
 <p>引入移动语义这一新特性之后，移动构造函数也随之产生，其接收同类型右值引用的实参，进行资源的迁移，将深浅拷贝两者的优势集中，既减少了开销，也无需担心出现 double free 的情况。</p>
-<h2 id="%E5%AE%8C%E7%BE%8E%E8%BD%AC%E5%8F%91" tabindex="-1"><a class="header-anchor" href="#完美转发">#</a>完美转发</h2>
+<h2 id="完美转发"><a class="header-anchor" href="#完美转发">#</a>完美转发</h2>
 <p><strong>完美转发</strong>指的是利用一个接受任意实参的函数模板将参数转发到其它函数，目标函数会收到与转发函数完全相同的实参，从而转发调用。转发函数实参是左值那目标函数实参也是左值，转发函数实参是右值那目标函数实参也是右值。</p>
 <p>由于万能引用的存在，函数模板 <code>func(Type&amp;&amp;)</code> 内部无法知道形参对应的实参到底是个左值还是右值，如果要用到该形参作为其他函数实参，就会出现问题，这里就要用到 <code>std::forward</code>。</p>
-<h3 id="std%3A%3Aforward" tabindex="-1"><a class="header-anchor" href="#std-forward">#</a>std::forward</h3>
+<h3 id="std-forward"><a class="header-anchor" href="#std-forward">#</a>std::forward</h3>
 <p>函数原型如下：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">template</span><span class="token operator">&lt;</span> <span class="token keyword">class</span> <span class="token class-name">T</span> <span class="token operator">&gt;</span>
 T<span class="token operator">&amp;&amp;</span> <span class="token function">forward</span><span class="token punctuation">(</span> <span class="token keyword">typename</span> <span class="token class-name">std</span><span class="token double-colon punctuation">::</span>remove_reference<span class="token operator">&lt;</span>T<span class="token operator">&gt;</span><span class="token double-colon punctuation">::</span>type<span class="token operator">&amp;</span> t <span class="token punctuation">)</span> <span class="token keyword">noexcept</span><span class="token punctuation">;</span>
@@ -446,7 +446,7 @@ T<span class="token operator">&amp;&amp;</span> <span class="token function">for
 <span class="token keyword">template</span><span class="token operator">&lt;</span> <span class="token keyword">class</span> <span class="token class-name">T</span> <span class="token operator">&gt;</span>
 T<span class="token operator">&amp;&amp;</span> <span class="token function">forward</span><span class="token punctuation">(</span> <span class="token keyword">typename</span> <span class="token class-name">std</span><span class="token double-colon punctuation">::</span>remove_reference<span class="token operator">&lt;</span>T<span class="token operator">&gt;</span><span class="token double-colon punctuation">::</span>type<span class="token operator">&amp;&amp;</span> t <span class="token punctuation">)</span> <span class="token keyword">noexcept</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>其作用就是返回参数对应的引用形式：传入左值返回左值引用，传入右值返回右值引用。</p>
-<h3 id="%E8%BD%AC%E5%8F%91%E5%87%BD%E6%95%B0" tabindex="-1"><a class="header-anchor" href="#转发函数">#</a>转发函数</h3>
+<h3 id="转发函数"><a class="header-anchor" href="#转发函数">#</a>转发函数</h3>
 <p>直接上例子：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">void</span> <span class="token function">func</span><span class="token punctuation">(</span> <span class="token keyword">int</span><span class="token operator">&amp;</span> t <span class="token punctuation">)</span> <span class="token punctuation">{</span> std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"lvalue\n"</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
 
@@ -649,12 +649,6 @@ T<span class="token operator">&amp;&amp;</span> <span class="token function">for
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -663,8 +657,8 @@ T<span class="token operator">&amp;&amp;</span> <span class="token function">for
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -680,41 +674,6 @@ T<span class="token operator">&amp;&amp;</span> <span class="token function">for
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

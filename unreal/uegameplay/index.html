@@ -335,7 +335,7 @@ UObject 是 UE 中所有 C++ 对象的根基类，它是 UE 对象系统的重�
         <div class="card-content article-card-content">
             <div id="articleContent">
                 <span id="more"></span>
-<h2 id="uobject" tabindex="-1"><a class="header-anchor" href="#UObject">#</a>UObject</h2>
+<h2 id="UObject"><a class="header-anchor" href="#UObject">#</a>UObject</h2>
 <blockquote>
 <p>部分参考 <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/24319968">InsideUE4 - UObject</a></p>
 </blockquote>
@@ -403,9 +403,9 @@ FName        NamePrivate<span class="token punctuation">;</span>
  */</span>
 ObjectPtr_Private<span class="token double-colon punctuation">::</span>TNonAccessTrackedObjectPtr<span class="token operator">&lt;</span>UObject<span class="token operator">&gt;</span> OuterPrivate<span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>后面四个对象都可以通过一个 public 接口 <code>GetXXX()</code> 获取。</p>
-<h3 id="uobject-%E7%9A%84%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86" tabindex="-1"><a class="header-anchor" href="#UObject-的内存管理">#</a>UObject 的内存管理</h3>
+<h3 id="UObject-的内存管理"><a class="header-anchor" href="#UObject-的内存管理">#</a>UObject 的内存管理</h3>
 <p>UObject 与 UE 内存管理相关的所有逻辑是在其基类 <code>UObjectBase</code> 中实现的。</p>
-<h4 id="%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0" tabindex="-1"><a class="header-anchor" href="#构造函数">#</a>构造函数</h4>
+<h4 id="构造函数"><a class="header-anchor" href="#构造函数">#</a>构造函数</h4>
 <p>首先观察 UObjectBase 的构造函数，发现执行了关键的一条函数 <code>AddObject()</code>。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>UObjectBase.cpp</span></div><code class="language-cpp"><span class="token class-name">UObjectBase</span><span class="token double-colon punctuation">::</span><span class="token function">UObjectBase</span><span class="token punctuation">(</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span>
 <span class="token punctuation">{</span>
@@ -425,7 +425,7 @@ ObjectPtr_Private<span class="token double-colon punctuation">::</span>TNonAcces
   <span class="token function">HashObject</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>这里主要关注其中两步，即 <code>AllocateUObjectIndex()</code> 和 <code>HashObject()</code>。</p>
-<h4 id="allocateuobjectindex()" tabindex="-1"><a class="header-anchor" href="#AllocateUObjectIndex">#</a>AllocateUObjectIndex()</h4>
+<h4 id="AllocateUObjectIndex"><a class="header-anchor" href="#AllocateUObjectIndex">#</a>AllocateUObjectIndex()</h4>
 <p>这个函数的作用是将 Object 放到一个全局的名为 <code>GUObjectArray</code> 的对象中。顾名思义，该对象用于管理所有 UObject 的信息，之后要提的垃圾回收也是基于这个对象进行的。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>UObjectArray.cpp</span></div><code class="language-cpp"><span class="token keyword">void</span> <span class="token class-name">FUObjectArray</span><span class="token double-colon punctuation">::</span><span class="token function">AllocateUObjectIndex</span><span class="token punctuation">(</span>UObjectBase<span class="token operator">*</span> Object<span class="token punctuation">,</span>
                                          EInternalObjectFlags InitialFlags<span class="token punctuation">,</span>
@@ -484,7 +484,7 @@ ObjectPtr_Private<span class="token double-colon punctuation">::</span>TNonAcces
   <span class="token comment">// 最后挨个通知订阅了 ObjectCreated 事件的 Listener</span>
   <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h4 id="hashobject()" tabindex="-1"><a class="header-anchor" href="#HashObject">#</a>HashObject()</h4>
+<h4 id="HashObject"><a class="header-anchor" href="#HashObject">#</a>HashObject()</h4>
 <p>这个函数是利用 FName 的唯一性，求出 FName 的哈希值 Hash 后，建立 Hash 到 Object 的映射，从而实现根据名字访问对象。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">void</span> <span class="token function">HashObject</span><span class="token punctuation">(</span>UObjectBase<span class="token operator">*</span> Object<span class="token punctuation">)</span>
 <span class="token punctuation">{</span>
@@ -515,7 +515,7 @@ ObjectPtr_Private<span class="token double-colon punctuation">::</span>TNonAcces
     <span class="token function">AddToClassMap</span><span class="token punctuation">(</span> ThreadHash<span class="token punctuation">,</span> Object <span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">}</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h4 id="freeuobjectindex()" tabindex="-1"><a class="header-anchor" href="#FreeUObjectIndex">#</a>FreeUObjectIndex()</h4>
+<h4 id="FreeUObjectIndex"><a class="header-anchor" href="#FreeUObjectIndex">#</a>FreeUObjectIndex()</h4>
 <p>该函数和 <code>AllocateUObjectIndex()</code> 对应，但是只在析构函数中调用，作用是回收 <code>GUObjectArray</code> 中的 item。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>UObjectArray.cpp</span></div><code class="language-cpp"><span class="token keyword">void</span> <span class="token class-name">FUObjectArray</span><span class="token double-colon punctuation">::</span><span class="token function">FreeUObjectIndex</span><span class="token punctuation">(</span>UObjectBase<span class="token operator">*</span> Object<span class="token punctuation">)</span>
 <span class="token punctuation">{</span>
@@ -533,7 +533,7 @@ ObjectPtr_Private<span class="token double-colon punctuation">::</span>TNonAcces
     ObjAvailableList<span class="token punctuation">.</span><span class="token function">Add</span><span class="token punctuation">(</span>Index<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">}</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="uobject-%E7%9A%84%E5%88%9B%E5%BB%BA" tabindex="-1"><a class="header-anchor" href="#UObject-的创建">#</a>UObject 的创建</h3>
+<h3 id="UObject-的创建"><a class="header-anchor" href="#UObject-的创建">#</a>UObject 的创建</h3>
 <p>因为 UObject 将其所有构造函数都设为了 private，所以我们只能通过以下两种方式构造一个 UObject：</p>
 <ul class="lvl-0">
 <li class="lvl-2">
@@ -579,7 +579,7 @@ ObjectPtr_Private<span class="token double-colon punctuation">::</span>TNonAcces
 <p>第二个 <code>bIsNativeFromCDO</code> 指的是是否根据**类默认对象(Class Default Object, CDO)**创建。</p>
 <p>第三个 <code>bCanRecycleSubobjects</code> 指的是是否可以重复利用<strong>子对象(Subobject)</strong>。其中 <code>RF_DefaultSubObject</code> 标签只会在 CreateDefaultSubobject 时被赋予。也就是说如果一个对象不是通过 CDO 创建，且不是一个创建中的 Subobject，那么就可以对原来的 Subobject 进行重复利用。</p>
 <p>至于为什么有「重复利用」一说，还得接着看后续的 <code>StaticAllocateObject()</code> 函数做了什么。</p>
-<h4 id="staticallocateobject()" tabindex="-1"><a class="header-anchor" href="#StaticAllocateObject">#</a>StaticAllocateObject()</h4>
+<h4 id="StaticAllocateObject"><a class="header-anchor" href="#StaticAllocateObject">#</a>StaticAllocateObject()</h4>
 <p>这个函数实际做的工作是创建一个 Object 实例或者替换一个已经存在的 Class/Outer/Name 都一样的 Object。执行替换操作时，原 Object 将会被销毁，新 Object 将会占用其内存空间。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp">UObject<span class="token operator">*</span> <span class="token function">StaticAllocateObject</span><span class="token punctuation">(</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span>
 <span class="token punctuation">{</span>
@@ -640,12 +640,12 @@ ObjectPtr_Private<span class="token double-colon punctuation">::</span>TNonAcces
   <span class="token keyword">return</span> Obj<span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>在 placement new 的过程中，就会执行 <code>UObject</code> 的构造函数，进而执行一些和 <code>GUObjectArray</code> 的交互行为。随着 <code>return Obj;</code> 的执行，至此，一个新的 UObject 就被创建好了。</p>
-<h3 id="uobject-%E7%9A%84%E9%94%80%E6%AF%81" tabindex="-1"><a class="header-anchor" href="#UObject-的销毁">#</a>UObject 的销毁</h3>
-<h4 id="%E8%87%AA%E5%8A%A8%E9%94%80%E6%AF%81" tabindex="-1"><a class="header-anchor" href="#自动销毁">#</a>自动销毁</h4>
+<h3 id="UObject-的销毁"><a class="header-anchor" href="#UObject-的销毁">#</a>UObject 的销毁</h3>
+<h4 id="自动销毁"><a class="header-anchor" href="#自动销毁">#</a>自动销毁</h4>
 <p>可以将指向 UObject 的指针置空，这样后续就会被 UE 自动回收掉</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>自动销毁</span></div><code class="language-cpp">Obj <span class="token operator">=</span> <span class="token generic-function"><span class="token function">NewObject</span><span class="token generic class-name"><span class="token operator">&lt;</span>UObject<span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">,</span> <span class="token function">TEXT</span><span class="token punctuation">(</span><span class="token string">"Obj"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 Obj <span class="token operator">=</span> <span class="token keyword">nullptr</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
-<h4 id="%E4%B8%BB%E5%8A%A8%E9%94%80%E6%AF%81" tabindex="-1"><a class="header-anchor" href="#主动销毁">#</a>主动销毁</h4>
+<h4 id="主动销毁"><a class="header-anchor" href="#主动销毁">#</a>主动销毁</h4>
 <p>UObject::ConditionalBeginDestroy()</p>
 <p>异步执行且对象在当前帧内持续有效等待下次GC<br>
 Obj-&gt;ConditionalBeginDestroy();<br>
@@ -662,7 +662,7 @@ Engine\Config \BaseEngine.ini 更改下面参数，设置销毁时间间隔</p>
 UWorld::ForceGarbageCollection 弃用</p>
 <p>GEngine-&gt;ForceGarbageCollection</p>
 <p>GEngine-&gt;ForceGarbageCollection(true);</p>
-<h2 id="uclass" tabindex="-1"><a class="header-anchor" href="#UClass">#</a>UClass</h2>
+<h2 id="UClass"><a class="header-anchor" href="#UClass">#</a>UClass</h2>
 
                 
             </div>
@@ -842,12 +842,6 @@ UWorld::ForceGarbageCollection 弃用</p>
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -856,8 +850,8 @@ UWorld::ForceGarbageCollection 弃用</p>
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -873,41 +867,6 @@ UWorld::ForceGarbageCollection 弃用</p>
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

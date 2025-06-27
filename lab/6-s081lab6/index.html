@@ -331,17 +331,17 @@ $ make clean
             <div id="articleContent">
                 <p>这里要我们在软件层面实现数据包的收发操作。</p>
 <span id="more"></span>
-<h2 id="preparation" tabindex="-1"><a class="header-anchor" href="#Preparation">#</a>Preparation</h2>
+<h2 id="Preparation"><a class="header-anchor" href="#Preparation">#</a>Preparation</h2>
 <p>切换到对应分支</p>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">git</span> fetch
 $ <span class="token function">git</span> checkout net
 $ <span class="token function">make</span> clean<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E6%A8%A1%E6%8B%9F%E7%BD%91%E7%BB%9C" tabindex="-1"><a class="header-anchor" href="#模拟网络">#</a>模拟网络</h2>
+<h2 id="模拟网络"><a class="header-anchor" href="#模拟网络">#</a>模拟网络</h2>
 <p>我们将使用名为 <strong>E1000</strong> 的网络设备来处理网络通信，实际上是 qemu 模拟了一个网卡和 PCI 总线，以及若干寄存器。不妨从 <code>connect()</code> 开始，逐步分析。</p>
-<h3 id="%E4%BB%8E-connect-%E5%BC%80%E5%A7%8B" tabindex="-1"><a class="header-anchor" href="#从-connect-开始">#</a>从 connect 开始</h3>
+<h3 id="从-connect-开始"><a class="header-anchor" href="#从-connect-开始">#</a>从 connect 开始</h3>
 <p><code>connect()</code> 实际上会触发系统调用 <code>sys_connect()</code>，它主要调用 <code>sockalloc()</code> 根据传入的参数（目的 ip 地址，源端口和目的端口）新建一个套接字，然后将其注册到一个 SOCK 类型的文件中，然后为该文件分配一个 fd 并返回。</p>
 <p>通过对该 fd 进行读写，就是进行数据的收发操作。</p>
-<h3 id="write(fd)" tabindex="-1"><a class="header-anchor" href="#write-fd">#</a>write(fd)</h3>
+<h3 id="write-fd"><a class="header-anchor" href="#write-fd">#</a>write(fd)</h3>
 <p>先看发数据。在用户态执行 <code>write(fd)</code> 会跳转到系统调用 <code>sys_write(fd)</code>，进一步执行 <code>filewrite(fd)</code>，发现传入的 fd 指向一个 SOCK 文件，下一步就会执行 <code>sockwrite()</code>。该函数就是将数据拷贝到 <code>struct mbuf</code> 类型的变量中，然后利用协议栈，不断封装 TCP/UDP 首部、IP 首部、以太网首部，最后得到一个完整的数据包，就可以发送了。</p>
 <pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/sysnet.c</span></div><code class="language-C">int
 sockwrite(struct sock *si, uint64 addr, int n)
@@ -394,7 +394,7 @@ net_tx_eth(struct mbuf *m, uint16 ethtype)
     mbuffree(m);
   }
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="read(fd)" tabindex="-1"><a class="header-anchor" href="#read-fd">#</a>read(fd)</h3>
+<h3 id="read-fd"><a class="header-anchor" href="#read-fd">#</a>read(fd)</h3>
 <p>收数据的流程基本与上面类似。在用户态执行 <code>read(fd)</code> 会跳转到系统调用 <code>sys_read(fd)</code>，进一步执行 <code>fileread(fd)</code>，发现传入的 fd 指向一个 SOCK 文件，下一步就会执行 <code>sockread()</code>。到这里就开始不一样了。<code>sockread()</code> 如果发现接收队列 <code>mbufq</code> 为空，就 sleep 直到被唤醒。</p>
 <p>而唤醒操作实际上由硬件决定。每当 E1000 收到一个数据包，就会触发一次中断 <code>e1000_intr()</code>，里面会调用 <code>e1000_recv()</code>。这是我们需要实现的，事实上，根据任务手册我们也能大概推断出，该函数需要调用若干次 <code>net_rx</code>，不断拆解头部最后得到数据，发给 <code>sockrecvudp()</code>，它会将数据（实际上是 <code>mbuf</code>）push 进接收队列，并唤醒沉睡中的 <code>sockread()</code>。醒了以后发现数据已经有了，那就美滋滋地读取，最后返回给用户态。</p>
 <pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/sysnet.c</span></div><code class="language-C">int
@@ -463,7 +463,7 @@ found:
   wakeup(&amp;si-&gt;rxq);             // 并唤醒
   ...
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="task1%3A-e1000-transmit" tabindex="-1"><a class="header-anchor" href="#Task1-E1000-Transmit">#</a>Task1: E1000 Transmit</h2>
+<h2 id="Task1-E1000-Transmit"><a class="header-anchor" href="#Task1-E1000-Transmit">#</a>Task1: E1000 Transmit</h2>
 <p>OK，接下来我们首先进行一个发送函数的实现。关于 <code>tx_ring[]</code>、<code>tx_mbufs[]</code> 以及其他寄存器就不提了，我们只要知道是一个环形结构即可，且 E1000_TDT 寄存器表明了我们应该从哪个索引进行写入。lab 手册的 hint 其实给的很详细了，这里只说一些我认为比较坑的点：</p>
 <ol>
 <li class="lvl-3">
@@ -511,7 +511,7 @@ e1000_transmit(struct mbuf *m)
   release(&amp;e1000_lock);
   return 0;
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="task2%3A-e1000-recv" tabindex="-1"><a class="header-anchor" href="#Task2-E1000-Recv">#</a>Task2: E1000 Recv</h2>
+<h2 id="Task2-E1000-Recv"><a class="header-anchor" href="#Task2-E1000-Recv">#</a>Task2: E1000 Recv</h2>
 <p>接收函数也是按照 hint 来即可。也说下坑点：</p>
 <ol>
 <li class="lvl-3">
@@ -551,7 +551,7 @@ e1000_recv(void)
     rxd-&gt;addr = (uint64)rx_mbufs[tail]-&gt;head;
   }
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9E%9C" tabindex="-1"><a class="header-anchor" href="#测试结果">#</a>测试结果</h2>
+<h2 id="测试结果"><a class="header-anchor" href="#测试结果">#</a>测试结果</h2>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">make</span> grade
 <span class="token punctuation">..</span>.
 <span class="token operator">==</span> Test running nettests <span class="token operator">==</span>
@@ -568,7 +568,7 @@ $ <span class="token function">make</span> qemu-gdb
 <span class="token operator">==</span> Test <span class="token function">time</span> <span class="token operator">==</span>
 time: OK
 Score: <span class="token number">100</span>/100<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E6%9C%80%E5%90%8E%E7%9A%84%E5%B7%A5%E4%BD%9C" tabindex="-1"><a class="header-anchor" href="#最后的工作">#</a>最后的工作</h2>
+<h2 id="最后的工作"><a class="header-anchor" href="#最后的工作">#</a>最后的工作</h2>
 <ol>
 <li class="lvl-3">
 <p><code>git commit -am ""</code> 将所有修改提交到本地;</p>
@@ -757,12 +757,6 @@ Score: <span class="token number">100</span>/100<span aria-hidden="true" class="
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -771,8 +765,8 @@ Score: <span class="token number">100</span>/100<span aria-hidden="true" class="
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -788,41 +782,6 @@ Score: <span class="token number">100</span>/100<span aria-hidden="true" class="
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

@@ -332,7 +332,7 @@
 <blockquote>
 <p>参考资料：《网络是怎样运行的》 by 户根勤</p>
 </blockquote>
-<h2 id="%E9%80%9A%E8%BF%87-dhcp-%E6%8B%BF-ip-%E5%9C%B0%E5%9D%80" tabindex="-1"><a class="header-anchor" href="#通过-DHCP-拿-IP-地址">#</a>通过 DHCP 拿 IP 地址</h2>
+<h2 id="通过-DHCP-拿-IP-地址"><a class="header-anchor" href="#通过-DHCP-拿-IP-地址">#</a>通过 DHCP 拿 IP 地址</h2>
 <p>假设这台主机刚刚插上网线准备接入互联网，那么此时此刻我们能够知道的仅有<strong>本机（或称之为客户端）的 MAC 地址</strong>这一信息，毕竟出厂就烧在 ROM 里。如果希望其能在网络中与其他节点进行通信，就需要知道<strong>客户端的 IP 地址</strong>。由于刚开始完全不知道任何信息，那么最先要做的事，就是去获得最近的 DHCP 服务器（下面简称 DS） 的 IP 地址，只有这样才能有足够的信息去构建请求消息，让其分配一个。</p>
 <p>那么怎么获得呢？最直接的做法就是广播一条只有 DS 收到后会回复的消息，这样我们拿到这条回复后就知道 DS 的信息了。这条广播消息长这样：</p>
 <table>
@@ -363,7 +363,7 @@
 </blockquote>
 <p>DS 收到后会发一个 <strong>ACK</strong> 回来，告知客户端的 IP 地址、子网掩码和 DNS 服务器的 IP 地址，客户端收到后进行配置，并在其 IP 转发表中安装默认网关。此刻我们正式完成了连接互联网的准备工作。</p>
 <p>此时此刻，我们已知的信息有：<strong>客户端 MAC 地址</strong>、<strong>客户端 IP 地址</strong>、<strong>默认网关 IP 地址</strong>、<strong>DNS 服务器 IP 地址</strong>。</p>
-<h2 id="%E9%80%9A%E8%BF%87-dns-%E8%8E%B7%E5%8F%96-web-%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84-ip-%E5%9C%B0%E5%9D%80" tabindex="-1"><a class="header-anchor" href="#通过-DNS-获取-Web-服务器的-IP-地址">#</a>通过 DNS 获取 Web 服务器的 IP 地址</h2>
+<h2 id="通过-DNS-获取-Web-服务器的-IP-地址"><a class="header-anchor" href="#通过-DNS-获取-Web-服务器的-IP-地址">#</a>通过 DNS 获取 Web 服务器的 IP 地址</h2>
 <p>在浏览器内输入链接敲回车，或点击链接后，浏览器应当解析该链接生成 HTTP GET 请求，然后调用 Socket 库委托协议栈生成消息发出去。这之间还有一些工作要完成，最先要完成的就是获取 Web 服务器的目的 IP 地址，这一步是通过向 DNS 服务器发起查询完成的，理由和请求分配 IP 地址一样。这条查询会被组装为：</p>
 <table>
 <thead>
@@ -423,7 +423,7 @@
 </ol>
 <p>这下所有手续齐全了，可以正式开始数据交互了。</p>
 <p>此时此刻，我们新增的已知信息有：<strong>Web 服务器 IP 地址</strong>、<strong>默认网关 MAC 地址</strong>、<strong>DNS 服务器 MAC 地址</strong>。</p>
-<h2 id="tcp-%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E5%BB%BA%E7%AB%8B%E8%BF%9E%E6%8E%A5" tabindex="-1"><a class="header-anchor" href="#TCP-三次握手建立连接">#</a>TCP 三次握手建立连接</h2>
+<h2 id="TCP-三次握手建立连接"><a class="header-anchor" href="#TCP-三次握手建立连接">#</a>TCP 三次握手建立连接</h2>
 <p>由于 HTTP 请求常常交给 TCP 协议，而 TCP 又需要保证在数据的传输之前，双方建立起了稳定的连接。首先客户端会创建一个 socket，用于唯一标识连接——毕竟可能存在多个网页同时点击该链接——同时会为客户端分配一个端口 <code>p</code>，该 socket 应当长成这样：</p>
 <table>
 <thead>
@@ -482,7 +482,7 @@
 <p>这个副本并不会影响原来的 socket，因为一个 socket 是由四个要素决定的，如果不创建副本直接连接，原来那个 socket 就会被本次连接占用，那就没有 socket 进行监听，后续的所有来自其他 host/server 的连接都得排队或 abort 了。</p>
 </blockquote>
 <p>客户端收到这条回复后，再发一个 ACK 回去表明收到了服务器发来的回复，如果一段时间内没有收到重复消息，说明这条 ACK 也被服务器收到了，连接正式确立。</p>
-<h2 id="%E8%BF%9B%E8%A1%8C%E6%95%B0%E6%8D%AE%E4%BC%A0%E8%BE%93" tabindex="-1"><a class="header-anchor" href="#进行数据传输">#</a>进行数据传输</h2>
+<h2 id="进行数据传输"><a class="header-anchor" href="#进行数据传输">#</a>进行数据传输</h2>
 <p>此时此刻，客户端与 Web 服务器各有一个 socket 被用于该连接，两边的数据传输也是基于各自的 socket 进行。所有工作做完后，对于客户端而言，就是生成 HTTP GET 请求然后不断加上协议栈各层的头部通过网卡发送出去，其中链路层头部就是客户端 MAC 地址与网关 MAC 地址，网络层与传输层的源地址与目标地址直接根据 socket 确立。经过交换机、路由器的层层转发，消息终于来到了 Web 服务器的 80 端口，然后 Web 服务器验证有效性后将消息进行拆解，发现是一条 GET 请求，遂将本地的 html 文件以二进制的形式进行答复。</p>
 <p>客户端收到该答复后，将二进制数据交给浏览器进行渲染，显示出网页。如果还有其他图片、视频等要素，依然也是通过上面的手段进行获取。</p>
 
@@ -664,12 +664,6 @@
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -678,8 +672,8 @@
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -695,41 +689,6 @@
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

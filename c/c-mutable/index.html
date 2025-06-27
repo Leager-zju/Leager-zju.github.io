@@ -329,7 +329,7 @@ bitwise constness：主张成">
             <div id="articleContent">
                 <p><code>mutable</code> 意为<strong>可变的</strong>，可以在<strong>非引用非常量非静态</strong>数据成员的声明中出现，允许被常量类对象修改。</p>
 <span id="more"></span>
-<h2 id="%E7%B1%BB%E4%B8%AD%E7%9A%84-mutable" tabindex="-1"><a class="header-anchor" href="#类中的-mutable">#</a>类中的 mutable</h2>
+<h2 id="类中的-mutable"><a class="header-anchor" href="#类中的-mutable">#</a>类中的 mutable</h2>
 <p>先聊聊一个有趣的话题，关于 <a href="../../c/c-const"><strong>const</strong></a> 类成员函数有两大观点流派：</p>
 <ol>
 <li class="lvl-3">
@@ -372,7 +372,7 @@ bitwise constness：主张成">
 <blockquote>
 <p>主要用于指定不影响类的外部可观察状态的成员，通常在并发场景下搭配互斥锁使用。</p>
 </blockquote>
-<h2 id="lambda-%E8%A1%A8%E8%BE%BE%E5%BC%8F%E4%B8%AD%E7%9A%84-mutable" tabindex="-1"><a class="header-anchor" href="#lambda-表达式中的-mutable">#</a>lambda 表达式中的 mutable</h2>
+<h2 id="lambda-表达式中的-mutable"><a class="header-anchor" href="#lambda-表达式中的-mutable">#</a>lambda 表达式中的 mutable</h2>
 <p>具体可参考<a href="../../c/c-function/#%E5%8F%AF%E9%80%89%E8%AF%B4%E6%98%8E%E7%AC%A6">本文</a>。</p>
 <p>简单来说就是 lambda 表达式会将值捕获的变量视为 <code>const</code>，若想要对其进行修改需加上 <code>mutable</code> 说明符。</p>
 
@@ -557,12 +557,6 @@ bitwise constness：主张成">
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -571,8 +565,8 @@ bitwise constness：主张成">
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -588,41 +582,6 @@ bitwise constness：主张成">
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

@@ -326,7 +326,7 @@
 <p>「<strong>动画系统</strong>」由多个动画工具和编辑器构成，其将基于骨架的变形与基于变形的顶点变形相结合，从而构建出复杂的动画。该系统可以用于播放和混合预先准备好的动画序列让基本玩家运动显得更加真实，创建自定义特殊动作，如伸缩台阶和墙壁（使用动画蒙太奇），通过变形目标应用伤害效果或面部表情，使用骨架控制直接控制骨骼变形，或创建基于逻辑的 状态机 来确定角色在指定情境下应该使用哪个动画。——<a target="_blank" rel="noopener" href="https://dev.epicgames.com/documentation/zh-cn/unreal-engine/animation-system-overview?application_version=4.27">虚幻官方文档</a></p>
 </blockquote>
 <span id="more"></span>
-<h2 id="%E9%AA%A8%E9%AA%BC%E4%B8%8E%E9%AA%A8%E6%9E%B6" tabindex="-1"><a class="header-anchor" href="#骨骼与骨架">#</a>骨骼与骨架</h2>
+<h2 id="骨骼与骨架"><a class="header-anchor" href="#骨骼与骨架">#</a>骨骼与骨架</h2>
 <p>在虚幻引擎中，<strong>骨架</strong>用于定义角色中的<strong>骨骼</strong>，同时关联动画数据，从而驱动动画。</p>
 <p>骨骼是骨架的基本组成单元，并在骨架中以树状结构组织。<strong>根骨骼</strong>是骨架层级结构的根节点。除了根骨骼外，每个骨骼都有一个<strong>父骨骼</strong>。此外，每个骨骼还有用于唯一标识符的<strong>名称</strong>以及用于确定在空间中状态的<strong>变换信息</strong>。</p>
 <blockquote>
@@ -363,18 +363,18 @@
   <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>每个骨骼的信息用 <code>FMeshBoneInfo</code> 结构体描述，有名称以及父骨骼在 TArray 中的索引。此外 <code>FReferenceSkeleton</code> 中还有骨骼的变换信息以及名称到数组索引的映射。</p>
-<h2 id="%E9%AA%A8%E6%9E%B6%E7%BD%91%E6%A0%BC%E4%BD%93" tabindex="-1"><a class="header-anchor" href="#骨架网格体">#</a>骨架网格体</h2>
+<h2 id="骨架网格体"><a class="header-anchor" href="#骨架网格体">#</a>骨架网格体</h2>
 <p><strong>骨架网格体</strong>是设置了骨架的模型资源，本质上是将<strong>几何数据</strong>、<strong>骨架信息</strong>、<strong>蒙皮权重</strong>进行结合得到的产物。其中，几何数据指的是模型<strong>顶点</strong>、三角形表面、UV 坐标、法线、切线等用于图像渲染的数据。在这里，我们只关注顶点这一概念。</p>
 <p>而蒙皮权重是骨架网格体中最重要的概念之一。在骨架网格体中，每根骨骼都与骨架网格体的一部分顶点相关联。当骨骼移动或旋转时，与其关联的顶点也会随之移动，从而实现模型的变形。其中，蒙皮权重定义了每个骨骼应用变换时对每个顶点的影响程度。权重越高，顶点受该骨骼的影响越大。</p>
-<h2 id="%E5%8A%A8%E7%94%BB%E6%A8%A1%E5%BC%8F" tabindex="-1"><a class="header-anchor" href="#动画模式">#</a>动画模式</h2>
+<h2 id="动画模式"><a class="header-anchor" href="#动画模式">#</a>动画模式</h2>
 <p>每个 Character 是默认带有 <code>SkeletalMeshComponent</code> 的 Pawn，其中 <code>SkeletalMeshComponent</code> 下面有一个名为「<strong>Animation Mode</strong>」的设置，其中比较主流的是「<strong>Use Animation Asset</strong>」和「<strong>Use Animation Blueprint</strong>」两种选项。</p>
 <img src="animmode.png" style="zoom:100%;">
-<h2 id="%E5%8A%A8%E7%94%BB%E5%BA%8F%E5%88%97" tabindex="-1"><a class="header-anchor" href="#动画序列">#</a>动画序列</h2>
+<h2 id="动画序列"><a class="header-anchor" href="#动画序列">#</a>动画序列</h2>
 <p><strong>动画序列</strong>是最简单的 Animation Asset。在任一时间点，一个骨架网格体中所有骨骼变换信息的集合又被称为<strong>姿势</strong>。动画序列包含了一系列带有姿势信息的关键帧，通过播放序列中的这些关键帧，并再将它们互相混合（比如插值混合），使得骨架网格体可以产生平滑的动画效果。</p>
 <blockquote>
 <p>每个动画序列专门针对一个特定骨架，且只能在该骨架上播放。换言之，对于不同的骨架网格体，只要使用的骨架相同，那么就可以共享动画序列。</p>
 </blockquote>
-<h2 id="%E5%8A%A8%E7%94%BB%E8%93%9D%E5%9B%BE" tabindex="-1"><a class="header-anchor" href="#动画蓝图">#</a>动画蓝图</h2>
+<h2 id="动画蓝图"><a class="header-anchor" href="#动画蓝图">#</a>动画蓝图</h2>
 <p><strong>动画蓝图</strong>用于管理和控制 Character 的动画行为，包含以下两个主要部分。</p>
 <p><strong>事件图表</strong>可以构建基于蓝图的逻辑，用于定义节点的属性和包含其他图表区域信息的变量。</p>
 <img src="event.png" style="zoom:80%;">
@@ -383,10 +383,10 @@
 <p>在动画图表中还可以利用<strong>状态机</strong>输出最终姿势。其功能是将不同的动画作为一系列状态，然后按照转换规则管理这些状态，转换规则可控制从一个状态混合到另一个状态，通常用于角色的移动逻辑。</p>
 <img src="sm1.png" style="zoom:80%;">
 <img src="state.png" style="zoom:80%;">
-<h2 id="%E5%8A%A8%E7%94%BB%E6%B7%B7%E5%90%88" tabindex="-1"><a class="header-anchor" href="#动画混合">#</a>动画混合</h2>
+<h2 id="动画混合"><a class="header-anchor" href="#动画混合">#</a>动画混合</h2>
 <p><strong>混合</strong>是指将两个或多个值或状态组合在一起的过程，以产生一个平滑的过渡或最终结果。而<strong>动画混合</strong>，指的就是多个动画序列里的每一条变换信息相互之间基于权重的运算过程，本质上是对每个时间点的姿势进行混合。</p>
 <p>通过动画混合，我们能够平滑地过渡和组合不同的动画姿势，从而创造出更自然的角色动画。比如根据角色的速度和方向，动态地在行走和跑步之间平滑过渡；或者将换弹与跑步相混合，得到一个奔跑时换弹的融合动作。</p>
-<h3 id="%E5%8F%98%E6%8D%A2%E4%BF%A1%E6%81%AF%E8%BF%90%E7%AE%97%E6%96%B9%E5%BC%8F" tabindex="-1"><a class="header-anchor" href="#变换信息运算方式">#</a>变换信息运算方式</h3>
+<h3 id="变换信息运算方式"><a class="header-anchor" href="#变换信息运算方式">#</a>变换信息运算方式</h3>
 <p>变换信息的运算有以下两种方式：<strong>覆写</strong>和<strong>叠加</strong>。</p>
 <p>覆写是直接将目标变换设置为<code>源变换 * 权重</code>。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>Overrite Transform</span></div><code class="language-cpp"><span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token operator">&gt;</span>
@@ -406,7 +406,7 @@ FORCEINLINE <span class="token keyword">void</span> <span class="token generic-f
   <span class="token keyword">const</span> ScalarRegister <span class="token function">VBlendWeight</span><span class="token punctuation">(</span>BlendWeight<span class="token punctuation">)</span><span class="token punctuation">;</span>
   Dest<span class="token punctuation">.</span><span class="token function">AccumulateWithShortestRotation</span><span class="token punctuation">(</span>Source<span class="token punctuation">,</span> VBlendWeight<span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="%E5%A7%BF%E5%8A%BF%E6%B7%B7%E5%90%88" tabindex="-1"><a class="header-anchor" href="#姿势混合">#</a>姿势混合</h3>
+<h3 id="姿势混合"><a class="header-anchor" href="#姿势混合">#</a>姿势混合</h3>
 <p>姿势混合将两个或多个动画的姿势组合在一起，以创建新的姿势，从而得到混合后的新的动画。</p>
 <p>虚幻引擎中的动画蓝图提供了以下几种基于混合节点的姿势混合方式：</p>
 <ol>
@@ -438,7 +438,7 @@ FORCEINLINE <span class="token keyword">void</span> <span class="token generic-f
 </ul>
 </li>
 </ol>
-<h3 id="%E6%B7%B7%E5%90%88%E7%A9%BA%E9%97%B4" tabindex="-1"><a class="header-anchor" href="#混合空间">#</a>混合空间</h3>
+<h3 id="混合空间"><a class="header-anchor" href="#混合空间">#</a>混合空间</h3>
 <p><strong>混合空间</strong>能够通过一个或多个输入参数在多个动画序列之间平滑地混合。这些参数通常是角色的属性，例如速度、方向、攻击角度等。</p>
 <p>混合空间由一系列采样点组成。每个采样点对应于一个特定的输入参数值，并指定要播放的动画序列。当输入参数的值发生变化时，混合空间会根据当前输入参数值，在<strong>相邻</strong>的采样点之间进行混合。</p>
 <blockquote>
@@ -447,15 +447,15 @@ FORCEINLINE <span class="token keyword">void</span> <span class="token generic-f
 <p>而在混合空间 2D 中，则会采用<strong>双线性插值</strong>的方式来混合。</p>
 </blockquote>
 <p>虽然都是进行「混合」，但与混合节点不同，混合空间更像是“参数驱动的过渡工具”，确保动画连续性，</p>
-<h2 id="%E5%8A%A8%E7%94%BB%E8%92%99%E5%A4%AA%E5%A5%87" tabindex="-1"><a class="header-anchor" href="#动画蒙太奇">#</a>动画蒙太奇</h2>
-<h3 id="%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86" tabindex="-1"><a class="header-anchor" href="#实现原理">#</a>实现原理</h3>
+<h2 id="动画蒙太奇"><a class="header-anchor" href="#动画蒙太奇">#</a>动画蒙太奇</h2>
+<h3 id="实现原理"><a class="header-anchor" href="#实现原理">#</a>实现原理</h3>
 <p>状态机将循环播放角色当前所处状态的动画序列，是持续性的，但这些动画序列必须预先静态绑定到每个状态中，无法在运行时通过参数动态指定不同的动画。当我们想实现「<strong>触发某些条件播放一次动画</strong>」这一功能时，如果使用状态机，则必须设置一个新状态，随着动画逻辑的增加，状态网络复杂性提升，得不偿失。</p>
 <p><strong>蒙太奇</strong>。所有 Slot 由一个全局变量「<strong>Anim Slot Manager</strong>」管理。下面的例子中，Slot 名为「<strong>DefaultGroup.UpperBody</strong>」，其中「<strong>DefaultGroup</strong>」是<strong>插槽组</strong>，一个蒙太奇中所有的 Slot 必须是同一组的。</p>
 <img src="slot.png" style="zoom:80%;">
 <p>我们可以利用动画图表表中的同名<strong>插槽节点</strong>，便可在播放蒙太奇时覆盖之前节点的输出姿势。在下面的例子中，「<strong>FullBody</strong>」节点置于状态机后，以覆盖的形式插入动画，用于全身的互动动作或者表情动作；「<strong>UpperBody</strong>」搭配「<strong>Layered blend per bone</strong>」节点，实现按上半身骨骼的姿势混合。</p>
 <img src="slotnode.png" style="zoom:80%;">
 <p>Slot Node 相当于一个过滤器，当且仅当执行 Play Montage 操作时，对应的 Slot Node 会被激活，从而覆盖前面的输出；反之，Slot Node 会直接将 Source 设置为 Output。</p>
-<h3 id="%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90" tabindex="-1"><a class="header-anchor" href="#源码剖析">#</a>源码剖析</h3>
+<h3 id="源码剖析"><a class="header-anchor" href="#源码剖析">#</a>源码剖析</h3>
 <p>在 C++ 中，Play Montage 操作实际上会调用 <code>UAnimInstance::Montage_Play()</code> 方法，并进一步走到 <code>UAnimInstance::Montage_PlayInternal()</code> 中。如果传入参数 <code>bStopAllMontages</code> 为 true（默认值），那么会终止第一个 Slot 所在 Group 内的其他蒙太奇。接下来，将执行以下几个比较重要的步骤：</p>
 <ol>
 <li class="lvl-3">
@@ -515,9 +515,9 @@ FORCEINLINE <span class="token keyword">void</span> <span class="token generic-f
 <blockquote>
 <p>播放/结束蒙太奇时，前后一帧不可能与状态机的输出完全一致，如果直接修改则会很突兀，所以需要用 BlendIn 和 BlendOut 作首尾的混合，因此需要计算权重。</p>
 </blockquote>
-<h2 id="%E5%8A%A8%E7%94%BB%E6%9B%B2%E7%BA%BF" tabindex="-1"><a class="header-anchor" href="#动画曲线">#</a>动画曲线</h2>
+<h2 id="动画曲线"><a class="header-anchor" href="#动画曲线">#</a>动画曲线</h2>
 <p><strong>动画曲线</strong>是一种基于时间轴的关键帧动画控制机制，本质上是 float 曲线，x 轴为时间轴，与对应的动画序列等长；y 轴为自定义参数，每一帧都有对应的数值。在动画蓝图中，可以通过「<strong>Get Curve Value</strong>」节点获取当前时间帧对应的曲线值，默认为 0（即使该动画序列中没有同名曲线，也返回 0）。</p>
-<h3 id="%E6%9B%B2%E7%BA%BF%E6%B7%B7%E5%90%88" tabindex="-1"><a class="header-anchor" href="#曲线混合">#</a>曲线混合</h3>
+<h3 id="曲线混合"><a class="header-anchor" href="#曲线混合">#</a>曲线混合</h3>
 <p>当对多个动画序列进行混合时，会对同名曲线也进行混合，同时「<strong>Get Curve Value</strong>」获取的曲线值一定是若干曲线的混合结果值。</p>
 <p>使用「<strong>Blend</strong>」节点进行混合时，「<strong>Get Curve Value</strong>」得到的曲线值的计算逻辑为 <code>CurveA * (1-Alpha) + CurveB * Alpha</code>，这与 Pose 的混合逻辑完全一致。</p>
 <p>使用「<strong>Layered blend per bone</strong>」节点进行混合时，则因「<strong>曲线混合选项</strong>」而异，具体如下表所示，假设输入姿势「<strong>Blend Poses i</strong>」对应的曲线为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><mi>u</mi><mi>r</mi><mi>v</mi><msub><mi>e</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">Curve_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="mord mathnormal">u</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="mord"><span class="mord mathnormal">e</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>。</p>
@@ -533,9 +533,9 @@ FORCEINLINE <span class="token keyword">void</span> <span class="token generic-f
 <blockquote>
 <p>上述 BlendWeights 会被 clamp 到 (0, 1) 间。</p>
 </blockquote>
-<h3 id="%E5%8F%98%E5%BD%A2%E7%9B%AE%E6%A0%87-morph-targets" tabindex="-1"><a class="header-anchor" href="#变形目标-Morph-Targets">#</a>变形目标 Morph Targets</h3>
+<h3 id="变形目标-Morph-Targets"><a class="header-anchor" href="#变形目标-Morph-Targets">#</a>变形目标 Morph Targets</h3>
 <p><strong>Morph Targets</strong> 本质上是一个变量，通过修改该变量的值，能够改变模型的顶点位置，从而实现形状的动态变化，常用于角色面部表情、物体形变等场景。这玩意一般是美术创建好，和 SkeletalMesh 一起导入 UE 中的，可以在骨骼网格体页面的「<strong>变形目标预览器</strong>」处查看。此时，应用于该骨骼网格体的动画序列可以直接创建已知变形目标变量的曲线。</p>
-<h2 id="%E5%8A%A8%E7%94%BB%E9%80%9A%E7%9F%A5" tabindex="-1"><a class="header-anchor" href="#动画通知">#</a>动画通知</h2>
+<h2 id="动画通知"><a class="header-anchor" href="#动画通知">#</a>动画通知</h2>
 <p><strong>动画通知</strong>可以在动画播放到某个时间点的时候发送一次通知（Anim Notify），或持续发送通知直到结束点（Anim Notify State）。本质上是绑定了**动画通知类（Anim Notify Class）**的 callback，当触发通知后会调用类内部的 <code>Notify()</code> 函数。</p>
 
                 
@@ -718,12 +718,6 @@ FORCEINLINE <span class="token keyword">void</span> <span class="token generic-f
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -732,8 +726,8 @@ FORCEINLINE <span class="token keyword">void</span> <span class="token generic-f
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -749,41 +743,6 @@ FORCEINLINE <span class="token keyword">void</span> <span class="token generic-f
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

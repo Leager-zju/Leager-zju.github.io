@@ -327,8 +327,8 @@
             <div id="articleContent">
                 <p>本 Project 需要我们基于 badger 实现一个独立存储引擎。</p>
 <span id="more"></span>
-<h2 id="%E6%80%9D%E8%B7%AF" tabindex="-1"><a class="header-anchor" href="#思路">#</a>思路</h2>
-<h3 id="part-a-implement-standalone-storage-engine" tabindex="-1"><a class="header-anchor" href="#Part-A-Implement-standalone-storage-engine">#</a>Part A Implement standalone storage engine</h3>
+<h2 id="思路"><a class="header-anchor" href="#思路">#</a>思路</h2>
+<h3 id="Part-A-Implement-standalone-storage-engine"><a class="header-anchor" href="#Part-A-Implement-standalone-storage-engine">#</a>Part A Implement standalone storage engine</h3>
 <p>需要实现的代码在 <code>kv/storage/standalone_storage/standalone_storage.go</code>。</p>
 <p><code>NewStandAloneStorage(conf *config.Config)</code> 是工厂函数，返回一个 <code>StandAloneStorage</code> 指针。在这里需要了解 <code>Config</code> 数据结构，里面存放了数据库文件路径等重要信息，并且在其他方法中也要用到，所以在 <code>StandAloneStorage</code> 结构体中需存放传入的 <code>Config</code> 信息，以及其包装的 badger DB 实例。</p>
 <p><code>Start()</code> 函数驱动存储引擎运行，调用 <code>engine_util.CreateDB()</code> 并将返回值存在结构体中即可；同样的，<code>Stop()</code> 调用 <code>badger.DB.Close()</code> 即完成存储引擎的关闭。</p>
@@ -337,7 +337,7 @@
 <blockquote>
 <p>这三个函数其实分别对应了 util_engine 包中为我们实现好的 <code>GetCFFromTxn()/NewCFIterator()</code> 以及 <code>badger.Txn.Commit()</code>。所以新建结构体的时候还得包裹 <code>badger.Txn</code> 变量。</p>
 </blockquote>
-<h3 id="part-b-implement-service-handlers" tabindex="-1"><a class="header-anchor" href="#Part-B-Implement-service-handlers">#</a>Part B Implement service handlers</h3>
+<h3 id="Part-B-Implement-service-handlers"><a class="header-anchor" href="#Part-B-Implement-service-handlers">#</a>Part B Implement service handlers</h3>
 <p>需要实现的代码在 <code>kv/server/raw_api.go</code>.</p>
 <p>这里需要实现的 4 个函数，其实就是获取传入的 <code>Request</code> 中的各种字段，调用 <code>Storage</code> 的 <code>Write</code>（对应 Put/Delete 请求）/<code>Reader</code>（对应 Get/Scan 请求），最后 return 一个 <code>Response</code> 即可。</p>
 <blockquote>
@@ -531,12 +531,6 @@
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -545,8 +539,8 @@
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -562,41 +556,6 @@
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

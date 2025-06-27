@@ -351,7 +351,7 @@
             <div id="articleContent">
                 <p>三分化，双循环。</p>
 <span id="more"></span>
-<h2 id="%E5%91%A8%E4%B8%80-%26-%E5%91%A8%E5%9B%9B" tabindex="-1"><a class="header-anchor" href="#周一-周四">#</a>周一 &amp; 周四</h2>
+<h2 id="周一-周四"><a class="header-anchor" href="#周一-周四">#</a>周一 &amp; 周四</h2>
 <p><strong>胸</strong>：</p>
 <ul class="lvl-0">
 <li class="lvl-2">
@@ -370,7 +370,7 @@
 <p>绳索下拉 4×8</p>
 </li>
 </ul>
-<h2 id="%E5%91%A8%E4%BA%8C-%26-%E5%91%A8%E4%BA%94" tabindex="-1"><a class="header-anchor" href="#周二-周五">#</a>周二 &amp; 周五</h2>
+<h2 id="周二-周五"><a class="header-anchor" href="#周二-周五">#</a>周二 &amp; 周五</h2>
 <p><strong>背</strong>：</p>
 <ul class="lvl-0">
 <li class="lvl-2">
@@ -389,14 +389,14 @@
 <p>弯举 4×8</p>
 </li>
 </ul>
-<h2 id="%E5%91%A8%E4%B8%89" tabindex="-1"><a class="header-anchor" href="#周三">#</a>周三</h2>
+<h2 id="周三"><a class="header-anchor" href="#周三">#</a>周三</h2>
 <p><strong>腿</strong>：</p>
 <ul class="lvl-0">
 <li class="lvl-2">
 <p>深蹲 4×8</p>
 </li>
 </ul>
-<h2 id="%E5%91%A8%E5%85%AD" tabindex="-1"><a class="header-anchor" href="#周六">#</a>周六</h2>
+<h2 id="周六"><a class="header-anchor" href="#周六">#</a>周六</h2>
 <p><strong>肩</strong>：</p>
 <ul class="lvl-0">
 <li class="lvl-2">
@@ -418,7 +418,7 @@
 <p>支撑举腿 4×12</p>
 </li>
 </ul>
-<h2 id="%E5%91%A8%E6%97%A5" tabindex="-1"><a class="header-anchor" href="#周日">#</a>周日</h2>
+<h2 id="周日"><a class="header-anchor" href="#周日">#</a>周日</h2>
 <p>睡觉去吧你。</p>
 
                 
@@ -599,12 +599,6 @@
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -613,8 +607,8 @@
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -630,41 +624,6 @@
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

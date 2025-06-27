@@ -337,7 +337,7 @@
 <p>Leader 通过 raft 层复制操作日志。</p>
 </li>
 </ol>
-<h2 id="part-a-the-shard-controller" tabindex="-1"><a class="header-anchor" href="#PART-A-The-Shard-controller">#</a>PART A-The Shard controller</h2>
+<h2 id="PART-A-The-Shard-controller"><a class="header-anchor" href="#PART-A-The-Shard-controller">#</a>PART A-The Shard controller</h2>
 <p>这一部分是比较简单的，去重检测、处理请求等方面几乎可以把 lab3 的代码搬过来。关键在于处理上层调用的 <code>Join</code>、<code>Leave</code>、<code>Move</code>、<code>Query</code> 这 4 个命令。由于 Shardctrler 管理一系列配置，故需要在结构体中额外设置一个 Config 切片。结构体如下：</p>
 <pre class="line-numbers language-go" data-language="go"><code class="language-go"><span class="token keyword">type</span> ShardCtrler <span class="token keyword">struct</span> <span class="token punctuation">{</span>
   mu    sync<span class="token punctuation">.</span>RWMutex
@@ -348,7 +348,7 @@
   lastRequestInfo <span class="token keyword">map</span><span class="token punctuation">[</span><span class="token builtin">int64</span><span class="token punctuation">]</span><span class="token operator">*</span>RequestInfo <span class="token comment">// clerkID -&gt; requestID</span>
   configs <span class="token punctuation">[</span><span class="token punctuation">]</span>Config <span class="token comment">// indexed by config num</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="%E6%96%B0%E5%BB%BA%E9%85%8D%E7%BD%AE" tabindex="-1"><a class="header-anchor" href="#新建配置">#</a>新建配置</h3>
+<h3 id="新建配置"><a class="header-anchor" href="#新建配置">#</a>新建配置</h3>
 <p><code>Query</code> 相当于读命令，不会对 Config 有任何更改，是可以不经过去重的，直接根据规则返回相应 Config 即可。</p>
 <p>其它 3 个需要经过去重表。其中 <code>Move</code> 较为简单，直接修改 Config 中 <code>Shards[]</code> 对应的值即可。对于 <code>Join</code> 和 <code>Leave</code>，在应用命令时需要创建一个新的 Config。</p>
 <blockquote>
@@ -409,7 +409,7 @@
     <span class="token keyword">go</span> <span class="token keyword">func</span><span class="token punctuation">(</span>reply_ <span class="token operator">*</span>Reply<span class="token punctuation">)</span> <span class="token punctuation">{</span> ch <span class="token operator">&lt;-</span> reply_ <span class="token punctuation">}</span><span class="token punctuation">(</span>reply<span class="token punctuation">)</span>
   <span class="token punctuation">}</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="%E5%88%86%E7%89%87%E5%86%8D%E5%88%86%E9%85%8D" tabindex="-1"><a class="header-anchor" href="#分片再分配">#</a>分片再分配</h3>
+<h3 id="分片再分配"><a class="header-anchor" href="#分片再分配">#</a>分片再分配</h3>
 <p>lab 要求<strong>新 Config 应尽可能将 Shard 均匀地分配到 groups 中，并应移动尽可能少的 Shard</strong>。这样做也是为了减少不必要的网络资源消耗，毕竟后续 Shard 的迁移是需要 RPC 的。</p>
 <p>若分配前存在分片处于<strong>无主</strong>状态（即 Config.Shards[i] = 0），则优先<strong>将该分片分配给拥有最少分片的 group</strong>。反之，则<strong>每次选取拥有最多分片的 group 给拥有最少分片的 group 迁移 Shard，直至两者拥有数量不超过 1</strong>。</p>
 <blockquote>
@@ -469,9 +469,9 @@
     <span class="token punctuation">}</span>
   <span class="token punctuation">}</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="part-b-shared-key%2Fvalue-server" tabindex="-1"><a class="header-anchor" href="#PART-B-Shared-Key-Value-Server">#</a>PART B-Shared Key/Value Server</h2>
+<h2 id="PART-B-Shared-Key-Value-Server"><a class="header-anchor" href="#PART-B-Shared-Key-Value-Server">#</a>PART B-Shared Key/Value Server</h2>
 <p>这一部分我认为是整个 6.824 lab 中最难的一个 Part。尽管 raft 算法也很难，但只要认真研读论文的图 2，依然能够写出 bugfree 的代码。这部分的难点在于，需要我们从头设计一个基于 Shard 的 KV 服务，而没有任何文献资料/Guide 来作指引，一旦没有灵感迸发，就会寸步难行。</p>
-<h3 id="%E5%BC%80%E5%A7%8B-4b-%E4%B9%8B%E5%89%8D%E9%9C%80%E8%A6%81%E6%83%B3%E6%98%8E%E7%99%BD%E7%9A%84%E4%B8%80%E4%BA%9B%E4%BA%8B" tabindex="-1"><a class="header-anchor" href="#开始-4B-之前需要想明白的一些事">#</a>开始 4B 之前需要想明白的一些事</h3>
+<h3 id="开始-4B-之前需要想明白的一些事"><a class="header-anchor" href="#开始-4B-之前需要想明白的一些事">#</a>开始 4B 之前需要想明白的一些事</h3>
 <p>磨蹭大半个月+仔细阅读实验要求后，我得出如下总结：</p>
 <p>该部分与 lab3 的不同之处在于，group 会不断加入/离开系统，为了平衡负载，系统需要在 group 之间转移 Shard。同时，随着 groups 的变化，系统的 Config 也会不断发生变化，且需要告知所有 group。简而言之，该 lab 的难点并不在于对 client 操作的实现——它已经在 lab3 中做完了，直接照抄即可——而是：</p>
 <ol>
@@ -483,7 +483,7 @@
 </li>
 </ol>
 <p>能够想明白上面两个问题，4B 的所有难点都迎刃而解，包括两个 Challenge。</p>
-<h3 id="clerk" tabindex="-1"><a class="header-anchor" href="#Clerk">#</a>Clerk</h3>
+<h3 id="Clerk"><a class="header-anchor" href="#Clerk">#</a>Clerk</h3>
 <p>Clerk 的工作和 lab3 非常相似，样例代码的思路也很清楚——一旦收到 ErrWrongGroup 回复，则说明自己缓存的 Config 有误，需向 Shardctrler 请求最新的 Config。和 lab3 类似，Clerk 需要缓存每个 group 的 Leader。</p>
 <p>这里有个很重要的一点：如果对某个 group 所有成员均发送失败，则认为该 group 全挂了，系统发生成员变动，此时 Clerk 缓存的 Config 一定已过时，再继续发下去极有可能死循环，需要尝试获取最新 Config。</p>
 <pre class="line-numbers language-go" data-language="go"><code class="language-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>ck <span class="token operator">*</span>Clerk<span class="token punctuation">)</span> <span class="token function">SendRequest</span><span class="token punctuation">(</span>Command <span class="token operator">*</span>OperationCommand<span class="token punctuation">)</span> <span class="token builtin">string</span> <span class="token punctuation">{</span>
@@ -510,7 +510,7 @@
     ck<span class="token punctuation">.</span>config <span class="token operator">=</span> ck<span class="token punctuation">.</span>sm<span class="token punctuation">.</span><span class="token function">Query</span><span class="token punctuation">(</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span>
   <span class="token punctuation">}</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="server" tabindex="-1"><a class="header-anchor" href="#Server">#</a>Server</h3>
+<h3 id="Server"><a class="header-anchor" href="#Server">#</a>Server</h3>
 <p>首先思考第一个问题，<strong>如何 ReConfig，Config 有更新后怎么做</strong>。这个问题还是比较容易的，只需要在启动 server 时异步开启一个 <strong>ConfigPuller</strong> 协程，定期向 Shardctrler 请求最新的 Config 即可。每个 server 还需维护一个 <code>CurrentConfig</code> 变量，一旦获得较新的 Config，就将其赋给 CurrentConfig。</p>
 <blockquote>
 <p>这个变量主要用于收到操作请求时判断是否返回 ErrWrongGroup，即如果 <code>CurrentConfig.Shards[key2shard(key)] != kv.gid</code>，说明本 group 不负责该分片，需报错。</p>
@@ -666,7 +666,7 @@
 </blockquote>
 <p>我参考了他的做法，加入了<strong>空日志检测机制</strong>。原文中有提到，不再赘述。</p>
 <p>基于以上讨论，整体架构就能进行如下设计了。</p>
-<h4 id="startserver" tabindex="-1"><a class="header-anchor" href="#StartServer">#</a>StartServer</h4>
+<h4 id="StartServer"><a class="header-anchor" href="#StartServer">#</a>StartServer</h4>
 <p>注意 Shard.KVs 需要先 make() 对象。</p>
 <pre class="line-numbers language-go" data-language="go"><code class="language-go"><span class="token keyword">func</span> <span class="token function">StartServer</span><span class="token punctuation">(</span>servers <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">*</span>labrpc<span class="token punctuation">.</span>ClientEnd<span class="token punctuation">,</span> me <span class="token builtin">int</span><span class="token punctuation">,</span> persister <span class="token operator">*</span>raft<span class="token punctuation">.</span>Persister<span class="token punctuation">,</span> maxraftstate <span class="token builtin">int</span><span class="token punctuation">,</span> gid <span class="token builtin">int</span><span class="token punctuation">,</span> ctrlers <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">*</span>labrpc<span class="token punctuation">.</span>ClientEnd<span class="token punctuation">,</span> make_end <span class="token keyword">func</span><span class="token punctuation">(</span><span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token operator">*</span>labrpc<span class="token punctuation">.</span>ClientEnd<span class="token punctuation">)</span> <span class="token operator">*</span>ShardKV <span class="token punctuation">{</span>
   labgob<span class="token punctuation">.</span><span class="token function">Register</span><span class="token punctuation">(</span>OperationCommand<span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">)</span>
@@ -702,7 +702,7 @@
 
   <span class="token keyword">return</span> kv
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h4 id="msgstruct" tabindex="-1"><a class="header-anchor" href="#MsgStruct">#</a>MsgStruct</h4>
+<h4 id="MsgStruct"><a class="header-anchor" href="#MsgStruct">#</a>MsgStruct</h4>
 <p>为不同操作命令定义了不同类型，这样就能通过 msg.Command.(type) 进行强转，并进一步根据 Command.Op 执行不同操作。rpc 的参数也统一采用 RPCArgs 的格式——pull Shard 请求和 GC 通知都需要 ShardId 与 ConfigNum。</p>
 <pre class="line-numbers language-go" data-language="go"><code class="language-go"><span class="token comment">// cmd</span>
 <span class="token keyword">type</span> OperationCommand <span class="token keyword">struct</span> <span class="token punctuation">{</span>
@@ -748,7 +748,7 @@
   ConfigNum     <span class="token builtin">int</span>
   LastRequestInfo <span class="token keyword">map</span><span class="token punctuation">[</span><span class="token builtin">int64</span><span class="token punctuation">]</span>RequestInfo
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h4 id="applier" tabindex="-1"><a class="header-anchor" href="#Applier">#</a>Applier</h4>
+<h4 id="Applier"><a class="header-anchor" href="#Applier">#</a>Applier</h4>
 <p>和 lab3 大同小异，只是多加了一些 Command 类型的判断。</p>
 <pre class="line-numbers language-go" data-language="go"><code class="language-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>kv <span class="token operator">*</span>ShardKV<span class="token punctuation">)</span> <span class="token function">Applier</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
   <span class="token comment">// goroutine</span>
@@ -772,7 +772,7 @@
     <span class="token punctuation">}</span>
   <span class="token punctuation">}</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h4 id="configpuller" tabindex="-1"><a class="header-anchor" href="#ConfigPuller">#</a>ConfigPuller</h4>
+<h4 id="ConfigPuller"><a class="header-anchor" href="#ConfigPuller">#</a>ConfigPuller</h4>
 <pre class="line-numbers language-go" data-language="go"><code class="language-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>kv <span class="token operator">*</span>ShardKV<span class="token punctuation">)</span> <span class="token function">ApplyUpdateConfigCommand</span><span class="token punctuation">(</span>msg raft<span class="token punctuation">.</span>ApplyMsg<span class="token punctuation">)</span> <span class="token punctuation">{</span>
   <span class="token comment">// locked</span>
   Command <span class="token operator">:=</span> msg<span class="token punctuation">.</span>Command<span class="token punctuation">.</span><span class="token punctuation">(</span>ConfigCommand<span class="token punctuation">)</span>
@@ -815,7 +815,7 @@
     time<span class="token punctuation">.</span><span class="token function">Sleep</span><span class="token punctuation">(</span>NewConfigQueryTimeOut<span class="token punctuation">)</span>
   <span class="token punctuation">}</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h4 id="shardpuller-%26-garbagecollector" tabindex="-1"><a class="header-anchor" href="#ShardPuller-GarbageCollector">#</a>ShardPuller &amp; GarbageCollector</h4>
+<h4 id="ShardPuller-GarbageCollector"><a class="header-anchor" href="#ShardPuller-GarbageCollector">#</a>ShardPuller &amp; GarbageCollector</h4>
 <p>两者其实非常相似。</p>
 <pre class="line-numbers language-go" data-language="go"><code class="language-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>kv <span class="token operator">*</span>ShardKV<span class="token punctuation">)</span> <span class="token function">ApplyShardCommand</span><span class="token punctuation">(</span>msg raft<span class="token punctuation">.</span>ApplyMsg<span class="token punctuation">)</span> <span class="token punctuation">{</span>
   Command <span class="token operator">:=</span> msg<span class="token punctuation">.</span>Command<span class="token punctuation">.</span><span class="token punctuation">(</span>ShardCommand<span class="token punctuation">)</span>
@@ -893,7 +893,7 @@
     time<span class="token punctuation">.</span><span class="token function">Sleep</span><span class="token punctuation">(</span>GarbageCollectorTimeOut<span class="token punctuation">)</span>
   <span class="token punctuation">}</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h4 id="emptyentrydetector" tabindex="-1"><a class="header-anchor" href="#EmptyEntryDetector">#</a>EmptyEntryDetector</h4>
+<h4 id="EmptyEntryDetector"><a class="header-anchor" href="#EmptyEntryDetector">#</a>EmptyEntryDetector</h4>
 <pre class="line-numbers language-go" data-language="go"><code class="language-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>kv <span class="token operator">*</span>ShardKV<span class="token punctuation">)</span> <span class="token function">ApplyEmptyCommand</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
   <span class="token comment">// "EMPTY COMMAND"</span>
 <span class="token punctuation">}</span>
@@ -907,7 +907,7 @@
     time<span class="token punctuation">.</span><span class="token function">Sleep</span><span class="token punctuation">(</span>EmptyEntryDetectorTimeOut<span class="token punctuation">)</span>
   <span class="token punctuation">}</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h4 id="%E7%BB%84%E9%97%B4-rpc" tabindex="-1"><a class="header-anchor" href="#组间-RPC">#</a>组间 RPC</h4>
+<h4 id="组间-RPC"><a class="header-anchor" href="#组间-RPC">#</a>组间 RPC</h4>
 <pre class="line-numbers language-go" data-language="go"><code class="language-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>kv <span class="token operator">*</span>ShardKV<span class="token punctuation">)</span> <span class="token function">HandleBetweenGroupRequest</span><span class="token punctuation">(</span>args <span class="token operator">*</span>RPCArgs<span class="token punctuation">,</span> reply <span class="token operator">*</span>RPCReply<span class="token punctuation">)</span> <span class="token punctuation">{</span>
   <span class="token comment">// RPC</span>
   <span class="token keyword">if</span> kv<span class="token punctuation">.</span>rf<span class="token punctuation">.</span><span class="token function">GetRaftState</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">!=</span> raft<span class="token punctuation">.</span>Leader <span class="token punctuation">{</span>
@@ -933,7 +933,7 @@
   <span class="token punctuation">}</span>
   reply<span class="token punctuation">.</span>ConfigNum<span class="token punctuation">,</span> reply<span class="token punctuation">.</span>Err <span class="token operator">=</span> configNum<span class="token punctuation">,</span> OK
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E6%80%BB%E7%BB%93" tabindex="-1"><a class="header-anchor" href="#总结">#</a>总结</h2>
+<h2 id="总结"><a class="header-anchor" href="#总结">#</a>总结</h2>
 <p>这么设计有以下好处：</p>
 <ol>
 <li class="lvl-3">
@@ -1140,12 +1140,6 @@ client 寻找对应
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -1154,8 +1148,8 @@ client 寻找对应
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -1171,41 +1165,6 @@ client 寻找对应
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

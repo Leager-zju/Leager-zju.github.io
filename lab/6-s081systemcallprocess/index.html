@@ -326,7 +326,7 @@
             <div id="articleContent">
                 <p>番外篇，探究通过 shell 运行命令时，系统调用到底是个什么流程。</p>
 <span id="more"></span>
-<h2 id="%E7%94%A8%E6%88%B7%E5%B1%82%E6%98%AF%E5%A6%82%E4%BD%95%E8%BF%9B%E8%A1%8C%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E7%9A%84" tabindex="-1"><a class="header-anchor" href="#用户层是如何进行系统调用的">#</a>用户层是如何进行系统调用的</h2>
+<h2 id="用户层是如何进行系统调用的"><a class="header-anchor" href="#用户层是如何进行系统调用的">#</a>用户层是如何进行系统调用的</h2>
 <p>以 <code>sleep.c</code> 为例，在 lab0 中我们知道要修改 Makefile 中的 <code>UPROGS</code> 变量，并且 <code>user/user.h</code> 中也为我们提供了 <code>sleep()</code> 的函数声明，但有一件事一直让我们感到疑惑，只不过 lab0 中并没有影响，那就是 <code>sleep()</code> 的定义在哪里？</p>
 <p>事实上，<code>Makefile</code> 在构建时，会首先调用 <code>user/usys.pl</code> 脚本文件，其作用是生成一个汇编语言文件 <code>usys.S</code>，这个文件会被解释成 <code>usys.o</code>，最后再和其它 <code>*.o</code> 文件一起链接成内核文件。那么这个脚本具体做了什么事呢？根据阅读我们发现，该文件就是利用 <code>entry()</code> 将用户层的各个函数注册成汇编语言，比如 <code>entry("sleep")</code> 会被注册为：</p>
 <pre class="line-numbers language-s" data-language="s"><div class="caption"><span>user/usys.S</span></div><code class="language-s">sleep:
@@ -341,7 +341,7 @@
 <blockquote>
 <p>这些 <code>SYS_xxx</code> 的值都在 <code>kernel/syscall.h</code> 中定义。</p>
 </blockquote>
-<h2 id="ecall-%E4%B8%8E-uservec" tabindex="-1"><a class="header-anchor" href="#ecall-与-uservec">#</a>ecall 与 uservec</h2>
+<h2 id="ecall-与-uservec"><a class="header-anchor" href="#ecall-与-uservec">#</a>ecall 与 uservec</h2>
 <p><code>ecall</code> 实际上是一条 CPU 指令，它只做三件事情：</p>
 <ol>
 <li class="lvl-3">
@@ -399,7 +399,7 @@ sfence.vma zero, zero<span aria-hidden="true" class="line-numbers-rows"><span></
 ## jump to usertrap(), which does not return
 jr t0<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>最后就是根据 t0 和内核页表，获取 <code>usertrap()</code> 函数物理地址，跳转过去并执行了。</p>
-<h2 id="usertrap()-%E5%81%9A%E4%BA%86%E4%BB%80%E4%B9%88" tabindex="-1"><a class="header-anchor" href="#usertrap-做了什么">#</a>usertrap() 做了什么</h2>
+<h2 id="usertrap-做了什么"><a class="header-anchor" href="#usertrap-做了什么">#</a>usertrap() 做了什么</h2>
 <pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/trap.c</span></div><code class="language-C">void
 usertrap(void)
 {
@@ -462,7 +462,7 @@ if(which_dev == 2)
 <pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/trap.c</span></div><code class="language-C">  usertrapret();
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 <p>最后，调用 <code>usertrapret()</code> 返回用户态；我们需要关注的就是这个 <code>syscall()</code> 函数，它取出 trapframe 下 a7 的值……这个值好熟悉，原来就是之前我们放入的 <code>SYS_xxx</code>。读取这个值后，从系统调用表中找到相应的系统调用函数指针，通过读取 trapframe 中的寄存器获取参数，就可以做事情了。</p>
-<h2 id="usertrapret()-%E5%81%9A%E4%BA%86%E4%BB%80%E4%B9%88" tabindex="-1"><a class="header-anchor" href="#usertrapret-做了什么">#</a>usertrapret() 做了什么</h2>
+<h2 id="usertrapret-做了什么"><a class="header-anchor" href="#usertrapret-做了什么">#</a>usertrapret() 做了什么</h2>
 <p><code>usertrapret()</code> 做了一些，为了返回用户态，软件层面要做的工作。嗯，其实就是恢复用户态数据到各个寄存器里。</p>
 <p>先回想一下哪些数据因为执行 <code>usertrap()</code> 而被保存或覆写了……用户程序计数器 PC、32 个用户寄存器、SATP 寄存器、STVEC 寄存器、SSCRATCH 寄存器……嗯好像就这些，那接下来就需要将原来用户态的数据写回了。</p>
 <pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/trap.c</span></div><code class="language-C">void
@@ -510,7 +510,7 @@ uint64 satp = MAKE_SATP(p-&gt;pagetable);<span aria-hidden="true" class="line-nu
 <blockquote>
 <p><code>ret</code> 实际调用的也是 <code>kernel/trap.c</code> 中的 <code>usertrapret()</code> 函数，做一些用户空间的恢复工作。当然有些事情得硬件处理，即执行名为 <code>userret</code> 的汇编函数（位于 <code>trampoline.S</code>）。</p>
 </blockquote>
-<h2 id="%E6%8E%A2%E7%B4%A2-userret" tabindex="-1"><a class="header-anchor" href="#探索-userret">#</a>探索 userret</h2>
+<h2 id="探索-userret"><a class="header-anchor" href="#探索-userret">#</a>探索 userret</h2>
 <p><code>usertrapret()</code> 还有一些无法在软件层面做的事，这些工作统统由 <code>userret</code> 负责。</p>
 <pre class="line-numbers language-S" data-language="S"><div class="caption"><span>kernel/trampoline.S</span></div><code class="language-S">.globl userret
 userret:
@@ -541,7 +541,7 @@ ld t6, 280(a0)<span aria-hidden="true" class="line-numbers-rows"><span></span><s
 ## usertrapret() set up sstatus and sepc.
 sret<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <p>最后，执行 <code>sret</code>，程序会切换回用户态，寄存器 SEPC 的数值会被拷贝到 PC，并且重新打开中断。因为同一进程的用户 PC 被记录到了 epc 中，直到 <code>usertrapret()</code> 才被写回 SEPC，所以不用担心被修改。</p>
-<h2 id="%E6%9C%80%E5%90%8E%E6%80%BB%E7%BB%93" tabindex="-1"><a class="header-anchor" href="#最后总结">#</a>最后总结</h2>
+<h2 id="最后总结"><a class="header-anchor" href="#最后总结">#</a>最后总结</h2>
 <img src="1.webp">
 <p>总结起来就是，对于任何一个用户层中允许调用的内核函数 <code>func()</code>，首先要在 <code>user/user.h</code> 中声明，还得在 <code>user/usys.pl</code> 中注册，在 <code>kernel/syscall.h</code> 定义新的系统调用号 <code>SYS_func</code>，以及在 <code>kernel/syscall.c</code> 的系统调用表中注册新的条目 <code>SYS_func =&gt; sys_func()</code>。当然不能忘了修改 <code>Makefile</code> 的 <code>UPROGS</code> 变量。</p>
 <p>当调用 <code>func()</code> 时，会将 <code>SYS_func</code> 载入 a7，然后调用 <code>ecall</code> 指令，进入到 <code>usertrap()</code> 函数中执行 <code>syscall()</code>，取出 <code>a7</code> 的系统调用号，查表得到系统调用 <code>sys_func()</code> 并执行，将返回值存到 a0 寄存器中，最后调用 <code>sret</code> 指令返回。这就是完整流程。</p>
@@ -724,12 +724,6 @@ sret<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -738,8 +732,8 @@ sret<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -755,41 +749,6 @@ sret<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

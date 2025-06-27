@@ -326,16 +326,16 @@
             <div id="articleContent">
                 <p><strong>线段树</strong>是一种能够在 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>log</mi><mo>⁡</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(\log n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span> 的时间复杂度下，动态维护区间信息的数据结构。</p>
 <span id="more"></span>
-<h2 id="%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84" tabindex="-1"><a class="header-anchor" href="#树状数组">#</a>树状数组</h2>
+<h2 id="树状数组"><a class="header-anchor" href="#树状数组">#</a>树状数组</h2>
 <p><a href="../shu-zhuang-shu-zu"><strong>树状数组</strong></a>虽然也能支持 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>log</mi><mo>⁡</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(\log n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span> 的区间查询，但仅仅是区间求和，对于区间最值问题显得有些无力。</p>
-<h2 id="%E7%BA%BF%E6%AE%B5%E6%A0%91" tabindex="-1"><a class="header-anchor" href="#线段树">#</a>线段树</h2>
+<h2 id="线段树"><a class="header-anchor" href="#线段树">#</a>线段树</h2>
 <p><strong>线段树</strong>将每个长度不为 1 的区间划分成左右两个区间递归求解，从而在逻辑上把整个区间划分为一个树形结构，通过合并左右两区间信息来求得该区间的信息。通常应用于<strong>区间求和</strong>、<strong>区间求最值</strong>等问题。</p>
 <p>线段树建树的思想并不难理解：如果当前节点负责区间 <code>[left, right]</code>，那么左儿子节点负责 <code>[left, mid]</code>，右儿子节点负责 <code>[mid + 1, right]</code>，这样的以中点的划分能够尽可能让同一层所有节点负责的区间大小相近。</p>
 <p>我们可以简单地用二叉树来构建，但这样就会存在开销（维护左右儿子的指针，在堆上分配内存）。然而根据建树的过程，我们也不难发现最后的树形结构与「满二叉树」非常接近，且当区间大小为 2 的幂时变满。此时我们就可以考虑用数组的方式来维护这棵树，如果我们使整棵树从下标 <code>index = 1</code> 开始，那么访问左儿子就是令 <code>index = index * 2</code>，访问右儿子就是令 <code>index = index * 2 + 1</code>。这样一来每个节点就比二叉树少维护了两个指针的信息，大大减少了内存开销。</p>
 <blockquote>
 <p>考虑到位运算的效率大于四则运算，上面访问儿子的方式也可以升级为 <code>index = index &lt;&lt; 1</code> 和 <code>index = (index &lt;&lt; 1) | 1</code>，证明略。</p>
 </blockquote>
-<h3 id="%E6%9E%84%E5%BB%BA" tabindex="-1"><a class="header-anchor" href="#构建">#</a>构建</h3>
+<h3 id="构建"><a class="header-anchor" href="#构建">#</a>构建</h3>
 <p>从而根据序列 <code>nums</code> 构建线段树 <code>st</code> 的代码用 C++ 可以如下实现：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>构建线段树</span></div><code class="language-cpp"><span class="token keyword">int</span> <span class="token function">build</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span>vector<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span><span class="token operator">&amp;</span> st<span class="token punctuation">,</span> <span class="token keyword">int</span> idx<span class="token punctuation">,</span>
           <span class="token keyword">const</span> std<span class="token double-colon punctuation">::</span>vector<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span><span class="token operator">&amp;</span> nums<span class="token punctuation">,</span> <span class="token keyword">int</span> left<span class="token punctuation">,</span> <span class="token keyword">int</span> right<span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -352,7 +352,7 @@
   <span class="token comment">// 求区间最大值则是用 st[idx] = std::max(lchild, rchild);</span>
   <span class="token comment">// 其他同理。</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="%E6%9F%A5%E8%AF%A2" tabindex="-1"><a class="header-anchor" href="#查询">#</a>查询</h3>
+<h3 id="查询"><a class="header-anchor" href="#查询">#</a>查询</h3>
 <p>现在我们已经有了线段树数组了，如何进行查询呢？考虑到每个节点负责的区间是固定的，所以在递归查询的时候需要额外提供当前节点的区间边界信息。为了降低开销，我们只要找到一个极大的子区间，即可读取该区间的信息，而无需进一步访问子节点。</p>
 <p>那么查询区间 <code>[left, right]</code> 信息的代码如下所示：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>区间查询</span></div><code class="language-cpp"><span class="token keyword">int</span> <span class="token function">query</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span>vector<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span><span class="token operator">&amp;</span> st<span class="token punctuation">,</span> <span class="token keyword">int</span> idx<span class="token punctuation">,</span> <span class="token keyword">int</span> lbound<span class="token punctuation">,</span> <span class="token keyword">int</span> rbound <span class="token comment">// 当前节点负责区间 [lbound, rbound]</span>
@@ -376,7 +376,7 @@
 
   <span class="token keyword">return</span> res<span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="%E4%BF%AE%E6%94%B9-%26-%E6%87%92%E6%83%B0%E6%A0%87%E8%AE%B0" tabindex="-1"><a class="header-anchor" href="#修改-懒惰标记">#</a>修改 &amp; 懒惰标记</h3>
+<h3 id="修改-懒惰标记"><a class="header-anchor" href="#修改-懒惰标记">#</a>修改 &amp; 懒惰标记</h3>
 <p>单点修改其实是区间修改中对应区间长度为 1 的情况，所以我们这里仅讨论区间修改。一种朴素的做法是遍历该区间，对其中每个元素，都去线段树中找到对应的长度为 1 的区间，然后自底向上修改。</p>
 <p>这种做法的问题在于，需要进行若干次单点修改，即深入到叶节点去操作。可我们的线段树维护的是区间信息啊，完全可以只修改极大子区间，却暂不进一步修改更深的子节点。</p>
 <p>那么子节点维护的区间信息肯定还是要去修改的，不然就会出现一致性的问题。那么什么时候修改呢？根据 LAZY 哲学，我们完全可以等到未来访问子区间的时候再去更新。显然如果未来并没有访问子区间，那我们就省下了若干修改操作，不得不说是很大的优化；即便访问了子区间，那么本次下推相当于将之前所有的累计更新放到这一次完成，也能大大优化时间开销。</p>
@@ -450,7 +450,7 @@
   <span class="token punctuation">}</span>
   st<span class="token punctuation">[</span>idx<span class="token punctuation">]</span> <span class="token operator">=</span> st<span class="token punctuation">[</span>idx <span class="token operator">&lt;&lt;</span> <span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">+</span> st<span class="token punctuation">[</span><span class="token punctuation">(</span>idx <span class="token operator">&lt;&lt;</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">|</span> <span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="%E6%9F%A5%E8%AF%A2-%26-%E6%87%92%E6%83%B0%E6%A0%87%E8%AE%B0" tabindex="-1"><a class="header-anchor" href="#查询-懒惰标记">#</a>查询 &amp; 懒惰标记</h3>
+<h3 id="查询-懒惰标记"><a class="header-anchor" href="#查询-懒惰标记">#</a>查询 &amp; 懒惰标记</h3>
 <p>有了懒惰标记后，查询部分代码也应当做相应修改。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>区间查询 with 懒惰标记 - 记录修改量</span></div><code class="language-cpp"><span class="token keyword">int</span> <span class="token function">query</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span>vector<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span><span class="token operator">&amp;</span> st<span class="token punctuation">,</span> <span class="token keyword">int</span> idx<span class="token punctuation">,</span> <span class="token keyword">int</span> lbound<span class="token punctuation">,</span> <span class="token keyword">int</span> rbound<span class="token punctuation">,</span>
           std<span class="token double-colon punctuation">::</span>vector<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span><span class="token operator">&amp;</span> lazy<span class="token punctuation">,</span> <span class="token comment">// lazy: 懒惰标记数组，记录修改量</span>
@@ -518,9 +518,9 @@
 
   <span class="token keyword">return</span> res<span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="%E7%A9%BA%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6" tabindex="-1"><a class="header-anchor" href="#空间复杂度">#</a>空间复杂度</h3>
+<h3 id="空间复杂度"><a class="header-anchor" href="#空间复杂度">#</a>空间复杂度</h3>
 <p>如果采用数组结构，则当序列长度为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> 时，表明线段树存在 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> 个叶节点，易得线段树深度最大为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">⌈</mo><mi>log</mi><mo>⁡</mo><mi>n</mi><mo stretchy="false">⌉</mo></mrow><annotation encoding="application/x-tex">\lceil\log{n}\rceil</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">⌈</span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">n</span></span><span class="mclose">⌉</span></span></span></span>。对应的数组存储最大容量为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mo>=</mo><msup><mn>2</mn><mrow><mo stretchy="false">⌈</mo><mi>log</mi><mo>⁡</mo><mi>n</mi><mo stretchy="false">⌉</mo><mo>+</mo><mn>1</mn></mrow></msup></mrow><annotation encoding="application/x-tex">s = 2^{\lceil\log{n}\rceil + 1}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">s</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.888em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.888em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mopen mtight">⌈</span><span class="mop mtight"><span class="mtight">l</span><span class="mtight">o</span><span class="mtight" style="margin-right:0.01389em;">g</span></span><span class="mspace mtight" style="margin-right:0.1952em;"></span><span class="mord mtight"><span class="mord mathnormal mtight">n</span></span><span class="mclose mtight">⌉</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span></span></span></span></span></span></span></span>。这个最大值在 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><msup><mn>2</mn><mi>x</mi></msup><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">n = 2^x+1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7477em;vertical-align:-0.0833em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6644em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">x</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> 时取到，此时 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mo>=</mo><msup><mn>2</mn><mrow><mi>x</mi><mo>+</mo><mn>2</mn></mrow></msup><mo>=</mo><msup><mn>2</mn><mrow><mi>log</mi><mo>⁡</mo><mo stretchy="false">(</mo><mi>n</mi><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo><mo>+</mo><mn>2</mn></mrow></msup><mo>=</mo><mn>4</mn><mo stretchy="false">(</mo><mi>n</mi><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">s = 2^{x+2} = 2^{\log(n-1)+2} = 4(n-1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">s</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">x</span><span class="mbin mtight">+</span><span class="mord mtight">2</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.888em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.888em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mop mtight"><span class="mtight">l</span><span class="mtight">o</span><span class="mtight" style="margin-right:0.01389em;">g</span></span><span class="mopen mtight">(</span><span class="mord mathnormal mtight">n</span><span class="mbin mtight">−</span><span class="mord mtight">1</span><span class="mclose mtight">)</span><span class="mbin mtight">+</span><span class="mord mtight">2</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">4</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">)</span></span></span></span>。所以我们可以简单地把数组的长度设置在 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>4</mn><mo stretchy="false">(</mo><mi>n</mi><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">4(n-1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">4</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">)</span></span></span></span> 大小，保证不会出现越界。</p>
-<h2 id="%E5%BA%94%E7%94%A8" tabindex="-1"><a class="header-anchor" href="#应用">#</a>应用</h2>
+<h2 id="应用"><a class="header-anchor" href="#应用">#</a>应用</h2>
 <ol>
 <li class="lvl-3">
 <p><a target="_blank" rel="noopener" href="https://leetcode.cn/submissions/detail/554071441/">&gt;&gt;&gt; LeetCode 2940 找到 Alice 和 Bob 可以相遇的建筑(Hard) &lt;&lt;&lt;</a></p>
@@ -705,12 +705,6 @@
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -719,8 +713,8 @@
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -736,41 +730,6 @@
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

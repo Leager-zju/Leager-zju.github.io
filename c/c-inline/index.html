@@ -326,7 +326,7 @@
             <div id="articleContent">
                 <p><strong><code>inline</code></strong> 只能用于修饰函数，能够解决一些频繁调用的小函数大量消耗栈内存的问题，是一种提高程序运行效率的手段。</p>
 <span id="more"></span>
-<h2 id="inline-%E5%9F%BA%E6%9C%AC" tabindex="-1"><a class="header-anchor" href="#inline-基本">#</a>inline 基本</h2>
+<h2 id="inline-基本"><a class="header-anchor" href="#inline-基本">#</a>inline 基本</h2>
 <p>众所周知，函数的调用需要消耗栈内存，每次调用一个函数，就会在栈中分配一片函数所需内存（如参数压栈），但栈内存大小是有限的，频繁使用就会造成因栈内存不足而导致程序出错的问题（经典<strong>段错误</strong>），比如函数的死循环递归调用。</p>
 <p>关键字 <code>inline</code> 所带来的就是在编译时期在函数调用处进行函数体内容展开（代码<strong>复制</strong>），换句话说就是不用执行正常的进入函数的步骤，直接执行函数体，这样一来就无需进行栈内存的分配。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">inline</span> <span class="token keyword">void</span> <span class="token function">func1</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"inline func1"</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
@@ -539,12 +539,6 @@
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -553,8 +547,8 @@
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -570,41 +564,6 @@
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

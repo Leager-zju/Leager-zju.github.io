@@ -327,7 +327,7 @@ Gameplay 技能系统 是一个高度灵活的框架，可用于构建你可能�
             <div id="articleContent">
                 <p>接下来是重头戏，要基于**虚幻技能系统(Gameplay Ability System, GAS)**设计角色技能玩法了。</p>
 <span id="more"></span>
-<h2 id="%E6%8A%80%E8%83%BD%E7%B3%BB%E7%BB%9F-gas" tabindex="-1"><a class="header-anchor" href="#技能系统-GAS">#</a>技能系统 GAS</h2>
+<h2 id="技能系统-GAS"><a class="header-anchor" href="#技能系统-GAS">#</a>技能系统 GAS</h2>
 <blockquote>
 <p>Gameplay 技能系统 是一个高度灵活的框架，可用于构建你可能会在 RPG 或 MOBA 游戏中看到的技能和属性类型。你可以构建可供游戏中的角色使用的动作或被动技能，使这些动作导致各种属性累积或损耗的状态效果，实现约束这些动作使用的"冷却"计时器或资源消耗，更改技能等级及每个技能等级的技能效果，激活粒子或音效，等等。简单来说，此系统可帮助你在任何现代 RPG 或 MOBA 游戏中设计、实现及高效关联各种游戏中的技能，既包括跳跃等简单技能，也包括你喜欢的角色的复杂技能集。—— 虚幻官方文档</p>
 </blockquote>
@@ -358,7 +358,7 @@ Gameplay 技能系统 是一个高度灵活的框架，可用于构建你可能�
 <blockquote>
 <p>具体可以参考 <a target="_blank" rel="noopener" href="https://github.com/tranek/GASDocumentation">GAS Documentation</a></p>
 </blockquote>
-<h2 id="ability-system-component" tabindex="-1"><a class="header-anchor" href="#Ability-System-Component">#</a>Ability System Component</h2>
+<h2 id="Ability-System-Component"><a class="header-anchor" href="#Ability-System-Component">#</a>Ability System Component</h2>
 <p>ASC 和 AS 需要附加到 Actor 上才能被访问并发挥出效果，并且该 Actor 称之为 <code>OwnerActor</code>。</p>
 <p>通常有两种 attach 方案：</p>
 <ol>
@@ -373,7 +373,7 @@ Gameplay 技能系统 是一个高度灵活的框架，可用于构建你可能�
 <p>Most Actors will have the ASC on themselves. If your Actor will respawn and need persistence of Attributes or GameplayEffects between spawns (like a hero in a MOBA), then the ideal location for the ASC is on the PlayerState.</p>
 </blockquote>
 <p>除了 <code>OwnActor</code>，GAS 的实际使用者称之为 <code>AvatarActor</code>。这里我们选择第一种方案来 attach ASC 和 AS。</p>
-<h3 id="player-state-%E4%B8%8E-replication-in-multi-player" tabindex="-1"><a class="header-anchor" href="#Player-State-与-Replication-in-multi-player">#</a>Player State 与 Replication in multi-player</h3>
+<h3 id="Player-State-与-Replication-in-multi-player"><a class="header-anchor" href="#Player-State-与-Replication-in-multi-player">#</a>Player State 与 Replication in multi-player</h3>
 <p>现在我们已经有了 Controller 类和 Character 类，那么接下来就是实现 PlayerState 类。步骤依然是创建 C++ 类 <code>RPlayerState</code> 与对应的蓝图类 <code>BP_RPlayerState</code>，并且在 Game Mode 中设置默认「玩家状态类」。我们可以在构造函数中为 <code>NetUpdateFrequency</code> 赋值，从而自定义 Play State 的复制速率。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>Components/RPlayerState.cpp</span></div><code class="language-cpp"><span class="token class-name">ARPlayerState</span><span class="token double-colon punctuation">::</span><span class="token function">ARPlayerState</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token punctuation">{</span>
@@ -384,7 +384,7 @@ Gameplay 技能系统 是一个高度灵活的框架，可用于构建你可能�
 <p>每个 client 上只会有<strong>一个</strong>属于自己 Pawn 的 Controller，只有 server 有所有 Controller。</p>
 <p>但每个 client 会拥有所有的 Pawn 及其 Player State，毕竟我们需要知道其它玩家的生命值、等级这些信息。这些信息就是由 Authority 负责同步了。</p>
 </blockquote>
-<h3 id="asc-%E8%AE%BE%E7%BD%AE%E4%B8%8E%E5%88%9D%E5%A7%8B%E5%8C%96" tabindex="-1"><a class="header-anchor" href="#ASC-设置与初始化">#</a>ASC 设置与初始化</h3>
+<h3 id="ASC-设置与初始化"><a class="header-anchor" href="#ASC-设置与初始化">#</a>ASC 设置与初始化</h3>
 <blockquote>
 <p>首先要新建 ASC 和 AS 的 C++ 类。步骤略。</p>
 </blockquote>
@@ -470,14 +470,14 @@ Gameplay 技能系统 是一个高度灵活的框架，可用于构建你可能�
     <span class="token punctuation">}</span>
   <span class="token punctuation">}</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="attribute-set" tabindex="-1"><a class="header-anchor" href="#Attribute-Set">#</a>Attribute Set</h2>
-<h3 id="attribute" tabindex="-1"><a class="header-anchor" href="#Attribute">#</a>Attribute</h3>
+<h2 id="Attribute-Set"><a class="header-anchor" href="#Attribute-Set">#</a>Attribute Set</h2>
+<h3 id="Attribute"><a class="header-anchor" href="#Attribute">#</a>Attribute</h3>
 <p>我们熟知的属性（生命值、等级）都是由一个叫 <code>FGameplayAttributeData</code> 的结构体表示的。这个结构体包含两个浮点数，<code>BaseValue</code> 和 <code>CurrentValue</code>，前者是属性的永久值，后者是在前者的基础上，由 Effect 修改得到的临时值，在 Effect 过期时变回 <code>BaseValue</code>。</p>
 <blockquote>
 <p>但是并不能这么用——Base Value 表示最大生命值，Current Value 表示当前生命值。</p>
 <p>比如英雄联盟里蒙多的 R 技能是一段时间内获得最大生命值，持续时间过后复原，这就要用到两个浮点数来维护了「最大生命值」这个属性了。所以应该用两个 <code>FGameplayAttributeData</code> 分别对应当前生命值和最大生命值。</p>
 </blockquote>
-<h3 id="%E5%9C%A8-attribute-set-%E4%B8%AD%E8%AE%BE%E7%BD%AE-attribute" tabindex="-1"><a class="header-anchor" href="#在-Attribute-Set-中设置-Attribute">#</a>在 Attribute Set 中设置 Attribute</h3>
+<h3 id="在-Attribute-Set-中设置-Attribute"><a class="header-anchor" href="#在-Attribute-Set-中设置-Attribute">#</a>在 Attribute Set 中设置 Attribute</h3>
 <p>AS 负责所有 Attribute 的管理，一个 ASC 可以有多个 AS，但是<strong>同一类</strong>的 AS 只能有一个。因为 AS 的内存开销并不大（两倍于属性个数的浮点数），可以选择让游戏中的每个角色共享一个大的单一的 AS，如果用不到某些属性，直接忽略即可。</p>
 <blockquote>
 <p>在 OwnerActor 的构造函数中创建 AS 会自动将其注册到其 ASC 中。</p>
@@ -537,7 +537,7 @@ cod<br>
 <p><code>DOREPLIFETIME*</code> 宏实际上会调用 <code>DOREPLIFETIME_WITH_PARAMS</code> 宏，并传入一个 <code>FDoRepLifetimeParams</code> 类型的额外参数，最后调用的是 <code>RegisterReplicatedLifetimeProperty()</code> 函数，根据函数名也可以知道，是进行了<strong>需要复制</strong>的变量的<strong>注册</strong>行为。</p>
 </blockquote>
 <p>之后可以通过命令行 <code>showdebug abilitysystem</code> 来进行 GAS 的调试。</p>
-<h3 id="%E8%AE%A2%E9%98%85-attribute-%E5%8F%98%E5%8C%96" tabindex="-1"><a class="header-anchor" href="#订阅-Attribute-变化">#</a>订阅 Attribute 变化</h3>
+<h3 id="订阅-Attribute-变化"><a class="header-anchor" href="#订阅-Attribute-变化">#</a>订阅 Attribute 变化</h3>
 <p>以玩家为例，ASC 和 AS 均放在 Player State 中，那么就由 Player State 管理 Attribute 发生变化时的行为，这在语义上也是说得通的。具体要怎么做呢？答案是用 ASC 的一个叫 <code>GetGameplayAttributeValueChangeDelegate()</code> 的函数。这个函数会获取一个**委托(Delegate)**变量。所谓委托就是允许其它类在其上订阅它们感兴趣的事件，一旦某事件 SomeEvent 发生，委托就会通过广播的行为，告知那些关注 SomeEvent 的类，这通常是以在委托类中绑定 callback 实现的。用法如下：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>Character/RCharacterBase.cpp</span></div><code class="language-cpp"><span class="token keyword">void</span> <span class="token class-name">ARPlayerState</span><span class="token double-colon punctuation">::</span><span class="token function">BeginPlay</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token punctuation">{</span>
@@ -554,14 +554,14 @@ cod<br>
 <blockquote>
 <p>课程中的实现太繁琐，我直接参考了 GAS Documentation 来做的。</p>
 </blockquote>
-<h2 id="gameplay-effect" tabindex="-1"><a class="header-anchor" href="#Gameplay-Effect">#</a>Gameplay Effect</h2>
+<h2 id="Gameplay-Effect"><a class="header-anchor" href="#Gameplay-Effect">#</a>Gameplay Effect</h2>
 <p><strong>Gameplay Effect(GE)</strong> 是 Ability 修改其自身和其他 Attribute 和 GameplayTag 的容器，其可以立即修改 Attribute（比如伤害或治疗）或应用长期的状态 buff/debuff（如加速或眩晕）。<code>UGameplayEffect</code> 只是一个定义单一游戏效果的数据类，不应该在其中添加额外的逻辑。通常会创建 <code>UGameplayEffect</code> 的派生蓝图类而非 C++ 类。</p>
-<h3 id="%E6%8C%81%E7%BB%AD%E6%97%B6%E9%97%B4" tabindex="-1"><a class="header-anchor" href="#持续时间">#</a>持续时间</h3>
+<h3 id="持续时间"><a class="header-anchor" href="#持续时间">#</a>持续时间</h3>
 <p>Effect 可分为三种，<strong>即刻(Instant)</strong>、<strong>有持续时间(Has Duration)<strong>和</strong>无限(Infinite)</strong>。其中 Instant 修改的是 BaseValue，通常用于伤害或治疗效果；其余两个修改的是 CurrentValue，通常用于 buff/debuff 之类的效果。</p>
 <p>一旦将 Effect 设置为 Has Duration 或 Infinite，就可以进而为其设置<strong>生效周期(Period)</strong>，并且可以指定「对应用执行周期影响」，表示是否在应用时立即生效。</p>
-<h3 id="%E4%BF%AE%E9%A5%B0%E7%AC%A6(modifier)" tabindex="-1"><a class="header-anchor" href="#修饰符-Modifier">#</a>修饰符(Modifier)</h3>
+<h3 id="修饰符-Modifier"><a class="header-anchor" href="#修饰符-Modifier">#</a>修饰符(Modifier)</h3>
 <p>修饰符指明了<strong>目标属性</strong>、<strong>操作类型</strong>、<strong>修改幅度</strong>，以及 Gameplay Tags 的过滤。</p>
-<h4 id="%E6%93%8D%E4%BD%9C%E7%B1%BB%E5%9E%8B" tabindex="-1"><a class="header-anchor" href="#操作类型">#</a>操作类型</h4>
+<h4 id="操作类型"><a class="header-anchor" href="#操作类型">#</a>操作类型</h4>
 <ul class="lvl-0">
 <li class="lvl-2">
 <p>「加」「乘」「除」: 这仨都是字面意思，多个对同一属性的操作，会通过聚合公式对属性的 CurrentValue 进行修改，结果为  <code>CurrentValue = (BaseValue + Add) * Mutiply / Divide</code>，其中 <code>Add</code> 为所有设置为「加」的 Modifier 的幅度；</p>
@@ -573,7 +573,7 @@ cod<br>
 <p>「无效」:</p>
 </li>
 </ul>
-<h4 id="%E4%BF%AE%E6%94%B9%E5%B9%85%E5%BA%A6" tabindex="-1"><a class="header-anchor" href="#修改幅度">#</a>修改幅度</h4>
+<h4 id="修改幅度"><a class="header-anchor" href="#修改幅度">#</a>修改幅度</h4>
 <ul class="lvl-0">
 <li class="lvl-2">
 <p>「可扩展浮点」: 硬编码一个固定值；</p>
@@ -596,17 +596,17 @@ cod<br>
 </ul>
 </li>
 </ul>
-<h4 id="%E6%9B%B2%E7%BA%BF%E8%A1%A8" tabindex="-1"><a class="header-anchor" href="#曲线表">#</a>曲线表</h4>
+<h4 id="曲线表"><a class="header-anchor" href="#曲线表">#</a>曲线表</h4>
 <p>曲线表就是用于实现不同等级的 Effect 能施加不同程度的 Modify，并且会在「修改幅度」的基础上再乘上曲线上当前 Level 的值。</p>
-<h4 id="%E6%A0%87%E7%AD%BE%E8%BF%87%E6%BB%A4" tabindex="-1"><a class="header-anchor" href="#标签过滤">#</a>标签过滤</h4>
+<h4 id="标签过滤"><a class="header-anchor" href="#标签过滤">#</a>标签过滤</h4>
 <p>根据 Source 和 Target 的标签情况，决定 Modifier 是否生效。比如可以实现类似「目标中毒时，降低 50% 防御力」的效果。</p>
-<h3 id="%E5%A0%86%E5%8F%A0(stack)" tabindex="-1"><a class="header-anchor" href="#堆叠-Stack">#</a>堆叠(Stack)</h3>
+<h3 id="堆叠-Stack"><a class="header-anchor" href="#堆叠-Stack">#</a>堆叠(Stack)</h3>
 <p>在英雄联盟这个游戏里，有很多技能/物品在使用后会获得一个「状态」。</p>
 <p>部分技能连续使用时或许还会叠加「状态」层数，有些可以无限叠加，如邪恶小法师的 Q 技能「黑暗祭祀」；有些有叠加上限，并且一旦持续时间消失会逐渐降低层数，如战争之影的 Q 技能「暴走」；有些一旦持续时间结束会失去所有层数，如诺克萨斯之手的被动技能「出血」；而有些并不能叠加层数，也就是最高只有一层……在 Gameplay Effect 里面，我们可以用「堆叠」功能实现同样的效果。这一功能通常搭配 <code>Has Duration</code> 的 Effect 使用。</p>
-<h4 id="%E5%A0%86%E5%8F%A0%E6%A0%B7%E5%BC%8F(stacking-type)" tabindex="-1"><a class="header-anchor" href="#堆叠样式-Stacking-Type">#</a>堆叠样式(Stacking Type)</h4>
+<h4 id="堆叠样式-Stacking-Type"><a class="header-anchor" href="#堆叠样式-Stacking-Type">#</a>堆叠样式(Stacking Type)</h4>
 <p>默认是「无」，即可以无限叠加，施加的每个 GameplayEffectSpec 都视为相互<strong>独立</strong>；</p>
 <p>还有两种是「按源聚合」与「按目标聚合」，将样式设置为这两种才能开启完整功能，并可以设置「堆栈限制次数」。前者是每个 Source 最多施加 n 个 Effect，后者是每个 Target 最多<strong>被</strong>施加 n 个 Effect。</p>
-<h4 id="%E5%A0%86%E6%A0%88%E6%8C%81%E7%BB%AD%E6%97%B6%E9%97%B4%E5%88%B7%E6%96%B0%E7%AD%96%E7%95%A5(stacking-duration-refresh-policy)" tabindex="-1"><a class="header-anchor" href="#堆栈持续时间刷新策略-Stacking-Duration-Refresh-Policy">#</a>堆栈持续时间刷新策略(Stacking Duration Refresh Policy)</h4>
+<h4 id="堆栈持续时间刷新策略-Stacking-Duration-Refresh-Policy"><a class="header-anchor" href="#堆栈持续时间刷新策略-Stacking-Duration-Refresh-Policy">#</a>堆栈持续时间刷新策略(Stacking Duration Refresh Policy)</h4>
 <ul class="lvl-0">
 <li class="lvl-2">
 <p>「成功应用时刷新」: 当有新的 Effect 成功入栈时，栈中其它 Effect 会刷新自身的持续时间；</p>
@@ -615,7 +615,7 @@ cod<br>
 <p>「永不刷新」: 不会刷新持续时间；</p>
 </li>
 </ul>
-<h4 id="%E5%A0%86%E6%A0%88%E5%91%A8%E6%9C%9F%E9%87%8D%E8%AE%BE%E7%AD%96%E7%95%A5(stacking-period-refresh-policy)" tabindex="-1"><a class="header-anchor" href="#堆栈周期重设策略-Stacking-Period-Refresh-Policy">#</a>堆栈周期重设策略(Stacking Period Refresh Policy)</h4>
+<h4 id="堆栈周期重设策略-Stacking-Period-Refresh-Policy"><a class="header-anchor" href="#堆栈周期重设策略-Stacking-Period-Refresh-Policy">#</a>堆栈周期重设策略(Stacking Period Refresh Policy)</h4>
 <ul class="lvl-0">
 <li class="lvl-2">
 <p>「成功应用后重设」: 当有新的 Effect 成功入栈时，栈中其它 Effect 会更新自身的周期时间，即如果设置了周期，则会将下次触发的时间修改为 <code>now + period</code>；</p>
@@ -624,7 +624,7 @@ cod<br>
 <p>「永不刷新」: 不会更新周期时间；</p>
 </li>
 </ul>
-<h4 id="%E5%A0%86%E6%A0%88%E8%BF%87%E6%9C%9F%E7%AD%96%E7%95%A5(stack-expiration-policy)" tabindex="-1"><a class="header-anchor" href="#堆栈过期策略-Stack-Expiration-Policy">#</a>堆栈过期策略(Stack Expiration Policy)</h4>
+<h4 id="堆栈过期策略-Stack-Expiration-Policy"><a class="header-anchor" href="#堆栈过期策略-Stack-Expiration-Policy">#</a>堆栈过期策略(Stack Expiration Policy)</h4>
 <p>每当栈内的某个 Effect 持续时间到了，就会应用该策略。</p>
 <ul class="lvl-0">
 <li class="lvl-2">
@@ -637,8 +637,8 @@ cod<br>
 <p>「刷新时长」: 用这个能实现 Infinite，并且可以通过 <code>OnStackCountChange()</code> 手动实现栈计数减少的行为；</p>
 </li>
 </ul>
-<h3 id="%E6%96%BD%E5%8A%A0-effect" tabindex="-1"><a class="header-anchor" href="#施加-Effect">#</a>施加 Effect</h3>
-<h4 id="%E7%94%9F%E5%91%BD%E6%81%A2%E5%A4%8D%E8%8D%AF%E6%B0%B4" tabindex="-1"><a class="header-anchor" href="#生命恢复药水">#</a>生命恢复药水</h4>
+<h3 id="施加-Effect"><a class="header-anchor" href="#施加-Effect">#</a>施加 Effect</h3>
+<h4 id="生命恢复药水"><a class="header-anchor" href="#生命恢复药水">#</a>生命恢复药水</h4>
 <blockquote>
 <p>「药水」本质上是一个放置在世界中的 Actor，自带碰撞范围，当角色 Overlap 时为其施加「立即恢复生命」的效果。</p>
 </blockquote>
@@ -671,7 +671,7 @@ cod<br>
 <p>然后在编辑器中创建一个派生蓝图类 <code>BP_HealthPotion</code>，设置 Static Mesh 和 Sphere Collision 以后，在蓝图中实现碰撞球体的 <code>BeginOverlap</code> 和 <code>EndOverlap</code> 方法。</p>
 <p>此时还需要填充 <code>EffectInfo</code> 成员。需要做的就是创建一个派生自 <code>UGameplayEffect</code> 的蓝图类，命名为 <code>GE_HealthPotion</code>，进行相关设置，如「Instant」「加」「RAttributeSet.CurHealth」「某个值」。创建完毕后即可进行类型的填充。这样就实现了一个简单的药水效果。</p>
 <p>基于上面这种创建流程，还可以设计「持续恢复生命值的药水」「一旦进入其中就会持续扣血的燃烧区域」等等。</p>
-<h4 id="pre%2Fpost-%E5%87%BD%E6%95%B0" tabindex="-1"><a class="header-anchor" href="#Pre-Post-函数">#</a>Pre/Post 函数</h4>
+<h4 id="Pre-Post-函数"><a class="header-anchor" href="#Pre-Post-函数">#</a>Pre/Post 函数</h4>
 <p>在施加 Effect 与实际修改 Attribute 前后，AS 分别会调用以下六个函数。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token comment">/**
  * PreGameplayEffectExecute -&gt; PreAttributeBaseChange -&gt; PreAttributeChange -&gt; (ATTRIBUTE BE CHANGED) -&gt;
@@ -717,11 +717,11 @@ cod<br>
 <span class="token keyword">void</span> <span class="token function">PostGameplayEffectExecute</span><span class="token punctuation">(</span><span class="token keyword">const</span> <span class="token keyword">struct</span> <span class="token class-name">FGameplayEffectModCallbackData</span><span class="token operator">&amp;</span> Data<span class="token punctuation">)</span> <span class="token keyword">override</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>其中主要关注 <code>PreAttributeChange()</code> 和 <code>PostGameplayEffectExecute()</code> 这两个。</p>
 <p>前者用于对 <code>NewValue</code> 进行 Clamp 操作，后者主要获取 Effect 的 Source 实现相关逻辑（比如反伤等等）。</p>
-<h3 id="%E7%A7%BB%E9%99%A4-effect" tabindex="-1"><a class="header-anchor" href="#移除-Effect">#</a>移除 Effect</h3>
+<h3 id="移除-Effect"><a class="header-anchor" href="#移除-Effect">#</a>移除 Effect</h3>
 <p>为了移除施加到 ASC Of Target 上的 Effect，需要调用的函数是 <code>RemoveActiveGameplayEffect()</code>。该函数需要两个参数：一个 <code>FActiveGameplayEffectHandle</code> 和一个浮点数。</p>
 <p>前者是通过调用 <code>ApplyGameplayEffectSpecToSelf()</code> 返回的，后者则表明了当移除该 Effect 时，要移除栈内多少个 Effect。默认为 <code>-1</code>，即全部移除。</p>
 <p>所以为了正确调用，需要由一定数据结构保存施加 Effect 时返回的那个 <code>FActiveGameplayEffectHandle</code>。常用的是 <code>TMap&lt;&gt;</code>，存储 Active Handle 到 ASC 的映射。</p>
-<h3 id="%E7%9B%91%E5%90%AC-effect-%E8%A1%8C%E4%B8%BA" tabindex="-1"><a class="header-anchor" href="#监听-Effect-行为">#</a>监听 Effect 行为</h3>
+<h3 id="监听-Effect-行为"><a class="header-anchor" href="#监听-Effect-行为">#</a>监听 Effect 行为</h3>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>AbilitySystemComponent.h</span></div><code class="language-cpp"><span class="token comment">/** Delegate for when an effect is applied */</span>
 <span class="token function">DECLARE_MULTICAST_DELEGATE_ThreeParams</span><span class="token punctuation">(</span>
   FOnGameplayEffectAppliedDelegate<span class="token punctuation">,</span>
@@ -773,7 +773,7 @@ FOnGameplayEffectAppliedDelegate OnPeriodicGameplayEffectExecuteDelegateOnTarget
 <span class="token punctuation">{</span>
   <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="gameplay-tags" tabindex="-1"><a class="header-anchor" href="#Gameplay-Tags">#</a>Gameplay Tags</h2>
+<h2 id="Gameplay-Tags"><a class="header-anchor" href="#Gameplay-Tags">#</a>Gameplay Tags</h2>
 <p><code>FGameplayTag</code> 是由 <code>GameplayTagManager</code> 注册的形似 Parent.Child.Grandchild… 的层级 <code>FName</code>，这些标签对于分类和描述对象的状态非常有用（例如如果某个 Character 处于眩晕状态，我们可以授予其一个 State.Debuff.Stun 的 Tag）。用 GameplayTag 可以替换布尔值或枚举值，多个 GameplayTag 应被保存于一个 <code>FGameplayTagContainer</code> 中，相比 <code>TArray&lt;FGameplayTag&gt;</code> 做了一些很有效率的优化。可以更快地判断一个 Character 是否具有某 Tag，从而决定是否施加 Effect。</p>
 
                 
@@ -954,12 +954,6 @@ FOnGameplayEffectAppliedDelegate OnPeriodicGameplayEffectExecuteDelegateOnTarget
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -968,8 +962,8 @@ FOnGameplayEffectAppliedDelegate OnPeriodicGameplayEffectExecuteDelegateOnTarget
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -985,41 +979,6 @@ FOnGameplayEffectAppliedDelegate OnPeriodicGameplayEffectExecuteDelegateOnTarget
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

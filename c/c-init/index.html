@@ -328,7 +328,7 @@ class A {
             <div id="articleContent">
                 <p>在 C++11 中，可以直接在变量名后面用 <strong><code>{初始化列表}</code></strong> 来进行对象的初始化。</p>
 <span id="more"></span>
-<h2 id="%E6%97%A7%E4%B8%96%E7%95%8C" tabindex="-1"><a class="header-anchor" href="#旧世界">#</a>旧世界</h2>
+<h2 id="旧世界"><a class="header-anchor" href="#旧世界">#</a>旧世界</h2>
 <p>C++11 以前，各种初始化方式如神仙打架，百花齐放，在同一个项目中，你或许可以看到如以下几种不同的初始化方式：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">A</span> <span class="token punctuation">{</span>
  <span class="token keyword">public</span><span class="token operator">:</span>
@@ -360,7 +360,7 @@ B b <span class="token operator">=</span> <span class="token punctuation">{</spa
 <li class="lvl-3">没有默认成员初始化器；</li>
 </ol>
 </blockquote>
-<h2 id="%E6%96%B0%E4%B8%96%E7%95%8C%EF%BC%81%E5%88%97%E8%A1%A8%E5%88%9D%E5%A7%8B%E5%8C%96" tabindex="-1"><a class="header-anchor" href="#新世界！列表初始化">#</a>新世界！列表初始化</h2>
+<h2 id="新世界！列表初始化"><a class="header-anchor" href="#新世界！列表初始化">#</a>新世界！列表初始化</h2>
 <p>为了统一代码，C++11 将列表初始化的功能进行拓展，使其能够应用于绝大多数构造情况，同样的，<code>new</code> 操作符等可以用圆括号进行初始化的地方，也可以使用初始化列表。如：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">A</span> <span class="token punctuation">{</span>
  <span class="token keyword">public</span><span class="token operator">:</span>
@@ -585,12 +585,6 @@ A<span class="token operator">*</span> a4 <span class="token operator">=</span> 
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -599,8 +593,8 @@ A<span class="token operator">*</span> a4 <span class="token operator">=</span> 
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -616,41 +610,6 @@ A<span class="token operator">*</span> a4 <span class="token operator">=</span> 
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

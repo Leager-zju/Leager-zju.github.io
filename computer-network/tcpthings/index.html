@@ -327,12 +327,12 @@ TCP 位于传输层，是面向连接且基于字节流的可靠协议。
             <div id="articleContent">
                 <p>聊聊传输控制协议(<strong>TCP</strong>, Transmission Control Protocol)。</p>
 <span id="more"></span>
-<h2 id="%E7%AE%80%E8%BF%B0" tabindex="-1"><a class="header-anchor" href="#简述">#</a>简述</h2>
+<h2 id="简述"><a class="header-anchor" href="#简述">#</a>简述</h2>
 <p>TCP 位于传输层，是<strong>面向连接</strong>且<strong>基于字节流</strong>的<strong>可靠</strong>协议。</p>
 <p>所谓<strong>面向连接</strong>，就是指如果使用 TCP 协议进行数据传输，那么必须在数据传输之前进行「一对一连接」，确认双方都能发送/接收数据后，才正式开始互发数据（全双工）。</p>
 <p>所谓<strong>基于字节流</strong>，就是指 TCP 层不关心有效负载的内容，只是将其视为若干字节。发送数据时直接从 buffer 中取出若干字节，用 Header 包装后发给下层；收到数据时，取走 Header 直接交付给应用层。这也容易导致多份不同的应用层数据同时位于一个 TCP 报文段中，存在<strong>粘包问题</strong>。</p>
 <p>所谓<strong>可靠</strong>，就是指 TCP 用重传机制保证数据尽可能全部到达，滑动窗口保证数据尽可能有序接收，拥塞控制保证网络尽可能不会同时收到过多报文而导致数据丢弃。</p>
-<h2 id="tcp-header" tabindex="-1"><a class="header-anchor" href="#TCP-Header">#</a>TCP Header</h2>
+<h2 id="TCP-Header"><a class="header-anchor" href="#TCP-Header">#</a>TCP Header</h2>
 <img src="header.png" style="zoom:50%">
 <p>TCP 能够提供上述服务，其首部中最关键的字段就是<strong>序列号</strong>和<strong>确认应答号</strong>，以及<strong>控制位</strong>。</p>
 <ul class="lvl-0">
@@ -358,10 +358,10 @@ TCP 位于传输层，是面向连接且基于字节流的可靠协议。
 <p><strong>FIN</strong>：为 1 时，表明发送方已无数据要发，请求正常终止连接；</p>
 </li>
 </ul>
-<h2 id="%E9%9D%A2%E5%90%91%E8%BF%9E%E6%8E%A5" tabindex="-1"><a class="header-anchor" href="#面向连接">#</a>面向连接</h2>
-<h3 id="%E5%A6%82%E4%BD%95%E5%94%AF%E4%B8%80%E7%A1%AE%E8%AE%A4%E4%B8%80%E4%B8%AA-tcp-%E8%BF%9E%E6%8E%A5%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#如何唯一确认一个-TCP-连接？">#</a>如何唯一确认一个 TCP 连接？</h3>
+<h2 id="面向连接"><a class="header-anchor" href="#面向连接">#</a>面向连接</h2>
+<h3 id="如何唯一确认一个-TCP-连接？"><a class="header-anchor" href="#如何唯一确认一个-TCP-连接？">#</a>如何唯一确认一个 TCP 连接？</h3>
 <p>我们知道无论是使用 TCP 还是 UDP，在操作系统层面都是通过 socket 进行远程通信的，而一个 socket 由 {源 PORT、源 IP、目标 PORT、目标 IP} 四元组唯一标识，所以只要四元组中有一个字段发生变化，就是不同的 socket。而一次连接是无法同时绑定到两个 socket 上的，所以也可以通过四元组来确定一个 TCP 连接。</p>
-<h3 id="tcp-%E5%BB%BA%E7%AB%8B%E8%BF%9E%E6%8E%A5%E2%80%94%E2%80%94%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B" tabindex="-1"><a class="header-anchor" href="#TCP-建立连接——三次握手">#</a>TCP 建立连接——三次握手</h3>
+<h3 id="TCP-建立连接——三次握手"><a class="header-anchor" href="#TCP-建立连接——三次握手">#</a>TCP 建立连接——三次握手</h3>
 <blockquote>
 <p>今天小明给小红打电话，小明拨打后第一句话就是：「喂喂喂，能听得到我吗？」小红听到后也回复：「嗯嗯可以听到，你能听到我说话吗？」小明听到后意识到小红能听到他说话，那么他只需要告诉小红「可以的。既然我们都能听到对方讲话，那我就开始跟你聊天了！」即可。</p>
 <p>这也表明只有两边都确认了双方能进行正常通话后，才能进行下去。否则，如果小明说话小红听不到（意味着小红没法做出回复），或小红说话小明听不到（小明不能确定小红是否能听见），又或是各自都听不到对方的声音，那么这次通话就是糟糕的，需要挂掉重新拨打。</p>
@@ -382,13 +382,13 @@ TCP 位于传输层，是面向连接且基于字节流的可靠协议。
 <blockquote>
 <p>上面是理想的情况，现实的网络中总存在这样那样的异常：进程可能崩溃、机器可能断电、传输可能超时……TCP 是一个牛逼的协议，它考虑到了种种情况，并且对每个情况都有相应的自洽的逻辑。</p>
 </blockquote>
-<h4 id="%E6%AF%8F%E6%AC%A1%E5%BB%BA%E7%AB%8B%E6%96%B0%E7%9A%84-tcp-%E8%BF%9E%E6%8E%A5%E6%97%B6%EF%BC%8C%E5%88%9D%E5%A7%8B%E5%BA%8F%E5%88%97%E5%8F%B7%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E9%9A%8F%E6%9C%BA%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#每次建立新的-TCP-连接时，初始序列号为什么要随机？">#</a>每次建立新的 TCP 连接时，初始序列号为什么要随机？</h4>
+<h4 id="每次建立新的-TCP-连接时，初始序列号为什么要随机？"><a class="header-anchor" href="#每次建立新的-TCP-连接时，初始序列号为什么要随机？">#</a>每次建立新的 TCP 连接时，初始序列号为什么要随机？</h4>
 <p>如果每次初始序列号是一样的，那么<strong>无法区分收到的报文是这次连接发来的还是之前的连接发来的</strong>。</p>
 <blockquote>
 <p>TCP 仅通过 <strong>双方 IP 地址和端口</strong> 唯一标识一个 TCP 连接，而序列号仅仅是一个 64 位无符号整数，一旦到上限就归零重新计数。这也就意味着无法根据序列号来辨识。</p>
 </blockquote>
 <p>如果说上面这个原因可以通过四次挥手的 <strong>TIME WAIT</strong> 阶段解决，那么还有一个原因，就是如果每次序列号都是一样的，黑客就可以很轻易地伪造一个报文让 server 接收，从而进行攻击。</p>
-<h4 id="%E4%BB%80%E4%B9%88%E6%98%AF-tcp-keepalive" tabindex="-1"><a class="header-anchor" href="#什么是-TCP-keepalive">#</a>什么是 TCP-keepalive</h4>
+<h4 id="什么是-TCP-keepalive"><a class="header-anchor" href="#什么是-TCP-keepalive">#</a>什么是 TCP-keepalive</h4>
 <p>连接建立完成，在数据传输过程中，如果 client 挂了，对于 server 而言，如果一直没收到 client 的消息，最好的策略就是确认 client 是否挂掉，如果挂掉就及时断开该连接，腾出系统资源，这个策略就是 TCP-keepalive，也称<strong>保活机制</strong>。</p>
 <p>具体为：server 会维护一个保活定时器，当收到 client 正常数据请求时，该定时器会重置；一旦定时器 timeout，就会主动给 client 发送一个「探测报文」</p>
 <ol>
@@ -399,7 +399,7 @@ TCP 位于传输层，是面向连接且基于字节流的可靠协议。
 <p>如果 client 超时未回复，server 并不会立即认为 client 挂了，而是重传，直到达到重传次数上限，才会认为 client 挂了，此时主动断开连接，释放资源；</p>
 </li>
 </ol>
-<h4 id="%E4%BB%80%E4%B9%88%E6%98%AF-syn-%E6%B4%AA%E6%B3%9B%E6%94%BB%E5%87%BB" tabindex="-1"><a class="header-anchor" href="#什么是-SYN-洪泛攻击">#</a>什么是 SYN 洪泛攻击</h4>
+<h4 id="什么是-SYN-洪泛攻击"><a class="header-anchor" href="#什么是-SYN-洪泛攻击">#</a>什么是 SYN 洪泛攻击</h4>
 <p>Linux 内核会为三次握手维护两个队列：</p>
 <ul class="lvl-0">
 <li class="lvl-2">
@@ -414,7 +414,7 @@ TCP 位于传输层，是面向连接且基于字节流的可靠协议。
 <p>所以如果 {<strong>SYN</strong>:1} 被 server 丢弃，则很有可能是 server 遭到了 SYN 攻击，连接队列满了。</p>
 </blockquote>
 <p>对于 server 而言，如果长时间处于 <strong>SYN RCVD</strong> 状态，肯定是不对的——它检测到超时就会进行重传，当重传到一定次数还没有收到 client 的第三次握手，则关闭连接，将其移出半连接队列，为正常连接腾出位置。</p>
-<h4 id="%E4%B8%BA%E4%BB%80%E4%B9%88%E6%8F%A1%E6%89%8B%E6%98%AF%E4%B8%89%E6%AC%A1%E8%80%8C%E4%B8%8D%E6%98%AF%E4%B8%A4%E6%AC%A1%EF%BC%9F%E5%9B%9B%E6%AC%A1%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#为什么握手是三次而不是两次？四次？">#</a>为什么握手是三次而不是两次？四次？</h4>
+<h4 id="为什么握手是三次而不是两次？四次？"><a class="header-anchor" href="#为什么握手是三次而不是两次？四次？">#</a>为什么握手是三次而不是两次？四次？</h4>
 <p>为了让双方确保各自均有发送和接收数据的能力——这个答案不错，但并不完整。使用三次握手而不是两次的还有一个关键原因在于，<strong>三次握手可以消除历史连接的影响</strong>。</p>
 <blockquote>
 <p>在真实网络中，<strong>丢包</strong>和<strong>超时</strong>是必须要考虑的两个异常状况。它们都会因为网络拥堵引起。其中超时报文可能会在遥远的未来到达，如果连接双方在这个报文起已经往前推进了，那么这个报文就是「<strong>历史</strong>」的。</p>
@@ -428,7 +428,7 @@ TCP 位于传输层，是面向连接且基于字节流的可靠协议。
 <p>至于连接建立后 client 宕机重启重连的情况，就参考下一个话题。</p>
 </blockquote>
 <p>而四次握手则是没有必要。就像最开始提到的<strong>电话问题</strong>，「你能听到吗？」和「可以。」分别对应了 连接请求 和 回复。小红只不过把连接请求和回复放在同一句话中，也就是将四次握手里的第二次和第三次合并，就成为了三次握手。</p>
-<h4 id="%E5%9C%A8-established-%E7%8A%B6%E6%80%81%E4%B8%8B%EF%BC%8Cserver-%E6%94%B6%E5%88%B0%E6%9D%A5%E8%87%AA%E5%90%8C%E4%B8%80%E4%B8%AA-client-%E7%9A%84%E8%BF%9E%E6%8E%A5%E8%AF%B7%E6%B1%82-%7Bsyn%3A1%7D-%E4%BC%9A%E6%80%8E%E4%B9%88%E5%A4%84%E7%90%86%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#在-ESTABLISHED-状态下，server-收到来自同一个-client-的连接请求-SYN-1-会怎么处理？">#</a>在 ESTABLISHED 状态下，server 收到来自同一个 client 的连接请求 {SYN:1} 会怎么处理？</h4>
+<h4 id="在-ESTABLISHED-状态下，server-收到来自同一个-client-的连接请求-SYN-1-会怎么处理？"><a class="header-anchor" href="#在-ESTABLISHED-状态下，server-收到来自同一个-client-的连接请求-SYN-1-会怎么处理？">#</a>在 ESTABLISHED 状态下，server 收到来自同一个 client 的连接请求 {SYN:1} 会怎么处理？</h4>
 <p>连接的建立，代表着双方都确认了对方的 socket/四元组，但即便是同一个 client，也可以用不同的 socket 建立连接。</p>
 <blockquote>
 <p>这里认为新的连接请求是 client 主观发起的，且旧连接已被弃用。</p>
@@ -441,7 +441,7 @@ TCP 位于传输层，是面向连接且基于字节流的可靠协议。
 <p>如果新的连接请求和之前用的是<strong>同一个</strong> socket：server 会认为 client 是不是搞错了，发送一个携带了对应旧连接的 SEQ 和 ACK 的所谓 <strong>Challenge ACK</strong> 的报文给 client。这会使得 client 在 <strong>SYN SENT</strong> 阶段收到一个不匹配的 ACK，就回复一个 {<strong>RST</strong>:1} 给 server，强制终止这次连接；</p>
 </li>
 </ol>
-<h3 id="tcp-%E6%96%AD%E5%BC%80%E8%BF%9E%E6%8E%A5%E2%80%94%E2%80%94%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B" tabindex="-1"><a class="header-anchor" href="#TCP-断开连接——四次挥手">#</a>TCP 断开连接——四次挥手</h3>
+<h3 id="TCP-断开连接——四次挥手"><a class="header-anchor" href="#TCP-断开连接——四次挥手">#</a>TCP 断开连接——四次挥手</h3>
 <p>根据三次握手，我们也不难理解四次挥手的整个过程。</p>
 <ol>
 <li class="lvl-3">
@@ -459,14 +459,14 @@ TCP 位于传输层，是面向连接且基于字节流的可靠协议。
 </ol>
 <img src="4hand.png" style="zoom:50%">
 <p>当然四次握手也不一定非得是四次，之所以是四次是因为 server 在收到 client 的断开连接请求时，可能还有数据要发送。如果没有数据要发送的话，二三次挥手可以合并到一起，此时跳过了 client 的 <strong>FIN WAIT 2</strong> 状态。</p>
-<h4 id="%E4%B8%BA%E4%BB%80%E4%B9%88-time-wait-%E8%A6%81%E7%AD%89-2msl" tabindex="-1"><a class="header-anchor" href="#为什么-TIME-WAIT-要等-2MSL">#</a>为什么 TIME WAIT 要等 2MSL</h4>
+<h4 id="为什么-TIME-WAIT-要等-2MSL"><a class="header-anchor" href="#为什么-TIME-WAIT-要等-2MSL">#</a>为什么 TIME WAIT 要等 2MSL</h4>
 <p>首先要知道 <strong>MSL</strong>(Maximum Segment Lifetime, 最大报文生存时间)是一个时间值，在网络上滞留时间超过这个值的报文将被丢弃，一般而言是 30s。而 2MSL 足以让本次连接中因为网络阻塞而滞留的报文全部消亡。即使极端情况下，从 client 发出到 server 接收，server 又作出回复，一来一回也最多需要两倍的时间，在这个时间段里所有收到的报文均会被 client 丢弃，剩下没收到的也会因为 IP 层的 TTL 归零而被路由器丢弃（MSL 必须大于 TTL 归零的时间）。</p>
 <p>前面提到，历史的连接可能会对未来的连接造成影响，如果下一次连接中某个报文使用了和本次连接某个报文相同的序列号，且 client 没有等待历史报文销毁就创建新的连接，server <strong>可能</strong>会收到历史报文，并且认为是本次连接中 client 发出的，那不就发生错误了么？</p>
 <blockquote>
 <p>因为初始序列号是随机的，加上序列号超过上限会从零开始继续增加，所以前后两次连接出现相同序列号的报文是完全有可能的。</p>
 </blockquote>
 <p>除此之外，如果第四次挥手时 client 的回复超时未抵达或丢失，那么 server 会重传断开连接请求，client 收到后会重发 {<strong>ACK</strong>:1}，并且重置 <strong>TIME WAIT</strong> 计时器。2MSL 足以确保在只发生一次丢失的情况下还能正确完成四次挥手过程。你问如果 client 的回复和 server 的重传一直丢失呢？概率太小了，为此增大等待时长，跟为了研究生补助去读研有什么区别（bushi。</p>
-<h4 id="%E6%9C%8D%E5%8A%A1%E7%AB%AF%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BC%9A%E5%87%BA%E7%8E%B0-time-wait-%E7%8A%B6%E6%80%81%EF%BC%9F%E8%AF%A5%E6%80%8E%E4%B9%88%E8%A7%A3%E5%86%B3%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#服务端为什么会出现-TIME-WAIT-状态？该怎么解决？">#</a>服务端为什么会出现 TIME WAIT 状态？该怎么解决？</h4>
+<h4 id="服务端为什么会出现-TIME-WAIT-状态？该怎么解决？"><a class="header-anchor" href="#服务端为什么会出现-TIME-WAIT-状态？该怎么解决？">#</a>服务端为什么会出现 TIME WAIT 状态？该怎么解决？</h4>
 <p>要明确的一点是，<strong>只有主动断开连接的一方，才会进入 TIME WAIT</strong>。这就意味着服务端主动断开了连接，问题大概率和 <strong>HTTP 的长连接</strong>有关。</p>
 <ol>
 <li class="lvl-3">
@@ -482,7 +482,7 @@ TCP 位于传输层，是面向连接且基于字节流的可靠协议。
 <p><strong>长连接请求数量达到上限</strong>：为了节省系统资源，server 能够维护的长连接数量是有限的，当超过这个上限（如 nginx 中的 <strong>keepalive_requests</strong>）时，就会主动关闭连接；</p>
 </li>
 </ol>
-<h4 id="%E5%A6%82%E6%9E%9C%E5%AE%A2%E6%88%B7%E7%AB%AF%E5%A4%A7%E9%87%8F%E8%BF%9E%E6%8E%A5%E5%A4%84%E4%BA%8E-time-wait-%E7%8A%B6%E6%80%81%EF%BC%8C%E4%BC%9A%E5%AF%BC%E8%87%B4%E4%BB%80%E4%B9%88%E9%97%AE%E9%A2%98%EF%BC%9F%E8%AF%A5%E6%80%8E%E4%B9%88%E8%A7%A3%E5%86%B3%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#如果客户端大量连接处于-TIME-WAIT-状态，会导致什么问题？该怎么解决？">#</a>如果客户端大量连接处于 TIME WAIT 状态，会导致什么问题？该怎么解决？</h4>
+<h4 id="如果客户端大量连接处于-TIME-WAIT-状态，会导致什么问题？该怎么解决？"><a class="header-anchor" href="#如果客户端大量连接处于-TIME-WAIT-状态，会导致什么问题？该怎么解决？">#</a>如果客户端大量连接处于 TIME WAIT 状态，会导致什么问题？该怎么解决？</h4>
 <blockquote>
 <p>client 通常作为主动断开连接的一方，极有可能出现大量连接同时处于 TIME WAIT 阶段。</p>
 </blockquote>
@@ -508,9 +508,9 @@ TCP 位于传输层，是面向连接且基于字节流的可靠协议。
 <p><strong>负载均衡</strong>：使用负载均衡来分担连接压力，将连接分发到多台服务器上，可以减少单台服务器上 TIME WAIT 状态连接的数量。</p>
 </li>
 </ol>
-<h4 id="%E5%A6%82%E6%9E%9C%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%A4%A7%E9%87%8F%E8%BF%9E%E6%8E%A5%E5%A4%84%E4%BA%8E-close-wait-%E7%8A%B6%E6%80%81%EF%BC%8C%E4%BC%9A%E5%AF%BC%E8%87%B4%E4%BB%80%E4%B9%88%E9%97%AE%E9%A2%98%EF%BC%9F%E8%AF%A5%E6%80%8E%E4%B9%88%E8%A7%A3%E5%86%B3%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#如果服务端大量连接处于-CLOSE-WAIT-状态，会导致什么问题？该怎么解决？">#</a>如果服务端大量连接处于 CLOSE WAIT 状态，会导致什么问题？该怎么解决？</h4>
+<h4 id="如果服务端大量连接处于-CLOSE-WAIT-状态，会导致什么问题？该怎么解决？"><a class="header-anchor" href="#如果服务端大量连接处于-CLOSE-WAIT-状态，会导致什么问题？该怎么解决？">#</a>如果服务端大量连接处于 CLOSE WAIT 状态，会导致什么问题？该怎么解决？</h4>
 <p>要明确的一点是，<strong>只有被动断开连接的一方，才会进入 CLOSE WAIT</strong>。这就意味着虽然客户端先一步主动断开了连接，但是服务端迟迟未断开，问题大概率和 server <strong>没有调用 <code>close()</code> 函数关闭连接</strong>有关。这就需要进行代码层面的排查，看看 <strong>epoll</strong> 流程是否有问题。</p>
-<h2 id="%E5%9F%BA%E4%BA%8E%E5%AD%97%E8%8A%82%E6%B5%81" tabindex="-1"><a class="header-anchor" href="#基于字节流">#</a>基于字节流</h2>
+<h2 id="基于字节流"><a class="header-anchor" href="#基于字节流">#</a>基于字节流</h2>
 <p>当用户消息通过 UDP 协议传输时，操作系统不会对消息进行拆分，在组装好 UDP 头部后就交给网络层来处理，所以发出去的每个 UDP 报文就是一个用户消息，这样接收方在接收到 UDP 报文后，读一个 UDP 报文（根据 UDP Header 的长度字段）就能读取到完整的用户消息。</p>
 <p>而根据 TCP Header，我们发现 TCP 并没有像 UDP 那样设置了数据字段的长度，当应用层有多个用户消息需要发送时，TCP 只是单纯地将这些消息以 Byte 的形式放到 buffer 中，然后从中取出合适的字节数量进行组装并下发给网络层。所以一个 TCP 报文内可能有<strong>多个不完整</strong>的用户消息数据。</p>
 <p>比如有两个消息 “How are you?” 和 “How old are you?” 要发送。</p>
@@ -518,16 +518,16 @@ TCP 位于传输层，是面向连接且基于字节流的可靠协议。
 <p>也可能会分散到两个报文：「How are you?」、「How old are you?」</p>
 <p>也有可能会被截断：「How are」、「 you?How old are you?」</p>
 <p>上面举的例子主要是为了说明，接收方收到一个报文后，并不能直接将解包后的数据视为一个完整的用户消息。这就是所谓的<strong>粘包问题</strong>，实际是应用层处理不当产生的问题。</p>
-<h3 id="tcp-%E7%B2%98%E5%8C%85%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3" tabindex="-1"><a class="header-anchor" href="#TCP-粘包如何解决">#</a>TCP 粘包如何解决</h3>
+<h3 id="TCP-粘包如何解决"><a class="header-anchor" href="#TCP-粘包如何解决">#</a>TCP 粘包如何解决</h3>
 <p>粘包的问题出现是因为不知道一个用户消息的边界在哪，如果知道了边界在哪，接收方就可以通过边界来划分出有效的用户消息。应用层构造数据包时，可以用特殊字符串作为终止符（如 <code>char*</code> 的 <code>'\0'</code>），也可以加上「长度」字段……只要能明确边界即可。</p>
-<h2 id="%E5%8F%AF%E9%9D%A0%E4%BC%A0%E8%BE%93" tabindex="-1"><a class="header-anchor" href="#可靠传输">#</a>可靠传输</h2>
-<h3 id="%E9%87%8D%E4%BC%A0%E6%9C%BA%E5%88%B6" tabindex="-1"><a class="header-anchor" href="#重传机制">#</a>重传机制</h3>
-<h4 id="%E8%B6%85%E6%97%B6%E9%87%8D%E4%BC%A0%EF%BC%88%E6%97%B6%E9%97%B4%E9%A9%B1%E5%8A%A8%EF%BC%89" tabindex="-1"><a class="header-anchor" href="#超时重传（时间驱动）">#</a>超时重传（时间驱动）</h4>
+<h2 id="可靠传输"><a class="header-anchor" href="#可靠传输">#</a>可靠传输</h2>
+<h3 id="重传机制"><a class="header-anchor" href="#重传机制">#</a>重传机制</h3>
+<h4 id="超时重传（时间驱动）"><a class="header-anchor" href="#超时重传（时间驱动）">#</a>超时重传（时间驱动）</h4>
 <p>每次发送报文时，会将其缓存在一个<strong>未确认队列</strong>中。当这些报文发出去后，如果<strong>在超时重传时间</strong>(<strong>RTO</strong>, <strong>R</strong>etransmission <strong>T</strong>ime<strong>O</strong>ut)内没有收到对这些报文的确认应答，则重传队列中的这些报文，并且将 RTO 加倍。一旦收到了确认，则会将 RTO 重置为初始值。</p>
-<h4 id="%E5%BF%AB%E9%87%8D%E4%BC%A0%EF%BC%88%E6%95%B0%E6%8D%AE%E9%A9%B1%E5%8A%A8%EF%BC%89" tabindex="-1"><a class="header-anchor" href="#快重传（数据驱动）">#</a>快重传（数据驱动）</h4>
+<h4 id="快重传（数据驱动）"><a class="header-anchor" href="#快重传（数据驱动）">#</a>快重传（数据驱动）</h4>
 <p>如果连续三次收到了相同的确认应答号 {<strong>Ack</strong>:n}，并且 {<strong>Seq</strong>:n} 已经发出去了，那么发送方会认为发出去的报文没被对方收到，此时马上进行重传。那么这里就会引发一个问题：只重传一个报文，还是重传该报文之后所有的报文？</p>
 <p>如果 {<strong>Seq</strong>:n} 之后有 {<strong>Seq</strong>:m} 未收到，但是 {<strong>Seq</strong>:p} 已经被收到（<code>n &lt; m, n &lt; p</code>），无论重传 n，还是重传 n,m,p，都会存在问题。需要有一种机制，让发送方知道只有 n 和 m 没发出去，这就是<strong>选择性确认</strong>(<strong>SACK</strong>, <strong>S</strong>elective, <strong>ACK</strong>nowledgment)。只需要在双方 TCP Header 的「选项」字段里加入 SACK 即可。在 Linux 下，可以通过 <code>net.ipv4.tcp_sack</code> 参数打开这个功能（Linux 2.4 后默认打开）。</p>
-<h3 id="%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3" tabindex="-1"><a class="header-anchor" href="#滑动窗口">#</a>滑动窗口</h3>
+<h3 id="滑动窗口"><a class="header-anchor" href="#滑动窗口">#</a>滑动窗口</h3>
 <p>窗口机制使得发送方可以一次性发送若干报文，并且在接收方处理完毕后，对这些报文进行<strong>累计确认</strong>，而不是每次只进行单个报文的交互，这大大提高了网络吞吐量。</p>
 <p>TCP Header 里的「窗口」字段指明了数据交互的窗口大小，也就是接收方的缓冲区的余量。接收方每次处理完数据后，会根据当前缓冲区的情况设置窗口大小，通知自己当前的处理能力；发送方会根据这个值调整下一次发送的数据量。</p>
 <blockquote>
@@ -538,7 +538,7 @@ TCP 位于传输层，是面向连接且基于字节流的可靠协议。
 <p>而发送方当前能发送的最大数据量称为<strong>发送窗口大小</strong>(<strong>SWS</strong>, <strong>S</strong>ender <strong>W</strong>indow <strong>S</strong>ize)，SWS 是由 RWS 和下面要提到的<strong>拥塞窗口大小</strong>(<strong>CWS</strong>, <strong>C</strong>ongestion <strong>W</strong>indow <strong>S</strong>ize)共同决定的，有 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>SWS</mtext><mo>=</mo><mi>min</mi><mo>⁡</mo><mo stretchy="false">(</mo><mtext>RWS</mtext><mo separator="true">,</mo><mtext>CWS</mtext><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\text{SWS} = \min(\text{RWS}, \text{CWS})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord text"><span class="mord">SWS</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">min</span><span class="mopen">(</span><span class="mord text"><span class="mord">RWS</span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord text"><span class="mord">CWS</span></span><span class="mclose">)</span></span></span></span>。</p>
 <p>需要注意的是，已发送但未确认的报文也占用了发送窗口。只有当报文得到确认，窗口才能右移。</p>
 </blockquote>
-<h3 id="%E6%8B%A5%E5%A1%9E%E6%8E%A7%E5%88%B6" tabindex="-1"><a class="header-anchor" href="#拥塞控制">#</a>拥塞控制</h3>
+<h3 id="拥塞控制"><a class="header-anchor" href="#拥塞控制">#</a>拥塞控制</h3>
 <p>如果当前网络拥堵，即使接收方的缓冲区十分空余，发送方也不能一次性发很多数据。发送方仅能通过接收方的反应来确定当前网络状况，如果出现了超时，或者连续多个 ACK，那么就认为当前网络可能不太良好，需要降低发送的数据量，而<strong>拥塞窗口</strong>就是用于控制发送量的另一个窗口值。CWS 的计算主要有以下 4 个原则：</p>
 <ol>
 <li class="lvl-3">
@@ -559,7 +559,7 @@ TCP 位于传输层，是面向连接且基于字节流的可靠协议。
 </blockquote>
 <img src="cc.png" style="zoom:50%">
 <p><font size="3"></font></p><div style="text-align:center"><font size="3">图源 小林Coding</font></div><p></p>
-<h2 id="tcp-%E5%92%8C-udp-%E6%AF%94%E8%BE%83" tabindex="-1"><a class="header-anchor" href="#TCP-和-UDP-比较">#</a>TCP 和 UDP 比较</h2>
+<h2 id="TCP-和-UDP-比较"><a class="header-anchor" href="#TCP-和-UDP-比较">#</a>TCP 和 UDP 比较</h2>
 <p>先来看看 UDP 的首部</p>
 <img src="udp.png" style="zoom:70%">
 <p>再来看看区别</p>
@@ -609,9 +609,9 @@ TCP 位于传输层，是面向连接且基于字节流的可靠协议。
 </tr>
 </tbody>
 </table>
-<h3 id="%E5%A6%82%E4%BD%95%E5%9F%BA%E4%BA%8E-udp-%E5%AE%9E%E7%8E%B0%E5%8F%AF%E9%9D%A0%E4%BC%A0%E8%BE%93%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#如何基于-UDP-实现可靠传输？">#</a>如何基于 UDP 实现可靠传输？</h3>
+<h3 id="如何基于-UDP-实现可靠传输？"><a class="header-anchor" href="#如何基于-UDP-实现可靠传输？">#</a>如何基于 UDP 实现可靠传输？</h3>
 <p><a target="_blank" rel="noopener" href="https://www.xiaolincoding.com/network/3_tcp/quic.html">QUIC</a></p>
-<h3 id="tcp-%E5%92%8C-udp-%E5%8F%AF%E4%BB%A5-bind-%E5%88%B0%E5%90%8C%E4%B8%80%E4%B8%AA%E7%AB%AF%E5%8F%A3%E5%90%97%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#TCP-和-UDP-可以-bind-到同一个端口吗？">#</a>TCP 和 UDP 可以 bind 到同一个端口吗？</h3>
+<h3 id="TCP-和-UDP-可以-bind-到同一个端口吗？"><a class="header-anchor" href="#TCP-和-UDP-可以-bind-到同一个端口吗？">#</a>TCP 和 UDP 可以 bind 到同一个端口吗？</h3>
 <p>可以的，操作系统为两种协议提供了不同的模块，互相独立，互不干扰。</p>
 <p>发送端创建 socket 的时候可以指定协议类别，从而调用 <code>send()</code> 的时候就会使用相应的模块处理；而接收端则会根据 IP Header 的协议字段来判断是 TCP 还是 UDP，从而使用相应模块处理。</p>
 
@@ -793,12 +793,6 @@ TCP 位于传输层，是面向连接且基于字节流的可靠协议。
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -807,8 +801,8 @@ TCP 位于传输层，是面向连接且基于字节流的可靠协议。
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -824,41 +818,6 @@ TCP 位于传输层，是面向连接且基于字节流的可靠协议。
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

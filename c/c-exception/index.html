@@ -326,7 +326,7 @@
             <div id="articleContent">
                 <p><strong>异常</strong>，在操作系统中指的是指令内部出现的"<strong>内中断</strong>"，如除数为零，地址越界等。这些情况在程序中也时有发生，C++ 为了应对偶发的程序异常事件，引入了<strong>异常处理</strong>机制。其基于三个关键字：<code>try</code>，<code>throw</code> 与 <code>catch</code>。</p>
 <span id="more"></span>
-<h2 id="%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E6%B5%81%E7%A8%8B" tabindex="-1"><a class="header-anchor" href="#异常处理流程">#</a>异常处理流程</h2>
+<h2 id="异常处理流程"><a class="header-anchor" href="#异常处理流程">#</a>异常处理流程</h2>
 <p>一个完整的异常处理流程如下：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>异常处理</span></div><code class="language-cpp"><span class="token keyword">try</span> <span class="token punctuation">{</span>
   <span class="token comment">/* code */</span>
@@ -410,7 +410,7 @@
 <p><strong>异常对象</strong>指的是由 <code>throw</code> 表达式在未指明的存储中构造的<strong>临时对象</strong>，不允许出现任何**<a target="_blank" rel="noopener" href="https://zh.cppreference.com/w/cpp/language/type#.E4.B8.8D.E5.AE.8C.E6.95.B4.E7.B1.BB.E5.9E.8B">不完整类型</a><strong>、<strong>抽象类</strong>、<strong>右值引用</strong>或</strong>指向不完整类型的指针**（<code>void*</code> 除外）的异常对象。并且对于异常对象类，其构造、析构函数必须公开。</p>
 <p>与其他临时对象不同，异常对象在初始化 <code>catch</code> 子句形参时被认为是左值，所以它可以用左值引用捕获、修改及重抛，并且将驻留在所有可能激活的 <code>catch</code> 语句都能访问到的内存空间中，在成功匹配的 <code>catch</code> 语句的结束处被自动析构。</p>
 <p>异常对象存放在内存的<strong>特殊位置</strong>，既不是栈也不是堆，<strong>该对象由异常机制负责创建和释放</strong>，所以避免 <code>throw new</code> 的做法，存在内存泄漏的问题。bugfree 起见，<strong>强烈建议</strong>使用派生自 <code>std::exception</code> 的类型来抛出异常对象，并且按<strong>左值引用</strong>捕获！</p>
-<h3 id="std%3A%3Aexcecption" tabindex="-1"><a class="header-anchor" href="#std-excecption">#</a>std::excecption</h3>
+<h3 id="std-excecption"><a class="header-anchor" href="#std-excecption">#</a>std::excecption</h3>
 <p><code>std::exception</code> 是所有异常类的基类，提供统一接口，比如 <code>typeid</code>、<code>dynamic_cast</code>、<code>new</code> 抛出的异常都是派生自该类。如果希望自定义异常派生类，则需要实现的 public 函数有：</p>
 <ol>
 <li class="lvl-3">
@@ -424,7 +424,7 @@
 </li>
 </ol>
 <p>基类有一个虚函数 <code>virtual const char* what() const noexcept</code>，用于返回解释该异常类型的字符串，一般通过重写该虚函数来实现表明不同异常的功能。</p>
-<h2 id="noexcept" tabindex="-1"><a class="header-anchor" href="#noexcept">#</a>noexcept</h2>
+<h2 id="noexcept"><a class="header-anchor" href="#noexcept">#</a>noexcept</h2>
 <p>声明为 <code>noexcept</code> <strong>说明符</strong>的函数能够确定性地不抛出异常，也可以通过声明为 <code>noexcept(expr)</code> 的方式，若 <code>expr = true</code> 则等效于 <code>noexcept</code>；反之表明可能抛出异常。如果一个函数声明了 <code>noexcept</code> 还抛异常，编译能过，但会直接 <code>terminate()</code>。关于 <code>noexcept</code> 函数，有以下几点值得注意：</p>
 <ol>
 <li class="lvl-3">
@@ -627,12 +627,6 @@
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -641,8 +635,8 @@
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -658,41 +652,6 @@
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

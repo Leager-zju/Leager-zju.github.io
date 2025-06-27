@@ -338,20 +338,20 @@
 </blockquote>
 <p>该 Task 在 code 层面难度并不大，甚至不如 lab1，真正的难度在于熟悉整个框架下数据的排布以及不同数据结构的含义。</p>
 <p>课程组已经为我们提供了一部分 Operator 的实现，就先从 Projection 算子开始熟悉一下整个执行层所涉及到的内容。</p>
-<h2 id="sample---projectionexcecutor" tabindex="-1"><a class="header-anchor" href="#Sample-ProjectionExcecutor">#</a>Sample - ProjectionExcecutor</h2>
+<h2 id="Sample-ProjectionExcecutor"><a class="header-anchor" href="#Sample-ProjectionExcecutor">#</a>Sample - ProjectionExcecutor</h2>
 <p>Projection 算子的构造函数如下</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token class-name">ProjectionExecutor</span><span class="token double-colon punctuation">::</span><span class="token function">ProjectionExecutor</span><span class="token punctuation">(</span>ExecutorContext <span class="token operator">*</span>exec_ctx<span class="token punctuation">,</span> <span class="token keyword">const</span> ProjectionPlanNode <span class="token operator">*</span>plan<span class="token punctuation">,</span> std<span class="token double-colon punctuation">::</span>unique_ptr<span class="token operator">&lt;</span>AbstractExecutor<span class="token operator">&gt;</span> <span class="token operator">&amp;&amp;</span>child_executor<span class="token punctuation">)</span><span class="token operator">:</span>
   <span class="token function">AbstractExecutor</span><span class="token punctuation">(</span>exec_ctx<span class="token punctuation">)</span><span class="token punctuation">,</span>
   <span class="token function">plan_</span><span class="token punctuation">(</span>plan<span class="token punctuation">)</span><span class="token punctuation">,</span>
   <span class="token function">child_executor_</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span><span class="token function">move</span><span class="token punctuation">(</span>child_executor<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="executorcontext" tabindex="-1"><a class="header-anchor" href="#ExecutorContext">#</a>ExecutorContext</h3>
+<h3 id="ExecutorContext"><a class="header-anchor" href="#ExecutorContext">#</a>ExecutorContext</h3>
 <p>这是每个算子在构造时都会获得的一个参数，即执行上下文，其包含当前 SQL 语句处理时相应的信息，包含：<code>Transaction</code>，<code>BufferPoolManager</code>，<code>TransactionManager</code>，<code>LockManager</code> 以及 <code>Catalog</code>。</p>
 <blockquote>
 <p>这里最关键的就是 <code>Catalog</code>，下面单独讲。</p>
 </blockquote>
-<h3 id="catalog" tabindex="-1"><a class="header-anchor" href="#Catalog">#</a>Catalog</h3>
+<h3 id="Catalog"><a class="header-anchor" href="#Catalog">#</a>Catalog</h3>
 <p>它维护当前数据库的目录信息，包括所有表信息(<strong>TableInfo</strong>)以及索引信息(<strong>IndexInfo</strong>)。Bustub 框架下，所有 Table/Index 都有一个唯一标识符 <code>table_oid</code> / <code>index_oid</code>，以及唯一的表名 <code>table_name</code> / 索引名 <code>index_name</code>，在 <code>Catalog</code> 中，可以通过这些标识符通过自带的 <code>GetTable()</code> / <code>GetIndex()</code> 函数来检索到信息。</p>
-<h4 id="tableinfo" tabindex="-1"><a class="header-anchor" href="#TableInfo">#</a>TableInfo</h4>
+<h4 id="TableInfo"><a class="header-anchor" href="#TableInfo">#</a>TableInfo</h4>
 <p>特定 Table 的所有信息，包括：</p>
 <ul class="lvl-0">
 <li class="lvl-2">
@@ -367,7 +367,7 @@
 <p><code>oid</code>：表标识符；</p>
 </li>
 </ul>
-<h4 id="indexinfo" tabindex="-1"><a class="header-anchor" href="#IndexInfo">#</a>IndexInfo</h4>
+<h4 id="IndexInfo"><a class="header-anchor" href="#IndexInfo">#</a>IndexInfo</h4>
 <p>某一 Table 上特定 Index 的所有信息，包括：</p>
 <ul class="lvl-0">
 <li class="lvl-2">
@@ -386,7 +386,7 @@
 <p><code>table_name_</code>：索引所在表名；</p>
 </li>
 </ul>
-<h3 id="plannode" tabindex="-1"><a class="header-anchor" href="#PlanNode">#</a>PlanNode</h3>
+<h3 id="PlanNode"><a class="header-anchor" href="#PlanNode">#</a>PlanNode</h3>
 <p>当用户输入一句 SQL 查询时，SQL 层会先解析该语句，先生成一棵 AST 抽象语法树，接下来 Plan 层将该 AST 经过 Optimization 层优化后生成一棵 PlanNodeTree，指明该 SQL 语句应该以怎样的顺序从 Table 中获取数据.</p>
 <p>下图就是语句 <code>(SELECT * FROM table_1, table_2 WHERE colA = colB) GROUP BY colA; </code> 对应的 PNT：</p>
 <img src="image-20230112151707548.png" alt="image-20230112151707548" style="zoom:67%;">
@@ -405,7 +405,7 @@
 <p><code>expressions_</code>：用于筛选，像上面的 <code>ColA = ColB</code> 就是一个 Expression。其自身带有一个 <code>Evaluate()</code> 函数，接受一个 Tuple，并判断其是否满足条件。在 Join 操作中，其也有一个 <code>EvaluateJoin</code> 函数，适用于<code>xx join xx on (Expression)</code> 型的查询；</p>
 </li>
 </ul>
-<h3 id="projection-%E6%89%A7%E8%A1%8C%E8%BF%87%E7%A8%8B" tabindex="-1"><a class="header-anchor" href="#Projection-执行过程">#</a>Projection 执行过程</h3>
+<h3 id="Projection-执行过程"><a class="header-anchor" href="#Projection-执行过程">#</a>Projection 执行过程</h3>
 <p>Projection 操作实际上是语句 <code>SELECT col_name FROM table_name</code> 的具象化，在 PNT 中其接收 <code>SELECT</code> 部分对应算子返回表的所有 Tuple，然后选取 col_name 对应的列，构造新的 Tuple 进行返回。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">bool</span> <span class="token class-name">ProjectionExecutor</span><span class="token double-colon punctuation">::</span><span class="token function">Next</span><span class="token punctuation">(</span>Tuple <span class="token operator">*</span>tuple<span class="token punctuation">,</span> RID <span class="token operator">*</span>rid<span class="token punctuation">)</span> <span class="token punctuation">{</span>
   Tuple child_tuple<span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
@@ -428,9 +428,9 @@
 
   <span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="task-%231---access-method-executors" tabindex="-1"><a class="header-anchor" href="#Task-1-Access-Method-Executors">#</a>Task #1 - Access Method Executors</h2>
+<h2 id="Task-1-Access-Method-Executors"><a class="header-anchor" href="#Task-1-Access-Method-Executors">#</a>Task #1 - Access Method Executors</h2>
 <p>诸如上述 Projection 算子，只是对真实表中的 Tuple 副本进行一系列操作，并不涉及磁盘中的 TableHeap。本 Task 需要我们与 TableHeap 打交道，实现 SeqScan，Insert，Delete 这三个算子。</p>
-<h3 id="seqscan" tabindex="-1"><a class="header-anchor" href="#SeqScan">#</a>SeqScan</h3>
+<h3 id="SeqScan"><a class="header-anchor" href="#SeqScan">#</a>SeqScan</h3>
 <p>对应 <code>SELECT * FROM table_name</code> 语句，需要获取 TableHeap 并从中读取所有 Tuple。</p>
 <p>ExecutorContext 所有算子都是一样的，先来看看 Plan 为我们提供的额外信息：</p>
 <ul class="lvl-0">
@@ -456,7 +456,7 @@
 </blockquote>
 </li>
 </ol>
-<h3 id="insert%2Fdelete" tabindex="-1"><a class="header-anchor" href="#Insert-Delete">#</a>Insert/Delete</h3>
+<h3 id="Insert-Delete"><a class="header-anchor" href="#Insert-Delete">#</a>Insert/Delete</h3>
 <p>下层算子返回需要 Insert/Delete 的 Tuple。</p>
 <p>这里分别需要调用 TableHeap 中的 <code>InsertTuple()</code> 和 <code>MarkDelete()</code> 来进行实际的插入和删除。同时，所操作的 Table 可能建有索引，需要对所有建立好的 Index 调用 <code>InsertEntry()</code> 和 <code>DeleteEntry()</code> 操作。</p>
 <p>除了对表的操作，Task 还要求我们输出一共操作了多少条 Tuple。很容易想到在算子里定义一个计数器 <code>cnt_</code>，初始化为 0，之后每操作一次便自增一次，直至下层没有 Tuple 输出后再将 <code>cnt_</code> 包装为 <code>Value(INTEGER, cnt_)</code>，最后构造为 Tuple 进行返回。</p>
@@ -468,13 +468,13 @@
 <span class="token punctuation">}</span>
 <span class="token keyword">return</span> res<span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>从而保证首次调用无论是否有操作都必然返回 <code>true</code>。</p>
-<h3 id="indexscan" tabindex="-1"><a class="header-anchor" href="#IndexScan">#</a>IndexScan</h3>
+<h3 id="IndexScan"><a class="header-anchor" href="#IndexScan">#</a>IndexScan</h3>
 <p>这个算子需要利用我们在 lab2 中实现的 B+ 树迭代器进行 Tuple 的获取。之前提到所有 leaf node 存的 kv 对中的 Value 都是 <code>RID</code>，故对于在某一列上作的索引，所有 Tuple 在该列上的值作为了 B+ 树的 Key，且根据索引的特性可知，这些值互不相同。</p>
 <p>根据 Guide，我们可以通过以下语句来将 Index 对象变为 B+ 树</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp">tree_ <span class="token operator">=</span> <span class="token generic-function"><span class="token function">dynamic_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span>BPlusTreeIndexForOneIntegerColumn <span class="token operator">*</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span>index_info_<span class="token operator">-&gt;</span>index_<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>这个对象里面有一个函数为 <code>GetBeginIterator()</code>，用以初始化我们的 Iterator。接下来就是不断获取 rid，然后根据 rid 获取 Table 中对应的 Tuple。</p>
-<h2 id="task-%232---aggregation-%26-join-executors" tabindex="-1"><a class="header-anchor" href="#Task-2-Aggregation-Join-Executors">#</a>Task #2 - Aggregation &amp; Join Executors</h2>
-<h3 id="aggregation" tabindex="-1"><a class="header-anchor" href="#Aggregation">#</a>Aggregation</h3>
+<h2 id="Task-2-Aggregation-Join-Executors"><a class="header-anchor" href="#Task-2-Aggregation-Join-Executors">#</a>Task #2 - Aggregation &amp; Join Executors</h2>
+<h3 id="Aggregation"><a class="header-anchor" href="#Aggregation">#</a>Aggregation</h3>
 <p>跟其余算子的流水线式运作不同，Aggregation 操作可以说是"Pipeline breaker"——对于一些诸如 <code>max()</code>，<code>sum()</code> 等的聚合函数，它们只能通过扫描全表来进行输出，而不能每取一个 Tuple 就能作出正确的判断。故这里我们的策略转变为：不断获取下层 Tuple，然后完善一个名为 <code>SimpleAggregationHashTable</code> 的对象，直至下层不再返回，此时利用构建好的聚合表，获取我们想要的聚合结果，根据输出模式构造 Tuple 并返回。</p>
 <blockquote>
 <p>相当于是最开始提到的方法 2 了。</p>
@@ -536,7 +536,7 @@
 <p>有。此时我们的输出 Tuple 不仅要包含 <code>aggregates_</code> 列，还需要在前面加上 <code>group_bys_</code> 列，这里就不需要考虑表是否为空的情况了，直接构造输出 Tuple，并在迭代器到达表 End 时返回 <code>false</code> 即可；</p>
 </li>
 </ol>
-<h3 id="nestedloopjoin" tabindex="-1"><a class="header-anchor" href="#NestedLoopJoin">#</a>NestedLoopJoin</h3>
+<h3 id="NestedLoopJoin"><a class="header-anchor" href="#NestedLoopJoin">#</a>NestedLoopJoin</h3>
 <p>嵌套循环连接的朴素思路很简单，对于外表每一个 Tuple，遍历内表中所有 Tuple，进行连接条件判断（即 <code>Expression.EvaluateJoin</code>），若满足条件则构造输出元组。但在火山模型下，每次调用只输出一个 Tuple，这就意味着我们需要保留一些信息，防止下次调用时 Tuple 顺序错乱。</p>
 <p>在 <code>Init()</code> 中就把所有输出 Tuple 构造好放到数组里，然后定义一个迭代器逐个输出是可以的，但这样就与火山模型的初衷背道而驰了。想要既能以正确顺序输出 Tuple，又满足流水线模式，就需要在算子内部存储外表 Tuple，并且在合适的时机对外表调用 <code>Next()</code>。</p>
 <p>此外，在本 lab 中，NLJ 算子仅支持内连接和左外连接，这两种连接方式有所不同：</p>
@@ -576,14 +576,14 @@
 
   <span class="token comment">// INNER JOIN &amp;&amp; JOIN EMPTY，需要外表继续 Next()，故外层用 while(true)</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="nestedindexjoin" tabindex="-1"><a class="header-anchor" href="#NestedIndexJoin">#</a>NestedIndexJoin</h3>
+<h3 id="NestedIndexJoin"><a class="header-anchor" href="#NestedIndexJoin">#</a>NestedIndexJoin</h3>
 <p>和 NLJ 思路大体一致，不同之处在于，内表相关的列已经建好了 Index，对于外表中的每一行 Tuple，我们需要利用外表对应的列通过 <code>key_predicate</code> 构建 probe key，从 Index 中获取相应内表的 RID，从而进一步去物理页面中获取 Tuple。</p>
 <p><code>key_predicate</code> 是一个 Expression 变量，利用 <code>Evaluate()</code> 找到传入 Tuple 中建立了索引的列上的 Value，然后再根据 <code>key_schema</code> 模式来构造元组。probe key 的构建大概长这样：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp">probe_value <span class="token operator">=</span> plan_<span class="token operator">-&gt;</span><span class="token function">KeyPredicate</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">-&gt;</span><span class="token function">Evaluate</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>outer_tuple_<span class="token punctuation">,</span> outer_schema_<span class="token punctuation">)</span><span class="token punctuation">;</span>
 probe_key <span class="token operator">=</span> <span class="token function">Tuple</span><span class="token punctuation">(</span><span class="token punctuation">{</span>probe_value<span class="token punctuation">}</span><span class="token punctuation">,</span> index_info_<span class="token operator">-&gt;</span>index_<span class="token operator">-&gt;</span><span class="token function">GetKeySchema</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 <p>其余关于何时调用外表 <code>Next()</code> 以及连接类型的讨论同 NLJ。</p>
-<h2 id="task-%233---sort-%2B-limit-executors-and-top-n-optimization" tabindex="-1"><a class="header-anchor" href="#Task-3-Sort-Limit-Executors-and-Top-N-Optimization">#</a>Task #3 - Sort + Limit Executors and Top-N Optimization</h2>
-<h3 id="sort" tabindex="-1"><a class="header-anchor" href="#Sort">#</a>Sort</h3>
+<h2 id="Task-3-Sort-Limit-Executors-and-Top-N-Optimization"><a class="header-anchor" href="#Task-3-Sort-Limit-Executors-and-Top-N-Optimization">#</a>Task #3 - Sort + Limit Executors and Top-N Optimization</h2>
+<h3 id="Sort"><a class="header-anchor" href="#Sort">#</a>Sort</h3>
 <p>用于 <code>ORDER BY</code> 关键字，同时还规定了排序类型：<code>ASC</code> / <code>DeSC</code>。若没有明确表示，则默认为 <code>ASC</code>。</p>
 <p>Sort 也是个 Pipeline Breaker，因为其需要等到获取完所有 Tuple 再返回结果。于是乎，需要在算子中定义一个 Tuple 数组，在 <code>Init()</code> 阶段构建好以后，用一个迭代器逐个输出即可。</p>
 <p>构建的过程也很简单，不断调用下层算子获取 Tuple 后加入数组，然后调用 <code>std::sort()</code> 并自定义排序方法。对于每个 <code>ORDER BY</code> 对应的列，若相等则比较下一列，否则按照排序类型直接返回 true or false。由于不会出现完全相同的两行，故自定义排序方法必定能在 <code>for</code> 循环中退出。</p>
@@ -605,9 +605,9 @@ probe_key <span class="token operator">=</span> <span class="token function">Tup
     <span class="token punctuation">}</span>
     <span class="token keyword">return</span> res<span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="limit" tabindex="-1"><a class="header-anchor" href="#Limit">#</a>Limit</h3>
+<h3 id="Limit"><a class="header-anchor" href="#Limit">#</a>Limit</h3>
 <p>这个就更简单了，略。</p>
-<h3 id="top-n-optimization-rule" tabindex="-1"><a class="header-anchor" href="#Top-N-Optimization-Rule">#</a>Top-N Optimization Rule</h3>
+<h3 id="Top-N-Optimization-Rule"><a class="header-anchor" href="#Top-N-Optimization-Rule">#</a>Top-N Optimization Rule</h3>
 <p>默认情况下，<code>ORDER BY col_name LIMIT n</code> 会先经过 Sort 算子，再经过 Limit 算子，如果 n &lt;&lt; Tuple 数量，则有相当一部分 Tuple 并没有参与到最终的输出，这显然是低效的，因为我们只需要 n 个结果。</p>
 <p>Top-N 将以上两个算子融合到一起，它动态维护当前所需的最多 n 条 Tuple，排序方式同 Sort 中讨论的那样。</p>
 <blockquote>
@@ -621,17 +621,17 @@ probe_key <span class="token operator">=</span> <span class="token function">Tup
 <span class="token keyword">auto</span> optimized_plan <span class="token operator">=</span> plan<span class="token operator">-&gt;</span><span class="token function">CloneWithChildren</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span><span class="token function">move</span><span class="token punctuation">(</span>children<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>易得 Bustub 的 Optimizer 采用后序遍历的方法，先优化下层算子，再逐个向上。</p>
 <p>需要注意的是 Top-N 优化有严格要求，必须是上层 Limit 下层 Sort 这样的形式才能进行优化。其余部分并不难。</p>
-<h2 id="leaderboard-task-(optional)" tabindex="-1"><a class="header-anchor" href="#Leaderboard-Task-Optional">#</a>Leaderboard Task (Optional)</h2>
-<h3 id="query-1%3A-where%E2%80%99s-the-index%3F" tabindex="-1"><a class="header-anchor" href="#Query-1-Where’s-the-Index">#</a>Query 1: Where’s the Index?</h3>
+<h2 id="Leaderboard-Task-Optional"><a class="header-anchor" href="#Leaderboard-Task-Optional">#</a>Leaderboard Task (Optional)</h2>
+<h3 id="Query-1-Where’s-the-Index"><a class="header-anchor" href="#Query-1-Where’s-the-Index">#</a>Query 1: Where’s the Index?</h3>
 <p>Guide 叽里呱啦讲了一堆，实际上就是让我们实现 Hash Join。思路很简单，构建一个哈希表，内外表在 Hash 函数下映射到同一个 HashKey 的进行 Join 即可。</p>
 <p>这里哈希表的数据结构设计其实可以完全照搬 Aggregation 里的那个哈希表。</p>
 <p>由于有左连接的设定，我选择用内表 Tuple 在 <code>Init()</code> 阶段构建哈希表，然后再用外表 Tuple 构建 HashJoinKey，到哈希表中进行查找。注意这里 HashJoinValue 应当为一个 Tuple 数组，毕竟内表的多个 Tuple 的 Hash 值可能会是相等的。</p>
 <p>此外，为了按序输出以及流水线运作，还需要在 HashJoinValue 中额外定义一个 <code>index_</code> 变量，表明当前 <code>Next()</code> 进行到哪一步了，这次应该挑选数组中哪一个 Tuple。在 <code>index_</code> 到达数组末尾后，外表才调用 <code>Next()</code>，并且 <code>index_</code> 需要初始化为 0——防止后续外表 Tuple 继续 Hash 到这个 HashJoinKey 上。</p>
 <p>关于左连接的特殊情况讨论同上。</p>
-<h3 id="query-2%3A-too-many-joins!" tabindex="-1"><a class="header-anchor" href="#Query-2-Too-Many-Joins">#</a>Query 2: Too Many Joins!</h3>
-<h3 id="query-3%3A-the-mad-data-scientist" tabindex="-1"><a class="header-anchor" href="#Query-3-The-Mad-Data-Scientist">#</a>Query 3: The Mad Data Scientist</h3>
+<h3 id="Query-2-Too-Many-Joins"><a class="header-anchor" href="#Query-2-Too-Many-Joins">#</a>Query 2: Too Many Joins!</h3>
+<h3 id="Query-3-The-Mad-Data-Scientist"><a class="header-anchor" href="#Query-3-The-Mad-Data-Scientist">#</a>Query 3: The Mad Data Scientist</h3>
 <p>这两个时间原因没做，之后再更新。</p>
-<h2 id="%E6%80%BB%E7%BB%93" tabindex="-1"><a class="header-anchor" href="#总结">#</a>总结</h2>
+<h2 id="总结"><a class="header-anchor" href="#总结">#</a>总结</h2>
 <p>火山模型的执行过程还是挺有意思的，整体实现起来也不难，更令人感到友好的是 Bustub 直接提供了所有 test sample，可以直接在本地运行并 debug，不需要到 GradeScope 上等了。</p>
 
                 
@@ -814,12 +814,6 @@ probe_key <span class="token operator">=</span> <span class="token function">Tup
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -828,8 +822,8 @@ probe_key <span class="token operator">=</span> <span class="token function">Tup
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -845,41 +839,6 @@ probe_key <span class="token operator">=</span> <span class="token function">Tup
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

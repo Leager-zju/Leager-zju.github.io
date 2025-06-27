@@ -341,7 +341,7 @@
 </li>
 </ul>
 <p>基于上述讨论，可以开始进行 lab tasks 的构思了。</p>
-<h2 id="task-%231---extendable-hash-table" tabindex="-1"><a class="header-anchor" href="#Task-1-Extendable-Hash-Table">#</a>Task #1 - Extendable Hash Table</h2>
+<h2 id="Task-1-Extendable-Hash-Table"><a class="header-anchor" href="#Task-1-Extendable-Hash-Table">#</a>Task #1 - Extendable Hash Table</h2>
 <p>具体概念请参考<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/537292608">可扩展哈希实现</a>。</p>
 <p>由于今年不需要实现删除元素后哈希表的收缩，所以这里的关键部分就是桶满了之后的 Split 操作。若 <code>Indexof(Key) = index</code> 的键值对插入前对应桶满了：</p>
 <ol>
@@ -361,7 +361,7 @@
 <p>重复插入 Key 的操作直至不再分裂。</p>
 </li>
 </ol>
-<h2 id="task-%232---lru-k-replacement-policy" tabindex="-1"><a class="header-anchor" href="#Task-2-LRU-K-Replacement-Policy">#</a>Task #2 - LRU-K Replacement Policy</h2>
+<h2 id="Task-2-LRU-K-Replacement-Policy"><a class="header-anchor" href="#Task-2-LRU-K-Replacement-Policy">#</a>Task #2 - LRU-K Replacement Policy</h2>
 <p>在 LRU 策略中，每次页面置换都会选择最近最不常访问的帧号。其原理是符合直觉的。但是，考虑这种情况，存在某一热点页面，之后 buffer pool 发生了偶然性的大量冷页面的读取，根据 LRU 策略，热页面会被换出。</p>
 <p>但我们并不希望其被换出，因为这些冷页面可能在很长一段时间内仅仅只有此次访问。LRU 策略的缺点就在于，其不能跟踪某一页面是否为热点页面，我们希望读取的代价最小，也就是热点页面在大多数情况下都不会被置换出。</p>
 <p>于是诞生了 LRU-K 策略。在本 lab 中，该策略是在原来的 LRU 基础上，新增维护了某一帧最近 K 次的访问记录，当需要置换页面时，replacer 会选出 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>−</mo><mi>d</mi><mi>i</mi><mi>s</mi><mi>t</mi><mi>a</mi><mi>n</mi><mi>c</mi><mi>e</mi></mrow><annotation encoding="application/x-tex">k-distance</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7778em;vertical-align:-0.0833em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal">d</span><span class="mord mathnormal">i</span><span class="mord mathnormal">s</span><span class="mord mathnormal">t</span><span class="mord mathnormal">an</span><span class="mord mathnormal">ce</span></span></span></span> 最大的那一帧。如果有多个 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>−</mo><mi>d</mi><mi>i</mi><mi>s</mi><mi>t</mi><mi>a</mi><mi>n</mi><mi>c</mi><mi>e</mi><mo>=</mo><mi>i</mi><mi>n</mi><mi>f</mi></mrow><annotation encoding="application/x-tex">k-distance = inf</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7778em;vertical-align:-0.0833em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal">d</span><span class="mord mathnormal">i</span><span class="mord mathnormal">s</span><span class="mord mathnormal">t</span><span class="mord mathnormal">an</span><span class="mord mathnormal">ce</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">in</span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span></span></span></span> 的帧，则换出最早被访问的那一个。</p>
@@ -370,7 +370,7 @@
 </blockquote>
 <p>在 LRU-K 策略下，上述热点页的问题就能得到解决，即便发生了多个偶然性的冷页面访问，置换也仅仅发生在固定一帧，其余热点页面则会受到保护。</p>
 <p>以上是对本 Task 核心部分的讨论，接下来是一些细节。</p>
-<h3 id="%E6%88%90%E5%91%98%E5%87%BD%E6%95%B0" tabindex="-1"><a class="header-anchor" href="#成员函数">#</a>成员函数</h3>
+<h3 id="成员函数"><a class="header-anchor" href="#成员函数">#</a>成员函数</h3>
 <ul class="lvl-0">
 <li class="lvl-2">
 <p><code>Evict(frame_id_t *frame_id)</code>：根据已有访问记录，挑选合适的 frame_id 进行置换，同时这里有个坑点，即选出一个 frame_id_t 后需清空其访问记录；</p>
@@ -386,21 +386,21 @@
 </li>
 </ul>
 <p>为了支持并发，需在上述所有函数中上锁。</p>
-<h3 id="%E6%88%90%E5%91%98%E5%8F%98%E9%87%8F%E8%AE%BE%E8%AE%A1" tabindex="-1"><a class="header-anchor" href="#成员变量设计">#</a>成员变量设计</h3>
+<h3 id="成员变量设计"><a class="header-anchor" href="#成员变量设计">#</a>成员变量设计</h3>
 <p>基于提供的成员函数，作出如下成员变量设计。</p>
-<h4 id="%E8%AE%BF%E9%97%AE%E8%AE%B0%E5%BD%95%E8%A1%A8" tabindex="-1"><a class="header-anchor" href="#访问记录表">#</a>访问记录表</h4>
+<h4 id="访问记录表"><a class="header-anchor" href="#访问记录表">#</a>访问记录表</h4>
 <p>在 bustub 框架下，帧号永远从 0 开始，于是访问记录表可以不采用 <code>unordered_map&lt;frame_id_t, AccessRecord&gt;</code>，而是 <code>std::vector&lt;AccessRecord&gt;</code>。每个 <code>AccessRecord</code> 记录最近 K 次访问的时间戳。</p>
 <p>在本 Task 中，我采用了 <code>std::list&lt;timestamp&gt;</code> 实现 <code>AccessRecord</code>。对于访问记录而言，只需维护 K 条记录，在追加记录时，若记录数已达 K 次，则移除最早的那次。显然，访问记录需要频繁的插入删除，以及末尾（倒数第 K 次记录）的访问，而 list 底层为一个双向链表，支持 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span> 的增删查。</p>
-<h4 id="%E7%BD%AE%E6%8D%A2%E9%98%9F%E5%88%97%E4%B8%8E%E9%98%9F%E5%88%97%E4%BD%8D%E7%BD%AE%E4%BF%A1%E6%81%AF" tabindex="-1"><a class="header-anchor" href="#置换队列与队列位置信息">#</a>置换队列与队列位置信息</h4>
+<h4 id="置换队列与队列位置信息"><a class="header-anchor" href="#置换队列与队列位置信息">#</a>置换队列与队列位置信息</h4>
 <p>每次置换时，可以选择遍历一遍访问记录表，再取合适的帧进行置换，但这样每次置换的时间开销为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span>。不难想到可以定义一个"<strong>置换队列</strong>"，按照 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>−</mo><mi>d</mi><mi>i</mi><mi>s</mi></mrow><annotation encoding="application/x-tex">k-dis</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7778em;vertical-align:-0.0833em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal">d</span><span class="mord mathnormal">i</span><span class="mord mathnormal">s</span></span></span></span> 大小进行排序，使得队首恒为下一次进行置换的帧号，用空间换时间，将置换开销提升至 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span>。</p>
 <p>在本 Task 中，我依然采用了 <code>std::list&lt;frame_id_t&gt;</code> 来实现 replace_queue。在 replace_queue 中，只需访问队首元素，且需要频繁的插入删除——<code>SetEvictable(true)</code> 将本来 unevictable 的帧设为 evictable，需要将 frame_id 插入置换队列中合适的位置；<code>SetEvictable(false)</code> 将本来 evictable 的帧设为 unevictable，需要将 frame_id 从置换队列中移除。</p>
 <p>这就导致插入/删除位置并不一定在首尾，查找插入/删除位置时需要进行 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span> 遍历，为了减少这一开销，可以维护所有帧号在置换队列中的<strong>位置</strong>（迭代器），从而将开销降至 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span>。</p>
 <p>有了这一信息，就无需单独维护某个 frame_id 是否 evictable 了——若 frame_id 对应的迭代器为 <code>replace_queue.end()</code>，则认为其 unevictable，反之同理。</p>
 <p>另外，若对一个 evictable 的帧进行 <code>RecordAccess</code>，则其访问记录会被修改，需改变其在 replace_queue 中的位置。</p>
-<h2 id="task-%233---buffer-pool-manager-instance" tabindex="-1"><a class="header-anchor" href="#Task-3-Buffer-Pool-Manager-Instance">#</a>Task #3 - Buffer Pool Manager Instance</h2>
+<h2 id="Task-3-Buffer-Pool-Manager-Instance"><a class="header-anchor" href="#Task-3-Buffer-Pool-Manager-Instance">#</a>Task #3 - Buffer Pool Manager Instance</h2>
 <p>到这里，就需要我们整合前两个 Task 的内容，对内存中的页面进行管理了。</p>
 <p>根据 lab guide 所述，<code>BufferPoolManagerInstance</code> 负责从 <code>DiskManager</code> 中获取页面并将它们存储在内存中，当它被明确指示这样做或者当它需要驱逐一个页面为新页面腾出空间时，它也可以将脏页写出到磁盘。系统中的所有内存页面都由 <code>Page</code> 对象表示。<code>BufferPoolManagerInstance</code> 不需要理解这些页面的内容。但作为系统开发人员，重要的是要了解 <code>Page</code> 对象只是缓冲池中内存的容器，因此并不特定于唯一页面。也就是说，每个 <code>Page</code> 对象都包含一个内存块，<code>DiskManager</code> 将使用这块内存存放从磁盘读取的物理页的内容的副本。</p>
-<h3 id="page-%E7%B1%BB" tabindex="-1"><a class="header-anchor" href="#Page-类">#</a>Page 类</h3>
+<h3 id="Page-类"><a class="header-anchor" href="#Page-类">#</a>Page 类</h3>
 <p>Page 类维护以下元信息：</p>
 <ul class="lvl-0">
 <li class="lvl-2">
@@ -416,7 +416,7 @@
 <p><code>is_dirty_</code>：若数据被线程修改且未写回磁盘，则为 true。进行页面置换时，若被换出的页面的 is_dirty_ = true，则需写回磁盘；</p>
 </li>
 </ul>
-<h3 id="%E6%88%90%E5%91%98%E5%8F%98%E9%87%8F" tabindex="-1"><a class="header-anchor" href="#成员变量">#</a>成员变量</h3>
+<h3 id="成员变量"><a class="header-anchor" href="#成员变量">#</a>成员变量</h3>
 <p>BPM 的成员变量无需额外设计，故研究一下其提供的变量。</p>
 <ul class="lvl-0">
 <li class="lvl-2">
@@ -432,7 +432,7 @@
 <p><code>std::list&lt;frame_id_t&gt; free_list_</code>：跟踪未存放任何 Page 对象的帧，当从磁盘中取出页面时优先使用 free_list 中的帧；</p>
 </li>
 </ul>
-<h3 id="%E6%88%90%E5%91%98%E5%87%BD%E6%95%B0-1" tabindex="-1"><a class="header-anchor" href="#成员函数-2">#</a>成员函数</h3>
+<h3 id="成员函数-2"><a class="header-anchor" href="#成员函数-2">#</a>成员函数</h3>
 <ul class="lvl-0">
 <li class="lvl-2">
 <p><code>NewPgImp(page_id_t *page_id)</code>：新建一个 Page，并将其插入到帧中，插入时优先使用 free_list 中的帧，其次再考虑利用 replacer 挑选一帧进行页面置换，置换时若页面为脏，则需写回磁盘。之后，除了修改 Page 对象的元信息，还需修改哈希表，构建新的映射；</p>
@@ -459,7 +459,7 @@
 </blockquote>
 </li>
 </ul>
-<h2 id="%E6%80%BB%E7%BB%93" tabindex="-1"><a class="header-anchor" href="#总结">#</a>总结</h2>
+<h2 id="总结"><a class="header-anchor" href="#总结">#</a>总结</h2>
 <p>总体实现并不难，跟着注释以及 lab guide 一步步来即可。</p>
 <p>善用框架提供的 <code>BUSTUB_ASSERT</code> 进行防御性编程，以便 DEBUG 时针对性地检测异常。</p>
 <p>并发所采用的 <code>std::scope_lock</code> 实际上采用了 <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/34660259">RAII</a> 的思想，简单来说就是利用类析构函数的特性来保证退出函数时必定能够释放锁，而无需手动释放，效果相当于 Go 里面的 <code>lock, defer unlock</code>。</p>
@@ -644,12 +644,6 @@
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -658,8 +652,8 @@
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -675,41 +669,6 @@
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

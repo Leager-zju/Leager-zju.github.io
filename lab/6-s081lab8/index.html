@@ -331,12 +331,12 @@ $ make clean
             <div id="articleContent">
                 <p>现在开始进入文件系统的阶段。</p>
 <span id="more"></span>
-<h2 id="preparation" tabindex="-1"><a class="header-anchor" href="#Preparation">#</a>Preparation</h2>
+<h2 id="Preparation"><a class="header-anchor" href="#Preparation">#</a>Preparation</h2>
 <p>切换到对应分支</p>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">git</span> fetch
 $ <span class="token function">git</span> checkout fs
 $ <span class="token function">make</span> clean<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
-<h2 id="task1%3A-large-files" tabindex="-1"><a class="header-anchor" href="#Task1-Large-files">#</a>Task1: Large files</h2>
+<h2 id="Task1-Large-files"><a class="header-anchor" href="#Task1-Large-files">#</a>Task1: Large files</h2>
 <p>该任务要求我们为 inode 实现<strong>二级间接索引</strong>。</p>
 <p>原本的 inode 含有 11 个直接索引和 1 个一级间接索引，已知一个 disk block 大小为 <code>1024</code>，一个块地址大小为 4B，那一个 block 内部可以容纳 256 条地址，即当前文件系统仅支持最大 <code>(11+256)*BSIZE = 267KB</code> 大小的文件。</p>
 <p>这里，我们需要将 1 个直接索引拿来升级为二级间接索引（指向一个包含 256 个一级间接索引的 block）。那么首先要修改 inode 结构体。xv6 中，除了表示磁盘上的 inode <code>struct dinode</code> 外，内存中还包含磁盘 inode 的拷贝 <code>struct inode</code>，这两者分别位于 <code>kernel/fs.h</code> 与 <code>kernel/file.h</code>。同时，还要修改一些宏字段如 <code>MAXFILE</code>，以适配我们「升级」后的文件系统。</p>
@@ -448,7 +448,7 @@ itrunc(struct inode *ip)
   ip-&gt;size = 0;
   iupdate(ip);
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="task2%3A-symbolic-links" tabindex="-1"><a class="header-anchor" href="#Task2-Symbolic-links">#</a>Task2: Symbolic links</h2>
+<h2 id="Task2-Symbolic-links"><a class="header-anchor" href="#Task2-Symbolic-links">#</a>Task2: Symbolic links</h2>
 <p>该任务要求我们实现创建符号链接的系统调用，也就是创建一个 SYMLINK 类型的 inode，其指向的磁盘块数据内容为某个文件/目录的路径。这里我们不用实现指向目录的符号链接，只需要实现对文件的符号链接即可。</p>
 <p>新增系统调用需要修改的文件就不说了。首先要新增两个宏，一个是用于 inode 类型的 <code>T_SYMLINK</code>，在 <code>kernel/stat.h</code> 中修改，另一个是用于 open 操作的选项 <code>O_NOFOLLOW</code>，在 <code>kernel/fcntl.h</code> 中修改，表明如果传入的路径解析出来是一个符号链接，且设置了该 option，就不用进一步打开链接对象，而是直接打开文件。否则，要逐渐深入，直到某路径对应的文件不是符号链接。</p>
 <p>接下来，我们已经创建了系统调用 <code>sys_symlink()</code>，那么该函数要做什么呢？只需要新建一个 inode，然后调用 <code>writei()</code> 将目标文件路径写入即可。对就这么简单。</p>
@@ -516,7 +516,7 @@ sys_open(void)
   }
   ...
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9E%9C" tabindex="-1"><a class="header-anchor" href="#测试结果">#</a>测试结果</h2>
+<h2 id="测试结果"><a class="header-anchor" href="#测试结果">#</a>测试结果</h2>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">make</span> grade
 <span class="token punctuation">..</span>.
 <span class="token operator">==</span> Test running bigfile <span class="token operator">==</span>
@@ -535,7 +535,7 @@ usertests: OK <span class="token punctuation">(</span><span class="token number"
 <span class="token operator">==</span> Test <span class="token function">time</span> <span class="token operator">==</span>
 time: OK
 Score: <span class="token number">100</span>/100<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E6%9C%80%E5%90%8E%E7%9A%84%E5%B7%A5%E4%BD%9C" tabindex="-1"><a class="header-anchor" href="#最后的工作">#</a>最后的工作</h2>
+<h2 id="最后的工作"><a class="header-anchor" href="#最后的工作">#</a>最后的工作</h2>
 <ol>
 <li class="lvl-3">
 <p><code>git commit -am ""</code> 将所有修改提交到本地;</p>
@@ -545,8 +545,8 @@ Score: <span class="token number">100</span>/100<span aria-hidden="true" class="
 </li>
 </ol>
 <p>可选的挑战再说吧，没有什么想做的欲望。</p>
-<h2 id="%E9%99%84%E5%BD%95%EF%BC%9A%E8%BD%AF%E9%93%BE%E6%8E%A5%E4%B8%8E%E7%A1%AC%E9%93%BE%E6%8E%A5%E7%9A%84%E5%8C%BA%E5%88%AB" tabindex="-1"><a class="header-anchor" href="#附录：软链接与硬链接的区别">#</a>附录：软链接与硬链接的区别</h2>
-<h3 id="unix-%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%AE%80%E8%BF%B0" tabindex="-1"><a class="header-anchor" href="#unix-文件系统简述">#</a>unix 文件系统简述</h3>
+<h2 id="附录：软链接与硬链接的区别"><a class="header-anchor" href="#附录：软链接与硬链接的区别">#</a>附录：软链接与硬链接的区别</h2>
+<h3 id="unix-文件系统简述"><a class="header-anchor" href="#unix-文件系统简述">#</a>unix 文件系统简述</h3>
 <p>文件数据存放在若干磁盘块中，unix fs 用索引节点(inode)来定位文件所对应的磁盘块号。C 语言实现中，inode 是一个结构体，存放若干文件属性，例如 xv6 完整的 inode 结构体如下所示：</p>
 <pre class="line-numbers language-C" data-language="C"><code class="language-C">// On-disk inode structure
 struct dinode {
@@ -561,14 +561,14 @@ struct dinode {
 <blockquote>
 <p>所以对于路径 “/foo/bar/hello.c” 上的文件而言，需要经过多次定位 inode 与读盘操作将 hello.c 的数据读入内存。</p>
 </blockquote>
-<h2 id="%E8%BD%AF%E9%93%BE%E6%8E%A5" tabindex="-1"><a class="header-anchor" href="#软链接">#</a>软链接</h2>
+<h2 id="软链接"><a class="header-anchor" href="#软链接">#</a>软链接</h2>
 <blockquote>
 <p>ln -s target symlink</p>
 </blockquote>
 <p>创建软链接相当于创建一个内容为<strong>目标文件路径</strong>的文件 <code>symlink</code>，为其分配一个全新的 inode 结构体与磁盘空间，通过 <code>symlink</code> 索引文件时只需获取盘块中的路径字符串，再对该路径进行递归访问。</p>
 <p>删除 <code>target</code> 后不会影响 <code>symlink</code>，如果在原来的目录下继续新建一个名为 <code>target</code> 的<strong>新</strong>文件，访问 <code>symlink</code> 依然成功。继续强调一遍，软链接即<strong>文件路径</strong>，只不过存放在磁盘中，不需要我们手打。在 Linux 中，利用 PATH 创建用户自定义目录下的软链接十分好用，不必进行 cp/mv 等操作。同时，允许用户<strong>跨文件系统</strong>进行访问。根据「万物即文件」，软链接也可以对<strong>目录</strong>创建。</p>
 <p>缺点是相比直接访问 <code>target</code> 多了一次（如果路径上的文件还是软链接类型文件则需要多次）读盘操作，同时存在一些创建文件的系统调用开销。</p>
-<h2 id="%E7%A1%AC%E9%93%BE%E6%8E%A5" tabindex="-1"><a class="header-anchor" href="#硬链接">#</a>硬链接</h2>
+<h2 id="硬链接"><a class="header-anchor" href="#硬链接">#</a>硬链接</h2>
 <blockquote>
 <p>ln target hardlink</p>
 </blockquote>
@@ -754,12 +754,6 @@ struct dinode {
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -768,8 +762,8 @@ struct dinode {
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -785,41 +779,6 @@ struct dinode {
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

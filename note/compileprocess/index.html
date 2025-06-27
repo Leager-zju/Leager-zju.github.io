@@ -333,7 +333,7 @@ main.c#include &amp;lt;stdio.h&amp;">
 <p>参考神书《CSAPP》</p>
 </blockquote>
 <span id="more"></span>
-<h2 id="%E6%95%B4%E4%BD%93%E6%B5%81%E7%A8%8B" tabindex="-1"><a class="header-anchor" href="#整体流程">#</a>整体流程</h2>
+<h2 id="整体流程"><a class="header-anchor" href="#整体流程">#</a>整体流程</h2>
 <p>本文将以以下程序为基础进行分析。</p>
 <pre class="line-numbers language-c" data-language="c"><div class="caption"><span>main.c</span></div><code class="language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h&gt;</span></span>
 
@@ -361,7 +361,7 @@ main.c#include &amp;lt;stdio.h&amp;">
 <p>通常，前三个阶段都会直接合并到一起，也就是直接从源文件生成目标文件。</p>
 </blockquote>
 <img src="1.png" style="zoom:80%">
-<h2 id="%E9%A2%84%E5%A4%84%E7%90%86%E9%98%B6%E6%AE%B5" tabindex="-1"><a class="header-anchor" href="#预处理阶段">#</a>预处理阶段</h2>
+<h2 id="预处理阶段"><a class="header-anchor" href="#预处理阶段">#</a>预处理阶段</h2>
 <p>预处理器(cpp)处理所有的以 <code>#</code> 起始的预编译指令，比如</p>
 <ol>
 <li class="lvl-3">
@@ -386,17 +386,17 @@ main.c#include &amp;lt;stdio.h&amp;">
 <blockquote>
 <p>通过运行 <code>gcc -E ??.c -o ??.i</code> 命令来进行预处理，我们将得到一个 <code>.i</code> 结尾的预处理文件。</p>
 </blockquote>
-<h2 id="%E7%BC%96%E8%AF%91%E9%98%B6%E6%AE%B5" tabindex="-1"><a class="header-anchor" href="#编译阶段">#</a>编译阶段</h2>
+<h2 id="编译阶段"><a class="header-anchor" href="#编译阶段">#</a>编译阶段</h2>
 <p>编译器(ccl)将预处理完的文本文件 <code>.i</code> 进行处理，检查语法规范性（包括词法分析、语法分析、语义分析），并进行一定优化，最后生成一个由汇编语言进行描述的文件 <code>.s</code>。</p>
 <blockquote>
 <p>通过运行 <code>gcc -S ??.i -o ??.s</code> 命令来进行预处理，我们将得到一个 <code>.s</code> 结尾的汇编文件。</p>
 </blockquote>
-<h2 id="%E6%B1%87%E7%BC%96%E9%98%B6%E6%AE%B5" tabindex="-1"><a class="header-anchor" href="#汇编阶段">#</a>汇编阶段</h2>
+<h2 id="汇编阶段"><a class="header-anchor" href="#汇编阶段">#</a>汇编阶段</h2>
 <p>汇编器(as)把编译阶段生成的 <code>.s</code> 文件转化成目标文件 <code>.o</code>。从文件结构上来讲，目标文件已经是二进制文件，本身就是按照可执行文件格式存储的，只是有些变量和函数的地址还未确定，且各 <code>.o</code> 文件地址空间相互独立（从地址 0x0 开始生成代码和数据节），程序还不能执行，需要依靠下一步的链接来找到这些变量和函数的地址并进行重定位。</p>
 <blockquote>
 <p>通过运行 <code>gcc -c ??.s -o ??.o</code> 命令来进行预处理，我们将得到一个 <code>.o</code> 结尾的目标文件。</p>
 </blockquote>
-<h3 id="%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F-elf" tabindex="-1"><a class="header-anchor" href="#可执行文件格式-ELF">#</a>可执行文件格式 ELF</h3>
+<h3 id="可执行文件格式-ELF"><a class="header-anchor" href="#可执行文件格式-ELF">#</a>可执行文件格式 ELF</h3>
 <p>以 Linux 为例，其可执行文件的格式为 <strong>ELF(Executable Linkable Format)</strong>，即<strong>可执行可链接格式</strong>。</p>
 <p>Linux 将采用的 ELF 格式的文件分为四类，分别是：</p>
 <ol>
@@ -416,12 +416,12 @@ main.c#include &amp;lt;stdio.h&amp;">
 <blockquote>
 <p>Linux下使用 file 命令可以查看相应的文件格式：<code>file test.o</code></p>
 </blockquote>
-<h3 id="%E5%8F%AF%E9%87%8D%E5%AE%9A%E4%BD%8D%E6%96%87%E4%BB%B6" tabindex="-1"><a class="header-anchor" href="#可重定位文件">#</a>可重定位文件</h3>
+<h3 id="可重定位文件"><a class="header-anchor" href="#可重定位文件">#</a>可重定位文件</h3>
 <p>下图就是一个经典的 ELF 可重定位目标文件格式</p>
 <img src="1.webp" style="zoom:80%">
-<h4 id="elf-header" tabindex="-1"><a class="header-anchor" href="#ELF-Header">#</a>ELF Header</h4>
+<h4 id="ELF-Header"><a class="header-anchor" href="#ELF-Header">#</a>ELF Header</h4>
 <p>**ELF 头(ELF Header)**描述了一些目标文件的信息，包括 ELF 头的大小、目标文件类型、机器类型、节头部表的文件偏移，以及节头部表项的大小和数量。</p>
-<h4 id="sections" tabindex="-1"><a class="header-anchor" href="#Sections">#</a>Sections</h4>
+<h4 id="Sections"><a class="header-anchor" href="#Sections">#</a>Sections</h4>
 <p>接下来一直到节头表之前就是若干**节(Section)**了。一般都有以下这些节：</p>
 <ol>
 <li class="lvl-3">
@@ -458,16 +458,16 @@ main.c#include &amp;lt;stdio.h&amp;">
 <p><code>.strtab</code>：字符串表，其内容包括 <code>.symtab</code> 和 <code>.debug</code> 节中的符号名，以及节头部中的节名字，以 null 结尾；</p>
 </li>
 </ol>
-<h4 id="section-header-table" tabindex="-1"><a class="header-anchor" href="#Section-Header-Table">#</a>Section Header Table</h4>
+<h4 id="Section-Header-Table"><a class="header-anchor" href="#Section-Header-Table">#</a>Section Header Table</h4>
 <p>**节头表(Section Header Table)**中的每一条目都按序对应前面节的信息。</p>
-<h3 id="%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6" tabindex="-1"><a class="header-anchor" href="#可执行文件">#</a>可执行文件</h3>
+<h3 id="可执行文件"><a class="header-anchor" href="#可执行文件">#</a>可执行文件</h3>
 <p>下图就是一个经典的 ELF 可执行文件格式</p>
 <img src="2.webp" style="zoom:80%">
 <p>最后被加载到内存中。在 Linux 86-64 系统中，代码段总是从地址 <code>0x400000</code> 处开始，后面是数据段。</p>
 <img src="3.webp" style="zoom:80%">
-<h4 id="elf-header-1" tabindex="-1"><a class="header-anchor" href="#ELF-Header-2">#</a>ELF Header</h4>
+<h4 id="ELF-Header-2"><a class="header-anchor" href="#ELF-Header-2">#</a>ELF Header</h4>
 <p><strong>ELF 头(ELF Header)<strong>除了描述文件的总体格式，还包括程序的</strong>入口</strong>（entry point），也就是当程序运行时要执行的第一条指令的地址。</p>
-<h4 id="program-header-table" tabindex="-1"><a class="header-anchor" href="#Program-Header-Table">#</a>Program Header Table</h4>
+<h4 id="Program-Header-Table"><a class="header-anchor" href="#Program-Header-Table">#</a>Program Header Table</h4>
 <p>**程序头部表(Program Header Table)**将连续的 sections 映射到内存段中。通过 <code>objdump</code> 可以查看 <code>prog</code> 的 PHT，部分表项如下所示。字段都已标注，不再赘述。</p>
 <pre class="line-numbers language-S" data-language="S"><code class="language-S">Program Header:
     PHDR off    0x0000000000000040 vaddr 0x0000000000000040 paddr 0x0000000000000040 align 2**3  ## PHDR: 给出头部表自身的大小与位置
@@ -476,8 +476,8 @@ main.c#include &amp;lt;stdio.h&amp;">
          filesz 0x000000000000001c memsz 0x000000000000001c flags r--
     LOAD off    0x0000000000000000 vaddr 0x0000000000000000 paddr 0x0000000000000000 align 2**12 ## LOAD: 可加载到内存的段
          filesz 0x00000000000005f0 memsz 0x00000000000005f0 flags r--<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h4 id="segments" tabindex="-1"><a class="header-anchor" href="#Segments">#</a>Segments</h4>
-<h3 id="%E7%AC%A6%E5%8F%B7%E4%B8%8E%E7%AC%A6%E5%8F%B7%E8%A1%A8" tabindex="-1"><a class="header-anchor" href="#符号与符号表">#</a>符号与符号表</h3>
+<h4 id="Segments"><a class="header-anchor" href="#Segments">#</a>Segments</h4>
+<h3 id="符号与符号表"><a class="header-anchor" href="#符号与符号表">#</a>符号与符号表</h3>
 <p>每个可重定位目标模块 m 都有一个符号表，它包含 m 定义和引用的符号的信息。在链接器的上下文中，有三种不同的符号：</p>
 <ol>
 <li class="lvl-3">
@@ -559,15 +559,15 @@ main.c#include &amp;lt;stdio.h&amp;">
 <blockquote>
 <p>前 8 个条目为链接器内部使用的符号。</p>
 </blockquote>
-<h2 id="%E9%93%BE%E6%8E%A5%E9%98%B6%E6%AE%B5" tabindex="-1"><a class="header-anchor" href="#链接阶段">#</a>链接阶段</h2>
+<h2 id="链接阶段"><a class="header-anchor" href="#链接阶段">#</a>链接阶段</h2>
 <p>链接器(ld)将各个 <code>.o</code> 目标文件按一定规则进行整合（符号解析、重定位），为各个符号生成最终虚拟地址，结果得到了一个拥有完整的虚拟地址空间的可执行文件 <code>.exe</code>，可以被加载到内存中运行。</p>
 <blockquote>
 <p>它使得<strong>分离编译</strong>（separate compilation）成为可能，我们不用将一个大型的应用程序组织成一个巨大的源文件，而是可以把它分解成为更小、更好管理的模块，可以独立的修改和编译这些模块。当我们改变这些模块中的一个时，只需要简单的重新编译它，并重新链接应用，而不必重新编译其他文件。</p>
 </blockquote>
-<h3 id="%E7%AC%A6%E5%8F%B7%E8%A7%A3%E6%9E%90" tabindex="-1"><a class="header-anchor" href="#符号解析">#</a>符号解析</h3>
+<h3 id="符号解析"><a class="header-anchor" href="#符号解析">#</a>符号解析</h3>
 <p>每个<strong>符号</strong>对应一个函数/变量，符号解析的目的是将每个符号引用正好和一个符号定义关联起来。对那些和引用定义在相同模块中的符号的引用是非常简单明了的，毕竟编译器只允许每个模块中每个局部符号有一个定义。而对于外部符号，链接器会在它的所有输入模块中寻找，如果找到，就把这个符号的地址填到符号表的相应条目中，反之则报链接错误。</p>
 <p>那么如果产生冲突呢？比如在多个模块中定义了同名全局符号，编译系统会怎么做呢？</p>
-<h4 id="%E9%93%BE%E6%8E%A5%E5%99%A8%E5%A6%82%E4%BD%95%E8%A7%A3%E6%9E%90%E5%A4%9A%E9%87%8D%E5%AE%9A%E4%B9%89%E7%9A%84%E5%85%A8%E5%B1%80%E7%AC%A6%E5%8F%B7" tabindex="-1"><a class="header-anchor" href="#链接器如何解析多重定义的全局符号">#</a>链接器如何解析多重定义的全局符号</h4>
+<h4 id="链接器如何解析多重定义的全局符号"><a class="header-anchor" href="#链接器如何解析多重定义的全局符号">#</a>链接器如何解析多重定义的全局符号</h4>
 <p>对于全局符号，编译系统以<strong>强(strong)/弱(weak)<strong>进行区分，函数和已初始化的全局变量为</strong>强符号</strong>，其余为<strong>弱符号</strong>。汇编器会把这个信息隐含地编码在可重定位目标文件的符号表里。那么知道这个信息后，链接器就可以根据一定规则处理多重定义的符号：</p>
 <ul class="lvl-0">
 <li class="lvl-2">
@@ -604,7 +604,7 @@ void f() {
 $ ./foobar
 x <span class="token operator">=</span> 0x0 y <span class="token operator">=</span> 0x80000000<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 <p>这 bug 还蛮难 de 的，毕竟编译器只会抛出一个 Who-cares 的警告。对于我们 coder 来讲，最好的做法是使用编译器的 <code>-Werror</code> 选项将所有警告变为报错。</p>
-<h3 id="%E9%87%8D%E5%AE%9A%E4%BD%8D" tabindex="-1"><a class="header-anchor" href="#重定位">#</a>重定位</h3>
+<h3 id="重定位"><a class="header-anchor" href="#重定位">#</a>重定位</h3>
 <p>一旦链接器完成了符号解析这一步，就把代码中的每个符号引用和正好一个符号定义（即它的一个输入目标模块中的一个符号表条目）关联起来。与此同时，链接器还知道了它的输入目标模块中的代码节和数据节的确切大小，就可以开始重定位步骤了。重定位由两步组成：</p>
 <ol>
 <li class="lvl-3">
@@ -614,7 +614,7 @@ x <span class="token operator">=</span> 0x0 y <span class="token operator">=</sp
 <p><strong>重定位节中的符号引用</strong>。链接器根据输入模块中 <code>.rel.text</code>/<code>.rel.data</code> 的<strong>重定位条目</strong>，修改 <code>.text</code>/<code>.data</code> 中对每个符号的引用，使得它们指向正确的运行时地址；</p>
 </li>
 </ol>
-<h4 id="%E9%87%8D%E5%AE%9A%E4%BD%8D%E6%9D%A1%E7%9B%AE" tabindex="-1"><a class="header-anchor" href="#重定位条目">#</a>重定位条目</h4>
+<h4 id="重定位条目"><a class="header-anchor" href="#重定位条目">#</a>重定位条目</h4>
 <p>前面讲 <a href="#sections">Sections</a> 的时候已经提到了两个与重定位信息相关的节。事实上，当汇编器生成一个目标模块时，它并不知道数据和代码最终将放在内存中的什么位置，也不知道这个模块引用的任何外部定义的函数或者全局变量的位置。所以，无论何时汇编器遇到对最终位置未知的目标引用，它就会生成一个重定位条目，告诉链接器在将目标文件合并成可执行文件时如何修改这个引用。重定位条目的数据结构定义如下：</p>
 <pre class="line-numbers language-C" data-language="C"><code class="language-C">typedef struct {
   long offset;    /* Offset of the reference to relocate */
@@ -697,7 +697,7 @@ x <span class="token operator">=</span> 0x0 y <span class="token operator">=</sp
 <pre class="line-numbers language-S" data-language="S"><code class="language-S">1144:  e8 0a 00 00 00       	call   1153 &lt;sum&gt;<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>取完 call 指令时，PC 值为 <code>0x1149</code>，然后 <code>PC &lt;- PC + 0xa = 0x1149 + 0xa = 0x1153</code>，验证成功。</p>
 </blockquote>
-<h3 id="%E9%9D%99%E6%80%81%E9%93%BE%E6%8E%A5" tabindex="-1"><a class="header-anchor" href="#静态链接">#</a>静态链接</h3>
+<h3 id="静态链接"><a class="header-anchor" href="#静态链接">#</a>静态链接</h3>
 <p>静态链接是指将所有相关的目标模块打包成为一个单独的文件，即<strong>静态库</strong>，它可以用做链接器的输入。这样一些公司在发布函数库时，只需要提供静态库即可，而不需要提供源文件让用户自行编译，同时还能起到隐藏源文件的效果。</p>
 <blockquote>
 <p>以 ISO C99 为例，它定义了一组广泛的标准 I/O、字符串操作和整数数学函数，例如 <code>atoi()</code>、<code>printf()</code> 和 <code>scanf()</code>，它们在 <code>libc.a</code> 库中，对每个 C 程序来说都是可用的。ISO C99 还在 <code>libm.a</code> 库中定义了一组广泛的浮点数学函数，例如 <code>sin()</code>、<code>cos()</code> 和 <code>sqrt</code>。</p>
@@ -735,7 +735,7 @@ $ gcc main.o <span class="token parameter variable">-static</span> -L. <span cla
 <p>整体流程如下图：</p>
 <img src="2.png" style="zoom:80%">
 <p>当链接器运行时，它判定 <code>main.o</code> 引用了 <code>addvec.o</code> 中定义的符号，所以复制 <code>addvec.o</code> 到可执行文件。因为程序不引用任何由 <code>multvec.o</code> 定义的符号，所以链接器就不会复制这个模块到可执行文件。链接器还会复制 <code>libc.a</code> 中的 <code>printf.o</code> 模块，以及其他许多 C 运行时系统中的其他模块。</p>
-<h3 id="%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5" tabindex="-1"><a class="header-anchor" href="#动态链接">#</a>动态链接</h3>
+<h3 id="动态链接"><a class="header-anchor" href="#动态链接">#</a>动态链接</h3>
 <p>静态库和所有的软件一样，需要定期维护和更新。如果程序员想要使用一个库的最新版本，他们必须以某种方式了解到该库的更新情况，然后显式地将他们的程序与某个特定版本的库重新链接。另一个问题是，诸如 <code>printf()</code> 这类几乎所有程序都会使用的函数，在运行时，这些函数的代码会被拷贝到每个运行进程的 <code>.text</code> 段中，这很浪费内存。</p>
 <blockquote>
 <p>像这种只读代码段，最好的做法是映射到内存中的某个特定区域，所有进程都能以某种方式访问到该区域，这就避免了不必要的拷贝。</p>
@@ -930,12 +930,6 @@ $ gcc main2.c -L. <span class="token parameter variable">-lvector</span> <span c
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -944,8 +938,8 @@ $ gcc main2.c -L. <span class="token parameter variable">-lvector</span> <span c
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -961,41 +955,6 @@ $ gcc main2.c -L. <span class="token parameter variable">-lvector</span> <span c
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

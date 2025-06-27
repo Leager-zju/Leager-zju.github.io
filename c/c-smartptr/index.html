@@ -326,7 +326,7 @@
             <div id="articleContent">
                 <p>C++ 不像 Java 那样有虚拟机动态的管理内存，如果使用裸指针，在程序运行过程中可能就会出现内存泄漏等问题，然而这种问题其实都可以通过 C++11 引入的<strong>智能指针</strong>来解决。</p>
 <span id="more"></span>
-<h2 id="%E8%A3%B8%E6%8C%87%E9%92%88%E7%9A%84%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F%E9%97%AE%E9%A2%98" tabindex="-1"><a class="header-anchor" href="#裸指针的内存泄漏问题">#</a>裸指针的内存泄漏问题</h2>
+<h2 id="裸指针的内存泄漏问题"><a class="header-anchor" href="#裸指针的内存泄漏问题">#</a>裸指针的内存泄漏问题</h2>
 <p>前面提到使用<strong>裸指针</strong>会存在内存泄漏等问题。这里用具体代码来说明：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>裸指针的内存泄漏</span></div><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">A</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
 <span class="token keyword">void</span> <span class="token function">func</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -337,10 +337,10 @@
   <span class="token keyword">delete</span> p<span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>如果 <code>func()</code> 运行过程中抛出异常或其他原因中途退出，则 <code>new</code> 出来的内存得不到释放，随着函数退出，<code>p</code> 的生存周期结束，之后这片内存就永远无法被访问，导致<strong>内存泄漏</strong>。</p>
-<h2 id="%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88" tabindex="-1"><a class="header-anchor" href="#智能指针">#</a>智能指针</h2>
+<h2 id="智能指针"><a class="header-anchor" href="#智能指针">#</a>智能指针</h2>
 <p><strong>智能指针</strong>设计出来就是为了解放程序员，使其无需担心是否释放内存的问题。其本质上是对裸指针进行封装，利用 RAII 思想在构造函数中 <code>new</code>，在析构函数中 <code>delete</code>，保证了内存不泄露。</p>
 <p>根据不同特性，智能指针分为以下三种。</p>
-<h2 id="std%3A%3Aunique_ptr" tabindex="-1"><a class="header-anchor" href="#std-unique-ptr">#</a>std::unique_ptr</h2>
+<h2 id="std-unique-ptr"><a class="header-anchor" href="#std-unique-ptr">#</a>std::unique_ptr</h2>
 <p><code>unique_ptr</code> 是一个<strong>独占型</strong>的智能指针，它<strong>不允许</strong>其它 <code>unique_ptr</code> 共享其管理的内部指针，故不允许<strong>拷贝构造</strong>与<strong>拷贝赋值</strong>，只能通过<strong>移动语义</strong>来获得资源。</p>
 <p><code>unique_ptr</code> 有两个版本：</p>
 <ol>
@@ -409,7 +409,7 @@ ptrs<span class="token punctuation">[</span><span class="token number">1</span><
  * ~A
  * ~A
  */</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="std%3A%3Ashared_ptr" tabindex="-1"><a class="header-anchor" href="#std-shared-ptr">#</a>std::shared_ptr</h2>
+<h2 id="std-shared-ptr"><a class="header-anchor" href="#std-shared-ptr">#</a>std::shared_ptr</h2>
 <p>与 <code>unique_ptr</code> 相反，<code>shared_ptr</code> 是一个<strong>共享型</strong>的智能指针，它<strong>允许</strong>其它 <code>shared_ptr</code> 共享其管理的内部指针，故实现了<strong>拷贝构造</strong>与<strong>拷贝赋值</strong>，并通过这两种方式进行资源共享。</p>
 <p>既然允许共享，那就存在多个 <code>shared_ptr</code> 使用同一片内存，故不能直接在析构时释放内存。在典型的实现中，<code>std::shared_ptr</code> 只保有两个指针：<strong>数据指针</strong> <code>_M_ptr</code> 以及<strong>计数器指针</strong> <code>_M_refcount</code>。</p>
 <blockquote>
@@ -491,7 +491,7 @@ shared_ptr<span class="token operator">&lt;</span>T<span class="token operator">
 <p>当程序结束时，aptr, bptr 调用析构函数，引用计数值减一，但此时两块内存的引用计数值仍然大于零，永远得不到释放。糟糕透了！</p>
 </li>
 </ol>
-<h2 id="std%3A%3Aweak_ptr" tabindex="-1"><a class="header-anchor" href="#std-weak-ptr">#</a>std::weak_ptr</h2>
+<h2 id="std-weak-ptr"><a class="header-anchor" href="#std-weak-ptr">#</a>std::weak_ptr</h2>
 <p>为了解决共享指针可能存在的<strong>循环引用</strong>问题，<code>weak_ptr</code> 被提出。</p>
 <p><code>weak_ptr</code> 用来表达<strong>临时所有权</strong>的概念：它不管理指针，也就没有 <code>get()</code> 函数，只能通过 <code>weak_ptr</code> / <code>shared_ptr</code> 进行构造。其拷贝与析构都不会影响引用计数，纯粹是作为一个<strong>旁观者</strong>监视 <code>shared_ptr</code> 中管理的资源是否存在，该功能可以通过成员函数 <code>expire()</code> 实现——检查被引用的对象是否已删除。</p>
 <blockquote>
@@ -530,7 +530,7 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
   <span class="token comment">// 不存在 shared_ptr 之间的拷贝，故引用计数值不会发生变化。</span>
   <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E5%A6%82%E4%BD%95%E6%89%8B%E6%92%95%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84-shared-ptr" tabindex="-1"><a class="header-anchor" href="#如何手撕一个简单的-shared-ptr">#</a>如何手撕一个简单的 shared ptr</h2>
+<h2 id="如何手撕一个简单的-shared-ptr"><a class="header-anchor" href="#如何手撕一个简单的-shared-ptr">#</a>如何手撕一个简单的 shared ptr</h2>
 <p>首先思考的是：shared ptr 需要支持哪些特性？</p>
 <ol>
 <li class="lvl-3">
@@ -787,12 +787,6 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -801,8 +795,8 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -818,41 +812,6 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

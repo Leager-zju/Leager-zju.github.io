@@ -327,9 +327,9 @@
             <div id="articleContent">
                 <p>标准模板库(Standard Template Library, STL)是一个 C++ 软件库，大量影响了 C++ 标准程序库但并非是其的一部分。其中包含 5 个组件，分别为迭代器、容器、容器适配器、算法、函数。</p>
 <span id="more"></span>
-<h2 id="%E8%BF%AD%E4%BB%A3%E5%99%A8" tabindex="-1"><a class="header-anchor" href="#迭代器">#</a>迭代器</h2>
-<h2 id="%E5%AE%B9%E5%99%A8" tabindex="-1"><a class="header-anchor" href="#容器">#</a>容器</h2>
-<h3 id="std%3A%3Avector" tabindex="-1"><a class="header-anchor" href="#std-vector">#</a>std::vector</h3>
+<h2 id="迭代器"><a class="header-anchor" href="#迭代器">#</a>迭代器</h2>
+<h2 id="容器"><a class="header-anchor" href="#容器">#</a>容器</h2>
+<h3 id="std-vector"><a class="header-anchor" href="#std-vector">#</a>std::vector</h3>
 <p>底层维护了一个「在<strong>堆</strong>上的具有连续内存的<strong>数组</strong>」。</p>
 <p>支持 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span> 的<strong>随机访问</strong>。</p>
 <p>对于<strong>查找</strong>，无序 vector 为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span>，有序 vector 可以利用二分查找降低至 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>log</mi><mo>⁡</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(\log n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span>。</p>
@@ -337,7 +337,7 @@
 <blockquote>
 <p>特别的，标准库提供 <code>vector&lt;bool&gt;</code> 的特化，它使得每个元素占用一个单独的位，而非 <code>sizeof(bool)</code> 字节，从而对空间效率进行了优化。</p>
 </blockquote>
-<h4 id="%E8%BF%AD%E4%BB%A3%E5%99%A8-std%3A%3Avector%3A%3Aiterator" tabindex="-1"><a class="header-anchor" href="#迭代器-std-vector-iterator">#</a>迭代器 std::vector::iterator</h4>
+<h4 id="迭代器-std-vector-iterator"><a class="header-anchor" href="#迭代器-std-vector-iterator">#</a>迭代器 std::vector::iterator</h4>
 <blockquote>
 <p>vector 维护的是一个连续线性空间，所以不论其元素型别为何，普通指针都可以作为 vector 的迭代器而满足所有必要条件，因为 vector 迭代器所需要的操作行为，如 <code>operator*</code>, <code>operator-&gt;</code>, <code>operator++</code>, <code>operator--</code>, <code>operator+</code>, <code>operator-</code>, <code>operator+=</code>, <code>operator-=</code>，普通指针天生就具备。vector 支持随机存取，而普通指针正有着这样的能力。所以，vector 提供的是 Random Access Iterators。——选自《STL 源码剖析》</p>
 </blockquote>
@@ -358,12 +358,12 @@
 <p>计算方式为: <code>size</code> = finish - start；<code>capacity</code> = end_of_storage - start。</p>
 </blockquote>
 <p>通过直接使用指针的方式，vector 实现了随机访问与空间的快速计算。但是也正因为是指向数组某个位置的指针，存在<strong>迭代器失效</strong>的问题——在频繁的 CRUD 后，同一迭代器在操作前后指向的元素可能会不同，甚至会悬垂。</p>
-<h4 id="%E6%89%A9%E5%AE%B9%E6%9C%BA%E5%88%B6" tabindex="-1"><a class="header-anchor" href="#扩容机制">#</a>扩容机制</h4>
+<h4 id="扩容机制"><a class="header-anchor" href="#扩容机制">#</a>扩容机制</h4>
 <p><code>vector</code> 的核心在于其长度自动可变，即<strong>扩容机制</strong>: 当目前可用的空间不足（即 <code>size = capacity</code> 且有新元素要加入）时，分配目前空间的两倍或者目前空间加上所需的新空间大小（取较大值），将原有元素移动到新的内存空间后，释放原来的空间。</p>
 <blockquote>
 <p>由于二倍扩容机制可能会导致内存的浪费（无法重新利用原来的内存），内存不足时扩容的拷贝也会造成较大性能开销。如果使用者能对容量有预期，那么采用 <code>vector::reserve()</code> 来预先分配内存，将大大的提高性能。</p>
 </blockquote>
-<h4 id="%E5%A6%82%E4%BD%95%E6%89%8B%E5%8A%A8%E9%87%8A%E6%94%BE-vector-%E5%86%85%E5%AD%98%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#如何手动释放-vector-内存？">#</a>如何手动释放 vector 内存？</h4>
+<h4 id="如何手动释放-vector-内存？"><a class="header-anchor" href="#如何手动释放-vector-内存？">#</a>如何手动释放 vector 内存？</h4>
 <p><code>vector::clear()</code> 方法仅仅移除元素，实际上底层分配的内存并不会随之减少，调用 <code>vector::capacity()</code> 时依然能够得到一个正值。</p>
 <p>那么如何释放内存呢？比如一个 <code>vector&lt;int&gt; nums</code>， 比较 hack 的一种方式是 <code>nums = {}</code>，这样既可以清空元素还会释放内存。正规的做法是令一个空 vector（右值）调用 <code>vector::swap()</code> 进行底层数组的交换，交换后 <code>nums</code> 指向一个空数组，而另一个右值会在当前作用域结束后被回收。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>一个手动释放 vector 内存的例子</span></div><code class="language-cpp"><span class="token generic-function"><span class="token function">vector</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">swap</span><span class="token punctuation">(</span>nums<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// nums 为待释放的 vector</span>
@@ -381,7 +381,7 @@ nums<span class="token punctuation">.</span><span class="token function">swap</s
     <span class="token operator">*</span>iter <span class="token operator">=</span> <span class="token keyword">nullptr</span><span class="token punctuation">;</span>
   <span class="token punctuation">}</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h4 id="emplace_back()-%E5%92%8C-push_back()-%E7%9A%84%E5%BC%82%E5%90%8C" tabindex="-1"><a class="header-anchor" href="#emplace-back-和-push-back-的异同">#</a>emplace_back() 和 push_back() 的异同</h4>
+<h4 id="emplace-back-和-push-back-的异同"><a class="header-anchor" href="#emplace-back-和-push-back-的异同">#</a>emplace_back() 和 push_back() 的异同</h4>
 <p>两者都是在数组末尾追加元素。区别在于:</p>
 <ul class="lvl-0">
 <li class="lvl-2">
@@ -394,7 +394,7 @@ nums<span class="token punctuation">.</span><span class="token function">swap</s
 <blockquote>
 <p>当然，如果当前 <code>size == capacity</code>，则会触发扩容。</p>
 </blockquote>
-<h3 id="std%3A%3Alist" tabindex="-1"><a class="header-anchor" href="#std-list">#</a>std::list</h3>
+<h3 id="std-list"><a class="header-anchor" href="#std-list">#</a>std::list</h3>
 <p>底层维护了一个「<strong>环状双向链表</strong>」。</p>
 <p>不支持随机访问，只能通过<strong>遍历</strong>的方式，复杂度为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span>。</p>
 <p>查找也是一样的，需要通过 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span> 的<strong>遍历</strong>。</p>
@@ -402,7 +402,7 @@ nums<span class="token punctuation">.</span><span class="token function">swap</s
 <blockquote>
 <p>list 的<strong>插入</strong>和<strong>删除</strong>并不会出现空间装满而重新扩容的情况，也不会引起迭代器失效——它对内存的控制是十分精准的，需要多少就分配多少，也就不会出现<strong>内部碎片</strong>（vector 有）。从而也可以思考出，调用 <code>clear()</code> 函数就能完整释放内存。</p>
 </blockquote>
-<h4 id="%E8%BF%AD%E4%BB%A3%E5%99%A8-std%3A%3Alist%3A%3Aiterator" tabindex="-1"><a class="header-anchor" href="#迭代器-std-list-iterator">#</a>迭代器 std::list::iterator</h4>
+<h4 id="迭代器-std-list-iterator"><a class="header-anchor" href="#迭代器-std-list-iterator">#</a>迭代器 std::list::iterator</h4>
 <blockquote>
 <p>由于 STL list 是一个双向链表(double linked-list)，迭代器必须具备前移、后移的能力，所以 list 提供的是Bidirectional Iterators。——选自《STL 源码剖析》</p>
 </blockquote>
@@ -411,17 +411,17 @@ nums<span class="token punctuation">.</span><span class="token function">swap</s
 <blockquote>
 <p>一些计算/判断方式: <code>begin</code> = node-&gt;next；<code>end</code> = node；<code>front</code> = *(node-&gt;next)；<code>back</code> = *(node-&gt;prev)；<code>empty</code> = node-&gt;next == node ……其余均可依次推导。</p>
 </blockquote>
-<h3 id="std%3A%3Adeque" tabindex="-1"><a class="header-anchor" href="#std-deque">#</a>std::deque</h3>
+<h3 id="std-deque"><a class="header-anchor" href="#std-deque">#</a>std::deque</h3>
 <p>底层维护了一个「由<strong>分段连续空间</strong>构成的<strong>双向队列</strong>」以及一个「中控器指针」。</p>
 <p>支持<strong>随机访问</strong>，但性能比 vector 要差。</p>
 <p><strong>插入</strong>和<strong>删除</strong>操作在头/尾很快，为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span>，但是在中间「非常非常」慢。</p>
-<h4 id="%E4%B8%AD%E6%8E%A7%E5%99%A8" tabindex="-1"><a class="header-anchor" href="#中控器">#</a>中控器</h4>
+<h4 id="中控器"><a class="header-anchor" href="#中控器">#</a>中控器</h4>
 <p>所谓<strong>中控器</strong>，其实就是一个二级指针，或者说一个数组，存着指向每一个连续空间（或称<strong>缓冲区</strong>）的指针。deque 内部有一个变量表示这个中控数组的大小，当超载时也会触发和 vector 相似的扩容操作（但这里的元素仅仅是 64 位的指针，所以开销比较稳定）。每个缓冲区的大小是相同的（默认情况下缓冲区大小为 <code>512B</code>，可以通过模板参数自定义），所以随机访问时可以对缓冲区大小 buffer size 取模，求得去第几个缓冲区访问，然后通过中控数组定位即可。</p>
 <blockquote>
 <p>这也就是为什么说虽然 deque 支持随机访问，但是性能比 vector 差了——需要进行<strong>两次</strong>数组访问。</p>
 </blockquote>
 <img src="deque.png" style="zoom:50%">
-<h4 id="%E8%BF%AD%E4%BB%A3%E5%99%A8-std%3A%3Adeque%3A%3Aiterator" tabindex="-1"><a class="header-anchor" href="#迭代器-std-deque-iterator">#</a>迭代器 std::deque::iterator</h4>
+<h4 id="迭代器-std-deque-iterator"><a class="header-anchor" href="#迭代器-std-deque-iterator">#</a>迭代器 std::deque::iterator</h4>
 <p>deque 内部维护了两个迭代器，分别是:</p>
 <ul class="lvl-0">
 <li class="lvl-2">
@@ -434,7 +434,7 @@ nums<span class="token punctuation">.</span><span class="token function">swap</s
 <p>和 vector 一样，这两个都是基于连续空间实现的容器，也就存在<strong>迭代器失效</strong>的问题。</p>
 <p>同时，为了能让迭代器在执行 <code>operator++</code> 时，能从一个缓冲区的尾部跳转到下一个缓冲区的头部，其内部除了维护一个指向当前元素的指针 <code>cur</code> 外，还必须记录当前缓冲区的首尾指针 <code>first</code>/<code>last</code>，以及指向中控器数组相应位置的指针 <code>node</code>。</p>
 <p>当需要进行缓冲区切换时，只需将 <code>node</code> 自增/自减，然后将 <code>first</code> 置为 <code>*node</code>，<code>last</code> 置为 <code>*node + buffer size</code> 即可。</p>
-<h4 id="%E6%89%A9%E5%AE%B9%E6%9C%BA%E5%88%B6-1" tabindex="-1"><a class="header-anchor" href="#扩容机制-2">#</a>扩容机制</h4>
+<h4 id="扩容机制-2"><a class="header-anchor" href="#扩容机制-2">#</a>扩容机制</h4>
 <p>deque 的扩容主要分为以下两种:</p>
 <ol>
 <li class="lvl-3">
@@ -447,9 +447,9 @@ nums<span class="token punctuation">.</span><span class="token function">swap</s
 <blockquote>
 <p>为了减少中控器扩容的次数，应尽可能将缓冲区指针放在中控器数组的居中位置，这样前后都有足够空间进行缓冲区的扩容。</p>
 </blockquote>
-<h4 id="%E5%86%85%E5%AD%98%E9%87%8A%E6%94%BE" tabindex="-1"><a class="header-anchor" href="#内存释放">#</a>内存释放</h4>
+<h4 id="内存释放"><a class="header-anchor" href="#内存释放">#</a>内存释放</h4>
 <p>虽然当某个缓冲区为空时，不一定要立刻释放，因为后面可能还会通过 <code>push</code> 使得元素加入该缓冲区，但是 STL 为了实现简单，当 <code>pop</code> 操作使得某个缓冲区变空，就立刻将其释放。</p>
-<h3 id="std%3A%3Aset%2Fstd%3A%3Amap" tabindex="-1"><a class="header-anchor" href="#std-set-std-map">#</a>std::set/std::map</h3>
+<h3 id="std-set-std-map"><a class="header-anchor" href="#std-set-std-map">#</a>std::set/std::map</h3>
 <p>这两位底层都是基于「<strong>红黑树</strong>」实现的，内部元素依照 key 值自动排序（允许自定义比较函数），不允许出现重复的 key 值（通过红黑树的 <code>insert_unique()</code> 实现）。<strong>增删查改</strong>的时间复杂度近似 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>log</mi><mo>⁡</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(\log n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span>。</p>
 <blockquote>
 <p>红黑树是一种弱平衡二叉搜索树，其性质如下:</p>
@@ -465,22 +465,22 @@ nums<span class="token punctuation">.</span><span class="token function">swap</s
 <p>那么为什么不用<strong>平衡二叉树(AVL)<strong>呢？尽管 AVL 是高度平衡的，但频繁的插入和删除，会引起频繁的旋转操作，导致效率下降。而红黑树是一种弱平衡二叉树，相对于严格要求平衡的平衡二叉树来说，它的</strong>旋转次数更少</strong>（红黑树的插入最多两次旋转，删除最多三次旋转），所以对于插入、删除操作较多的情况下，通常使用红黑树。</p>
 </blockquote>
 <p>map 仅仅比 set 多了一个 value 字段，二者都不能通过迭代器修改 key 的值。并且因为红黑树的特性，所有 key 其实都对应一个树结点，和 list 很像，当进行插入和删除时，不会出现迭代器失效的情况。</p>
-<h3 id="std%3A%3Amulti_set%2Fstd%3A%3Amulti_map" tabindex="-1"><a class="header-anchor" href="#std-multi-set-std-multi-map">#</a>std::multi_set/std::multi_map</h3>
+<h3 id="std-multi-set-std-multi-map"><a class="header-anchor" href="#std-multi-set-std-multi-map">#</a>std::multi_set/std::multi_map</h3>
 <p>和普通的 set/map 相比，他俩允许出现重复的 key 值（通过红黑树的 <code>insert_equal()</code> 实现）</p>
-<h3 id="std%3A%3Aunordered_set%2Fstd%3A%3Aunordered_map" tabindex="-1"><a class="header-anchor" href="#std-unordered-set-std-unordered-map">#</a>std::unordered_set/std::unordered_map</h3>
+<h3 id="std-unordered-set-std-unordered-map"><a class="header-anchor" href="#std-unordered-set-std-unordered-map">#</a>std::unordered_set/std::unordered_map</h3>
 <p>这两位底层都是基于「<strong>哈希表</strong>」实现的，是<strong>无序</strong>的。最优情况<strong>增删查改</strong>的时间复杂度是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span>，最差情况为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span>，出现这种差异是因为数据的分布是否均匀会极大影响容器的性能。</p>
-<h4 id="%E5%86%B2%E7%AA%81%E5%A4%84%E7%90%86" tabindex="-1"><a class="header-anchor" href="#冲突处理">#</a>冲突处理</h4>
+<h4 id="冲突处理"><a class="header-anchor" href="#冲突处理">#</a>冲突处理</h4>
 <p>以 <code>unordered_map</code> 为例，其底层哈希表采用<strong>桶+链法</strong>解决冲突，如下图:</p>
 <img src="1.png" style="zoom:50%">
 <p>每产生一次哈希冲突，就在当前 bucket 中链入新数据。而当同位置上的元素节点大于 <strong>8</strong> 个的时候，会自动转化为成一棵<strong>红黑树</strong>，用于降低长链表的查找压力。</p>
 <blockquote>
 <p>另外，哈希表存储结构还有一个重要的属性，称为<strong>负载因子</strong>，用于衡量容器存储键值对的空/满程度。负载因子越大，意味着容器越满，即各链表中挂载着越多的键值对，这无疑会降低容器查找目标键值对的效率；反之，负载因子越小，容器肯定越空，但并不一定各个链表中挂载的键值对就越少。如果设计的哈希函数不合理，使得各个键值对的键代入该函数得到的哈希值始终相同（所有键值对始终存储在同一链表上），这种情况下，即便增加桶数使得负载因子减小，该容器的查找效率依旧很差。</p>
 </blockquote>
-<h4 id="%E5%93%88%E5%B8%8C%E5%87%BD%E6%95%B0-hashfcn-%E4%B8%8E%E5%8E%BB%E9%87%8D%E8%A7%84%E5%88%99-equalkey" tabindex="-1"><a class="header-anchor" href="#哈希函数-HashFcn-与去重规则-EqualKey">#</a>哈希函数 HashFcn 与去重规则 EqualKey</h4>
+<h4 id="哈希函数-HashFcn-与去重规则-EqualKey"><a class="header-anchor" href="#哈希函数-HashFcn-与去重规则-EqualKey">#</a>哈希函数 HashFcn 与去重规则 EqualKey</h4>
 <p>默认情况下，unordered set/unordered map 使用了 STL 为我们提供的默认哈希函数 <code>std::hash</code> 对 key 进行哈希，与 <code>std::equal_to</code> 进行去重。这两者对一些常用类型如 <code>int</code>/<code>std::string</code> 做了特化，所以可以直接使用这些类型作为 key 值。</p>
 <p>当我们需要设置自定义对象作为 key 时，就需要自行特化 <code>std::hash&lt;UserObject&gt;</code> 和 <code>std::equal_to&lt;UserObject&gt;</code>，否则构造 <code>unordered_*&lt;UserObject, *&gt;</code> 时会报错。而 value 则无此限制。</p>
-<h2 id="%E5%AE%B9%E5%99%A8%E9%80%82%E9%85%8D%E5%99%A8" tabindex="-1"><a class="header-anchor" href="#容器适配器">#</a>容器适配器</h2>
-<h3 id="std%3A%3Astack%2Fstd%3A%3Aqueue" tabindex="-1"><a class="header-anchor" href="#std-stack-std-queue">#</a>std::stack/std::queue</h3>
+<h2 id="容器适配器"><a class="header-anchor" href="#容器适配器">#</a>容器适配器</h2>
+<h3 id="std-stack-std-queue"><a class="header-anchor" href="#std-stack-std-queue">#</a>std::stack/std::queue</h3>
 <p>根据这两者的逻辑特性，并不需要特地实现新的容器，只需要在原有的容器基础上进行修改即可：</p>
 <ul class="lvl-0">
 <li class="lvl-2">
@@ -493,9 +493,9 @@ nums<span class="token punctuation">.</span><span class="token function">swap</s
 <p>默认情况下，二者都基于 deque 进行实现。</p>
 <p>以 <code>stack&lt;T, deque&lt;T&gt;&gt;</code> 为例，<code>push()</code> 实际上就是调用了 <code>deque::push_back()</code>，说明是在尾端进行增删，那么取栈顶元素和弹出栈顶元素的操作也显而易见了。</p>
 <p>⚠️需要注意的是，这两者本身不提供遍历功能，也就<strong>都没有</strong>实现各自的迭代器类型。</p>
-<h3 id="std%3A%3Apriority_queue" tabindex="-1"><a class="header-anchor" href="#std-priority-queue">#</a>std::priority_queue</h3>
+<h3 id="std-priority-queue"><a class="header-anchor" href="#std-priority-queue">#</a>std::priority_queue</h3>
 <p>默认以 vector 作为底层容器，以「<strong>堆</strong>」作为处理规则。与 queue 不同，它虽然也允许元素以任意顺序加入容器，但每次取出的一定是「优先级最高」的元素，而非 FIFO。</p>
-<h4 id="%E6%AF%94%E8%BE%83%E8%A7%84%E5%88%99-comp" tabindex="-1"><a class="header-anchor" href="#比较规则-comp">#</a>比较规则 comp</h4>
+<h4 id="比较规则-comp"><a class="header-anchor" href="#比较规则-comp">#</a>比较规则 comp</h4>
 <p>priority_queue 允许自定义比较规则，其应当是一个实现了 <code>bool operator()(const &amp;a, const &amp;b)</code> 的结构体/类，返回值为 true 表示 lhs 的优先级比 rhs 的优先级小。</p>
 <p>默认情况下使用 <code>std::less&lt;T&gt;</code> 作为比较规则，其实现形式可能是下面这样，也就意味着<strong>元素值越「小」，优先级越低</strong>。所以当我们使用 <code>priority_queue&lt;int&gt;</code> 时，总是能取到优先队列中的最大值。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>std::less 的可能实现形式</span></div><code class="language-cpp"><span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">T</span><span class="token operator">&gt;</span>
@@ -507,13 +507,13 @@ nums<span class="token punctuation">.</span><span class="token function">swap</s
 <blockquote>
 <p>如果不想实现比较规则，也可以考虑重载对象的 <code>operator&lt;</code> 函数，效果是一样的。</p>
 </blockquote>
-<h2 id="%E7%AE%97%E6%B3%95" tabindex="-1"><a class="header-anchor" href="#算法">#</a>算法</h2>
-<h3 id="std%3A%3Asort" tabindex="-1"><a class="header-anchor" href="#std-sort">#</a>std::sort</h3>
+<h2 id="算法"><a class="header-anchor" href="#算法">#</a>算法</h2>
+<h3 id="std-sort"><a class="header-anchor" href="#std-sort">#</a>std::sort</h3>
 <p><code>std::sort</code> 考虑了不同 workload 下的排序性能，并将其结合，表现为：数据量大时，使用 Quick Sort 分段递归排序；一旦分段后的数据量小于某个阈值，改用 Insertion Sort；若递归层数过深（当数据量大且基本有序时容易发生），还会改用 Heap Sort。当然，它只接受<strong>随机存取迭代器(RandomAccessIterators)</strong>（通常是 <code>begin()</code> 与 <code>end()</code>），允许用户自定义比较规则，其应当是一个实现了 <code>bool operator()(const &amp;a, const &amp;b)</code> 的结构体/类，返回值为 true 表示 lhs 小于 rhs。默认情况下使用 <code>std::less&lt;T&gt;</code> 作为比较规则，所以当我们仅传入前两个参数时，函数会将容器进行递增排序。</p>
 <blockquote>
 <p>下面默认只传入前两个参数。</p>
 </blockquote>
-<h4 id="insertion-sort" tabindex="-1"><a class="header-anchor" href="#Insertion-Sort">#</a>Insertion Sort</h4>
+<h4 id="Insertion-Sort"><a class="header-anchor" href="#Insertion-Sort">#</a>Insertion Sort</h4>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>Insertion Sort</span></div><code class="language-cpp"><span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">RandomAccessIterator</span><span class="token operator">&gt;</span>
 <span class="token keyword">void</span> <span class="token function">__insertion_sort</span><span class="token punctuation">(</span>RandomAccessIterator first<span class="token punctuation">,</span>
                       RandomAccessIterator last<span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -547,7 +547,7 @@ nums<span class="token punctuation">.</span><span class="token function">swap</s
   <span class="token punctuation">}</span>
   <span class="token operator">*</span>last <span class="token operator">=</span> value<span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h4 id="quick-sort" tabindex="-1"><a class="header-anchor" href="#Quick-Sort">#</a>Quick Sort</h4>
+<h4 id="Quick-Sort"><a class="header-anchor" href="#Quick-Sort">#</a>Quick Sort</h4>
 <p>上面是 Insertion Sort 的部分，当数据量小时性能优于 Quick Sort，但是当数据量增大时其 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><msup><mi>n</mi><mn>2</mn></msup><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n^2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0641em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span> 的时间复杂度还是令人摇头。这种情况下就需要 Quick Sort 来解决了。</p>
 <p><code>std::sort</code> 对 Quick Sort 做的第一个优化是，以 Median-of-Three 的方式选出合适的 pivot，即取整个序列的头、尾、中央三个位置的元素，以其**中值(median)**作为 pivot，这样能够保证在划分时不会出现空的子区间。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>Median-of-Three</span></div><code class="language-cpp"><span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">T</span><span class="token operator">&gt;</span>
@@ -803,12 +803,6 @@ RandomAccessIterator <span class="token function">__unguarded_partion</span><spa
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -817,8 +811,8 @@ RandomAccessIterator <span class="token function">__unguarded_partion</span><spa
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -834,41 +828,6 @@ RandomAccessIterator <span class="token function">__unguarded_partion</span><spa
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

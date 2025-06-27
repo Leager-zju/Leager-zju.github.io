@@ -333,14 +333,14 @@ sudo apt-get install zsh git">
 <blockquote>
 <p>这里使用的是 Ubuntu</p>
 </blockquote>
-<h2 id="%E5%AE%89%E8%A3%85-zsh" tabindex="-1"><a class="header-anchor" href="#安装-zsh">#</a>安装 zsh</h2>
+<h2 id="安装-zsh"><a class="header-anchor" href="#安装-zsh">#</a>安装 zsh</h2>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">apt-get</span> update <span class="token operator">&amp;&amp;</span> <span class="token function">sudo</span> <span class="token function">apt-get</span> upgrade <span class="token parameter variable">-y</span>
 <span class="token function">sudo</span> <span class="token function">apt-get</span> <span class="token function">install</span> <span class="token function">zsh</span> <span class="token function">git</span> <span class="token function">curl</span> <span class="token parameter variable">-y</span>
 <span class="token function">sudo</span> chsh <span class="token parameter variable">-s</span> <span class="token variable">${which zsh}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E5%AE%89%E8%A3%85-oh-my-zsh" tabindex="-1"><a class="header-anchor" href="#安装-oh-my-zsh">#</a>安装 oh-my-zsh</h2>
+<h2 id="安装-oh-my-zsh"><a class="header-anchor" href="#安装-oh-my-zsh">#</a>安装 oh-my-zsh</h2>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 国内镜像</span>
 <span class="token function">sh</span> <span class="token parameter variable">-c</span> <span class="token string">"<span class="token variable"><span class="token variable">$(</span><span class="token function">curl</span> <span class="token parameter variable">-fsSL</span> https://gitee.com/pocmon/ohmyzsh/raw/master/tools/install.sh<span class="token variable">)</span></span>"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
-<h2 id="%E5%AE%89%E8%A3%85-powerlevel10k-%E4%B8%BB%E9%A2%98" tabindex="-1"><a class="header-anchor" href="#安装-powerlevel10k-主题">#</a>安装 powerlevel10k 主题</h2>
+<h2 id="安装-powerlevel10k-主题"><a class="header-anchor" href="#安装-powerlevel10k-主题">#</a>安装 powerlevel10k 主题</h2>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 安装主题与 自动补全、语法高亮 两大插件</span>
 <span class="token function">git</span> clone <span class="token parameter variable">--depth</span><span class="token operator">=</span><span class="token number">1</span> https://gitee.com/romkatv/powerlevel10k.git <span class="token variable">${ZSH_CUSTOM<span class="token operator">:-</span>$HOME<span class="token operator">/</span>.oh-my-zsh<span class="token operator">/</span>custom}</span>/themes/powerlevel10k
 <span class="token function">git</span> clone https://github.com/zsh-users/zsh-autosuggestions <span class="token variable">${ZSH_CUSTOM<span class="token operator">:-</span>~<span class="token operator">/</span>.oh-my-zsh<span class="token operator">/</span>custom}</span>/plugins/zsh-autosuggestions
@@ -534,12 +534,6 @@ sudo apt-get install zsh git">
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -548,8 +542,8 @@ sudo apt-get install zsh git">
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -565,41 +559,6 @@ sudo apt-get install zsh git">
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

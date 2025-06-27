@@ -326,7 +326,7 @@
             <div id="articleContent">
                 <p>现在进入操作系统的另一大特性：并发。</p>
 <span id="more"></span>
-<h2 id="%E7%BA%BF%E7%A8%8B%E5%88%87%E6%8D%A2-in-xv6" tabindex="-1"><a class="header-anchor" href="#线程切换-in-xv6">#</a>线程切换 in xv6</h2>
+<h2 id="线程切换-in-xv6"><a class="header-anchor" href="#线程切换-in-xv6">#</a>线程切换 in xv6</h2>
 <p>在 xv6 中，每个进程都可以视为有一个主线程，逐行运行指令，享有所有寄存器的使用权。然而，时间片到期，也就是进程收到时钟中断后，会调用 <code>yield()</code> 函数<strong>自愿</strong>让出 CPU。</p>
 <p>该函数会将当前进程运行状态设置为 <code>RUNNABLE</code>，也就是所谓的<strong>就绪态</strong>，然后调用 <code>sched()</code>。</p>
 <p><code>sched()</code> 进行一些合理性检查后，会调用 <code>switch()</code> 进行上下文的切换：保存当前进程上下文到 <code>proc-&gt;context</code> 中，并将寄存器设置为 CPU 调度器线程的上下文（<code>struct context</code> 指明了保存的上下文都有哪些寄存器，基本都是 <strong>Callee Saved Register</strong>，这里主要关注 ra）。也就是说，调用 <code>swtch()</code> 后，本来 ra 应该为 <code>sched()</code> 中调用 <code>swtch()</code> 处的地址，但 <code>switch()</code> 的一通操作，ra 成为了调度器线程 <code>scheduler()</code> 函数的地址，那么 <code>swtch()</code> 最后的 ret 指令会进入到 <code>scheduler()</code> 开始执行。</p>
@@ -338,12 +338,12 @@
 <p>ret 指令会自动设置 PC，也就不用保存。</p>
 </blockquote>
 <p>而页表寄存器的切换与 TLB 的清除工作，是当进程切换后，必然会进入 <code>usertrapret()</code>（<code>forkret()</code> 最后也会进入），这里会进行内核态到用户态页表的切换，而用户态页表地址在 <code>struct proc</code> 中的 <code>pagetable</code> 里，调度到哪个进程自然就会将 SATP 设为对应进程的 <code>proc-&gt;pagetable</code>。</p>
-<h2 id="preparation" tabindex="-1"><a class="header-anchor" href="#Preparation">#</a>Preparation</h2>
+<h2 id="Preparation"><a class="header-anchor" href="#Preparation">#</a>Preparation</h2>
 <p>切换到对应分支</p>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">git</span> fetch
 $ <span class="token function">git</span> checkout thread
 $ <span class="token function">make</span> clean<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
-<h2 id="task1%3A-uthread%3A-switching-between-threads" tabindex="-1"><a class="header-anchor" href="#Task1-Uthread-switching-between-threads">#</a>Task1: Uthread: switching between threads</h2>
+<h2 id="Task1-Uthread-switching-between-threads"><a class="header-anchor" href="#Task1-Uthread-switching-between-threads">#</a>Task1: Uthread: switching between threads</h2>
 <p>该任务就是实现线程间的切换，其实现完全可以参考进程切换，毕竟本质上也是主线程的切换。</p>
 <pre class="line-numbers language-C" data-language="C"><div class="caption"><span>user/uthread.c</span></div><code class="language-C">...
 // 定义上下文结构体，其实就是直接抄了 proc.h 里的。
@@ -416,7 +416,7 @@ thread_switch:
 
   ret    /* return to ra */<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>基本都是参考已有的实现，但关键是弄明白具体发生了什么。</p>
-<h2 id="task2%3A-using-threads" tabindex="-1"><a class="header-anchor" href="#Task2-Using-threads">#</a>Task2: Using threads</h2>
+<h2 id="Task2-Using-threads"><a class="header-anchor" href="#Task2-Using-threads">#</a>Task2: Using threads</h2>
 <p>该任务（和下一个任务）是熟悉 <code>pthread.h</code> 库并发编程，场景是对一个哈希表进行并发读写，由于是批量写完再读，所以不用给读操作加锁（读写交错的话就要加锁了）。</p>
 <p>这里的哈希表采用最简单的拉链法处理冲突和直接哈希进行映射，一共有 <code>NBUCKETS</code> 个桶，每个桶用链表实现，用 <code>key % NBUCKETS</code> 进行映射，然后插到桶链表的末尾。</p>
 <p>最开始我们可以为整个表设置一个大锁，一旦要进行写操作，就上锁，写完放锁。但这样效率很低，毕竟一共有互不干涉的 <code>NBUCKETS</code> 个桶，如果两个 key 分别映射到不同的桶，那就没有必要用大锁来互斥。于是可以考虑开一个锁数组，每个桶对应一个表，根据 key 的映射结果决定给哪个桶上锁放锁，这样效率会比之前快很多。</p>
@@ -445,7 +445,7 @@ main(int argc, char *argv[])
   }
   ...
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="task3%3A-barrier" tabindex="-1"><a class="header-anchor" href="#Task3-Barrier">#</a>Task3: Barrier</h2>
+<h2 id="Task3-Barrier"><a class="header-anchor" href="#Task3-Barrier">#</a>Task3: Barrier</h2>
 <p>这个任务就是用到条件变量相关的库函数了。场景是每个线程都有一个 for 循环，每次循环都要调用 <code>barrier()</code> 进行短暂阻塞，保证每个线程的循环轮次保持一致。</p>
 <pre class="line-numbers language-C" data-language="C"><div class="caption"><span>notxv6/barrier.c</span></div><code class="language-C">static void *
 thread(void *xa)
@@ -523,7 +523,7 @@ barrier()
 
   pthread_mutex_unlock(&amp;bstate.barrier_mutex);
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9E%9C" tabindex="-1"><a class="header-anchor" href="#测试结果">#</a>测试结果</h2>
+<h2 id="测试结果"><a class="header-anchor" href="#测试结果">#</a>测试结果</h2>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">make</span> grade
 <span class="token punctuation">..</span>.
 <span class="token operator">==</span> Test uthread <span class="token operator">==</span>
@@ -539,7 +539,7 @@ barrier: OK <span class="token punctuation">(</span><span class="token number">2
 <span class="token operator">==</span> Test <span class="token function">time</span> <span class="token operator">==</span>
 time: OK
 Score: <span class="token number">60</span>/60<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E6%9C%80%E5%90%8E%E7%9A%84%E5%B7%A5%E4%BD%9C" tabindex="-1"><a class="header-anchor" href="#最后的工作">#</a>最后的工作</h2>
+<h2 id="最后的工作"><a class="header-anchor" href="#最后的工作">#</a>最后的工作</h2>
 <ol>
 <li class="lvl-3">
 <p><code>git commit -am ""</code> 将所有修改提交到本地;</p>
@@ -728,12 +728,6 @@ Score: <span class="token number">60</span>/60<span aria-hidden="true" class="li
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -742,8 +736,8 @@ Score: <span class="token number">60</span>/60<span aria-hidden="true" class="li
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -759,41 +753,6 @@ Score: <span class="token number">60</span>/60<span aria-hidden="true" class="li
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

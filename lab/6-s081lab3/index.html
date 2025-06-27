@@ -331,17 +331,17 @@ $ make clean
             <div id="articleContent">
                 <p>现在是，陷入内核时间。</p>
 <span id="more"></span>
-<h2 id="preparation" tabindex="-1"><a class="header-anchor" href="#Preparation">#</a>Preparation</h2>
+<h2 id="Preparation"><a class="header-anchor" href="#Preparation">#</a>Preparation</h2>
 <p>切换到对应分支</p>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">git</span> fetch
 $ <span class="token function">git</span> checkout traps
 $ <span class="token function">make</span> clean<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
-<h2 id="task1%3A-risc-v-assembly" tabindex="-1"><a class="header-anchor" href="#Task1-RISC-V-assembly">#</a>Task1: RISC-V assembly</h2>
+<h2 id="Task1-RISC-V-assembly"><a class="header-anchor" href="#Task1-RISC-V-assembly">#</a>Task1: RISC-V assembly</h2>
 <p>第一个任务就是了解一下 RISC-V 汇编语言，直接跳过。</p>
 <blockquote>
 <p>反正 Hello World 就完事了(</p>
 </blockquote>
-<h2 id="task2%3A-backtrace" tabindex="-1"><a class="header-anchor" href="#Task2-Backtrace">#</a>Task2: Backtrace</h2>
+<h2 id="Task2-Backtrace"><a class="header-anchor" href="#Task2-Backtrace">#</a>Task2: Backtrace</h2>
 <p>该任务要求我们实现 <code>backtrace()</code> 特性，打印函数调用层次，方便 debug。</p>
 <p>课程笔记中已经为我们展示了栈中各个栈帧(Stack Frame)的排布情况，如下图所示。</p>
 <img src="1.png">
@@ -360,10 +360,10 @@ backtrace(void)
     printf("%p\n", ret);
   }
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="task3%3A-alarm" tabindex="-1"><a class="header-anchor" href="#Task3-Alarm">#</a>Task3: Alarm</h2>
+<h2 id="Task3-Alarm"><a class="header-anchor" href="#Task3-Alarm">#</a>Task3: Alarm</h2>
 <p>该任务要求我们实现定时器功能，即给定 interval 和一个 handler，每 interval 次时钟中断，调用一次 <code>handler()</code>。</p>
 <p>lab 手册已经给我们提供了 <code>sigalarm()</code> 和 <code>sigreturn()</code> 函数签名，我们要做的就是实现对应的系统调用。注册过程略掉，我们先看看 <code>sys_sigalarm()</code> 要做什么。</p>
-<h3 id="sys_sigalarm" tabindex="-1"><a class="header-anchor" href="#sys-sigalarm">#</a>sys_sigalarm</h3>
+<h3 id="sys-sigalarm"><a class="header-anchor" href="#sys-sigalarm">#</a>sys_sigalarm</h3>
 <p><code>sys_sigalarm()</code> 接收两个参数 interval 和 handler，并将其保存到当前进程，这样每次时钟中断时，我们检查距离上次调用 handler 的时间，如果到了 interval 个 ticks，就进行调用。</p>
 <p>但不能直接进行 <code>p-&gt;handler()</code> 这样的指令，因为 handler 是个用户态函数指针，保存的是用户态的虚拟地址，而处理时钟中断时位于内核态。为了正确调用，我们可以令 <code>p-&gt;trapframe-&gt;epc = p-&gt;handler</code>，这样在 <code>usertrapret()</code> 时，该值会被写入 SEPC，那么我们返回用户态时就可以直接跳到这个指令。而由于 handler 内部调用了 <code>sigreturn()</code>，会返回时钟中断之前的代码位置 （记为 origin）。</p>
 <p>总结一下就是，代码运行到 origin 时触发时钟中断，进入内核态处理，再进入用户态调用 handler，完了之后触发系统调用 <code>sigreturn()</code> 再一次进入内核态进行处理，最后回到 origin。</p>
@@ -399,7 +399,7 @@ sys_sigalarm(void)
   return 0;
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>以及别忘了需要在 <code>allocproc()</code> 和 <code>freeproc()</code> 中进行一些修改。</p>
-<h3 id="when-and-how-to-call-handler%3F" tabindex="-1"><a class="header-anchor" href="#when-and-how-to-call-handler">#</a>when and how to call handler?</h3>
+<h3 id="when-and-how-to-call-handler"><a class="header-anchor" href="#when-and-how-to-call-handler">#</a>when and how to call handler?</h3>
 <p>上文说到，需要在每次时钟中断时检查 ticks。而时钟中断的处理位于 <code>kernel/trap.c</code> 的 <code>usertrap()</code> 函数中，即函数末尾的 <code>if (which_dev==2)</code> 分支。这个判断条件为真，意味着当前处理的是时钟中断。</p>
 <p>那么如果 <code>p-&gt;timeout</code> 非零，意味着定时器有效（<code>p-&gt;handler</code> 为零不能作为是否有效的依据，因为传入的函数地址可能在虚拟空间的最开始，也就是地址为 <code>0x0</code>）。</p>
 <p>如果当前未运行 handler，将 tick 增加，一旦达到阈值 timeout，就将 trapframe 进行拷贝，然后修改 trapframe 的 epc 字段，等待 <code>usertrapret()</code> 结束后跳转到 handler 并执行。</p>
@@ -422,7 +422,7 @@ usertrap(void)
 
   usertrapret();
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="sys_sigreturn" tabindex="-1"><a class="header-anchor" href="#sys-sigreturn">#</a>sys_sigreturn</h3>
+<h3 id="sys-sigreturn"><a class="header-anchor" href="#sys-sigreturn">#</a>sys_sigreturn</h3>
 <p>定时器返回函数就更简单了。恢复原来的 trapframe 数据，这样对硬件而言，中间发生的事都无所谓，毕竟从 origin 触发时钟中断，到 sigreturn 返回，trapframe 都没有变，那也就能进行正确的恢复。</p>
 <blockquote>
 <p>由此可见 trapframe 在恢复用户态的重要性。</p>
@@ -436,7 +436,7 @@ sys_sigreturn(void)
   memmove(p-&gt;trapframe, &amp;p-&gt;trapframe_copy, sizeof(struct trapframe));
   return 0;
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9E%9C" tabindex="-1"><a class="header-anchor" href="#测试结果">#</a>测试结果</h2>
+<h2 id="测试结果"><a class="header-anchor" href="#测试结果">#</a>测试结果</h2>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">make</span> grade
 <span class="token punctuation">..</span>.
 <span class="token operator">==</span> Test answers-traps.txt <span class="token operator">==</span> answers-traps.txt: OK
@@ -458,7 +458,7 @@ usertests: OK <span class="token punctuation">(</span><span class="token number"
 <span class="token operator">==</span> Test <span class="token function">time</span> <span class="token operator">==</span>
 time: OK
 Score: <span class="token number">85</span>/85<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E6%9C%80%E5%90%8E%E7%9A%84%E5%B7%A5%E4%BD%9C" tabindex="-1"><a class="header-anchor" href="#最后的工作">#</a>最后的工作</h2>
+<h2 id="最后的工作"><a class="header-anchor" href="#最后的工作">#</a>最后的工作</h2>
 <ol>
 <li class="lvl-3">
 <p><code>git commit -am ""</code> 将所有修改提交到本地;</p>
@@ -647,12 +647,6 @@ Score: <span class="token number">85</span>/85<span aria-hidden="true" class="li
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -661,8 +655,8 @@ Score: <span class="token number">85</span>/85<span aria-hidden="true" class="li
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -678,41 +672,6 @@ Score: <span class="token number">85</span>/85<span aria-hidden="true" class="li
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

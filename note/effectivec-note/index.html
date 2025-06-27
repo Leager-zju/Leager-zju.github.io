@@ -334,12 +334,12 @@ C++ = C + Object">
 <p>当 C++ 律师！</p>
 </blockquote>
 <span id="more"></span>
-<h2 id="1.-%E8%A7%86-c%2B%2B-%E4%B8%BA%E4%B8%80%E4%B8%AA%E8%AF%AD%E8%A8%80%E8%81%94%E9%82%A6" tabindex="-1"><a class="header-anchor" href="#1-视-C-为一个语言联邦">#</a>1. 视 C++ 为一个语言联邦</h2>
+<h2 id="1-视-C-为一个语言联邦"><a class="header-anchor" href="#1-视-C-为一个语言联邦">#</a>1. 视 C++ 为一个语言联邦</h2>
 <p>C++ 高效编程守则视情况而变化，取决于使用 C++ 的哪一部分。</p>
 <blockquote>
 <p><code>C++</code> = <code>C</code> + <code>Object-Oriented C++</code> + <code>Template C++</code> + <code>STL</code>。</p>
 </blockquote>
-<h2 id="2.-%E5%B0%BD%E9%87%8F%E4%BB%A5-const%2C-enum%2C-inline-%E6%9B%BF%E6%8D%A2-%23define" tabindex="-1"><a class="header-anchor" href="#2-尽量以-const-enum-inline-替换-define">#</a>2. 尽量以 const, enum, inline 替换 #define</h2>
+<h2 id="2-尽量以-const-enum-inline-替换-define"><a class="header-anchor" href="#2-尽量以-const-enum-inline-替换-define">#</a>2. 尽量以 const, enum, inline 替换 #define</h2>
 <p>或可以说"尽量用编译器代替预处理器"。</p>
 <ol>
 <li class="lvl-3">
@@ -370,7 +370,7 @@ C++ = C + Object">
 </li>
 </ol>
 <p>但这并不是说预处理器就一无是处了，我们依然需要依靠 <code>#include</code> 来引入头文件，以及依赖 <code>#ifdef</code>，<code>#ifndef</code> 来控制编译。就像最开始说的那样，<strong>尽量用编译器代替预处理器</strong>。</p>
-<h2 id="3.-%E5%B0%BD%E5%8F%AF%E8%83%BD%E4%BD%BF%E7%94%A8-const" tabindex="-1"><a class="header-anchor" href="#3-尽可能使用-const">#</a>3. 尽可能使用 const</h2>
+<h2 id="3-尽可能使用-const"><a class="header-anchor" href="#3-尽可能使用-const">#</a>3. 尽可能使用 const</h2>
 <p>关于 <code>const</code> 具体可参考<a href="../../c/c-const"><strong>本文</strong></a>。</p>
 <p><code>const</code> 更像是一种约束，只要某个变量确定性地能保持不变，我们应该尽可能加上这一约束，以取得编译器的优化。反之，则容易被玩坏，比如：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Rational</span> <span class="token punctuation">{</span>
@@ -423,7 +423,7 @@ Rational a<span class="token punctuation">,</span> b<span class="token punctuati
 <span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>在 non-const 版本中将 <code>*this</code> 转型为 const，便能调用 const 函数，最后通过 <code>const_cast</code> 移除常量性。代码瞬间精简不少！尽管，使用 cast 是一个糟糕的想法，但在这里，很安全。</p>
 <p>而另一种做法，即通过 const 函数调用 non-const 函数，则是一种错误行为，为了不冒 const 风险，不建议采取这种做法。</p>
-<h2 id="4.-%E7%A1%AE%E5%AE%9A%E5%AF%B9%E8%B1%A1%E8%A2%AB%E4%BD%BF%E7%94%A8%E5%89%8D%E5%B7%B2%E5%85%88%E8%A2%AB%E5%88%9D%E5%A7%8B%E5%8C%96" tabindex="-1"><a class="header-anchor" href="#4-确定对象被使用前已先被初始化">#</a>4. 确定对象被使用前已先被初始化</h2>
+<h2 id="4-确定对象被使用前已先被初始化"><a class="header-anchor" href="#4-确定对象被使用前已先被初始化">#</a>4. 确定对象被使用前已先被初始化</h2>
 <p>C++ 并不能保证变量在所有语境下声明时都能得到初始化，但能保证读取未初始化的值会导致 <strong>UB</strong>。</p>
 <p>与其记忆哪些语境下会初始化，哪些语境下不会，不如选择<strong>永远在使用对象前将其初始化</strong>。</p>
 <p>对于内置类型，我们应当手动初始化；而对于非内置类型，则需要用到构造函数，并保证初始化每一个成员变量，此时只有两种方式：要么赋值，要么初始化列表。</p>
@@ -481,23 +481,23 @@ Tool<span class="token operator">&amp;</span> <span class="token function">getTo
 <span class="token punctuation">}</span>
 
 Human <span class="token function">Jack</span><span class="token punctuation">(</span><span class="token function">getTool</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 保证得到初始化</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="5.-%E4%BA%86%E8%A7%A3-c%2B%2B-%E9%BB%98%E9%BB%98%E7%BC%96%E5%86%99%E5%B9%B6%E8%B0%83%E7%94%A8%E5%93%AA%E4%BA%9B%E5%87%BD%E6%95%B0" tabindex="-1"><a class="header-anchor" href="#5-了解-C-默默编写并调用哪些函数">#</a>5. 了解 C++ 默默编写并调用哪些函数</h2>
+<h2 id="5-了解-C-默默编写并调用哪些函数"><a class="header-anchor" href="#5-了解-C-默默编写并调用哪些函数">#</a>5. 了解 C++ 默默编写并调用哪些函数</h2>
 <p><a href="../../c/c-oop/#%E8%A3%85"><strong>见此处</strong></a></p>
 <blockquote>
 <p>C++11 引入移动语义之后，对于一个<strong>空类</strong>，编译器将为其默认生成以下 6 种特殊成员函数，且访问级别默认为 <code>public</code>（见下文）：<strong>默认构造函数</strong>、<strong>析构函数</strong>、<strong>拷贝构造函数</strong>、<strong>拷贝赋值运算符</strong>、<strong>移动构造函数</strong>、<strong>移动赋值运算符</strong>。</p>
 </blockquote>
-<h2 id="6.-%E8%8B%A5%E4%B8%8D%E6%83%B3%E4%BD%BF%E7%94%A8%E7%BC%96%E8%AF%91%E5%99%A8%E8%87%AA%E5%8A%A8%E7%94%9F%E6%88%90%E7%9A%84%E5%87%BD%E6%95%B0%EF%BC%8C%E5%B0%B1%E8%AF%A5%E6%98%8E%E7%A1%AE%E6%8B%92%E7%BB%9D" tabindex="-1"><a class="header-anchor" href="#6-若不想使用编译器自动生成的函数，就该明确拒绝">#</a>6. 若不想使用编译器自动生成的函数，就该明确拒绝</h2>
+<h2 id="6-若不想使用编译器自动生成的函数，就该明确拒绝"><a class="header-anchor" href="#6-若不想使用编译器自动生成的函数，就该明确拒绝">#</a>6. 若不想使用编译器自动生成的函数，就该明确拒绝</h2>
 <p>通常来说，如果不希望使用某函数，则不声明即可。但上面那点提到，尽管你可能没声明，但一旦尝试调用，编译器就会自动帮你声明。</p>
 <p>所以希望完全阻止这种调用行为，可以加上 <a href="../../c/c-defaultanddelete/#delete"><code>delete</code> 说明符</a>。</p>
 <blockquote>
 <p>与 <code>default</code> 相对，后面加上 <code>= delete</code> 的函数会被视为<strong>弃置</strong>(deleted)，在编译器眼中这个函数<strong>禁止被定义</strong>，对该函数的调用会导致编译错误，继而从根本上解决了这个问题。</p>
 </blockquote>
-<h2 id="7.-%E4%B8%BA%E5%A4%9A%E6%80%81%E5%9F%BA%E7%B1%BB%E5%A3%B0%E6%98%8E-virtual-%E6%9E%90%E6%9E%84%E5%87%BD%E6%95%B0" tabindex="-1"><a class="header-anchor" href="#7-为多态基类声明-virtual-析构函数">#</a>7. 为多态基类声明 virtual 析构函数</h2>
+<h2 id="7-为多态基类声明-virtual-析构函数"><a class="header-anchor" href="#7-为多态基类声明-virtual-析构函数">#</a>7. 为多态基类声明 virtual 析构函数</h2>
 <p>见<a href="../../c/c-oop/#%E6%B3%A8%E6%84%8F"><strong>此处</strong></a>第 5 条。</p>
 <blockquote>
 <p>当可能用到基类指针/引用绑定派生类时，基类的析构函数必须为虚函数。这是因为当出现 <code>Base* ptr = new Derived</code> 这样的代码时，虽然 <code>ptr</code> 是 <code>Base</code> 类的指针，但我们实际上还分配了一个 <code>Derived</code> 类的空间，如果析构函数非虚，则只会执行 <code>Base</code> 类的析构函数，而属于 <code>Derived</code> 的那一部分并没有被析构。为了程序安全运行，我们应该要调用派生类的析构函数，也就是通过将基类析构函数设为虚函数来实现；</p>
 </blockquote>
-<h2 id="8.-%E5%88%AB%E8%AE%A9%E5%BC%82%E5%B8%B8%E9%80%83%E7%A6%BB%E6%9E%90%E6%9E%84%E5%87%BD%E6%95%B0" tabindex="-1"><a class="header-anchor" href="#8-别让异常逃离析构函数">#</a>8. 别让异常逃离析构函数</h2>
+<h2 id="8-别让异常逃离析构函数"><a class="header-anchor" href="#8-别让异常逃离析构函数">#</a>8. 别让异常逃离析构函数</h2>
 <p>C++ 虽然并不禁止析构函数吐出异常，但<strong>不建议</strong>。考虑这种情况：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Widget</span> <span class="token punctuation">{</span>
  <span class="token keyword">public</span><span class="token operator">:</span>
@@ -535,7 +535,7 @@ std<span class="token double-colon punctuation">::</span>vector<span class="toke
 </li>
 </ol>
 <p>两种做法均能阻止异常的逃逸，这是好的。另外，如果客户需要对某个函数运行期间抛出的异常做出响应，那么类应该提供一个普通函数（而不是在析构函数中）执行该响应。</p>
-<h2 id="9.-%E7%BB%9D%E4%B8%8D%E5%9C%A8%E6%9E%84%E9%80%A0%E5%92%8C%E6%9E%90%E6%9E%84%E8%BF%87%E7%A8%8B%E4%B8%AD%E8%B0%83%E7%94%A8-virtual-%E5%87%BD%E6%95%B0" tabindex="-1"><a class="header-anchor" href="#9-绝不在构造和析构过程中调用-virtual-函数">#</a>9. 绝不在构造和析构过程中调用 virtual 函数</h2>
+<h2 id="9-绝不在构造和析构过程中调用-virtual-函数"><a class="header-anchor" href="#9-绝不在构造和析构过程中调用-virtual-函数">#</a>9. 绝不在构造和析构过程中调用 virtual 函数</h2>
 <p>假设有一个 transaction 类体系，用于模拟股市的买卖等操作，每次创建一个交易对象时，都会根据交易类型进行一次适当的记录。比如下面这个看起来挺好的做法：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Transaction</span> <span class="token punctuation">{</span>
  <span class="token keyword">public</span><span class="token operator">:</span>
@@ -601,14 +601,14 @@ BuyTransation buyTxn<span class="token punctuation">;</span><span aria-hidden="t
     <span class="token punctuation">{</span> <span class="token comment">/* ... */</span> <span class="token punctuation">}</span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>这样就由<strong>令派生类将必要的信息向上传递</strong>代替了<strong>使用虚函数向下调用</strong>。</p>
-<h2 id="10.-%E4%BB%A4-operator%3D-%E8%BF%94%E5%9B%9E%E4%B8%80%E4%B8%AA-reference-to-*this" tabindex="-1"><a class="header-anchor" href="#10-令-operator-返回一个-reference-to-this">#</a>10. 令 operator= 返回一个 reference to *this</h2>
+<h2 id="10-令-operator-返回一个-reference-to-this"><a class="header-anchor" href="#10-令-operator-返回一个-reference-to-this">#</a>10. 令 operator= 返回一个 reference to *this</h2>
 <p>关于赋值，可以写为如下形式：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">int</span> a<span class="token punctuation">,</span> b<span class="token punctuation">,</span> c<span class="token punctuation">;</span>
 a <span class="token operator">=</span> b <span class="token operator">=</span> c <span class="token operator">=</span> <span class="token number">15</span><span class="token punctuation">;</span>
 <span class="token comment">// 由于赋值遵循右结合律，故被解析为</span>
 a <span class="token operator">=</span> <span class="token punctuation">(</span>b <span class="token operator">=</span> <span class="token punctuation">(</span>c <span class="token operator">=</span> <span class="token number">15</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 <p>为了实现<strong>连锁赋值</strong>，<code>operator=</code> 必须返回一个自身的引用。这同样适用于 <code>+=</code>、<code>-=</code>、<code>后++</code> 等运算符。</p>
-<h2 id="11.-%E5%9C%A8-operator%3D-%E4%B8%AD%E5%A4%84%E7%90%86%22%E8%87%AA%E6%88%91%E8%B5%8B%E5%80%BC%22" tabindex="-1"><a class="header-anchor" href="#11-在-operator-中处理-自我赋值">#</a>11. 在 operator= 中处理"自我赋值"</h2>
+<h2 id="11-在-operator-中处理-自我赋值"><a class="header-anchor" href="#11-在-operator-中处理-自我赋值">#</a>11. 在 operator= 中处理"自我赋值"</h2>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Object</span> <span class="token punctuation">{</span>
   <span class="token comment">/* ... */</span>
  <span class="token keyword">private</span><span class="token operator">:</span>
@@ -665,7 +665,7 @@ Object<span class="token operator">&amp;</span> opeartor<span class="token opera
 <blockquote>
 <p>当然可以在这些方案的最开始加上证同测试，但需要在自我赋值开销与目标代码、CPU 控制流之间做出 trade-off。</p>
 </blockquote>
-<h2 id="12.-%E5%A4%8D%E5%88%B6%E5%AF%B9%E8%B1%A1%E6%97%B6%E5%8B%BF%E5%BF%98%E5%85%B6%E6%AF%8F%E4%B8%AA%E6%88%90%E5%88%86" tabindex="-1"><a class="header-anchor" href="#12-复制对象时勿忘其每个成分">#</a>12. 复制对象时勿忘其每个成分</h2>
+<h2 id="12-复制对象时勿忘其每个成分"><a class="header-anchor" href="#12-复制对象时勿忘其每个成分">#</a>12. 复制对象时勿忘其每个成分</h2>
 <p>本来编译器会为你默认生成一个完美的拷贝构造/拷贝赋值，但不一定是你想要的，所以此时你进行了一些自定义。</p>
 <p>结果后面类加入了新的成员变量，你就需要时刻警醒自己：别忘了修改自定义的拷贝构造与拷贝赋值。否则就会出现违背<a href="#4.-%E7%A1%AE%E5%AE%9A%E5%AF%B9%E8%B1%A1%E8%A2%AB%E4%BD%BF%E7%94%A8%E5%89%8D%E5%B7%B2%E5%85%88%E8%A2%AB%E5%88%9D%E5%A7%8B%E5%8C%96"><strong>条款 4</strong></a> 的结果。</p>
 <p>当然这还好说，但一旦出现继承，另一个噩梦又来了……</p>
@@ -710,12 +710,12 @@ Object<span class="token operator">&amp;</span> opeartor<span class="token opera
   <span class="token keyword">int</span> priority<span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>最后要注意的是，如果拷贝构造与拷贝赋值出现了重复部分，可以将这些重复的部分写入新的函数(eg.<code>init()</code>)，然后让它俩一起调用，从而消除冗余。而不是让一个拷贝调用另一个拷贝——<a href="../../c/c-oop/#%E8%B5%8B%E5%80%BC%E8%BF%90%E7%AE%97%E7%AC%A6">构造跟赋值不能混为一谈</a>！</p>
-<h2 id="13.-%E4%BB%A5%E5%AF%B9%E8%B1%A1%E7%AE%A1%E7%90%86%E8%B5%84%E6%BA%90" tabindex="-1"><a class="header-anchor" href="#13-以对象管理资源">#</a>13. 以对象管理资源</h2>
+<h2 id="13-以对象管理资源"><a class="header-anchor" href="#13-以对象管理资源">#</a>13. 以对象管理资源</h2>
 <p>关于本条款，可以阅读 <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/34660259"><strong>RAII</strong></a> 与<a href="../../c/c-smartptr"><strong>智能指针</strong></a> 相关内容。</p>
 <blockquote>
 <p>构造时获取资源，析构时释放资源。</p>
 </blockquote>
-<h2 id="14.-%E5%9C%A8%E8%B5%84%E6%BA%90%E7%AE%A1%E7%90%86%E7%B1%BB%E4%B8%AD%E5%B0%8F%E5%BF%83-coping-%E8%A1%8C%E4%B8%BA" tabindex="-1"><a class="header-anchor" href="#14-在资源管理类中小心-coping-行为">#</a>14. 在资源管理类中小心 coping 行为</h2>
+<h2 id="14-在资源管理类中小心-coping-行为"><a class="header-anchor" href="#14-在资源管理类中小心-coping-行为">#</a>14. 在资源管理类中小心 coping 行为</h2>
 <p>资源管理类的核心是 RAII 技术，而智能指针则将其表现在了 heap-based 资源上。但并非所有资源都是 heap-based，一个很常见的例子就是<strong>互斥锁</strong>，获取资源相当于进行 <code>lock()</code>，而释放资源则相当于 <code>unlock()</code>。我们希望利用 RAII 来管理这种资源，则可以很容易写出以下代码：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Lock</span> <span class="token punctuation">{</span>
  <span class="token keyword">public</span><span class="token operator">:</span>
@@ -744,11 +744,11 @@ std<span class="token double-colon punctuation">::</span>mutex<span class="token
 <p>第二，<strong>引用计数法</strong>，正如 <a href="../../c/c-smartptr/#std::shared_ptr"><strong>shared_ptr</strong></a> 做的那样，直到该资源的最后一个使用者被销毁后才释放；</p>
 <p>第三，<strong>拷贝底部资源</strong>，注意这里的拷贝是指深拷贝，即不仅仅拷贝指针，同时拷贝一份指针指向的内存；</p>
 <p>第四，<strong>转移底部资源所有权</strong>，即实现<a href="../../c/c-value/#%E7%A7%BB%E5%8A%A8%E8%AF%AD%E4%B9%89"><strong>移动语义</strong></a>；</p>
-<h2 id="15.-%E5%9C%A8%E8%B5%84%E6%BA%90%E7%AE%A1%E7%90%86%E7%B1%BB%E4%B8%AD%E6%8F%90%E4%BE%9B%E5%AF%B9%E5%8E%9F%E5%A7%8B%E8%B5%84%E6%BA%90%E7%9A%84%E8%AE%BF%E9%97%AE" tabindex="-1"><a class="header-anchor" href="#15-在资源管理类中提供对原始资源的访问">#</a>15. 在资源管理类中提供对原始资源的访问</h2>
+<h2 id="15-在资源管理类中提供对原始资源的访问"><a class="header-anchor" href="#15-在资源管理类中提供对原始资源的访问">#</a>15. 在资源管理类中提供对原始资源的访问</h2>
 <p>或通过 api 来提供对原始资源的显式访问，或通过在类内自定义类型转换提供隐式访问。一般而言显示访问比较安全，而隐式访问比较方便，需要根据实际应用场景作出 trade-off。</p>
-<h2 id="16.-%E6%88%90%E5%AF%B9%E4%BD%BF%E7%94%A8-new-%E5%92%8C-delete-%E6%97%B6%E9%87%87%E5%8F%96%E7%9B%B8%E5%90%8C%E5%BD%A2%E5%BC%8F" tabindex="-1"><a class="header-anchor" href="#16-成对使用-new-和-delete-时采取相同形式">#</a>16. 成对使用 new 和 delete 时采取相同形式</h2>
+<h2 id="16-成对使用-new-和-delete-时采取相同形式"><a class="header-anchor" href="#16-成对使用-new-和-delete-时采取相同形式">#</a>16. 成对使用 new 和 delete 时采取相同形式</h2>
 <p>游戏规则很简单：如果你调用 new 时使用 <code>[]</code>，你必须在对应调用 delete 时也使用 <code>[]</code>。如果你调用 new 时没有使用 <code>[]</code>，那么也不该在对应调用 delete 时使用 <code>[]</code>。</p>
-<h2 id="17.-%E4%BB%A5%E7%8B%AC%E7%AB%8B%E8%AF%AD%E5%8F%A5%E5%B0%86-newed-%E5%AF%B9%E8%B1%A1%E7%BD%AE%E5%85%A5%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88" tabindex="-1"><a class="header-anchor" href="#17-以独立语句将-newed-对象置入智能指针">#</a>17. 以独立语句将 newed 对象置入智能指针</h2>
+<h2 id="17-以独立语句将-newed-对象置入智能指针"><a class="header-anchor" href="#17-以独立语句将-newed-对象置入智能指针">#</a>17. 以独立语句将 newed 对象置入智能指针</h2>
 <p>考虑这样一个函数 <code>foo()</code>：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">int</span> <span class="token function">bar</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token keyword">void</span> <span class="token function">foo</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span>shared_ptr<span class="token operator">&lt;</span>Object<span class="token operator">&gt;</span> pInt<span class="token punctuation">,</span> <span class="token keyword">int</span> someint<span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -773,14 +773,14 @@ std<span class="token double-colon punctuation">::</span>mutex<span class="token
 <p>设想一下，如果 <code>bar()</code> 抛出一个异常，导致程序终止，会发生什么？new 出来的 <code>Object</code> 指针将无家可归，它并没有被 shared_ptr 保有，而我们依赖后者来防止资源泄漏，但很遗憾，资源泄漏发生了。解决方案很简单，就像条款说的，<strong>以独立语句将 newed 对象置入智能指针</strong>。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp">std<span class="token double-colon punctuation">::</span>shared_ptr<span class="token operator">&lt;</span>Object<span class="token operator">&gt;</span> <span class="token function">pObj</span><span class="token punctuation">(</span><span class="token keyword">new</span> Object<span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token function">foo</span><span class="token punctuation">(</span>pObj<span class="token punctuation">,</span> <span class="token function">bar</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// perfect! 绝不会引发泄漏</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
-<h2 id="18.-%E8%AE%A9%E6%8E%A5%E5%8F%A3%E5%AE%B9%E6%98%93%E8%A2%AB%E6%AD%A3%E7%A1%AE%E4%BD%BF%E7%94%A8%EF%BC%8C%E4%B8%8D%E6%98%93%E8%A2%AB%E8%AF%AF%E7%94%A8" tabindex="-1"><a class="header-anchor" href="#18-让接口容易被正确使用，不易被误用">#</a>18. 让接口容易被正确使用，不易被误用</h2>
+<h2 id="18-让接口容易被正确使用，不易被误用"><a class="header-anchor" href="#18-让接口容易被正确使用，不易被误用">#</a>18. 让接口容易被正确使用，不易被误用</h2>
 <p>促进正确使用很简单，只需要满足 api 的一致性，以及与内置类型的行为兼容即可。</p>
 <p>但误用却时有发生。任何一个 api 如果要求客户必须记得做某些事，就是有着"不正确使用"的倾向，因为客户可能会忘记。比如<a target="_blank" rel="noopener" href="https://refactoringguru.cn/design-patterns/factory-method"><strong>工厂函数</strong></a>如果在内部 new 了一个指针并将其返回，则客户很容易忘记 delete，或是 delete 多次。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp">Object<span class="token operator">*</span> <span class="token function">factory</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>或许你会想到将该指针托付给一个智能指针，比如 <code>std::shared_ptr&lt;Object&gt; pObj(factory());</code>，但客户也很可能会忘记使用智能指针。事实上，一个好的设计是令该 api 返回一个智能指针，即</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp">std<span class="token double-colon punctuation">::</span>shared_ptr<span class="token operator">&lt;</span>Object<span class="token operator">&gt;</span> <span class="token function">factory</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>这便消除了上面这些问题发生的可能性。</p>
-<h2 id="19.-%E8%AE%BE%E8%AE%A1-class-%E7%8A%B9%E5%A6%82%E8%AE%BE%E8%AE%A1-type" tabindex="-1"><a class="header-anchor" href="#19-设计-class-犹如设计-type">#</a>19. 设计 class 犹如设计 type</h2>
+<h2 id="19-设计-class-犹如设计-type"><a class="header-anchor" href="#19-设计-class-犹如设计-type">#</a>19. 设计 class 犹如设计 type</h2>
 <p>C++ 就像其他 OOP 语言一样，当我们定义一个新 class，也就定义了一个新 type。身为 C++ 程序员，我们并不只是 class 设计者，还是 type 设计者，重载(overloading)函数和操作符、控制内存的分配和归还、定义对象的初始化和终结……全都由我们负责。因此我们应该带着和"语言设计者当初设计语言内置类型时"一样的谨慎来研讨 class 的设计。</p>
 <p>为了搞清"<strong>如何设计高效的类</strong>"这一问题，我们必须想明白以下几件事：</p>
 <ol>
@@ -821,14 +821,14 @@ std<span class="token double-colon punctuation">::</span>mutex<span class="token
 <p><strong>真的需要新 type 吗？</strong>——如果只是为了给基类添加新功能而定义派生类，那不如直接加点成员函数或模板；</p>
 </li>
 </ol>
-<h2 id="20.-%E5%AE%81%E4%BB%A5%E5%BC%95%E7%94%A8%E4%BC%A0%E9%80%92%E4%BB%A3%E6%9B%BF%E5%80%BC%E4%BC%A0%E9%80%92" tabindex="-1"><a class="header-anchor" href="#20-宁以引用传递代替值传递">#</a>20. 宁以引用传递代替值传递</h2>
+<h2 id="20-宁以引用传递代替值传递"><a class="header-anchor" href="#20-宁以引用传递代替值传递">#</a>20. 宁以引用传递代替值传递</h2>
 <p>说白了就是降低因<strong>构造/析构</strong>新的局部对象带来的额外开销，毕竟传引用的开销可以忽略不计，也没有生成新对象。</p>
 <blockquote>
 <p>至于引用是否需要加 <code>const</code>，则需要根据具体应用场景灵活变化。</p>
 </blockquote>
 <p>还有一个隐性好处是，可以通过将派生类传递给基类引用来实现多态——如果是值传递，那么就容易造成<strong>对象切割</strong>。</p>
 <p>最后要注意的是，C++ 里的引用常以指针的形式实现，意味着引用传递实际上传的是指针，那么对于内置类型、迭代器和函数对象而言，值传递的效率往往比引用传递的高——引用传递则还多了一步地址寻址的操作。</p>
-<h2 id="21.-%E5%BF%85%E9%A1%BB%E8%BF%94%E5%9B%9E%E5%AF%B9%E8%B1%A1%E6%97%B6%EF%BC%8C%E5%88%AB%E5%A6%84%E6%83%B3%E8%BF%94%E5%9B%9E%E5%85%B6-reference" tabindex="-1"><a class="header-anchor" href="#21-必须返回对象时，别妄想返回其-reference">#</a>21. 必须返回对象时，别妄想返回其 reference</h2>
+<h2 id="21-必须返回对象时，别妄想返回其-reference"><a class="header-anchor" href="#21-必须返回对象时，别妄想返回其-reference">#</a>21. 必须返回对象时，别妄想返回其 reference</h2>
 <p>尽管我们了解了引用传递的优势，但也不能一味追求引用传递，尤其是传递一些 reference 指向实际不存在的对象，这可不是件好事。</p>
 <p>以<a href="#3-%E5%B0%BD%E5%8F%AF%E8%83%BD%E4%BD%BF%E7%94%A8-const"><strong>条款 3</strong></a> 中 <code>Rational</code> 类为例，它内含一个函数用于计算两个有理数的乘积。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Rational</span> <span class="token punctuation">{</span>
@@ -883,7 +883,7 @@ Rational a<span class="token punctuation">,</span> b<span class="token punctuati
   <span class="token keyword">return</span> <span class="token function">Rational</span><span class="token punctuation">(</span>lhs<span class="token punctuation">.</span>n <span class="token operator">*</span> rhs<span class="token punctuation">.</span>n<span class="token punctuation">,</span> lhs<span class="token punctuation">.</span>d <span class="token operator">*</span> rhs<span class="token punctuation">.</span>d<span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 <p>我们已经探讨过，在 on-the-stack，on-the-heap，static 这些思路中，都难免存在构造/析构一个新的对象带来的开销，既然逃不过，那不如选择最稳妥的做法，更何况这只不过是一个非常小的代价罢了。</p>
-<h2 id="22.-%E5%B0%86%E6%88%90%E5%91%98%E5%8F%98%E9%87%8F%E5%A3%B0%E6%98%8E%E4%B8%BA-private" tabindex="-1"><a class="header-anchor" href="#22-将成员变量声明为-private">#</a>22. 将成员变量声明为 private</h2>
+<h2 id="22-将成员变量声明为-private"><a class="header-anchor" href="#22-将成员变量声明为-private">#</a>22. 将成员变量声明为 private</h2>
 <p>就<strong>语法一致性</strong>而言，如果 public 下全是成员函数，客户就无需思考某个成员后面是否需要加圆括号。</p>
 <p>另外，使用函数可以对成员变量的处理有着更精确的<strong>访问控制</strong>。如果将成员变量设为 public，那么可以很轻易地直接读写，而通过函数，则可以人为控制读写权限，就像下面这样：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">AccessLevels</span> <span class="token punctuation">{</span>
@@ -900,7 +900,7 @@ Rational a<span class="token punctuation">,</span> b<span class="token punctuati
   <span class="token keyword">int</span> WriteOnly<span class="token punctuation">;</span>  <span class="token comment">// 只写</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>最后，考虑整个类的<strong>封装性</strong>，将成员变量隐藏在函数接口的背后，可以为"所有可能的实现"提供弹性，并且可以确保类的约束条件总是会获得维护，因为只有成员函数可以影响它们。</p>
-<h2 id="23.-%E5%AE%81%E4%BB%A5-non-member%E3%80%81non-friend-%E6%9B%BF%E6%8D%A2-member-%E5%87%BD%E6%95%B0" tabindex="-1"><a class="header-anchor" href="#23-宁以-non-member、non-friend-替换-member-函数">#</a>23. 宁以 non-member、non-friend 替换 member 函数</h2>
+<h2 id="23-宁以-non-member、non-friend-替换-member-函数"><a class="header-anchor" href="#23-宁以-non-member、non-friend-替换-member-函数">#</a>23. 宁以 non-member、non-friend 替换 member 函数</h2>
 <p>考虑一个网页浏览器的例子，它拥有清理缓存、清理访问历史，以及清理所有 cookies 的功能</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">WebBrowser</span> <span class="token punctuation">{</span>
  <span class="token keyword">public</span><span class="token operator">:</span>
@@ -926,7 +926,7 @@ Rational a<span class="token punctuation">,</span> b<span class="token punctuati
 <p>好的设计中，如果能够实现相同功能，那么会优先考虑 non-member 函数。为什么？</p>
 <p>首先，non-member non-friend 函数能够提供<strong>更大的封装性</strong>。前一条款曾说过，成员变量应该是 private，否则将有无限的函数可以访问它们，它们也就毫无封装性。而一个 non-member non-friend 函数并不会增加"能够访问类内 private 成分"的函数数量。</p>
 <p>其次，non-member 函数也可以是其他类的成员函数。比较自然的做法是让它俩处于同一命名空间。不仅如此，我们还应意识到，命名空间不像 classes，前者可以跨越多个源码文件，而后者不行。将所有像 <code>clearBrowser()</code> 的这些 <strong>utility 函数</strong>放在多个头文件内但隶属同一个命名空间，意味客户可以轻松扩展这一组 utility 函数，<strong>增加包裹弹性</strong>，<strong>降低编译耦合度</strong>。他们需要做的就是添加更多 non-member non-friend 函数到此命名空间内，这允许客户只对他们所用的那一小部分系统形成编译耦合——毕竟如果我们想要用 <code>&lt;vector&gt;</code> 相关 utility 函数，无需 <code>#include&lt;memory&gt;</code>。</p>
-<h2 id="24.-%E8%8B%A5%E6%89%80%E6%9C%89%E5%8F%82%E6%95%B0%E7%9A%86%E9%9C%80%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2%EF%BC%8C%E8%AF%B7%E4%B8%BA%E6%AD%A4%E9%87%87%E7%94%A8-non-member-%E5%87%BD%E6%95%B0" tabindex="-1"><a class="header-anchor" href="#24-若所有参数皆需类型转换，请为此采用-non-member-函数">#</a>24. 若所有参数皆需类型转换，请为此采用 non-member 函数</h2>
+<h2 id="24-若所有参数皆需类型转换，请为此采用-non-member-函数"><a class="header-anchor" href="#24-若所有参数皆需类型转换，请为此采用-non-member-函数">#</a>24. 若所有参数皆需类型转换，请为此采用 non-member 函数</h2>
 <p><a href="#21-%E5%BF%85%E9%A1%BB%E8%BF%94%E5%9B%9E%E5%AF%B9%E8%B1%A1%E6%97%B6%E5%88%AB%E5%A6%84%E6%83%B3%E8%BF%94%E5%9B%9E%E5%85%B6-reference"><strong>条款 21</strong></a> 中的 <code>Rational</code> 类对象的构造函数并没有声明为 <code>explicit</code>，也就意味着允许隐式的转换。梅耶在导读中已经提过"令 class 支持隐式转换是一种糟糕的行为"，但有例外。<code>Rational</code> 中便是梅耶刻意为之，那么为什么？</p>
 <p>注意到，类中进行乘积的函数被设为 non-member 函数。当然也可以写成成员函数，比如这样：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Rational</span> <span class="token punctuation">{</span>
@@ -943,7 +943,7 @@ result <span class="token operator">=</span> <span class="token number">2</span>
 <p>而即便构造函数为 non-explicit，<code>result = 2 * oneHalf</code> 这句依然无法编译通过，本质原因在于我们实现的是 <code>Rational::operator* (const Rational&amp;)</code>，而运算符左侧为 <code>int</code> 型，该类型并不支持 <code>int::operator* (const Rational&amp;)</code> 这样的运算。</p>
 <p>定理为，<strong>只有当参数被列于参数列表时，该参数才是隐式类型转换的合格参与者，而 this 不是</strong>。一个好的设计应当满足所有的应用场景，为了解决这一问题，我们要做的便是像条款 21 中的那样，将 <code>operator*</code> 定义为 non-member，并（可以）令其为 <code>friend</code>——以便访问 lhs, rhs 的 private 变量。</p>
 <p>这样一来，<code>result = 2 * oneHalf</code> 便可以被编译器视为 <code>result = operator*(Rational(2), oneHalf)</code>。编译通过！</p>
-<h2 id="25.-%E8%80%83%E8%99%91%E5%86%99%E5%87%BA%E4%B8%80%E4%B8%AA%E4%B8%8D%E6%8A%9B%E5%87%BA%E5%BC%82%E5%B8%B8%E7%9A%84-swap-%E5%87%BD%E6%95%B0" tabindex="-1"><a class="header-anchor" href="#25-考虑写出一个不抛出异常的-swap-函数">#</a>25. 考虑写出一个不抛出异常的 swap 函数</h2>
+<h2 id="25-考虑写出一个不抛出异常的-swap-函数"><a class="header-anchor" href="#25-考虑写出一个不抛出异常的-swap-函数">#</a>25. 考虑写出一个不抛出异常的 swap 函数</h2>
 <p>当 <code>std::swap</code> 的缺省实现版，或对其全特化无法满足需求（无法访问 private 成员）时，考虑添加一个 <code>swap</code> 成员函数，并确保其不抛出异常。为了方便，可以在同一个命名空间中提供一个 non-member non-std <code>swap</code> 来调用前者。调用成员函数 <code>swap</code> 时，应针对 <code>std::swap</code> 使用 <code>using</code> 声明，然后不带任何作用域运算符 <code>::</code> 地来为具体的成员变量调用 <code>swap</code>。就像这样：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">namespace</span> WidgetStuff <span class="token punctuation">{</span>
   <span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">T</span><span class="token operator">&gt;</span>
@@ -965,7 +965,7 @@ result <span class="token operator">=</span> <span class="token number">2</span>
   <span class="token punctuation">}</span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span> <span class="token comment">//namespace WidgetStuff</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>千万不要试图通过偏特化 <code>std::swap</code> 的方式来实现目标，因为 C++ 禁止对函数模板进行偏特化。或许可以通过添加重载版本来逃避，但尽量不要忘 <code>std</code> 里添加新东西。</p>
-<h2 id="26.-%E5%B0%BD%E5%8F%AF%E8%83%BD%E5%BB%B6%E5%90%8E%E5%8F%98%E9%87%8F%E5%AE%9A%E4%B9%89%E5%BC%8F%E7%9A%84%E5%87%BA%E7%8E%B0%E6%97%B6%E9%97%B4" tabindex="-1"><a class="header-anchor" href="#26-尽可能延后变量定义式的出现时间">#</a>26. 尽可能延后变量定义式的出现时间</h2>
+<h2 id="26-尽可能延后变量定义式的出现时间"><a class="header-anchor" href="#26-尽可能延后变量定义式的出现时间">#</a>26. 尽可能延后变量定义式的出现时间</h2>
 <p>这一条款的提出是源于这样一个场景：如果某个变量定义后，在其真正使用之前，同个作用域内抛出了异常，那么该变量的定义将白白浪费了一次构造与一次析构的开销。</p>
 <p>当然，基于<a href="#4-%E7%A1%AE%E5%AE%9A%E5%AF%B9%E8%B1%A1%E8%A2%AB%E4%BD%BF%E7%94%A8%E5%89%8D%E5%B7%B2%E5%85%88%E8%A2%AB%E5%88%9D%E5%A7%8B%E5%8C%96"><strong>条款 4</strong></a> 的讨论，我们也不容易写出先定义，然后使用到的时候再赋值这种行为，这比直接在构造时指定初值效率低太多了。所以，不应该只延后变量的定义，而是直到非用该变量不可的前一刻为止，甚至是尝试延后这份定义知道能给它初值实参为止，这不仅能避免构造/析构不必要的对象，还可以避免无意义的默认构造行为。更深一层说，以"具有明显意义的处置"进行初始化还可以附带说明变量的目的。</p>
 <p>那么，在循环中，我们可能容易产生疑虑：如果变量只在循环内使用，那么是定义在循环外，然后每次循环迭代时赋值，还是定义在循环内，每次循环构造一个新的 on-the-stack 变量？</p>
@@ -982,12 +982,12 @@ Widget w<span class="token punctuation">;</span>
 <p>方法 A 的开销为：1 次构造 + 1 次析构 + n 次赋值；</p>
 <p>方法 B 的开销为：n 次构造 + n 次析构；</p>
 <p>所以，如果赋值的开销比一组构造/析构的开销小，那么自然选择方法 A；反之，选择方法 B。但方法 A 造成名称 w 的作用域比方法 B 更大，有时会对程序的可理解性和易维护性造成冲突，这也是需要考虑在内的因素。</p>
-<h2 id="27.-%E5%B0%BD%E9%87%8F%E5%B0%91%E5%81%9A%E8%BD%AC%E5%9E%8B%E5%8A%A8%E4%BD%9C" tabindex="-1"><a class="header-anchor" href="#27-尽量少做转型动作">#</a>27. 尽量少做转型动作</h2>
+<h2 id="27-尽量少做转型动作"><a class="header-anchor" href="#27-尽量少做转型动作">#</a>27. 尽量少做转型动作</h2>
 <p>文章 <a href="../../c/c-cast"><strong>C++ の Cast</strong></a> 中已经介绍过 C++ 中类型转换的内容。尽量避免转型，特别是在注重效率的代码中避免 <code>dynamic_cast</code>。如果非要转型，也尽可能使用 C+±style 转型。</p>
-<h2 id="28.-%E9%81%BF%E5%85%8D%E8%BF%94%E5%9B%9E-handles-%E6%8C%87%E5%90%91%E5%AF%B9%E8%B1%A1%E5%86%85%E9%83%A8%E6%88%90%E5%88%86" tabindex="-1"><a class="header-anchor" href="#28-避免返回-handles-指向对象内部成分">#</a>28. 避免返回 handles 指向对象内部成分</h2>
+<h2 id="28-避免返回-handles-指向对象内部成分"><a class="header-anchor" href="#28-避免返回-handles-指向对象内部成分">#</a>28. 避免返回 handles 指向对象内部成分</h2>
 <p>通常我们认为，对象的"内部"就是指它的成员变量，但其实 non-public 成员函数也是对象"内部"的一部分，因此也应该留心不要返回它们的 handles，这意味你绝对不该令成员函数返回一个指针/引用指向"访问级别较低"的成员函数。如果你那么做，后者的实际访问级别就会提高如同访问级别较高者，因为客户可以取得一个指针指向那个"访问级别较低"的函数，然后通过那个指针调用它。这无形中相当于将 private 变量变成了 public，就跟之前提到的那样，这降低了封装性。</p>
 <p>此外，handles 也可能出现<strong>悬空</strong>的情况，即获取一个对象内部变量的指针/引用后，该对象在真正使用之前销毁，那么该指针/引用实际上指向了一个未知的变量，这极为糟糕。毕竟，handles 并不能延长变量的生命周期。这和 <a href="../../c/c-function/#%E6%82%AC%E5%9E%82%E5%BC%95%E7%94%A8"><strong>lambda 表达式</strong></a>中提到的有异曲同工之妙。</p>
-<h2 id="29.-%E4%B8%BA%22%E5%BC%82%E5%B8%B8%E5%AE%89%E5%85%A8%22%E8%80%8C%E5%8A%AA%E5%8A%9B%E6%98%AF%E5%80%BC%E5%BE%97%E7%9A%84" tabindex="-1"><a class="header-anchor" href="#29-为-异常安全-而努力是值得的">#</a>29. 为"异常安全"而努力是值得的</h2>
+<h2 id="29-为-异常安全-而努力是值得的"><a class="header-anchor" href="#29-为-异常安全-而努力是值得的">#</a>29. 为"异常安全"而努力是值得的</h2>
 <p>关于异常可见<a href="../../c/c-exception"><strong>此文</strong></a>。</p>
 <p><strong>异常安全函数</strong>提供以下三个保证之一：</p>
 <ol>
@@ -1001,12 +1001,12 @@ Widget w<span class="token punctuation">;</span>
 <p><strong>不抛保证</strong>：承诺绝不抛出异常，因为它们总能完成原先承诺的功能；</p>
 </li>
 </ol>
-<h2 id="30.-%E9%80%8F%E5%BD%BB%E4%BA%86%E8%A7%A3-inlining-%E7%9A%84%E9%87%8C%E9%87%8C%E5%A4%96%E5%A4%96" tabindex="-1"><a class="header-anchor" href="#30-透彻了解-inlining-的里里外外">#</a>30. 透彻了解 inlining 的里里外外</h2>
+<h2 id="30-透彻了解-inlining-的里里外外"><a class="header-anchor" href="#30-透彻了解-inlining-的里里外外">#</a>30. 透彻了解 inlining 的里里外外</h2>
 <p>关于 inline，请看<a href="../../c/c-inline"><strong>此文</strong></a>。</p>
 <blockquote>
 <p>inline 函数背后的整体观念是，将"对此函数的每一个调用"都以函数本体替换之。优点是能够免除函数调用成本，比宏多了类型检查，以及其他编译器优化。缺点是增加了目标码大小，导致程序体积太大，可能导致额外的换页行为，降低 cache 命中率，以及隐性的其他效率降低。</p>
 </blockquote>
-<h2 id="31.-%E5%B0%86%E6%96%87%E4%BB%B6%E4%B9%8B%E9%97%B4%E7%9A%84%E7%BC%96%E8%AF%91%E8%80%A6%E5%90%88%E5%BA%A6%E9%99%8D%E8%87%B3%E6%9C%80%E4%BD%8E" tabindex="-1"><a class="header-anchor" href="#31-将文件之间的编译耦合度降至最低">#</a>31. 将文件之间的编译耦合度降至最低</h2>
+<h2 id="31-将文件之间的编译耦合度降至最低"><a class="header-anchor" href="#31-将文件之间的编译耦合度降至最低">#</a>31. 将文件之间的编译耦合度降至最低</h2>
 <p>我们不希望仅仅修改某个头文件后，重新 make 项目还要花大量时间将所有文件重新编译链接一遍。问题出在 C++ 并没有把接口从实现很好地分离。类的定义式不仅有各种 api，还有各种数据的实现条目。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Person</span> <span class="token punctuation">{</span>
  <span class="token keyword">public</span><span class="token operator">:</span>
@@ -1104,7 +1104,7 @@ std<span class="token double-colon punctuation">::</span>shared_ptr<span class="
 <p>对前者而言，成员函数必须通过 pimpl 获取数据，这会为每一次访问添加一层间接性，并且每一个对象所需内存增加了一个指针大小，这在 64 位机器上为 8B。最后， pimpl 的初始化必须经历动态内存分配带来的困扰——<code>new</code> 的开销，以及 <code>bad_alloc</code> 的可能性。</p>
 <p>至于后者，由于每个函数都是虚函数，所以每次函数调用都会在运行时带来查找虚表的开销，当然，所有派生类也增加了（至少）一个 vptr 的大小。</p>
 <p>我们进行效率分析时必须进行代价分析，但这些代价，之于降低耦合度带来的好处，则可以忽略不计了。</p>
-<h2 id="32.-%E7%A1%AE%E5%AE%9A%E4%BD%A0%E7%9A%84-public-%E7%BB%A7%E6%89%BF%E5%A1%91%E6%A8%A1%E5%87%BA-is-a%EF%BC%88%E6%98%AF%E4%B8%80%E7%A7%8D%EF%BC%89%E5%85%B3%E7%B3%BB" tabindex="-1"><a class="header-anchor" href="#32-确定你的-public-继承塑模出-is-a（是一种）关系">#</a>32. 确定你的 public 继承塑模出 is-a（是一种）关系</h2>
+<h2 id="32-确定你的-public-继承塑模出-is-a（是一种）关系"><a class="header-anchor" href="#32-确定你的-public-继承塑模出-is-a（是一种）关系">#</a>32. 确定你的 public 继承塑模出 is-a（是一种）关系</h2>
 <p>如果令 <code>class Derived</code> 以 public 继承自 <code>class Base</code>，这就是告诉编译器与读者，每个 Derived 对象同时也是一个 Base 对象，Derived 是 Base 的特殊化，而 Base 是 Derived 的一般化，Base 能派上用场的地方，Derived 一定也可以。因为<strong>每个 Derived 都 is-a（是一种） Base 对象</strong>，而反之不成立。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Person</span> <span class="token punctuation">{</span> <span class="token comment">/* ... */</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
 <span class="token keyword">class</span> <span class="token class-name">Student</span><span class="token operator">:</span> <span class="token base-clause"><span class="token keyword">public</span> <span class="token class-name">Person</span></span> <span class="token punctuation">{</span> <span class="token comment">/* ... */</span><span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
@@ -1113,7 +1113,7 @@ std<span class="token double-colon punctuation">::</span>shared_ptr<span class="
 <blockquote>
 <p>尽管如此，直觉往往会误导我们的设计——企鹅属于鸟类，但企鹅不会飞；正方形属于矩形，但矩形可以仅仅修改长或宽中的其中一个变量，正方形仅有<strong>边长</strong>这一个属性……许多继承可能接近事实真相，也可能不。我们要做的就是尽可能实现 <strong>is-a</strong> 这一特质。</p>
 </blockquote>
-<h2 id="33.-%E9%81%BF%E5%85%8D%E9%81%AE%E6%8E%A9%E7%BB%A7%E6%89%BF%E8%80%8C%E6%9D%A5%E7%9A%84%E5%90%8D%E7%A7%B0" tabindex="-1"><a class="header-anchor" href="#33-避免遮掩继承而来的名称">#</a>33. 避免遮掩继承而来的名称</h2>
+<h2 id="33-避免遮掩继承而来的名称"><a class="header-anchor" href="#33-避免遮掩继承而来的名称">#</a>33. 避免遮掩继承而来的名称</h2>
 <p>众所周知，当编译器遇到某个名称时，它会从内向外逐个作用域去查找是否有匹配的"东西"，因为内层作用域的名称会<strong>遮掩</strong>外层作用域的名称。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">int</span> x<span class="token punctuation">;</span>
 <span class="token keyword">void</span> <span class="token function">func</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -1201,7 +1201,7 @@ Derived d<span class="token punctuation">;</span>
 
 d<span class="token punctuation">.</span><span class="token function">mf1</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>   <span class="token comment">// OK! 调用 Base::mf1()</span>
 d<span class="token punctuation">.</span><span class="token function">mf1</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// ERROR! Base::mf1(int) 被掩盖</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="34.-%E5%8C%BA%E5%88%86%E6%8E%A5%E5%8F%A3%E7%BB%A7%E6%89%BF%E5%92%8C%E5%AE%9E%E7%8E%B0%E7%BB%A7%E6%89%BF" tabindex="-1"><a class="header-anchor" href="#34-区分接口继承和实现继承">#</a>34. 区分接口继承和实现继承</h2>
+<h2 id="34-区分接口继承和实现继承"><a class="header-anchor" href="#34-区分接口继承和实现继承">#</a>34. 区分接口继承和实现继承</h2>
 <p>public 继承实际上由两部分组成：<strong>函数接口继承</strong>与<strong>函数实现继承</strong>。</p>
 <p>基于 is-a，函数接口总是会被继承，毕竟如果某个函数可用于基类，那么必然可用于派生类。</p>
 <ul class="lvl-0">
@@ -1233,7 +1233,7 @@ d<span class="token punctuation">.</span><span class="token function">mf1</span>
 <p>将所有函数声明为 virtual。但某些函数并不该在派生类中被 override，对这部分函数最好的做法是声明为 non-virtual；</p>
 </li>
 </ol>
-<h2 id="35.-%E8%80%83%E8%99%91-virtual-%E5%87%BD%E6%95%B0%E4%BB%A5%E5%A4%96%E7%9A%84%E5%85%B6%E4%BB%96%E9%80%89%E6%8B%A9" tabindex="-1"><a class="header-anchor" href="#35-考虑-virtual-函数以外的其他选择">#</a>35. 考虑 virtual 函数以外的其他选择</h2>
+<h2 id="35-考虑-virtual-函数以外的其他选择"><a class="header-anchor" href="#35-考虑-virtual-函数以外的其他选择">#</a>35. 考虑 virtual 函数以外的其他选择</h2>
 <p>假设你正在写一个暴力砍杀类型的游戏，你打算为游戏内的人物设计一个继承体系，人物会因被伤害或其他因素而扣血。你因此决定提供一个成员函数 <code>healthValue()</code>，它会返回一个整数，表示人物的血量。由于不同的人物可能以不同的方式计算他们的血量，将 <code>healthValue()</code> 声明为 virtual 似乎是再明白不过的做法。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">GameCharacter</span> <span class="token punctuation">{</span>
  <span class="token keyword">public</span><span class="token operator">:</span>
@@ -1327,11 +1327,11 @@ EvilBadguy <span class="token function">ebg2</span><span class="token punctuatio
 <p>传统 <strong>Strategy 设计模式</strong>。它会将函数做成一个分离的继承体系中的 virtual 成员函数。构造函数接受一个 <code>HealthCalcFunc</code> 类指针，通过传入不同派生类地址实现效果。</p>
 </li>
 </ol>
-<h2 id="36.-%E7%BB%9D%E4%B8%8D-override-%E7%BB%A7%E6%89%BF%E6%9D%A5%E7%9A%84-non-virtual-%E5%87%BD%E6%95%B0" tabindex="-1"><a class="header-anchor" href="#36-绝不-override-继承来的-non-virtual-函数">#</a>36. 绝不 override 继承来的 non-virtual 函数</h2>
+<h2 id="36-绝不-override-继承来的-non-virtual-函数"><a class="header-anchor" href="#36-绝不-override-继承来的-non-virtual-函数">#</a>36. 绝不 override 继承来的 non-virtual 函数</h2>
 <p>记住就行了。</p>
-<h2 id="37.-%E7%BB%9D%E4%B8%8D%E9%87%8D%E6%96%B0%E5%AE%9A%E4%B9%89%E7%BB%A7%E6%89%BF%E6%9D%A5%E7%BC%BA%E7%9C%81%E5%8F%82%E6%95%B0%E5%80%BC" tabindex="-1"><a class="header-anchor" href="#37-绝不重新定义继承来缺省参数值">#</a>37. 绝不重新定义继承来缺省参数值</h2>
+<h2 id="37-绝不重新定义继承来缺省参数值"><a class="header-anchor" href="#37-绝不重新定义继承来缺省参数值">#</a>37. 绝不重新定义继承来缺省参数值</h2>
 <p>基于上条，这里就只考虑带缺省参数的 virtual 函数。这种情况下，本条款成立的理由就非常直接而明确了：virtual 函数为动态绑定，而缺省参数值却是静态绑定。那么在用基类指针指向派生类时，指针的静态类型必然为基类，则就会出现"调用一个定义于派生类的虚函数，却使用了基类指定的缺省参数值"这一情况。这也就直接宣告派生类对缺省值的重新定义无效化了。</p>
-<h2 id="38.-%E9%80%9A%E8%BF%87%E5%A4%8D%E5%90%88%E5%A1%91%E6%A8%A1%E5%87%BA-has-a-%E6%88%96%22%E6%A0%B9%E6%8D%AE%E6%9F%90%E7%89%A9%E5%AE%9E%E7%8E%B0%E5%87%BA%22" tabindex="-1"><a class="header-anchor" href="#38-通过复合塑模出-has-a-或-根据某物实现出">#</a>38. 通过复合塑模出 has-a 或"根据某物实现出"</h2>
+<h2 id="38-通过复合塑模出-has-a-或-根据某物实现出"><a class="header-anchor" href="#38-通过复合塑模出-has-a-或-根据某物实现出">#</a>38. 通过复合塑模出 has-a 或"根据某物实现出"</h2>
 <p>当某种类型的对象内含另一种类型的对象，这就是复合关系。如同 public 含有 is-a 意义一样，复合关系也有着 has-a（有一个）或"根据某物实现出"的意义。就比如想实现一个 set 数据结构，复用 <code>std::set</code> 是最方便的，但是其为了提高时间效率，提高了空间开销，每个元素额外有三个指针的空间占用。加一条限制：我们希望空间比时间重要。那么复用 <code>std::set</code> 就并不可取。于是在万千种替代方法中，随机挑选了一个用 <code>std::list</code> 实现，决定复用它。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">T</span><span class="token operator">&gt;</span>
 <span class="token keyword">class</span> <span class="token class-name">Set</span><span class="token operator">:</span> <span class="token base-clause"><span class="token keyword">public</span> std<span class="token double-colon punctuation">::</span><span class="token class-name">list</span><span class="token operator">&lt;</span><span class="token class-name">T</span><span class="token operator">&gt;</span></span> <span class="token punctuation">{</span> <span class="token comment">/* ... */</span> <span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
@@ -1347,7 +1347,7 @@ EvilBadguy <span class="token function">ebg2</span><span class="token punctuatio
  <span class="token keyword">private</span><span class="token operator">:</span>
   std<span class="token double-colon punctuation">::</span>list<span class="token operator">&lt;</span>T<span class="token operator">&gt;</span> rep<span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="39.-%E6%98%8E%E6%99%BA%E8%80%8C%E5%AE%A1%E6%85%8E%E5%9C%B0%E4%BD%BF%E7%94%A8-private-%E7%BB%A7%E6%89%BF" tabindex="-1"><a class="header-anchor" href="#39-明智而审慎地使用-private-继承">#</a>39. 明智而审慎地使用 private 继承</h2>
+<h2 id="39-明智而审慎地使用-private-继承"><a class="header-anchor" href="#39-明智而审慎地使用-private-继承">#</a>39. 明智而审慎地使用 private 继承</h2>
 <p>public 继承可以实现 is-a 语义，这是前文讨论过的。那么 private 继承呢？首先要明确几点规则，如果一个类之间的继承关系为 private，那么：</p>
 <ol>
 <li class="lvl-3">
@@ -1361,11 +1361,11 @@ EvilBadguy <span class="token function">ebg2</span><span class="token punctuatio
 </li>
 </ol>
 <p>第三个事实令人感到不安，因为复合关系也能实现这一层语义。如果非得选一个，还是<strong>复合关系更胜一筹</strong>，因为复合更容易理解，只有必要时采用 private 继承。何为必要？即需要访问基类 protected 成员，或需要 override virtual 函数时。</p>
-<h2 id="40.-%E6%98%8E%E6%99%BA%E8%80%8C%E5%AE%A1%E6%85%8E%E5%9C%B0%E4%BD%BF%E7%94%A8%E5%A4%9A%E9%87%8D%E7%BB%A7%E6%89%BF" tabindex="-1"><a class="header-anchor" href="#40-明智而审慎地使用多重继承">#</a>40. 明智而审慎地使用多重继承</h2>
+<h2 id="40-明智而审慎地使用多重继承"><a class="header-anchor" href="#40-明智而审慎地使用多重继承">#</a>40. 明智而审慎地使用多重继承</h2>
 <p>关于多继承的事，请看<a href="../../c/c-oop/#%E7%BB%A7%E6%89%BF"><strong>此文</strong></a>。</p>
 <p>多重继承容易引发歧义，且带来了虚继承的需求。虚继承还会带来一系列成本，除非虚基类不带任何数据。</p>
 <p>但多重继承也不是一无是处，在 public 继承某个接口类，并且 private 继承某个协助类时才发挥出正当用途。</p>
-<h2 id="41.-%E4%BA%86%E8%A7%A3%E9%9A%90%E5%BC%8F%E6%8E%A5%E5%8F%A3%E5%92%8C%E7%BC%96%E8%AF%91%E6%9C%9F%E5%A4%9A%E6%80%81" tabindex="-1"><a class="header-anchor" href="#41-了解隐式接口和编译期多态">#</a>41. 了解隐式接口和编译期多态</h2>
+<h2 id="41-了解隐式接口和编译期多态"><a class="header-anchor" href="#41-了解隐式接口和编译期多态">#</a>41. 了解隐式接口和编译期多态</h2>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token comment">// 隐式接口</span>
 <span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">T</span><span class="token operator">&gt;</span>
 <span class="token keyword">void</span> <span class="token function">doProcessing</span><span class="token punctuation">(</span>T<span class="token operator">&amp;</span> w<span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -1378,7 +1378,7 @@ EvilBadguy <span class="token function">ebg2</span><span class="token punctuatio
 <p>w 必须支持在 <strong>template</strong> 中指定需要 w 进行执行的操作，这里是 <code>size()</code>，<code>operator!=()</code>，<code>normalize()</code> 和 <code>swap()</code>，还有一个拷贝构造函数。如果某个类型 <code>T</code> 不支持这些功能，那么编译失败。这些就是所谓的<strong>隐式接口</strong>。</p>
 <p>而一旦支持了，就会根据 <code>T</code> 的不同，调用不同类型的这些函数。这种实例化在编译期决定，就是所谓的<strong>编译期多态</strong>。</p>
 <p>而对于 <strong>class</strong> 而言，接口都是<strong>显式</strong>的，以函数签名为中心，通过 virtual 函数实现<strong>运行时多态</strong>。</p>
-<h2 id="42.-%E4%BA%86%E8%A7%A3-typename-%E7%9A%84%E5%8F%8C%E9%87%8D%E6%84%8F%E4%B9%89" tabindex="-1"><a class="header-anchor" href="#42-了解-typename-的双重意义">#</a>42. 了解 typename 的双重意义</h2>
+<h2 id="42-了解-typename-的双重意义"><a class="header-anchor" href="#42-了解-typename-的双重意义">#</a>42. 了解 typename 的双重意义</h2>
 <p>在 template 中，<code>typename</code> 和 <code>class</code> 具有同样的含义。就比如下面这两种声明方式，其实是没有区别的。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">T</span><span class="token operator">&gt;</span> <span class="token keyword">class</span> <span class="token class-name">Widget</span><span class="token punctuation">;</span>
 <span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">T</span><span class="token operator">&gt;</span> <span class="token keyword">class</span> <span class="token class-name">Widget</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
@@ -1410,7 +1410,7 @@ EvilBadguy <span class="token function">ebg2</span><span class="token punctuatio
     <span class="token keyword">typename</span> <span class="token class-name">Base</span><span class="token operator">&lt;</span>T<span class="token operator">&gt;</span><span class="token double-colon punctuation">::</span>Nested temp<span class="token punctuation">;</span>              <span class="token comment">// 允许，且必须</span>
   <span class="token punctuation">}</span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="43.-%E5%AD%A6%E4%B9%A0%E5%A4%84%E7%90%86%E6%A8%A1%E6%9D%BF%E5%8C%96%E5%9F%BA%E7%B1%BB%E5%86%85%E7%9A%84%E5%90%8D%E7%A7%B0" tabindex="-1"><a class="header-anchor" href="#43-学习处理模板化基类内的名称">#</a>43. 学习处理模板化基类内的名称</h2>
+<h2 id="43-学习处理模板化基类内的名称"><a class="header-anchor" href="#43-学习处理模板化基类内的名称">#</a>43. 学习处理模板化基类内的名称</h2>
 <p>如果一个派生类模板继承自基类模板，并且派生类试图调用基类中的函数，那么极有可能无法通过编译：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">T</span><span class="token operator">&gt;</span>
 <span class="token keyword">class</span> <span class="token class-name">Base</span> <span class="token punctuation">{</span>
@@ -1489,7 +1489,7 @@ d<span class="token punctuation">.</span><span class="token function">bar</span>
 </li>
 </ol>
 <p>上述做法仅仅是提供一个假设，而一旦实例化了一个 <code>Derived&lt;int&gt;</code> 对象，那么一切依然照旧——无法通过编译。</p>
-<h2 id="44.-%E5%B0%86%E4%B8%8E%E5%8F%82%E6%95%B0%E6%97%A0%E5%85%B3%E7%9A%84%E4%BB%A3%E7%A0%81%E6%8A%BD%E7%A6%BB-template" tabindex="-1"><a class="header-anchor" href="#44-将与参数无关的代码抽离-template">#</a>44. 将与参数无关的代码抽离 template</h2>
+<h2 id="44-将与参数无关的代码抽离-template"><a class="header-anchor" href="#44-将与参数无关的代码抽离-template">#</a>44. 将与参数无关的代码抽离 template</h2>
 <p>template 是节省时间和避免代码重复的奇技淫巧。但如果不小心，使用 template 也可能会导致代码膨胀，即实例化时，产生多个类和多个函数，造成重复的二进制代码。所以任何 template 代码都不该与某个造成膨胀的参数产生耦合关系。</p>
 <p>因<strong>非类型模板参数</strong>而造成的代码膨胀，往往可以通过函数参数或类成员变量替换的方式来<strong>消除</strong>，但会因此将编译期行为迁移到运行期。</p>
 <p>因<strong>类型参数</strong>造成的代码膨胀，可以让带有完全相同二进制表述的实例类型共享实现码来<strong>降低</strong>。</p>
@@ -1536,7 +1536,7 @@ m2<span class="token punctuation">.</span><span class="token function">invert</s
   T data<span class="token punctuation">[</span>n<span class="token operator">*</span>n<span class="token punctuation">]</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>基类 <code>SquareMatrixBase</code> 中放置了一个带参数的 <code>invert()</code>，不同的是它只对矩阵元素对象的<strong>类型</strong>进行参数化，而不对矩阵的尺寸参数化，因此对于某给定类型，所有矩阵共享唯一一个 <code>SquareMatrixBase</code> 类，也因此共享唯一一个 <code>invert()</code>。</p>
-<h2 id="45.-%E8%BF%90%E7%94%A8%E6%88%90%E5%91%98%E5%87%BD%E6%95%B0%E6%A8%A1%E6%9D%BF%E6%8E%A5%E5%8F%97%E6%89%80%E6%9C%89%E5%85%BC%E5%AE%B9%E7%B1%BB%E5%9E%8B" tabindex="-1"><a class="header-anchor" href="#45-运用成员函数模板接受所有兼容类型">#</a>45. 运用成员函数模板接受所有兼容类型</h2>
+<h2 id="45-运用成员函数模板接受所有兼容类型"><a class="header-anchor" href="#45-运用成员函数模板接受所有兼容类型">#</a>45. 运用成员函数模板接受所有兼容类型</h2>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">T</span><span class="token operator">&gt;</span>
 <span class="token keyword">class</span> <span class="token class-name">SmartPtr</span> <span class="token punctuation">{</span>
  <span class="token keyword">public</span><span class="token operator">:</span>
@@ -1551,7 +1551,7 @@ m2<span class="token punctuation">.</span><span class="token function">invert</s
   T<span class="token operator">*</span> heldPtr<span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p><code>SmartPtr&lt;Base&gt;</code> 与 <code>SmartPtr&lt;Derived&gt;</code> 是两种完全不同的类型，无法通过后者对前者进行拷贝构造/赋值，尽管相应的裸指针是拥有这种转换能力的。通过定义<strong>构造函数模板</strong>，上述转型得以实现。这种构造函数又称<strong>泛化拷贝构造函数</strong>。而这种函数的出现并不会替代正常拷贝构造函数的地位，如果没有声明，编译器依然会默认生成一个 <code>SmartPtr(const SmartPtr&amp;)</code> 来，所以为了面面俱到，必须同时声明泛化版本的和"正常"版本的拷贝构造函数。相同规则也适用于<strong>赋值</strong>。</p>
-<h2 id="46.-%E9%9C%80%E8%A6%81%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2%E6%97%B6%E8%AF%B7%E4%B8%BA%E6%A8%A1%E6%9D%BF%E5%AE%9A%E4%B9%89%E9%9D%9E%E6%88%90%E5%91%98%E5%87%BD%E6%95%B0" tabindex="-1"><a class="header-anchor" href="#46-需要类型转换时请为模板定义非成员函数">#</a>46. 需要类型转换时请为模板定义非成员函数</h2>
+<h2 id="46-需要类型转换时请为模板定义非成员函数"><a class="header-anchor" href="#46-需要类型转换时请为模板定义非成员函数">#</a>46. 需要类型转换时请为模板定义非成员函数</h2>
 <p><a href="#24-%E8%8B%A5%E6%89%80%E6%9C%89%E5%8F%82%E6%95%B0%E7%9A%86%E9%9C%80%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2%E8%AF%B7%E4%B8%BA%E6%AD%A4%E9%87%87%E7%94%A8-non-member-%E5%87%BD%E6%95%B0"><strong>条款 24</strong></a> 讨论过为什么惟有 non-member 函数才有能力"在所有实参身上实施院式类型转换"，该条款并以 <code>Rational</code> 类的 <code>operator*()</code> 函数为例。本条款将对该例子进行扩充——模板化。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">T</span><span class="token operator">&gt;</span>
 <span class="token keyword">class</span> <span class="token class-name">Rational</span> <span class="token punctuation">{</span>
@@ -1611,11 +1611,11 @@ Rational<span class="token operator">&lt;</span><span class="token keyword">int<
   <span class="token punctuation">}</span>
   <span class="token comment">/* ... */</span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="47.-%E8%AF%B7%E4%BD%BF%E7%94%A8-traits-classes-%E8%A1%A8%E7%8E%B0%E7%B1%BB%E5%9E%8B%E4%BF%A1%E6%81%AF" tabindex="-1"><a class="header-anchor" href="#47-请使用-traits-classes-表现类型信息">#</a>47. 请使用 traits classes 表现类型信息</h2>
+<h2 id="47-请使用-traits-classes-表现类型信息"><a class="header-anchor" href="#47-请使用-traits-classes-表现类型信息">#</a>47. 请使用 traits classes 表现类型信息</h2>
 <p>STL 里使用 <a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_15730877/article/details/117482541"><strong>iterator_traits</strong></a> 来表达迭代器的信息，包含迭代器类型所属(iterator_category)，所指对象类型(value_type)，迭代器间距离(difference_type)，所指内容指针(pointer)，所指内容引用(reference)。根据这些信息，就能为算法提供深度优化。这些信息在编译期可用，通过 template 和特化完成实现，并有可能在编译期对类型执行 if-else 测试。</p>
-<h2 id="48.-%E8%AE%A4%E8%AF%86%E6%A8%A1%E6%9D%BF%E5%85%83%E7%BC%96%E7%A8%8B" tabindex="-1"><a class="header-anchor" href="#48-认识模板元编程">#</a>48. 认识模板元编程</h2>
+<h2 id="48-认识模板元编程"><a class="header-anchor" href="#48-认识模板元编程">#</a>48. 认识模板元编程</h2>
 <p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/137853957"><strong>模板元编程</strong></a>的优点在于，其执行于编译期，故可以在编译期侦测出一些原本运行时才能找出的错误，并且降低了运行时长、可执行文件大小与内存需求，但劣势很明显，编译时期变长了许多。</p>
-<h2 id="49.-%E4%BA%86%E8%A7%A3-new-handler-%E7%9A%84%E8%A1%8C%E4%B8%BA" tabindex="-1"><a class="header-anchor" href="#49-了解-new-handler-的行为">#</a>49. 了解 new-handler 的行为</h2>
+<h2 id="49-了解-new-handler-的行为"><a class="header-anchor" href="#49-了解-new-handler-的行为">#</a>49. 了解 new-handler 的行为</h2>
 <p>当 <code>operator new</code> 抛出异常以反映一个未获满足的内存需求之前，它会先调用一个错误处理函数，即 <code>new-handler</code>，定义为一个 <code>void(*)()</code> 类型的函数指针。我们可以通过 <code>set_new_handler()</code> 函数来自定义这个处理函数。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token comment">// 已声明于 &lt;new&gt; 中的代码</span>
 <span class="token keyword">namespace</span> std <span class="token punctuation">{</span>
@@ -1701,7 +1701,7 @@ std<span class="token double-colon punctuation">::</span>new_handler <span class
 </ul>
 </li>
 </ol>
-<h2 id="50.-%E4%BA%86%E8%A7%A3-new-%E5%92%8C-delete-%E7%9A%84%E5%90%88%E7%90%86%E6%9B%BF%E6%8D%A2%E6%97%B6%E6%9C%BA" tabindex="-1"><a class="header-anchor" href="#50-了解-new-和-delete-的合理替换时机">#</a>50. 了解 new 和 delete 的合理替换时机</h2>
+<h2 id="50-了解-new-和-delete-的合理替换时机"><a class="header-anchor" href="#50-了解-new-和-delete-的合理替换时机">#</a>50. 了解 new 和 delete 的合理替换时机</h2>
 <p>为何要替换呢？总的来说有以下理由：</p>
 <ol>
 <li class="lvl-3">
@@ -1729,10 +1729,10 @@ std<span class="token double-colon punctuation">::</span>new_handler <span class
 <p>获得非传统的行为；</p>
 </li>
 </ol>
-<h2 id="51.-%E7%BC%96%E5%86%99-new-%E5%92%8C-delete-%E6%97%B6%E9%9C%80%E5%9B%BA%E5%AE%88%E5%B8%B8%E8%A7%84" tabindex="-1"><a class="header-anchor" href="#51-编写-new-和-delete-时需固守常规">#</a>51. 编写 new 和 delete 时需固守常规</h2>
+<h2 id="51-编写-new-和-delete-时需固守常规"><a class="header-anchor" href="#51-编写-new-和-delete-时需固守常规">#</a>51. 编写 new 和 delete 时需固守常规</h2>
 <p><code>operator new</code> 应该内含一个无限循环，在其中尝试分配内存，若无法满足，则调用 <code>new-handler</code>。它需要有能力处理 0 bytes 的分配申请。类中的重载版本还应该处理比正确大小更大的错误申请。</p>
 <p><code>operator delete</code> 应该不处理任何 <code>nullptr</code> 的释放申请。同样的，类中的重载版本还应该处理比正确大小更大的错误申请。</p>
-<h2 id="52.-%E5%86%99%E4%BA%86-placement-new-%E4%B9%9F%E8%A6%81%E5%86%99-placement-delete" tabindex="-1"><a class="header-anchor" href="#52-写了-placement-new-也要写-placement-delete">#</a>52. 写了 placement new 也要写 placement delete</h2>
+<h2 id="52-写了-placement-new-也要写-placement-delete"><a class="header-anchor" href="#52-写了-placement-new-也要写-placement-delete">#</a>52. 写了 placement new 也要写 placement delete</h2>
 <p>如果一个 placement new 没有 placement delete，那么当 new 的内存分配动作需要取消并恢复原状时就没有任何 delete 会被调用。因此，为了消除这种内存泄漏，有必要在写了 placement new 的同时声明一个 placement delete。</p>
 <p>btw，如<a href="#33-%E9%81%BF%E5%85%8D%E9%81%AE%E6%8E%A9%E7%BB%A7%E6%89%BF%E8%80%8C%E6%9D%A5%E7%9A%84%E5%90%8D%E7%A7%B0"><strong>条款 33</strong></a> 讨论的那样，我们必须小心让 <code>operator new</code> 掩盖外层作用域的其它版本。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Base</span> <span class="token punctuation">{</span>
@@ -1755,12 +1755,12 @@ Derived<span class="token operator">*</span> pd <span class="token operator">=</
 <span class="token keyword">void</span><span class="token operator">*</span> <span class="token keyword">operator</span> <span class="token keyword">new</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span>size_t<span class="token punctuation">,</span> <span class="token keyword">const</span> std<span class="token double-colon punctuation">::</span>nothrow_t<span class="token operator">&amp;</span><span class="token punctuation">)</span> <span class="token keyword">noexcept</span><span class="token punctuation">;</span>  <span class="token comment">// nothrow new</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <p>如果在类内声明任何 <code>operator new</code>，它会遮掩上述这些标准形式。除非你就是要阻止用户使用这些形式，否则请确保它们在你所生成的任何自定义 <code>operator new</code> 可用。对于每一个可用的 <code>operator new</code>，也请确定提供对应的 <code>operator delete</code>。如果希望这些函数有着平常的行为，只要令自定义重载版本调用全局版本即可。</p>
 <p>一个简单做法是，建立一个基类，内含所有调用全局版本的 new 和 delete。凡是想以自定义形式扩充的用户，可利用继承机制与 <code>using</code> 声明取得标准形式。</p>
-<h2 id="53.-%E4%B8%8D%E8%A6%81%E8%BD%BB%E5%BF%BD%E7%BC%96%E8%AF%91%E5%99%A8%E7%9A%84%E8%AD%A6%E5%91%8A" tabindex="-1"><a class="header-anchor" href="#53-不要轻忽编译器的警告">#</a>53. 不要轻忽编译器的警告</h2>
+<h2 id="53-不要轻忽编译器的警告"><a class="header-anchor" href="#53-不要轻忽编译器的警告">#</a>53. 不要轻忽编译器的警告</h2>
 <p>一旦从某个特定编译器的警告信息中获得经验，你将学会了解，不同的信息意味什么——那往往和它们"看起来"的意义十分不同！尽管一般认为，写出一个在最高警告级别下也无任何警告信息的程序最是理想，然而一旦有了上述的经验和对警告信息的深刻理解，你倒是可以选择忽略某些警告信息。不管怎样说，在你打发某个警告信息之前，请确定你了解它意图说出的精确意义。这很重要。</p>
 <p>记住，警告信息天生和编译器相依，不同的编译器有不同的警告标准。所以，草率编程然后倚赖编译器为你指出错误，并不可取。</p>
-<h2 id="54.-%E8%AE%A9%E8%87%AA%E5%B7%B1%E7%86%9F%E6%82%89%E5%8C%85%E6%8B%AC-tr1-%E5%9C%A8%E5%86%85%E7%9A%84%E6%A0%87%E5%87%86%E7%A8%8B%E5%BA%8F%E5%BA%93" tabindex="-1"><a class="header-anchor" href="#54-让自己熟悉包括-TR1-在内的标准程序库">#</a>54. 让自己熟悉包括 TR1 在内的标准程序库</h2>
+<h2 id="54-让自己熟悉包括-TR1-在内的标准程序库"><a class="header-anchor" href="#54-让自己熟悉包括-TR1-在内的标准程序库">#</a>54. 让自己熟悉包括 TR1 在内的标准程序库</h2>
 <p>所有功能都被 <a target="_blank" rel="noopener" href="https://zh.cppreference.com/w/cpp/11"><strong>C++11</strong></a> 囊括。</p>
-<h2 id="55.-%E8%AE%A9%E8%87%AA%E5%B7%B1%E7%86%9F%E6%82%89-boost" tabindex="-1"><a class="header-anchor" href="#55-让自己熟悉-Boost">#</a>55. 让自己熟悉 Boost</h2>
+<h2 id="55-让自己熟悉-Boost"><a class="header-anchor" href="#55-让自己熟悉-Boost">#</a>55. 让自己熟悉 Boost</h2>
 <p>大部分都被 <a target="_blank" rel="noopener" href="https://zh.cppreference.com/w/cpp/11"><strong>C++11</strong></a> 囊括。</p>
 
                 
@@ -1941,12 +1941,6 @@ Derived<span class="token operator">*</span> pd <span class="token operator">=</
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -1955,8 +1949,8 @@ Derived<span class="token operator">*</span> pd <span class="token operator">=</
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -1972,41 +1966,6 @@ Derived<span class="token operator">*</span> pd <span class="token operator">=</
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

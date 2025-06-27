@@ -343,7 +343,7 @@
 <p>动态委托</p>
 </li>
 </ol>
-<h2 id="%E5%8D%95%E6%92%AD%E5%A7%94%E6%89%98-%26-%E5%8A%A8%E6%80%81%E5%8D%95%E6%92%AD%E5%A7%94%E6%89%98" tabindex="-1"><a class="header-anchor" href="#单播委托-动态单播委托">#</a>单播委托 &amp; 动态单播委托</h2>
+<h2 id="单播委托-动态单播委托"><a class="header-anchor" href="#单播委托-动态单播委托">#</a>单播委托 &amp; 动态单播委托</h2>
 <p>单播，顾名思义就是最多只能绑定<strong>一个</strong>可调用对象，并且不支持反射和序列化。优点是支持返回值。</p>
 <p>而「动态」的意思是会在执行时实时根据给定的「函数名」去查找对应的函数（需要用 <code>UFUNCTION()</code> 修饰），因此执行速度很慢。此外，动态单播并不支持反射和序列化。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>单播委托</span></div><code class="language-cpp"><span class="token comment">/**
@@ -374,7 +374,7 @@
  * 有返回值
  */</span>
 <span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">DECLARE_DYNAMIC_DELEGATE_RetVal</span><span class="token expression"><span class="token operator">*</span><span class="token punctuation">(</span>DelegateType<span class="token punctuation">,</span> ParamType1<span class="token punctuation">,</span> ParamName1<span class="token punctuation">,</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E5%A4%9A%E6%92%AD%E5%A7%94%E6%89%98-%26-%E5%8A%A8%E6%80%81%E5%A4%9A%E6%92%AD%E5%A7%94%E6%89%98" tabindex="-1"><a class="header-anchor" href="#多播委托-动态多播委托">#</a>多播委托 &amp; 动态多播委托</h2>
+<h2 id="多播委托-动态多播委托"><a class="header-anchor" href="#多播委托-动态多播委托">#</a>多播委托 &amp; 动态多播委托</h2>
 <p>多播则是允许绑定多个可调用对象，但不支持返回值和反射。</p>
 <p>动态多播同样需要用 <code>UFUNCTION()</code> 修饰，但支持反射以及序列化，也就是可以在蓝图中进行绑定，此时需要使用 <code>BlueprintAssignable</code> 修饰符。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>多播委托</span></div><code class="language-cpp"><span class="token comment">/**
@@ -394,7 +394,7 @@
  * 相当于定义了一个继承自 TBaseDynamicMulticastDelegate 的类
  */</span>
 <span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">DECLARE_DYNAMIC_MULTICAST_DELEGATE</span><span class="token expression"><span class="token operator">*</span><span class="token punctuation">(</span>DelegateType<span class="token punctuation">,</span> ParamType1<span class="token punctuation">,</span> ParamName1<span class="token punctuation">,</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E4%BA%8B%E4%BB%B6" tabindex="-1"><a class="header-anchor" href="#事件">#</a>事件</h2>
+<h2 id="事件"><a class="header-anchor" href="#事件">#</a>事件</h2>
 <p>除了上面 7 个宏族，UE 里还有一种声明方式是 <code>DECLARE_EVENT*()</code>。它和多播很像，但指定了 Owner，即只能在 Owner 类的成员函数中调用 <code>BroadCast()</code>。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>EVENT 委托源码</span></div><code class="language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name function">FUNC_DECLARE_EVENT</span><span class="token expression"><span class="token punctuation">(</span> OwningType<span class="token punctuation">,</span> EventName<span class="token punctuation">,</span> ReturnType<span class="token punctuation">,</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token punctuation">)</span> </span><span class="token punctuation">\</span>
   <span class="token expression"><span class="token keyword">class</span> <span class="token class-name">EventName</span> <span class="token operator">:</span> <span class="token keyword">public</span> TMulticastDelegate<span class="token operator">&lt;</span><span class="token function">ReturnType</span><span class="token punctuation">(</span>__VA_ARGS__<span class="token punctuation">)</span><span class="token operator">&gt;</span> </span><span class="token punctuation">\</span>
@@ -402,8 +402,8 @@
     <span class="token expression"><span class="token keyword">friend</span> <span class="token keyword">class</span> <span class="token class-name">OwningType</span><span class="token punctuation">;</span> </span><span class="token punctuation">\</span>
   <span class="token expression"><span class="token punctuation">}</span><span class="token punctuation">;</span></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>可以看到用了友元类来进行访问权限的控制。</p>
-<h2 id="%E7%BB%91%E5%AE%9A-%26-%E8%A7%A3%E7%BB%91" tabindex="-1"><a class="header-anchor" href="#绑定-解绑">#</a>绑定 &amp; 解绑</h2>
-<h3 id="%E9%9D%9E%E5%8A%A8%E6%80%81%E5%A7%94%E6%89%98" tabindex="-1"><a class="header-anchor" href="#非动态委托">#</a>非动态委托</h3>
+<h2 id="绑定-解绑"><a class="header-anchor" href="#绑定-解绑">#</a>绑定 &amp; 解绑</h2>
+<h3 id="非动态委托"><a class="header-anchor" href="#非动态委托">#</a>非动态委托</h3>
 <p><code>Bind*()</code> 系用于单播绑定，<code>Add*()</code> 系用于多播绑定。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>非动态委托</span></div><code class="language-cpp"><span class="token comment">/* 绑定类的静态函数 */</span>
 MyUnicastDelegate<span class="token punctuation">.</span><span class="token function">BindStatic</span><span class="token punctuation">(</span><span class="token comment">/* A static function pointer */</span><span class="token punctuation">,</span> <span class="token comment">/* Parameters */</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -460,7 +460,7 @@ MyMulticastDelegate<span class="token punctuation">.</span><span class="token fu
 <blockquote>
 <p>对于单播而言，后续的绑定会覆盖之前的。</p>
 </blockquote>
-<h3 id="%E5%8A%A8%E6%80%81%E5%A7%94%E6%89%98" tabindex="-1"><a class="header-anchor" href="#动态委托">#</a>动态委托</h3>
+<h3 id="动态委托"><a class="header-anchor" href="#动态委托">#</a>动态委托</h3>
 <p>动态委托绑定的函数必须用 <code>UFUNCTION()</code> 修饰，否则无效。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>动态委托</span></div><code class="language-cpp"><span class="token comment">/* 动态单播 */</span>
 <span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name function">BindDynamic</span><span class="token expression"><span class="token punctuation">(</span> UserObject<span class="token punctuation">,</span> FuncName <span class="token punctuation">)</span> </span><span class="token punctuation">\</span>
@@ -493,7 +493,7 @@ MyMulticastDelegate<span class="token punctuation">.</span><span class="token fu
 
 <span class="token function">RemoveDynamic</span><span class="token punctuation">(</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>这几个其实都是宏定义，而不是类的成员函数（所以 intellisense 没法识别）。</p>
-<h2 id="%E9%80%9A%E7%9F%A5" tabindex="-1"><a class="header-anchor" href="#通知">#</a>通知</h2>
+<h2 id="通知"><a class="header-anchor" href="#通知">#</a>通知</h2>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>通知</span></div><code class="language-cpp"><span class="token comment">/* 单播/动态单播 通知，可能存在函数指针无效的问题，此时会报错 */</span>
 <span class="token function">Execute</span><span class="token punctuation">(</span><span class="token comment">/* Parameters */</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
@@ -685,12 +685,6 @@ MyMulticastDelegate<span class="token punctuation">.</span><span class="token fu
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -699,8 +693,8 @@ MyMulticastDelegate<span class="token punctuation">.</span><span class="token fu
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -716,41 +710,6 @@ MyMulticastDelegate<span class="token punctuation">.</span><span class="token fu
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

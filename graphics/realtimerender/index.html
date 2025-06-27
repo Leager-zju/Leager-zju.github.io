@@ -345,8 +345,8 @@
 </li>
 </ol>
 <img src="gpipe.png" style="zoom:50%">
-<h2 id="%E5%87%A0%E4%BD%95%E9%98%B6%E6%AE%B5" tabindex="-1"><a class="header-anchor" href="#几何阶段">#</a>几何阶段</h2>
-<h3 id="%E9%A1%B6%E7%82%B9%E5%A4%84%E7%90%86" tabindex="-1"><a class="header-anchor" href="#顶点处理">#</a>顶点处理</h3>
+<h2 id="几何阶段"><a class="header-anchor" href="#几何阶段">#</a>几何阶段</h2>
+<h3 id="顶点处理"><a class="header-anchor" href="#顶点处理">#</a>顶点处理</h3>
 <p>我们首先要定义世界中的所有几何体。这些物体是由一系列顶点构成的，在这一阶段我们只需要定义所有顶点的世界位置坐标即可。</p>
 <blockquote>
 <p>无论物体怎么变换，点与点之间的连接关系是保持不变的，同时因为每次处理顶点都是独立的，不需要额外考虑其他，对于计算而言更简便，所以进行这一步速度会相当快。</p>
@@ -356,7 +356,7 @@
 <blockquote>
 <p>此时我们就可以根据需要，进行更多顶点相关的操作，比如<strong>网格细分</strong>、<strong>位移贴图</strong>、<strong>顶点着色</strong>（计算光照信息、纹理采样）等。</p>
 </blockquote>
-<h3 id="%E6%8A%95%E5%BD%B1" tabindex="-1"><a class="header-anchor" href="#投影">#</a>投影</h3>
+<h3 id="投影"><a class="header-anchor" href="#投影">#</a>投影</h3>
 <p>尽管至此 GPU 已经在三维空间中做了很多工作，但我们最终是要在一个二维的屏幕上查看我们渲染出来的图像，这就需要 GPU 把三维空间映射到二维平面上了。为了方便之后的运算，我们需要进行<strong>观测变换</strong>与<strong>投影变换</strong>。这一步是主要是将所有顶点从世界空间映射到相机的「<strong>裁剪空间</strong>」中，涉及到两个关键的变换矩阵。</p>
 <p>由于是左乘矩阵的形式，所以观测变换矩阵先将顶点进行平移，然后执行相机「从末状态到起始状态的逆变换」。其中 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="bold">e</mi></mrow><annotation encoding="application/x-tex">\mathbf{e}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4444em;"></span><span class="mord mathbf">e</span></span></span></span> 表示相机位置，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><mi>g</mi><mo>^</mo></mover></mrow><annotation encoding="application/x-tex">\hat{g}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord accent"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.2222em;"><span class="mord">^</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1944em;"><span></span></span></span></span></span></span></span></span> 表示相机朝向，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><mi>t</mi><mo>^</mo></mover></mrow><annotation encoding="application/x-tex">\hat{t}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8785em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8785em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">t</span></span><span style="top:-3.1841em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1667em;"><span class="mord">^</span></span></span></span></span></span></span></span></span></span> 表示相机上方。</p>
 <p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi mathvariant="bold">M</mi><mrow><mi>v</mi><mi>i</mi><mi>e</mi><mi>w</mi></mrow></msub><mo>=</mo><mrow><mo fence="true">(</mo><mtable rowspacing="0.16em" columnalign="center center center center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>x</mi><mrow><mover accent="true"><mi>g</mi><mo>^</mo></mover><mo>×</mo><mover accent="true"><mi>t</mi><mo>^</mo></mover></mrow></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>y</mi><mrow><mover accent="true"><mi>g</mi><mo>^</mo></mover><mo>×</mo><mover accent="true"><mi>t</mi><mo>^</mo></mover></mrow></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>z</mi><mrow><mover accent="true"><mi>g</mi><mo>^</mo></mover><mo>×</mo><mover accent="true"><mi>t</mi><mo>^</mo></mover></mrow></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>x</mi><mover accent="true"><mi>t</mi><mo>^</mo></mover></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>y</mi><mover accent="true"><mi>t</mi><mo>^</mo></mover></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>z</mi><mover accent="true"><mi>t</mi><mo>^</mo></mover></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>x</mi><mrow><mo>−</mo><mover accent="true"><mi>g</mi><mo>^</mo></mover></mrow></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>y</mi><mrow><mo>−</mo><mover accent="true"><mi>g</mi><mo>^</mo></mover></mrow></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>z</mi><mrow><mo>−</mo><mover accent="true"><mi>g</mi><mo>^</mo></mover></mrow></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd></mtr></mtable><mo fence="true">)</mo></mrow><mrow><mo fence="true">(</mo><mtable rowspacing="0.16em" columnalign="center center center center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mo>−</mo><msub><mi>x</mi><mi>e</mi></msub></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mo>−</mo><msub><mi>y</mi><mi>e</mi></msub></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mo>−</mo><msub><mi>z</mi><mi>e</mi></msub></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd></mtr></mtable><mo fence="true">)</mo></mrow></mrow><annotation encoding="application/x-tex">\mathbf{M}_{view} =
@@ -475,7 +475,7 @@ l0,-1344c-2,-159.3,-10,-310.7,-24,-454c-53.3,-528,-210,-949.7,
 <p>这里是右手系下的透视投影变换矩阵，且相机朝 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>z</mi></mrow><annotation encoding="application/x-tex">z</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.04398em;">z</span></span></span></span> 轴负半轴。</p>
 </blockquote>
 <img src="squish.png" alt="squish" style="zoom:80%">
-<h3 id="%E6%98%A0%E5%B0%84%E4%B8%8E%E8%A3%81%E5%89%AA" tabindex="-1"><a class="header-anchor" href="#映射与裁剪">#</a>映射与裁剪</h3>
+<h3 id="映射与裁剪"><a class="header-anchor" href="#映射与裁剪">#</a>映射与裁剪</h3>
 <p>接下来，我们就需要将立方体中的所有顶点映射到「<strong>屏幕空间</strong>」中，这一步并不困难，只需要简单地进行缩放+平移即可。所执行的变换矩阵如下所示。</p>
 <p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi mathvariant="bold">M</mi><mrow><mi>v</mi><mi>i</mi><mi>e</mi><mi>w</mi><mi>p</mi><mi>o</mi><mi>r</mi><mi>t</mi></mrow></msub><mrow><mo fence="true">(</mo><mtable rowspacing="0.16em" columnalign="center center center center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mfrac><mrow><mi>w</mi><mi>i</mi><mi>d</mi><mi>t</mi><mi>h</mi></mrow><mn>2</mn></mfrac></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mfrac><mrow><mi>w</mi><mi>i</mi><mi>d</mi><mi>t</mi><mi>h</mi></mrow><mn>2</mn></mfrac></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mfrac><mrow><mi>h</mi><mi>e</mi><mi>i</mi><mi>g</mi><mi>h</mi><mi>t</mi></mrow><mn>2</mn></mfrac></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mfrac><mrow><mi>h</mi><mi>e</mi><mi>i</mi><mi>g</mi><mi>h</mi><mi>t</mi></mrow><mn>2</mn></mfrac></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd></mtr></mtable><mo fence="true">)</mo></mrow><mspace linebreak="newline"></mspace></mrow><annotation encoding="application/x-tex">\mathbf{M}_{viewport}
 \left(
@@ -505,11 +505,11 @@ l0,-1344c-2,-159.3,-10,-310.7,-24,-454c-53.3,-528,-210,-949.7,
 <p>其中屏幕空间为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>0</mn><mo separator="true">,</mo><mi>w</mi><mi>i</mi><mi>d</mi><mi>t</mi><mi>h</mi><mo stretchy="false">]</mo><mo>∗</mo><mo stretchy="false">[</mo><mn>0</mn><mo separator="true">,</mo><mi>h</mi><mi>e</mi><mi>i</mi><mi>g</mi><mi>h</mi><mi>t</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[0, width]*[0, height]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.02691em;">w</span><span class="mord mathnormal">i</span><span class="mord mathnormal">d</span><span class="mord mathnormal">t</span><span class="mord mathnormal">h</span><span class="mclose">]</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">h</span><span class="mord mathnormal">e</span><span class="mord mathnormal">i</span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mord mathnormal">h</span><span class="mord mathnormal">t</span><span class="mclose">]</span></span></span></span>。超出屏幕空间外的顶点将被剔除，不参与渲染，同时在线段与屏幕空间边界的交点处生成新的顶点——这就是裁剪。</p>
 <img src="clip.png" style="zoom:50%">
 <p>之后所有顶点的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo separator="true">,</mo><mi>y</mi></mrow><annotation encoding="application/x-tex">x, y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span></span></span></span> 坐标就映射到了屏幕空间中，但是还有 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>z</mi></mrow><annotation encoding="application/x-tex">z</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.04398em;">z</span></span></span></span> 的信息呢！之所以保留这个信息，是因为我们还需要利用 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>z</mi></mrow><annotation encoding="application/x-tex">z</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.04398em;">z</span></span></span></span> 来进行物体之间是否存在遮挡的判断。该判断位于光栅化阶段中。</p>
-<h2 id="%E4%B8%89%E8%A7%92%E5%BD%A2%E5%A4%84%E7%90%86%E9%98%B6%E6%AE%B5" tabindex="-1"><a class="header-anchor" href="#三角形处理阶段">#</a>三角形处理阶段</h2>
+<h2 id="三角形处理阶段"><a class="header-anchor" href="#三角形处理阶段">#</a>三角形处理阶段</h2>
 <p>该阶段做的事很简单，即将顶点进行配对，生成点与点之间的关系，进行三角形的设置。</p>
-<h2 id="%E5%85%89%E6%A0%85%E5%8C%96%E9%98%B6%E6%AE%B5" tabindex="-1"><a class="header-anchor" href="#光栅化阶段">#</a>光栅化阶段</h2>
+<h2 id="光栅化阶段"><a class="header-anchor" href="#光栅化阶段">#</a>光栅化阶段</h2>
 <p>这一阶段主要是判断屏幕上的像素对应到屏幕空间中的哪些内容。</p>
-<h3 id="%E9%87%87%E6%A0%B7" tabindex="-1"><a class="header-anchor" href="#采样">#</a>采样</h3>
+<h3 id="采样"><a class="header-anchor" href="#采样">#</a>采样</h3>
 <p>我们需要遍历所有三角形（仅使用 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo separator="true">,</mo><mi>y</mi></mrow><annotation encoding="application/x-tex">x, y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span></span></span></span> 坐标），判断哪些像素被该三角形包含，这一操作称为<strong>采样(Sample)</strong>。同一三角形包含的所有像素称为<strong>片元(Fragment)</strong>。为了降低开销，我们可以用三角形的 AABB 减少需要判断的像素点。</p>
 <img src="sample.png" alt="所有红色点组成一个 Fragment" style="zoom:70%">
 <blockquote>
@@ -520,27 +520,27 @@ l0,-1344c-2,-159.3,-10,-310.7,-24,-454c-53.3,-528,-210,-949.7,
 <img src="22supersample.png" style="zoom:50%">
 <img src="afterss.png" style="zoom:50%">
 <img src="result.png" style="zoom:50%">
-<h2 id="%E7%89%87%E5%85%83%E5%A4%84%E7%90%86%E9%98%B6%E6%AE%B5" tabindex="-1"><a class="header-anchor" href="#片元处理阶段">#</a>片元处理阶段</h2>
+<h2 id="片元处理阶段"><a class="header-anchor" href="#片元处理阶段">#</a>片元处理阶段</h2>
 <p>这是十分重要的阶段，它将根据顶点的信息，通过「插值」的方式为每个片元计算颜色，比如计算每个片元的光照效果（考虑光照模型、材质和光源等因素）；将纹理映射到片元上；甚至直接根据之前生成的顶点的着色信息进行片元着色……。总而言之，这一步的核心在于着色，或者说「<strong>计算像素 RGB 值</strong>」。对于透射投影，我们需要用到**透射校正插值(Perspetive-Correct-Interpolation)**来正确插值片段的颜色、纹理等信息。</p>
 <blockquote>
 <p>其实是可以和光栅化合并的。但是为了和 GAMES101 的说法对齐，故单独提取出来。</p>
 </blockquote>
-<h3 id="z-buffer" tabindex="-1"><a class="header-anchor" href="#Z-Buffer">#</a>Z-Buffer</h3>
+<h3 id="Z-Buffer"><a class="header-anchor" href="#Z-Buffer">#</a>Z-Buffer</h3>
 <p>有些像素可能会被多个三角形包含，那就要判断包含该像素的若干三角形谁离相机更近了。还记得我们之前说保留了屏幕空间中所有顶点的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>z</mi></mrow><annotation encoding="application/x-tex">z</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.04398em;">z</span></span></span></span> 值，接下来通过插值的方式我们可以获取三角形中任意一点的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>z</mi></mrow><annotation encoding="application/x-tex">z</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.04398em;">z</span></span></span></span> 值。</p>
 <p>Z-Buffer 就是用来存每个像素「最接近相机」的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>z</mi></mrow><annotation encoding="application/x-tex">z</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.04398em;">z</span></span></span></span> 值。对于一个三角形的所有采样点，如果发现某个点 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mi>x</mi><mo separator="true">,</mo><mi>y</mi><mo separator="true">,</mo><mi>z</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(x, y, z)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="mclose">)</span></span></span></span> 对应的深度 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">∣</mi><mi>z</mi><mi mathvariant="normal">∣</mi></mrow><annotation encoding="application/x-tex">|z|</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">∣</span><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="mord">∣</span></span></span></span> 超过 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>Z-Buffer</mtext><mo stretchy="false">(</mo><mi>x</mi><mo separator="true">,</mo><mi>y</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\text{Z-Buffer}(x, y)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">Z-Buffer</span></span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mclose">)</span></span></span></span>，那么就将其舍弃，反之用该点信息更新 Z-Buffer 以及一个叫**帧缓存(Frame Buffer)**的玩意。</p>
 <blockquote>
 <p>帧缓存维护所有像素点对应的像素 RGB 值。</p>
 </blockquote>
 <p>这样一来，帧缓存中的像素值就是经过了遮挡判断后的正确的值。</p>
-<h2 id="%E8%BE%93%E5%87%BA%E5%90%88%E6%88%90%E9%98%B6%E6%AE%B5" tabindex="-1"><a class="header-anchor" href="#输出合成阶段">#</a>输出合成阶段</h2>
+<h2 id="输出合成阶段"><a class="header-anchor" href="#输出合成阶段">#</a>输出合成阶段</h2>
 <p>完成计算/渲染后，经过各种测试，将缓冲中的像素数据发送到显示设备，即可呈现给用户。</p>
 <blockquote>
 <p>GPU 会使用<strong>双重缓冲(Double Buffering)<strong>的策略，即屏幕上显示</strong>前置缓冲(Front Buffer)</strong>，而渲染好的像素值先被送入<strong>后置缓冲(Back Buffer)</strong>。</p>
 </blockquote>
-<h3 id="%E8%A3%81%E5%89%AA%E6%B5%8B%E8%AF%95" tabindex="-1"><a class="header-anchor" href="#裁剪测试">#</a>裁剪测试</h3>
-<h3 id="alpha-%E6%B5%8B%E8%AF%95" tabindex="-1"><a class="header-anchor" href="#Alpha-测试">#</a>Alpha 测试</h3>
-<h3 id="%E6%A8%A1%E6%9D%BF%E6%B5%8B%E8%AF%95" tabindex="-1"><a class="header-anchor" href="#模板测试">#</a>模板测试</h3>
-<h3 id="%E6%B7%B1%E5%BA%A6%E6%B5%8B%E8%AF%95" tabindex="-1"><a class="header-anchor" href="#深度测试">#</a>深度测试</h3>
+<h3 id="裁剪测试"><a class="header-anchor" href="#裁剪测试">#</a>裁剪测试</h3>
+<h3 id="Alpha-测试"><a class="header-anchor" href="#Alpha-测试">#</a>Alpha 测试</h3>
+<h3 id="模板测试"><a class="header-anchor" href="#模板测试">#</a>模板测试</h3>
+<h3 id="深度测试"><a class="header-anchor" href="#深度测试">#</a>深度测试</h3>
 
                 
             </div>
@@ -720,12 +720,6 @@ l0,-1344c-2,-159.3,-10,-310.7,-24,-454c-53.3,-528,-210,-949.7,
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -734,8 +728,8 @@ l0,-1344c-2,-159.3,-10,-310.7,-24,-454c-53.3,-528,-210,-949.7,
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -751,41 +745,6 @@ l0,-1344c-2,-159.3,-10,-310.7,-24,-454c-53.3,-528,-210,-949.7,
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

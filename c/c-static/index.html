@@ -326,7 +326,7 @@ static 修饰的普通变量存储在静态区，其生命周期延长至整个�
             <div id="articleContent">
                 <p><strong><code>static</code></strong> 是 C++ 中很常用的修饰符，它被用来控制变量的存储方式和可见性。</p>
 <span id="more"></span>
-<h2 id="static-%E6%99%AE%E9%80%9A%E5%8F%98%E9%87%8F" tabindex="-1"><a class="header-anchor" href="#static-普通变量">#</a>static 普通变量</h2>
+<h2 id="static-普通变量"><a class="header-anchor" href="#static-普通变量">#</a>static 普通变量</h2>
 <p><code>static</code> 修饰的普通变量存储在<strong>静态区</strong>，其生命周期延长至整个程序结束。只有第一次会执行初始化，若无初始值，则用默认值进行初始化。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Foo</span> <span class="token punctuation">{</span>
  <span class="token keyword">public</span><span class="token operator">:</span>
@@ -349,9 +349,9 @@ static 修饰的普通变量存储在静态区，其生命周期延长至整个�
 <span class="token comment">// End</span>
 <span class="token comment">// ~Foo</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>特别的，<code>static</code> 修饰<strong>全局变量</strong>时，这个全局变量只能在本文件中访问，不能在其它文件中访问，即便是 <code>extern</code> 外部声明也不可以。</p>
-<h2 id="static-%E5%87%BD%E6%95%B0" tabindex="-1"><a class="header-anchor" href="#static-函数">#</a>static 函数</h2>
+<h2 id="static-函数"><a class="header-anchor" href="#static-函数">#</a>static 函数</h2>
 <p><code>static</code> 修饰的函数仅在定义该函数的文件内才能使用。一般在多人开发项目时，为了防止与他人命名空间里的函数重名，可以这么做。</p>
-<h2 id="static-%E7%B1%BB%E6%88%90%E5%91%98%E5%8F%98%E9%87%8F%2F%E7%B1%BB%E6%88%90%E5%91%98%E5%87%BD%E6%95%B0" tabindex="-1"><a class="header-anchor" href="#static-类成员变量-类成员函数">#</a>static 类成员变量/类成员函数</h2>
+<h2 id="static-类成员变量-类成员函数"><a class="header-anchor" href="#static-类成员变量-类成员函数">#</a>static 类成员变量/类成员函数</h2>
 <p><code>static</code> 修饰的类成员变量/类成员函数提供一层<strong>类共享</strong>语义，即该成员变量/函数<strong>不属于任一对象，而是属于整个类</strong>，在内存中只占用一份空间，可直接通过 <code>类名::成员变量名</code> 或 <code>类名::成员函数名</code> 访问，而不需要先创建对象。根据这一特点，静态函数中也就不存在 <code>this</code> 指针，也无法使用非静态成员变量。</p>
 <blockquote>
 <p>非静态成员变量依附于特定的对象，而静态成员函数在类实例化之前就已经分配空间，此时非静态成员变量连个影子都见不到，更别说使用了。</p>
@@ -587,12 +587,6 @@ static 修饰的普通变量存储在静态区，其生命周期延长至整个�
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -601,8 +595,8 @@ static 修饰的普通变量存储在静态区，其生命周期延长至整个�
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -618,41 +612,6 @@ static 修饰的普通变量存储在静态区，其生命周期延长至整个�
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

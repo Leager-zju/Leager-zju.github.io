@@ -326,7 +326,7 @@
             <div id="articleContent">
                 <p>并行计算。<a target="_blank" rel="noopener" href="https://gfxcourses.stanford.edu/cs149/fall23">&gt;&gt;&gt; 传送门 &lt;&lt;&lt;</a></p>
 <span id="more"></span>
-<h2 id="lecture-1%3A-why-parallelism" tabindex="-1"><a class="header-anchor" href="#Lecture-1-Why-Parallelism">#</a>Lecture 1: Why Parallelism</h2>
+<h2 id="Lecture-1-Why-Parallelism"><a class="header-anchor" href="#Lecture-1-Why-Parallelism">#</a>Lecture 1: Why Parallelism</h2>
 <p>很早以前实现并行的性价比并不高，因为人们只需要等最新的 CPU 出来就行。厂商通过以下两种方式提升 CPU 性能：</p>
 <ol>
 <li class="lvl-3">
@@ -338,27 +338,27 @@
 </ol>
 <p>然而时钟频率因为 energy wall 达到瓶颈，ILP 也受限于指令流的设计，我们迫切地需要其他手段来提升程序执行效率，所以需要我们编写代码提高性能。</p>
 <p>所谓并行(Parallelism)，其实可以理解为，在原来<strong>单个时钟周期</strong>内执行单条指令处理单个数据的基础上，实现多个处理器/线程进行合作，从而更快地解决问题。在 CPU 性能一定的情况下，并行能最大化利用 CPU，提升程序执行效率。</p>
-<h2 id="lecture-2%3A-a-modern-multi-core-processor" tabindex="-1"><a class="header-anchor" href="#Lecture-2-A-Modern-Multi-Core-Processor">#</a>Lecture 2: A Modern Multi-Core Processor</h2>
-<h3 id="%E5%B9%B6%E8%A1%8C%E6%89%A7%E8%A1%8C" tabindex="-1"><a class="header-anchor" href="#并行执行">#</a>并行执行</h3>
+<h2 id="Lecture-2-A-Modern-Multi-Core-Processor"><a class="header-anchor" href="#Lecture-2-A-Modern-Multi-Core-Processor">#</a>Lecture 2: A Modern Multi-Core Processor</h2>
+<h3 id="并行执行"><a class="header-anchor" href="#并行执行">#</a>并行执行</h3>
 <p>目前有以下几种并行执行的方式：</p>
-<h4 id="%E8%B6%85%E6%A0%87%E9%87%8F(superscalar)" tabindex="-1"><a class="header-anchor" href="#超标量-Superscalar">#</a>超标量(Superscalar)</h4>
+<h4 id="超标量-Superscalar"><a class="header-anchor" href="#超标量-Superscalar">#</a>超标量(Superscalar)</h4>
 <p>一个时钟周期内执行多条 independent 的指令（其实就是 ILP）。所谓 independent，就是指指令之间不 load/store 同一内存地址/寄存器里的数据。像下面这两条指令就是不 independent 的。</p>
 <img src="1.png" style="zoom:40%">
 <blockquote>
 <p>ILP 的实现需要在一个 CPU core 内包含多个 Data Fetch/Instruction Decode 模块。</p>
 </blockquote>
-<h4 id="%E5%A4%9A%E6%A0%B8(multi-core)" tabindex="-1"><a class="header-anchor" href="#多核-Multi-core">#</a>多核(Multi-core)</h4>
+<h4 id="多核-Multi-core"><a class="header-anchor" href="#多核-Multi-core">#</a>多核(Multi-core)</h4>
 <p>多核确实能提高执行效率，如果不与其他策略配合使用，只会是堆砌成本的下下策，依然没有改变单核效率低下的问题。</p>
 <img src="2.png" style="zoom:40%">
-<h4 id="%E5%8D%95%E4%B8%AA%E6%8C%87%E4%BB%A4%E5%A4%84%E7%90%86%E5%A4%9A%E4%B8%AA%E6%95%B0%E6%8D%AE(simd%2C-single-instruction-multiple-data)" tabindex="-1"><a class="header-anchor" href="#单个指令处理多个数据-SIMD-Single-Instruction-Multiple-Data">#</a>单个指令处理多个数据(SIMD, Single Instruction Multiple Data)</h4>
+<h4 id="单个指令处理多个数据-SIMD-Single-Instruction-Multiple-Data"><a class="header-anchor" href="#单个指令处理多个数据-SIMD-Single-Instruction-Multiple-Data">#</a>单个指令处理多个数据(SIMD, Single Instruction Multiple Data)</h4>
 <p>通过向量的方式进行数据处理。</p>
 <img src="3.png" style="zoom:40%">
 <blockquote>
 <p>SIMD 的实现需要在一个 CPU core 内包含多个 ALU 模块。配合多核能够实现一条指令处理 #core * #ALU 个数据</p>
 </blockquote>
 <p>然而，遇到条件指令(if)时，因为所有 ALU 共享 Decode 模块，所以会出现某些 ALU 不满足条件而无法利用的情况，导致并不能达到 peak performance。最好能进行数据层面的优化，使得同一组 ALU 处理的数据能够满足同一条件。</p>
-<h3 id="%E5%85%B6%E4%BB%96%E7%93%B6%E9%A2%88" tabindex="-1"><a class="header-anchor" href="#其他瓶颈">#</a>其他瓶颈</h3>
-<h4 id="%E6%97%B6%E5%BB%B6(latency)" tabindex="-1"><a class="header-anchor" href="#时延-latency">#</a>时延(latency)</h4>
+<h3 id="其他瓶颈"><a class="header-anchor" href="#其他瓶颈">#</a>其他瓶颈</h3>
+<h4 id="时延-latency"><a class="header-anchor" href="#时延-latency">#</a>时延(latency)</h4>
 <p>当遇到 load/store 等访问内存的指令时，因为数据传输需要时间，称为 <strong>Stall</strong>，只有当数据到达 CPU 后才指令才能继续运行。</p>
 <p><strong>解决方案</strong>：</p>
 <ol>
@@ -372,13 +372,13 @@
 </blockquote>
 </li>
 </ol>
-<h4 id="%E5%B8%A6%E5%AE%BD(bandwidth)" tabindex="-1"><a class="header-anchor" href="#带宽-bandwidth">#</a>带宽(bandwidth)</h4>
+<h4 id="带宽-bandwidth"><a class="header-anchor" href="#带宽-bandwidth">#</a>带宽(bandwidth)</h4>
 <p>CPU 依靠总线(bus)单位时间内最多可以从内存中获取的数据量。一旦某次计算所需数据量过大，带宽也将成为限制。</p>
 <p><strong>解决方案</strong>：</p>
 <p>减少数据从内存读取的次数，比如用 Cache。</p>
-<h2 id="lecture-3%3A-parallel-programming-abstractions" tabindex="-1"><a class="header-anchor" href="#Lecture-3-Parallel-Programming-Abstractions">#</a>Lecture 3: Parallel Programming Abstractions</h2>
-<h3 id="abstractions-vs-implementation" tabindex="-1"><a class="header-anchor" href="#Abstractions-vs-implementation">#</a>Abstractions vs implementation</h3>
-<h3 id="three-models-of-communication" tabindex="-1"><a class="header-anchor" href="#Three-models-of-communication">#</a>Three models of communication</h3>
+<h2 id="Lecture-3-Parallel-Programming-Abstractions"><a class="header-anchor" href="#Lecture-3-Parallel-Programming-Abstractions">#</a>Lecture 3: Parallel Programming Abstractions</h2>
+<h3 id="Abstractions-vs-implementation"><a class="header-anchor" href="#Abstractions-vs-implementation">#</a>Abstractions vs implementation</h3>
+<h3 id="Three-models-of-communication"><a class="header-anchor" href="#Three-models-of-communication">#</a>Three models of communication</h3>
 
                 
             </div>
@@ -561,12 +561,6 @@
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -575,8 +569,8 @@
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -592,41 +586,6 @@
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

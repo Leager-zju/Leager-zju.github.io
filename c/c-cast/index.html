@@ -328,7 +328,7 @@
                 <p>当表达式期望为 <code>T</code> 类型，而我们只能产生 <code>S</code> 类型的表达式时，就需要利用<strong>类型转换</strong>功能来满足需求。</p>
 <span id="more"></span>
 <p>传统的转换总结来说分为<strong>隐式</strong>与<strong>显式</strong>两种。</p>
-<h2 id="%E9%9A%90%E5%BC%8F%E8%BD%AC%E6%8D%A2" tabindex="-1"><a class="header-anchor" href="#隐式转换">#</a>隐式转换</h2>
+<h2 id="隐式转换"><a class="header-anchor" href="#隐式转换">#</a>隐式转换</h2>
 <p>凡是在语境中使用了某种表达式类型 <code>T1</code>，但语境不接受该类型，而接受另一类型 <code>T2</code> 的时候，会进行<strong>隐式转换</strong>。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>隐式转换</span></div><code class="language-cpp"><span class="token keyword">int</span> a <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
 <span class="token keyword">long</span> <span class="token keyword">long</span> b <span class="token operator">=</span> a <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">;</span> <span class="token comment">// int -&gt; long long</span>
@@ -354,16 +354,16 @@
 </ul>
 <p>综上所述，在不同编译器标准下，答案分别为 2 2 1。</p>
 </blockquote>
-<h2 id="%E6%98%BE%E5%BC%8F%E8%BD%AC%E6%8D%A2" tabindex="-1"><a class="header-anchor" href="#显式转换">#</a>显式转换</h2>
+<h2 id="显式转换"><a class="header-anchor" href="#显式转换">#</a>显式转换</h2>
 <p>显式转换就是在表达式之前加上想要转换的目标类型。</p>
-<h3 id="cast-in-c" tabindex="-1"><a class="header-anchor" href="#Cast-in-C">#</a>Cast in C</h3>
+<h3 id="Cast-in-C"><a class="header-anchor" href="#Cast-in-C">#</a>Cast in C</h3>
 <p>C 中的类型转换语法非常简单粗暴，直接在表达式前加上 <code>(Target_Type)</code> 即可，如：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>显式转换</span></div><code class="language-cpp"><span class="token keyword">double</span> pi <span class="token operator">=</span> <span class="token number">3.14</span><span class="token punctuation">;</span>
 <span class="token keyword">int</span> p <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">)</span>pi<span class="token punctuation">;</span>
 std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> p<span class="token punctuation">;</span> <span class="token comment">// output: 3</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <p>但这种粗暴的强转会带来许多难以察觉的安全性问题。于是，C++ 提供了许多应用场景更广泛的转换算子，用于删除 C 语言转换中的一些多义性和危险继承。</p>
-<h3 id="cast-in-c%2B%2B" tabindex="-1"><a class="header-anchor" href="#Cast-in-C-2">#</a>Cast in C++</h3>
-<h4 id="static_cast" tabindex="-1"><a class="header-anchor" href="#static-cast">#</a>static_cast</h4>
+<h3 id="Cast-in-C-2"><a class="header-anchor" href="#Cast-in-C-2">#</a>Cast in C++</h3>
+<h4 id="static-cast"><a class="header-anchor" href="#static-cast">#</a>static_cast</h4>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token generic-function"><span class="token function">static_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span>new_type<span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span>expr<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>该算子实现的效果与 C 中的强转差不多，但由于<strong>没有</strong>在运行时进行类型检查来确保安全性，故跟 <strong>Cast in C</strong> 一样存在隐患，用于<strong>非多态对象</strong>的转换。</p>
 <blockquote>
@@ -386,7 +386,7 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
                                 <span class="token comment">// 如果此时 pb 指向一个非 D 类对象，则调用 pd1-&gt;val 出错。</span>
   B<span class="token operator">*</span> pb1 <span class="token operator">=</span> <span class="token generic-function"><span class="token function">static_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span>B<span class="token operator">*</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span>pd<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// safe! 基类指针一定能指向所有派生类</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h4 id="dynamic_cast" tabindex="-1"><a class="header-anchor" href="#dynamic-cast">#</a>dynamic_cast</h4>
+<h4 id="dynamic-cast"><a class="header-anchor" href="#dynamic-cast">#</a>dynamic_cast</h4>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token generic-function"><span class="token function">dynamic_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span>new_type<span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span>expr<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 其中 new_type/expr 必须为指针或引用。若 new_type 为指针，则 expr 必须为指针；如为引用，则 expr 为左值</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>与 <code>static_cast</code> 相对，<code>dynamic_cast</code> 在运行时执行类型检查，故用于<strong>多态对象</strong>的<strong>向上</strong>转换，且更加安全。具体表现为：</p>
 <ul class="lvl-0">
@@ -518,7 +518,7 @@ A<span class="token operator">*</span> pa <span class="token operator">=</span> 
 <p>事实上，如果 <code>new_type</code> 与 <code>expr</code> 所指代的指针/引用类型处于同一层次（比如这里的 <code>D</code> 与 <code>B</code>），并且 <code>expr</code> 所指向/绑定的对象为它俩的共同派生类，则可以进行<strong>横向转换</strong>，比如：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp">B<span class="token operator">*</span> pb <span class="token operator">=</span> <span class="token generic-function"><span class="token function">dynamic_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span>B<span class="token operator">*</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span>pd<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>在一些更复杂的类层次结构中，<strong>横向转换</strong>可以极大地提高 coding 效率。</p>
-<h4 id="reinterpret_cast" tabindex="-1"><a class="header-anchor" href="#reinterpret-cast">#</a>reinterpret_cast</h4>
+<h4 id="reinterpret-cast"><a class="header-anchor" href="#reinterpret-cast">#</a>reinterpret_cast</h4>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token generic-function"><span class="token function">reinterpret_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span>new_type<span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span>expr<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p><code>reinterpret_cast</code> 通过对底层比特位重新解读来进行类型间的转换。当然，这也是不安全的，需要程序员手动检查。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>reinterpret_cast</span></div><code class="language-cpp"><span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -529,7 +529,7 @@ A<span class="token operator">*</span> pa <span class="token operator">=</span> 
 <span class="token comment">// output:</span>
 <span class="token comment">// 0000000169AFFD5C</span>
 <span class="token comment">// 6068108636</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h4 id="const_cast" tabindex="-1"><a class="header-anchor" href="#const-cast">#</a>const_cast</h4>
+<h4 id="const-cast"><a class="header-anchor" href="#const-cast">#</a>const_cast</h4>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token generic-function"><span class="token function">const_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span>new_type<span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span>expr<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p><code>const_cast</code> 最大特点就在于它可以移除 <code>expr</code> 的 cv 限定，这是其余几个算子都做不到的。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>const_cast</span></div><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">A</span> <span class="token punctuation">{</span>
@@ -565,7 +565,7 @@ A<span class="token operator">*</span> pa <span class="token operator">=</span> 
 <span class="token comment">// output:</span>
 <span class="token comment">// a = 1 *pa = 2 ra = 2</span>
 <span class="token comment">// a = 1 *pa = 3 ra = 3</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E7%94%A8%E6%88%B7%E5%AE%9A%E4%B9%89%E8%BD%AC%E6%8D%A2" tabindex="-1"><a class="header-anchor" href="#用户定义转换">#</a>用户定义转换</h2>
+<h2 id="用户定义转换"><a class="header-anchor" href="#用户定义转换">#</a>用户定义转换</h2>
 <p>在现代 C++ 中，传统转换已然无法轻易满足日益增长的应用需求，需要用户自己制定转换规则，来提高代码效率。</p>
 <p>但用户能修改的只有两种，初始化构造函数与用户定义转换函数。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>User Defined Cast</span></div><code class="language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;iostream&gt;</span></span>
@@ -600,8 +600,8 @@ A<span class="token operator">*</span> pa <span class="token operator">=</span> 
 <span class="token comment">// call operator int()</span>
 <span class="token comment">// call explicit operator int* ()</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>有了这一功能，我们就能轻易地使用 <code>operator bool()</code> 来将某些类对象直接嵌到条件判断表达式中——直接通过自定义规则隐式转换为可被接收的 <code>bool</code> 类型。</p>
-<h2 id="%E8%BF%90%E8%A1%8C%E6%97%B6%E7%B1%BB%E5%9E%8B%E4%BF%A1%E6%81%AF(rtti)" tabindex="-1"><a class="header-anchor" href="#运行时类型信息-RTTI">#</a>运行时类型信息(RTTI)</h2>
-<h3 id="typeid-%E7%AE%97%E5%AD%90" tabindex="-1"><a class="header-anchor" href="#typeid-算子">#</a>typeid 算子</h3>
+<h2 id="运行时类型信息-RTTI"><a class="header-anchor" href="#运行时类型信息-RTTI">#</a>运行时类型信息(RTTI)</h2>
+<h3 id="typeid-算子"><a class="header-anchor" href="#typeid-算子">#</a>typeid 算子</h3>
 <blockquote>
 <p>定义于头文件 <code>&lt;typeinfo&gt;</code></p>
 </blockquote>
@@ -662,7 +662,7 @@ A<span class="token operator">*</span> pa <span class="token operator">=</span> 
 <p>这是因为这里的 <code>Base</code> 为多态对象，当应用于多态类型的表达式时，<code>typeid</code> 的求值会对表达式求值，并指代表示该表达式动态类型的对象，这涉及运行时开销（虚表查找）。这里如果表达式是通过对一个指针解引用所得，且该指针是空指针值，那么就会抛出 <code>std::bad_typeid</code> 异常。</p>
 <p>而其他情况下 <code>typeid</code> 表达式都在编译时解决，不会对表达式求值。</p>
 <p>了解了这一点，也就基本知道 <code>dynamic_cast</code> 的原理了——其实它就是利用 <strong>RTTI</strong> 去判断一个指针实际所指的对象类型，这依赖于虚函数表，故仅用于多态类型的转换，无法对非多态对象执行 <code>dynamic_cast</code>。</p>
-<h3 id="type_info" tabindex="-1"><a class="header-anchor" href="#type-info">#</a>type_info</h3>
+<h3 id="type-info"><a class="header-anchor" href="#type-info">#</a>type_info</h3>
 <p>上面说到 <code>typeid</code> 会返回一个 <code>type_info</code> 类，实际上它保有一个类型的实现指定信息，包括类型的名称和比较二个类型相等的方法或相对顺序。定义如下：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">type_info</span> <span class="token punctuation">{</span>
 <span class="token keyword">public</span><span class="token operator">:</span>
@@ -679,7 +679,7 @@ A<span class="token operator">*</span> pa <span class="token operator">=</span> 
   type_info<span class="token operator">&amp;</span> <span class="token keyword">operator</span><span class="token operator">=</span><span class="token punctuation">(</span><span class="token keyword">const</span> type_info<span class="token operator">&amp;</span> rhs<span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token keyword">delete</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>每个类型的 <code>type_info</code> 是独一无二的，故禁止了拷贝。除了之前提过的 <code>name()</code> 方法，在这里我仅关注 <code>operator=</code> 算子，另外两个不作深究。而 <code>operator=</code> 主要是检查对象是否指代相同类型，这个会经常用到，通常用于比较两个带有虚函数的类的对象是否相等。</p>
-<h3 id="rtti-%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86" tabindex="-1"><a class="header-anchor" href="#RTTI-底层原理">#</a>RTTI 底层原理</h3>
+<h3 id="RTTI-底层原理"><a class="header-anchor" href="#RTTI-底层原理">#</a>RTTI 底层原理</h3>
 <p>在一个多态对象的内存模型中，最开始就会放一个指向虚表的虚表指针 <code>vptr</code>，而在虚表的 <strong><code>-1</code></strong> 索引处保有一个 <code>type_info*</code> 条目，其指向的 <code>type_info</code> 保存着该多态对象的类型信息。<code>typeid</code> 会判断出表达式是否为一个多态对象，若是，则不断地深入内存，进行虚表指针 -&gt; 类型信息指针 -&gt; 类型信息层层递进，最后找到 <code>type_info</code> 并返回；而非多态对象则没有虚表这一概念，直接在编译期求得静态类型即可。</p>
 
                 
@@ -860,12 +860,6 @@ A<span class="token operator">*</span> pa <span class="token operator">=</span> 
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -874,8 +868,8 @@ A<span class="token operator">*</span> pa <span class="token operator">=</span> 
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -891,41 +885,6 @@ A<span class="token operator">*</span> pa <span class="token operator">=</span> 
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

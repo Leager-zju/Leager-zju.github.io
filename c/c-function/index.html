@@ -327,10 +327,10 @@ auto func = [ 捕获 ] ( 参数列表 ) 可选说明符 -&amp;gt; 返">
             <div id="articleContent">
                 <p>C++11 新增了若干使<strong>函数调用</strong>更加方便的特性。</p>
 <span id="more"></span>
-<h2 id="lambda-%E8%A1%A8%E8%BE%BE%E5%BC%8F" tabindex="-1"><a class="header-anchor" href="#lambda-表达式">#</a>lambda 表达式</h2>
+<h2 id="lambda-表达式"><a class="header-anchor" href="#lambda-表达式">#</a>lambda 表达式</h2>
 <p>lambda 表达式是<strong>闭包类型</strong>的<strong>纯右值</strong>变量，也可以称之为<a target="_blank" rel="noopener" href="https://www.google.com.hk/url?sa=t&amp;rct=j&amp;q=&amp;esrc=s&amp;source=web&amp;cd=&amp;ved=2ahUKEwijk6yxhNP8AhVY7XMBHQtYCeQQFnoECAwQAQ&amp;url=https%3A%2F%2Fzh.wikipedia.org%2Fwiki%2F%25E5%258C%25BF%25E5%2590%258D%25E5%2587%25BD%25E6%2595%25B0&amp;usg=AOvVaw0TjqSvvMd1ENd3yfCUYuz-"><strong>匿名函数</strong></a>。其基本用法为：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">auto</span> func <span class="token operator">=</span> <span class="token punctuation">[</span> 捕获 <span class="token punctuation">]</span> <span class="token punctuation">(</span> 参数列表 <span class="token punctuation">)</span> 可选说明符 <span class="token operator">-&gt;</span> 返回值类型 <span class="token punctuation">{</span> 函数体 <span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<h3 id="%E6%8D%95%E8%8E%B7" tabindex="-1"><a class="header-anchor" href="#捕获">#</a>捕获</h3>
+<h3 id="捕获"><a class="header-anchor" href="#捕获">#</a>捕获</h3>
 <p>换句话说就是能够在函数体内使用捕获的变量。lambda 表达式支持以下捕获方式：</p>
 <ul class="lvl-0">
 <li class="lvl-2">
@@ -355,7 +355,7 @@ auto func = [ 捕获 ] ( 参数列表 ) 可选说明符 -&amp;gt; 返">
 </blockquote>
 </li>
 </ul>
-<h3 id="%E5%8F%AF%E9%80%89%E8%AF%B4%E6%98%8E%E7%AC%A6" tabindex="-1"><a class="header-anchor" href="#可选说明符">#</a>可选说明符</h3>
+<h3 id="可选说明符"><a class="header-anchor" href="#可选说明符">#</a>可选说明符</h3>
 <p>在 C++11 中，说明符只有 <code>mutable</code>。不加上该说明符，编译器会将值捕获的对象视为<strong>常量</strong>，只能调用其 const 成员函数；只有加上后，捕获对象的 const 限定消除，才能修改值捕获的对象，以及调用它们的非 const 成员函数。就像这样：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">A</span> <span class="token punctuation">{</span>
   <span class="token keyword">public</span><span class="token operator">:</span>
@@ -380,14 +380,14 @@ A a<span class="token punctuation">;</span>
   a<span class="token punctuation">.</span><span class="token function">foo</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   a<span class="token punctuation">.</span><span class="token function">bar</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="%E5%BB%B6%E8%BF%9F%E8%B0%83%E7%94%A8" tabindex="-1"><a class="header-anchor" href="#延迟调用">#</a>延迟调用</h3>
+<h3 id="延迟调用"><a class="header-anchor" href="#延迟调用">#</a>延迟调用</h3>
 <p>在值捕获的情况下，除了会将捕获的对象视为 const，还会发生下面这种情况：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">int</span> a <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
 <span class="token keyword">auto</span> f <span class="token operator">=</span> <span class="token punctuation">[</span>a<span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> a<span class="token punctuation">;</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
 a<span class="token operator">++</span><span class="token punctuation">;</span>
 <span class="token function">f</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 输出 0</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 <p>从这个例子中不难发现，在捕获阶段 lambda 表达式的相关变量值就已经确定，尽管之后发生了修改，表达式内的变量也不会随之改变，这就是值捕获的<strong>延迟特性</strong>。如果希望值随着外部变化一起修改，则需要采用<strong>引用捕获</strong>。</p>
-<h3 id="%E6%82%AC%E5%9E%82%E5%BC%95%E7%94%A8" tabindex="-1"><a class="header-anchor" href="#悬垂引用">#</a>悬垂引用</h3>
+<h3 id="悬垂引用"><a class="header-anchor" href="#悬垂引用">#</a>悬垂引用</h3>
 <p>值捕获存在这样那样的注意事项，但引用捕获也并不是完美的。当引用捕获的对象在 lambda 表达式调用之前就已经因生命周期结束而被回收时，此时若在 lambda 表达式中使用该对象，那么会发生<strong>未定义行为</strong>。比如：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">A</span> <span class="token punctuation">{</span>
  <span class="token keyword">public</span><span class="token operator">:</span>
@@ -399,10 +399,10 @@ A<span class="token operator">*</span> a <span class="token operator">=</span> <
 
 <span class="token function">f</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 不一定报错，但 Undefined behavior</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>lambda 并不能延长对象的生命周期，这是值得注意的。</p>
-<h3 id="%E6%80%9D%E8%80%83" tabindex="-1"><a class="header-anchor" href="#思考">#</a>思考</h3>
+<h3 id="思考"><a class="header-anchor" href="#思考">#</a>思考</h3>
 <p>lambda 表达式作为一种变量存在，其又能通 <code>operator()</code> 来进行函数体的调用，不难发现，它与<strong>仿函数</strong>很像，即重载了 <code>operator()</code> 的类（<strong>函数对象</strong>），而该类的构造函数以及成员变量也由 lambda 表达式的捕获符来决定。</p>
 <p>相比于传统函数，lambda 表达式胜在简洁方便，就地定义，让程序员更加灵活自由地在诸如 <code>std::sort</code> 等函数下编写自定义规则。由于不少语言都开始加入了匿名函数的特性，一定程度上揭示了未来编程的趋势。</p>
-<h2 id="std%3A%3Afunction" tabindex="-1"><a class="header-anchor" href="#std-function">#</a>std::function</h2>
+<h2 id="std-function"><a class="header-anchor" href="#std-function">#</a>std::function</h2>
 <blockquote>
 <p>使用 <code>std::function</code> 需包含 <code>&lt;functional&gt;</code> 头文件。</p>
 </blockquote>
@@ -414,11 +414,11 @@ A<span class="token operator">*</span> a <span class="token operator">=</span> <
 <blockquote>
 <p>跟秦始皇统一六国差不多(bushi</p>
 </blockquote>
-<h3 id="std%3A%3Afuntion%3A%3Aoperator()" tabindex="-1"><a class="header-anchor" href="#std-funtion-operator">#</a>std::funtion::operator()</h3>
+<h3 id="std-funtion-operator"><a class="header-anchor" href="#std-funtion-operator">#</a>std::funtion::operator()</h3>
 <p>函数原型为：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp">R <span class="token keyword">operator</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">(</span> Args<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> args <span class="token punctuation">)</span> <span class="token keyword">const</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>等效于进行 <code>INVOKE&lt;R&gt;(f, std::forward&lt;Args&gt;(args)...) </code>，其中 <code>f</code> 是实例目标，相当于是将收到的参数包<strong>转发</strong>给目标可调用对象，实际操作依然为 <code>f(args)</code>。</p>
-<h3 id="%E5%8F%AF%E8%B0%83%E7%94%A8%E5%AF%B9%E8%B1%A1" tabindex="-1"><a class="header-anchor" href="#可调用对象">#</a>可调用对象</h3>
+<h3 id="可调用对象"><a class="header-anchor" href="#可调用对象">#</a>可调用对象</h3>
 <p>先来说说什么是可调用对象。可调用对象简单来说就是给定合适的参数列表，其能够返回某个值。常见的可调用对象有以下几种：</p>
 <ul class="lvl-0">
 <li class="lvl-2">
@@ -440,7 +440,7 @@ A<span class="token operator">*</span> a <span class="token operator">=</span> <
 <p><code>std::bind</code> 表达式；</p>
 </li>
 </ul>
-<h3 id="%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95" tabindex="-1"><a class="header-anchor" href="#使用方法">#</a>使用方法</h3>
+<h3 id="使用方法"><a class="header-anchor" href="#使用方法">#</a>使用方法</h3>
 <ul class="lvl-0">
 <li class="lvl-2">
 <p>存储<strong>函数</strong></p>
@@ -522,12 +522,12 @@ h <span class="token operator">=</span> std<span class="token double-colon punct
 <span class="token function">h</span><span class="token punctuation">(</span><span class="token number">4</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 相当于调用 foo.foobar(4)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 </li>
 </ul>
-<h3 id="%E6%80%9D%E8%80%83-1" tabindex="-1"><a class="header-anchor" href="#思考-2">#</a>思考</h3>
+<h3 id="思考-2"><a class="header-anchor" href="#思考-2">#</a>思考</h3>
 <p>于是乎，如果希望某一函数能够接受一个可调用对象的形参，实际传参时再也不用纠结是传函数指针还是 lambda 表达式了，一个 <code>std::function</code> 统统搞定。</p>
-<h2 id="std%3A%3Abind" tabindex="-1"><a class="header-anchor" href="#std-bind">#</a>std::bind</h2>
+<h2 id="std-bind"><a class="header-anchor" href="#std-bind">#</a>std::bind</h2>
 <p><code>std::bind</code> 将部分<strong>固定参数</strong> <code>args</code> 和可调用对象 <code>f</code> 绑定到一起生成一个新的可调用对象（或称<strong>转发器</strong>） <code>binder</code>，剩下的未绑定参数被 <code>std::placeholders</code> 的占位符 <code>_1, _2, _3...</code> 所替换。调用 <code>binder</code> 时，参数会被转发给 <code>f</code>，事实上调用的还是 <code>f</code>。</p>
 <p>乍一眼看上去这与 <code>std::function</code> 相性非常相似，事实上 <code>std::bind</code> 生成的转发器可以由 <code>std::function</code> 接纳存储，以便随时调用，就和上面示例的那样。</p>
-<h3 id="%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95-1" tabindex="-1"><a class="header-anchor" href="#使用方法-2">#</a>使用方法</h3>
+<h3 id="使用方法-2"><a class="header-anchor" href="#使用方法-2">#</a>使用方法</h3>
 <p>先上例子：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">void</span> <span class="token function">foo</span><span class="token punctuation">(</span><span class="token keyword">int</span> i<span class="token punctuation">,</span> <span class="token keyword">int</span> j<span class="token punctuation">,</span> <span class="token keyword">int</span> k<span class="token punctuation">)</span> <span class="token punctuation">{</span>
   std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> i <span class="token operator">+</span> j <span class="token operator">+</span> k<span class="token punctuation">;</span>
@@ -551,7 +551,7 @@ std<span class="token double-colon punctuation">::</span>function<span class="to
 <blockquote>
 <p>内层的 <code>std::bind(bar, 9)</code> 会先转发给可调用对象 <code>bar</code>，获取返回值后再让外层转发。</p>
 </blockquote>
-<h2 id="%E6%80%BB%E7%BB%93" tabindex="-1"><a class="header-anchor" href="#总结">#</a>总结</h2>
+<h2 id="总结"><a class="header-anchor" href="#总结">#</a>总结</h2>
 <p>以上三种特性让用户进行函数调用时更灵活自由，极大的提高了编程效率。</p>
 
                 
@@ -732,12 +732,6 @@ std<span class="token double-colon punctuation">::</span>function<span class="to
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -746,8 +740,8 @@ std<span class="token double-colon punctuation">::</span>function<span class="to
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -763,41 +757,6 @@ std<span class="token double-colon punctuation">::</span>function<span class="to
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

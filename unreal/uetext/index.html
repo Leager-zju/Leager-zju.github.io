@@ -326,7 +326,7 @@ C++ 支持两种字符集，ANSI 和 Unicode，实际对应的字符类型分别
             <div id="articleContent">
                 <p>在 UE 中主要有三种字符串实现，分别是 <code>FName</code>，<code>FText</code>，<code>FString</code>。参考官方文档，对这三种实现进行深入剖析。</p>
 <span id="more"></span>
-<h2 id="tchar" tabindex="-1"><a class="header-anchor" href="#TCHAR">#</a>TCHAR</h2>
+<h2 id="TCHAR"><a class="header-anchor" href="#TCHAR">#</a>TCHAR</h2>
 <p>C++ 支持两种字符集，ANSI 和 Unicode，实际对应的字符类型分别是 <code>char</code> 和 <code>wchar_t</code>。为了在不同平台环境下，使用不同的字符类型，UE 使用 <code>TCHAR</code> 对 <code>char</code> 和 <code>wchar_t</code> 进行封装，将其中的操作进行了统一，使程序具有可移植性。</p>
 <blockquote>
 <p>Either ANSICHAR or WIDECHAR, depending on whether the platform supports wide characters or the requirements of the licensee.</p>
@@ -352,7 +352,7 @@ C++ 支持两种字符集，ANSI 和 Unicode，实际对应的字符类型分别
 <span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name function">UTF8TEXT</span><span class="token expression"><span class="token punctuation">(</span>x<span class="token punctuation">)</span> <span class="token punctuation">(</span>UE<span class="token double-colon punctuation">::</span>Core<span class="token double-colon punctuation">::</span><span class="token class-name">Private</span><span class="token double-colon punctuation">::</span><span class="token function">ToUTF8Literal</span><span class="token punctuation">(</span><span class="token function">UTF8TEXT_PASTE</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span></span></span>
 <span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name function">WIDETEXT</span><span class="token expression"><span class="token punctuation">(</span>str<span class="token punctuation">)</span> <span class="token function">WIDETEXT_PASTE</span><span class="token punctuation">(</span>str<span class="token punctuation">)</span></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>不难发现，会根据 <code>PLATFORM_TCHAR_IS_UTF8CHAR</code> 这个宏来选择相应的编码方式。而 UE 中的所有字符串都作为 FString 或 TCHAR 数组以 UTF-16 格式存储在内存中，所以内部设置字符串变量文字时应使用 <code>TEXT()</code> 宏。</p>
-<h3 id="%E7%BC%96%E7%A0%81%E8%BD%AC%E6%8D%A2" tabindex="-1"><a class="header-anchor" href="#编码转换">#</a>编码转换</h3>
+<h3 id="编码转换"><a class="header-anchor" href="#编码转换">#</a>编码转换</h3>
 <p>UE 提供了一些宏，可以将字符串转换为各种编码或从各种编码转换字符串。这些宏使用局部范围内声明的类实例，并在堆栈上分配空间，因此<strong>保留</strong>指向这些宏的指针非常重要。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token comment">// TCHAR* -&gt; char*</span>
 <span class="token function">TCHAR_TO_ANSI</span><span class="token punctuation">(</span>TcharString<span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -362,9 +362,9 @@ C++ 支持两种字符集，ANSI 和 Unicode，实际对应的字符类型分别
 <span class="token function">ANSI_TO_TCHAR</span><span class="token punctuation">(</span>CharString<span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token comment">// wchar_t* -&gt; TCHAR*</span>
 <span class="token function">UTF8_TO_TCHAR</span><span class="token punctuation">(</span>WChartString<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="fname" tabindex="-1"><a class="header-anchor" href="#FName">#</a>FName</h2>
+<h2 id="FName"><a class="header-anchor" href="#FName">#</a>FName</h2>
 <p>FName 在语义上指的是资源的<strong>名字</strong>。其具有<strong>大小写不敏感</strong>，<strong>不可变</strong>，<strong>唯一</strong>这三个特性。</p>
-<h3 id="%E5%BA%95%E5%B1%82%E5%AE%9E%E7%8E%B0" tabindex="-1"><a class="header-anchor" href="#底层实现">#</a>底层实现</h3>
+<h3 id="底层实现"><a class="header-anchor" href="#底层实现">#</a>底层实现</h3>
 <p>FName 本质上是一个<strong>索引</strong>，内部只有三个整型变量，而不存储任何字符串内容。</p>
 <p>其唯一性是通过「基于哈希表的存储系统」实现的。在用字符串进行 FName 的构造时，首先会将字符串做一次哈希，映射到哈希表中，并得到在哈希表中的索引号，这样保证不会有重复的字符串出现在表中的同时，又能通过索引号进行快速查询。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>class FName in NameTypes.h</span></div><code class="language-cpp"><span class="token comment">/**
@@ -388,7 +388,7 @@ FNameEntryId	DisplayIndex<span class="token punctuation">;</span><span aria-hidd
 <p>之所以这么搞是因为当在关卡中拷贝一个名为 <code>Name</code> 的 Actor 时，新生成的那份会在名字后面加一个后缀，成为 <code>Name_1</code>。后续的拷贝就是 <code>_2</code>，<code>_3</code>，……如果把每个 Actor 的名字都加入表中，那内存开销就是 O(n)。而如果划分为 string/number 两个部分，就只需要存一份字符串即可，同时又会把 number 部分以 uint32 的形式存储起来，可以用于 compare，大大节省了内存开销。</p>
 </blockquote>
 <p><code>ComparisonIndex</code> 和 <code>DisplayIndex</code> 的区别在于，索引到的 string portion 是否区分大小写。比如 <code>ABC</code> 和 <code>abc</code> 两个 FName，当进行比较时，会用 ComparisonIndex 去 IgnoreCase 的那张表查询，得到的结果一致，认为是两个相同的 FName；而用于显示时，则用 DisplayIndex 去 CaseSensitive 的表查询，这张表存的就是原始字符串了。</p>
-<h3 id="%E4%B8%BA%E4%BD%95%E5%BF%AB" tabindex="-1"><a class="header-anchor" href="#为何快">#</a>为何快</h3>
+<h3 id="为何快"><a class="header-anchor" href="#为何快">#</a>为何快</h3>
 <p>两个 FName 之间的比较并不执行字符串的对比，而是进行<strong>数值</strong>的对比，这可极大地节约 CPU 开销。该数值是通过一个内部函数 <code>ToUnstableInt()</code> 进行计算的，这个函数会将 <code>ComparisonIndex</code> 和 <code>Number</code> 组装成一个 uint64 的值，然后返回。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>NameTypes.h</span></div><code class="language-cpp">FORCEINLINE uint64 <span class="token function">ToUnstableInt</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span>
 <span class="token punctuation">{</span>
@@ -401,19 +401,19 @@ FNameEntryId	DisplayIndex<span class="token punctuation">;</span><span aria-hidd
   <span class="token keyword">return</span> Out<span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>为了优化字符串，在游戏开发过程中，如果可以确定哪些字符串是固定不变的数据且无需考虑文本本地化，应该尽可能对它们使用 FName，只在必要的时候才将 FName 转换为其他字符串类型进行操作。</p>
-<h3 id="%E6%9F%A5%E6%89%BE%E4%B8%8E%E6%B7%BB%E5%8A%A0" tabindex="-1"><a class="header-anchor" href="#查找与添加">#</a>查找与添加</h3>
+<h3 id="查找与添加"><a class="header-anchor" href="#查找与添加">#</a>查找与添加</h3>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token comment">// 若不在表中，则构造函数结果为 NAME_None/FName()，但不进行添加。</span>
 FName res1 <span class="token operator">=</span> <span class="token function">FName</span><span class="token punctuation">(</span><span class="token function">TEXT</span><span class="token punctuation">(</span><span class="token string">"foo"</span><span class="token punctuation">)</span><span class="token punctuation">,</span> FNAME_Find<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
 <span class="token comment">// 若不在表中，则添加；反之做和 Find 一样的行为。</span>
 FName res2 <span class="token operator">=</span> <span class="token function">FName</span><span class="token punctuation">(</span><span class="token function">TEXT</span><span class="token punctuation">(</span><span class="token string">"bar"</span><span class="token punctuation">)</span><span class="token punctuation">,</span> FNAME_Add<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="ftext" tabindex="-1"><a class="header-anchor" href="#FText">#</a>FText</h2>
+<h2 id="FText"><a class="header-anchor" href="#FText">#</a>FText</h2>
 <p>FText 是一种静态字符串。当字符串需要显示给玩家时，使用 FText 以支持文本本地化和增强字体渲染性能。</p>
-<h3 id="%E5%BA%95%E5%B1%82%E5%AE%9E%E7%8E%B0-1" tabindex="-1"><a class="header-anchor" href="#底层实现-2">#</a>底层实现</h3>
+<h3 id="底层实现-2"><a class="header-anchor" href="#底层实现-2">#</a>底层实现</h3>
 <p>FText 对象内部用一个带<strong>引用计数</strong>的智能指针 <code>TRefCountPtr&lt;ITextData&gt;</code> 来指向实际存储的数据，这样就使得拷贝一个 FText 的成本很低。</p>
-<h2 id="fstring" tabindex="-1"><a class="header-anchor" href="#FString">#</a>FString</h2>
+<h2 id="FString"><a class="header-anchor" href="#FString">#</a>FString</h2>
 <p>FString 则是是对 string 进行的一个封装，和 <code>std::string</code> 非常相似，但底层字符串是用 <code>TArray&lt;TCHAR&gt;</code> 进行存储的。其着重于字符串的操作，提供了大量对字符串的操作接口，是三者中唯一<strong>可修改</strong>的字符串类型，但其它两种字符串来说消耗更高，性能更低。</p>
-<h2 id="%E4%B8%89%E8%80%85%E4%B9%8B%E9%97%B4%E7%9A%84%E8%BD%AC%E6%8D%A2" tabindex="-1"><a class="header-anchor" href="#三者之间的转换">#</a>三者之间的转换</h2>
+<h2 id="三者之间的转换"><a class="header-anchor" href="#三者之间的转换">#</a>三者之间的转换</h2>
 <table>
 <thead>
 <tr>
@@ -641,12 +641,6 @@ FName res2 <span class="token operator">=</span> <span class="token function">FN
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -655,8 +649,8 @@ FName res2 <span class="token operator">=</span> <span class="token function">FN
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -672,41 +666,6 @@ FName res2 <span class="token operator">=</span> <span class="token function">FN
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

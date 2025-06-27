@@ -323,7 +323,7 @@
             <div id="articleContent">
                 <p>虽然使用 <code>auto</code> 可以大大简化代码，但对于一些使用 <code>dynamic_cast</code> 的结果不能用 <code>auto</code> 作为占位符。将冗长的变量类型简化仍然是很头疼的一个问题，幸好 C++11 提供了用关键字 <strong><code>using</code></strong> 给类型起<strong>别名</strong>的特性，既能有效简化代码，又不影响可读性。</p>
 <span id="more"></span>
-<h2 id="%23define-%E4%B8%8E-typedef" tabindex="-1"><a class="header-anchor" href="#define-与-typedef">#</a>#define 与 typedef</h2>
+<h2 id="define-与-typedef"><a class="header-anchor" href="#define-与-typedef">#</a>#define 与 typedef</h2>
 <p>C 中就已经存在使用 <code>#define</code> / <code>typedef</code> 来给类型取别名的用法，但为什么还要多此一举用 <code>using</code>？它们的区别在哪？</p>
 <p><code>#define</code> 是宏定义指令，其在预处理阶段直接将源码文本进行替换，不进行类型检查。</p>
 <blockquote>
@@ -348,7 +348,7 @@
 <blockquote>
 <p>在网上找到很多说 <code>typedef</code> / <code>#define</code> 无法起模板别名的文章，但实际操作了一遍，发现或许是编译器更新了，一些以前认为无法实现的代码如今都能编译通过。所以还是绝知此事要躬行。</p>
 </blockquote>
-<h2 id="using" tabindex="-1"><a class="header-anchor" href="#using">#</a>using</h2>
+<h2 id="using"><a class="header-anchor" href="#using">#</a>using</h2>
 <p><code>using</code> 不仅可以用于导入命名空间或类成员，还可以用于起别名。事实上，<code>using</code> 能够实现的功能也已经完全将 <code>typedef</code> 能做的包含在内，完全可以舍弃功能单一并且代码反人类直觉的 <code>typedef</code>，改用可读性更高的 <code>using</code>。</p>
 <blockquote>
 <p>委员会既然推出了这一新特性，照着用就完事了~</p>
@@ -541,12 +541,6 @@
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -555,8 +549,8 @@
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -572,41 +566,6 @@
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

@@ -330,13 +330,13 @@ $ make clean
             <div id="articleContent">
                 <p>最后一个，也是最有挑战性的一项 coding 任务，是所有前置 lab 的知识综合。</p>
 <span id="more"></span>
-<h2 id="preparation" tabindex="-1"><a class="header-anchor" href="#Preparation">#</a>Preparation</h2>
+<h2 id="Preparation"><a class="header-anchor" href="#Preparation">#</a>Preparation</h2>
 <p>切换到对应分支</p>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">git</span> fetch
 $ <span class="token function">git</span> checkout mmap
 $ <span class="token function">make</span> clean<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <p>我们需要实现的 <code>mmap()</code> 与 <code>munmap()</code> 这两个是系统调用，那就要修改若干文件，这在之前的 lab 中已经操作过很多次了，跳过不聊。</p>
-<h2 id="%E4%BB%8E-mmap-%E5%BC%80%E5%A7%8B" tabindex="-1"><a class="header-anchor" href="#从-mmap-开始">#</a>从 mmap 开始</h2>
+<h2 id="从-mmap-开始"><a class="header-anchor" href="#从-mmap-开始">#</a>从 mmap 开始</h2>
 <blockquote>
 <p>void* mmap(void* addr, size_t length, int prot, int flags, int fd, off_t offset);</p>
 </blockquote>
@@ -345,7 +345,7 @@ $ <span class="token function">make</span> clean<span aria-hidden="true" class="
 <blockquote>
 <p>本 lab 中，入参 <code>addr</code> 可以假设恒为 0。</p>
 </blockquote>
-<h3 id="%E5%A6%82%E4%BD%95%E6%98%A0%E5%B0%84%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#如何映射？">#</a>如何映射？</h3>
+<h3 id="如何映射？"><a class="header-anchor" href="#如何映射？">#</a>如何映射？</h3>
 <p><strong>假设</strong>，对于文件 <code>f</code>，我们选择从 <code>offset</code> 处开始 2 个 PGSIZE 大小的内容进行映射，操作系统会为我们分配 2 个 PGSIZE 大小的虚拟空间，起始地址为 <code>va</code>，长度 <code>length = 2*PGSIZE</code>，并记录下对应文件的偏移量 <code>offset</code>。操作系统还会在合适的时间分配内存，但要注意的是，虽然虚拟地址空间是连续的，但是分配的物理内存并不一定连续，这两页可能会分别映射到两个离散的地址 <code>pa1</code> 和 <code>pa2</code>。其中 <code>pa1</code> 中的内容为 <code>f</code> 中 <code>offset</code> 开始的一个 PGSIZE 的数据，而 <code>pa2</code> 中的内容为 <code>f</code> 中 <code>offset+PGSIZE</code> 开始的一个 PGSIZE 的数据。</p>
 <table>
 <thead>
@@ -368,7 +368,7 @@ $ <span class="token function">make</span> clean<span aria-hidden="true" class="
 </tr>
 </tbody>
 </table>
-<h3 id="%E5%AE%9E%E7%8E%B0-vma" tabindex="-1"><a class="header-anchor" href="#实现-VMA">#</a>实现 VMA</h3>
+<h3 id="实现-VMA"><a class="header-anchor" href="#实现-VMA">#</a>实现 VMA</h3>
 <p>根据手册，第一次调用 <code>mmap()</code> 时，我们不必为其分配物理内存，而是仅仅在虚拟空间划出一块区域并返回相应的 <code>va</code>，等到通过 <code>va</code> 访问内存时，发现页表中没有相应 pte，这个时候再去分配物理内存。</p>
 <blockquote>
 <p>这就是和 <strong>lab COW</strong> 一样利用了 page fault，防止映射大文件时一次 alloc 所有空间导致物理内存不够用的情况。</p>
@@ -396,7 +396,7 @@ $ <span class="token function">make</span> clean<span aria-hidden="true" class="
   uint64 max_VMA;         // trampoline and trapframe
 };<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>到此，虚拟内存的分配记录就完成了。</p>
-<h3 id="sys_mmap" tabindex="-1"><a class="header-anchor" href="#sys-mmap">#</a>sys_mmap</h3>
+<h3 id="sys-mmap"><a class="header-anchor" href="#sys-mmap">#</a>sys_mmap</h3>
 <p>读取参数，找到可用 vma 并设置数据即可。</p>
 <pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/sysfile.c</span></div><code class="language-C">uint64
 sys_mmap(void)
@@ -449,7 +449,7 @@ sys_mmap(void)
   vma-&gt;offset = offset;
   return va;
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="page-fault" tabindex="-1"><a class="header-anchor" href="#page-fault">#</a>page fault</h3>
+<h3 id="page-fault"><a class="header-anchor" href="#page-fault">#</a>page fault</h3>
 <p>当出现读/写的 page fault 时，就需要检查是否是在 mmap 内存上引起的。如果是，那就进行物理内存的分配，页表项的建立，以及文件数据的拷贝。注意需要逐页进行物理内存分配。</p>
 <pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/trap.c</span></div><code class="language-C">void
 usertrap(void)
@@ -518,7 +518,7 @@ usertrap(void)
   }
   ...
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E8%BF%9B%E8%A1%8C-munmap" tabindex="-1"><a class="header-anchor" href="#进行-munmap">#</a>进行 munmap</h2>
+<h2 id="进行-munmap"><a class="header-anchor" href="#进行-munmap">#</a>进行 munmap</h2>
 <blockquote>
 <p>int munmap(void *addr, int length)</p>
 </blockquote>
@@ -529,7 +529,7 @@ usertrap(void)
 <blockquote>
 <p>这很合理，毕竟解除了某一区域的映射，那么 vma 中文件的映射长度与偏移量肯定也会发生变化，不然就会出现不一致的问题。下次对已解除区域重新 <code>mmap()</code> 时，经查 vma 数组发现已经有映射了，这显然与现实矛盾。</p>
 </blockquote>
-<h3 id="sys_munmap" tabindex="-1"><a class="header-anchor" href="#sys-munmap">#</a>sys_munmap</h3>
+<h3 id="sys-munmap"><a class="header-anchor" href="#sys-munmap">#</a>sys_munmap</h3>
 <pre class="line-numbers language-C" data-language="C"><div class="caption"><span>kernel/sysfile.c</span></div><code class="language-C">uint64
 sys_munmap(void)
 {
@@ -557,7 +557,7 @@ sys_munmap(void)
   return -1;
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>其中 <code>vmaunmap()</code> 就是做了所需要的全部工作——修改 page table、释放内存、修改 vma。</p>
-<h3 id="%E8%BF%98%E4%B8%8D%E5%A4%9F" tabindex="-1"><a class="header-anchor" href="#还不够">#</a>还不够</h3>
+<h3 id="还不够"><a class="header-anchor" href="#还不够">#</a>还不够</h3>
 <p>进程结束的时候，可能用户会忘记调用 <code>munmap()</code>，而进程只会释放 TRAMPOLINE 和 TRAPFRAME 以及低虚拟地址处的内存，对于文件映射内存区域，还需要我们额外加入代码进行处理。手册提示我们加在 <code>exit()</code> 函数里，我想是因为所有进程正常退出时都会调用该函数，并且我尝试在 <code>freeproc()</code> 中进行内存释放和数据写回，发现会在 <code>bcache</code> 上产生死锁的问题，但并未深究。</p>
 <p>以及还要在 <code>allocproc()</code> 与 <code>freeproc()</code> 里增加对 <code>vma[]</code> 与 <code>max_VMA</code> 的初始化与重置。</p>
 <p>哦对，调用 <code>fork()</code> 创建子进程时，只需要拷贝 <code>vma[]</code> 与 <code>max_VMA</code> 即可，而不需要拷贝物理内存，这也是利用了 page fault 的 lazy allocation 策略——用到再分配。</p>
@@ -608,7 +608,7 @@ fork(void)
   }
   ...
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9E%9C" tabindex="-1"><a class="header-anchor" href="#测试结果">#</a>测试结果</h2>
+<h2 id="测试结果"><a class="header-anchor" href="#测试结果">#</a>测试结果</h2>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">make</span> grade
 <span class="token punctuation">..</span>.
 <span class="token operator">==</span> Test running mmaptest <span class="token operator">==</span>
@@ -637,7 +637,7 @@ usertests: OK <span class="token punctuation">(</span><span class="token number"
 <span class="token operator">==</span> Test <span class="token function">time</span> <span class="token operator">==</span>
 time: OK
 Score: <span class="token number">140</span>/140<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E6%9C%80%E5%90%8E%E7%9A%84%E5%B7%A5%E4%BD%9C" tabindex="-1"><a class="header-anchor" href="#最后的工作">#</a>最后的工作</h2>
+<h2 id="最后的工作"><a class="header-anchor" href="#最后的工作">#</a>最后的工作</h2>
 <ol>
 <li class="lvl-3">
 <p><code>git commit -am ""</code> 将所有修改提交到本地;</p>
@@ -826,12 +826,6 @@ Score: <span class="token number">140</span>/140<span aria-hidden="true" class="
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -840,8 +834,8 @@ Score: <span class="token number">140</span>/140<span aria-hidden="true" class="
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -857,41 +851,6 @@ Score: <span class="token number">140</span>/140<span aria-hidden="true" class="
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

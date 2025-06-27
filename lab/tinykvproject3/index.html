@@ -328,11 +328,11 @@
             <div id="articleContent">
                 <p>本 Project 需要我们实现多个存储节点之间的管理。</p>
 <span id="more"></span>
-<h2 id="%E6%80%9D%E8%B7%AF" tabindex="-1"><a class="header-anchor" href="#思路">#</a>思路</h2>
-<h3 id="part-a-leadership%2Fmembership-change-in-raft" tabindex="-1"><a class="header-anchor" href="#Part-A-Leadership-Membership-Change-in-Raft">#</a>Part A Leadership/Membership Change in Raft</h3>
+<h2 id="思路"><a class="header-anchor" href="#思路">#</a>思路</h2>
+<h3 id="Part-A-Leadership-Membership-Change-in-Raft"><a class="header-anchor" href="#Part-A-Leadership-Membership-Change-in-Raft">#</a>Part A Leadership/Membership Change in Raft</h3>
 <p>需要修改的代码位于 <code>raft/raft.go</code>。</p>
 <p>在 3A 中我们仅需修改 Raft 层的逻辑，而完整的 Change 流程将在 3B 中实现。</p>
-<h4 id="1-leadership-change" tabindex="-1"><a class="header-anchor" href="#1-Leadership-Change">#</a>1 Leadership Change</h4>
+<h4 id="1-Leadership-Change"><a class="header-anchor" href="#1-Leadership-Change">#</a>1 Leadership Change</h4>
 <p>Raft 层首先会 <code>Step</code> 一条 <code>MsgTransferLeader</code>。由于任何节点都有可能收到该消息，故需根据身份分类讨论：</p>
 <p><strong>Non-Leader</strong>：将消息转发给 Leader;</p>
 <p><strong>Leader</strong>：如果迁移目标 <code>transferee</code> 是自己，则什么也不干（已经是 Leader 无需迁移）；反之：</p>
@@ -353,7 +353,7 @@
 <p>一旦满足迁移条件，Leader 应该立即向其发送一条<code>MsgTimeoutNow</code>，<code>transferee</code> 在收到消息后立即开始新的选举——即 <code>Step(MsgHup)</code>——从而依靠最新的 <code>Term</code> 和 <code>LastLog</code> 当选领导人;</p>
 </li>
 </ol>
-<h4 id="2-membership-change" tabindex="-1"><a class="header-anchor" href="#2-Membership-Change">#</a>2 Membership Change</h4>
+<h4 id="2-Membership-Change"><a class="header-anchor" href="#2-Membership-Change">#</a>2 Membership Change</h4>
 <p>这里我们仅需修改 <code>Raft.addNode()</code> 与 <code>Raft.removeNode()</code>。</p>
 <p>节点的增减其实就是对 <code>Raft.Prs</code> 哈希表的修改：</p>
 <ul class="lvl-0">
@@ -365,7 +365,7 @@
 </li>
 </ul>
 <p>对节点的增删会导致「大多数」发送变化：若节点增加，则新节点等待 <code>AppendEntries</code> 即可。若节点减少，则需要重新更新 <code>committed</code> 并发送;</p>
-<h3 id="part-b-implement-admin-commands" tabindex="-1"><a class="header-anchor" href="#Part-B-Implement-Admin-Commands">#</a>Part B Implement Admin Commands</h3>
+<h3 id="Part-B-Implement-Admin-Commands"><a class="header-anchor" href="#Part-B-Implement-Admin-Commands">#</a>Part B Implement Admin Commands</h3>
 <p>3B 中我们就要正式实现加上<strong>域分裂</strong>(Region Split)在内的所有 Admin Commands 了。需要实现的代码位于 <code>kv/Raftstore/peer_msg_handler.go</code> 与 <code>kv/Raftstore/peer.go</code> 中。</p>
 <p>写 3B 之前我们需要粗略回顾一下整个系统的构成。</p>
 <p>在我们之前实现的 Raft 算法中，所有 <code>Peer</code> 位于不同存储节点上，对于一个分布式系统而言，这样能保证一个节点挂掉的同时依旧能依靠剩下的节点来提供服务。而在所有节点构成的图中，并非所有节点都两两连通，那么就需要根据不同的连通分量进行划分，这个划分单位就是 <code>Cluster</code>。</p>
@@ -406,9 +406,9 @@
 </blockquote>
 <p>以 Mock 版本为例，每个 <code>Peer</code> 都有一个 <code>PeerMsgHandler</code>，用于接收从 <code>Cluster</code> 发来的消息，见 <code>HandleMsg()</code>。在 Part B 中，我们主要谈以下 3 个 Admin Commands。</p>
 <p>这 3 种 Commands 所位于的 Message Type 均为 <code>MsgTypeRaftCmd</code>，那么首先会来到 <code>proposeRaftCommand()</code> 函数中。</p>
-<h4 id="1-propose-transfer-leader" tabindex="-1"><a class="header-anchor" href="#1-Propose-transfer-leader">#</a>1 Propose transfer leader</h4>
+<h4 id="1-Propose-transfer-leader"><a class="header-anchor" href="#1-Propose-transfer-leader">#</a>1 Propose transfer leader</h4>
 <p>因为领导迁移仅仅是一个操作，无需所有节点进行复制，所以收到该类型的 Command 时，直接调用 <code>RawNode.TransferLeader()</code> 即可。</p>
-<h4 id="2-implement-conf-change-in-raftstore" tabindex="-1"><a class="header-anchor" href="#2-Implement-conf-change-in-Raftstore">#</a>2 Implement conf change in Raftstore</h4>
+<h4 id="2-Implement-conf-change-in-Raftstore"><a class="header-anchor" href="#2-Implement-conf-change-in-Raftstore">#</a>2 Implement conf change in Raftstore</h4>
 <p>一次完整的 conf change 流程如下</p>
 <ol>
 <li class="lvl-3">
@@ -465,7 +465,7 @@
 <p>3B 的最后几个测试中概率出现这种情况，我的做法是：算我过了。</p>
 </blockquote>
 <p>由于 conf change 和后面的 region split 会导致 <code>RegionEpoch</code> 发生变化，所有 apply 之前都应当检查 <code>Request.Header</code> 中的校验字段是否匹配，除了 <code>RegionId</code> 是否一致、<code>RegionEpoch</code> 是否匹配，对于根据 <code>Key</code> 进行的操作，还要检查 <code>Key</code> 是否在 <code>Region</code> 中。很典型的例子就是目标 <code>Key</code> 因之前进行了 region split 跑到另一个 <code>Region</code> 里去了，此时再执行操作必然破坏一致性。</p>
-<h4 id="implement-split-region-in-raftstore" tabindex="-1"><a class="header-anchor" href="#Implement-split-region-in-Raftstore">#</a>Implement split region in Raftstore</h4>
+<h4 id="Implement-split-region-in-Raftstore"><a class="header-anchor" href="#Implement-split-region-in-Raftstore">#</a>Implement split region in Raftstore</h4>
 <p>一次完整的 region split 流程如下：</p>
 <ol>
 <li class="lvl-3">
@@ -503,9 +503,9 @@
 </li>
 </ol>
 <p>region split 中并没有很难处理的疑难杂症。</p>
-<h3 id="part-c-scheduler" tabindex="-1"><a class="header-anchor" href="#Part-C-Scheduler">#</a>Part C Scheduler</h3>
+<h3 id="Part-C-Scheduler"><a class="header-anchor" href="#Part-C-Scheduler">#</a>Part C Scheduler</h3>
 <p>需要修改的代码位于 <code>scheduler/server/cluster.go</code> 与 <code>scheduler/server/schedulers/balance_region.go</code>，分别需要实现 <code>processRegionHeartbeat()</code> 函数与 <code>Schedule()</code> 函数。总体来讲比 3B 简单许多，根据任务书一步步来即可，仅有少量小bug需要根据测试的打印结果来调整。</p>
-<h4 id="1-collect-region-heartbeat" tabindex="-1"><a class="header-anchor" href="#1-Collect-region-heartbeat">#</a>1 Collect region heartbeat</h4>
+<h4 id="1-Collect-region-heartbeat"><a class="header-anchor" href="#1-Collect-region-heartbeat">#</a>1 Collect region heartbeat</h4>
 <p>根据 3B 中描述的整体系统流程，每个集群 <code>Cluster</code> 所持有的总调度器 <code>Scheduler</code> 会根据 <code>Region</code> 发来的心跳信息为其分配任务（PeerChange、RegionSplit 等）。在真实网络下，心跳信息会以不可预知的速度到达 <code>Scheduler</code>，同时也可能因为网络分区而收到来自同个 <code>Region</code> 不同 Leader 的信息——这就需要我们记录下每个 <code>Region</code> 的重要信息（用 <code>RegionInfo</code> 这个数据结构来表示），以防收到 stale heartbeat。</p>
 <p>先来介绍一下整体流程，其实和 3B 中的 Mock 差不多：</p>
 <p>首先，<code>Region</code> 的 Leader 发送心跳，<code>Server</code> 通过 <code>RegionHeartbeat()</code> 不断收取心跳信息，并从中提取出发送方的 <code>RegionInfo</code>，然后下放到 <code>Cluster</code>，通过 <code>HandleRegionHeartbeat()</code> 根据当前 <code>RegionInfo</code> 进行处理：</p>
@@ -581,7 +581,7 @@
 <p>检查通过后，调用 <code>putRegion()</code> 将该 info 插入表中，并删除原有 info（如果有的话）。</p>
 <p>最后，调用 <code>updateStoreStatusLocked()</code> 更新集群中所有存储节点状态。</p>
 <p>此处没有什么疑难杂症，很快就能完成。</p>
-<h4 id="2-implement-region-balance-scheduler" tabindex="-1"><a class="header-anchor" href="#2-Implement-region-balance-scheduler">#</a>2 Implement region balance scheduler</h4>
+<h4 id="2-Implement-region-balance-scheduler"><a class="header-anchor" href="#2-Implement-region-balance-scheduler">#</a>2 Implement region balance scheduler</h4>
 <p>上面提到的 <code>Operator</code> 是怎么来的呢？有一部分就是 <code>Scheduler</code> 产生的。</p>
 <p><code>Cluster</code> 一经创建便持有一个 <code>Coordinator</code>，其会通过 <code>runScheduler()</code> 来调用 <code>scheduler.Schedule()</code>，定期检查是否有存储节点超载，就需要找到该节点 <code>src</code> 的一个<strong>合适</strong>的 <code>Region</code>，将位于 <code>src</code> 中从属于该 <code>Region</code> 的 <code>Peer</code> 转移到某个<strong>合适</strong>的目标节点 <code>dst</code>，从而达成负载均衡，并通过函数返回的 <code>MovePeerOperator</code> 加到该 <code>Region</code> 对应的「待执行命令」中，等待下一次该 <code>Region</code> 发来心跳信息时执行。</p>
 <blockquote>
@@ -653,7 +653,7 @@ newPeer <span class="token operator">:=</span> <span class="token function">Allo
 <p>并且由于 <code>RaftGroup</code> 随时可能变化，故对于不在组内的节点而言，任何消息都是无效的——即便收到消息，也不能做任何事。对于新加入组的节点而言，Raft 层的 <code>Prs</code> 可能未被正确初始化，所以如果收到一条 peer 的消息而该 peer 又不在 <code>Prs</code> 中时，将其加入。</p>
 </blockquote>
 <p>有一点不能理解的是，虽然任务书中表示 <code>RegionEpoch.ConfVer</code> 会在 confchange 中改变，但并没有说 <code>RegionEpoch.Version</code> 也会改，只说了在 split 中改变。然而测试用例会不通过「只修改了 confver 而不修改 version」的代码。</p>
-<h4 id="3-regionsplit" tabindex="-1"><a class="header-anchor" href="#3-RegionSplit">#</a>3 RegionSplit</h4>
+<h4 id="3-RegionSplit"><a class="header-anchor" href="#3-RegionSplit">#</a>3 RegionSplit</h4>
 <p>不同 RaftGroup 负责不同 Region，随着时间推进必然会有一些 Region 会超出一个值 <code>RegionSplitSize</code>，为了负载均衡，必须将这些过大的 Region 一分为二。</p>
 
                 
@@ -834,12 +834,6 @@ newPeer <span class="token operator">:=</span> <span class="token function">Allo
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -848,8 +842,8 @@ newPeer <span class="token operator">:=</span> <span class="token function">Allo
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -865,41 +859,6 @@ newPeer <span class="token operator">:=</span> <span class="token function">Allo
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

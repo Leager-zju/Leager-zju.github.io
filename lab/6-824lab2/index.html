@@ -337,7 +337,7 @@
             <div id="articleContent">
                 <p>本实验要求我们实现 Raft 算法，包括其领导人选举、日志复制、快照等关键要素。</p>
 <span id="more"></span>
-<h2 id="%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99" tabindex="-1"><a class="header-anchor" href="#参考资料">#</a>参考资料</h2>
+<h2 id="参考资料"><a class="header-anchor" href="#参考资料">#</a>参考资料</h2>
 <ul class="lvl-0">
 <li class="lvl-2">
 <p>有一个<a target="_blank" rel="noopener" href="http://thesecretlivesofdata.com/raft/#home">非常通俗易懂的Raft 可视化网站</a>；</p>
@@ -352,7 +352,7 @@
 <p>当然，这门课的 TA 编写的 <a target="_blank" rel="noopener" href="https://thesquareplanet.com/blog/students-guide-to-raft/">RAFT GUIDE</a> 也不容忽视。</p>
 </li>
 </ul>
-<h2 id="part-a-raft-leader-election" tabindex="-1"><a class="header-anchor" href="#PART-A-Raft-Leader-Election">#</a>PART A-Raft Leader Election</h2>
+<h2 id="PART-A-Raft-Leader-Election"><a class="header-anchor" href="#PART-A-Raft-Leader-Election">#</a>PART A-Raft Leader Election</h2>
 <p>PartA 主要负责 Raft 节点超时选举的流程。我把这一过程描述为以下步骤：</p>
 <ol>
 <li class="lvl-3">
@@ -383,7 +383,7 @@
 <blockquote>
 <p>这一部分并不难，只需修改 <code>Raft.go</code> 即可，而解决它的关键在于 paper 中的 <strong>Figure2</strong>，为我们提供了非常有用的结构体定义以及规则。</p>
 </blockquote>
-<h3 id="%E7%BB%93%E6%9E%84%E4%BD%93%E5%AE%9A%E4%B9%89" tabindex="-1"><a class="header-anchor" href="#结构体定义">#</a>结构体定义</h3>
+<h3 id="结构体定义"><a class="header-anchor" href="#结构体定义">#</a>结构体定义</h3>
 <pre class="line-numbers language-go" data-language="go"><div class="caption"><span>Raft.go</span></div><code class="language-go"><span class="token comment">// 每个日志条目存相应的索引、term 以及操作</span>
 <span class="token keyword">type</span> LogEntry <span class="token keyword">struct</span> <span class="token punctuation">{</span>
   Index   <span class="token builtin">int</span>
@@ -436,7 +436,7 @@
 <blockquote>
 <p>当然，一旦 Follower 成功同步，它对应的两个字段会被更新为满足 <code>next = match+1 = lastLogIndex+1</code>。</p>
 </blockquote>
-<h3 id="timer" tabindex="-1"><a class="header-anchor" href="#Timer">#</a>Timer</h3>
+<h3 id="Timer"><a class="header-anchor" href="#Timer">#</a>Timer</h3>
 <p>根据算法要求，需要<strong>选举定时器</strong>和<strong>心跳定时器</strong>各一个。如果当前为 Leader，则只处理心跳定时器的消息；反之，则只处理选举定时器的消息。当然，处理完了还得进行重置。</p>
 <blockquote>
 <p>尽管 6.824 提了一嘴不要用 go time 库里的 timer，但感觉应该是怕学生不会用用错。</p>
@@ -460,7 +460,7 @@
     <span class="token punctuation">}</span>
   <span class="token punctuation">}</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="candidate-%E5%8F%91%E9%80%81%E6%8A%95%E7%A5%A8%E8%AF%B7%E6%B1%82" tabindex="-1"><a class="header-anchor" href="#Candidate-发送投票请求">#</a>Candidate 发送投票请求</h3>
+<h3 id="Candidate-发送投票请求"><a class="header-anchor" href="#Candidate-发送投票请求">#</a>Candidate 发送投票请求</h3>
 <p>理想情况下，Leader 发一次 voteRequest，Peer 收到后发送回复并被 Leader 接收，在一个 RTT 就能解决问题。但由于网络的不稳定性，可能存在丢包，Leader<br>
 发出去的不一定被 Peer 收到，Peer 的回复也不一定被 Leader 确认。那么此时就需要 Leader 不断发送 RPC 直至收到回复，保证选举严格正常进行。</p>
 <p>那么在这种策略下，就不得不谈谈如何处理过期的消息。这里的过期有两层含义：</p>
@@ -505,7 +505,7 @@
     <span class="token punctuation">}</span>
   <span class="token punctuation">}</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="%E5%AF%B9%E6%8A%95%E7%A5%A8%E8%AF%B7%E6%B1%82%E8%BF%9B%E8%A1%8C%E5%9B%9E%E5%A4%8D" tabindex="-1"><a class="header-anchor" href="#对投票请求进行回复">#</a>对投票请求进行回复</h3>
+<h3 id="对投票请求进行回复"><a class="header-anchor" href="#对投票请求进行回复">#</a>对投票请求进行回复</h3>
 <p>关键在于<strong>拒绝</strong>请求的条件判断。以下情况需要拒绝投票请求的：</p>
 <ol>
 <li class="lvl-3">
@@ -521,7 +521,7 @@
   <span class="token comment">// 如果不拒绝，那就同意请求，修改一系列变量，并重置选举定时器</span>
   <span class="token comment">// 如果当前 Term 较低，需要更新并转为 Follower</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="%E6%88%90%E4%B8%BA-leader" tabindex="-1"><a class="header-anchor" href="#成为-Leader">#</a>成为 Leader</h3>
+<h3 id="成为-Leader"><a class="header-anchor" href="#成为-Leader">#</a>成为 Leader</h3>
 <p>当选后需<strong>立即</strong>广播一次 <strong>HeartBeat</strong>，以巩固地位。这是为了避免其他节点触发选举超时而进行新的一轮选举。<strong>而事实上我们并不需要这一次多余的选举</strong>。</p>
 <pre class="line-numbers language-go" data-language="go"><code class="language-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>rf <span class="token operator">*</span>Raft<span class="token punctuation">)</span> <span class="token function">StartHeartbeat</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
   <span class="token keyword">for</span> peer <span class="token operator">:=</span> <span class="token keyword">range</span> rf<span class="token punctuation">.</span>peers <span class="token punctuation">{</span>
@@ -533,10 +533,10 @@
 <blockquote>
 <p>2A 中，<code>SendHeartBeat()</code>不需要发送多余的信息，只要告诉其它节点"我"的当前 Term 即可。其它节点收到 RPC 后，根据收到的 Term 进行相应操作。</p>
 </blockquote>
-<h2 id="part-b-log-replication" tabindex="-1"><a class="header-anchor" href="#PART-B-Log-Replication">#</a>PART B-Log Replication</h2>
+<h2 id="PART-B-Log-Replication"><a class="header-anchor" href="#PART-B-Log-Replication">#</a>PART B-Log Replication</h2>
 <p>这一 part 要求我们实现日志复制，选举约束与快速恢复。</p>
-<h3 id="%E6%97%A5%E5%BF%97%E5%A4%8D%E5%88%B6" tabindex="-1"><a class="header-anchor" href="#日志复制">#</a>日志复制</h3>
-<h4 id="%E5%8F%91%E9%80%81%E4%BE%A7(leader)" tabindex="-1"><a class="header-anchor" href="#发送侧-Leader">#</a>发送侧(Leader)</h4>
+<h3 id="日志复制"><a class="header-anchor" href="#日志复制">#</a>日志复制</h3>
+<h4 id="发送侧-Leader"><a class="header-anchor" href="#发送侧-Leader">#</a>发送侧(Leader)</h4>
 <p>上层通过调用 Start() 函数向 Leader 发送一个 command，我们需要将这一 command 打包成日志，并同步给 Followers。按照实验要求，我们需要立刻返回这一 command 在日志中的索引与相应 term，同时如果上层调用的节点不是 Leader ，则直接 <code>false</code>。</p>
 <p>Leader 定期发送 Heartbeat，如果满足 <code>nextIndex[i] &lt;= lastLogIndex</code>，说明有新的日志需要同步，且要求：</p>
 <ul class="lvl-0">
@@ -604,7 +604,7 @@
   <span class="token punctuation">}</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>这里需要注意的是：每次更新 Applied 不能用 goroutine，因为 goroutine 的执行顺序是不可预知的，否则会报 “out of order xxx” 的错，也就是未按序 apply。</p>
-<h4 id="%E6%8E%A5%E6%94%B6%E4%BE%A7(follower)" tabindex="-1"><a class="header-anchor" href="#接收侧-Follower">#</a>接收侧(Follower)</h4>
+<h4 id="接收侧-Follower"><a class="header-anchor" href="#接收侧-Follower">#</a>接收侧(Follower)</h4>
 <p>对于收到的 AppendEntries RPC，paper 中给出以下规则：</p>
 <ol>
 <li class="lvl-3">
@@ -624,7 +624,7 @@
 </li>
 </ol>
 <p>逐个 adapt 到代码里即可。这里同样要在更新 <code>commitIndex</code> 后通知 Applier 传达给上层。</p>
-<h3 id="%E9%80%89%E4%B8%BE%E7%BA%A6%E6%9D%9F" tabindex="-1"><a class="header-anchor" href="#选举约束">#</a>选举约束</h3>
+<h3 id="选举约束"><a class="header-anchor" href="#选举约束">#</a>选举约束</h3>
 <p>这其实很好理解，Follwer 只 Grant 最后一个日志比它更 up-to-date 的 <code>VoteRequest</code>，也就是说要满足以下两点：</p>
 <ol>
 <li class="lvl-3">
@@ -640,9 +640,9 @@
   reply<span class="token punctuation">.</span>Term<span class="token punctuation">,</span> reply<span class="token punctuation">.</span>Grant<span class="token punctuation">,</span> reply<span class="token punctuation">.</span>Err <span class="token operator">=</span> rf<span class="token punctuation">.</span>CurrentTerm<span class="token punctuation">,</span> <span class="token boolean">false</span><span class="token punctuation">,</span> ErrLogNotMatch
   <span class="token keyword">return</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="%E5%BF%AB%E9%80%9F%E6%81%A2%E5%A4%8D" tabindex="-1"><a class="header-anchor" href="#快速恢复">#</a>快速恢复</h3>
+<h3 id="快速恢复"><a class="header-anchor" href="#快速恢复">#</a>快速恢复</h3>
 <p>Guide 上面讲的还挺清楚的，<code>conflictIndex</code> 是 Follwer <strong>发生冲突的那条日志</strong>的 Index，<code>conflictTerm</code> 就是那条日志的 Term。</p>
-<h4 id="%E6%8E%A5%E5%8F%97%E4%BE%A7(follower)" tabindex="-1"><a class="header-anchor" href="#接受侧-Follower">#</a>接受侧(Follower)</h4>
+<h4 id="接受侧-Follower"><a class="header-anchor" href="#接受侧-Follower">#</a>接受侧(Follower)</h4>
 <ul class="lvl-0">
 <li class="lvl-2">
 <p>If a follower does not have prevLogIndex in its log, it should return with <strong>conflictIndex = len(log)</strong> and <strong>conflictTerm = None</strong>.</p>
@@ -651,7 +651,7 @@
 <p>If a follower does have prevLogIndex in its log, but the term does not match, it should return <strong>conflictTerm = log[prevLogIndex].Term</strong>, and then search its log for <strong>the first index whose entry has term equal to conflictTerm</strong>.</p>
 </li>
 </ul>
-<h4 id="%E5%8F%91%E9%80%81%E4%BE%A7(leader)-1" tabindex="-1"><a class="header-anchor" href="#发送侧-Leader-2">#</a>发送侧(Leader)</h4>
+<h4 id="发送侧-Leader-2"><a class="header-anchor" href="#发送侧-Leader-2">#</a>发送侧(Leader)</h4>
 <ul class="lvl-0">
 <li class="lvl-2">
 <p>Upon receiving a conflict response, the Leader should first search its log for conflictTerm. If it finds an entry in its log with that term, it should <strong>set nextIndex to be the one beyond the index of the last entry in that term in its log</strong>.</p>
@@ -687,7 +687,7 @@
 
   <span class="token keyword">return</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="%E5%85%B6%E4%BB%96" tabindex="-1"><a class="header-anchor" href="#其他">#</a>其他</h3>
+<h3 id="其他"><a class="header-anchor" href="#其他">#</a>其他</h3>
 <ol>
 <li class="lvl-3">
 <p>在初始化 Raft node 的时候我把一个 <code>{Index: 0, Term: 0}</code> 的日志放到最开始，这样就能让它每一个 Index 都能直接对应，而不需要考虑数组从 0 开始，PrevLogTerm 也就不需要考虑 PrevLogIndex 是否大于零了；</p>
@@ -696,7 +696,7 @@
 <p>AppendEntryRPC 无论成功和失败都返回 ConflictIndex 和 ConflictTerm，并且规定当 Append Entry 成功时，Reply 中的 ConflictIndex 是 Follwer 执行 Append 后的最后一个索引，从而正确更新到 <code>next[]</code> 和 <code>match[]</code>；</p>
 </li>
 </ol>
-<h2 id="part-c-persistence" tabindex="-1"><a class="header-anchor" href="#PART-C-Persistence">#</a>PART C-Persistence</h2>
+<h2 id="PART-C-Persistence"><a class="header-anchor" href="#PART-C-Persistence">#</a>PART C-Persistence</h2>
 <p>这块虽然标了 hard，但实际代码量可以忽略不计。总的来说要我们实现一致性，即能保证节点 crash 后能恢复到原来的状态。</p>
 <p>Paper 中已经为我们标出了哪些变量（VoteFor、Term、Entry）是需要保持一致性的，所以 Persist() 和 ReadPersist() 没什么好聊的，直接 uncomment 掉，稍微改改就好了。</p>
 <p>我们需要在这三个变量被修改的时候，及时调用 Persist() 函数以保存到 rf.Persist 里。</p>
@@ -716,7 +716,7 @@
 </li>
 </ul>
 <p>由于系统的高并发性与网络的不可靠性，我们还需要在合适的位置及时上锁，尽可能保证线性一致（善用 <code>rf.mu</code>）。</p>
-<h2 id="part-d-log-compaction" tabindex="-1"><a class="header-anchor" href="#PART-D-Log-Compaction">#</a>PART D-Log Compaction</h2>
+<h2 id="PART-D-Log-Compaction"><a class="header-anchor" href="#PART-D-Log-Compaction">#</a>PART D-Log Compaction</h2>
 <p>由于日志会无限增长，如果不采取某些措施，内存则会被大大浪费。我们使用<strong>快照</strong>来解决这一问题。6.824 中，上层每收到 Raft 层传来的需要 Apply 的日志，都会检查日志大小是否超限，一旦超限，就会<strong>主动</strong>将当前存储的状态打包成一份 SnapshotData，传给 Raft 层并调用 <code>Snapshot()</code>，告知其上层在哪一位置做了快照，之前得到 Apply 的日志都不需要保留了，需要进行日志截断。如下图所示：</p>
 <img src="1.jpg" style="zoom:80%;">
 <p>原理就如 Paper 中说的那样。在这一 part 中我们需要做这些事情：</p>
@@ -734,15 +734,15 @@
 <p>实现 crash 后恢复所需的持久状态；</p>
 </li>
 </ol>
-<h3 id="%E7%B4%A2%E5%BC%95" tabindex="-1"><a class="header-anchor" href="#索引">#</a>索引</h3>
+<h3 id="索引"><a class="header-anchor" href="#索引">#</a>索引</h3>
 <p>因为节点的日志里存的 Index 不一定和数组下标一一对应了，前面我将每个 <code>rf.Entry[0]</code> 都采用 <code>{Index: 0, Term: 0}</code> 的哨兵来防止越界，在这里由于进行了日志压缩，哨兵可以改为 {Index: LastIncludedIndex, Term: LastIncludedTerm}，这样一来日志索引 index 到数组里的位置就变成了 <code>index - rf.Entry[0].Index</code></p>
 <p>⚠ 每个涉及到<strong>索引</strong>的地方都要进行修改</p>
-<h3 id="snapshot(index-int%2C-snapshot-%5B%5Dbyte)" tabindex="-1"><a class="header-anchor" href="#Snapshot-index-int-snapshot-byte">#</a>Snapshot(index int, snapshot []byte)</h3>
+<h3 id="Snapshot-index-int-snapshot-byte"><a class="header-anchor" href="#Snapshot-index-int-snapshot-byte">#</a>Snapshot(index int, snapshot []byte)</h3>
 <p>这里的 index 其实就是 <code>LastIncludedIndex</code>，而 snapshot 其实就是上层告诉我们的<strong>当前存储的快照数据 SnapshotData</strong>，需要进行持久化。我们对 index 进行一个范围的判断，如果不越界，则进行日志的截断，并进行一个 <code>persist.SaveSnapshot()</code> 的操作。</p>
 <blockquote>
 <p><code>persist.go</code> 里没有单独保存 snapshot 的函数，需要自己添加一个。</p>
 </blockquote>
-<h3 id="installsnapshotrpc" tabindex="-1"><a class="header-anchor" href="#InstallSnapShotRPC">#</a>InstallSnapShotRPC</h3>
+<h3 id="InstallSnapShotRPC"><a class="header-anchor" href="#InstallSnapShotRPC">#</a>InstallSnapShotRPC</h3>
 <p>args 和 reply 要的变量都直接在 6.824 lab 网页的 hint 里和 paper 里找就行。唯一要解决的问题是，发送端要在什么时机发送这个 RPC？</p>
 <p>最简单的做法是，如果某个 peer 因为断电等原因已经落后太多（Leader 要发给它的首条日志已经被压缩进了 snapshot 中），那么为了让它跟上脚步快速推进，就需要发送一个快照过去。这种情况其实就是 <code>nextIndex[peer] &lt;= rf.Entry[0].Index</code>。而这一条件的检查可以放在待发送 AppendEntry 的时刻，也就是每个心跳时刻先检查 <code>nextIndex[peer]</code>。如果满足发快照的条件，就发 InstallSnapShotRPC；反之发 AppendEntryRPC。</p>
 <pre class="line-numbers language-go" data-language="go"><code class="language-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>rf <span class="token operator">*</span>Raft<span class="token punctuation">)</span> <span class="token function">SendHeartBeat</span><span class="token punctuation">(</span>peer <span class="token builtin">int</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -987,12 +987,6 @@ client 寻找对应
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -1001,8 +995,8 @@ client 寻找对应
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -1018,41 +1012,6 @@ client 寻找对应
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

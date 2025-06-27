@@ -326,7 +326,7 @@
             <div id="articleContent">
                 <p>该问题是<strong>进程与线程的区别</strong>中的一个核心问题。</p>
 <span id="more"></span>
-<h2 id="%E8%BF%9B%E7%A8%8B%E6%9C%89%E4%BB%80%E4%B9%88" tabindex="-1"><a class="header-anchor" href="#进程有什么">#</a>进程有什么</h2>
+<h2 id="进程有什么"><a class="header-anchor" href="#进程有什么">#</a>进程有什么</h2>
 <p>一个进程需要存放若干数据，以及若干指令，那么首先其会有一片内存，在分页机制下，所有进程都必须有其独立的<strong>页表(PT, Page Table)</strong>，从而完成虚拟地址到物理地址（<em>用户地址空间</em>）的转换。</p>
 <p>有页表，就肯定需要一个访问机制。目前操作系统一般都采用二级页表，也就是访页时最先进入<strong>页目录(PD, Page Directory)</strong>，再根据里面的页目录项获取页表物理地址。需要一个寄存器来存储该目录的物理地址，即<strong>页目录表寄存器(PDBR, Page Directory Base Register)</strong>（x86_64 下使用 <strong>CR3</strong>）通过向该寄存器赋予页目录基地址（物理），便可随时访问页目录。</p>
 <p>以及<strong>页表缓存(TLB, Translation Lookaside Buffer)</strong>，用于加快虚拟地址-&gt;物理地址的转换。</p>
@@ -335,12 +335,12 @@
 <p>物理地址 = CS &lt;&lt; 4 + IP</p>
 </blockquote>
 <p>程序的运行必然是由若干函数组合起来运行的。当一个函数在运行时，需要为它在栈中创建一个栈帧用来记录运行时产生的相关信息，因此每个函数在执行前都会创建一个栈帧，在它返回时会销毁该栈帧。栈由高地址向低地址拓展，为了访问栈，就必须要有<strong>栈基址(BP, Base Pointer)</strong>，以及<strong>栈顶指针(SP, Stack Pointer)</strong>。</p>
-<h2 id="%E7%BA%BF%E7%A8%8B%E6%9C%89%E4%BB%80%E4%B9%88" tabindex="-1"><a class="header-anchor" href="#线程有什么">#</a>线程有什么</h2>
+<h2 id="线程有什么"><a class="header-anchor" href="#线程有什么">#</a>线程有什么</h2>
 <p>线程与进程的关系，就好比函数与程序的关系。同一进程下的所有线程都共享同一地址空间，包括全局变量与代码段。但每个线程有各自的<strong>栈</strong>空间与 <strong>CS:IP</strong>，就好比不同函数对应的参数与返回地址都不同，所执行的指令所处位置也不一定相同。</p>
 <blockquote>
 <p>Linux 中进程与线程都被抽象为 <code>task_struct</code>，各自拥有 <code>pid</code>，但其内存所指 <code>mm_struct</code> 是相同的。</p>
 </blockquote>
-<h2 id="%E8%BF%9B%E7%A8%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B%E5%88%87%E6%8D%A2%E5%BC%80%E9%94%80" tabindex="-1"><a class="header-anchor" href="#进程与线程切换开销">#</a>进程与线程切换开销</h2>
+<h2 id="进程与线程切换开销"><a class="header-anchor" href="#进程与线程切换开销">#</a>进程与线程切换开销</h2>
 <p>进程的切换，必然伴随着上文提到的种种寄存器的保存与加载。除了这些，最大的开销来源于：从一个进程切换到另一个进程时，对应的地址空间也将切换，那么 TLB 是需要被清空的，这样就导致 TLB miss 以及访页速率降低，当然，Cache miss 率也会提高。</p>
 <p>然而，<strong>同一进程内</strong>的线程切换并不涉及地址空间的切换，仅仅保存其 BP, SP 以及若干寄存器即可。</p>
 <blockquote>
@@ -526,12 +526,6 @@
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -540,8 +534,8 @@
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -557,41 +551,6 @@
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

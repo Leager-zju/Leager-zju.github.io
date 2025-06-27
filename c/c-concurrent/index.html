@@ -327,7 +327,7 @@
             <div id="articleContent">
                 <p>C++11 新增了官方<strong>并发支持库</strong>，使得我们能够更好地在系统间移植程序，之前的 Boost 库等也就随之成为历史了。</p>
 <span id="more"></span>
-<h2 id="%E5%B9%B6%E5%8F%91%E4%B8%8E%E5%B9%B6%E8%A1%8C" tabindex="-1"><a class="header-anchor" href="#并发与并行">#</a>并发与并行</h2>
+<h2 id="并发与并行"><a class="header-anchor" href="#并发与并行">#</a>并发与并行</h2>
 <p>多线程的世界中，常常会涉及这俩重要概念。</p>
 <p>从定义的角度来说，在操作系统中，<strong>并发</strong>是指一个时间段中有几个程序都处于已启动运行到运行完毕之间，且这几个程序都是在同一个处理机上运行，但任一个时刻点上只有一个程序在处理机上运行；而<strong>并行</strong>指的是一组程序按独立异步的速度执行，无论从微观还是宏观，程序都是一起执行的。 （抄自百科）</p>
 <p>用自己的语言描述：</p>
@@ -343,13 +343,13 @@
 </li>
 </ul>
 <p>综上所述，<strong>并发</strong>与<strong>并行</strong>的最主要区别，就在于各个线程是否能够"同时"进行。</p>
-<h2 id="%E5%B9%B6%E5%8F%91%E6%94%AF%E6%8C%81%E5%BA%93" tabindex="-1"><a class="header-anchor" href="#并发支持库">#</a>并发支持库</h2>
+<h2 id="并发支持库"><a class="header-anchor" href="#并发支持库">#</a>并发支持库</h2>
 <p>并发支持库与 boost 很像，主要包含以下 5 个头文件。</p>
-<h3 id="%3C-thread-%3E" tabindex="-1"><a class="header-anchor" href="#thread">#</a>&lt; thread &gt;</h3>
+<h3 id="thread"><a class="header-anchor" href="#thread">#</a>&lt; thread &gt;</h3>
 <blockquote>
 <p>此头文件中定义了 <code>std::thread</code> 以及访问当前执行线程的函数 <code>std::this_thread</code></p>
 </blockquote>
-<h4 id="std%3A%3Athread" tabindex="-1"><a class="header-anchor" href="#std-thread">#</a>std::thread</h4>
+<h4 id="std-thread"><a class="header-anchor" href="#std-thread">#</a>std::thread</h4>
 <p>该类管理<strong>单个<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Thread_(computing)">执行线程</a></strong>，并对外提供 api。</p>
 <p>首先讲下<strong>初始化方式</strong>。由于每个线程都是一个独立的执行单位，故不存在两个同样的执行线程，那么<strong>拷贝构造</strong>与<strong>拷贝赋值</strong>因此被<strong>弃置</strong>(<code>delete</code>)。除此之外，其初始化方式共有四种重载形式：</p>
 <table>
@@ -439,7 +439,7 @@
  * t4 id: 3, joinable: true
  */</span>
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h4 id="std%3A%3Athis_thread" tabindex="-1"><a class="header-anchor" href="#std-this-thread">#</a>std::this_thread</h4>
+<h4 id="std-this-thread"><a class="header-anchor" href="#std-this-thread">#</a>std::this_thread</h4>
 <p>这实际上是 <code>std</code> 下的一个命名空间，用来表示当前线程。</p>
 <p>该命名空间下有以下常用成员函数：</p>
 <ol>
@@ -460,11 +460,11 @@
 <span class="token keyword">inline</span> <span class="token keyword">void</span> <span class="token function">sleep_until</span><span class="token punctuation">(</span><span class="token keyword">const</span> std<span class="token double-colon punctuation">::</span>chrono<span class="token double-colon punctuation">::</span>time_point<span class="token operator">&lt;</span>Clock<span class="token punctuation">,</span> Duration<span class="token operator">&gt;</span><span class="token operator">&amp;</span> time<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 </li>
 </ol>
-<h3 id="%3C-mutex-%3E" tabindex="-1"><a class="header-anchor" href="#mutex">#</a>&lt; mutex &gt;</h3>
+<h3 id="mutex"><a class="header-anchor" href="#mutex">#</a>&lt; mutex &gt;</h3>
 <blockquote>
 <p>此头文件中定义了各种互斥锁如 <code>std::mutex</code>，<code>std::lock_guard</code>，<code>std::unique_lock</code> 等</p>
 </blockquote>
-<h4 id="std%3A%3Amutex" tabindex="-1"><a class="header-anchor" href="#std-mutex">#</a>std::mutex</h4>
+<h4 id="std-mutex"><a class="header-anchor" href="#std-mutex">#</a>std::mutex</h4>
 <p>mutex，全称 <strong>mutual exclusion</strong>(互斥体)，用于保护共享数据的<strong>互斥</strong>访问，也就是常说的<strong>锁</strong>。mutex 相当于一种独占性的资源，仅有 <code>lock</code> / <code>try_lock</code>（获取该资源）与 <code>unlock</code>（释放该资源）两种操作，其余各种锁都是围绕 mutex 进行封装与变形，故这些锁的<strong>拷贝构造函数</strong>与<strong>拷贝赋值运算符</strong>被<strong>弃置</strong>。其<strong>主要特性</strong>如下：</p>
 <ul class="lvl-0">
 <li class="lvl-2">
@@ -490,7 +490,7 @@
 <p><code>unlock()</code>：释放 mutex；</p>
 </li>
 </ol>
-<h4 id="std%3A%3Atimed_mutex" tabindex="-1"><a class="header-anchor" href="#std-timed-mutex">#</a>std::timed_mutex</h4>
+<h4 id="std-timed-mutex"><a class="header-anchor" href="#std-timed-mutex">#</a>std::timed_mutex</h4>
 <p>在 mutex 基础上，timedMutex 添加了<strong>超时语义</strong>，相关成员函数为：</p>
 <ol>
 <li class="lvl-3">
@@ -501,11 +501,11 @@
 </li>
 </ol>
 <p>以上两个函数都会在成功时返回 <code>true</code>，失败时返回 <code>false</code>。</p>
-<h4 id="std%3A%3Arecursively_mutex" tabindex="-1"><a class="header-anchor" href="#std-recursively-mutex">#</a>std::recursively_mutex</h4>
+<h4 id="std-recursively-mutex"><a class="header-anchor" href="#std-recursively-mutex">#</a>std::recursively_mutex</h4>
 <p>以上两种锁都无法重复获取，即已占有 mutex 的线程继续 <code>lock</code> / <code>try_lock</code> 会发生 UB。在 mutex 基础上，recursivelyMutex 添加了<strong>递归语义</strong>，即允许线程多次上锁，并在释放相等次数的锁后结束（好比左右括号匹配）。其成员函数与 mutex 一致。</p>
-<h4 id="std%3A%3Arecursively_timed_mutex" tabindex="-1"><a class="header-anchor" href="#std-recursively-timed-mutex">#</a>std::recursively_timed_mutex</h4>
+<h4 id="std-recursively-timed-mutex"><a class="header-anchor" href="#std-recursively-timed-mutex">#</a>std::recursively_timed_mutex</h4>
 <p><strong>省流</strong>：recursivelyMutex + timedMutex</p>
-<h4 id="std%3A%3Alock()-%26-std%3A%3Atry_lock()" tabindex="-1"><a class="header-anchor" href="#std-lock-std-try-lock">#</a>std::lock() &amp; std::try_lock()</h4>
+<h4 id="std-lock-std-try-lock"><a class="header-anchor" href="#std-lock-std-try-lock">#</a>std::lock() &amp; std::try_lock()</h4>
 <p>除了各个锁类以外，&lt;mutex&gt; 头文件下还定义了两个全局函数 <code>std::lock()</code> 与 <code>std::try_lock()</code>，提供了通用的<strong>一次性加多个锁</strong>的方法。<strong>函数原型</strong>如下：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">template</span><span class="token operator">&lt;</span> <span class="token keyword">class</span> <span class="token class-name">Lockable1</span><span class="token punctuation">,</span> <span class="token keyword">class</span> <span class="token class-name">Lockable2</span><span class="token punctuation">,</span> <span class="token keyword">class</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> LockableN <span class="token operator">&gt;</span>
 <span class="token keyword">void</span> <span class="token function">lock</span><span class="token punctuation">(</span> Lockable1<span class="token operator">&amp;</span> lock1<span class="token punctuation">,</span> Lockable2<span class="token operator">&amp;</span> lock2<span class="token punctuation">,</span> LockableN<span class="token operator">&amp;</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> lockn <span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -513,7 +513,7 @@
 <span class="token keyword">template</span><span class="token operator">&lt;</span> <span class="token keyword">class</span> <span class="token class-name">Lockable1</span><span class="token punctuation">,</span> <span class="token keyword">class</span> <span class="token class-name">Lockable2</span><span class="token punctuation">,</span> <span class="token keyword">class</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> LockableN <span class="token operator">&gt;</span>
 <span class="token keyword">int</span> <span class="token function">try_lock</span><span class="token punctuation">(</span> Lockable1<span class="token operator">&amp;</span> lock1<span class="token punctuation">,</span> Lockable2<span class="token operator">&amp;</span> lock2<span class="token punctuation">,</span> LockableN<span class="token operator">&amp;</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> lockn <span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p><code>std::lock()</code> 为阻塞式加锁，<code>std::try_lock()</code> 为异步式加锁，它俩其实是去调用每种 lockable 对象，即 mutex 自身的方法，然后加锁，并且不会因为不同线程上锁顺序不同而死锁，这是因为一旦上锁失败，则不再推进，而对所有已上锁的 mutex 调用 <code>unlock()</code>，然后再次重复尝试，直至所有 mutex 都已上锁。</p>
-<h4 id="std%3A%3Alock_guard" tabindex="-1"><a class="header-anchor" href="#std-lock-guard">#</a>std::lock_guard</h4>
+<h4 id="std-lock-guard"><a class="header-anchor" href="#std-lock-guard">#</a>std::lock_guard</h4>
 <p>对于不加超时语义的 mutex 而言，需要程序员主动上锁解锁，但如果某线程在 unlock 之前就因为抛出异常而被迫终止，那么其持有的 mutex 就永远无法释放，所有等待该资源的线程也就陷入了无尽的阻塞中，这显然是不可用的。并且这样的手动释放要求我们在所有执行体的出口都要解锁，也增加了不必要的代码量。</p>
 <p><code>lock_guard</code> 应用了 <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/34660259">RAII 技术</a>，其将 mutex 进一步封装，并在构造/析构函数中进行资源的分配/释放，这样就不会出现上述问题——因为一旦线程退出，其所有资源都会被释放，那么必然会调用析构函数，进行解锁，防止线程由于编码失误导致一直持有锁。</p>
 <blockquote>
@@ -544,7 +544,7 @@ std<span class="token double-colon punctuation">::</span>lock_guard <span class=
 a<span class="token punctuation">.</span><span class="token function">lock</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>                         <span class="token comment">// 这句没有就报错</span>
 std<span class="token double-colon punctuation">::</span>lock_guard <span class="token function">c</span><span class="token punctuation">(</span>a<span class="token punctuation">,</span> adopt_lock<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 告知 a 已上锁，此时用这种初始化方式</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>下面还会讲另外两种上锁模式，也是同理的。</p>
-<h4 id="std%3A%3Aunique_lock" tabindex="-1"><a class="header-anchor" href="#std-unique-lock">#</a>std::unique_lock</h4>
+<h4 id="std-unique-lock"><a class="header-anchor" href="#std-unique-lock">#</a>std::unique_lock</h4>
 <p>顾名思义，unique_lock 是独占性的，故不存在两个 unique_lock 对应同一个 mutex 对象，故<strong>移动构造函数</strong>与<strong>移动赋值运算符</strong>得到了实现，方便转移资源。</p>
 <p>类定义如下：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">Mutex</span><span class="token operator">&gt;</span>
@@ -612,7 +612,7 @@ std<span class="token double-colon punctuation">::</span>lock_guard <span class=
 <blockquote>
 <p>lock_gurad 相比于 unique_lock 更轻量，但因为 unique_lock 类可以手动解锁，所以<strong>条件变量</strong>都搭配 unique_lock 一起使用，因为条件变量在 wait 时需要有手动解锁的能力。</p>
 </blockquote>
-<h4 id="std%3A%3Acall_once()" tabindex="-1"><a class="header-anchor" href="#std-call-once">#</a>std::call_once()</h4>
+<h4 id="std-call-once"><a class="header-anchor" href="#std-call-once">#</a>std::call_once()</h4>
 <p>此函数保证某一函数在多线程环境中只调用一次，它需要配合 <code>std::once_flag</code> 使用。<strong>函数原型</strong>为：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">template</span><span class="token operator">&lt;</span> <span class="token keyword">class</span> <span class="token class-name">Callable</span><span class="token punctuation">,</span> <span class="token keyword">class</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> Args <span class="token operator">&gt;</span>
 <span class="token keyword">void</span> <span class="token function">call_once</span><span class="token punctuation">(</span> std<span class="token double-colon punctuation">::</span>once_flag<span class="token operator">&amp;</span> flag<span class="token punctuation">,</span> Callable<span class="token operator">&amp;&amp;</span> f<span class="token punctuation">,</span> Args<span class="token operator">&amp;&amp;</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> args <span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
@@ -640,11 +640,11 @@ once_flag flag<span class="token punctuation">;</span>
 <span class="token punctuation">}</span>
 
 <span class="token comment">// output: 0 call</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="%3C-atomic-%3E" tabindex="-1"><a class="header-anchor" href="#atomic">#</a>&lt; atomic &gt;</h3>
+<h3 id="atomic"><a class="header-anchor" href="#atomic">#</a>&lt; atomic &gt;</h3>
 <blockquote>
 <p>此头文件中定义了原子变量 <code>std::atomic&lt;T&gt;</code>，以及其各种特化 <code>std::atomic_int</code>，<code>std::atomic_bool</code> 等</p>
 </blockquote>
-<h4 id="std%3A%3Aatomic" tabindex="-1"><a class="header-anchor" href="#std-atomic">#</a>std::atomic</h4>
+<h4 id="std-atomic"><a class="header-anchor" href="#std-atomic">#</a>std::atomic</h4>
 <p>考虑这样一个情况：存在一整型变量 <code>x = 0</code>，现在有两个线程 A, B 分别对其执行加 1 与 减 1 的操作，这些操作可以归结为两步原子操作：</p>
 <ol>
 <li class="lvl-3">
@@ -671,8 +671,8 @@ std<span class="token double-colon punctuation">::</span>mutex m<span class="tok
 <span class="token keyword">void</span> <span class="token function">add</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> x<span class="token operator">++</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
 <span class="token keyword">void</span> <span class="token function">sub</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> x<span class="token operator">--</span><span class="token punctuation">;</span> <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <p>事实上，原子变量能帮助我们自动控制线程之间的同步，保证加/减等操作的原子性——若一个线程写入原子对象，同时另一线程从它读取，则行为良好定义。</p>
-<h3 id="%3C-condition_variable-%3E" tabindex="-1"><a class="header-anchor" href="#condition-variable">#</a>&lt; condition_variable &gt;</h3>
-<h4 id="std%3A%3Acondition_variable" tabindex="-1"><a class="header-anchor" href="#std-condition-variable">#</a>std::condition_variable</h4>
+<h3 id="condition-variable"><a class="header-anchor" href="#condition-variable">#</a>&lt; condition_variable &gt;</h3>
+<h4 id="std-condition-variable"><a class="header-anchor" href="#std-condition-variable">#</a>std::condition_variable</h4>
 <p><code>condition_variable</code> 是利用线程间共享的<strong>全局变量</strong>进行<strong>同步</strong>的一种机制，能用于阻塞一个或多个线程（或称使其等待(<strong>wait</strong>)），直至另一线程通知(<strong>notify</strong>)条件变量将等待的线程唤醒。相当于操作系统里的 <strong>P/V</strong> 操作。</p>
 <blockquote>
 <p>下面就用 P/V 代称 wait/notify。</p>
@@ -752,14 +752,14 @@ std<span class="token double-colon punctuation">::</span>cv_status <span class="
 
 <span class="token comment">// 唤醒等待队列中的所有线程</span>
 <span class="token keyword">void</span> <span class="token function">notify_all</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">noexcept</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h4 id="std%3A%3Acondition_variable_any" tabindex="-1"><a class="header-anchor" href="#std-condition-variable-any">#</a>std::condition_variable_any</h4>
+<h4 id="std-condition-variable-any"><a class="header-anchor" href="#std-condition-variable-any">#</a>std::condition_variable_any</h4>
 <p>与 <code>condition_variable</code> 相比，<code>condition_variable_any</code> 是 <code>condition_variable</code> 的泛化，其支持任一 Lockable 的锁，不一定非要用 <code>unique_lock</code>。除此以外与 <code>condition_variable</code> 几乎完全一致，就不聊了。</p>
-<h4 id="std%3A%3Anotify_all_at_thread_exit()" tabindex="-1"><a class="header-anchor" href="#std-notify-all-at-thread-exit">#</a>std::notify_all_at_thread_exit()</h4>
+<h4 id="std-notify-all-at-thread-exit"><a class="header-anchor" href="#std-notify-all-at-thread-exit">#</a>std::notify_all_at_thread_exit()</h4>
 <p>在此线程完全结束时调用 <code>notify_all()</code>。函数原型为：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">void</span> <span class="token function">notify_all_at_thread_exit</span><span class="token punctuation">(</span> std<span class="token double-colon punctuation">::</span>condition_variable<span class="token operator">&amp;</span> cond<span class="token punctuation">,</span>
                                 std<span class="token double-colon punctuation">::</span>unique_lock<span class="token operator">&lt;</span>std<span class="token double-colon punctuation">::</span>mutex<span class="token operator">&gt;</span> lk <span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 <p>需要注意的是，调用该函数之前，必须首先用与 cond 绑定的相同 mutex 来创建 unique_lock 对象，并且传参时需要用 <code>move()</code> 将先前获得的锁 <code>lk</code> 的所有权转移到内部存储。</p>
-<h4 id="%E5%94%A4%E9%86%92%E4%B8%A2%E5%A4%B1" tabindex="-1"><a class="header-anchor" href="#唤醒丢失">#</a>唤醒丢失</h4>
+<h4 id="唤醒丢失"><a class="header-anchor" href="#唤醒丢失">#</a>唤醒丢失</h4>
 <p>上面讲条件变量用法时，我提到"<strong>尝试进行 P/V 的线程必须在持有锁时进行 P/V</strong>"，那么如果不上锁就 wait/notify 会怎样呢？不加锁便进行wait 操作的行为我们已经说过是 UB，而不加锁便进行 notify 的行为会导致<strong>唤醒丢失</strong>，且看：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token comment">// case1 唤醒丢失</span>
 std<span class="token double-colon punctuation">::</span>mutex m<span class="token punctuation">;</span>
@@ -829,7 +829,7 @@ thread2<span class="token punctuation">.</span><span class="token function">join
 <p>thread2 先上锁然后 notify_all（此时会隐式地解锁），再是 thread1 上锁并进行 wait。由于没有其它线程执行唤醒的工作，thread1 将永远 wait 下去——thread2 的 notify 实际上丢失了！这便是<strong>不加条件导致唤醒丢失</strong>的经典案例。</p>
 <p>为了解决这一问题，我们应当加上某些限制，使得 notify 确定性地位于 wait 之后。于是需要套上一层条件判断的语句（如 <code>while</code>），检测当前是否应当 wait，套上 <code>while</code> 后，即便 thread2 首先执行，但由于 thread2 中修改了 predicate，thread1 也就能够很快检测到，能够跳过 wait 阶段。当然也可以不用 <code>while</code>，而是写成下面这种样子，这两者是等价的。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp">cond<span class="token punctuation">.</span><span class="token function">wait</span><span class="token punctuation">(</span>lock<span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> flag<span class="token punctuation">;</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<h4 id="%E8%99%9A%E5%81%87%E5%94%A4%E9%86%92" tabindex="-1"><a class="header-anchor" href="#虚假唤醒">#</a>虚假唤醒</h4>
+<h4 id="虚假唤醒"><a class="header-anchor" href="#虚假唤醒">#</a>虚假唤醒</h4>
 <p>当上面的条件判断语句由 <code>while</code> 改为 <code>if</code> 时，便存在<strong>虚假唤醒</strong>的情况。</p>
 <blockquote>
 <p>当一个线程从等待一个已发出信号的条件变量中醒来，却发现它正在等待的条件不满足时，就会发生<strong>虚假唤醒</strong>。之所以称为虚假，是因为该线程似乎无缘无故地被唤醒了。但是虚假唤醒不会无缘无故地发生：它们通常会发生，因为在条件变量发出信号和等待线程最终运行之间，另一个线程运行并改变了条件。（抄自<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Spurious_wakeup">百科</a>）</p>
@@ -853,11 +853,11 @@ std<span class="token double-colon punctuation">::</span>condition_variable cond
   cond<span class="token punctuation">.</span><span class="token function">notify_all</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>解决办法就是<strong>将 wait 放到条件判断循环中</strong>，即类似于上一节中第二段代码。</p>
-<h3 id="%3C-future-%3E" tabindex="-1"><a class="header-anchor" href="#future">#</a>&lt; future &gt;</h3>
-<h4 id="std%3A%3Afuture" tabindex="-1"><a class="header-anchor" href="#std-future">#</a>std::future</h4>
+<h3 id="future"><a class="header-anchor" href="#future">#</a>&lt; future &gt;</h3>
+<h4 id="std-future"><a class="header-anchor" href="#std-future">#</a>std::future</h4>
 <p><code>std::future</code> 类型变量可以用于保存某个异步任务的结果（<strong>共享变量</strong>），并且内含一个状态(state)来表示该任务是否完成(ready)。因此可以把它当成一种简单的线程间同步的手段。通常由某个 “Provider” 创建，并在未来的某个线程中设置共享变量的值（future 因此得名），另外一个线程中与该共享变量相关联的 <code>std::future</code> 对象调用 <code>get()</code> 获取该值。</p>
 <p>如果共享变量中 <code>state != ready</code>，则对 <code>std::future::get()</code> 的调用会阻塞，直到 Provider 设置了共享变量的值（然后 <code>state == ready</code>），这才返回异步任务的值或异常（如果发生了异常）。</p>
-<h4 id="std%3A%3Apromise" tabindex="-1"><a class="header-anchor" href="#std-promise">#</a>std::promise</h4>
+<h4 id="std-promise"><a class="header-anchor" href="#std-promise">#</a>std::promise</h4>
 <p><code>std::promise&lt;T&gt;</code> 属于 Provider。它关联了一个 <code>std::future&lt;T&gt;</code> 对象，并可以通过 <code>get_future()</code> 返回该对象。同样的，它也可以通过 <code>set_value(T)</code> 进行共享变量的赋值，从而唤醒另一个调用了 <code>std::future::get()</code> 的线程（如果有）。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;functional&gt;</span></span>
 <span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;future&gt;</span></span>
@@ -880,7 +880,7 @@ std<span class="token double-colon punctuation">::</span>condition_variable cond
 <span class="token punctuation">}</span>
 <span class="token comment">// output:</span>
 <span class="token comment">// value: 10</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h4 id="std%3A%3Apackaged_task" tabindex="-1"><a class="header-anchor" href="#std-packaged-task">#</a>std::packaged_task</h4>
+<h4 id="std-packaged-task"><a class="header-anchor" href="#std-packaged-task">#</a>std::packaged_task</h4>
 <p><code>std::packaged_task&lt;T(Args...)&gt;</code> 也是 Provider。它除了关联一个 <code>std::future&lt;T&gt;</code> 对象，还包装了一个类型为 <code>T(Args...)</code> 的<strong>可调用对象</strong>。packaged_task 实现了 <code>operator()</code>（因而可以作为 <code>std::thread</code> 的初始化参数），调用一个 packaged_task 相当于调用内含的可调用对象，并将返回值或异常存在关联的 future 里。</p>
 <p>当线程 a 用一个 <code>std::packaged_task</code> 初始化新线程 b 时，a 可以调用 <code>std::packaged_task::get_future()</code> 返回一个 future 对象，并调用 <code>get()</code> 阻塞直至 b 执行完返回。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;chrono&gt;</span></span>
@@ -922,9 +922,9 @@ std<span class="token double-colon punctuation">::</span>condition_variable cond
 <span class="token comment">// 1</span>
 <span class="token comment">// Finished!</span>
 <span class="token comment">// The countdown lasted for 10 seconds.</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="pthread(posix-thread)" tabindex="-1"><a class="header-anchor" href="#pthread-POSIX-thread">#</a>pthread(POSIX thread)</h2>
+<h2 id="pthread-POSIX-thread"><a class="header-anchor" href="#pthread-POSIX-thread">#</a>pthread(POSIX thread)</h2>
 <p>pthread 是一个在类 UNIX 系统下广泛使用的并发包，Linux 系统下在 glibc 库里实现。</p>
-<h3 id="pthread_mutex_t" tabindex="-1"><a class="header-anchor" href="#pthread-mutex-t">#</a>pthread_mutex_t</h3>
+<h3 id="pthread-mutex-t"><a class="header-anchor" href="#pthread-mutex-t">#</a>pthread_mutex_t</h3>
 <p>这是 pthread 中对于锁的数据结构定义，如下所示：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">typedef</span> <span class="token keyword">union</span>
 <span class="token punctuation">{</span>
@@ -945,9 +945,9 @@ std<span class="token double-colon punctuation">::</span>condition_variable cond
   <span class="token punctuation">}</span> __data<span class="token punctuation">;</span>
   <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
 <span class="token punctuation">}</span> pthread_mutex_t<span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="pthread_mutex_lock(mutex)" tabindex="-1"><a class="header-anchor" href="#pthread-mutex-lock-mutex">#</a>pthread_mutex_lock(mutex)</h3>
+<h3 id="pthread-mutex-lock-mutex"><a class="header-anchor" href="#pthread-mutex-lock-mutex">#</a>pthread_mutex_lock(mutex)</h3>
 <p>这是提供给用户的加锁函数，内部会判断锁的类型，并执行不同的上锁策略。</p>
-<h4 id="%E6%99%AE%E9%80%9A%E9%94%81" tabindex="-1"><a class="header-anchor" href="#普通锁">#</a>普通锁</h4>
+<h4 id="普通锁"><a class="header-anchor" href="#普通锁">#</a>普通锁</h4>
 <p>对于<strong>普通锁</strong>，直接进行加锁。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">__glibc_likely</span> <span class="token punctuation">(</span>type <span class="token operator">==</span> PTHREAD_MUTEX_TIMED_NP<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
   <span class="token comment">/* 普通锁 */</span>
@@ -955,7 +955,7 @@ std<span class="token double-colon punctuation">::</span>condition_variable cond
     <span class="token function">LLL_MUTEX_LOCK</span> <span class="token punctuation">(</span>mutex<span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token function">assert</span> <span class="token punctuation">(</span>mutex<span class="token operator">-&gt;</span>__data<span class="token punctuation">.</span>__owner <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h4 id="%E5%8F%AF%E9%87%8D%E5%85%A5%E9%94%81" tabindex="-1"><a class="header-anchor" href="#可重入锁">#</a>可重入锁</h4>
+<h4 id="可重入锁"><a class="header-anchor" href="#可重入锁">#</a>可重入锁</h4>
 <p>对于<strong>可重入锁</strong>，如果同一线程加锁，则直接增加计数器；否则，像普通锁一样加锁。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">__builtin_expect</span> <span class="token punctuation">(</span><span class="token function">PTHREAD_MUTEX_TYPE</span> <span class="token punctuation">(</span>mutex<span class="token punctuation">)</span> <span class="token operator">==</span> PTHREAD_MUTEX_RECURSIVE_NP<span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
   <span class="token comment">/* 可重入锁 */</span>
@@ -974,7 +974,7 @@ std<span class="token double-colon punctuation">::</span>condition_variable cond
   <span class="token function">assert</span> <span class="token punctuation">(</span>mutex<span class="token operator">-&gt;</span>__data<span class="token punctuation">.</span>__owner <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   mutex<span class="token operator">-&gt;</span>__data<span class="token punctuation">.</span>__count <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h4 id="%E8%87%AA%E9%80%82%E5%BA%94%E9%94%81" tabindex="-1"><a class="header-anchor" href="#自适应锁">#</a>自适应锁</h4>
+<h4 id="自适应锁"><a class="header-anchor" href="#自适应锁">#</a>自适应锁</h4>
 <p>对于<strong>自适应锁</strong>，则是首先进行一定次数的「自旋」，如果达到次数上限后依然没有获得锁，则像普通锁一样加锁。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">__builtin_expect</span> <span class="token punctuation">(</span><span class="token function">PTHREAD_MUTEX_TYPE</span> <span class="token punctuation">(</span>mutex<span class="token punctuation">)</span> <span class="token operator">==</span> PTHREAD_MUTEX_ADAPTIVE_NP<span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
   <span class="token comment">/* 自适应锁 */</span>
@@ -999,7 +999,7 @@ std<span class="token double-colon punctuation">::</span>condition_variable cond
   <span class="token punctuation">}</span>
   <span class="token function">assert</span> <span class="token punctuation">(</span>mutex<span class="token operator">-&gt;</span>__data<span class="token punctuation">.</span>__owner <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h4 id="%E6%A3%80%E9%94%99%E9%94%81" tabindex="-1"><a class="header-anchor" href="#检错锁">#</a>检错锁</h4>
+<h4 id="检错锁"><a class="header-anchor" href="#检错锁">#</a>检错锁</h4>
 <p>对于<strong>检错锁</strong>，则首先检查是否为同一线程重复上锁，是一种简单的避免死锁的逻辑。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">else</span> <span class="token punctuation">{</span>
   <span class="token comment">/* 检错锁 */</span>
@@ -1010,7 +1010,7 @@ std<span class="token double-colon punctuation">::</span>condition_variable cond
 
   <span class="token keyword">goto</span> simple<span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="lll_mutex_lock(mutex)" tabindex="-1"><a class="header-anchor" href="#LLL-MUTEX-LOCK-mutex">#</a>LLL_MUTEX_LOCK(mutex)</h3>
+<h3 id="LLL-MUTEX-LOCK-mutex"><a class="header-anchor" href="#LLL-MUTEX-LOCK-mutex">#</a>LLL_MUTEX_LOCK(mutex)</h3>
 <p>这其实是一个宏，将其展开后我们可以得到 <code>__lll_lock(&amp;((mutex)-&gt;__data.__lock), PTHREAD_MUTEX_PSHARED (mutex))</code>。所以其实是走了 <code>__lll_lock()</code> 宏，第二个参数用于获取当前锁是否为共享锁（读锁）。</p>
 <p>来看看上锁的策略吧！简单来说就是先尝试用 CAS 获取锁，如果获取失败（被占用）就执行 <code>__lll_lock_wait*()</code> 挂起等待。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name function">__lll_lock</span><span class="token expression"><span class="token punctuation">(</span>futex<span class="token punctuation">,</span> <span class="token keyword">private</span><span class="token punctuation">)</span>                                      </span><span class="token punctuation">\</span>
@@ -1033,7 +1033,7 @@ std<span class="token double-colon punctuation">::</span>condition_variable cond
 <blockquote>
 <p>这里是直接把 <code>pthread_mutex_t</code> 里的 <code>__lock</code> 拿来当 futex 使了。</p>
 </blockquote>
-<h4 id="__lll_lock_wait()" tabindex="-1"><a class="header-anchor" href="#lll-lock-wait">#</a>__lll_lock_wait()</h4>
+<h4 id="lll-lock-wait"><a class="header-anchor" href="#lll-lock-wait">#</a>__lll_lock_wait()</h4>
 <p><code>*futex</code> 为 2 表示 “acquired, possibly with waiters”，所以如果已经为 2 了，就直接等待；之后检查锁状态是否为 0，然后将其置 2，如果最开始状态非 0 则等待。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">void</span> <span class="token function">__lll_lock_wait</span> <span class="token punctuation">(</span><span class="token keyword">int</span> <span class="token operator">*</span>futex<span class="token punctuation">,</span> <span class="token keyword">int</span> <span class="token keyword">private</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
   <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">*</span>futex <span class="token operator">==</span> <span class="token number">2</span><span class="token punctuation">)</span>
@@ -1042,7 +1042,7 @@ std<span class="token double-colon punctuation">::</span>condition_variable cond
   <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token function">atomic_exchange_acq</span> <span class="token punctuation">(</span>futex<span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token number">0</span><span class="token punctuation">)</span>
     <span class="token function">lll_futex_wait</span> <span class="token punctuation">(</span>futex<span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token keyword">private</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">/* Wait if *futex == 2. */</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h4 id="lll_futex_wait()%2Flll_futex_timed_wait()" tabindex="-1"><a class="header-anchor" href="#lll-futex-wait-lll-futex-timed-wait">#</a>lll_futex_wait()/lll_futex_timed_wait()</h4>
+<h4 id="lll-futex-wait-lll-futex-timed-wait"><a class="header-anchor" href="#lll-futex-wait-lll-futex-timed-wait">#</a>lll_futex_wait()/lll_futex_timed_wait()</h4>
 <p><code>lll_futex_wait</code> 这个宏走的是 <code>lll_futex_timed_wait()</code>。如果 lll_futex_wake 后 *futexp 值还是 val，则以 <strong>FUTEX_WAIT</strong> 执行系统调用 <code>futex()</code> 进行等待。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name function">lll_futex_timed_wait</span><span class="token expression"><span class="token punctuation">(</span>futexp<span class="token punctuation">,</span> val<span class="token punctuation">,</span> timeout<span class="token punctuation">,</span> <span class="token keyword">private</span><span class="token punctuation">)</span>     </span><span class="token punctuation">\</span>
   <span class="token expression"><span class="token function">lll_futex_syscall</span> <span class="token punctuation">(</span><span class="token number">4</span><span class="token punctuation">,</span> futexp<span class="token punctuation">,</span>                                 </span><span class="token punctuation">\</span>
@@ -1057,7 +1057,7 @@ std<span class="token double-colon punctuation">::</span>condition_variable cond
     <span class="token expression"><span class="token punctuation">(</span><span class="token function">__glibc_unlikely</span> <span class="token punctuation">(</span><span class="token function">INTERNAL_SYSCALL_ERROR_P</span> <span class="token punctuation">(</span>__ret<span class="token punctuation">,</span> __err<span class="token punctuation">)</span><span class="token punctuation">)</span>         </span><span class="token punctuation">\</span>
      <span class="token expression"><span class="token operator">?</span> <span class="token operator">-</span><span class="token function">INTERNAL_SYSCALL_ERRNO</span> <span class="token punctuation">(</span>__ret<span class="token punctuation">,</span> __err<span class="token punctuation">)</span> <span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>                     </span><span class="token punctuation">\</span>
   <span class="token expression"><span class="token punctuation">}</span><span class="token punctuation">)</span></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="lll_unlock()" tabindex="-1"><a class="header-anchor" href="#lll-unlock">#</a>lll_unlock()</h3>
+<h3 id="lll-unlock"><a class="header-anchor" href="#lll-unlock">#</a>lll_unlock()</h3>
 <p>释放锁的核心函数。无条件将锁的状态置 0，如果旧状态值为 2，则还需要执行 <code>lll_futex_wake</code> 去唤醒等待的线程，此时第一个竞争成功的线程通过 <code>atomic_exchange_acq (futex, 2)</code> 将状态置 2 后成功获取到锁，如此往复。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name function">__lll_unlock</span><span class="token expression"><span class="token punctuation">(</span>futex<span class="token punctuation">,</span> <span class="token keyword">private</span><span class="token punctuation">)</span>                   </span><span class="token punctuation">\</span>
   <span class="token expression"><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token keyword">void</span><span class="token punctuation">)</span>                                              </span><span class="token punctuation">\</span>
@@ -1070,7 +1070,7 @@ std<span class="token double-colon punctuation">::</span>condition_variable cond
 
 <span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name function">lll_unlock</span><span class="token expression"><span class="token punctuation">(</span>futex<span class="token punctuation">,</span> <span class="token keyword">private</span><span class="token punctuation">)</span>    </span><span class="token punctuation">\</span>
   <span class="token expression"><span class="token function">__lll_unlock</span> <span class="token punctuation">(</span><span class="token operator">&amp;</span><span class="token punctuation">(</span>futex<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token keyword">private</span><span class="token punctuation">)</span></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h4 id="lll_futex_wake()" tabindex="-1"><a class="header-anchor" href="#lll-futex-wake">#</a>lll_futex_wake()</h4>
+<h4 id="lll-futex-wake"><a class="header-anchor" href="#lll-futex-wake">#</a>lll_futex_wake()</h4>
 <p>以 <strong>FUTEX_WAKE</strong> 去执行系统调用 <code>futex()</code>。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp">
 <span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name function">lll_futex_wake</span><span class="token expression"><span class="token punctuation">(</span>futexp<span class="token punctuation">,</span> nr<span class="token punctuation">,</span> <span class="token keyword">private</span><span class="token punctuation">)</span>            </span><span class="token punctuation">\</span>
@@ -1081,10 +1081,10 @@ std<span class="token double-colon punctuation">::</span>condition_variable cond
                        <span class="token expression"><span class="token punctuation">(</span>futexp<span class="token punctuation">)</span><span class="token punctuation">,</span> FUTEX_WAKE<span class="token punctuation">,</span> <span class="token punctuation">(</span>nr<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span> </span><span class="token punctuation">\</span>
         <span class="token expression">__ret<span class="token punctuation">;</span>                                         </span><span class="token punctuation">\</span>
   <span class="token expression"><span class="token punctuation">}</span><span class="token punctuation">)</span></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E5%B9%B6%E5%8F%91%E5%BA%94%E7%94%A8" tabindex="-1"><a class="header-anchor" href="#并发应用">#</a>并发应用</h2>
-<h3 id="%E6%97%A0%E9%94%81%E9%98%9F%E5%88%97(lockless-queue)" tabindex="-1"><a class="header-anchor" href="#无锁队列-Lockless-Queue">#</a>无锁队列(Lockless Queue)</h3>
+<h2 id="并发应用"><a class="header-anchor" href="#并发应用">#</a>并发应用</h2>
+<h3 id="无锁队列-Lockless-Queue"><a class="header-anchor" href="#无锁队列-Lockless-Queue">#</a>无锁队列(Lockless Queue)</h3>
 <p>可参考<a target="_blank" rel="noopener" href="https://coolshell.cn/articles/8239.html">这篇文章</a>。</p>
-<h3 id="%E7%BA%BF%E7%A8%8B%E6%B1%A0(thread-pool)" tabindex="-1"><a class="header-anchor" href="#线程池-Thread-Pool">#</a>线程池(Thread Pool)</h3>
+<h3 id="线程池-Thread-Pool"><a class="header-anchor" href="#线程池-Thread-Pool">#</a>线程池(Thread Pool)</h3>
 <p>利用 <code>std::future</code> 和 <code>std::packaged_task</code>，我们可以实现一个支持异步返回结果的<strong>线程池</strong>。</p>
 <p>和普通的仅支持<strong>执行但不返回结果</strong>的线程池相比，其核心在于一个 <code>ThreadPool::execute()</code> 执行函数。该函数为模板函数，允许传入一个可调用对象及其参数列表，内部通过 <code>std::packaged_task</code> 包装后交付给空闲线程执行，并将返回结果保存在其关联的 <code>std::future</code> 对象中。执行函数可以返回这个 future，并让用户通过 <code>std::future::get()</code> 等待执行结果。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>线程池</span></div><code class="language-cpp"><span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">F</span><span class="token punctuation">,</span> <span class="token keyword">class</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>Args<span class="token operator">&gt;</span>
@@ -1288,12 +1288,6 @@ std<span class="token double-colon punctuation">::</span>condition_variable cond
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -1302,8 +1296,8 @@ std<span class="token double-colon punctuation">::</span>condition_variable cond
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -1319,41 +1313,6 @@ std<span class="token double-colon punctuation">::</span>condition_variable cond
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

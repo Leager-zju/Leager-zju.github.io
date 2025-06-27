@@ -326,14 +326,14 @@
             <div id="articleContent">
                 <p>C++11引入了 <strong><code>auto</code></strong> 和 <strong><code>decltype</code></strong> 这两个关键字，从而可以在编译期就推导出变量或者表达式的类型，方便开发者编码也简化了代码。</p>
 <span id="more"></span>
-<h2 id="auto" tabindex="-1"><a class="header-anchor" href="#auto">#</a>auto</h2>
+<h2 id="auto"><a class="header-anchor" href="#auto">#</a>auto</h2>
 <p>关键字 <code>auto</code> 的作用便是自动推导变量/函数(C<ins>14起)/模板(C</ins>20起)的类型，例如这样推导是可以的：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">auto</span> foobar <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>           <span class="token comment">// OK! 此时 auto 被编译器推导为 int</span>
 <span class="token keyword">auto</span> foo <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token operator">*</span>bar <span class="token operator">=</span> <span class="token operator">&amp;</span>foo<span class="token punctuation">;</span> <span class="token comment">// OK! foo, bar 分别为 int 与 int*，此时 auto 被推导为 int（若将 * 删去则报错）</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 <p>但不能这样推导：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">auto</span> foobar<span class="token punctuation">;</span>               <span class="token comment">// ERROR! 必须初始化，否则编译器无法推导。毕竟 auto 只是一个占位符，不能真正代替数据类型进行声明</span>
 <span class="token keyword">auto</span> foo <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">,</span> bar <span class="token operator">=</span> <span class="token number">1.0</span><span class="token punctuation">;</span>   <span class="token comment">// ERROR! foo, bar 分别为 int 和 double 类型，auto 会产生二义性，非良构</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
-<h3 id="%E6%8E%A8%E5%AF%BC%E8%A7%84%E5%88%99" tabindex="-1"><a class="header-anchor" href="#推导规则">#</a>推导规则</h3>
+<h3 id="推导规则"><a class="header-anchor" href="#推导规则">#</a>推导规则</h3>
 <p>除了上面讲的外，关于 <code>auto</code> 还有以下几条规则：</p>
 <ol>
 <li class="lvl-3">
@@ -370,11 +370,11 @@
 <p>不允许用作<strong>模板参数</strong>，如 <code>std::vector&lt;auto&gt; f{1, 2, 3}; </code> 是不允许的，编译器会报 <code>'auto' not allowed in template argument</code> 错误；</p>
 </li>
 </ol>
-<h3 id="%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF" tabindex="-1"><a class="header-anchor" href="#应用场景">#</a>应用场景</h3>
+<h3 id="应用场景"><a class="header-anchor" href="#应用场景">#</a>应用场景</h3>
 <p>将变量声明为迭代器类型是一件非常痛苦的事，尤其是 <code>std::unordered_map&lt;Typename1, Typename2&gt;::iterator it = map.begin();</code> 这样的语句，对本人这样的懒惰程序员而言简直是灾祸🤦‍♂️……</p>
 <p>在有了 <code>auto</code> 后，就可以把上面的语句改写为 <code>auto it = map.begin()</code>，懒癌福音🥰</p>
 <p>一般地，我个人认为，使用 <code>auto</code>的前提是不能影响代码可读性，对于一些不重要的中间变量，使用 <code>auto</code> 不会破坏可读性，还能大大提高 code 效率，但对于一些关键的变量，如函数返回值，或是利用到类多态特性的地方，则不建议用 <code>auto</code>。</p>
-<h2 id="decltype" tabindex="-1"><a class="header-anchor" href="#decltype">#</a>decltype</h2>
+<h2 id="decltype"><a class="header-anchor" href="#decltype">#</a>decltype</h2>
 <p>尽管都是在编译器进行类型推导，但与 <code>auto</code> 不同，<code>decltype</code> 根据已声明的变量或表达式推导其类型，无需初始化，例如：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">int</span> foo <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
 <span class="token keyword">decltype</span><span class="token punctuation">(</span>foo<span class="token punctuation">)</span> bar<span class="token punctuation">;</span> <span class="token comment">// 由于 foo 为 int，则 decltype(foo) 被推导为 int</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
@@ -383,7 +383,7 @@
 
 <span class="token keyword">decltype</span><span class="token punctuation">(</span>func<span class="token punctuation">)</span> p<span class="token punctuation">;</span>   <span class="token comment">// OK! p 为 void(void) 的函数类型，注意和函数指针类型 void(*p)(void) 不同</span>
 <span class="token keyword">decltype</span><span class="token punctuation">(</span><span class="token function">func</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> q<span class="token punctuation">;</span> <span class="token comment">// ERROR!</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="%E6%8E%A8%E5%AF%BC%E8%A7%84%E5%88%99-1" tabindex="-1"><a class="header-anchor" href="#推导规则-2">#</a>推导规则</h3>
+<h3 id="推导规则-2"><a class="header-anchor" href="#推导规则-2">#</a>推导规则</h3>
 <p>除了上面讲的外，关于 <code>decltype</code> 还有以下几条规则：</p>
 <ol>
 <li class="lvl-3">
@@ -422,7 +422,7 @@
 <span class="token keyword">decltype</span><span class="token punctuation">(</span>func<span class="token punctuation">)</span> f2<span class="token punctuation">;</span> <span class="token comment">// ERROR! func 有两个重载</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 </li>
 </ol>
-<h3 id="%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF-1" tabindex="-1"><a class="header-anchor" href="#应用场景-2">#</a>应用场景</h3>
+<h3 id="应用场景-2"><a class="header-anchor" href="#应用场景-2">#</a>应用场景</h3>
 <p>当类模板中需要根据传入的模板参数类中的成员变量来进一步确定类型的变量时，则用 <code>decltype</code> 是个很好的选择。常见于推导函数返回值类型的情况，例如：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">T</span><span class="token punctuation">,</span> <span class="token keyword">typename</span> <span class="token class-name">U</span><span class="token operator">&gt;</span>
 <span class="token operator">?</span> <span class="token function">func</span><span class="token punctuation">(</span>T t<span class="token punctuation">,</span> U u<span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -613,12 +613,6 @@
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -627,8 +621,8 @@
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -644,41 +638,6 @@
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

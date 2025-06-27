@@ -330,12 +330,12 @@ $ make clean
             <div id="articleContent">
                 <p>在本 lab 中，我们将进行页表机制的探索。</p>
 <span id="more"></span>
-<h2 id="preparation" tabindex="-1"><a class="header-anchor" href="#Preparation">#</a>Preparation</h2>
+<h2 id="Preparation"><a class="header-anchor" href="#Preparation">#</a>Preparation</h2>
 <p>切换到对应分支</p>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">git</span> fetch
 $ <span class="token function">git</span> checkout pgtbl
 $ <span class="token function">make</span> clean<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
-<h2 id="task1%3A-speed-up-system-calls" tabindex="-1"><a class="header-anchor" href="#Task1-Speed-up-system-calls">#</a>Task1: Speed up system calls</h2>
+<h2 id="Task1-Speed-up-system-calls"><a class="header-anchor" href="#Task1-Speed-up-system-calls">#</a>Task1: Speed up system calls</h2>
 <p>该任务要求我们在进程虚拟地址空间中添加一个固定项：<code>USYSCALL</code>，该页的开头字段为当前进程 <code>pid</code>，这样一来 <code>getpid()</code> 就不用陷入内核，而是直接通过访问虚拟地址即可获取，从而加快速度。</p>
 <p>用户层函数 <code>ugetpid()</code> 已经为我们实现好了，我们只需要关注内核中，更具体来讲，是新建进程时<strong>初始化虚拟地址空间</strong>动作中发生的事。</p>
 <p>进程会在两个时候被创建，一个是 <code>userinit()</code>(<code>kernel/proc.c</code>)时，一个是调用 <code>fork()</code> 时。进程的创建会调用 <code>kernel/proc.c</code> 中的 <code>allocproc()</code>，然后通过 <code>proc_pagetable()</code> 来初始化页表。</p>
@@ -416,7 +416,7 @@ proc_freepagetable(pagetable_t pagetable, uint64 sz)
   uvmunmap(pagetable, USYSCALL, 1, 0); // (!new)
   uvmfree(pagetable, sz);
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="task2%3A-print-a-page-table" tabindex="-1"><a class="header-anchor" href="#Task2-Print-a-page-table">#</a>Task2: Print a page table</h2>
+<h2 id="Task2-Print-a-page-table"><a class="header-anchor" href="#Task2-Print-a-page-table">#</a>Task2: Print a page table</h2>
 <p>现在我们需要按照给定格式，在 <code>kernel/exec.c:119</code> 插入 <code>if(p-&gt;pid==1) vmprint(p-&gt;pagetable)</code> 来输出初始进程的页表，以可视化并有助于 debug。</p>
 <p>参考 <code>kernel/vm.c</code> 中的 <code>freewalk()</code>，我们主要关注的是它以怎样的方式遍历页目录结构——获取表项，得到物理地址，根据标志位判断这一物理地址是页表还是数据页，决定是否需要进一步深入。</p>
 <blockquote>
@@ -468,7 +468,7 @@ vmprintwalk(pagetable_t pagetable, int level)
     }
   }
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="task3%3A-detecting-which-pages-have-been-accessed" tabindex="-1"><a class="header-anchor" href="#Task3-Detecting-which-pages-have-been-accessed">#</a>Task3: Detecting which pages have been accessed</h2>
+<h2 id="Task3-Detecting-which-pages-have-been-accessed"><a class="header-anchor" href="#Task3-Detecting-which-pages-have-been-accessed">#</a>Task3: Detecting which pages have been accessed</h2>
 <p>该任务要求我们利用跟踪哪些页被访问过，并且通过用户层函数 <code>pgaccess()</code> 来获取自从上一次调用以来被访问过的页。</p>
 <p>既然如此，那每个页表项就需要一个「访问位」咯，根据上面那张图，我们可以在 <code>kernel/riscv.h</code> 中添加一行 <code>#define PTE_A (1L &lt;&lt; 6)</code>，方便进行位运算。</p>
 <p>lab 已经贴心地为我们做好了所有准备工作，包括修改 <code>usys.pl</code>、注册系统调用等，所以我们只需要在 <code>kernel/sysproc.c</code> 中实现 <code>sys_pgaccess()</code> 函数即可。</p>
@@ -536,7 +536,7 @@ walkaddr(pagetable_t pagetable, uint64 va)
   pa = PTE2PA(*pte);
   return pa;
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9E%9C" tabindex="-1"><a class="header-anchor" href="#测试结果">#</a>测试结果</h2>
+<h2 id="测试结果"><a class="header-anchor" href="#测试结果">#</a>测试结果</h2>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">make</span> grade
 <span class="token punctuation">..</span>.
 <span class="token operator">==</span> Test pgtbltest <span class="token operator">==</span>
@@ -558,7 +558,7 @@ $ <span class="token function">make</span> qemu-gdb
 <span class="token operator">==</span> Test <span class="token function">time</span> <span class="token operator">==</span>
 time: OK
 Score: <span class="token number">46</span>/46<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E6%9C%80%E5%90%8E%E7%9A%84%E5%B7%A5%E4%BD%9C" tabindex="-1"><a class="header-anchor" href="#最后的工作">#</a>最后的工作</h2>
+<h2 id="最后的工作"><a class="header-anchor" href="#最后的工作">#</a>最后的工作</h2>
 <ol>
 <li class="lvl-3">
 <p><code>git commit -am ""</code> 将所有修改提交到本地;</p>
@@ -747,12 +747,6 @@ Score: <span class="token number">46</span>/46<span aria-hidden="true" class="li
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -761,8 +755,8 @@ Score: <span class="token number">46</span>/46<span aria-hidden="true" class="li
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -778,41 +772,6 @@ Score: <span class="token number">46</span>/46<span aria-hidden="true" class="li
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

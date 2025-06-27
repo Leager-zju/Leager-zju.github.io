@@ -323,7 +323,7 @@
             <div id="articleContent">
                 <p>在游戏中，涉及到碰撞检测的场景十分广泛——子弹打中角色、玩家移动时会被场景阻挡、……「如何高效地判断两个物体是否接触」，是游戏开发中必须思考的一个问题。虽然我们可以用 **AABB 包围盒(Axis-Aligned Bounding Boxes)**进行粗略的判断，但对于检测精度要求高的场景，AABB 便不能满足了，需要一种更加精确的检测方法。</p>
 <span id="more"></span>
-<h2 id="%E5%88%86%E7%A6%BB%E8%BD%B4" tabindex="-1"><a class="header-anchor" href="#分离轴">#</a>分离轴</h2>
+<h2 id="分离轴"><a class="header-anchor" href="#分离轴">#</a>分离轴</h2>
 <p><strong>分离轴定理(Seperating Axis Theorem, SAT)<strong>适用于判断两个二维</strong>凸多边形</strong>之间是否相交。</p>
 <blockquote>
 <p>在几何学中，凸多边形是一种简单多边形，其不存在边自我相交的情况，且任两点之间连成的直线皆位于多边形内部，这个特性与内部为凸集的简单多边形等价。在凸多边形中，所有内角都小于或等于180度，而在严格凸多边形中，所有内角都严格小于180度。——摘自<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E5%87%B8%E5%A4%9A%E8%BE%B9%E5%BD%A2">维基百科</a></p>
@@ -332,7 +332,7 @@
 <p>在这种情况下，想象存在一束与分离轴平行的光线，使得这两个图形在一条与分离轴垂直的直线（<strong>投影轴</strong>）上形成两条线段投影。如果这两个图形不相交，则投影必然也不相交。如下图所示</p>
 <img src="project.png">
 <p>虽然不一定保证对于任意的分离轴，两个图形形成的投影都不相交，但只要存在一条分离轴使得投影不相交，那么就认为这两个图形不相交——这就是 SAT 的核心思想了。</p>
-<h2 id="%E5%88%A9%E7%94%A8%E5%88%86%E7%A6%BB%E8%BD%B4%E5%AE%9A%E7%90%86%E6%A3%80%E6%B5%8B%E7%A2%B0%E6%92%9E" tabindex="-1"><a class="header-anchor" href="#利用分离轴定理检测碰撞">#</a>利用分离轴定理检测碰撞</h2>
+<h2 id="利用分离轴定理检测碰撞"><a class="header-anchor" href="#利用分离轴定理检测碰撞">#</a>利用分离轴定理检测碰撞</h2>
 <p>由上文引出两个问题：</p>
 <ol>
 <li class="lvl-3">
@@ -342,13 +342,13 @@
 <p>对于给定的分离轴，如何判断投影是否相交？</p>
 </li>
 </ol>
-<h3 id="%E5%A6%82%E4%BD%95%E6%89%BE%E5%88%86%E7%A6%BB%E8%BD%B4%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#如何找分离轴？">#</a>如何找分离轴？</h3>
+<h3 id="如何找分离轴？"><a class="header-anchor" href="#如何找分离轴？">#</a>如何找分离轴？</h3>
 <p>直接抛结论：<strong>如果两个凸多边形不相交，则这两个多边形中必然存在一条边 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>e</mi></mrow><annotation encoding="application/x-tex">e</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">e</span></span></span></span>，其与投影轴平行，且法向量与我们要找的分离轴平行。</strong></p>
 <blockquote>
 <p>这很好理解，如果两个凸多边形不相交，那么必然存在一条边，同一图形的其他各边都在此边的同旁。</p>
 </blockquote>
 <p>那么可以遍历所有边的法向量，求两个图形在投影轴上的投影，如果某一次迭代使得投影不相交，意味着找到了分离轴，也就能得出「两者不相交」的结论。</p>
-<h3 id="%E5%A6%82%E4%BD%95%E6%B1%82%E6%8A%95%E5%BD%B1%EF%BC%9F" tabindex="-1"><a class="header-anchor" href="#如何求投影？">#</a>如何求投影？</h3>
+<h3 id="如何求投影？"><a class="header-anchor" href="#如何求投影？">#</a>如何求投影？</h3>
 <p>根据所学知识，无论分离轴和投影轴如何平移，图形在投影轴上的投影的相对关系是保持不变的。为了简化计算，我们可以将投影轴平移至通过原点。假设投影轴所在直线对应单位向量 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="bold">p</mi></mrow><annotation encoding="application/x-tex">\mathbf{p}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6389em;vertical-align:-0.1944em;"></span><span class="mord mathbf">p</span></span></span></span>，那么图形在其上的投影线段可以表示为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mi mathvariant="bold">p</mi></mrow><annotation encoding="application/x-tex">k\mathbf{p}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="mord mathbf">p</span></span></span></span>，其中 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span></span></span></span> 属于某个闭区间（下面称为「<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span></span></span></span> 区间」）。如果两个图形的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span></span></span></span> 区间相交，那么投影线段也就相交了。</p>
 <blockquote>
 <p>向量 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="bold">p</mi></mrow><annotation encoding="application/x-tex">\mathbf{p}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6389em;vertical-align:-0.1944em;"></span><span class="mord mathbf">p</span></span></span></span> 可以由图形中两个相邻点对应的二元组做差，然后单位化得到。</p>
@@ -358,13 +358,13 @@
 <p>顶点 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>A</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">A_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">A</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 是由一个二元组表示的，也可以视为向量 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="bold">O</mi><msub><mi mathvariant="bold">A</mi><mi mathvariant="bold">i</mi></msub></mrow><annotation encoding="application/x-tex">\mathbf{OA_i}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8361em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathbf">O</span><span class="mord"><span class="mord mathbf">A</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span>，那么从 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>A</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">A_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">A</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 出发作 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="bold">p</mi></mrow><annotation encoding="application/x-tex">\mathbf{p}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6389em;vertical-align:-0.1944em;"></span><span class="mord mathbf">p</span></span></span></span> 的垂线，与 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="bold">p</mi></mrow><annotation encoding="application/x-tex">\mathbf{p}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6389em;vertical-align:-0.1944em;"></span><span class="mord mathbf">p</span></span></span></span> 的交点就是投影点，且该投影点可以表示为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>k</mi><mi>i</mi></msub><mi mathvariant="bold">p</mi></mrow><annotation encoding="application/x-tex">k_i\mathbf{p}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0315em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord mathbf">p</span></span></span></span>，其中 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>k</mi><mi>i</mi></msub><mo>=</mo><mrow><mi mathvariant="bold">O</mi><msub><mi mathvariant="bold">A</mi><mi mathvariant="bold">i</mi></msub></mrow><mo separator="true">⋅</mo><mi mathvariant="bold">p</mi></mrow><annotation encoding="application/x-tex">k_i = \mathbf{OA_i}·\mathbf{p}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0315em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8805em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathbf">O</span><span class="mord"><span class="mord mathbf">A</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span><span class="mpunct">⋅</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathbf">p</span></span></span></span>。</p>
 </blockquote>
 <p>求区间是否相交就容易多了，不再赘述。</p>
-<h2 id="%E9%A2%9D%E5%A4%96%E7%9A%84%E8%AE%A8%E8%AE%BA" tabindex="-1"><a class="header-anchor" href="#额外的讨论">#</a>额外的讨论</h2>
-<h3 id="%E5%9C%86%E4%B8%8E%E5%9C%86%E7%9A%84%E7%A2%B0%E6%92%9E%E6%A3%80%E6%B5%8B" tabindex="-1"><a class="header-anchor" href="#圆与圆的碰撞检测">#</a>圆与圆的碰撞检测</h3>
+<h2 id="额外的讨论"><a class="header-anchor" href="#额外的讨论">#</a>额外的讨论</h2>
+<h3 id="圆与圆的碰撞检测"><a class="header-anchor" href="#圆与圆的碰撞检测">#</a>圆与圆的碰撞检测</h3>
 <p>这个情况很简单，因为对于圆我们总是维护两个信息：圆心 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span></span></span></span> 和半径 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi></mrow><annotation encoding="application/x-tex">r</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span></span></span></span>。那么判断两个圆是否相交，只需判断两个圆心的距离 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">∣</mi><mrow><msub><mi mathvariant="bold">M</mi><mn mathvariant="bold">1</mn></msub><msub><mi mathvariant="bold">M</mi><mn mathvariant="bold">2</mn></msub></mrow><mi mathvariant="normal">∣</mi></mrow><annotation encoding="application/x-tex">|\mathbf{M_1M_2}|</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">∣</span><span class="mord"><span class="mord"><span class="mord mathbf">M</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord"><span class="mord mathbf">M</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathbf mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span><span class="mord">∣</span></span></span></span> 是否小于等于半径之和 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>r</mi><mn>1</mn></msub><mo>+</mo><msub><mi>r</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">r_1+r_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>。</p>
-<h3 id="%E5%A4%9A%E8%BE%B9%E5%BD%A2%E4%B8%8E%E5%9C%86%E7%9A%84%E7%A2%B0%E6%92%9E%E6%A3%80%E6%B5%8B" tabindex="-1"><a class="header-anchor" href="#多边形与圆的碰撞检测">#</a>多边形与圆的碰撞检测</h3>
+<h3 id="多边形与圆的碰撞检测"><a class="header-anchor" href="#多边形与圆的碰撞检测">#</a>多边形与圆的碰撞检测</h3>
 <p>这个情况需要找到多边形离圆心 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span></span></span></span> 最近的点 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal">A</span></span></span></span>，此时向量 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="bold">A</mi><mi mathvariant="bold">M</mi></mrow><annotation encoding="application/x-tex">\mathbf{AM}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6861em;"></span><span class="mord"><span class="mord mathbf">AM</span></span></span></span></span> 就是投影轴，而圆的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span></span></span></span> 区间端点则是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="bold">A</mi><mi mathvariant="bold">M</mi></mrow><annotation encoding="application/x-tex">\mathbf{AM}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6861em;"></span><span class="mord"><span class="mord mathbf">AM</span></span></span></span></span> 与圆形成的两个交点处取得。</p>
 <img src="多边形与圆.png">
-<h3 id="%E4%B8%BA%E4%BB%80%E4%B9%88%E5%8F%AA%E8%83%BD%E6%98%AF%E5%87%B8%E5%A4%9A%E8%BE%B9%E5%BD%A2" tabindex="-1"><a class="header-anchor" href="#为什么只能是凸多边形">#</a>为什么只能是凸多边形</h3>
+<h3 id="为什么只能是凸多边形"><a class="header-anchor" href="#为什么只能是凸多边形">#</a>为什么只能是凸多边形</h3>
 <p>如下图所示，有一个图像是凹多边形。此时尽管两个图形并不相交，但是不存在一条分离轴将两个图形分开。</p>
 <img src="凹多边形.png">
                 
@@ -545,12 +545,6 @@
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -559,8 +553,8 @@
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -576,41 +570,6 @@
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

@@ -326,7 +326,7 @@
             <div id="articleContent">
                 <p>C++11 中新增了 <strong><code>default</code></strong> 与 <strong><code>delete</code></strong> 这俩关键字。请不要误会，这里的 <code>delete</code> 并不是与 <code>new</code> 搭配使用释放内存的那个，而是跟 <code>default</code> 相对的用于类成员函数声明的关键字。</p>
 <span id="more"></span>
-<h2 id="default" tabindex="-1"><a class="header-anchor" href="#default">#</a>default</h2>
+<h2 id="default"><a class="header-anchor" href="#default">#</a>default</h2>
 <p>众所周知，如果用户自定义了一个类的构造函数，则编译器不会为其隐式生成默认构造函数。可能它觉得你想根据自己的需求定义构造函数。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">A</span> <span class="token punctuation">{</span>
  <span class="token keyword">public</span><span class="token operator">:</span>
@@ -358,7 +358,7 @@ C c<span class="token punctuation">;</span>  <span class="token comment">// OK! 
 
 A a<span class="token punctuation">;</span> <span class="token comment">// OK!</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>这样一来，就避免了程序员定义函数的繁重工作。同时，使用 <code>default</code> 修饰的函数也比用户自定义的函数拥有<strong>更高的执行效率</strong>，这也是该特性的一大优势。</p>
-<h2 id="delete" tabindex="-1"><a class="header-anchor" href="#delete">#</a>delete</h2>
+<h2 id="delete"><a class="header-anchor" href="#delete">#</a>delete</h2>
 <p>在 C++11 以前，如果想要禁止类的某个成员函数被调用，只有两种策略：要么将其声明为私有函数，要么干脆定义为空函数，什么也不做。因为有些类从功能的角度考虑必然不能对某些函数进行实现甚至定义——总不能让程序员在 <code>human</code> 类中搞了个 <code>fly()</code> 函数吧。</p>
 <p>但问题在于，第一种做法并不能阻止类内或友元类的调用，和第二种做法一样无法在调用时报错，程序员也就很难找到代码问题所在。两种做法并没有从根本上解决问题——<strong>这些函数不该被定义</strong>。</p>
 <p>于是，<code>delete</code> 被提出。与 <code>default</code> 相对，后面加上 <code>= delete</code> 的函数会被视为<strong>弃置</strong>(deleted)，在编译器眼中这个函数<strong>禁止被定义</strong>，对该函数的调用会导致编译错误，继而从根本上解决了这个问题。与 <code>default</code> 不同，<code>delete</code> 可以用于修饰任何类成员函数。</p>
@@ -555,12 +555,6 @@ a3 <span class="token operator">=</span> a1<span class="token punctuation">;</sp
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -569,8 +563,8 @@ a3 <span class="token operator">=</span> a1<span class="token punctuation">;</sp
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -586,41 +580,6 @@ a3 <span class="token operator">=</span> a1<span class="token punctuation">;</sp
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

@@ -326,7 +326,7 @@
             <div id="articleContent">
                 <p>有些 C++11 特性比较琐碎，单纯用一篇文章描述浪费，还有灌水嫌疑(bushi)，于是整合到同一篇来讲。</p>
 <span id="more"></span>
-<h2 id="%E8%8C%83%E5%9B%B4-for-%E5%BE%AA%E7%8E%AF" tabindex="-1"><a class="header-anchor" href="#范围-for-循环">#</a>范围 for 循环</h2>
+<h2 id="范围-for-循环"><a class="header-anchor" href="#范围-for-循环">#</a>范围 for 循环</h2>
 <p>允许 for 循环中使用 <code>for (范围变量声明 : 范围表达式)</code> 的形式进行遍历，无需 <code>for(...;...;...)</code> 式的写法。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp">std<span class="token double-colon punctuation">::</span>vector<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span> v<span class="token punctuation">;</span>
 
@@ -339,15 +339,15 @@
 <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">auto</span><span class="token operator">&amp;&amp;</span> item <span class="token operator">:</span> v<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment">// item 为 int&amp; 型</span>
   <span class="token function">DoSomeThing</span><span class="token punctuation">(</span>item<span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="constexpr" tabindex="-1"><a class="header-anchor" href="#constexpr">#</a>constexpr</h2>
+<h2 id="constexpr"><a class="header-anchor" href="#constexpr">#</a>constexpr</h2>
 <p><code>constexpr</code> 和 <code>const</code> 很像，两者的共同之处在于都是<strong>修饰词</strong>，可以用于修饰变量与函数，不同之处在于，<code>const</code> 修饰的对象仅包含一层 <strong>read-only</strong> 含义，即仅保证该对象在运行时不会被改变，但其仍有可能为动态变量。</p>
 <p>而 <code>constexpr</code> 可以说是 <code>const</code> 的升华版本，用 <code>constexpr</code> 修饰的对象<strong>在编译时便能计算出来</strong>，整个运行过程中都不可以被改变，直接自带一层 <code>const</code> 语义。这可以说是一个非常强大的优化，有些操作能够直接在编译时完成，就不用再在运行时多次耗费时间。</p>
 <blockquote>
 <p>在 constexpr 出现之前，可以在编译期初始化的 const 都隐式为 constexpr，所以其实早就有了。直到 C++11，constexpr 才从 const 中<strong>细分</strong>出来成为一个关键字。作为一门效率敏感型的语言，应当尽可能地使用 <strong>constexpr</strong> 进行代码优化。</p>
 </blockquote>
-<h3 id="constexpr-%E5%8F%98%E9%87%8F" tabindex="-1"><a class="header-anchor" href="#constexpr-变量">#</a>constexpr 变量</h3>
+<h3 id="constexpr-变量"><a class="header-anchor" href="#constexpr-变量">#</a>constexpr 变量</h3>
 <p>用 <code>constexpr</code> 修饰的变量必须为<a target="_blank" rel="noopener" href="https://zh.cppreference.com/w/cpp/named_req/LiteralType">字面类型</a>，并且必须立即被初始化，初始化时所调用的表达式必须为<a target="_blank" rel="noopener" href="https://zh.cppreference.com/w/cpp/language/constant_expression">常量表达式</a>。</p>
-<h3 id="constexpr-%E5%87%BD%E6%95%B0" tabindex="-1"><a class="header-anchor" href="#constexpr-函数">#</a>constexpr 函数</h3>
+<h3 id="constexpr-函数"><a class="header-anchor" href="#constexpr-函数">#</a>constexpr 函数</h3>
 <p>对于用 <code>constexpr</code> 修饰的函数，如果其传入的参数可以在编译时计算出来，那么这个函数就会产生编译时的值；反之，就和普通函数一样了。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">constexpr</span> <span class="token keyword">int</span> <span class="token function">calculate</span><span class="token punctuation">(</span><span class="token keyword">int</span> x<span class="token punctuation">,</span> <span class="token keyword">int</span> y<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> x <span class="token operator">+</span> y<span class="token punctuation">;</span> <span class="token punctuation">}</span>
 
@@ -375,7 +375,7 @@
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">constexpr</span> <span class="token keyword">int</span> <span class="token function">fact</span><span class="token punctuation">(</span><span class="token keyword">int</span> i<span class="token punctuation">)</span> <span class="token punctuation">{</span>
   <span class="token keyword">return</span> i <span class="token operator">&gt;</span> <span class="token number">1</span> <span class="token operator">?</span> i <span class="token operator">*</span> <span class="token function">fact</span><span class="token punctuation">(</span>i<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
-<h3 id="constexpr-%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0" tabindex="-1"><a class="header-anchor" href="#constexpr-构造函数">#</a>constexpr 构造函数</h3>
+<h3 id="constexpr-构造函数"><a class="header-anchor" href="#constexpr-构造函数">#</a>constexpr 构造函数</h3>
 <p>若构造函数中所有参数均为 constexpr 变量，则该类的所有成员变量也均为 constexpr，这个对象也就为 constexpr 对象了。</p>
 <p>需<strong>额外注意</strong>的是：</p>
 <ol>
@@ -404,7 +404,7 @@
   <span class="token keyword">constexpr</span> Test <span class="token function">bar</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>           <span class="token comment">// OK! 此时 bar 为 constexpr 对象</span>
   <span class="token keyword">constexpr</span> <span class="token keyword">int</span> val <span class="token operator">=</span> t<span class="token punctuation">.</span><span class="token function">get_val</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// OK!</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="nullptr" tabindex="-1"><a class="header-anchor" href="#nullptr">#</a>nullptr</h2>
+<h2 id="nullptr"><a class="header-anchor" href="#nullptr">#</a>nullptr</h2>
 <p>C++11 以前使用宏 <code>NULL</code> 来表示空指针。本质上它是 <code>#define NULL 0</code>，也就是一个数字 0，并不算真正意义上的指针。如果遇到以下代码，则会出现二义性：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">void</span> <span class="token function">func</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
 <span class="token keyword">void</span> <span class="token function">func</span><span class="token punctuation">(</span><span class="token keyword">void</span><span class="token operator">*</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
@@ -439,7 +439,7 @@
 <span class="token comment">// 函数 func(int*) 已调用</span>
 <span class="token comment">// 函数 func(int) 已调用</span>
 <span class="token comment">// 函数 func(int*) 已调用</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="override" tabindex="-1"><a class="header-anchor" href="#override">#</a>override</h2>
+<h2 id="override"><a class="header-anchor" href="#override">#</a>override</h2>
 <p><code>override</code> 用于修饰派生类中的<strong>虚函数</strong>，告诉编译器（与程序员）该函数进行了重写。如果一个函数声明为 <code>override</code> 但父类却没有这个虚函数，编译报错，故可以避免程序员在重写基类函数时无意产生的错误，提高代码规范性。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">struct</span> <span class="token class-name">A</span> <span class="token punctuation">{</span>
     <span class="token keyword">virtual</span> <span class="token keyword">void</span> <span class="token function">foo</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -451,7 +451,7 @@
   <span class="token keyword">void</span> <span class="token function">foo</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">override</span><span class="token punctuation">;</span>       <span class="token comment">// OK!</span>
   <span class="token keyword">void</span> <span class="token function">bar</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">override</span><span class="token punctuation">;</span>       <span class="token comment">// ERROR! A::bar 非虚</span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="final" tabindex="-1"><a class="header-anchor" href="#final">#</a>final</h2>
+<h2 id="final"><a class="header-anchor" href="#final">#</a>final</h2>
 <p><code>final</code> 用于指定某个<strong>虚函数</strong>不能在派生类中被重写，或者某个类不能被派生。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">struct</span> <span class="token class-name">Base</span> <span class="token punctuation">{</span>
   <span class="token keyword">virtual</span> <span class="token keyword">void</span> <span class="token function">foo</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -470,7 +470,7 @@
 <blockquote>
 <p>对于多态类，如果确定一个虚函数不会再被覆盖，或者该类不会再被继承，则推荐标上 <code>final</code>。这可以为编译器提供非常有价值的编译优化信息，总而将原本需要推迟到运行期才能确定的虚函数调用提前在编译期就已确定。如被调用的函数能与上层调用方一起进一步地做函数内联、常量折叠、无用代码消除等优化，则可以压榨出非常可观的性能提升。</p>
 </blockquote>
-<h2 id="enum-class" tabindex="-1"><a class="header-anchor" href="#enum-class">#</a>enum class</h2>
+<h2 id="enum-class"><a class="header-anchor" href="#enum-class">#</a>enum class</h2>
 <p>C++11 以前，<strong>枚举</strong>并不限定作用域，所有枚举成员均暴露在外层作用域下，并且所有枚举值都可自动转换为整型。这也就导致：</p>
 <ol>
 <li class="lvl-3">
@@ -499,12 +499,12 @@ newColor l2 <span class="token operator">=</span> Light<span class="token double
 std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>boolalpha<span class="token punctuation">;</span>
 std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token punctuation">(</span>red <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// output: true</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>虽然限制很多，但也更安全。应当尽可能使用带限定域的枚举。</p>
-<h2 id="static_assert" tabindex="-1"><a class="header-anchor" href="#static-assert">#</a>static_assert</h2>
+<h2 id="static-assert"><a class="header-anchor" href="#static-assert">#</a>static_assert</h2>
 <p>说到这个，就不得不提另一个很像的叫 <code>assert</code> 的玩意。这两者都起到<strong>断言</strong>的作用，区别在于：</p>
 <p><code>static_assert</code> 作为 C++11 新引入的<strong>关键字</strong>，为<strong>静态断言</strong>，即编译时进行断言，若表达式为 false，则编译错误。这样一来不会生成目标代码，也不会影响程序性能。用法为：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">static_assert</span><span class="token punctuation">(</span>expr<span class="token punctuation">,</span> msg<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 如果 expr == false，则输出 msg</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p><code>assert</code> 为<strong>动态断言</strong>，在运行时执行，不影响编译（其实就是一个<strong>宏</strong>）。通过 <code>static_cast&lt;bool&gt;</code> 把表达式转换成 <code>bool</code> 类型，从而实现断言。缺点在于影响程序性能，常用于 debug 模式，在 release 模式中一般会关掉。</p>
-<h2 id="%E8%87%AA%E5%AE%9A%E4%B9%89%E5%AD%97%E9%9D%A2%E9%87%8F" tabindex="-1"><a class="header-anchor" href="#自定义字面量">#</a>自定义字面量</h2>
+<h2 id="自定义字面量"><a class="header-anchor" href="#自定义字面量">#</a>自定义字面量</h2>
 <p>C++ 自带如下字面量（及其对应引用）：</p>
 <ol>
 <li class="lvl-3">
@@ -560,8 +560,8 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 </ul>
 </blockquote>
 <p>如果希望在编译时就调用字面量后缀函数，则需要把函数定义为 <code>constexpr</code>。</p>
-<h2 id="%E6%96%B0%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84" tabindex="-1"><a class="header-anchor" href="#新的数据结构">#</a>新的数据结构</h2>
-<h3 id="std%3A%3Aforward_list" tabindex="-1"><a class="header-anchor" href="#std-forward-list">#</a>std::forward_list</h3>
+<h2 id="新的数据结构"><a class="header-anchor" href="#新的数据结构">#</a>新的数据结构</h2>
+<h3 id="std-forward-list"><a class="header-anchor" href="#std-forward-list">#</a>std::forward_list</h3>
 <blockquote>
 <p>定义于头文件 <code>&lt;forward_list&gt;</code></p>
 </blockquote>
@@ -645,18 +645,18 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 </tr>
 </tbody>
 </table>
-<h3 id="std%3A%3Aunordered_map" tabindex="-1"><a class="header-anchor" href="#std-unordered-map">#</a>std::unordered_map</h3>
+<h3 id="std-unordered-map"><a class="header-anchor" href="#std-unordered-map">#</a>std::unordered_map</h3>
 <blockquote>
 <p>定义于头文件 <code>&lt;unordered_map&gt;</code></p>
 </blockquote>
 <p><code>std::map</code> 底层采用红黑树实现，会对 key 进行排序，适用于对有序有要求的场景，缺点是内存占用大。</p>
 <p><code>std::unordered_map</code> 底层采用哈希表实现，并不会进行排序，且查找时间几乎为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span>，适用于查找多的场景。用法几乎与 <code>std::map</code> 一样。</p>
-<h3 id="std%3A%3Aunordered_set" tabindex="-1"><a class="header-anchor" href="#std-unordered-set">#</a>std::unordered_set</h3>
+<h3 id="std-unordered-set"><a class="header-anchor" href="#std-unordered-set">#</a>std::unordered_set</h3>
 <blockquote>
 <p>定义于头文件 <code>&lt;unordered_set&gt;</code></p>
 </blockquote>
 <p>其之于 <code>std::set</code> 就好比 <code>std::unordered_map</code> 之于 <code>std::map</code>。略。</p>
-<h3 id="std%3A%3Aarray" tabindex="-1"><a class="header-anchor" href="#std-array">#</a>std::array</h3>
+<h3 id="std-array"><a class="header-anchor" href="#std-array">#</a>std::array</h3>
 <blockquote>
 <p>定义于头文件 <code>&lt;array&gt;</code></p>
 </blockquote>
@@ -682,7 +682,7 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 </li>
 </ul>
 <p>并且类内使用 <code>fill()</code> 函数来代替之前的 <code>memset()</code> 操作。</p>
-<h3 id="std%3A%3Atuple" tabindex="-1"><a class="header-anchor" href="#std-tuple">#</a>std::tuple</h3>
+<h3 id="std-tuple"><a class="header-anchor" href="#std-tuple">#</a>std::tuple</h3>
 <blockquote>
 <p>定义于头文件 <code>&lt;tuple&gt;</code></p>
 </blockquote>
@@ -723,25 +723,25 @@ m<span class="token punctuation">.</span><span class="token function">emplace</s
 </li>
 </ul>
 <p>并可以通过全局函数 <code>std::get&lt;index&gt;(tuple)</code> 访问 tuple 对象的第 index 个元素。</p>
-<h2 id="%E6%96%B0%E7%9A%84%E7%AE%97%E6%B3%95" tabindex="-1"><a class="header-anchor" href="#新的算法">#</a>新的算法</h2>
+<h2 id="新的算法"><a class="header-anchor" href="#新的算法">#</a>新的算法</h2>
 <blockquote>
 <p>定义于头文件 <code>&lt;algorithm&gt;</code></p>
 </blockquote>
-<h3 id="std%3A%3Aall_of-%2F-std%3A%3Aany_of-%2F-std%3A%3Anone_of" tabindex="-1"><a class="header-anchor" href="#std-all-of-std-any-of-std-none-of">#</a>std::all_of / std::any_of / std::none_of</h3>
+<h3 id="std-all-of-std-any-of-std-none-of"><a class="header-anchor" href="#std-all-of-std-any-of-std-none-of">#</a>std::all_of / std::any_of / std::none_of</h3>
 <p><code>std::all_of(first, last, pred)</code> 检查迭代器范围 <code>[first, last)</code> 内是否均满足 <code>pred</code>；</p>
 <p><code>std::any_of(first, last, pred)</code> 检查迭代器范围 <code>[first, last)</code> 内是否存在一个元素满足 <code>pred</code>；</p>
 <p><code>std::none_of(first, last, pred)</code> 检查迭代器范围 <code>[first, last)</code> 内是否均不满足 <code>pred</code>；</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp">std<span class="token double-colon punctuation">::</span>vector<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span> nums<span class="token punctuation">{</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
 std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>boolalpha <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span><span class="token function">all_of</span><span class="token punctuation">(</span>nums<span class="token punctuation">.</span><span class="token function">begin</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> nums<span class="token punctuation">.</span><span class="token function">end</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token keyword">int</span> i<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> i <span class="token operator">&gt;</span> <span class="token number">0</span><span class="token punctuation">;</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token comment">// output: true</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
-<h3 id="std%3A%3Afind-%2F-std%3A%3Afind_if-%2F-std%3A%3Afind_if_not" tabindex="-1"><a class="header-anchor" href="#std-find-std-find-if-std-find-if-not">#</a>std::find / std::find_if / std::find_if_not</h3>
+<h3 id="std-find-std-find-if-std-find-if-not"><a class="header-anchor" href="#std-find-std-find-if-std-find-if-not">#</a>std::find / std::find_if / std::find_if_not</h3>
 <p><code>std::find(first, last, value)</code> 返回迭代器范围 <code>[first, last)</code> 内第一个 <code>operator== (value)</code> 返回 true 的元素<strong>的迭代器</strong>；</p>
 <p><code>std::find_if(first, last, pred)</code> 返回迭代器范围 <code>[first, last)</code> 内第一个满足 <code>pred</code> 的元素<strong>的迭代器</strong>；</p>
 <p><code>std::find_if_not(first, last, pred)</code> 返回迭代器范围 <code>[first, last)</code> 内第一个不满足 <code>pred</code> 的元素<strong>的迭代器</strong>；</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp">std<span class="token double-colon punctuation">::</span>vector<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span> nums<span class="token punctuation">{</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
 std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token operator">*</span>std<span class="token double-colon punctuation">::</span><span class="token function">find_if</span><span class="token punctuation">(</span>nums<span class="token punctuation">.</span><span class="token function">begin</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> nums<span class="token punctuation">.</span><span class="token function">end</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token keyword">int</span> i<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> i <span class="token operator">&gt;</span> <span class="token number">3</span><span class="token punctuation">;</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token comment">// output: 4</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
-<h3 id="std%3A%3Acopy-%2F-std%3A%3Acopy_if-%2F-std%3A%3Acopy_n" tabindex="-1"><a class="header-anchor" href="#std-copy-std-copy-if-std-copy-n">#</a>std::copy / std::copy_if / std::copy_n</h3>
+<h3 id="std-copy-std-copy-if-std-copy-n"><a class="header-anchor" href="#std-copy-std-copy-if-std-copy-n">#</a>std::copy / std::copy_if / std::copy_n</h3>
 <p><code>std::copy(first, last, begin)</code> 复制迭代器范围 <code>[first, last)</code> 内所有元素到 <code>begin</code> 开始的范围；</p>
 <p><code>std::copy_if(first, last, begin, pred)</code> 与上面相比，仅复制满足 <code>pred</code> 的元素；</p>
 <p><code>std::copy_n(first, count, begin)</code> 复制从 <code>first</code> 开始的 <code>count</code> 个元素到 <code>begin</code> 开始的范围；</p>
@@ -749,31 +749,31 @@ std<span class="token double-colon punctuation">::</span>cout <span class="token
 std<span class="token double-colon punctuation">::</span>vector<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span> new_nums<span class="token punctuation">;</span>
 std<span class="token double-colon punctuation">::</span><span class="token function">copy_n</span><span class="token punctuation">(</span>nums<span class="token punctuation">.</span><span class="token function">begin</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">,</span> new_nums<span class="token punctuation">.</span><span class="token function">begin</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token comment">// new_nums = {1, 2, 3, 4, 5}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="std%3A%3Ais_partitioned" tabindex="-1"><a class="header-anchor" href="#std-is-partitioned">#</a>std::is_partitioned</h3>
+<h3 id="std-is-partitioned"><a class="header-anchor" href="#std-is-partitioned">#</a>std::is_partitioned</h3>
 <p><code>std::is_partitioned(first, last, pred)</code> 检查迭代器范围 <code>[first, last)</code> 内是否所有满足 <code>pred</code> 的元素都在不满足 <code>pred</code> 的元素之前</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp">std<span class="token double-colon punctuation">::</span>vector<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span> nums<span class="token punctuation">{</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
 std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>boolalpha <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span><span class="token function">is_partitioned</span><span class="token punctuation">(</span>nums<span class="token punctuation">.</span><span class="token function">begin</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> nums<span class="token punctuation">.</span><span class="token function">end</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token keyword">int</span> i<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> i <span class="token operator">&lt;=</span> <span class="token number">3</span><span class="token punctuation">;</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token comment">// output: true</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
-<h3 id="std%3A%3Ais_sorted" tabindex="-1"><a class="header-anchor" href="#std-is-sorted">#</a>std::is_sorted</h3>
+<h3 id="std-is-sorted"><a class="header-anchor" href="#std-is-sorted">#</a>std::is_sorted</h3>
 <p><code>std::is_sorted(first, last{, comp})</code> 检查迭代器范围 <code>[first, last)</code> 内是否有序。可自定义比较器 <code>comp</code>，默认为非降序，即 <code>comp &lt;=&gt; operator&lt;</code>。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp">std<span class="token double-colon punctuation">::</span>vector<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span> nums<span class="token punctuation">{</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
 std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>boolalpha <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span><span class="token function">is_sorted</span><span class="token punctuation">(</span>nums<span class="token punctuation">.</span><span class="token function">begin</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> nums<span class="token punctuation">.</span><span class="token function">end</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token comment">// output: true</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
-<h3 id="std%3A%3Aminmax" tabindex="-1"><a class="header-anchor" href="#std-minmax">#</a>std::minmax</h3>
+<h3 id="std-minmax"><a class="header-anchor" href="#std-minmax">#</a>std::minmax</h3>
 <p><code>std::minmax(a, b{, comp})</code> 返回 <code>a</code>，<code>b</code> 中较小值与较大值<strong>的引用</strong>，并打包为 <code>std::pair</code> 返回，可自定义比较器 <code>comp</code>。</p>
 <p>若需要返回至少三个元素中的最小值与最大值的引用，则改为版本 <code>std::minmax(initializer_list{, comp})</code>。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">int</span> minm<span class="token punctuation">,</span> maxm<span class="token punctuation">;</span>
 std<span class="token double-colon punctuation">::</span><span class="token function">tie</span><span class="token punctuation">(</span>minm<span class="token punctuation">,</span> maxm<span class="token punctuation">)</span> <span class="token operator">=</span> std<span class="token double-colon punctuation">::</span><span class="token function">minmax</span><span class="token punctuation">(</span><span class="token punctuation">{</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> minm <span class="token operator">&lt;&lt;</span> <span class="token string">" "</span> <span class="token operator">&lt;&lt;</span> maxm<span class="token punctuation">;</span>
 <span class="token comment">// output: 1 5</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="std%3A%3Aminmax_element" tabindex="-1"><a class="header-anchor" href="#std-minmax-element">#</a>std::minmax_element</h3>
+<h3 id="std-minmax-element"><a class="header-anchor" href="#std-minmax-element">#</a>std::minmax_element</h3>
 <p><code>std::minmax_element(first, last{, comp})</code> 返回迭代器范围 <code>[first, last)</code> 中较小值与较大值<strong>的迭代器</strong>，并打包为 <code>std::pair</code> 返回，可自定义比较器 <code>comp</code>。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp">std<span class="token double-colon punctuation">::</span>vector<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span> nums<span class="token punctuation">{</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
 std<span class="token double-colon punctuation">::</span>vector<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span><span class="token double-colon punctuation">::</span>iterator min_iter<span class="token punctuation">,</span> max_iter<span class="token punctuation">;</span>
 std<span class="token double-colon punctuation">::</span><span class="token function">tie</span><span class="token punctuation">(</span>min_iter<span class="token punctuation">,</span> max_iter<span class="token punctuation">)</span> <span class="token operator">=</span> std<span class="token double-colon punctuation">::</span><span class="token function">minmax_element</span><span class="token punctuation">(</span>nums<span class="token punctuation">.</span><span class="token function">begin</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> nums<span class="token punctuation">.</span><span class="token function">end</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token operator">*</span>min_iter <span class="token operator">&lt;&lt;</span> <span class="token string">" "</span> <span class="token operator">&lt;&lt;</span> <span class="token operator">*</span>max_iter<span class="token punctuation">;</span>
 <span class="token comment">// output: 1 5</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="std%3A%3Aitoa" tabindex="-1"><a class="header-anchor" href="#std-itoa">#</a>std::itoa</h3>
+<h3 id="std-itoa"><a class="header-anchor" href="#std-itoa">#</a>std::itoa</h3>
 <p><code>std::itoa(first, last, value)</code> 以 value 为起始，并不断以 <code>++value</code> 填充迭代器范围 <code>[first, last)</code>。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp">std<span class="token double-colon punctuation">::</span>vector<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span> <span class="token function">nums</span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 std<span class="token double-colon punctuation">::</span><span class="token function">itoa</span><span class="token punctuation">(</span>nums<span class="token punctuation">.</span><span class="token function">begin</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> nums<span class="token punctuation">.</span><span class="token function">end</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -957,12 +957,6 @@ std<span class="token double-colon punctuation">::</span><span class="token func
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -971,8 +965,8 @@ std<span class="token double-colon punctuation">::</span><span class="token func
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -988,41 +982,6 @@ std<span class="token double-colon punctuation">::</span><span class="token func
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

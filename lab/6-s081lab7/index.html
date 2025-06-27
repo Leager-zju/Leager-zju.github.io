@@ -331,12 +331,12 @@ $ make clean
             <div id="articleContent">
                 <p>这个 lab 就是对原先的并发控制进行优化。</p>
 <span id="more"></span>
-<h2 id="preparation" tabindex="-1"><a class="header-anchor" href="#Preparation">#</a>Preparation</h2>
+<h2 id="Preparation"><a class="header-anchor" href="#Preparation">#</a>Preparation</h2>
 <p>切换到对应分支</p>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">git</span> fetch
 $ <span class="token function">git</span> checkout lock
 $ <span class="token function">make</span> clean<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
-<h2 id="task1%3A-memory-allocator" tabindex="-1"><a class="header-anchor" href="#Task1-Memory-allocator">#</a>Task1: Memory allocator</h2>
+<h2 id="Task1-Memory-allocator"><a class="header-anchor" href="#Task1-Memory-allocator">#</a>Task1: Memory allocator</h2>
 <p>原来的内存分配模块持有一把大锁，每当要分配内存时都会将大锁锁定，直至分配完成。这样对多核的机器并不是很友好，因为每个 CPU core 都需要在大锁上竞争，造成资源浪费。</p>
 <p>一种优化策略是，将空闲的内存划分为 CPU core 数量的区域，每个 core 对应整个空闲链表的一部分，且各自维护相应的锁，不同 core 只需要在自己负责那部分即可。当然有的 core 上运行的进程可能需要多个页，一旦自己那部分空闲内存不够了，就需要从其他 core 的空闲内存中「窃取」一页出来。</p>
 <blockquote>
@@ -385,7 +385,7 @@ kalloc(void)
   }
   ...
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="task2%3A-buffer-cache" tabindex="-1"><a class="header-anchor" href="#Task2-Buffer-cache">#</a>Task2: Buffer cache</h2>
+<h2 id="Task2-Buffer-cache"><a class="header-anchor" href="#Task2-Buffer-cache">#</a>Task2: Buffer cache</h2>
 <p>这个 task 也是对并发控制进行优化，只不过针对的是磁盘块在内存中的 cache。<code>kernel/bio.c</code> 里有相关实现，结构体 <code>bcache</code> 内部维护了一个双向链表，用于支持 LRU 策略。同样的，每次操作都要对大锁进行竞争。</p>
 <p>由于每个 disk block 都有各自的块号 <code>blockno</code>，那么可以划分为不同的 “bucket”，根据 blockno 映射到不同的 bucket，每个 bucket 有一把锁，这样就减少了竞争。</p>
 <p>同时，根据 <code>kernel/trap.c</code> 里的 <code>ticks</code> 变量，我们也可以为每个 block 增加一个 <code>timestamp</code> 字段，用于标识最后访问该块的时间戳，这样就不需要双向链表来做 LRU 了，每次 victim 的时候找到 <code>timestamp</code> 最小的 block 即可。</p>
@@ -467,7 +467,7 @@ void
 bunpin(struct buf *b) {
   // 根据 b-&gt;blockno 映射到 bucket
 }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9E%9C" tabindex="-1"><a class="header-anchor" href="#测试结果">#</a>测试结果</h2>
+<h2 id="测试结果"><a class="header-anchor" href="#测试结果">#</a>测试结果</h2>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">make</span> grade
 <span class="token punctuation">..</span>.
 <span class="token operator">==</span> Test running kalloctest <span class="token operator">==</span>
@@ -493,7 +493,7 @@ usertests: OK <span class="token punctuation">(</span><span class="token number"
 <span class="token operator">==</span> Test <span class="token function">time</span> <span class="token operator">==</span>
 time: OK
 Score: <span class="token number">70</span>/70<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="%E6%9C%80%E5%90%8E%E7%9A%84%E5%B7%A5%E4%BD%9C" tabindex="-1"><a class="header-anchor" href="#最后的工作">#</a>最后的工作</h2>
+<h2 id="最后的工作"><a class="header-anchor" href="#最后的工作">#</a>最后的工作</h2>
 <ol>
 <li class="lvl-3">
 <p><code>git commit -am ""</code> 将所有修改提交到本地;</p>
@@ -682,12 +682,6 @@ Score: <span class="token number">70</span>/70<span aria-hidden="true" class="li
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -696,8 +690,8 @@ Score: <span class="token number">70</span>/70<span aria-hidden="true" class="li
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -713,41 +707,6 @@ Score: <span class="token number">70</span>/70<span aria-hidden="true" class="li
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>

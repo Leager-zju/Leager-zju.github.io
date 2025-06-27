@@ -328,7 +328,7 @@
                 <p>接下来开始存储与索引部分的实现。手撕 B+ 树！</p>
 <p><a target="_blank" rel="noopener" href="https://15445.courses.cs.cmu.edu/fall2022/project2/">&gt;&gt;&gt; LAB 主页传送门 &lt;&lt;&lt;</a></p>
 <span id="more"></span>
-<h2 id="task-%231---b%2Btree-pages" tabindex="-1"><a class="header-anchor" href="#Task-1-B-Tree-Pages">#</a>Task #1 - B+Tree Pages</h2>
+<h2 id="Task-1-B-Tree-Pages"><a class="header-anchor" href="#Task-1-B-Tree-Pages">#</a>Task #1 - B+Tree Pages</h2>
 <p>首先，在本 lab 中，B+ 树的所有节点都以 <code>BPlusTreePage</code> 即页的形式存在，其包含若干元数据。其中，根据所处位置不同，B+ 树的节点又分为内部节点(<strong>Internal node</strong>)与叶节点(<strong>Leaf node</strong>)。B+ 树的特点就是 internal node 仅用于索引，leaf node 存放真实数据，故这两者的键值对类型略有不同：</p>
 <ol>
 <li class="lvl-3">
@@ -339,9 +339,9 @@
 </li>
 </ol>
 <p>这便是第一个 Task 的主要任务——完善这三个数据结构。</p>
-<h3 id="bplustreepage" tabindex="-1"><a class="header-anchor" href="#BPlusTreePage">#</a>BPlusTreePage</h3>
+<h3 id="BPlusTreePage"><a class="header-anchor" href="#BPlusTreePage">#</a>BPlusTreePage</h3>
 <p>基类，包含一些公共变量。</p>
-<h4 id="%E6%88%90%E5%91%98%E5%8F%98%E9%87%8F" tabindex="-1"><a class="header-anchor" href="#成员变量">#</a>成员变量</h4>
+<h4 id="成员变量"><a class="header-anchor" href="#成员变量">#</a>成员变量</h4>
 <ul class="lvl-0">
 <li class="lvl-2">
 <p><code>page_type_</code>：指明该节点为内部节点还是叶节点，无需强转后判断；</p>
@@ -367,7 +367,7 @@
 <p>btw，尽管名字里都带个 “Page”，但 lab1 和 lab2 的 “Page” 其实是不同的，<code>BPlusTreePage</code> 实际上对应了 BPM 里面 Page 对象的 <code>data_</code> 部分，因此在访问节点时，首先通过 BPM.FetchPage 方法获取 Page 对象，再将其 <code>data_</code> 部分 <code>reinterpret_cast</code> 为 <code>BPlusTreePage</code>，最后根据对应的 <code>page_type_</code> 强转为 Internal/Leaf page。具体数据排布如下图所示：</p>
 <img src="image-20230111164135789.png" alt="image-20230111164135789" style="zoom:60%;">
 <p>HEADER 内的 <code>page_id</code> 实际上和外层 Page 对象的 <code>page_id</code> 是相等的。</p>
-<h3 id="bplusinternalpage" tabindex="-1"><a class="header-anchor" href="#BPlusInternalPage">#</a>BPlusInternalPage</h3>
+<h3 id="BPlusInternalPage"><a class="header-anchor" href="#BPlusInternalPage">#</a>BPlusInternalPage</h3>
 <p>内部节点，不存放数据，仅用于索引，且 m 个 Key 对应 m+1 个 Child。基于 lab1 BPM 的实现，所有的 node 都可以通过 page_id 来进行获取，故这里的索引实际上就是 child node 对应的 page_id。</p>
 <p>关于其成员函数的实现，除了原本给的，我还添加了以下函数：</p>
 <ol>
@@ -379,12 +379,12 @@
 </li>
 </ol>
 <p>这在后续 BPlusTree 的 Insert/Remove 的实现中比较重要。当然，<code>BPlusLeafPage</code> 类中也包含以上两个方法。</p>
-<h3 id="bplusleafpage" tabindex="-1"><a class="header-anchor" href="#BPlusLeafPage">#</a>BPlusLeafPage</h3>
+<h3 id="BPlusLeafPage"><a class="header-anchor" href="#BPlusLeafPage">#</a>BPlusLeafPage</h3>
 <p>叶节点，存放实际数据，且 m 个 Key 对应 m 个 Value。</p>
 <p>根据 B+ 树的性质，所有叶节点同时以链表形式排布，从而支持 range-search。故 leaf page 的 HEADER 还要加上 4B 的 next_page_id，以索引到下一个叶节点。如果是最右边那个叶节点，则该变量为 <code>INVALID_PAGE_ID</code>。</p>
-<h2 id="task-%232---b%2Btree-data-structure" tabindex="-1"><a class="header-anchor" href="#Task-2-B-Tree-Data-Structure">#</a>Task #2 - B+Tree Data Structure</h2>
+<h2 id="Task-2-B-Tree-Data-Structure"><a class="header-anchor" href="#Task-2-B-Tree-Data-Structure">#</a>Task #2 - B+Tree Data Structure</h2>
 <p>本 Task 是本 lab 的核心部分，也是最难的部分，相比于 Task1 仅仅是实现各节点的数据结构，Task2 就要开始真正手撕 B+ 树了。</p>
-<h3 id="getvalue(key)" tabindex="-1"><a class="header-anchor" href="#GetValue-Key">#</a>GetValue(Key)</h3>
+<h3 id="GetValue-Key"><a class="header-anchor" href="#GetValue-Key">#</a>GetValue(Key)</h3>
 <p>查操作较为简单，只需根据 Key 从根节点开始不断往下走即可，重点在于找 child，而不涉及多余的操作。根据 B+ 树的特性，对于 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mi>a</mi><mi>g</mi><mi>e</mi><mi mathvariant="normal">_</mi><mi>i</mi><msub><mi>d</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">Page\_id_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0044em;vertical-align:-0.31em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="mord mathnormal">a</span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mord mathnormal">e</span><span class="mord" style="margin-right:0.02778em;">_</span><span class="mord mathnormal">i</span><span class="mord"><span class="mord mathnormal">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 对应节点为根的子树中，所有 key <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>K</mi></mrow><annotation encoding="application/x-tex">K</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">K</span></span></span></span> 均满足 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>K</mi><mi>e</mi><msub><mi>y</mi><mi>i</mi></msub><mo>≤</mo><mi>K</mi><mo>&lt;</mo><mi>K</mi><mi>e</mi><msub><mi>y</mi><mrow><mi>i</mi><mo>+</mo><mn>1</mn></mrow></msub></mrow><annotation encoding="application/x-tex">Key_i \leq K &lt; Key_{i+1}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8778em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">Ke</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7224em;vertical-align:-0.0391em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">K</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8917em;vertical-align:-0.2083em;"></span><span class="mord mathnormal">Ke</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span></span></span></span>，且作索引的内部节点的第一个 Key 不参与比较。故查找子节点 page_id 所在索引的函数可以实现为：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">int</span> <span class="token function">GetChildPageIndex</span><span class="token punctuation">(</span>InternalPage <span class="token operator">*</span>internal_node<span class="token punctuation">,</span> <span class="token keyword">const</span> KeyType <span class="token operator">&amp;</span>key<span class="token punctuation">)</span> <span class="token punctuation">{</span>
   <span class="token keyword">int</span> child_index<span class="token punctuation">;</span>
@@ -395,7 +395,7 @@
   <span class="token punctuation">}</span>
   <span class="token keyword">return</span> child_index<span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="insert(key%2C-value)" tabindex="-1"><a class="header-anchor" href="#Insert-Key-Value">#</a>Insert(Key, Value)</h3>
+<h3 id="Insert-Key-Value"><a class="header-anchor" href="#Insert-Key-Value">#</a>Insert(Key, Value)</h3>
 <p>B+ 树的插入规则如下：</p>
 <ol>
 <li class="lvl-3">
@@ -469,7 +469,7 @@
 
   <span class="token keyword">return</span> res<span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="remove(key)" tabindex="-1"><a class="header-anchor" href="#Remove-Key">#</a>Remove(Key)</h3>
+<h3 id="Remove-Key"><a class="header-anchor" href="#Remove-Key">#</a>Remove(Key)</h3>
 <p>删除规则和插入大体类似：</p>
 <ol>
 <li class="lvl-3">
@@ -508,18 +508,18 @@
 </blockquote>
 </blockquote>
 <p>它同样是个递归行为，我也定义了一个 <code>RecursivelyRemove()</code> 函数，流程和 insert 大体一致，不同之处在于 sibling 的挑选，需要考虑当前 child 是否为 parent 最左侧/最右侧的 child。</p>
-<h2 id="task-%233---index-iterator" tabindex="-1"><a class="header-anchor" href="#Task-3-Index-Iterator">#</a>Task #3 - Index Iterator</h2>
+<h2 id="Task-3-Index-Iterator"><a class="header-anchor" href="#Task-3-Index-Iterator">#</a>Task #3 - Index Iterator</h2>
 <p>这一 Task 相对而言简单许多，首先需要我们完善 <code>IndexIterator</code> 类，实现其四个运算符（<code>*</code>, <code>++</code>, <code>==</code>, <code>!=</code>）以及一个 <code>IsEnd()</code> 函数，还需要我们完善 <code>BPlusTreePage</code> 类中的 <code>Begin()</code> 与 <code>End()</code> 函数，其分别返回一个 <code>IndexIterator</code>。总体而言还是不难的。</p>
-<h3 id="indexiterator" tabindex="-1"><a class="header-anchor" href="#IndexIterator">#</a>IndexIterator</h3>
+<h3 id="IndexIterator"><a class="header-anchor" href="#IndexIterator">#</a>IndexIterator</h3>
 <p>由于 <code>IndexIterator</code> 是遍历 leaf node 的迭代器，故需要记录当前 kv 对的一些信息，如所在的 leaf page 以及当前 kv 对所在下标，即：</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp">BPlusTreeLeafPage<span class="token operator">&lt;</span>KeyType<span class="token punctuation">,</span> ValueType<span class="token punctuation">,</span> KeyComparator<span class="token operator">&gt;</span> <span class="token operator">*</span>cur_page_<span class="token punctuation">;</span>
 <span class="token keyword">int</span> cur_index_<span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 <p><code>IsEnd()</code> 只需判断当前 Page 指针是否为 <code>nullptr</code> 即可。</p>
 <p><code>==</code> 运算符不仅需要判断两个迭代器所处的 Page 的 page_id 及 index 是否相等，还需要在最开始加上 IsEnd() 的判断。</p>
-<h3 id="begin-%2F-end" tabindex="-1"><a class="header-anchor" href="#Begin-End">#</a>Begin / End</h3>
+<h3 id="Begin-End"><a class="header-anchor" href="#Begin-End">#</a>Begin / End</h3>
 <p><code>Begin</code> 有两个重载函数，一个是无参 <code>Begin()</code>，只要找到 B+ 树中最左边那个叶节点即可。</p>
 <p>另一个是 <code>Begin(Key)</code>，返回的 <code>IndexIterator</code> 需满足对应的 key <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>K</mi><mo>&lt;</mo><mo>=</mo><mi>K</mi><mi>e</mi><mi>y</mi></mrow><annotation encoding="application/x-tex">K &lt;= Key</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7224em;vertical-align:-0.0391em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">K</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&lt;=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8778em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">Key</span></span></span></span>，这与之前实现的 <code>GetValue</code> 有异曲同工之妙。</p>
-<h2 id="task-%234---concurrent-index" tabindex="-1"><a class="header-anchor" href="#Task-4-Concurrent-Index">#</a>Task #4 - Concurrent Index</h2>
+<h2 id="Task-4-Concurrent-Index"><a class="header-anchor" href="#Task-4-Concurrent-Index">#</a>Task #4 - Concurrent Index</h2>
 <p>这一 Task 要求我们在原先的基础上，令 B+ 树支持并发操作，这里需要用到的一个思路就是 <strong>Lock Crabbing</strong>。</p>
 <p>如果要实现不冲突的并发操作，最朴素的想法是从 root 开始，一直到 leaf 这条路径上的所有 node 依次上锁，完成递归操作后依次解锁，直至所有锁都释放。</p>
 <p>但这样就将并发变成了纯粹的 Serialized Operation，还不如直接对整个 B+ 树上一把大锁。实际上有些 node 可能并不需要这把锁，也就是说事务的这次 Insert/Remove 操作并不会对该 node 造成任何影响，完全可以直接解锁，让其它事务尽快获得该 node 上的锁，从而提高吞吐率。而对于 GetValue 操作，目的是读取 leaf node 上的数据，internal node 在索引完后就失去了其作用，因此也可以直接解锁。</p>
@@ -556,12 +556,12 @@
 <p>反之，大锁会在 root page id 完成更新后解除，若采用法 2，解锁时机并没有发生变化，下一个事务依然会在同一时刻获取到最新 root node 的锁；</p>
 </li>
 </ol>
-<h2 id="%E6%80%BB%E7%BB%93" tabindex="-1"><a class="header-anchor" href="#总结">#</a>总结</h2>
+<h2 id="总结"><a class="header-anchor" href="#总结">#</a>总结</h2>
 <p>课程组很贴心地为我们提供了 <strong>b_plus_tree_printer</strong> 这样的工具，生成 <code>.dot</code> 文件后可以直接复制到<a target="_blank" rel="noopener" href="http://dreampuf.github.io/GraphvizOnline/">这个网站</a>上进行图像生成。当然，也可以<a target="_blank" rel="noopener" href="https://15445.courses.cs.cmu.edu/fall2022/bpt-printer/">直接在浏览器上运行命令行</a>。将 B+ 树可视化，更方便我们 debug。</p>
 <p><a target="_blank" rel="noopener" href="https://www.cs.usfca.edu/~galles/visualization/BPlusTree.html">这个网站</a>也为我们提供了 B+ 树各个操作的可视化过程，适合入门学习。</p>
 <p>本 lab 的实现难度还是挺大的，debug 过程非常吃力，尤其是 GradeScope 不提供测试代码，打印 LOG 还有概率发生 error，跟 6.824 直接公开测试用例的做法比起来还是对小白恶意更大一些，不过手撕完 B+ 树的那种神清气爽还是前所未有的。</p>
 <p>当然，还是要善用 BUSTUB_ASSERT 进行防御性编程。</p>
-<h2 id="%E9%A2%98%E5%A4%96%E8%AF%9D%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E7%94%A8-b%2B-tree-%E8%80%8C%E4%B8%8D%E6%98%AF-b-tree" tabindex="-1"><a class="header-anchor" href="#题外话：为什么用-B-Tree-而不是-B-Tree">#</a>题外话：为什么用 B+ Tree 而不是 B Tree</h2>
+<h2 id="题外话：为什么用-B-Tree-而不是-B-Tree"><a class="header-anchor" href="#题外话：为什么用-B-Tree-而不是-B-Tree">#</a>题外话：为什么用 B+ Tree 而不是 B Tree</h2>
 <p>主要有三点原因：</p>
 <ol>
 <li class="lvl-3">
@@ -755,12 +755,6 @@
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -769,8 +763,8 @@
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('4'),
+            headingSelector: 'h1, h2, h3, h4'
         });
 
         // Set scroll toc fixed.
@@ -786,41 +780,6 @@
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>
