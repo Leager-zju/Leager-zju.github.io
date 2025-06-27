@@ -1,172 +1,1248 @@
 <!DOCTYPE HTML>
-<html lang="<%= config.language %>">
-<%- partial('_partial/head') %>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="TinyKV Project3 Multi-Raft, 没什么看头的地方">
+    <meta name="description" content="本 Project 需要我们实现多个存储节点之间的管理。
+
+#思路
+#Part A Leadership/Membership Change in Raft
+需要修改的代码位于 raft/raft.go。
+在 3A 中我们仅需修改 Raft">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+    <title>TinyKV Project3 Multi-Raft | 没什么看头的地方</title>
+    <link rel="icon" type="image/png" href="/dt.png">
+    
+
+
+    <!-- bg-cover style     -->
+
+
+
+<link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+<link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+<link rel="stylesheet" type="text/css" href="/css/matery.css">
+<link rel="stylesheet" type="text/css" href="/css/my.css">
+<link rel="stylesheet" type="text/css" href="/css/dark.css" media="none" onload="if(media!='all')media='all'">
+
+
+
+
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+    <link rel="stylesheet" href="/css/post.css">
+
+
+
+
+    
+
+
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css">
+
+    <script src="/libs/jquery/jquery-3.6.0.min.js"></script>
+
+<meta name="generator" content="Hexo 6.3.0">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
 
 <body>
-    <%- partial('_partial/header') %>
-    <%- body %>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/comment_bg.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">没什么看头的地方</span>
+                </a>
+            </div>
+            
 
-    <%- partial('_partial/footer') %>
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/archives" class="waves-effect waves-light">
+      
+      <i class="fas fa-archive" style="zoom: 0.6;"></i>
+      
+      <span>归档</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+  <li>
+    <a href="javascript:;" class="waves-effect waves-light" onclick="switchNightMode()" title="深色/浅色模式" >
+      <i id="sum-moon-icon" class="fas fa-sun" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
 
-    <%- partial('_partial/search') %>
-    <%- partial('_widget/day-night') %>
-    <%- partial('_partial/back-top') %>
 
-    <script src="<%- theme.jsDelivr.url %><%- url_for(theme.libs.js.materialize) %>"></script>
-    <script src="<%- theme.jsDelivr.url %><%- url_for(theme.libs.js.masonry) %>"></script>
-    <script src="<%- theme.jsDelivr.url %><%- url_for(theme.libs.js.aos) %>"></script>
-    <script src="<%- theme.jsDelivr.url %><%- url_for(theme.libs.js.scrollProgress) %>"></script>
-    <script src="<%- theme.jsDelivr.url %><%- url_for(theme.libs.js.lightgallery) %>"></script>
-    <script src="<%- theme.jsDelivr.url %><%- url_for(theme.libs.js.matery) %>"></script>
+<div id="mobile-nav" class="side-nav sidenav">
 
-    <% if (theme.mermaid.enable) { %>
-        <!-- <script src='https://unpkg.com/mermaid@<%= theme.mermaid.version %>/dist/mermaid.min.js'></script> -->
-        <script src='<%- theme.jsDelivr.url %><%- url_for(theme.libs.js.mermaid) %>'></script>
-        <script>
-          if (window.mermaid) {
-            mermaid.initialize({theme: 'forest'});
-          }
-        </script>
-    <% } %>
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/comment_bg.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">没什么看头的地方</div>
+        <div class="logo-desc">
+            
+            【数据删除】
+            
+        </div>
+    </div>
 
-    <% if (theme.translate.enable) { %>
-        <script type="text/javascript" src="<%- theme.jsDelivr.url %><%- url_for(theme.libs.js.sc2tc) %>"></script>
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/archives" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-archive"></i>
+			
+			归档
+		</a>
+          
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/Leager-zju" class="waves-effect waves-light" target="_blank">
+                <i class="fab fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+            <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/Leager-zju" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+   data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+        
+    </nav>
+
+</header>
+
+    
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/0.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">TinyKV Project3 Multi-Raft</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                          <div class="article-tag">
+                            <span class="chip bg-color">这个人太懒了，都不想加标签</span>
+                          </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/Lab/" class="post-category">
+                                Lab
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2023-08-20
+                </div>
+                
+
+                
+
+                
+
+                
+
+                
+            </div>
+        </div>
+        <hr class="clearfix">
+
+        
+        <!-- 是否加载使用自带的 prismjs. -->
+        <link rel="stylesheet" href="/libs/prism/prism.min.css">
+        
+
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <p>本 Project 需要我们实现多个存储节点之间的管理。</p>
+<span id="more"></span>
+<h2 id="%E6%80%9D%E8%B7%AF" tabindex="-1"><a class="header-anchor" href="#思路">#</a>思路</h2>
+<h3 id="part-a-leadership%2Fmembership-change-in-raft" tabindex="-1"><a class="header-anchor" href="#Part-A-Leadership-Membership-Change-in-Raft">#</a>Part A Leadership/Membership Change in Raft</h3>
+<p>需要修改的代码位于 <code>raft/raft.go</code>。</p>
+<p>在 3A 中我们仅需修改 Raft 层的逻辑，而完整的 Change 流程将在 3B 中实现。</p>
+<h4 id="1-leadership-change" tabindex="-1"><a class="header-anchor" href="#1-Leadership-Change">#</a>1 Leadership Change</h4>
+<p>Raft 层首先会 <code>Step</code> 一条 <code>MsgTransferLeader</code>。由于任何节点都有可能收到该消息，故需根据身份分类讨论：</p>
+<p><strong>Non-Leader</strong>：将消息转发给 Leader;</p>
+<p><strong>Leader</strong>：如果迁移目标 <code>transferee</code> 是自己，则什么也不干（已经是 Leader 无需迁移）；反之：</p>
+<ol>
+<li class="lvl-3">
+<p>检查其是否有资格上任（即日志是否和自己一样新）;</p>
+</li>
+<li class="lvl-3">
+<p>如果 <code>transferee</code> 的日志不是最新的，则 Leader 应该向其发送 <code>MsgAppend</code>（并停止进行任何之后的 <code>Propose</code>）直到其符合条件——这需要在后续的 <code>HandleAppendEntriesResponse()</code> 中进行判断;</p>
+</li>
+<li class="lvl-3">
+<p>一旦满足迁移条件，Leader 应该立即向其发送一条<code>MsgTimeoutNow</code>，<code>transferee</code> 在收到消息后立即开始新的选举——即 <code>Step(MsgHup)</code>——从而依靠最新的 <code>Term</code> 和 <code>LastLog</code> 当选领导人;</p>
+</li>
+<li class="lvl-3">
+<p>如果 <code>transferee</code> 的日志不是最新的，则 Leader 应该向其发送 <code>MsgAppend</code>（并停止进行任何之后的 <code>Propose</code>）直到其符合条件——这需要在后续的 <code>HandleAppendEntriesResponse()</code> 中进行判断;</p>
+</li>
+<li class="lvl-3">
+<p>一旦满足迁移条件，Leader 应该立即向其发送一条<code>MsgTimeoutNow</code>，<code>transferee</code> 在收到消息后立即开始新的选举——即 <code>Step(MsgHup)</code>——从而依靠最新的 <code>Term</code> 和 <code>LastLog</code> 当选领导人;</p>
+</li>
+</ol>
+<h4 id="2-membership-change" tabindex="-1"><a class="header-anchor" href="#2-Membership-Change">#</a>2 Membership Change</h4>
+<p>这里我们仅需修改 <code>Raft.addNode()</code> 与 <code>Raft.removeNode()</code>。</p>
+<p>节点的增减其实就是对 <code>Raft.Prs</code> 哈希表的修改：</p>
+<ul class="lvl-0">
+<li class="lvl-2">
+<p>如果待增加节点未出现在 <code>RaftGroup</code> 中，则新增一个条目;</p>
+</li>
+<li class="lvl-2">
+<p>如果待删除节点出现在 <code>RaftGroup</code> 中，则删除一个条目;</p>
+</li>
+</ul>
+<p>对节点的增删会导致「大多数」发送变化：若节点增加，则新节点等待 <code>AppendEntries</code> 即可。若节点减少，则需要重新更新 <code>committed</code> 并发送;</p>
+<h3 id="part-b-implement-admin-commands" tabindex="-1"><a class="header-anchor" href="#Part-B-Implement-Admin-Commands">#</a>Part B Implement Admin Commands</h3>
+<p>3B 中我们就要正式实现加上<strong>域分裂</strong>(Region Split)在内的所有 Admin Commands 了。需要实现的代码位于 <code>kv/Raftstore/peer_msg_handler.go</code> 与 <code>kv/Raftstore/peer.go</code> 中。</p>
+<p>写 3B 之前我们需要粗略回顾一下整个系统的构成。</p>
+<p>在我们之前实现的 Raft 算法中，所有 <code>Peer</code> 位于不同存储节点上，对于一个分布式系统而言，这样能保证一个节点挂掉的同时依旧能依靠剩下的节点来提供服务。而在所有节点构成的图中，并非所有节点都两两连通，那么就需要根据不同的连通分量进行划分，这个划分单位就是 <code>Cluster</code>。</p>
+<p>一个 <code>Cluster</code> 中包含了多个存储节点 <code>Raftstore</code>，每个 <code>Raftstore</code> 存储大量 KV 对，如果只用一个 Raft Group 对其进行管理，则消耗的资源太大——生成一个 Snapshot 可能就会把整个系统搞慢，于是开发者很聪明，将这些 KV 对根据哈希算法划分为不同区间，每个区间各由一个 Raft Group 来管理，这就是 <code>Region</code>。可以认为一个 <code>Region</code> 本质上就是一个 Raft Group + [StartKey, EndKey)。</p>
+<p>当 <code>Client</code> 针对某个 Key 进行增删改查操作时，会将该命令发给 <code>Cluster</code>。<code>Cluster</code> 手上掌握着管辖范围内所有 <code>Raftstore</code> 的信息以及所有 <code>Region</code> 的信息，保存在一个叫 <code>Scheduler</code> 的结构中。有了这些信息，<code>Cluster</code> 就可以根据 Key 找到是哪个 <code>Region</code> 存着，进一步找到该 <code>Region</code> 中 Leader 所在的存储节点，向该节点发送命令，命令除了一些关于操作的信息，命令头 <code>Header</code> 中还存有目标 <code>Region</code> 的相关信息作为校验码，如 <code>RegionId</code>, <code>RegionEpoch</code> 以便进行校对。</p>
+<p>此外，<code>Cluster</code> 还承担自我修正的功能，即 <code>Cluster</code> 会通过 <code>RegionHeartbeat()</code> 函数不断接收所有 <code>Region</code> 发来的<strong>心跳信息</strong>（区别于 Raft 层 Heartbeat），这些心跳信息包含 <code>Region</code> 的当前信息，包括 <code>RegionEpoch</code>, Leader 等，<code>Cluster</code> 根据这些信息决定是否向对应的 <code>Region</code> 做出一些调整措施。</p>
+<blockquote>
+<p>在 MockClient 里，测试用例做出的操作会被缓存，等到下次 <code>RegionHeartbeat()</code> 时，判断对应 <code>Region</code> 是否有未执行完毕的操作，如果有，则在 Response 中告知。</p>
+<pre class="line-numbers language-go" data-language="go"><div class="caption"><span>kv/test_raftstore/scheduler.go</span></div><code class="language-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>r <span class="token operator">*</span>SchedulerTaskHandler<span class="token punctuation">)</span> <span class="token function">Handle</span><span class="token punctuation">(</span>t worker<span class="token punctuation">.</span>Task<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">switch</span> task <span class="token operator">:=</span> t<span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token keyword">type</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token operator">...</span>
+  <span class="token keyword">case</span> <span class="token operator">*</span>SchedulerRegionHeartbeatTask<span class="token punctuation">:</span>
+    r<span class="token punctuation">.</span><span class="token function">onHeartbeat</span><span class="token punctuation">(</span>task<span class="token punctuation">)</span> <span class="token comment">// 调用 RegionHeartbeat</span>
+  <span class="token operator">...</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">func</span> <span class="token punctuation">(</span>m <span class="token operator">*</span>MockSchedulerClient<span class="token punctuation">)</span> <span class="token function">RegionHeartbeat</span><span class="token punctuation">(</span>req <span class="token operator">*</span>schedulerpb<span class="token punctuation">.</span>RegionHeartbeatRequest<span class="token punctuation">)</span> <span class="token builtin">error</span> <span class="token punctuation">{</span>
+  <span class="token comment">// check if BootStrap</span>
+
+  <span class="token comment">// update pending peers and leader of region</span>
+
+  <span class="token comment">// check region epoch</span>
+
+  resp <span class="token operator">:=</span> <span class="token function">makeResp</span><span class="token punctuation">(</span>req<span class="token punctuation">)</span>
+  <span class="token keyword">if</span> op <span class="token operator">:=</span> m<span class="token punctuation">.</span>operators<span class="token punctuation">[</span>regionID<span class="token punctuation">]</span><span class="token punctuation">;</span> op <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+     <span class="token keyword">if</span> m<span class="token punctuation">.</span><span class="token function">tryFinished</span><span class="token punctuation">(</span>op<span class="token punctuation">,</span> req<span class="token punctuation">.</span>Region<span class="token punctuation">,</span> req<span class="token punctuation">.</span>Leader<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token function">delete</span><span class="token punctuation">(</span>m<span class="token punctuation">.</span>operators<span class="token punctuation">,</span> regionID<span class="token punctuation">)</span>
+    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+      m<span class="token punctuation">.</span><span class="token function">makeRegionHeartbeatResponse</span><span class="token punctuation">(</span>op<span class="token punctuation">,</span> resp<span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token comment">// send response to store where the leader is located</span>
+  <span class="token keyword">return</span> <span class="token boolean">nil</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>而在 3C 中则要实现真实的 Scheduler。</p>
+</blockquote>
+<p>以 Mock 版本为例，每个 <code>Peer</code> 都有一个 <code>PeerMsgHandler</code>，用于接收从 <code>Cluster</code> 发来的消息，见 <code>HandleMsg()</code>。在 Part B 中，我们主要谈以下 3 个 Admin Commands。</p>
+<p>这 3 种 Commands 所位于的 Message Type 均为 <code>MsgTypeRaftCmd</code>，那么首先会来到 <code>proposeRaftCommand()</code> 函数中。</p>
+<h4 id="1-propose-transfer-leader" tabindex="-1"><a class="header-anchor" href="#1-Propose-transfer-leader">#</a>1 Propose transfer leader</h4>
+<p>因为领导迁移仅仅是一个操作，无需所有节点进行复制，所以收到该类型的 Command 时，直接调用 <code>RawNode.TransferLeader()</code> 即可。</p>
+<h4 id="2-implement-conf-change-in-raftstore" tabindex="-1"><a class="header-anchor" href="#2-Implement-conf-change-in-Raftstore">#</a>2 Implement conf change in Raftstore</h4>
+<p>一次完整的 conf change 流程如下</p>
+<ol>
+<li class="lvl-3">
+<p>调用 <code>RawNode.ProposeConfChange()</code> 给 Leader Propose 一条 <code>EntryConfChange</code> 的<strong>特殊类型</strong>日志;</p>
+</li>
+<li class="lvl-3">
+<p>apply 到这条命令时，首先检查该命令是否有效，即 <code>RegionId</code> 与 <code>RegionEpoch</code> 是否匹配，若不匹配，说明在收到消息之前已经进行过 Peer Change 或 Region Split，返回一个 <code>error</code>;</p>
+</li>
+<li class="lvl-3">
+<p>令当前 <code>RegionEpoch</code> 中的 <code>confVersion</code> 字段自增 <code>1</code>;</p>
+</li>
+<li class="lvl-3">
+<p>根据 <code>ChangeType</code> 执行新 <code>Peer</code> 的添加 or 已有 <code>Peer</code> 的删除，表现为：修改 <code>Region</code> 中的 <code>Peers</code>，以及调用 <code>insertPeerCache()</code>/<code>removePeerCache()</code>;</p>
+</li>
+</ol>
+<blockquote>
+<p>注意，如果删除自身节点，则要执行 <code>destroyPeer()</code>，会删除包括 <code>RegionRanges</code> 在内的诸多字段，故后续步骤无需再管，直接 return 即可，此时完成当前 entry apply 后应直接退出，不能将数据写到 badger 里。</p>
+<p>如果待添加的 <code>Peer</code> 已在 Group 中则啥也不做，同理，如果待删除的 <code>Peer</code> 不在了也啥也不做，而不是返回 <code>error</code>。</p>
+</blockquote>
+<ol>
+<li class="lvl-3">
+<p>更新 <code>storeMeta</code>，注意这是个临界变量，在真实并发场景下对其的修改需要<strong>加锁</strong>;</p>
+</li>
+<li class="lvl-3">
+<p>调用 <code>rawnode.ApplyConfChange()</code>，然后根据命令类型进行 <code>Raft</code> 层的节点变动;</p>
+</li>
+<li class="lvl-3">
+<p>如果当前节点在 <code>Raft</code> 层是 Leader 的身份，则需要返回 Response，并且给 <code>Scheduler</code> 发一则心跳信息，表示该操作已完成;</p>
+</li>
+</ol>
+<p>接下来我们不禁心生疑惑：<strong>对于 <code>AddPeer</code> 而言，新加入的 <code>Peer</code> 所在 <code>Raftstore</code> 是怎么知道他需要创建一个 <code>Peer</code>？这个 <code>Peer</code> 又是怎么知道他在哪个 <code>Region</code> 中的呢？<code>Region</code> 中原来的那些 <code>Peer</code> 是怎么知道新的 <code>Peer</code> 已经加入了呢？</strong></p>
+<p>首先要了解的是，测试代码里所使用的只是模拟的 <code>Cluster</code>，不妨称它为 <code>MockCluster</code>（当然代码里面它就叫 <code>Cluster</code>，在文件 <code>kv/test_raftstore/cluster.go</code> 中）。</p>
+<p>这个 <code>MockCluster</code> 持有一个 <code>NodeSimulator</code> 来模拟大型分布式集群的节点间通信，以及 C/S 之间的通信。所有的测试用操作，包括 <code>MustPut()</code>/<code>MustGet()</code>/<code>MustDelete()</code> 等都会一步步通过 <code>MockCluster.CallCommandOnLeader()</code> 到 <code>MockCluster.CallCommand()</code> 再到 <code>NodeSimulator.CallCommandOnStore()</code>，最后通过目标 <code>Raftstore</code> 对应的 <code>RaftstoreRouter</code> 的结构进行发送。</p>
+<p>之前 <code>HandleRaftReady()</code> 时调用 <code>send()</code> 函数将 <code>Ready</code> 中的 Msgs 发出去，本质上就是通过 <code>RaftstoreRouter.SendRaftMessage()</code> 执行发送操作。</p>
+<blockquote>
+<p>因为这里都是在本地模拟，所以不用考虑远程调用、网络流之类的问题。</p>
+</blockquote>
+<p><code>SendRaftMessage()</code> 函数做的事其实很简单——先调用 <code>send()</code> 发 <code>MsgTypeRaftMessage</code> 类型的消息（通过 <code>peerSender</code> 这个管道进行传递），如果出现错误，再调用 <code>sendStore()</code> 发 <code>MsgTypeStoreRaftMessage</code> 类型的消息（通过 <code>storeSender</code> 这个管道进行传递）。</p>
+<p>消息进了这两个管道，最后会从哪里被接受呢？</p>
+<p>首先，<code>RaftstoreRouter</code> 会在 <code>Raftstore</code> 生成时一并创建，见函数 <code>CreateRaftstore()</code>。本质上一个 <code>Raftstore</code> 内所有部分都共享同一个 <code>router</code>，无论是 <code>Raftstore.router</code> 还是 <code>ctx.router</code>，都指向同一个数据结构。下面都叫它 <code>router</code> 了。</p>
+<p>每个 <code>Raftstore</code> 在启动时都会调用 <code>startWorkers()</code>，然后启动 <code>raftWorker</code> 和 <code>storeWorker</code> 这俩 GoRoutine，它们均接收从 <code>router</code> 中传来的消息，前者用的是 <code>router.peerSender</code> 这个管道，后者从 <code>router.storeSender</code> 这个管道取消息。问题得到了解答。</p>
+<p>同时我们也发现，在 <code>send()</code> 函数中，如果发现当前 <code>Raftstore</code> 并没有目标 <code>Region</code> 存在，则返回一个 <code>error</code>，消息也会直接送到 <code>storeWorker</code> 手上。<code>storeWorker</code> 拿到后发现是一条 <code>MsgTypeStoreRaftMessage</code>，便调用 <code>onRaftMessage()</code> 进行后续处理。走到这里，我们又有新发现了，那就是任务书中也提到了的 <code>maybeCreatePeer()</code> 函数，其注释是这么写的：<em>If target peer doesn’t exist, create it.</em></p>
+<blockquote>
+<p>这里新建 <code>Peer</code> 的操作我们也应认真看看，包括：修改 <code>StoreMeta</code>，调用 <code>router.register()</code> 进行<strong>注册</strong>，以及发送一条 <code>MsgTypeStart</code> 消息<strong>唤醒</strong>其启动 <code>ticker</code> 正式开始工作。</p>
+</blockquote>
+<p>再来看之前的疑惑，第一个问题其实得到解答了：随着上述步骤 4, 6 的执行，新 <code>Peer</code> 的信息已经加载到 <code>PeerCache</code> 中了，Raft 层也将新的 <code>Peer</code> 加载到 <code>Prs</code> 表中。当 Leader 下一次群发 heartbeat 或 append 时，会给新 <code>Peer</code> 也发一份 RaftMessage，目标 <code>Raftstore</code> 收到后发现没有目标 <code>Region</code> 存在，也就开始了后续的创建操作。</p>
+<p>对于第二个问题，在创建 <code>Peer</code> 之前，<code>Raftstore</code>收到的消息就含有 <code>Region</code> 相关信息。</p>
+<p>第三个问题，Follwers/Candidates 在 apply conf change 时仅仅是将其加到了 <code>Prs</code> 中，如果网络一切良好，其实不用做出任何操作。而 Leader 不一样，在添加 <code>Prs</code> 时，<code>Match</code>/<code>Next</code> 字段其实都应该赋 <strong>0</strong>——因为该 <code>Peer</code> 尚未初始化——这样一来，一旦发送 append 消息中遍历到新 <code>Peer</code> 时，发现其 <code>Next=0</code>，无论如何都会小于 <code>truncatedIndex</code>，Leader 会立刻发送 snapshot 过去。由于是通过 <code>replicatePeer()</code> 的方式进行创建，我们会发现这种方式创建的 <code>Peer</code>，其 Raft 层的 <code>Prs</code> 最开始是空的，甚至不包含自身，在这种状态下可以认为其属于一个「<strong>待机</strong>」状态，只允许处理 <code>MsgSnapshot</code>，其余消息一律作废。</p>
+<p>只有收到了 snapshot 并更细状态后，<code>Prs</code> 也被正确赋值，其才知道了其他节点的存在，此时脱离「<strong>待机</strong>」状态。</p>
+<p>等到 Leader 收到回复后，新 <code>Peer</code> 才算正式加入 Group。</p>
+<blockquote>
+<p>当然，如果网络很差，snapshot 并没有收到，反而 Leader 早早挂了，那么新 <code>Peer</code> 并未被初始化，也无法参与原有节点在 election timeout 后发起的选举，可能会导致该 Group 彻底死掉——只有两个 <code>Peer</code> 时，Candidate 无论如何也无法从另一个未初始化的 <code>Peer</code> 处得到选票，也就无法成为 Leader。</p>
+<p>但是在 apply snapshot 之前又不能回应其余消息——谁知道 apply snapshot 后会不会拒绝呢？</p>
+<p>3B 的最后几个测试中概率出现这种情况，我的做法是：算我过了。</p>
+</blockquote>
+<p>由于 conf change 和后面的 region split 会导致 <code>RegionEpoch</code> 发生变化，所有 apply 之前都应当检查 <code>Request.Header</code> 中的校验字段是否匹配，除了 <code>RegionId</code> 是否一致、<code>RegionEpoch</code> 是否匹配，对于根据 <code>Key</code> 进行的操作，还要检查 <code>Key</code> 是否在 <code>Region</code> 中。很典型的例子就是目标 <code>Key</code> 因之前进行了 region split 跑到另一个 <code>Region</code> 里去了，此时再执行操作必然破坏一致性。</p>
+<h4 id="implement-split-region-in-raftstore" tabindex="-1"><a class="header-anchor" href="#Implement-split-region-in-Raftstore">#</a>Implement split region in Raftstore</h4>
+<p>一次完整的 region split 流程如下：</p>
+<ol>
+<li class="lvl-3">
+<p><code>ticker</code> 定期通过 <code>onSplitRegionCheckTick()</code> 向 <code>splitChecker</code> 发送 <code>SplitCheckTask</code> 检查是否需要进行 split，如果需要则通过 <code>router</code> 发送一条 <code>MsgTypeSplitRegion</code> 消息;</p>
+</li>
+<li class="lvl-3">
+<p>收到该消息后，<code>Peer</code> 执行 <code>onPrepareSplitRegion()</code>，首先校验该 split 是否合理，若是，则给 <code>Scheduler</code> 发送一则 <code>SchedulerAskSplitTask</code>;</p>
+</li>
+<li class="lvl-3">
+<p>随后 <code>Scheduler</code> 生成新的 <code>RegionId</code> 以及新的 <code>PeerId</code>，包裹在 <code>Split</code> 的 Admin Command 中，通过 <code>router</code> 发松;</p>
+</li>
+<li class="lvl-3">
+<p>handler 收到消息，给 Leader propose 一条命令;</p>
+</li>
+<li class="lvl-3">
+<p>apply 到这条命令时，首先检查该命令是否有效，即 <code>RegionId</code> 与 <code>RegionEpoch</code> 是否匹配，若不匹配，说明在收到消息之前已经进行过 Peer Change 或 Region Split，返回一个 <code>error</code>;</p>
+</li>
+<li class="lvl-3">
+<p>根据命令中包含的 <code>splitKey</code> 划分为两个 <code>Region</code>，值区间分别为 <code>[startKey, splitKey)</code> 与 <code>[splitKey, endKey)</code>，且 <code>RegionEpoch</code> 中的 <code>Version</code> 字段均在原基础上加 <code>1</code>;</p>
+<blockquote>
+<p>其中前者为原 <code>Region</code>，后者为新 <code>Region</code></p>
+</blockquote>
+</li>
+<li class="lvl-3">
+<p>根据命令中的 <code>NewPeerIds</code>，为新 <code>Region</code> 的 <code>Peers</code> 修改 <code>PeerId</code>，<code>StoreId</code> 不变;</p>
+</li>
+<li class="lvl-3">
+<p>调用 <code>createPeer()</code> 在当前 <code>Raftstore</code> 上创建 <code>Peer</code>，并如同 <code>maybeCreatePeer()</code> 的那样进行注册与唤醒等操作;</p>
+</li>
+<li class="lvl-4">
+<p>更新 <code>storeMeta</code>，分裂出的两个 <code>Region</code> 都要更新;</p>
+</li>
+<li class="lvl-4">
+<p>如果当前节点在 <code>Raft</code> 层是 Leader 的身份，则需要返回 Response，并且给 <code>Scheduler</code> 发一则心跳信息，表示该操作已完成;</p>
+</li>
+</ol>
+<p>region split 中并没有很难处理的疑难杂症。</p>
+<h3 id="part-c-scheduler" tabindex="-1"><a class="header-anchor" href="#Part-C-Scheduler">#</a>Part C Scheduler</h3>
+<p>需要修改的代码位于 <code>scheduler/server/cluster.go</code> 与 <code>scheduler/server/schedulers/balance_region.go</code>，分别需要实现 <code>processRegionHeartbeat()</code> 函数与 <code>Schedule()</code> 函数。总体来讲比 3B 简单许多，根据任务书一步步来即可，仅有少量小bug需要根据测试的打印结果来调整。</p>
+<h4 id="1-collect-region-heartbeat" tabindex="-1"><a class="header-anchor" href="#1-Collect-region-heartbeat">#</a>1 Collect region heartbeat</h4>
+<p>根据 3B 中描述的整体系统流程，每个集群 <code>Cluster</code> 所持有的总调度器 <code>Scheduler</code> 会根据 <code>Region</code> 发来的心跳信息为其分配任务（PeerChange、RegionSplit 等）。在真实网络下，心跳信息会以不可预知的速度到达 <code>Scheduler</code>，同时也可能因为网络分区而收到来自同个 <code>Region</code> 不同 Leader 的信息——这就需要我们记录下每个 <code>Region</code> 的重要信息（用 <code>RegionInfo</code> 这个数据结构来表示），以防收到 stale heartbeat。</p>
+<p>先来介绍一下整体流程，其实和 3B 中的 Mock 差不多：</p>
+<p>首先，<code>Region</code> 的 Leader 发送心跳，<code>Server</code> 通过 <code>RegionHeartbeat()</code> 不断收取心跳信息，并从中提取出发送方的 <code>RegionInfo</code>，然后下放到 <code>Cluster</code>，通过 <code>HandleRegionHeartbeat()</code> 根据当前 <code>RegionInfo</code> 进行处理：</p>
+<pre class="line-numbers language-go" data-language="go"><div class="caption"><span>scheduler/server/grpc_service.go</span></div><code class="language-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>s <span class="token operator">*</span>Server<span class="token punctuation">)</span> <span class="token function">RegionHeartbeat</span><span class="token punctuation">(</span>stream schedulerpb<span class="token punctuation">.</span>Scheduler_RegionHeartbeatServer<span class="token punctuation">)</span> <span class="token builtin">error</span> <span class="token punctuation">{</span>
+  <span class="token keyword">for</span> <span class="token punctuation">{</span>
+    <span class="token operator">...</span>
+    request<span class="token punctuation">,</span> err <span class="token operator">:=</span> server<span class="token punctuation">.</span><span class="token function">Recv</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token operator">...</span>
+    region <span class="token operator">:=</span> core<span class="token punctuation">.</span><span class="token function">RegionFromHeartbeat</span><span class="token punctuation">(</span>request<span class="token punctuation">)</span>
+    <span class="token operator">...</span>
+    err <span class="token operator">=</span> cluster<span class="token punctuation">.</span><span class="token function">HandleRegionHeartbeat</span><span class="token punctuation">(</span>region<span class="token punctuation">)</span>
+    <span class="token operator">...</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>在处理的过程中，<code>Cluster</code> 首先调用 <code>processRegionHeartbeat()</code> 更新信息，若成功且该 <code>Region</code> 拥有至少一个 <code>Peer</code>，就调用 <code>Dispatch(Heartbeat)</code> 检查是否有对该 <code>Region</code> 待执行的命令 <code>Operator</code>：</p>
+<pre class="line-numbers language-go" data-language="go"><div class="caption"><span>scheduler/server/cluster_worker.go</span></div><code class="language-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>c <span class="token operator">*</span>RaftCluster<span class="token punctuation">)</span> <span class="token function">HandleRegionHeartbeat</span><span class="token punctuation">(</span>region <span class="token operator">*</span>core<span class="token punctuation">.</span>RegionInfo<span class="token punctuation">)</span> <span class="token builtin">error</span> <span class="token punctuation">{</span>
+  <span class="token keyword">if</span> err <span class="token operator">:=</span> c<span class="token punctuation">.</span><span class="token function">processRegionHeartbeat</span><span class="token punctuation">(</span>region<span class="token punctuation">)</span><span class="token punctuation">;</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> err
+  <span class="token punctuation">}</span>
+
+  c<span class="token punctuation">.</span><span class="token function">RLock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  co <span class="token operator">:=</span> c<span class="token punctuation">.</span>coordinator
+  c<span class="token punctuation">.</span><span class="token function">RUnlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  co<span class="token punctuation">.</span>opController<span class="token punctuation">.</span><span class="token function">Dispatch</span><span class="token punctuation">(</span>region<span class="token punctuation">,</span> schedule<span class="token punctuation">.</span>DispatchFromHeartBeat<span class="token punctuation">)</span>
+  <span class="token keyword">return</span> <span class="token boolean">nil</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>对于该 <code>Operator</code>：</p>
+<ol>
+<li class="lvl-3">
+<p>如果尚未执行完毕（每个 <code>Operator</code> 集成了多个步骤 <code>OpStep</code>，可能只执行到中间的某一步）且未超时，检查该 <code>Region</code> 的 <code>ConfVersion</code> 是否完全由该 <code>Operator</code> 修改：若是，则调用 <code>SendScheduleCommand()</code> 执行下一步命令——发送相应 <code>RegionHeartbeatResponse</code>，当 <code>Region</code> 收到后便会 propose 相应命令；反之，说明该 <code>Operator</code> 已过时，将其移除，并将状态设置为 <code>OperatorStatus_CANCEL</code>;</p>
+</li>
+<li class="lvl-3">
+<p>如果已执行完毕，将其移除，并将状态设置为 <code>OperatorStatus_SUCCESS</code>;</p>
+</li>
+<li class="lvl-3">
+<p>如果超时，将其移除，并将状态设置为 <code>OperatorStatus_TIMEOUT</code>;</p>
+</li>
+</ol>
+<pre class="line-numbers language-go" data-language="go"><div class="caption"><span>scheduler/server/schedule/operator_controller.go</span></div><code class="language-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>oc <span class="token operator">*</span>OperatorController<span class="token punctuation">)</span> <span class="token function">Dispatch</span><span class="token punctuation">(</span>region <span class="token operator">*</span>core<span class="token punctuation">.</span>RegionInfo<span class="token punctuation">,</span> source <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">if</span> op <span class="token operator">:=</span> oc<span class="token punctuation">.</span><span class="token function">GetOperator</span><span class="token punctuation">(</span>region<span class="token punctuation">.</span><span class="token function">GetID</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span> op <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+    timeout <span class="token operator">:=</span> op<span class="token punctuation">.</span><span class="token function">IsTimeout</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token keyword">if</span> step <span class="token operator">:=</span> op<span class="token punctuation">.</span><span class="token function">Check</span><span class="token punctuation">(</span>region<span class="token punctuation">)</span><span class="token punctuation">;</span> step <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span>timeout <span class="token punctuation">{</span>
+      origin <span class="token operator">:=</span> op<span class="token punctuation">.</span><span class="token function">RegionEpoch</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+      latest <span class="token operator">:=</span> region<span class="token punctuation">.</span><span class="token function">GetRegionEpoch</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+      changes <span class="token operator">:=</span> latest<span class="token punctuation">.</span><span class="token function">GetConfVer</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> origin<span class="token punctuation">.</span><span class="token function">GetConfVer</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+      <span class="token keyword">if</span> source <span class="token operator">==</span> DispatchFromHeartBeat <span class="token operator">&amp;&amp;</span>
+        changes <span class="token operator">&gt;</span> <span class="token function">uint64</span><span class="token punctuation">(</span>op<span class="token punctuation">.</span><span class="token function">ConfVerChanged</span><span class="token punctuation">(</span>region<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">if</span> oc<span class="token punctuation">.</span><span class="token function">RemoveOperator</span><span class="token punctuation">(</span>op<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+          oc<span class="token punctuation">.</span>opRecords<span class="token punctuation">.</span><span class="token function">Put</span><span class="token punctuation">(</span>op<span class="token punctuation">,</span> schedulerpb<span class="token punctuation">.</span>OperatorStatus_CANCEL<span class="token punctuation">)</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">return</span>
+      <span class="token punctuation">}</span>
+      oc<span class="token punctuation">.</span><span class="token function">SendScheduleCommand</span><span class="token punctuation">(</span>region<span class="token punctuation">,</span> step<span class="token punctuation">,</span> source<span class="token punctuation">)</span>
+      <span class="token keyword">return</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">if</span> op<span class="token punctuation">.</span><span class="token function">IsFinish</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> oc<span class="token punctuation">.</span><span class="token function">RemoveOperator</span><span class="token punctuation">(</span>op<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      oc<span class="token punctuation">.</span>opRecords<span class="token punctuation">.</span><span class="token function">Put</span><span class="token punctuation">(</span>op<span class="token punctuation">,</span> schedulerpb<span class="token punctuation">.</span>OperatorStatus_SUCCESS<span class="token punctuation">)</span>
+    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> timeout <span class="token operator">&amp;&amp;</span> oc<span class="token punctuation">.</span><span class="token function">RemoveOperator</span><span class="token punctuation">(</span>op<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      oc<span class="token punctuation">.</span>opRecords<span class="token punctuation">.</span><span class="token function">Put</span><span class="token punctuation">(</span>op<span class="token punctuation">,</span> schedulerpb<span class="token punctuation">.</span>OperatorStatus_TIMEOUT<span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>我们只需要实现函数 <code>processRegionHeartbeat()</code>。</p>
+<p>首先检查该 <code>RegionInfo</code> 的可信度：</p>
+<ol>
+<li class="lvl-3">
+<p>如果在已有的表中记录过同一 <code>RegionId</code> 的 info，并且新 info 的 <code>RegionEpoch</code> 中的两个字段 <code>ConfVersion</code>, <code>Version</code> 只要有一个比已有的小，就认为不可信，返回 <code>ErrRegionIsState</code>;</p>
+</li>
+<li class="lvl-3">
+<p>如果存在那些与新 info 对应的 Key 区间有重合的 info（这种情况发生于 Region Split 操作），并且新 info 的 <code>RegionEpoch</code> 中的两个字段 <code>ConfVersion</code>, <code>Version</code> 只要有一个比已有的小，就认为不可信，返回 <code>ErrRegionIsState</code>;</p>
+</li>
+</ol>
+<p>检查通过后，调用 <code>putRegion()</code> 将该 info 插入表中，并删除原有 info（如果有的话）。</p>
+<p>最后，调用 <code>updateStoreStatusLocked()</code> 更新集群中所有存储节点状态。</p>
+<p>此处没有什么疑难杂症，很快就能完成。</p>
+<h4 id="2-implement-region-balance-scheduler" tabindex="-1"><a class="header-anchor" href="#2-Implement-region-balance-scheduler">#</a>2 Implement region balance scheduler</h4>
+<p>上面提到的 <code>Operator</code> 是怎么来的呢？有一部分就是 <code>Scheduler</code> 产生的。</p>
+<p><code>Cluster</code> 一经创建便持有一个 <code>Coordinator</code>，其会通过 <code>runScheduler()</code> 来调用 <code>scheduler.Schedule()</code>，定期检查是否有存储节点超载，就需要找到该节点 <code>src</code> 的一个<strong>合适</strong>的 <code>Region</code>，将位于 <code>src</code> 中从属于该 <code>Region</code> 的 <code>Peer</code> 转移到某个<strong>合适</strong>的目标节点 <code>dst</code>，从而达成负载均衡，并通过函数返回的 <code>MovePeerOperator</code> 加到该 <code>Region</code> 对应的「待执行命令」中，等待下一次该 <code>Region</code> 发来心跳信息时执行。</p>
+<blockquote>
+<p>一个 <code>MovePeerOperator</code> 包含以下步骤：</p>
+<ol>
+<li class="lvl-3">删除原节点的 <code>Peer</code>（即 <code>RemovePeer</code> 操作）;</li>
+<li class="lvl-3">如果必要则还要进行 <code>transferLeader</code>;</li>
+<li class="lvl-3">将新 <code>Peer</code> 加入 <code>Region</code>（即 <code>AddPeer</code> 操作）;</li>
+</ol>
+<p>最后等待该新 <code>Peer</code> 收到消息正式加入 Group。</p>
+</blockquote>
+<p>上文提到<strong>合适</strong>，那么究竟何谓<strong>合适</strong>？</p>
+<p>首先是<strong>合适</strong>的 <code>Region</code>，任务书指出：</p>
+<ol>
+<li class="lvl-3">
+<p>First, it will try to select a <code>pending region</code> because pending may mean the disk is overloaded;</p>
+</li>
+<li class="lvl-3">
+<p>If there isn’t a pending region, it will try to find a <code>follower region</code>;</p>
+</li>
+<li class="lvl-3">
+<p>If it still cannot pick out one region, it will try to pick <code>leader regions</code>;</p>
+</li>
+</ol>
+<blockquote>
+<p>可以利用框架提供的三个函数 <code>GetPendingRegionsWithLock()</code>, <code>GetFollowersWithLock()</code> and <code>GetLeadersWithLock()</code> 进行挑选。</p>
+</blockquote>
+<p><code>dst</code> 的确定原则也很简单：在所有满足 src.RegionSize - dst.RegionSize &gt; 2 * region.ApproximateSize 中选出那个 <code>RegionSize</code> 最小的节点。如果 <code>RegionSize</code> 差值不够大，那么在迁移后很可能重新迁移回去。</p>
+<blockquote>
+<p>当然，目标节点必须不包含同一 <code>Region</code>，原因不言而喻，需要在 coding 中特别注意。</p>
+</blockquote>
+<p>确定下来后，我们就可以在 <code>dst</code> 上调用 <code>AllocPeer()</code> 分配空间了，然后根据已有信息创建一个 <code>MovePeerOperator</code> 并返回。</p>
+<p>值得注意的是，我们进行检查的所有节点必须为 <strong>suitable</strong>，即：a suitable store should be <code>up</code> and the <code>down time</code> cannot be longer than <code>MaxStoreDownTime</code> of the cluster, which you can get through <code>cluster.GetMaxStoreDownTime()</code>.</p>
+<p>整个代码如下：</p>
+<pre class="line-numbers language-go" data-language="go"><div class="caption"><span>scheduler/server/cluster.go</span></div><code class="language-go"><span class="token keyword">var</span> originalRegion <span class="token operator">*</span>core<span class="token punctuation">.</span>RegionInfo
+<span class="token keyword">var</span> originalStore <span class="token operator">*</span>core<span class="token punctuation">.</span>StoreInfo
+<span class="token keyword">var</span> targetStore <span class="token operator">*</span>core<span class="token punctuation">.</span>StoreInfo
+stores <span class="token operator">:=</span> <span class="token function">GetAllSortedSuitableStores</span><span class="token punctuation">(</span>cluster<span class="token punctuation">)</span>
+
+<span class="token comment">// find original region and original store</span>
+cb <span class="token operator">:=</span> <span class="token keyword">func</span><span class="token punctuation">(</span>container core<span class="token punctuation">.</span>RegionsContainer<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  originalRegion <span class="token operator">=</span> container<span class="token punctuation">.</span><span class="token function">RandomRegion</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token builtin">byte</span><span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token builtin">byte</span><span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">for</span> i<span class="token punctuation">,</span> store <span class="token operator">:=</span> <span class="token keyword">range</span> stores <span class="token punctuation">{</span>
+  <span class="token keyword">if</span> originalRegion <span class="token operator">=</span> <span class="token function">SelectSuitableRegion</span><span class="token punctuation">(</span>cb<span class="token punctuation">)</span><span class="token punctuation">;</span> originalRegion <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+    originalStore <span class="token operator">=</span> stores<span class="token punctuation">[</span>i<span class="token punctuation">]</span>
+    <span class="token keyword">break</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">if</span> originalStore <span class="token operator">==</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> <span class="token boolean">nil</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// find target store</span>
+<span class="token keyword">for</span> target <span class="token operator">:=</span> <span class="token function">len</span><span class="token punctuation">(</span>stores<span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">;</span> target <span class="token operator">&gt;=</span> <span class="token number">0</span><span class="token punctuation">;</span> target<span class="token operator">--</span> <span class="token punctuation">{</span>
+  regionInTargetStore <span class="token operator">:=</span> <span class="token function">RegionIsInStore</span><span class="token punctuation">(</span>originalRegion<span class="token punctuation">,</span> stores<span class="token punctuation">[</span>target<span class="token punctuation">]</span><span class="token punctuation">)</span>
+  <span class="token keyword">if</span> <span class="token operator">!</span>regionInTargetStore <span class="token operator">&amp;&amp;</span> <span class="token function">isDifferenceBigEnough</span><span class="token punctuation">(</span>stores<span class="token punctuation">[</span>original<span class="token punctuation">]</span><span class="token punctuation">,</span> stores<span class="token punctuation">[</span>target<span class="token punctuation">]</span><span class="token punctuation">,</span> originalRegion<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    targetStore <span class="token operator">=</span> stores<span class="token punctuation">[</span>target<span class="token punctuation">]</span>
+    <span class="token keyword">break</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">if</span> targetStore <span class="token operator">==</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> <span class="token boolean">nil</span>
+<span class="token punctuation">}</span>
+
+newPeer <span class="token operator">:=</span> <span class="token function">AllocPeer</span><span class="token punctuation">(</span>cluster<span class="token punctuation">,</span> stores<span class="token punctuation">[</span>target<span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">GetID</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token keyword">return</span> <span class="token function">CreateMovePeerOperator</span><span class="token punctuation">(</span>s<span class="token punctuation">.</span><span class="token function">GetName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> cluster<span class="token punctuation">,</span> originalRegion<span class="token punctuation">,</span> operator<span class="token punctuation">.</span>OpBalance<span class="token punctuation">,</span> stores<span class="token punctuation">[</span>original<span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">GetID</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> stores<span class="token punctuation">[</span>target<span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">GetID</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> newPeer<span class="token punctuation">.</span><span class="token function">GetId</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<blockquote>
+<p>并且由于 <code>RaftGroup</code> 随时可能变化，故对于不在组内的节点而言，任何消息都是无效的——即便收到消息，也不能做任何事。对于新加入组的节点而言，Raft 层的 <code>Prs</code> 可能未被正确初始化，所以如果收到一条 peer 的消息而该 peer 又不在 <code>Prs</code> 中时，将其加入。</p>
+</blockquote>
+<p>有一点不能理解的是，虽然任务书中表示 <code>RegionEpoch.ConfVer</code> 会在 confchange 中改变，但并没有说 <code>RegionEpoch.Version</code> 也会改，只说了在 split 中改变。然而测试用例会不通过「只修改了 confver 而不修改 version」的代码。</p>
+<h4 id="3-regionsplit" tabindex="-1"><a class="header-anchor" href="#3-RegionSplit">#</a>3 RegionSplit</h4>
+<p>不同 RaftGroup 负责不同 Region，随着时间推进必然会有一些 Region 会超出一个值 <code>RegionSplitSize</code>，为了负载均衡，必须将这些过大的 Region 一分为二。</p>
+
+                
+            </div>
+            <hr/>
+
+            
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            <span class="chip bg-color">这个人太懒了，都不想加标签</span>
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+    <div class="social-share" data-sites="qq,wechat" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+    <script src="/libs/share/js/social-share.min.js"></script>
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/lab/tinykvproject4/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/0.jpg" class="responsive-img" alt="TinyKV Project4 Transaction">
+                        
+                        <span class="card-title">TinyKV Project4 Transaction</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            本 Project 需要我们实现基于 MVCC 的事务模块。
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2023-08-20
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Lab/" class="post-category">
+                                    Lab
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/lab/tinykvproject2/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/0.jpg" class="responsive-img" alt="TinyKV Project2 RaftKV">
+                        
+                        <span class="card-title">TinyKV Project2 RaftKV</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            本 Project 需要我们实现基础 Raft 算法。
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2023-08-14
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Lab/" class="post-category">
+                                    Lab
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+
+  <!-- 是否加载使用自带的 prismjs. -->
+  <script type="text/javascript" src="/libs/prism/prism.min.js"></script>
+
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card" style="background-color: white;">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+<script src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+    MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$', '$'], ['\\(', '\\)']]}
+    });
+</script>
+
+
+
+    <footer class="page-footer bg-color">
+    
+
+    <div class="container row center-align"
+         style="margin-bottom: 15px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            
+                <span id="year">2023-2025</span>
+            
+            <a href="/about" target="_blank">Leager</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            
+                <span id="translate">|&nbsp;繁/简：</span><a id="translateLink" href="javascript:translatePage();">繁</a>
+            
+            <br>
+            
+            
+            
+                
+            
+            
+                <span id="busuanzi_container_site_pv">
+                &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
+                    <span id="busuanzi_value_site_pv" class="white-color"></span>
+            </span>
+            
+            
+                <span id="busuanzi_container_site_uv">
+                &nbsp;|&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;
+                    <span id="busuanzi_value_site_uv" class="white-color"></span>
+            </span>
+            
+            <br>
+
+            <!-- 运行天数提醒. -->
+            
+                <span id="sitetime"> Loading ...</span>
+                <script>
+                    var calcSiteTime = function () {
+                        var seconds = 1000;
+                        var minutes = seconds * 60;
+                        var hours = minutes * 60;
+                        var days = hours * 24;
+                        var years = days * 365;
+                        var today = new Date();
+                        var startYear = "2023";
+                        var startMonth = "8";
+                        var startDate = "1";
+                        var startHour = "0";
+                        var startMinute = "0";
+                        var startSecond = "0";
+                        var todayYear = today.getFullYear();
+                        var todayMonth = today.getMonth() + 1;
+                        var todayDate = today.getDate();
+                        var todayHour = today.getHours();
+                        var todayMinute = today.getMinutes();
+                        var todaySecond = today.getSeconds();
+                        var t1 = Date.UTC(startYear, startMonth, startDate, startHour, startMinute, startSecond);
+                        var t2 = Date.UTC(todayYear, todayMonth, todayDate, todayHour, todayMinute, todaySecond);
+                        var diff = t2 - t1;
+                        var diffYears = Math.floor(diff / years);
+                        var diffDays = Math.floor((diff / days) - diffYears * 365);
+
+                        // 区分是否有年份.
+                        var language = 'zh-CN';
+                        if (startYear === String(todayYear)) {
+                            document.getElementById("year").innerHTML = todayYear;
+                            var daysTip = 'This site has been running for ' + diffDays + ' days';
+                            if (language === 'zh-CN') {
+                                daysTip = '本站已运行 ' + diffDays + ' 天';
+                            } else if (language === 'zh-HK') {
+                                daysTip = '本站已運行 ' + diffDays + ' 天';
+                            }
+                            document.getElementById("sitetime").innerHTML = daysTip;
+                        } else {
+                            document.getElementById("year").innerHTML = startYear + " - " + todayYear;
+                            var yearsAndDaysTip = 'This site has been running for ' + diffYears + ' years and '
+                                + diffDays + ' days';
+                            if (language === 'zh-CN') {
+                                yearsAndDaysTip = '本站已运行 ' + diffYears + ' 年 ' + diffDays + ' 天';
+                            } else if (language === 'zh-HK') {
+                                yearsAndDaysTip = '本站已運行 ' + diffYears + ' 年 ' + diffDays + ' 天';
+                            }
+                            document.getElementById("sitetime").innerHTML = yearsAndDaysTip;
+                        }
+                    }
+
+                    calcSiteTime();
+                </script>
+            
+            <br>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link social-statis">
+    <a href="https://github.com/Leager-zju" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:1004729740@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+
+
+
+
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1004729740" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1004729740" data-position="top" data-delay="50">
+        <i class="fab fa-qq"></i>
+    </a>
+
+
+
+
+
+
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    var searchFunc = function (path, search_id, content_id) {
+        'use strict';
+        $.ajax({
+            url: path,
+            dataType: "xml",
+            success: function (xmlResponse) {
+                // get the contents from search data
+                var datas = $("entry", xmlResponse).map(function () {
+                    return {
+                        title: $("title", this).text(),
+                        content: $("content", this).text(),
+                        url: $("url", this).text()
+                    };
+                }).get();
+                var $input = document.getElementById(search_id);
+                var $resultContent = document.getElementById(content_id);
+                $input.addEventListener('input', function () {
+                    var str = '<ul class=\"search-result-list\">';
+                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                    $resultContent.innerHTML = "";
+                    if (this.value.trim().length <= 0) {
+                        return;
+                    }
+                    // perform local searching
+                    datas.forEach(function (data) {
+                        var isMatch = true;
+                        var data_title = data.title.trim().toLowerCase();
+                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
+                        var data_url = data.url;
+                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
+                        var index_title = -1;
+                        var index_content = -1;
+                        var first_occur = -1;
+                        // only match artiles with not empty titles and contents
+                        if (data_title !== '' && data_content !== '') {
+                            keywords.forEach(function (keyword, i) {
+                                index_title = data_title.indexOf(keyword);
+                                index_content = data_content.indexOf(keyword);
+                                if (index_title < 0 && index_content < 0) {
+                                    isMatch = false;
+                                } else {
+                                    if (index_content < 0) {
+                                        index_content = 0;
+                                    }
+                                    if (i === 0) {
+                                        first_occur = index_content;
+                                    }
+                                }
+                            });
+                        }
+                        // show search results
+                        if (isMatch) {
+                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
+                            var content = data.content.trim().replace(/<[^>]+>/g, "");
+                            if (first_occur >= 0) {
+                                // cut out 100 characters
+                                var start = first_occur - 20;
+                                var end = first_occur + 80;
+                                if (start < 0) {
+                                    start = 0;
+                                }
+                                if (start === 0) {
+                                    end = 100;
+                                }
+                                if (end > content.length) {
+                                    end = content.length;
+                                }
+                                var match_content = content.substr(start, end);
+                                // highlight all keywords
+                                keywords.forEach(function (keyword) {
+                                    var regS = new RegExp(keyword, "gi");
+                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
+                                });
+
+                                str += "<p class=\"search-result\">" + match_content + "...</p>"
+                            }
+                            str += "</li>";
+                        }
+                    });
+                    str += "</ul>";
+                    $resultContent.innerHTML = str;
+                });
+            }
+        });
+    };
+
+    searchFunc('/search.xml', 'searchInput', 'searchResult');
+});
+</script>
+
+    <!-- 白天和黑夜主题 -->
+<div class="stars-con">
+    <div id="stars"></div>
+    <div id="stars2"></div>
+    <div id="stars3"></div>  
+</div>
+
+<script>
+    function switchNightMode() {
+        $('<div class="Cuteen_DarkSky"><div class="Cuteen_DarkPlanet"></div></div>').appendTo($('body')),
+        setTimeout(function () {
+            $('body').hasClass('DarkMode') 
+            ? ($('body').removeClass('DarkMode'), localStorage.setItem('isDark', '0'), $('#sum-moon-icon').removeClass("fa-sun").addClass('fa-moon')) 
+            : ($('body').addClass('DarkMode'), localStorage.setItem('isDark', '1'), $('#sum-moon-icon').addClass("fa-sun").removeClass('fa-moon')),
+            
+            setTimeout(function () {
+            $('.Cuteen_DarkSky').fadeOut(1e3, function () {
+                $(this).remove()
+            })
+            }, 2e3)
+        })
+    }
+</script>
+
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    
+
+    
+        <script type="text/javascript" src="/js/tw_cn.js"></script>
         <script type="text/javascript">
           var defaultEncoding = 2; //网站编写字体是否繁体，1-繁体，2-简体
           var translateDelay = 0; //延迟时间,若不在前, 要设定延迟翻译时间, 如100表示100ms,默认为0
-          var cookieDomain = "<%= config.url %>"; //Cookie地址, 一定要设定, 通常为你的网址
+          var cookieDomain = "http://Leager-zju.github.io"; //Cookie地址, 一定要设定, 通常为你的网址
           var msgToTraditionalChinese = "繁"; //此处可以更改为你想要显示的文字
           var msgToSimplifiedChinese = "简"; //同上，但两处均不建议更改
           var translateButtonId = "translateLink"; //默认互换id
           translateInitilization();
         </script>
-    <% } %>
     
-    <% if (theme.sakura.enable) { %>
-        
-        <script type="text/javascript">
-            // 只在桌面版网页启用特效
-            var windowWidth = $(window).width();
-            if (windowWidth > 768) {
-                document.write('<script type="text/javascript" src="<%- theme.jsDelivr.url %><%- url_for(theme.libs.js.sakura) %>"><\/script>');
-            }
-        </script>
-    <% } %>
+    
+    
 
     <!-- 雪花特效 -->
-    <% if (theme.snowdown.enable) { %> 
-        <script type="text/javascript">
-            // 只在桌面版网页启用特效
-            var windowWidth = $(window).width();
-            if (windowWidth > 768) {
-                document.write('<script type="text/javascript" src="<%- theme.jsDelivr.url %><%- url_for(theme.libs.js.snow) %>"><\/script>');
-            }
-        </script>
-    <% } %>
+    
 
     <!-- 鼠标星星特效 -->
-    <% if (theme.mouseStar.enable) { %> 
-        <script type="text/javascript">
-            // 只在桌面版网页启用特效
-            var windowWidth = $(window).width();
-            if (windowWidth > 768) {
-                document.write('<script type="text/javascript" src="<%- theme.jsDelivr.url %><%- url_for(theme.libs.js.star) %>"><\/script>');
-            }
-        </script>
-    <% } %>
+    
 
-    <% if (theme.tcaptcha.enable) { %> 
-        <script src="https://ssl.captcha.qq.com/TCaptcha.js"></script>
-        <script src="<%- theme.jsDelivr.url %><%- url_for(theme.libs.js.tcaptcha) %>"></script>
-        <button id="TencentCaptcha" data-appid="<%- theme.tcaptcha.appid %>" data-cbfn="callback" type="button" hidden></button>
-    <% } %>
+    
 
-    <%- partial('_partial/baidu-analytics') %>
-    <%- partial('_partial/baidu-push') %>
-    <% if (theme.clicklove.enable) { %>
-    <script src="<%- theme.jsDelivr.url %><%- url_for(theme.libs.js.clicklove) %>" async="async"></script>
-    <% } %>
-    <% if (theme.busuanziStatistics && theme.busuanziStatistics.enable) { %>
-    <script async src="<%- theme.jsDelivr.url %><%- url_for(theme.libs.js.busuanzi) %>"></script>
-    <% } %>
+    <!-- Baidu Analytics -->
 
-    <% if (theme.tidio.enable) { %>
-        <script src="//code.tidio.co/<%- theme.tidio.public_key %>.js"></script>
-        <script>
-            $(document).ready(function () {
-                setInterval(change_Tidio, 50);
-                function change_Tidio() {
-                    var tidio=$("#tidio-chat iframe");
-                    if(tidio.css("display")=="block"&& $(window).width()>977 ){
-                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" &&$(window).width()>977)>0? "-40px" : ($("div.toc-title").length&&$(window).width()>977)>0?"<%if(theme.toc.showToggleBtn){%>85px<%}else{%>20px<%}%>":"20px";
-                        document.getElementById("tidio-chat-iframe").style.right="-15px";
-                        document.getElementById("tidio-chat-iframe").style.height=parseInt(tidio.css("height"))>=520?"520px":tidio.css("height");
-                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
-                    }
-                    else if(tidio.css("display")=="block"&&$(window).width()>601 &&$(window).width()<992 ){
-                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" && 601< $(window).width()<992)>0? "-40px":"20px" ;
-                        document.getElementById("tidio-chat-iframe").style.right="-15px";
-                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
-                    }
-                    else if(tidio.css("display")=="block"&&$(window).width()<601 && parseInt(tidio.css("height"))<230){
-                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" && $(window).width()<601)>0? "-10px":"45px" ;
-                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
-                    }
-                    if( tidio.css("display")=="block"&&$(window).width()<601 && parseInt(tidio.css("height"))>=230){
-                        document.getElementById("tidio-chat-iframe").style.zIndex="998";
-                    }
-                }
-            });
-        </script>
-    <% } %>
+    <!-- Baidu Push -->
 
-    <% if (theme.daovoice.enable) { %>
-    <script>
-        (function (i, s, o, g, r, a, m) {
-            i["DaoVoiceObject"] = r;
-            i[r] = i[r] || function () {
-                (i[r].q = i[r].q || []).push(arguments)
-            }, i[r].l = 1 * new Date();
-            a = s.createElement(o), m = s.getElementsByTagName(o)[0];
-            a.async = 1;
-            a.src = g;
-            a.charset = "utf-8";
-            m.parentNode.insertBefore(a, m)
-        })(window, document, "script", ('https:' == document.location.protocol ? 'https:' : 'http:') +
-            "//widget.daovoice.io/widget/6984b559.js", "daovoice")
-        daovoice('init', {
-            app_id: "<%- theme.daovoice.app_id %>"
-        });
-        daovoice('update');
-    </script>
-    <% } %>
+    
+    <script src="/libs/others/clicklove.js" async="async"></script>
+    
+    
+    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
+    
+
+    
+
+    
 
     <!--腾讯兔小巢-->
-    <% if (theme.tuxiaochao.enable) { %>
-        <div style="position:fixed;bottom:125px;right:16px;cursor: pointer;">
-            <a title="兔小巢" href="https://support.qq.com/products/<%- theme.tuxiaochao.productId %>"><i class="fa fa-comments fa-3x"  aria-hidden="true"></i></a>
-        </div>
-    <%}%>
-    <% if (theme.canvas_nest.enable) { %>
-    <script type="text/javascript" color="<%- theme.canvas_nest.color %>"
-        pointColor="<%- theme.canvas_nest.pointColor %>" opacity='<%- theme.canvas_nest.opacity %>'
-        zIndex="<%- theme.canvas_nest.zIndex %>" count="<%- theme.canvas_nest.count %>"
-        src="<%- theme.jsDelivr.url %><%- url_for(theme.libs.js.canvas_nest) %>"></script>
-    <% } %>
+    
+    
 
-    <% if (theme.ribbon.enable) { %>
-    <% var ribbonSrc = theme.ribbon.clickChange ? theme.libs.js.ribbon : theme.libs.js.ribbonRefresh; %>
-    <script type="text/javascript" size="<%- theme.ribbon.size %>" alpha='<%- theme.ribbon.alpha %>'
-        zIndex="<%- theme.ribbon.zIndex %>" src="<%- theme.jsDelivr.url %><%- url_for(ribbonSrc) %>" async="async"></script>
-    <% } %>
+    
 
-    <% if (theme.ribbon_dynamic.enable) { %>
-    <script type="text/javascript" src="<%- theme.jsDelivr.url %><%- url_for(theme.libs.js.ribbon_dynamic) %>" async="async"></script>
-    <% } %>
+    
+    <script type="text/javascript" src="/libs/background/ribbon-dynamic.js" async="async"></script>
+    
 
-    <% if (theme.instantpage.enable) { %>
-    <script src="<%- theme.jsDelivr.url %><%- url_for(theme.libs.js.instantpage) %>" type="module"></script>
-    <% } %>
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
 
     <script type="text/javascript">
         document.addEventListener('visibilitychange', function () {

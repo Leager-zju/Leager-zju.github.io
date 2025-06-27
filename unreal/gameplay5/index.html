@@ -1,172 +1,1368 @@
 <!DOCTYPE HTML>
-<html lang="<%= config.language %>">
-<%- partial('_partial/head') %>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="Gameplay Study(5)：Gameplay Ability System(GAS), 没什么看头的地方">
+    <meta name="description" content="接下来是重头戏，要基于**虚幻技能系统(Gameplay Ability System, GAS)**设计角色技能玩法了。
+
+#技能系统 GAS
+
+Gameplay 技能系统 是一个高度灵活的框架，可用于构建你可能会在 RPG 或 MOBA">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+    <title>Gameplay Study(5)：Gameplay Ability System(GAS) | 没什么看头的地方</title>
+    <link rel="icon" type="image/png" href="/dt.png">
+    
+
+
+    <!-- bg-cover style     -->
+
+
+
+<link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+<link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+<link rel="stylesheet" type="text/css" href="/css/matery.css">
+<link rel="stylesheet" type="text/css" href="/css/my.css">
+<link rel="stylesheet" type="text/css" href="/css/dark.css" media="none" onload="if(media!='all')media='all'">
+
+
+
+
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+    <link rel="stylesheet" href="/css/post.css">
+
+
+
+
+    
+
+
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css">
+
+    <script src="/libs/jquery/jquery-3.6.0.min.js"></script>
+
+<meta name="generator" content="Hexo 6.3.0">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
 
 <body>
-    <%- partial('_partial/header') %>
-    <%- body %>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/comment_bg.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">没什么看头的地方</span>
+                </a>
+            </div>
+            
 
-    <%- partial('_partial/footer') %>
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/archives" class="waves-effect waves-light">
+      
+      <i class="fas fa-archive" style="zoom: 0.6;"></i>
+      
+      <span>归档</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+  <li>
+    <a href="javascript:;" class="waves-effect waves-light" onclick="switchNightMode()" title="深色/浅色模式" >
+      <i id="sum-moon-icon" class="fas fa-sun" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
 
-    <%- partial('_partial/search') %>
-    <%- partial('_widget/day-night') %>
-    <%- partial('_partial/back-top') %>
 
-    <script src="<%- theme.jsDelivr.url %><%- url_for(theme.libs.js.materialize) %>"></script>
-    <script src="<%- theme.jsDelivr.url %><%- url_for(theme.libs.js.masonry) %>"></script>
-    <script src="<%- theme.jsDelivr.url %><%- url_for(theme.libs.js.aos) %>"></script>
-    <script src="<%- theme.jsDelivr.url %><%- url_for(theme.libs.js.scrollProgress) %>"></script>
-    <script src="<%- theme.jsDelivr.url %><%- url_for(theme.libs.js.lightgallery) %>"></script>
-    <script src="<%- theme.jsDelivr.url %><%- url_for(theme.libs.js.matery) %>"></script>
+<div id="mobile-nav" class="side-nav sidenav">
 
-    <% if (theme.mermaid.enable) { %>
-        <!-- <script src='https://unpkg.com/mermaid@<%= theme.mermaid.version %>/dist/mermaid.min.js'></script> -->
-        <script src='<%- theme.jsDelivr.url %><%- url_for(theme.libs.js.mermaid) %>'></script>
-        <script>
-          if (window.mermaid) {
-            mermaid.initialize({theme: 'forest'});
-          }
-        </script>
-    <% } %>
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/comment_bg.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">没什么看头的地方</div>
+        <div class="logo-desc">
+            
+            【数据删除】
+            
+        </div>
+    </div>
 
-    <% if (theme.translate.enable) { %>
-        <script type="text/javascript" src="<%- theme.jsDelivr.url %><%- url_for(theme.libs.js.sc2tc) %>"></script>
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/archives" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-archive"></i>
+			
+			归档
+		</a>
+          
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/Leager-zju" class="waves-effect waves-light" target="_blank">
+                <i class="fab fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+            <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/Leager-zju" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+   data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+        
+    </nav>
+
+</header>
+
+    
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/0.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">Gameplay Study(5)：Gameplay Ability System(GAS)</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                          <div class="article-tag">
+                            <span class="chip bg-color">这个人太懒了，都不想加标签</span>
+                          </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/Unreal/" class="post-category">
+                                Unreal
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2024-08-23
+                </div>
+                
+
+                
+
+                
+
+                
+
+                
+            </div>
+        </div>
+        <hr class="clearfix">
+
+        
+        <!-- 是否加载使用自带的 prismjs. -->
+        <link rel="stylesheet" href="/libs/prism/prism.min.css">
+        
+
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <p>接下来是重头戏，要基于**虚幻技能系统(Gameplay Ability System, GAS)**设计角色技能玩法了。</p>
+<span id="more"></span>
+<h2 id="%E6%8A%80%E8%83%BD%E7%B3%BB%E7%BB%9F-gas" tabindex="-1"><a class="header-anchor" href="#技能系统-GAS">#</a>技能系统 GAS</h2>
+<blockquote>
+<p>Gameplay 技能系统 是一个高度灵活的框架，可用于构建你可能会在 RPG 或 MOBA 游戏中看到的技能和属性类型。你可以构建可供游戏中的角色使用的动作或被动技能，使这些动作导致各种属性累积或损耗的状态效果，实现约束这些动作使用的"冷却"计时器或资源消耗，更改技能等级及每个技能等级的技能效果，激活粒子或音效，等等。简单来说，此系统可帮助你在任何现代 RPG 或 MOBA 游戏中设计、实现及高效关联各种游戏中的技能，既包括跳跃等简单技能，也包括你喜欢的角色的复杂技能集。—— 虚幻官方文档</p>
+</blockquote>
+<p>技能系统主要有以下几个主要核心部件</p>
+<ul class="lvl-0">
+<li class="lvl-2">
+<p><strong>技能系统组件(Ability System Component, ASC)</strong>: 是 Actor 和**游戏玩法系统(Gameplay Ability System)**之间的桥梁，负责处理许多事务包括授予技能、激活技能等。</p>
+</li>
+<li class="lvl-2">
+<p><strong>属性集(Attribute Set, AS)</strong>: 存储角色的游戏属性（生命值、攻击力等），管理游戏属性与系统其他部分之间的交互，并将自己注册到角色的技能系统组件中。</p>
+</li>
+<li class="lvl-2">
+<p><strong>技能(Gameplay Ability)</strong>: 对「技能」的封装，定义技能效果、技能消耗，以及释放条件等。并异步运行角色动画、粒子和声效等。</p>
+</li>
+<li class="lvl-2">
+<p><strong>技能任务(Ability Task)</strong>: 异步执行技能相关的工作（播放施法动画、激发投射物粒子效果等），可以通过调用 <code>EndTask()</code> 函数自行终止。</p>
+</li>
+<li class="lvl-2">
+<p><strong>效果(Gameplay Effect)</strong>: 执行与属性相关的多种功能，这些效果可以是即时效果，比如施加伤害，也可以是持续效果，比如毒杀，在一定的时间内对角色造成伤害。</p>
+</li>
+<li class="lvl-2">
+<p><strong>提示(Gameplay Cue)</strong>: 负责处理音效、粒子效果等。</p>
+</li>
+<li class="lvl-2">
+<p><strong>标签(Gameplay Tag)</strong>: 使用层次结构，执行 Identify 的功能，同时比 bool、enum、string 更加灵活。</p>
+</li>
+</ul>
+<blockquote>
+<p>具体可以参考 <a target="_blank" rel="noopener" href="https://github.com/tranek/GASDocumentation">GAS Documentation</a></p>
+</blockquote>
+<h2 id="ability-system-component" tabindex="-1"><a class="header-anchor" href="#Ability-System-Component">#</a>Ability System Component</h2>
+<p>ASC 和 AS 需要附加到 Actor 上才能被访问并发挥出效果，并且该 Actor 称之为 <code>OwnerActor</code>。</p>
+<p>通常有两种 attach 方案：</p>
+<ol>
+<li class="lvl-3">
+<p>第一种是 attach 到一个叫「PlayerState」的类里。这个类是持久化的，Game Mode 会在玩家加入游戏时或游戏开始时，为每个玩家创建一个新的 Player State 对象，并在需要时将其分配给对应的玩家（事实上 Pawn 可以通过 <code>GetPlayerState()</code> 获取指向该类实例的指针）。即便 Pawn 死亡被销毁，该对象也依然存在，这也就意味着它和 Pawn 是<strong>独立</strong>的。所以如果需要用到这一特性，则可以考虑将 ASC/AS attach 到 Player State 上；</p>
+</li>
+<li class="lvl-3">
+<p>当然，如果不需要用到相关特性，比如一旦 Pawn 死亡之后就不会再用到其技能/属性了，常见的有 Moba 游戏中的小兵，那就可以直接 attach 到 Character 上；</p>
+</li>
+</ol>
+<blockquote>
+<p>Most Actors will have the ASC on themselves. If your Actor will respawn and need persistence of Attributes or GameplayEffects between spawns (like a hero in a MOBA), then the ideal location for the ASC is on the PlayerState.</p>
+</blockquote>
+<p>除了 <code>OwnActor</code>，GAS 的实际使用者称之为 <code>AvatarActor</code>。这里我们选择第一种方案来 attach ASC 和 AS。</p>
+<h3 id="player-state-%E4%B8%8E-replication-in-multi-player" tabindex="-1"><a class="header-anchor" href="#Player-State-与-Replication-in-multi-player">#</a>Player State 与 Replication in multi-player</h3>
+<p>现在我们已经有了 Controller 类和 Character 类，那么接下来就是实现 PlayerState 类。步骤依然是创建 C++ 类 <code>RPlayerState</code> 与对应的蓝图类 <code>BP_RPlayerState</code>，并且在 Game Mode 中设置默认「玩家状态类」。我们可以在构造函数中为 <code>NetUpdateFrequency</code> 赋值，从而自定义 Play State 的复制速率。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>Components/RPlayerState.cpp</span></div><code class="language-cpp"><span class="token class-name">ARPlayerState</span><span class="token double-colon punctuation">::</span><span class="token function">ARPlayerState</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+  NetUpdateFrequency <span class="token operator">=</span> <span class="token number">100.0f</span><span class="token punctuation">;</span> <span class="token comment">// 100 updates per second</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>什么是复制速率？事实上，在多人游戏中，在某一时刻，clients 可能会持有不同的数据版本，此时就需要有一个 Authority 来决定正确的数据版本。这个 Authority 可以是 server，也可以是 client 中的「房主」，它负责会持有所有 Pawn 的 Player State，并且单向复制到其它的 client 上，从而实现同步。那么如果复制速率太低，就容易出现不一致的情况；如果太高，则会影响性能。</p>
+<blockquote>
+<p>每个 client 上只会有<strong>一个</strong>属于自己 Pawn 的 Controller，只有 server 有所有 Controller。</p>
+<p>但每个 client 会拥有所有的 Pawn 及其 Player State，毕竟我们需要知道其它玩家的生命值、等级这些信息。这些信息就是由 Authority 负责同步了。</p>
+</blockquote>
+<h3 id="asc-%E8%AE%BE%E7%BD%AE%E4%B8%8E%E5%88%9D%E5%A7%8B%E5%8C%96" tabindex="-1"><a class="header-anchor" href="#ASC-设置与初始化">#</a>ASC 设置与初始化</h3>
+<blockquote>
+<p>首先要新建 ASC 和 AS 的 C++ 类。步骤略。</p>
+</blockquote>
+<p>如果 ASC 是 attach 到 Player State 上的，那么它也会跟着一起复制，并且根据 Replication Mode 实现不同的复制效果。其中 Tag 和 Cue 永远会复制到其它 client 上，唯一区别在于 Effect 是否被复制。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Replication Mode</th>
+<th style="text-align:left">描述</th>
+<th style="text-align:left">使用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Full</td>
+<td style="text-align:left">每个 Effect 都会复制到所有 client</td>
+<td style="text-align:left">单机</td>
+</tr>
+<tr>
+<td style="text-align:left">Mixed</td>
+<td style="text-align:left">Effect 只会被复制到持有它的 Actor</td>
+<td style="text-align:left">多人游戏中玩家控制的角色</td>
+</tr>
+<tr>
+<td style="text-align:left">Minimal</td>
+<td style="text-align:left">永不复制 Effect</td>
+<td style="text-align:left">多人游戏中 AI 控制的角色</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️<strong>注意</strong>: Mixed 期望 OwnerActor 的 Owner 是 Controller。PlayerState 的 Owner 在默认情况下是 Controller，但 Character 不是。如果在 OwnerActor 不是 PlayerState 的时候使用 Mixed 模式，那么必须在 OwnerActor 上调用 <code>SetOwner()</code>（PlayerState 的 Owner 会自动设置为 Controller）。</p>
+</blockquote>
+<p>对于本项目而言，敌怪就是 <strong>AI-Controlled Pawn</strong>，它会直接持有 ASC 和 AS。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>Character/Enermy/REnermyBase.cpp</span></div><code class="language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">"Components/GAS/RGASComponent.h"</span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">"Components/GAS/RGASAttributeSet.h"</span></span>
+
+<span class="token class-name">AREnermyBase</span><span class="token double-colon punctuation">::</span><span class="token function">AREnermyBase</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+  <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+  AbilitySystemComponent <span class="token operator">=</span> <span class="token generic-function"><span class="token function">CreateDefaultSubobject</span><span class="token generic class-name"><span class="token operator">&lt;</span>URGASComponent<span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span><span class="token string">"GAS Comp"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token function">ensure</span><span class="token punctuation">(</span>AbilitySystemComponent<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  AttributeSet <span class="token operator">=</span> <span class="token generic-function"><span class="token function">CreateDefaultSubobject</span><span class="token generic class-name"><span class="token operator">&lt;</span>URGASAttributeSet<span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span><span class="token string">"GAS Attribute Set"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token function">ensure</span><span class="token punctuation">(</span>AttributeSet<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  AbilitySystemComponent<span class="token operator">-&gt;</span><span class="token function">SetIsReplicated</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  AbilitySystemComponent<span class="token operator">-&gt;</span><span class="token function">SetReplicationMode</span><span class="token punctuation">(</span>EGameplayEffectReplicationMode<span class="token double-colon punctuation">::</span>Mixed<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>并且在 <code>PossessedBy()</code> 函数中进行初始化就行。这个函数会在游戏为每个 Pawn 分配 Controller 时调用。</p>
+<p>而对于 <strong>Player-Controlled Pawn</strong>，则是在 <code>RPlayerState</code> 中持有（创建组件的步骤略）。</p>
+<p>但是初始化的时机略有不同。考虑到 Player State 会在运行时由上层分配给 Pawn，所以不仅需要在 <code>PossessedBy()</code> 函数中进行初始化，还需要在 Pawn 的 <code>OnRep_PlayerState()</code> 也进行初始化。这样一来就能得到实现思路了。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>Character/RCharacterBase.cpp</span></div><code class="language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">"Components/RPlayerState.h"</span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">"AbilitySystemComponent.h"</span></span>
+
+<span class="token keyword">void</span> <span class="token class-name">ARCharacterBase</span><span class="token double-colon punctuation">::</span><span class="token function">PossessedBy</span><span class="token punctuation">(</span>AController<span class="token operator">*</span> NewController<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+  <span class="token class-name">Super</span><span class="token double-colon punctuation">::</span><span class="token function">PossessedBy</span><span class="token punctuation">(</span>NewController<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>GASComponent<span class="token punctuation">)</span>
+  <span class="token punctuation">{</span>
+    GASComponent<span class="token operator">-&gt;</span><span class="token function">InitAbilityActorInfo</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">,</span> <span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span> 
+  <span class="token keyword">else</span>
+  <span class="token punctuation">{</span>
+    <span class="token function">InitAbilityActorInfo</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">void</span> <span class="token class-name">ARCharacterBase</span><span class="token double-colon punctuation">::</span><span class="token function">OnRep_PlayerState</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+  <span class="token class-name">Super</span><span class="token double-colon punctuation">::</span><span class="token function">OnRep_PlayerState</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token function">InitAbilityActorInfo</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">void</span> <span class="token class-name">ARCharacterBase</span><span class="token double-colon punctuation">::</span><span class="token function">InitAbilityActorInfo</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>ARPlayerState<span class="token operator">*</span> PS <span class="token operator">=</span> <span class="token generic-function"><span class="token function">GetPlayerState</span><span class="token generic class-name"><span class="token operator">&lt;</span>ARPlayerState<span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>UAbilitySystemComponent<span class="token operator">*</span> ASC <span class="token operator">=</span> PS<span class="token operator">-&gt;</span><span class="token function">GetAbilitySystemComponent</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+      ASC<span class="token operator">-&gt;</span><span class="token function">InitAbilityActorInfo</span><span class="token punctuation">(</span>PS<span class="token punctuation">,</span> <span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="attribute-set" tabindex="-1"><a class="header-anchor" href="#Attribute-Set">#</a>Attribute Set</h2>
+<h3 id="attribute" tabindex="-1"><a class="header-anchor" href="#Attribute">#</a>Attribute</h3>
+<p>我们熟知的属性（生命值、等级）都是由一个叫 <code>FGameplayAttributeData</code> 的结构体表示的。这个结构体包含两个浮点数，<code>BaseValue</code> 和 <code>CurrentValue</code>，前者是属性的永久值，后者是在前者的基础上，由 Effect 修改得到的临时值，在 Effect 过期时变回 <code>BaseValue</code>。</p>
+<blockquote>
+<p>但是并不能这么用——Base Value 表示最大生命值，Current Value 表示当前生命值。</p>
+<p>比如英雄联盟里蒙多的 R 技能是一段时间内获得最大生命值，持续时间过后复原，这就要用到两个浮点数来维护了「最大生命值」这个属性了。所以应该用两个 <code>FGameplayAttributeData</code> 分别对应当前生命值和最大生命值。</p>
+</blockquote>
+<h3 id="%E5%9C%A8-attribute-set-%E4%B8%AD%E8%AE%BE%E7%BD%AE-attribute" tabindex="-1"><a class="header-anchor" href="#在-Attribute-Set-中设置-Attribute">#</a>在 Attribute Set 中设置 Attribute</h3>
+<p>AS 负责所有 Attribute 的管理，一个 ASC 可以有多个 AS，但是<strong>同一类</strong>的 AS 只能有一个。因为 AS 的内存开销并不大（两倍于属性个数的浮点数），可以选择让游戏中的每个角色共享一个大的单一的 AS，如果用不到某些属性，直接忽略即可。</p>
+<blockquote>
+<p>在 OwnerActor 的构造函数中创建 AS 会自动将其注册到其 ASC 中。</p>
+</blockquote>
+<p>为了在 AS 中设置 Attribute，需要使用 <code>UPROPERTY(ReplicatedUsing = FunctionName**)</code> 修饰，这指定了一个 callback，该函数在属性通过网络更新时执行，同时要在当前类实现该 callback。比如当前生命值属性：</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>Components/GAS/RGASAttributeSet.h</span></div><code class="language-cpp"><span class="token function">UCLASS</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">class</span> <span class="token class-name">ACTIONRPG_API</span> URGASAttributeSet <span class="token operator">:</span> <span class="token keyword">public</span> UAttributeSet
+<span class="token punctuation">{</span>
+  <span class="token function">GENERATED_BODY</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">public</span><span class="token operator">:</span>
+  <span class="token function">UPROPERTY</span><span class="token punctuation">(</span>BlueprintReadOnly<span class="token punctuation">,</span> ReplicatedUsing <span class="token operator">=</span> OnRep_CurHealth<span class="token punctuation">)</span>
+  FGameplayAttributeData CurHealth<span class="token punctuation">;</span>
+
+  <span class="token function">UFUNCTION</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">void</span> <span class="token function">OnRep_CurHealth</span><span class="token punctuation">(</span><span class="token keyword">const</span> FGameplayAttributeData<span class="token operator">&amp;</span> OldCurHealth<span class="token punctuation">)</span> <span class="token keyword">const</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>同时为了将相关的 CRUD 接口暴露给外部，可以添加下面这个宏到头文件最前面</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>Components/GAS/RGASAttributeSet.h</span></div><code class="language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">"AbilitySystemComponent.h"</span> <span class="token comment">// 必须加上</span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name function">ATTRIBUTE_ACCESSORS</span><span class="token expression"><span class="token punctuation">(</span>ClassName<span class="token punctuation">,</span> PropertyName<span class="token punctuation">)</span> </span><span class="token punctuation">\</span>
+        <span class="token expression"><span class="token function">GAMEPLAYATTRIBUTE_PROPERTY_GETTER</span><span class="token punctuation">(</span>ClassName<span class="token punctuation">,</span> PropertyName<span class="token punctuation">)</span> </span><span class="token punctuation">\</span>
+        <span class="token expression"><span class="token function">GAMEPLAYATTRIBUTE_VALUE_GETTER</span><span class="token punctuation">(</span>PropertyName<span class="token punctuation">)</span> </span><span class="token punctuation">\</span>
+        <span class="token expression"><span class="token function">GAMEPLAYATTRIBUTE_VALUE_SETTER</span><span class="token punctuation">(</span>PropertyName<span class="token punctuation">)</span> </span><span class="token punctuation">\</span>
+        <span class="token expression"><span class="token function">GAMEPLAYATTRIBUTE_VALUE_INITTER</span><span class="token punctuation">(</span>PropertyName<span class="token punctuation">)</span></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>并且加上类似于 <code>ATTRIBUTE_ACCESSORS(URGASAttributeSet, CurHealth)</code> 这样的语句。之后，需要用 <code>GAMEPLAYATTRIBUTE_REPNOTIFY</code> 宏填充 <code>On_Rep*</code> 函数，如下所示：</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>Components/GAS/RGASAttributeSet.cpp</span></div><code class="language-cpp"><span class="token keyword">void</span> <span class="token class-name">URGASAttributeSet</span><span class="token double-colon punctuation">::</span><span class="token function">OnRep_CurHealth</span><span class="token punctuation">(</span><span class="token keyword">const</span> FGameplayAttributeData<span class="token operator">&amp;</span> OldCurHealth<span class="token punctuation">)</span> <span class="token keyword">const</span>
+<span class="token punctuation">{</span>
+  <span class="token function">GAMEPLAYATTRIBUTE_REPNOTIFY</span><span class="token punctuation">(</span>URGASAttributeSet<span class="token punctuation">,</span> CurHealth<span class="token punctuation">,</span> OldCurHealth<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">/**
+也可以用宏
+
+#define SETUP_ONREP_FUNCTION_DECLARATION(ClassName, Attr)\
+      void ClassName::OnRep_##Attr(const FGameplayAttributeData&amp; Old##Attr) const\
+      {\
+      GAMEPLAYATTRIBUTE_REPNOTIFY(ClassName, Attr, Old##Attr);\
+      }
+*/</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>This is a helper macro that can be used in RepNotify functions to handle attributes that will be predictively modified by clients. 这句话是源码中对宏的 comment，意思是加上这个宏就可以处理将被客户端预测修改的属性。</p>
+<blockquote>
+<p>所谓「预测」，指的就是 client 在被一个 Effect 影响时，可以把对相关值的修改放在「将修改请求发到 server 等其<strong>认可</strong>并同步」之前。而如果 server 认为该修改<strong>不合理</strong>（不认可），则会将 client 的修改 rollback。</p>
+<p>预测机制使得多人游戏更加流畅。因为很少会出现「不合理」的修改请求，所以这种<strong>乐观</strong>的策略能大大减少对属性值修改的时延——如果没有预测机制，则需要等到下次 server 进行同步时才会对属性值进行修改。</p>
+</blockquote>
+<p>当 Attribute 被复制时的行为已经做好了，接下来还要指定一个 Attribute 如何被复制，这是在函数 <code>GetLifetimeReplicatedProps()</code> 中实现的。该函数负责复制我们使用 Replicated 说明符指派的任何属性，并可用于配置属性的复制方式。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>Components/GAS/RGASAttributeSet.cpp</span></div><code class="language-cpp"><span class="token keyword">void</span> <span class="token class-name">URGASAttributeSet</span><span class="token double-colon punctuation">::</span><span class="token function">GetLifetimeReplicatedProps</span><span class="token punctuation">(</span>TArray<span class="token operator">&lt;</span>FLifetimeProperty<span class="token operator">&gt;</span><span class="token operator">&amp;</span> OutLifetimeProps<span class="token punctuation">)</span> <span class="token keyword">const</span>
+<span class="token punctuation">{</span>
+  <span class="token class-name">Super</span><span class="token double-colon punctuation">::</span><span class="token function">GetLifetimeReplicatedProps</span><span class="token punctuation">(</span>OutLifetimeProps<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 这一行必不可少</span>
+
+  <span class="token function">DOREPLIFETIME_CONDITION_NOTIFY</span><span class="token punctuation">(</span>URGASAttributeSet<span class="token punctuation">,</span> CurHealth<span class="token punctuation">,</span> COND_None<span class="token punctuation">,</span> REPNOTIFY_Always<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>其中 <code>DOREPLIFETIME_CONDITION_NOTIFY</code> 宏的前两个参数很容易理解，分别是类名和类中的属性名，关键在于后两个参数。</p>
+<p>第三个参数指明了 server 进行复制的条件。<code>COND_NONE</code> 是默认值，即无条件复制。<br>
+cod<br>
+第四个参数指明了 client 触发 OnRep 的条件。<code>REPNOTIFY_Always</code> 是一个枚举值，表明无论什么情况都会触发 OnRep，而默认是仅当 server 下发的值和 client 不同时才触发 OnRep，如果相同（意味着进行了正确的预测）则不会触发。</p>
+<blockquote>
+<p><code>DOREPLIFETIME*</code> 宏实际上会调用 <code>DOREPLIFETIME_WITH_PARAMS</code> 宏，并传入一个 <code>FDoRepLifetimeParams</code> 类型的额外参数，最后调用的是 <code>RegisterReplicatedLifetimeProperty()</code> 函数，根据函数名也可以知道，是进行了<strong>需要复制</strong>的变量的<strong>注册</strong>行为。</p>
+</blockquote>
+<p>之后可以通过命令行 <code>showdebug abilitysystem</code> 来进行 GAS 的调试。</p>
+<h3 id="%E8%AE%A2%E9%98%85-attribute-%E5%8F%98%E5%8C%96" tabindex="-1"><a class="header-anchor" href="#订阅-Attribute-变化">#</a>订阅 Attribute 变化</h3>
+<p>以玩家为例，ASC 和 AS 均放在 Player State 中，那么就由 Player State 管理 Attribute 发生变化时的行为，这在语义上也是说得通的。具体要怎么做呢？答案是用 ASC 的一个叫 <code>GetGameplayAttributeValueChangeDelegate()</code> 的函数。这个函数会获取一个**委托(Delegate)**变量。所谓委托就是允许其它类在其上订阅它们感兴趣的事件，一旦某事件 SomeEvent 发生，委托就会通过广播的行为，告知那些关注 SomeEvent 的类，这通常是以在委托类中绑定 callback 实现的。用法如下：</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>Character/RCharacterBase.cpp</span></div><code class="language-cpp"><span class="token keyword">void</span> <span class="token class-name">ARPlayerState</span><span class="token double-colon punctuation">::</span><span class="token function">BeginPlay</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+  <span class="token class-name">Super</span><span class="token double-colon punctuation">::</span><span class="token function">BeginPlay</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>AbilitySystemComponent <span class="token operator">&amp;&amp;</span> AttributeSet<span class="token punctuation">)</span>
+  <span class="token punctuation">{</span>
+    <span class="token comment">// 就是下面这一行，返回的 Handle 可以设为成员变量。</span>
+    <span class="token comment">// AddUObject 就是在绑定 callback</span>
+    <span class="token comment">// 一旦 CurHealth 发生变化，就会调用 OnCurHealthChanged()</span>
+    OnCurHealthChangedDelegateHandle <span class="token operator">=</span> AbilitySystemComponent<span class="token operator">-&gt;</span><span class="token function">GetGameplayAttributeValueChangeDelegate</span><span class="token punctuation">(</span>AttributeSet<span class="token operator">-&gt;</span><span class="token function">GetCurHealthAttribute</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">AddUObject</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">,</span> <span class="token operator">&amp;</span>ARPlayerState<span class="token double-colon punctuation">::</span>OnCurHealthChanged<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<blockquote>
+<p>课程中的实现太繁琐，我直接参考了 GAS Documentation 来做的。</p>
+</blockquote>
+<h2 id="gameplay-effect" tabindex="-1"><a class="header-anchor" href="#Gameplay-Effect">#</a>Gameplay Effect</h2>
+<p><strong>Gameplay Effect(GE)</strong> 是 Ability 修改其自身和其他 Attribute 和 GameplayTag 的容器，其可以立即修改 Attribute（比如伤害或治疗）或应用长期的状态 buff/debuff（如加速或眩晕）。<code>UGameplayEffect</code> 只是一个定义单一游戏效果的数据类，不应该在其中添加额外的逻辑。通常会创建 <code>UGameplayEffect</code> 的派生蓝图类而非 C++ 类。</p>
+<h3 id="%E6%8C%81%E7%BB%AD%E6%97%B6%E9%97%B4" tabindex="-1"><a class="header-anchor" href="#持续时间">#</a>持续时间</h3>
+<p>Effect 可分为三种，<strong>即刻(Instant)</strong>、<strong>有持续时间(Has Duration)<strong>和</strong>无限(Infinite)</strong>。其中 Instant 修改的是 BaseValue，通常用于伤害或治疗效果；其余两个修改的是 CurrentValue，通常用于 buff/debuff 之类的效果。</p>
+<p>一旦将 Effect 设置为 Has Duration 或 Infinite，就可以进而为其设置<strong>生效周期(Period)</strong>，并且可以指定「对应用执行周期影响」，表示是否在应用时立即生效。</p>
+<h3 id="%E4%BF%AE%E9%A5%B0%E7%AC%A6(modifier)" tabindex="-1"><a class="header-anchor" href="#修饰符-Modifier">#</a>修饰符(Modifier)</h3>
+<p>修饰符指明了<strong>目标属性</strong>、<strong>操作类型</strong>、<strong>修改幅度</strong>，以及 Gameplay Tags 的过滤。</p>
+<h4 id="%E6%93%8D%E4%BD%9C%E7%B1%BB%E5%9E%8B" tabindex="-1"><a class="header-anchor" href="#操作类型">#</a>操作类型</h4>
+<ul class="lvl-0">
+<li class="lvl-2">
+<p>「加」「乘」「除」: 这仨都是字面意思，多个对同一属性的操作，会通过聚合公式对属性的 CurrentValue 进行修改，结果为  <code>CurrentValue = (BaseValue + Add) * Mutiply / Divide</code>，其中 <code>Add</code> 为所有设置为「加」的 Modifier 的幅度；</p>
+</li>
+<li class="lvl-2">
+<p>「重载」: 用当前值覆盖最后一个应用的修饰符的结果；</p>
+</li>
+<li class="lvl-2">
+<p>「无效」:</p>
+</li>
+</ul>
+<h4 id="%E4%BF%AE%E6%94%B9%E5%B9%85%E5%BA%A6" tabindex="-1"><a class="header-anchor" href="#修改幅度">#</a>修改幅度</h4>
+<ul class="lvl-0">
+<li class="lvl-2">
+<p>「可扩展浮点」: 硬编码一个固定值；</p>
+</li>
+<li class="lvl-2">
+<p>「属性基础」: 最简单来说就是允许根据 Attribute 代入某个公式进行计算求出最终结果；</p>
+<ul class="lvl-2">
+<li class="lvl-4">
+<p><strong>支持属性</strong>中可以指定基于 Source 还是 Target，也可以指定 Attribute，若设置为<strong>快照</strong>，则会捕获 Effect <strong>创建</strong>时刻的数据，否则捕获<strong>施加</strong>时刻的数据；</p>
+</li>
+<li class="lvl-4">
+<p><strong>属性计算幅度</strong>可以指定 <code>Value</code> 取 <code>BaseValue</code> 还是 <code>CurrentValue</code>，还是 <code>CurrentValue - BaseValue</code>；</p>
+<blockquote>
+<p>可以分别用于对应<strong>最大生命值</strong>、<strong>当前生命值</strong>、<strong>已损失生命值</strong>。</p>
+</blockquote>
+</li>
+<li class="lvl-4">
+<p>最后按照 <code>(Value + PreMultiplyAdditiveValue) * Coeffcient + PostMultiplyAdditiveValue</code> 得出最终修改值；</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="%E6%9B%B2%E7%BA%BF%E8%A1%A8" tabindex="-1"><a class="header-anchor" href="#曲线表">#</a>曲线表</h4>
+<p>曲线表就是用于实现不同等级的 Effect 能施加不同程度的 Modify，并且会在「修改幅度」的基础上再乘上曲线上当前 Level 的值。</p>
+<h4 id="%E6%A0%87%E7%AD%BE%E8%BF%87%E6%BB%A4" tabindex="-1"><a class="header-anchor" href="#标签过滤">#</a>标签过滤</h4>
+<p>根据 Source 和 Target 的标签情况，决定 Modifier 是否生效。比如可以实现类似「目标中毒时，降低 50% 防御力」的效果。</p>
+<h3 id="%E5%A0%86%E5%8F%A0(stack)" tabindex="-1"><a class="header-anchor" href="#堆叠-Stack">#</a>堆叠(Stack)</h3>
+<p>在英雄联盟这个游戏里，有很多技能/物品在使用后会获得一个「状态」。</p>
+<p>部分技能连续使用时或许还会叠加「状态」层数，有些可以无限叠加，如邪恶小法师的 Q 技能「黑暗祭祀」；有些有叠加上限，并且一旦持续时间消失会逐渐降低层数，如战争之影的 Q 技能「暴走」；有些一旦持续时间结束会失去所有层数，如诺克萨斯之手的被动技能「出血」；而有些并不能叠加层数，也就是最高只有一层……在 Gameplay Effect 里面，我们可以用「堆叠」功能实现同样的效果。这一功能通常搭配 <code>Has Duration</code> 的 Effect 使用。</p>
+<h4 id="%E5%A0%86%E5%8F%A0%E6%A0%B7%E5%BC%8F(stacking-type)" tabindex="-1"><a class="header-anchor" href="#堆叠样式-Stacking-Type">#</a>堆叠样式(Stacking Type)</h4>
+<p>默认是「无」，即可以无限叠加，施加的每个 GameplayEffectSpec 都视为相互<strong>独立</strong>；</p>
+<p>还有两种是「按源聚合」与「按目标聚合」，将样式设置为这两种才能开启完整功能，并可以设置「堆栈限制次数」。前者是每个 Source 最多施加 n 个 Effect，后者是每个 Target 最多<strong>被</strong>施加 n 个 Effect。</p>
+<h4 id="%E5%A0%86%E6%A0%88%E6%8C%81%E7%BB%AD%E6%97%B6%E9%97%B4%E5%88%B7%E6%96%B0%E7%AD%96%E7%95%A5(stacking-duration-refresh-policy)" tabindex="-1"><a class="header-anchor" href="#堆栈持续时间刷新策略-Stacking-Duration-Refresh-Policy">#</a>堆栈持续时间刷新策略(Stacking Duration Refresh Policy)</h4>
+<ul class="lvl-0">
+<li class="lvl-2">
+<p>「成功应用时刷新」: 当有新的 Effect 成功入栈时，栈中其它 Effect 会刷新自身的持续时间；</p>
+</li>
+<li class="lvl-2">
+<p>「永不刷新」: 不会刷新持续时间；</p>
+</li>
+</ul>
+<h4 id="%E5%A0%86%E6%A0%88%E5%91%A8%E6%9C%9F%E9%87%8D%E8%AE%BE%E7%AD%96%E7%95%A5(stacking-period-refresh-policy)" tabindex="-1"><a class="header-anchor" href="#堆栈周期重设策略-Stacking-Period-Refresh-Policy">#</a>堆栈周期重设策略(Stacking Period Refresh Policy)</h4>
+<ul class="lvl-0">
+<li class="lvl-2">
+<p>「成功应用后重设」: 当有新的 Effect 成功入栈时，栈中其它 Effect 会更新自身的周期时间，即如果设置了周期，则会将下次触发的时间修改为 <code>now + period</code>；</p>
+</li>
+<li class="lvl-2">
+<p>「永不刷新」: 不会更新周期时间；</p>
+</li>
+</ul>
+<h4 id="%E5%A0%86%E6%A0%88%E8%BF%87%E6%9C%9F%E7%AD%96%E7%95%A5(stack-expiration-policy)" tabindex="-1"><a class="header-anchor" href="#堆栈过期策略-Stack-Expiration-Policy">#</a>堆栈过期策略(Stack Expiration Policy)</h4>
+<p>每当栈内的某个 Effect 持续时间到了，就会应用该策略。</p>
+<ul class="lvl-0">
+<li class="lvl-2">
+<p>「清除整个堆栈」: 字面意思；</p>
+</li>
+<li class="lvl-2">
+<p>「移除单一堆栈并刷新持续时长」: 将过期的移除，剩下的 Effect 刷新自身的持续时间；</p>
+</li>
+<li class="lvl-2">
+<p>「刷新时长」: 用这个能实现 Infinite，并且可以通过 <code>OnStackCountChange()</code> 手动实现栈计数减少的行为；</p>
+</li>
+</ul>
+<h3 id="%E6%96%BD%E5%8A%A0-effect" tabindex="-1"><a class="header-anchor" href="#施加-Effect">#</a>施加 Effect</h3>
+<h4 id="%E7%94%9F%E5%91%BD%E6%81%A2%E5%A4%8D%E8%8D%AF%E6%B0%B4" tabindex="-1"><a class="header-anchor" href="#生命恢复药水">#</a>生命恢复药水</h4>
+<blockquote>
+<p>「药水」本质上是一个放置在世界中的 Actor，自带碰撞范围，当角色 Overlap 时为其施加「立即恢复生命」的效果。</p>
+</blockquote>
+<p>首先可以创建一个 Actor 类 <code>REffectActor</code>，表示所有能够为具有 ASC 的角色施加 GameplayEffect 的物体的基类。这一基类实现了一个公有的方法 <code>ApplyEffectToTarget()</code>，语义为对目标施加 Effect。</p>
+<p>很多时候一个 Actor 可以施加多种效果，比如造成伤害（Instant）后施加一个持续若干秒的 debuff（Duration），所以就需要在类中定义一个 <code>TArray&lt;&gt;</code>，用于存放该 Actor 能够施加的所有 Effect 的类型。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>Actor/EffectActor.cpp</span></div><code class="language-cpp"><span class="token keyword">bool</span> <span class="token class-name">AREffectActor</span><span class="token double-colon punctuation">::</span><span class="token function">ApplyEffectToTarget</span><span class="token punctuation">(</span>AActor<span class="token operator">*</span> TargetActor<span class="token punctuation">,</span> FEffectInfo<span class="token operator">&amp;</span> EffectInfo<span class="token punctuation">,</span> <span class="token keyword">bool</span> bMayCancelLater<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+  UAbilitySystemComponent<span class="token operator">*</span> ASCOfTarget <span class="token operator">=</span> <span class="token class-name">UAbilitySystemBlueprintLibrary</span><span class="token double-colon punctuation">::</span><span class="token function">GetAbilitySystemComponent</span><span class="token punctuation">(</span>TargetActor<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">IsValid</span><span class="token punctuation">(</span>ASCOfTarget<span class="token punctuation">)</span> <span class="token operator">||</span> <span class="token operator">!</span>EffectInfo<span class="token punctuation">.</span>GameplayEffectClass<span class="token punctuation">)</span>
+  <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">float</span> EffectLevel <span class="token operator">=</span> EffectInfo<span class="token punctuation">.</span>EffectLevel<span class="token punctuation">;</span>
+  TSubclassOf<span class="token operator">&lt;</span>UGameplayEffect<span class="token operator">&gt;</span> GameplayEffectClass <span class="token operator">=</span> EffectInfo<span class="token punctuation">.</span>GameplayEffectClass<span class="token punctuation">;</span>
+
+  <span class="token comment">// 创建一个 Effect Context，用于后续生成 Effect</span>
+  FGameplayEffectContextHandle EffectContextHandle <span class="token operator">=</span> ASCOfTarget<span class="token operator">-&gt;</span><span class="token function">MakeEffectContext</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token comment">// 设置 Effect 的施加者 Source，保存在 Effect Context 中</span>
+  EffectContextHandle<span class="token punctuation">.</span><span class="token function">AddSourceObject</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  
+  <span class="token comment">// 根据 Effect class 和 Effect Context 生成一个 EffectSpec</span>
+  <span class="token keyword">const</span> FGameplayEffectSpecHandle EffectSpecHandle <span class="token operator">=</span> ASCOfTarget<span class="token operator">-&gt;</span><span class="token function">MakeOutgoingSpec</span><span class="token punctuation">(</span>GameplayEffectClass<span class="token punctuation">,</span> EffectLevel<span class="token punctuation">,</span> EffectContextHandle<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// 施加到 Target 的 ASC 上，并返回一个 Active Gameplay Effect Handle</span>
+  <span class="token keyword">const</span> FActiveGameplayEffectHandle ActiveEffectHandle <span class="token operator">=</span> ASCOfTarget<span class="token operator">-&gt;</span><span class="token function">ApplyGameplayEffectSpecToSelf</span><span class="token punctuation">(</span><span class="token operator">*</span><span class="token punctuation">(</span>EffectSpecHandle<span class="token punctuation">.</span>Data<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>然后在编辑器中创建一个派生蓝图类 <code>BP_HealthPotion</code>，设置 Static Mesh 和 Sphere Collision 以后，在蓝图中实现碰撞球体的 <code>BeginOverlap</code> 和 <code>EndOverlap</code> 方法。</p>
+<p>此时还需要填充 <code>EffectInfo</code> 成员。需要做的就是创建一个派生自 <code>UGameplayEffect</code> 的蓝图类，命名为 <code>GE_HealthPotion</code>，进行相关设置，如「Instant」「加」「RAttributeSet.CurHealth」「某个值」。创建完毕后即可进行类型的填充。这样就实现了一个简单的药水效果。</p>
+<p>基于上面这种创建流程，还可以设计「持续恢复生命值的药水」「一旦进入其中就会持续扣血的燃烧区域」等等。</p>
+<h4 id="pre%2Fpost-%E5%87%BD%E6%95%B0" tabindex="-1"><a class="header-anchor" href="#Pre-Post-函数">#</a>Pre/Post 函数</h4>
+<p>在施加 Effect 与实际修改 Attribute 前后，AS 分别会调用以下六个函数。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token comment">/**
+ * PreGameplayEffectExecute -&gt; PreAttributeBaseChange -&gt; PreAttributeChange -&gt; (ATTRIBUTE BE CHANGED) -&gt;
+ * PostAttributeChange -&gt; ON_ATTRIBUTE_CHANGED DELEGATE -&gt; PostAttributeBaseChange -&gt; PostGameplayEffectExecute
+ */</span>
+
+<span class="token comment">/**
+ * Called just before any modification happens to an attribute's base value which is modified by Instant Gameplay Effects.
+ */</span>
+<span class="token keyword">void</span> <span class="token function">PreAttributeBaseChange</span><span class="token punctuation">(</span><span class="token keyword">const</span> FGameplayAttribute<span class="token operator">&amp;</span> Attribute<span class="token punctuation">,</span> <span class="token keyword">float</span><span class="token operator">&amp;</span> NewValue<span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token keyword">override</span><span class="token punctuation">;</span>
+
+<span class="token comment">/**
+ * Called just after any modification happens to an attribute's base value which is modified by Instant Gameplay Effects.
+ */</span>
+<span class="token keyword">void</span> <span class="token function">PostAttributeBaseChange</span><span class="token punctuation">(</span><span class="token keyword">const</span> FGameplayAttribute<span class="token operator">&amp;</span> Attribute<span class="token punctuation">,</span> <span class="token keyword">float</span> OldValue<span class="token punctuation">,</span> <span class="token keyword">float</span> NewValue<span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token keyword">override</span><span class="token punctuation">;</span>
+
+<span class="token comment">/**
+ * Called just before any modification happens to an attribute's current value which is modified by Duration based Gameplay Effects.
+ * 
+ * This function is meant to enforce things like "Health = Clamp(Health, 0, MaxHealth)" and NOT things like "trigger this extra thing if damage is applied, etc".
+ */</span>
+<span class="token keyword">void</span> <span class="token function">PreAttributeChange</span><span class="token punctuation">(</span><span class="token keyword">const</span> FGameplayAttribute<span class="token operator">&amp;</span> Attribute<span class="token punctuation">,</span> <span class="token keyword">float</span><span class="token operator">&amp;</span> NewValue<span class="token punctuation">)</span> <span class="token keyword">override</span><span class="token punctuation">;</span>
+
+<span class="token comment">/**
+ * Called just after any modification happens to an attribute.'s current value which is modified by Duration based Gameplay Effects.
+ */</span>
+<span class="token keyword">void</span> <span class="token function">PostAttributeChange</span><span class="token punctuation">(</span><span class="token keyword">const</span> FGameplayAttribute<span class="token operator">&amp;</span> Attribute<span class="token punctuation">,</span> <span class="token keyword">float</span> OldValue<span class="token punctuation">,</span> <span class="token keyword">float</span> NewValue<span class="token punctuation">)</span> <span class="token keyword">override</span><span class="token punctuation">;</span>
+
+<span class="token comment">/**
+ * Called just before the Gameplay Effect is executed.
+ * 
+ * Return true to continue, or false to throw out the modification.
+ */</span>
+<span class="token keyword">bool</span> <span class="token function">PreGameplayEffectExecute</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">FGameplayEffectModCallbackData</span><span class="token operator">&amp;</span> Data<span class="token punctuation">)</span> <span class="token keyword">override</span><span class="token punctuation">;</span>
+
+<span class="token comment">/**
+ * Called just after the Gameplay Effect is executed.
+ * 
+ * When PostGameplayEffectExecute() is called, changes to the Attribute have already happened,
+ * but they have not replicated back to clients yet so clamping values here will not cause two network updates to clients.
+ * Clients will only receive the update after clamping.
+ */</span>
+<span class="token keyword">void</span> <span class="token function">PostGameplayEffectExecute</span><span class="token punctuation">(</span><span class="token keyword">const</span> <span class="token keyword">struct</span> <span class="token class-name">FGameplayEffectModCallbackData</span><span class="token operator">&amp;</span> Data<span class="token punctuation">)</span> <span class="token keyword">override</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>其中主要关注 <code>PreAttributeChange()</code> 和 <code>PostGameplayEffectExecute()</code> 这两个。</p>
+<p>前者用于对 <code>NewValue</code> 进行 Clamp 操作，后者主要获取 Effect 的 Source 实现相关逻辑（比如反伤等等）。</p>
+<h3 id="%E7%A7%BB%E9%99%A4-effect" tabindex="-1"><a class="header-anchor" href="#移除-Effect">#</a>移除 Effect</h3>
+<p>为了移除施加到 ASC Of Target 上的 Effect，需要调用的函数是 <code>RemoveActiveGameplayEffect()</code>。该函数需要两个参数：一个 <code>FActiveGameplayEffectHandle</code> 和一个浮点数。</p>
+<p>前者是通过调用 <code>ApplyGameplayEffectSpecToSelf()</code> 返回的，后者则表明了当移除该 Effect 时，要移除栈内多少个 Effect。默认为 <code>-1</code>，即全部移除。</p>
+<p>所以为了正确调用，需要由一定数据结构保存施加 Effect 时返回的那个 <code>FActiveGameplayEffectHandle</code>。常用的是 <code>TMap&lt;&gt;</code>，存储 Active Handle 到 ASC 的映射。</p>
+<h3 id="%E7%9B%91%E5%90%AC-effect-%E8%A1%8C%E4%B8%BA" tabindex="-1"><a class="header-anchor" href="#监听-Effect-行为">#</a>监听 Effect 行为</h3>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>AbilitySystemComponent.h</span></div><code class="language-cpp"><span class="token comment">/** Delegate for when an effect is applied */</span>
+<span class="token function">DECLARE_MULTICAST_DELEGATE_ThreeParams</span><span class="token punctuation">(</span>
+  FOnGameplayEffectAppliedDelegate<span class="token punctuation">,</span>
+  UAbilitySystemComponent<span class="token operator">*</span><span class="token punctuation">,</span>
+  <span class="token keyword">const</span> FGameplayEffectSpec<span class="token operator">&amp;</span><span class="token punctuation">,</span>
+  FActiveGameplayEffectHandle
+<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">/**
+ * Called on server whenever a GE is applied to self.
+ * This includes instant and duration based GEs.
+ */</span>
+FOnGameplayEffectAppliedDelegate OnGameplayEffectAppliedDelegateToSelf<span class="token punctuation">;</span>
+
+<span class="token comment">/**
+ * Called on server whenever a GE is applied to someone else.
+ * This includes instant and duration based GEs.
+ */</span>
+FOnGameplayEffectAppliedDelegate OnGameplayEffectAppliedDelegateToTarget<span class="token punctuation">;</span>
+
+<span class="token comment">/**
+ * Called on both client and server whenever a duration based GE is added
+ * (E.g., instant GEs do not trigger this).
+ */</span>
+FOnGameplayEffectAppliedDelegate OnActiveGameplayEffectAddedDelegateToSelf<span class="token punctuation">;</span>
+
+<span class="token comment">/**
+ * Called on server whenever a periodic GE executes on self
+ */</span>
+FOnGameplayEffectAppliedDelegate OnPeriodicGameplayEffectExecuteDelegateOnSelf<span class="token punctuation">;</span>
+
+<span class="token comment">/**
+ * Called on server whenever a periodic GE executes on target
+ */</span>
+FOnGameplayEffectAppliedDelegate OnPeriodicGameplayEffectExecuteDelegateOnTarget<span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>上面这些就是当 Effect 施加时可能进行广播的委托对象，在类 <code>UAbilitySystemComponent</code> 中定义。当我们要实现一些诸如「受到某些技能效果时触发某些事件」的功能，就需要用到这些了。</p>
+<p>可以在 <code>RGASComponent</code> 类的 <code>BeginPlay()</code> 函数中执行 callback 的注册。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><div class="caption"><span>Components/GAS/RGASComponent.cpp</span></div><code class="language-cpp"><span class="token keyword">void</span> <span class="token class-name">URGASComponent</span><span class="token double-colon punctuation">::</span><span class="token function">BeginPlay</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+  <span class="token class-name">Super</span><span class="token double-colon punctuation">::</span><span class="token function">BeginPlay</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  OnGameplayEffectAppliedDelegateToSelf<span class="token punctuation">.</span><span class="token function">AddUObject</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">,</span>
+                                                   <span class="token operator">&amp;</span>URGASComponent<span class="token double-colon punctuation">::</span>OnEffectApplied<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">void</span> <span class="token class-name">URGASComponent</span><span class="token double-colon punctuation">::</span><span class="token function">OnEffectApplied</span><span class="token punctuation">(</span>UAbilitySystemComponent<span class="token operator">*</span> AbilitySystemComponent<span class="token punctuation">,</span>
+                                     <span class="token keyword">const</span> FGameplayEffectSpec<span class="token operator">&amp;</span> EffectSpec<span class="token punctuation">,</span>
+                                     FActiveGameplayEffectHandle EffectHandle<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+  <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="gameplay-tags" tabindex="-1"><a class="header-anchor" href="#Gameplay-Tags">#</a>Gameplay Tags</h2>
+<p><code>FGameplayTag</code> 是由 <code>GameplayTagManager</code> 注册的形似 Parent.Child.Grandchild… 的层级 <code>FName</code>，这些标签对于分类和描述对象的状态非常有用（例如如果某个 Character 处于眩晕状态，我们可以授予其一个 State.Debuff.Stun 的 Tag）。用 GameplayTag 可以替换布尔值或枚举值，多个 GameplayTag 应被保存于一个 <code>FGameplayTagContainer</code> 中，相比 <code>TArray&lt;FGameplayTag&gt;</code> 做了一些很有效率的优化。可以更快地判断一个 Character 是否具有某 Tag，从而决定是否施加 Effect。</p>
+
+                
+            </div>
+            <hr/>
+
+            
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            <span class="chip bg-color">这个人太懒了，都不想加标签</span>
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+    <div class="social-share" data-sites="qq,wechat" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+    <script src="/libs/share/js/social-share.min.js"></script>
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/unreal/gameplay6/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/0.jpg" class="responsive-img" alt="Gameplay Study(6)：UI">
+                        
+                        <span class="card-title">Gameplay Study(6)：UI</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            既然有了属性，我们就要一些 UI 控件来对关心的属性进行可视化。
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2024-08-24
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Unreal/" class="post-category">
+                                    Unreal
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/unreal/gameplay4/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/0.jpg" class="responsive-img" alt="Gameplay Study(4)：Highlight &amp; Interface">
+                        
+                        <span class="card-title">Gameplay Study(4)：Highlight &amp; Interface</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            现在要实现一个新功能：鼠标悬停在某个 Actor 身上时，能够使其高亮显示，移走时取消高亮。
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2024-08-22
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Unreal/" class="post-category">
+                                    Unreal
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+
+  <!-- 是否加载使用自带的 prismjs. -->
+  <script type="text/javascript" src="/libs/prism/prism.min.js"></script>
+
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card" style="background-color: white;">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+<script src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+    MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$', '$'], ['\\(', '\\)']]}
+    });
+</script>
+
+
+
+    <footer class="page-footer bg-color">
+    
+
+    <div class="container row center-align"
+         style="margin-bottom: 15px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            
+                <span id="year">2023-2025</span>
+            
+            <a href="/about" target="_blank">Leager</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            
+                <span id="translate">|&nbsp;繁/简：</span><a id="translateLink" href="javascript:translatePage();">繁</a>
+            
+            <br>
+            
+            
+            
+                
+            
+            
+                <span id="busuanzi_container_site_pv">
+                &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
+                    <span id="busuanzi_value_site_pv" class="white-color"></span>
+            </span>
+            
+            
+                <span id="busuanzi_container_site_uv">
+                &nbsp;|&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;
+                    <span id="busuanzi_value_site_uv" class="white-color"></span>
+            </span>
+            
+            <br>
+
+            <!-- 运行天数提醒. -->
+            
+                <span id="sitetime"> Loading ...</span>
+                <script>
+                    var calcSiteTime = function () {
+                        var seconds = 1000;
+                        var minutes = seconds * 60;
+                        var hours = minutes * 60;
+                        var days = hours * 24;
+                        var years = days * 365;
+                        var today = new Date();
+                        var startYear = "2023";
+                        var startMonth = "8";
+                        var startDate = "1";
+                        var startHour = "0";
+                        var startMinute = "0";
+                        var startSecond = "0";
+                        var todayYear = today.getFullYear();
+                        var todayMonth = today.getMonth() + 1;
+                        var todayDate = today.getDate();
+                        var todayHour = today.getHours();
+                        var todayMinute = today.getMinutes();
+                        var todaySecond = today.getSeconds();
+                        var t1 = Date.UTC(startYear, startMonth, startDate, startHour, startMinute, startSecond);
+                        var t2 = Date.UTC(todayYear, todayMonth, todayDate, todayHour, todayMinute, todaySecond);
+                        var diff = t2 - t1;
+                        var diffYears = Math.floor(diff / years);
+                        var diffDays = Math.floor((diff / days) - diffYears * 365);
+
+                        // 区分是否有年份.
+                        var language = 'zh-CN';
+                        if (startYear === String(todayYear)) {
+                            document.getElementById("year").innerHTML = todayYear;
+                            var daysTip = 'This site has been running for ' + diffDays + ' days';
+                            if (language === 'zh-CN') {
+                                daysTip = '本站已运行 ' + diffDays + ' 天';
+                            } else if (language === 'zh-HK') {
+                                daysTip = '本站已運行 ' + diffDays + ' 天';
+                            }
+                            document.getElementById("sitetime").innerHTML = daysTip;
+                        } else {
+                            document.getElementById("year").innerHTML = startYear + " - " + todayYear;
+                            var yearsAndDaysTip = 'This site has been running for ' + diffYears + ' years and '
+                                + diffDays + ' days';
+                            if (language === 'zh-CN') {
+                                yearsAndDaysTip = '本站已运行 ' + diffYears + ' 年 ' + diffDays + ' 天';
+                            } else if (language === 'zh-HK') {
+                                yearsAndDaysTip = '本站已運行 ' + diffYears + ' 年 ' + diffDays + ' 天';
+                            }
+                            document.getElementById("sitetime").innerHTML = yearsAndDaysTip;
+                        }
+                    }
+
+                    calcSiteTime();
+                </script>
+            
+            <br>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link social-statis">
+    <a href="https://github.com/Leager-zju" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:1004729740@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+
+
+
+
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1004729740" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1004729740" data-position="top" data-delay="50">
+        <i class="fab fa-qq"></i>
+    </a>
+
+
+
+
+
+
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    var searchFunc = function (path, search_id, content_id) {
+        'use strict';
+        $.ajax({
+            url: path,
+            dataType: "xml",
+            success: function (xmlResponse) {
+                // get the contents from search data
+                var datas = $("entry", xmlResponse).map(function () {
+                    return {
+                        title: $("title", this).text(),
+                        content: $("content", this).text(),
+                        url: $("url", this).text()
+                    };
+                }).get();
+                var $input = document.getElementById(search_id);
+                var $resultContent = document.getElementById(content_id);
+                $input.addEventListener('input', function () {
+                    var str = '<ul class=\"search-result-list\">';
+                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                    $resultContent.innerHTML = "";
+                    if (this.value.trim().length <= 0) {
+                        return;
+                    }
+                    // perform local searching
+                    datas.forEach(function (data) {
+                        var isMatch = true;
+                        var data_title = data.title.trim().toLowerCase();
+                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
+                        var data_url = data.url;
+                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
+                        var index_title = -1;
+                        var index_content = -1;
+                        var first_occur = -1;
+                        // only match artiles with not empty titles and contents
+                        if (data_title !== '' && data_content !== '') {
+                            keywords.forEach(function (keyword, i) {
+                                index_title = data_title.indexOf(keyword);
+                                index_content = data_content.indexOf(keyword);
+                                if (index_title < 0 && index_content < 0) {
+                                    isMatch = false;
+                                } else {
+                                    if (index_content < 0) {
+                                        index_content = 0;
+                                    }
+                                    if (i === 0) {
+                                        first_occur = index_content;
+                                    }
+                                }
+                            });
+                        }
+                        // show search results
+                        if (isMatch) {
+                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
+                            var content = data.content.trim().replace(/<[^>]+>/g, "");
+                            if (first_occur >= 0) {
+                                // cut out 100 characters
+                                var start = first_occur - 20;
+                                var end = first_occur + 80;
+                                if (start < 0) {
+                                    start = 0;
+                                }
+                                if (start === 0) {
+                                    end = 100;
+                                }
+                                if (end > content.length) {
+                                    end = content.length;
+                                }
+                                var match_content = content.substr(start, end);
+                                // highlight all keywords
+                                keywords.forEach(function (keyword) {
+                                    var regS = new RegExp(keyword, "gi");
+                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
+                                });
+
+                                str += "<p class=\"search-result\">" + match_content + "...</p>"
+                            }
+                            str += "</li>";
+                        }
+                    });
+                    str += "</ul>";
+                    $resultContent.innerHTML = str;
+                });
+            }
+        });
+    };
+
+    searchFunc('/search.xml', 'searchInput', 'searchResult');
+});
+</script>
+
+    <!-- 白天和黑夜主题 -->
+<div class="stars-con">
+    <div id="stars"></div>
+    <div id="stars2"></div>
+    <div id="stars3"></div>  
+</div>
+
+<script>
+    function switchNightMode() {
+        $('<div class="Cuteen_DarkSky"><div class="Cuteen_DarkPlanet"></div></div>').appendTo($('body')),
+        setTimeout(function () {
+            $('body').hasClass('DarkMode') 
+            ? ($('body').removeClass('DarkMode'), localStorage.setItem('isDark', '0'), $('#sum-moon-icon').removeClass("fa-sun").addClass('fa-moon')) 
+            : ($('body').addClass('DarkMode'), localStorage.setItem('isDark', '1'), $('#sum-moon-icon').addClass("fa-sun").removeClass('fa-moon')),
+            
+            setTimeout(function () {
+            $('.Cuteen_DarkSky').fadeOut(1e3, function () {
+                $(this).remove()
+            })
+            }, 2e3)
+        })
+    }
+</script>
+
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    
+
+    
+        <script type="text/javascript" src="/js/tw_cn.js"></script>
         <script type="text/javascript">
           var defaultEncoding = 2; //网站编写字体是否繁体，1-繁体，2-简体
           var translateDelay = 0; //延迟时间,若不在前, 要设定延迟翻译时间, 如100表示100ms,默认为0
-          var cookieDomain = "<%= config.url %>"; //Cookie地址, 一定要设定, 通常为你的网址
+          var cookieDomain = "http://Leager-zju.github.io"; //Cookie地址, 一定要设定, 通常为你的网址
           var msgToTraditionalChinese = "繁"; //此处可以更改为你想要显示的文字
           var msgToSimplifiedChinese = "简"; //同上，但两处均不建议更改
           var translateButtonId = "translateLink"; //默认互换id
           translateInitilization();
         </script>
-    <% } %>
     
-    <% if (theme.sakura.enable) { %>
-        
-        <script type="text/javascript">
-            // 只在桌面版网页启用特效
-            var windowWidth = $(window).width();
-            if (windowWidth > 768) {
-                document.write('<script type="text/javascript" src="<%- theme.jsDelivr.url %><%- url_for(theme.libs.js.sakura) %>"><\/script>');
-            }
-        </script>
-    <% } %>
+    
+    
 
     <!-- 雪花特效 -->
-    <% if (theme.snowdown.enable) { %> 
-        <script type="text/javascript">
-            // 只在桌面版网页启用特效
-            var windowWidth = $(window).width();
-            if (windowWidth > 768) {
-                document.write('<script type="text/javascript" src="<%- theme.jsDelivr.url %><%- url_for(theme.libs.js.snow) %>"><\/script>');
-            }
-        </script>
-    <% } %>
+    
 
     <!-- 鼠标星星特效 -->
-    <% if (theme.mouseStar.enable) { %> 
-        <script type="text/javascript">
-            // 只在桌面版网页启用特效
-            var windowWidth = $(window).width();
-            if (windowWidth > 768) {
-                document.write('<script type="text/javascript" src="<%- theme.jsDelivr.url %><%- url_for(theme.libs.js.star) %>"><\/script>');
-            }
-        </script>
-    <% } %>
+    
 
-    <% if (theme.tcaptcha.enable) { %> 
-        <script src="https://ssl.captcha.qq.com/TCaptcha.js"></script>
-        <script src="<%- theme.jsDelivr.url %><%- url_for(theme.libs.js.tcaptcha) %>"></script>
-        <button id="TencentCaptcha" data-appid="<%- theme.tcaptcha.appid %>" data-cbfn="callback" type="button" hidden></button>
-    <% } %>
+    
 
-    <%- partial('_partial/baidu-analytics') %>
-    <%- partial('_partial/baidu-push') %>
-    <% if (theme.clicklove.enable) { %>
-    <script src="<%- theme.jsDelivr.url %><%- url_for(theme.libs.js.clicklove) %>" async="async"></script>
-    <% } %>
-    <% if (theme.busuanziStatistics && theme.busuanziStatistics.enable) { %>
-    <script async src="<%- theme.jsDelivr.url %><%- url_for(theme.libs.js.busuanzi) %>"></script>
-    <% } %>
+    <!-- Baidu Analytics -->
 
-    <% if (theme.tidio.enable) { %>
-        <script src="//code.tidio.co/<%- theme.tidio.public_key %>.js"></script>
-        <script>
-            $(document).ready(function () {
-                setInterval(change_Tidio, 50);
-                function change_Tidio() {
-                    var tidio=$("#tidio-chat iframe");
-                    if(tidio.css("display")=="block"&& $(window).width()>977 ){
-                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" &&$(window).width()>977)>0? "-40px" : ($("div.toc-title").length&&$(window).width()>977)>0?"<%if(theme.toc.showToggleBtn){%>85px<%}else{%>20px<%}%>":"20px";
-                        document.getElementById("tidio-chat-iframe").style.right="-15px";
-                        document.getElementById("tidio-chat-iframe").style.height=parseInt(tidio.css("height"))>=520?"520px":tidio.css("height");
-                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
-                    }
-                    else if(tidio.css("display")=="block"&&$(window).width()>601 &&$(window).width()<992 ){
-                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" && 601< $(window).width()<992)>0? "-40px":"20px" ;
-                        document.getElementById("tidio-chat-iframe").style.right="-15px";
-                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
-                    }
-                    else if(tidio.css("display")=="block"&&$(window).width()<601 && parseInt(tidio.css("height"))<230){
-                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" && $(window).width()<601)>0? "-10px":"45px" ;
-                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
-                    }
-                    if( tidio.css("display")=="block"&&$(window).width()<601 && parseInt(tidio.css("height"))>=230){
-                        document.getElementById("tidio-chat-iframe").style.zIndex="998";
-                    }
-                }
-            });
-        </script>
-    <% } %>
+    <!-- Baidu Push -->
 
-    <% if (theme.daovoice.enable) { %>
-    <script>
-        (function (i, s, o, g, r, a, m) {
-            i["DaoVoiceObject"] = r;
-            i[r] = i[r] || function () {
-                (i[r].q = i[r].q || []).push(arguments)
-            }, i[r].l = 1 * new Date();
-            a = s.createElement(o), m = s.getElementsByTagName(o)[0];
-            a.async = 1;
-            a.src = g;
-            a.charset = "utf-8";
-            m.parentNode.insertBefore(a, m)
-        })(window, document, "script", ('https:' == document.location.protocol ? 'https:' : 'http:') +
-            "//widget.daovoice.io/widget/6984b559.js", "daovoice")
-        daovoice('init', {
-            app_id: "<%- theme.daovoice.app_id %>"
-        });
-        daovoice('update');
-    </script>
-    <% } %>
+    
+    <script src="/libs/others/clicklove.js" async="async"></script>
+    
+    
+    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
+    
+
+    
+
+    
 
     <!--腾讯兔小巢-->
-    <% if (theme.tuxiaochao.enable) { %>
-        <div style="position:fixed;bottom:125px;right:16px;cursor: pointer;">
-            <a title="兔小巢" href="https://support.qq.com/products/<%- theme.tuxiaochao.productId %>"><i class="fa fa-comments fa-3x"  aria-hidden="true"></i></a>
-        </div>
-    <%}%>
-    <% if (theme.canvas_nest.enable) { %>
-    <script type="text/javascript" color="<%- theme.canvas_nest.color %>"
-        pointColor="<%- theme.canvas_nest.pointColor %>" opacity='<%- theme.canvas_nest.opacity %>'
-        zIndex="<%- theme.canvas_nest.zIndex %>" count="<%- theme.canvas_nest.count %>"
-        src="<%- theme.jsDelivr.url %><%- url_for(theme.libs.js.canvas_nest) %>"></script>
-    <% } %>
+    
+    
 
-    <% if (theme.ribbon.enable) { %>
-    <% var ribbonSrc = theme.ribbon.clickChange ? theme.libs.js.ribbon : theme.libs.js.ribbonRefresh; %>
-    <script type="text/javascript" size="<%- theme.ribbon.size %>" alpha='<%- theme.ribbon.alpha %>'
-        zIndex="<%- theme.ribbon.zIndex %>" src="<%- theme.jsDelivr.url %><%- url_for(ribbonSrc) %>" async="async"></script>
-    <% } %>
+    
 
-    <% if (theme.ribbon_dynamic.enable) { %>
-    <script type="text/javascript" src="<%- theme.jsDelivr.url %><%- url_for(theme.libs.js.ribbon_dynamic) %>" async="async"></script>
-    <% } %>
+    
+    <script type="text/javascript" src="/libs/background/ribbon-dynamic.js" async="async"></script>
+    
 
-    <% if (theme.instantpage.enable) { %>
-    <script src="<%- theme.jsDelivr.url %><%- url_for(theme.libs.js.instantpage) %>" type="module"></script>
-    <% } %>
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
 
     <script type="text/javascript">
         document.addEventListener('visibilitychange', function () {
