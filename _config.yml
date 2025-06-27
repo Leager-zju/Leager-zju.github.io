@@ -106,9 +106,49 @@ deploy:
   repo: https://github.com/Leager-zju/Leager-zju.github.io.git
   branch: master
 
-markdown: redcarpet
-redcarpet:
-    extensions: ["fenced_code_blocks", "autolink", "tables", "strikethrough"]
+markdown:
+  preset: "default"
+  render:
+    html: true # 是否解析 HTML 内容, 如果为 true 则表示解析, false 表示将 HTML 转意为文本.
+    xhtmlOut: false # 将 HTML 内容渲染为 XHTML 的形式 (XHTML 语法非常严格, 比如原 HTML 中的 <br> 标签必须要使用 <br/> 这样的形式进行 "自闭和") 可能会出现兼容性问题.
+    langPrefix: 'language-' # 只适用 Hexo 默认的两个高亮插件禁用时 # 为围栏代码块中语法定义选项渲染后自动添加 class 名前缀, 如 ---html 渲染为 <class="language-html">
+    breaks: false # true 则将所有换行渲染为 <br> 标签 # 这种行为不属于 CommandMark 和 GFM.
+    linkify: false # true 则自动解析链接并添加为 <a> 标签, false 则将链接渲染为文本.
+    typographer: true # 默认 true # 自动转义各种排版用字符, 如 ©
+    quotes: '“”‘’' # 当 typographer 定义为 true 时的自动转换引号的行为, quotes: '“”‘’' 则表示将 "123" '123'转换为 “123” ‘123’
+  enable_rules:
+  disable_rules:
+  plugins:
+    - markdown-it-abbr
+    - markdown-it-cjk-breaks
+    - markdown-it-deflist
+    - markdown-it-emoji
+    - markdown-it-footnote
+    - markdown-it-ins
+    - markdown-it-mark
+    - markdown-it-sub
+    - markdown-it-sup
+    - markdown-it-checkbox
+    - markdown-it-imsize
+    - markdown-it-expandable
+    - name: markdown-it-container
+      options: success
+    - name: markdown-it-container
+      options: tips
+    - name: markdown-it-container
+      options: warning
+    - name: markdown-it-container
+      options: danger
+  anchors:
+    level: 2
+    collisionSuffix: ""
+    permalink: false
+    permalinkClass: "header-anchor"
+    permalinkSide: "left"
+    permalinkSymbol: "¶"
+    case: 0
+    separator: "-"
+
 
 # Matery Only
 search:
