@@ -6,7 +6,7 @@ mathjax:
 date: 2024-08-07 21:47:26
 summary:
 categories:
-  - Lua
+  - lua
 tags:
 img:
 ---
@@ -71,16 +71,16 @@ print(c, d)     --> 5       nil
 
 Lua 有 8 大基本类型：
 
-|数据类型|描述|
-|:-|:-|
-|nil|本作用域内无效的变量均为该类型，打印结果也是 nil|
-|boolean|只有 false 和 nil 算 `false`，其余都是 `true`|
-|number|双精度浮点数，允许隐式转为 string|
-|string|字符串，用**成对**的单引号/双引号包裹，也可以用 `[[` 和 `]]` 包裹跨行字符串，允许隐式转为 number|
-|function|Lua 或 C 的函数|
-|userdata|C 中的数据结构|
-|thread|线程|
-|table|支持任意类型的 key-value 映射|
+| 数据类型 | 描述                                                                                             |
+| :------- | :----------------------------------------------------------------------------------------------- |
+| nil      | 本作用域内无效的变量均为该类型，打印结果也是 nil                                                 |
+| boolean  | 只有 false 和 nil 算 `false`，其余都是 `true`                                                    |
+| number   | 双精度浮点数，允许隐式转为 string                                                                |
+| string   | 字符串，用**成对**的单引号/双引号包裹，也可以用 `[[` 和 `]]` 包裹跨行字符串，允许隐式转为 number |
+| function | Lua 或 C 的函数                                                                                  |
+| userdata | C 中的数据结构                                                                                   |
+| thread   | 线程                                                                                             |
+| table    | 支持任意类型的 key-value 映射                                                                    |
 
 可以通过 `type()` 函数获取某个变量的类型，函数返回值为 `string` 类型。
 
@@ -225,19 +225,19 @@ end
 
 > ⚠️**注意字符串的位置默认从 1 开始**
 
-|函数|描述|
-|:-|:-|
-|string.upper(str)|将 str 转为大写。|
-|string.upper(str)|将 str 转为小写。|
-|string.gsub(str, substr, replace, num)|将 str 中前 num 个 substr 子串替换为 replace。|
-|string.find(str, pattern, init=1, plain=true)|找到 str 从 init 开始第一次出现的 pattern，并返回其起始位置与结束位置。如果 plain 为 true 则禁用正则匹配。没找到就返回 nil。|
-|string.reserve(str)|将 str 反转。|
-|string.char(...)|可变参函数，输入若干 number，并将 number 转成对应的字符然后拼成字符串（如 97 98 -> "ab"）。|
-|string.byte(str, i=1, j=i)|返回 str[i:j] 的所有字符对应整数（如 'a' -> 97）。|
-|string.length(str)|求长度，等价于 #str。|
-|string.rep(str, n)|将 str 重复 n 次。|
-|string.match(str, pattern, init=1)|找到 str 从 init 开始第一次出现的 pattern，并返回匹配到的结果串。支持正则匹配。匹配失败就返回 nil。|
-|string.gmatch(str, pattern)|**迭代器函数**。不断对 str 进行 pattern 的匹配，并返回匹配到的结果串。支持正则匹配。直到返回 nil。|
+| 函数                                          | 描述                                                                                                                         |
+| :-------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------- |
+| string.upper(str)                             | 将 str 转为大写。                                                                                                            |
+| string.upper(str)                             | 将 str 转为小写。                                                                                                            |
+| string.gsub(str, substr, replace, num)        | 将 str 中前 num 个 substr 子串替换为 replace。                                                                               |
+| string.find(str, pattern, init=1, plain=true) | 找到 str 从 init 开始第一次出现的 pattern，并返回其起始位置与结束位置。如果 plain 为 true 则禁用正则匹配。没找到就返回 nil。 |
+| string.reserve(str)                           | 将 str 反转。                                                                                                                |
+| string.char(...)                              | 可变参函数，输入若干 number，并将 number 转成对应的字符然后拼成字符串（如 97 98 -> "ab"）。                                  |
+| string.byte(str, i=1, j=i)                    | 返回 str[i:j] 的所有字符对应整数（如 'a' -> 97）。                                                                           |
+| string.length(str)                            | 求长度，等价于 #str。                                                                                                        |
+| string.rep(str, n)                            | 将 str 重复 n 次。                                                                                                           |
+| string.match(str, pattern, init=1)            | 找到 str 从 init 开始第一次出现的 pattern，并返回匹配到的结果串。支持正则匹配。匹配失败就返回 nil。                          |
+| string.gmatch(str, pattern)                   | **迭代器函数**。不断对 str 进行 pattern 的匹配，并返回匹配到的结果串。支持正则匹配。直到返回 nil。                           |
 
 ### 数组
 
@@ -572,18 +572,18 @@ end
 
 其余运算符也可以重载，如下：
 
-|   元方法   |对应运算符|
-|:---------:|:--------:|
-| __add	    |    +     |
-| __sub	    |    -     |
-| __mul	    |    *     |
-| __div	    |    /     |
-| __mod	    |    %     |
-| __unm	    |    -     |
-| __concat  |    ..    |
-| __eq      |    ==    |
-| __lt      |    <     |
-| __le      |    <=    |
+|  元方法  | 对应运算符 |
+| :------: | :--------: |
+|  __add   |     +      |
+|  __sub   |     -      |
+|  __mul   |     *      |
+|  __div   |     /      |
+|  __mod   |     %      |
+|  __unm   |     -      |
+| __concat |     ..     |
+|   __eq   |     ==     |
+|   __lt   |     <      |
+|   __le   |     <=     |
 
 ## 进阶玩法
 
@@ -971,14 +971,14 @@ consumer()
 print(coroutine.resume(newProductor)) --> false    cannot resume dead coroutine
 ```
 
-|序号|描述|控制权属于 main|控制权属于 newProductor|
-|:-|:--------------------------|:---:|:-:|
-|1|首先，我们通过 `coroutine.create()` 创建了一个 thread 类型的对象 `newProductor`，绑定到函数 `productor()`。根据输出结果可以看到，此时其并未启动。|√||
-|2|main 继续调用 `consumer()` 函数，并通过 `coroutine.resume()` 的方式启动 `newProductor`，并等着获取抛出的值。||√|
-|3|`newProductor` 启动，在 `productor()` 内部通过 `coroutine.yield(i)` 抛出一个值的同时将自身挂起；如果函数结束，则抛出 nil。|√||
-|4.1|如果 main 在 `receive()` 中获取到了非 nil 值，则重复第二步。||√|
-|4.2|如果 main 在 `receive()` 中获取到了 nil 值，这意味着 `newProductor` 已经正常结束，那 main 也需结束|√||
-|5|截至目前 `status` 都是 true，但如果后续再次通过 `resume()` 尝试启动 `newProductor`，则会报错|√||
+| 序号 | 描述                                                                                                                                              | 控制权属于 main | 控制权属于 newProductor |
+| :--- | :------------------------------------------------------------------------------------------------------------------------------------------------ | :-------------: | :---------------------: |
+| 1    | 首先，我们通过 `coroutine.create()` 创建了一个 thread 类型的对象 `newProductor`，绑定到函数 `productor()`。根据输出结果可以看到，此时其并未启动。 |        √        |                         |
+| 2    | main 继续调用 `consumer()` 函数，并通过 `coroutine.resume()` 的方式启动 `newProductor`，并等着获取抛出的值。                                      |                 |            √            |
+| 3    | `newProductor` 启动，在 `productor()` 内部通过 `coroutine.yield(i)` 抛出一个值的同时将自身挂起；如果函数结束，则抛出 nil。                        |        √        |                         |
+| 4.1  | 如果 main 在 `receive()` 中获取到了非 nil 值，则重复第二步。                                                                                      |                 |            √            |
+| 4.2  | 如果 main 在 `receive()` 中获取到了 nil 值，这意味着 `newProductor` 已经正常结束，那 main 也需结束                                                |        √        |                         |
+| 5    | 截至目前 `status` 都是 true，但如果后续再次通过 `resume()` 尝试启动 `newProductor`，则会报错                                                      |        √        |                         |
 
 不难看出，其实协程就是通过用户编码的方式来将协程的切换行为委托给用户而非操作系统。虽然说是说 thread 类型的变量，但其实还是以用户态的形式运作的，和需要操作系统调度的「线程」有本质区别。
 
@@ -990,15 +990,15 @@ print(coroutine.resume(newProductor)) --> false    cannot resume dead coroutine
 
 `io.open()` 会返回一个文件句柄 `file`，其实现了以下成员函数：
 
-|file 函数|描述|
-|:-------------------------|:-------------------------------------------------------------------|
-|file:close()               | 关闭文件。也可以通过 `file=nil` 使其被垃圾回收，但回收时间随机，不建议。 |
-|file:read(...)             | 每个传入的参数为一种读取方式，对应一个返回值。有以下几种读取方式：<br>`"l"`:（**默认**）读一行，不包括换行符。**只能用于文本文件**。<br>`"L"`: 读一行，包括换行符。**只能用于文本文件**。<br>`"n"`: 读一个 number。<br>`"a"`: 从当前位置读整个文件。<br>`number`: 传入一个整数，读 number 个字节。<br>如果读取失败则返回 nil。|
-|file:write(...)            | 将所有入参（**只能**是 string 或 number）写入文件。写入行为取决于 `open()` 中指定的打开方式。如果失败则返回 nil, errstring。 |
-|file:lines(...)            | **迭代器函数**，能够指定和 `read()` 一样的读取方式循环读取文件直至 EOF。|
-|file:flush()               | 将缓冲区内容落盘。 |
-|file:seek(whence, offset=0)| 修改文件当前位置为 `base+offset`。第一个参数为 string，用于指定 base。<br>`"cur"`: （**默认**）base 为文件当前位置。<br>`"set"`: base 为文件起始位置。<br>`"end"`: base 为 EOF。<br>若成功则返回文件当前位置，否则返回 nil, errstring。|
-|file:setvbuf(mode, size)   | 设置文件输出缓冲模式。<br>`"no"`: 无缓冲，任何写入都会落盘。<br>`"full"`: 全缓冲，仅当缓冲区满或显示调用 `flush()` 时落盘。<br>`"line"`: 行缓冲，遇到换行符时落盘。|
+| file 函数                   | 描述                                                                                                                                                                                                                                                                                                                           |
+| :-------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| file:close()                | 关闭文件。也可以通过 `file=nil` 使其被垃圾回收，但回收时间随机，不建议。                                                                                                                                                                                                                                                       |
+| file:read(...)              | 每个传入的参数为一种读取方式，对应一个返回值。有以下几种读取方式：<br>`"l"`:（**默认**）读一行，不包括换行符。**只能用于文本文件**。<br>`"L"`: 读一行，包括换行符。**只能用于文本文件**。<br>`"n"`: 读一个 number。<br>`"a"`: 从当前位置读整个文件。<br>`number`: 传入一个整数，读 number 个字节。<br>如果读取失败则返回 nil。 |
+| file:write(...)             | 将所有入参（**只能**是 string 或 number）写入文件。写入行为取决于 `open()` 中指定的打开方式。如果失败则返回 nil, errstring。                                                                                                                                                                                                   |
+| file:lines(...)             | **迭代器函数**，能够指定和 `read()` 一样的读取方式循环读取文件直至 EOF。                                                                                                                                                                                                                                                       |
+| file:flush()                | 将缓冲区内容落盘。                                                                                                                                                                                                                                                                                                             |
+| file:seek(whence, offset=0) | 修改文件当前位置为 `base+offset`。第一个参数为 string，用于指定 base。<br>`"cur"`: （**默认**）base 为文件当前位置。<br>`"set"`: base 为文件起始位置。<br>`"end"`: base 为 EOF。<br>若成功则返回文件当前位置，否则返回 nil, errstring。                                                                                        |
+| file:setvbuf(mode, size)    | 设置文件输出缓冲模式。<br>`"no"`: 无缓冲，任何写入都会落盘。<br>`"full"`: 全缓冲，仅当缓冲区满或显示调用 `flush()` 时落盘。<br>`"line"`: 行缓冲，遇到换行符时落盘。                                                                                                                                                            |
 
 一些基本操作如下：
 

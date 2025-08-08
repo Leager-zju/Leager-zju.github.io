@@ -6,7 +6,7 @@ mathjax:
 date: 2024-08-23 12:00:00
 summary:
 categories:
-  - Unreal
+  - unreal
 tags:
 img:
 ---
@@ -67,11 +67,11 @@ ARPlayerState::ARPlayerState()
 
 如果 ASC 是 attach 到 Player State 上的，那么它也会跟着一起复制，并且根据 Replication Mode 实现不同的复制效果。其中 Tag 和 Cue 永远会复制到其它 client 上，唯一区别在于 Effect 是否被复制。
 
-|Replication Mode|描述                           |使用场景               |
-|:---------------|:------------------------------|:---------------------|
-|Full            |每个 Effect 都会复制到所有 client|单机                  |
-|Mixed           |Effect 只会被复制到持有它的 Actor|多人游戏中玩家控制的角色|
-|Minimal         |永不复制 Effect                 |多人游戏中 AI 控制的角色|
+| Replication Mode | 描述                              | 使用场景                 |
+| :--------------- | :-------------------------------- | :----------------------- |
+| Full             | 每个 Effect 都会复制到所有 client | 单机                     |
+| Mixed            | Effect 只会被复制到持有它的 Actor | 多人游戏中玩家控制的角色 |
+| Minimal          | 永不复制 Effect                   | 多人游戏中 AI 控制的角色 |
 
 > ⚠️**注意**: Mixed 期望 OwnerActor 的 Owner 是 Controller。PlayerState 的 Owner 在默认情况下是 Controller，但 Character 不是。如果在 OwnerActor 不是 PlayerState 的时候使用 Mixed 模式，那么必须在 OwnerActor 上调用 `SetOwner()`（PlayerState 的 Owner 会自动设置为 Controller）。
 

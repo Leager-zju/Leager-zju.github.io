@@ -6,7 +6,7 @@ mathjax:
 date: 2025-03-06 13:02:50
 summary:
 categories:
-  - Unreal
+  - unreal
 tags:
 img:
 ---
@@ -262,15 +262,15 @@ UAnimInstance::UpdateAnimation(...)
 
 使用「**Layered blend per bone**」节点进行混合时，则因「**曲线混合选项**」而异，具体如下表所示，假设输入姿势「**Blend Poses i**」对应的曲线为 $Curve_i$。
 
-|选项|计算逻辑||
-|:-:|:-:|
-|Override|同名曲线中取最后一次出现的，即 $i$ 最大的|
-|Do Not Override|同名曲线中取第一次出现的，即 $i$ 最小的|
-|Blend by Weight|$Curve = BaseCurve + \sum\limits_0^n BlendWeights_i*Curve_i$|
-|Normalize by Weight|$\displaystyle{Curve = \frac{BaseCurve + \sum\limits_0^n BlendWeights_i*Curve_i}{1+\sum\limits_0^n BlendWeights_i}}$|
-|Use Base Pose|取 Base Pose 对应曲线值|
-|Use Max Value|取所有 Poses 对应曲线的最大值（不考虑不存在）|
-|Use Min Value|取所有 Poses 对应曲线的最小值（不考虑不存在）|
+|        选项         |                                                       计算逻辑                                                       |  |
+| :-----------------: | :------------------------------------------------------------------------------------------------------------------: |
+|      Override       |                                      同名曲线中取最后一次出现的，即 $i$ 最大的                                       |
+|   Do Not Override   |                                       同名曲线中取第一次出现的，即 $i$ 最小的                                        |
+|   Blend by Weight   |                             $Curve = BaseCurve + \sum\limits_0^n BlendWeights_i*Curve_i$                             |
+| Normalize by Weight | $\displaystyle{Curve = \frac{BaseCurve + \sum\limits_0^n BlendWeights_i*Curve_i}{1+\sum\limits_0^n BlendWeights_i}}$ |
+|    Use Base Pose    |                                               取 Base Pose 对应曲线值                                                |
+|    Use Max Value    |                                    取所有 Poses 对应曲线的最大值（不考虑不存在）                                     |
+|    Use Min Value    |                                    取所有 Poses 对应曲线的最小值（不考虑不存在）                                     |
 
 > 上述 BlendWeights 会被 clamp 到 (0, 1) 间。
 

@@ -6,7 +6,7 @@ mathjax:
 date: 2023-10-07 11:23:53
 summary:
 categories:
-  - Computer Network
+  - computer network
 tags:
 img:
 ---

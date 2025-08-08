@@ -6,7 +6,7 @@ mathjax:
 date: 2023-01-16 12:37:37
 summary:
 categories:
-  - C++
+  - cpp
 tags:
 img:
 ---

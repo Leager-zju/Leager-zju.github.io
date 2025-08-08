@@ -6,7 +6,7 @@ mathjax:
 date: 2024-08-27 12:00:00
 summary:
 categories:
-  - Unreal
+  - unreal
 tags:
 img:
 ---
@@ -141,11 +141,11 @@ FString 则是是对 string 进行的一个封装，和 `std::string` 非常相�
 
 ## 三者之间的转换
 
-|从|到|函数|说明|
-|:-:|:-:|:-:|:-:|
-|FName|FText|`FText::FromName(name)`||
-|FName|FString|`name.ToString()`||
-|FText|FName||FText 不能直接转换到 FName，可先转换为 FString，再转换为 FName|
-|FText|FString|`txt.ToString()`|对于某些语言来说可能存在损耗。|
-|FString|FName|`FName(*str)`|**不可靠**。因为 FName 不区分大小写，所以转换存在损耗。|
-|FString|FText|`FText::FromString(str)`||
+|   从    |   到    |           函数           |                              说明                              |
+| :-----: | :-----: | :----------------------: | :------------------------------------------------------------: |
+|  FName  |  FText  | `FText::FromName(name)`  |                                                                |
+|  FName  | FString |    `name.ToString()`     |                                                                |
+|  FText  |  FName  |                          | FText 不能直接转换到 FName，可先转换为 FString，再转换为 FName |
+|  FText  | FString |     `txt.ToString()`     |                 对于某些语言来说可能存在损耗。                 |
+| FString |  FName  |      `FName(*str)`       |    **不可靠**。因为 FName 不区分大小写，所以转换存在损耗。     |
+| FString |  FText  | `FText::FromString(str)` |                                                                |

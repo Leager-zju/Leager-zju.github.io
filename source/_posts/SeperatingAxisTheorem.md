@@ -6,7 +6,7 @@ mathjax:
 date: 2024-08-11 19:28:17
 summary:
 categories:
-  - Graphics
+  - graphics
 tags:
 img:
 ---

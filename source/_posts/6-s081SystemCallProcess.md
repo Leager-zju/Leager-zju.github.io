@@ -6,7 +6,7 @@ mathjax:
 date: 2023-10-25 20:37:37
 summary:
 categories:
-  - Lab
+  - lab
 tags:
 img:
 ---

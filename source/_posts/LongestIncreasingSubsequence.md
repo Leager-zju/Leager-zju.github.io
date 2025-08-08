@@ -6,7 +6,7 @@ mathjax:
 date: 2023-09-06 14:23:27
 summary:
 categories:
-  - Algorithm
+  - algorithm
 tags:
 img:
 ---

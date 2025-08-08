@@ -6,7 +6,7 @@ mathjax:
 date: 2024-03-31 21:10:06
 summary:
 categories:
-  - Note
+  - note
 tags:
 img:
 ---
