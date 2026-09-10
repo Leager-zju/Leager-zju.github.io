@@ -2,7 +2,7 @@ name: Deploy Hugo site
 
 on:
   push:
-    branches: [hexo]
+    branches: [hugo]
   workflow_dispatch:
 
 permissions:
