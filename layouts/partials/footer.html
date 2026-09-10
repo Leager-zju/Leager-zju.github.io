@@ -1,0 +1,22 @@
+<footer class="site-footer">
+  <div class="shell footer-grid">
+    <section>
+      <p class="eyebrow">FIELD NOTES / {{ .Site.Params.since }}—NOW</p>
+      <h2>把复杂问题，写成可回看的路径。</h2>
+      <p>{{ .Site.Params.footerNote }}</p>
+    </section>
+    <section>
+      <p class="footer-label">EXPLORE</p>
+      <ul>
+        {{ range .Site.Data.navigation }}<li><a href="{{ .url | relURL }}">{{ .name }}</a></li>{{ end }}
+      </ul>
+    </section>
+    <section>
+      <p class="footer-label">CONNECT</p>
+      <ul>
+        {{ range .Site.Data.social }}<li><a href="{{ .url }}" rel="me noopener" target="_blank">{{ .name }} <span>↗</span></a></li>{{ end }}
+      </ul>
+    </section>
+  </div>
+  <div class="shell footer-bottom"><span>© {{ now.Year }} {{ .Site.Params.author }}</span><a href="{{ .Site.Params.repository }}" target="_blank" rel="noopener">Source on GitHub ↗</a></div>
+</footer>

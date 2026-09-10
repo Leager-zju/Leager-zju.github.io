@@ -1,8 +1,9 @@
 .DS_Store
 Thumbs.db
-db.json
 *.log
-node_modules/
+
+# Hugo build artifacts
 public/
-.deploy*/
-_multiconfig.yml
+resources/_gen/
+.hugo_build.lock
+.tools/

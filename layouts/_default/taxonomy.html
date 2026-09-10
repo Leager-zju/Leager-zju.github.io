@@ -1,0 +1,4 @@
+{{ define "main" }}
+<section class="section-hero shell"><p class="eyebrow">TAXONOMY / {{ .Data.Singular }}</p><div class="section-hero-row"><div><h1>{{ .Title }}</h1><p>共 {{ len .Pages }} 篇内容。</p></div></div></section>
+<section class="shell"><div class="post-grid">{{ range .Pages.ByDate.Reverse }}{{ partial "post-card.html" . }}{{ end }}</div></section>
+{{ end }}

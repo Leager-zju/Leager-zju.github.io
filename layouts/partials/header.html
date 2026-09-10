@@ -1,0 +1,19 @@
+<header class="site-header">
+  <div class="shell header-inner">
+    <a class="brand" href="{{ "/" | relURL }}" aria-label="返回首页">
+      <img src="{{ "images/mark.svg" | relURL }}" alt="" width="40" height="40">
+      <span><strong>LEAGER</strong><small>FIELD NOTES</small></span>
+    </a>
+    <nav class="primary-nav" aria-label="主导航">
+      {{ range .Site.Data.navigation }}
+        {{ $active := or (eq $.RelPermalink .url) (and (ne .url "/") (hasPrefix $.RelPermalink .url)) }}
+        <a href="{{ .url | relURL }}" class="{{ if $active }}is-active{{ end }}">{{ .name }}</a>
+      {{ end }}
+    </nav>
+    <div class="header-actions">
+      <a class="icon-button search-trigger" href="{{ "/notes/" | relURL }}#filter" aria-label="筛选文章">⌕</a>
+      <button class="icon-button theme-toggle" type="button" aria-label="切换明暗主题" aria-pressed="false">◐</button>
+      <button class="menu-toggle" type="button" aria-label="展开导航" aria-expanded="false">菜单</button>
+    </div>
+  </div>
+</header>

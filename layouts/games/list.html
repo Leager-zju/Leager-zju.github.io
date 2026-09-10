@@ -1,0 +1,4 @@
+{{ define "main" }}
+{{ partial "section-hero.html" . }}
+<section class="shell work-grid">{{ range .RegularPages.ByDate.Reverse }}<article class="work-card"><div class="work-card-visual game-visual"><span>{{ .Params.engine | default "GAME LOG" }}</span><i>✦</i></div><div class="work-card-body"><div class="work-meta"><span>{{ .Params.status | default "IN PROGRESS" }}</span><span>{{ .Date.Format "2006" }}</span></div><h2><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2><p>{{ .Summary | plainify | htmlUnescape }}</p><div class="stack">{{ range .Params.stack }}<span>{{ . }}</span>{{ end }}</div><a class="text-link" href="{{ .RelPermalink }}">查看档案 <span>→</span></a></div></article>{{ end }}</section>
+{{ end }}

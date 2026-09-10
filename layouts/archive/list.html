@@ -1,0 +1,4 @@
+{{ define "main" }}
+<section class="section-hero shell"><p class="eyebrow">COMPLETE LOG</p><div class="section-hero-row"><div><h1>{{ .Title }}</h1><p>按时间线回看每一次记录和长期学习的轨迹。</p></div></div></section>
+<section class="shell archive-list">{{ range (where .Site.RegularPages "Section" "notes").GroupByDate "2006" }}<section class="archive-year"><h2>{{ .Key }}</h2><div>{{ range .Pages.ByDate.Reverse }}<a href="{{ .RelPermalink }}"><time>{{ .Date.Format "01.02" }}</time><span>{{ .Title }}</span><small>{{ delimit .Params.categories " · " }}</small><i>→</i></a>{{ end }}</div></section>{{ end }}</section>
+{{ end }}

@@ -1,0 +1,4 @@
+{{ define "main" }}
+<section class="section-hero shell"><p class="eyebrow">KNOWLEDGE MAP</p><div class="section-hero-row"><div><h1>{{ .Title }}</h1><p>按主题重新进入已有的知识节点。</p></div></div></section>
+<section class="shell term-grid">{{ range .Data.Terms.Alphabetical }}<a class="term-card" href="{{ .Page.RelPermalink }}"><span>{{ printf "%02d" .Count }}</span><h2>{{ .Page.Title }}</h2><i>→</i></a>{{ end }}</section>
+{{ end }}

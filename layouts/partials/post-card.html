@@ -1,0 +1,12 @@
+<article class="post-card">
+  <div class="post-card-top">
+    <span class="index-mark">{{ printf "%02d" .Date.Day }}</span>
+    <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006.01" }}</time>
+  </div>
+  <h2><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
+  <p>{{ .Summary | plainify | htmlUnescape | truncate 150 }}</p>
+  <footer>
+    <span class="taxonomy-list">{{ range first 2 .Params.categories }}<a href="{{ "/categories/" | relURL }}{{ . | urlize }}/">{{ . }}</a>{{ end }}</span>
+    <a class="text-link" href="{{ .RelPermalink }}">阅读 <span>→</span></a>
+  </footer>
+</article>

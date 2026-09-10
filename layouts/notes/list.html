@@ -1,0 +1,8 @@
+{{ define "main" }}
+{{ partial "section-hero.html" . }}
+<section class="shell list-toolbar" id="filter">
+  <label class="search-box"><span>⌕</span><input id="post-filter" type="search" placeholder="按标题、摘要或分类筛选文章" autocomplete="off"><kbd>/</kbd></label>
+  <div class="chip-row" aria-label="按分类筛选"><button class="chip is-active" data-category="all">全部</button>{{ range .Site.Taxonomies.categories.Alphabetical }}<button class="chip" data-category="{{ .Name | urlize }}">{{ .Page.Title }} <small>{{ .Count }}</small></button>{{ end }}</div>
+</section>
+<section class="shell"><p id="filter-result" class="filter-result">显示 {{ len .RegularPages }} 篇文章</p><div id="post-list" class="post-grid post-grid-full">{{ range .RegularPages.ByDate.Reverse }}<div data-search-item data-categories="{{ range .Params.categories }}{{ . | urlize }} {{ end }}" data-search-text="{{ printf "%s %s %s" .Title (.Summary | plainify) (delimit .Params.categories " ") | lower }}">{{ partial "post-card.html" . }}</div>{{ end }}</div><p id="filter-empty" class="filter-empty" hidden>没有匹配的文章。换个关键词或分类试试。</p></section>
+{{ end }}

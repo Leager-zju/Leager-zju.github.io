@@ -1,0 +1,16 @@
+{{ define "main" }}
+<article class="article-shell shell">
+  <header class="article-header">
+    <p class="eyebrow">{{ with index .Params.categories 0 }}{{ . }} / {{ end }}{{ .Date.Format "2006.01.02" }}</p>
+    <h1>{{ .Title }}</h1>
+    {{ with .Summary }}<p class="article-deck">{{ . | plainify | htmlUnescape }}</p>{{ end }}
+    <div class="article-meta"><span>发布于 {{ .Date.Format "2006-01-02" }}</span>{{ if .Site.Params.showReadingTime }}<span>{{ .ReadingTime }} 分钟阅读</span>{{ end }}{{ if .Site.Params.showLastMod }}<span>更新 {{ .Lastmod.Format "2006-01-02" }}</span>{{ end }}</div>
+  </header>
+  <div class="article-layout">
+    <div class="article-main"><div class="article-content">{{ .Content }}</div>{{ with .Params.categories }}<footer class="article-footer"><p>归类于</p><div class="taxonomy-list large">{{ range . }}<a href="{{ "/categories/" | relURL }}{{ . | urlize }}/">{{ . }}</a>{{ end }}</div></footer>{{ end }}</div>
+    {{ if ne .TableOfContents "<nav id=\"TableOfContents\"></nav>" }}<aside class="article-toc"><p>ON THIS PAGE</p>{{ .TableOfContents }}</aside>{{ end }}
+  </div>
+</article>
+{{ $related := .Site.RegularPages.Related . | first 3 }}
+{{ with $related }}<section class="shell related-section"><header class="section-heading"><div><p class="eyebrow">CONTINUE READING</p><h2>相关笔记</h2></div></header><div class="post-grid">{{ range . }}{{ partial "post-card.html" . }}{{ end }}</div></section>{{ end }}
+{{ end }}

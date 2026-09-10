@@ -1,0 +1,5 @@
+{{ define "main" }}
+{{ partial "section-hero.html" . }}
+<section class="shell prose-page">{{ .Content }}</section>
+{{ if .RegularPages }}<section class="shell"><div class="post-grid">{{ range .RegularPages.ByDate.Reverse }}{{ partial "post-card.html" . }}{{ end }}</div></section>{{ end }}
+{{ end }}

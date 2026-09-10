@@ -1,0 +1,6 @@
+{{ define "main" }}
+{{ $notes := where .Site.RegularPages "Section" "notes" }}
+<section class="section-hero shell"><p class="eyebrow">MIGRATION CONTROL ROOM</p><div class="section-hero-row"><div><h1>{{ .Title }}</h1><p>用于快速确认内容迁移、核心栏目、视觉系统和长期维护边界。</p></div><span class="section-count">{{ len $notes }}<small>migrated notes</small></span></div></section>
+<section class="shell acceptance-grid"><article><span>01</span><h2>内容迁移</h2><p>全部文章及同目录媒体已作为 Hugo Page Bundles 管理。图片、视频和原始 HTML 可以在文章页直接复核。</p><a class="text-link" href="{{ "/notes/" | relURL }}">打开文章总览 <span>→</span></a></article><article><span>02</span><h2>信息架构</h2><p>文章、项目、游戏成为并列的内容入口；分类、归档作为横向检索层，不再绑死主题结构。</p><a class="text-link" href="{{ "/archive/" | relURL }}">查看时间归档 <span>→</span></a></article><article><span>03</span><h2>无 Node 构建</h2><p>站点仅需 Hugo 构建和维护；所有源码都在仓库根目录的标准 Hugo 结构中。</p><a class="text-link" href="{{ .Site.Params.repository }}" target="_blank" rel="noopener">查看源码 <span>↗</span></a></article></section>
+<section class="shell acceptance-checks"><p class="eyebrow">SUGGESTED WALKTHROUGH</p><ol><li><b>首页</b><span>确认导航、亮暗模式、最近文章和新栏目入口。</span></li><li><b>文章页</b><span>抽查 GAMES101、C++、6.824 文章的公式、代码、图片和目录。</span></li><li><b>文章总览</b><span>使用分类 Chips 与关键词过滤验证 86 篇迁移内容。</span></li><li><b>归档页</b><span>确认时间线和分类入口可以进入全部历史内容。</span></li></ol></section>
+{{ end }}

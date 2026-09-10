@@ -1,0 +1,66 @@
+baseURL: "https://leager-zju.github.io/"
+languageCode: "zh-CN"
+defaultContentLanguage: "zh-cn"
+title: "Leager / Field Notes"
+enableRobotsTXT: true
+enableGitInfo: true
+hasCJKLanguage: true
+summaryLength: 90
+
+pagination:
+  pagerSize: 12
+
+permalinks:
+  notes: "/notes/:slug/"
+  projects: "/projects/:slug/"
+  games: "/games/:slug/"
+
+taxonomies:
+  category: "categories"
+  tag: "tags"
+  series: "series"
+
+outputs:
+  home:
+    - HTML
+    - RSS
+    - JSON
+
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
+  highlight:
+    noClasses: false
+    lineNos: true
+    lineNumbersInTable: false
+    codeFences: true
+    guessSyntax: true
+    style: "github-dark"
+  tableOfContents:
+    startLevel: 2
+    endLevel: 4
+    ordered: true
+
+params:
+  author: "Leager"
+  description: "关于系统、图形学、游戏开发与持续学习的个人知识库。"
+  accent: "#8bf5c9"
+  repository: "https://github.com/Leager-zju/Leager-zju.github.io"
+  since: 2022
+  math: true
+  showReadingTime: true
+  showLastMod: true
+  footerNote: "Built with Hugo. Designed for durable notes and playable ideas."
+
+related:
+  includeNewer: true
+  threshold: 55
+  toLower: true
+  indices:
+    - name: "categories"
+      weight: 100
+    - name: "tags"
+      weight: 80
+    - name: "date"
+      weight: 10

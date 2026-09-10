@@ -1,0 +1,3 @@
+{{ define "main" }}
+<article class="shell work-detail"><header class="work-detail-header"><p class="eyebrow">PROJECT / {{ .Params.status | default "ARCHIVED" }}</p><h1>{{ .Title }}</h1><p>{{ .Summary | plainify | htmlUnescape }}</p><div class="stack">{{ range .Params.stack }}<span>{{ . }}</span>{{ end }}</div></header><div class="article-content">{{ .Content }}</div></article>
+{{ end }}

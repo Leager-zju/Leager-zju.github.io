@@ -1,0 +1,7 @@
+<section class="section-hero shell">
+  <p class="eyebrow">{{ .Params.kicker | default "KNOWLEDGE BASE" }}</p>
+  <div class="section-hero-row">
+    <div><h1>{{ .Title }}</h1><p>{{ .Content | plainify | htmlUnescape }}</p></div>
+    {{ if .IsSection }}<span class="section-count">{{ len .RegularPages }}<small>entries</small></span>{{ end }}
+  </div>
+</section>

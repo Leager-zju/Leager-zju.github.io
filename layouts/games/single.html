@@ -1,0 +1,3 @@
+{{ define "main" }}
+<article class="shell work-detail game-detail"><header class="work-detail-header"><p class="eyebrow">GAME / {{ .Params.status | default "IN PROGRESS" }}</p><h1>{{ .Title }}</h1><p>{{ .Summary | plainify | htmlUnescape }}</p><div class="stack">{{ range .Params.stack }}<span>{{ . }}</span>{{ end }}</div></header><div class="article-content">{{ .Content }}</div></article>
+{{ end }}
