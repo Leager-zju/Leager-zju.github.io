@@ -14,10 +14,10 @@ repo_url: "https://github.com/Leager-zju/WebIdle"
 
 ## 开始游戏
 
-[打开网页游戏](https://leager-zju.github.io/Demo/)
+[打开网页游戏](https://leager-zju.github.io/WebIdle/)
 
 ## 源码
 
-[查看 GitHub 仓库](https://github.com/Leager-zju/Demo)
+[查看 GitHub 仓库](https://github.com/Leager-zju/WebIdle)
 
 游戏源码与主站分开维护，后续可以独立增加玩法、资源、关卡和版本记录。
