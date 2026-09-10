@@ -6,8 +6,8 @@ summary: "一个使用 HTML、Canvas 和 JavaScript 搭建的网页游戏起点�
 status: "PLAYABLE DEMO"
 engine: "WEB GAME"
 stack: ["HTML", "Canvas", "JavaScript"]
-play_url: "https://leager-zju.github.io/Demo/"
-repo_url: "https://github.com/Leager-zju/Demo"
+play_url: "https://leager-zju.github.io/WebIdle/"
+repo_url: "https://github.com/Leager-zju/WebIdle"
 ---
 
 这是一个独立网页游戏仓库的首个可运行版本，目前提供一个轻量的 Canvas 游戏场景和基础移动控制。
