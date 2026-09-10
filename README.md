@@ -16,14 +16,14 @@ hugo server --buildDrafts
 - `/notes/`：86 篇文章、关键词和分类筛选
 - `/notes/games101note/`：公式、图片与长文排版
 - `/notes/c-function/`：代码高亮、目录和图片
-- `/projects/`、`/games/`：项目与游戏内容模型
-- `/archive/`：时间归档
+- `/projects/`、`/games/`：学习系列与游戏内容模型
+- `/archive/`：时间轴
 - `/lab/`：验收台
 
 ## 内容维护
 
 - 新文章放在 `content/notes/<slug>/index.md`；图片和视频放在同一页面包目录。
-- 新项目放在 `content/projects/`；新游戏放在 `content/games/`。
+- 新学习系列放在 `content/projects/`；新游戏放在 `content/games/`。
 - 主导航定义于 `data/navigation.yaml`。
 - 视觉样式定义于 `assets/css/site.css`。
 - 页面布局定义于 `layouts/`。

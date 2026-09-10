@@ -1,5 +1,5 @@
 ---
 title: "游戏"
 kicker: "PLAYABLE WORLDS / 03"
-description: "面向游戏作品、技术 Demo 与开发日志的独立空间；这里不只是展示成品，也保存迭代中的选择。"
+description: "收集值得一玩的网页游戏链接；这里提供入口和简短备注，不承担 Unreal Engine 学习记录。"
 ---

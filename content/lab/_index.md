@@ -1,4 +1,4 @@
 ---
 title: "验收台"
-layout: "list"
+draft: true
 ---

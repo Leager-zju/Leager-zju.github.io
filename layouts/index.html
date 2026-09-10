@@ -5,15 +5,19 @@
 <section class="home-hero">
   <div class="shell hero-grid">
     <div class="hero-copy">
-      <p class="eyebrow">PERSONAL KNOWLEDGE SYSTEM / 2026</p>
+      <p class="eyebrow">PERSONAL KNOWLEDGE SYSTEM</p>
       <h1>从底层系统<br>到可玩的世界。</h1>
-      <p class="hero-lead">这里沉淀 C++、操作系统、分布式系统、图形学与游戏开发中的思考、实验和长期项目。</p>
-      <div class="hero-actions"><a class="button button-primary" href="{{ "/notes/" | relURL }}">浏览文章 <span>→</span></a><a class="button button-secondary" href="{{ "/projects/" | relURL }}">查看项目</a></div>
+      <p class="hero-lead">这里沉淀 C++、操作系统、分布式系统、图形学与游戏开发中的思考、实验和长期实践。</p>
+      <div class="hero-actions">
+        <a class="button button-primary" href="{{ "/notes/" | relURL }}">浏览文章 <span>→</span></a>
+        <a class="button button-secondary" href="{{ "/projects/" | relURL }}">查看学习系列</a>
+        <a class="button button-secondary" href="{{ "/games/" | relURL }}">玩小游戏</a>
+      </div>
     </div>
     <aside class="signal-panel" aria-label="站点内容概览">
       <p class="panel-label">LIVE INDEX</p>
       <div class="metric"><strong>{{ len $notes }}</strong><span>篇长期笔记</span></div>
-      <div class="metric"><strong>{{ len $projects }}</strong><span>个项目条目</span></div>
+      <div class="metric"><strong>{{ len $projects }}</strong><span>个学习系列</span></div>
       <div class="metric"><strong>{{ len $games }}</strong><span>个游戏条目</span></div>
       <div class="signal-line"><i></i><span>持续构建中</span></div>
     </aside>
@@ -34,7 +38,7 @@
 </section>
 
 <section class="shell home-section launch-section">
-  <header class="section-heading"><div><p class="eyebrow">NEXT FRONTIER</p><h2>项目与游戏</h2></div></header>
-  <div class="launch-grid"><a class="launch-card project-launch" href="{{ "/projects/" | relURL }}"><span>PROJECTS / 01</span><h3>把实验、原型与开源工作组织成可以阅读的作品。</h3><b>进入项目库 →</b></a><a class="launch-card game-launch" href="{{ "/games/" | relURL }}"><span>GAMES / 02</span><h3>保留开发过程，也呈现每个世界可玩的部分。</h3><b>进入游戏库 →</b></a></div>
+  <header class="section-heading"><div><p class="eyebrow">NEXT FRONTIER</p><h2>学习系列与游戏</h2></div></header>
+  <div class="launch-grid"><a class="launch-card project-launch" href="{{ "/projects/" | relURL }}"><span>LEARNING SERIES / 01</span><h3>把课程、技术专题与长期实践组织成可以回看的学习路径。</h3><b>进入学习系列 →</b></a><a class="launch-card game-launch" href="{{ "/games/" | relURL }}"><span>GAMES / 02</span><h3>保留开发过程，也呈现每个世界可玩的部分。</h3><b>进入游戏库 →</b></a></div>
 </section>
 {{ end }}
